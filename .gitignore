@@ -1,4 +1,29 @@
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+*.pyc
 *.log
 *.pot
 *.pyc
-local_settings.py
+
+# Users media
+app/media/*
+
+# Binary files and database
+*.db
+
+# Virtualenv
+venv
+.env
+
+# Generated files
+app/static/CACHE
+app/media
+staticfiles

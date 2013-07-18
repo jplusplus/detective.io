@@ -4,7 +4,6 @@ import sys
 import dj_database_url  
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
-gettext = lambda s: s
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -104,6 +103,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -114,7 +114,7 @@ ROOT_URLCONF = 'app.urls'
 WSGI_APPLICATION = 'app.wsgi.application'
 
 TEMPLATE_DIRS = (
-    here('detective.templates'),
+    here('detective/templates'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -134,6 +134,8 @@ COMPRESS_CSS_FILTERS = (
 
 COMPRESS_ENABLED = False
 
+INTERNAL_IPS = ('127.0.0.1',)
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -146,8 +148,10 @@ INSTALLED_APPS = (
     'neo4django.admin',
     # Compresses linked and inline JavaScript or CSS into a single cached file.    
     'compressor', 
+    'debug_toolbar',
+    'tastypie',
     # Internal
-    'app.detective',
+    'app.detective', 
 )
 
 # A sample logging configuration. The only tangible logging

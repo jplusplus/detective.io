@@ -143,7 +143,6 @@ header.mini {
 			li {
 				float:left;
 				display:block;
-				width:300px;
 				margin-right:20px;
 				margin-top:20px;
 				text-align:center;
@@ -152,10 +151,12 @@ header.mini {
 				.box-shadow(0 3px 0 0 fade(#000, 10));
 				
 				a {
-					display:block;
+					display:table-cell;
+					vertical-align:middle;
 					padding:20px;
 					height:260px;
-					background:#BCB5A6;
+					width:260px;
+					background:#BCB5A6;					
 					color:@bodyBackground;
 				}
 			}

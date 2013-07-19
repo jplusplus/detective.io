@@ -1,0 +1,27 @@
+{% extends "base.dj.html" %}
+{% load staticfiles %}
+{% block title %}Home{% endblock %}
+
+{% block extracss %}
+    <link rel="stylesheet" type="text/less" href="{% static 'detective/css/base.less' %}">
+{% endblock %}
+
+{% block extrajs %}
+    <script type="text/javascript"   src="{% static 'detective/js/vendor/modernizr.custom.js' %}"></script>
+    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular.js' %}"></script>
+    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-sanitize.js' %}"></script>
+    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-resource.js' %}"></script>
+    <script type="text/javascript"   src="{% static 'detective/js/vendor/underscore-min.js' %}"></script>
+    <script type="text/coffeescript" src="{% static 'detective/js/controllers.coffee' %}"></script>
+    <script type="text/coffeescript" src="{% static 'detective/js/filters.coffee' %}"></script>
+    <script type="text/coffeescript" src="{% static 'detective/js/services.coffee' %}"></script>
+    <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>    
+    <script type="text/coffeescript" src="{% static 'detective/js/directives.coffee' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div ng-app="detective" id="ng-app">        
+    	{% include "partials/header.dj.html" %}
+        <div id="content" ng-view></div>
+    </div>
+{% endblock %}

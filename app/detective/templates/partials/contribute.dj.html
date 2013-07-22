@@ -1,0 +1,164 @@
+<div id="contribute">
+	<div class="contribute-start contribute-bg contribute-shadow" ng-if="! individuals.length">
+		<div class="container">			
+			<h2>Add a new individual to the database</h2>
+			<div class="row-fluid top30">
+				<div class="span3">
+					<label class="btn input-block-level btn-fade btn-large">
+						<input type="radio" value="project" ng-model="new.type" class="hidden" />
+						Project
+					</label>
+				</div>
+				<div class="span9 desc">
+					A Project is an endeavor that is carried out by one or several Organizations. Think of "Soccket", which is a project by Uncharted Play, for instance.
+				</div>
+			</div>
+			<form class="row-fluid kick-start" ng-if="new.type == 'project'" ng-submit="addIndividual()">
+				<label class="span3">
+					Name of the project
+				</label>
+				<div class="span9 input-append">
+					<input type="text" class="input-xlarge" ng-model="new.name" />
+					<button class="btn btn-contribute">Create</button>
+				</div>
+			</form>
+			<div class="row-fluid top30">
+				<div class="span3">
+					<label class="btn input-block-level btn-fade btn-large">
+						<input type="radio" value="product" ng-model="new.type" class="hidden" />
+						Product
+					</label>
+				</div>
+				<div class="span9 desc">
+					A Product is an outcome of a Project. A Project can have one (in the case of a building or power plant) or several Products. The Soccket Ball, for instance, is a product of the Soccket project.
+				</div>
+			</div>
+			<form class="row-fluid kick-start" ng-if="new.type == 'product'" ng-submit="addIndividual()">
+				<label class="span3">
+					Name of the product
+				</label>
+				<div class="span9 input-append">
+					<input type="text" class="input-xlarge" ng-model="new.name" />
+					<button class="btn btn-contribute">Create</button>
+				</div>
+			</form>
+			<div class="row-fluid top30">
+				<div class="span3">
+					<label class="btn input-block-level btn-fade btn-large">
+						<input type="radio" value="organization" ng-model="new.type" class="hidden" />
+						Organization
+					</label>
+				</div>
+				<div class="span9 desc">
+					An Organization can be an NGO, a Company, an International Organization or a Venture Fund. Uncharted Play is an Organization.
+				</div>
+			</div>
+			<form class="row-fluid kick-start" ng-if="new.type == 'organization'" ng-submit="addIndividual()">
+				<label class="span3">
+					Name of the organization
+				</label>
+				<div class="span9 input-append input-append">
+					<input type="text" class="input-xlarge" ng-model="new.name" />
+					<button class="btn btn-contribute">Create</button>
+				</div>
+			</form>
+			<div class="row-fluid top30">
+				<div class="span3">
+					<label class="btn input-block-level btn-fade btn-large">
+						<input type="radio" value="person" ng-model="new.type" class="hidden" />
+						Person
+					</label>
+				</div>
+				<div class="span9 desc">
+					A Person can be any physical person.
+				</div>
+			</div>
+			<form class="row-fluid kick-start" ng-if="new.type == 'person'" ng-submit="addIndividual()">
+				<label class="span3">
+					Name of the person
+				</label>
+				<div class="span9 input-append">
+					<input type="text" class="input-xlarge" ng-model="new.name" />
+					<button class="btn btn-contribute">Create</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="individual-forms container" ng-if="individuals.length">
+		<div class="individual  contribute-bg contribute-shadow top30" ng-repeat="individual in individuals">
+			<div class="head">
+				<h3>[[individual.name]]</h3>	
+				<div class="pull-right">
+					<a ng-click="removeIndividual($index)" href="">
+						<i class="icon-white icon-trash"></i>
+						Remove
+					</a>
+				</div>			
+				<h4>Adding a new [[individual.type]]</h4>
+			</div>
+			<div class="form-horizontal">
+
+				<div class="row-fluid top10">
+					<label class="span3 tr" for="inputName">Name</label>
+					<div class="span4">
+						<input type="text" id="inputName" class="input-block-level" ng-model="individual.name" requried />
+					</div>
+				</div>
+
+				<div class="row-fluid top10">
+					<label class="span3 tr" for="inputOwner">Owner(s)</label>
+					<div class="span4">
+						<div ng-repeat="owner in individual.owners" class="bottom10">
+							<input type="text" 
+								id="inputOwner" 
+								class="input-block-level" 
+								ng-model="owner.name" />
+						</div>
+
+						<div class="top10">
+							<a ng-click="addMore(individual, 'owners')">
+								<i class="icon-plus"></i>
+								Add another owner for this project
+							</a>
+						</div>
+					</div>
+					<span class="span5">
+						<p>The owner or owners of the project. Must be an <em>Organization</em>.</p>
+						<p>In case the project is lead only by individuals, create an Organization with the name of the Project. Read the FAQ for more.</p>
+					</span>
+				</div>
+
+
+				<div class="row-fluid top10">
+					<label class="span3 tr" for="inputTwitter">Twitter</label>
+					<div class="span4 input-prepend">
+						<span class="add-on">@</span>
+						<input type="text" id="inputTwitter" ng-model="individual.twitter" />
+					</div>
+					<span class="span5">
+						<p>Leave blank if the Project has no Twitter account</p>
+					</div>
+				</div>
+
+				<div class="row-fluid top10">
+					<label class="span3 tr" for="inputStarted">Started</label>
+					<div class="span4">
+						<input type="text" id="inputStarted" class="input-block-level" ng-model="individual.twitter" />
+					</div>
+					<div class="span5">
+						<p>
+							Must be a year. Represents the time when the Project was
+							started, even if the start date predates the incorporation of the
+							underlying Organization.
+						</p>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+

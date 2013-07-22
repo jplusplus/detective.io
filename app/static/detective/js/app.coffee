@@ -1,4 +1,4 @@
-angular
+Detective = angular
     .module('detective', [])
     .run(
         [             
@@ -23,9 +23,9 @@ angular
                         controller: LandingAllCtrl
                         templateUrl: "./partial/landing/all.html"
                     })
-                    .when('/energy/', {
-                        controller: LandingEnergyCtrl  
-                        templateUrl: "./partial/landing/energy.html"
+                    .when('/:topic/contribute', {
+                        controller: ContributeCtrl  
+                        templateUrl: "./partial/contribute.html"
                     })
                     .otherwise redirectTo: '/'
         ]

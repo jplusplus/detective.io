@@ -8,7 +8,8 @@
 @import-once 'bootstrap-overload.less';
 
 @zIndexContext: 10;
-@zIndexHeader: @zIndexContext+100;
+@zIndexContent: @zIndexContext+100;
+@zIndexHeader : @zIndexContent+100;
 
 @understandColor:#FE7878;
 @contributeColor:#00BDA4;
@@ -19,35 +20,47 @@ body {
     position:relative;
     z-index:@zIndexContext;
 
-    a:hover {
+    a:hover,
+    a:focus,
+    a:active {
         text-decoration:none;
     }
 
 	.understand-color { color:@understandColor; }
     .understand-bg {
-    	background-color:@understandColor;
+    	background-color:@understandColor;    	
     	&, a { color:darken(@understandColor, 40%); }
     	a:hover { color:darken(@understandColor, 60%);}
+    }
+    .understand-shadow {
+    	.box-shadow(0 3px 0 darken(@understandColor, 10));
     }
 
 	.contribute-color { color:@contributeColor; }
 	.contribute-bg {
-		background-color:@contributeColor;
+		background-color:@contributeColor;		
 		&, a { color:darken(@contributeColor, 40%); }
 		a:hover { color:darken(@contributeColor, 60%);}
+	}
+	.contribute-shadow {
+		.box-shadow(0 3px 0 darken(@contributeColor, 10));
 	}
 
 	.explore-color { color:@exploreColor; }
 	.explore-bg {
-		background-color:@exploreColor;
+		background-color:@exploreColor;		
 		&, a { color:darken(@exploreColor, 40%); }
 		a:hover { color:darken(@exploreColor, 60%);}
+	}
+	.explore-shadow {
+		.box-shadow(0 3px 0 darken(@exploreColor, 10));
 	}
 
 }
 
 header, header.mini:hover {
 	@openSpeed: 0.4s;
+	position:relative;
 	z-index:@zIndexHeader;
 	padding:20px 0;
 	background:fade(#2E2D2A, 90);
@@ -119,7 +132,7 @@ header, header.mini:hover {
 }
 
 header.mini {
-	padding-bottom:0;
+	padding-bottom:1px/10px;
 	
 	h2 {
 		margin:15px 0 0;
@@ -134,17 +147,21 @@ header.mini {
 
 
 #content {
-	margin:0 30px;
+	position:relative;
+	z-index:@zIndexContent;
+	padding-top:1px/10px;
 	
 	.landing {
 		
 		&.all.cards {
 
-			li {
+			margin-left:30px;			
+
+			.box {
 				float:left;
 				display:block;
-				margin-right:20px;
-				margin-top:20px;
+				margin-right:30px;
+				margin-top:30px;
 				text-align:center;
 				border:1px solid darken(#BCB5A6, 50%);
 				border-bottom-width:3px;
@@ -161,5 +178,53 @@ header.mini {
 				}
 			}
 		}
+	}
+
+}
+
+#contribute {
+	
+	.contribute-start, .individual-forms .individual {		
+		padding:30px;
+		a, & { color:white;	}
+	}
+		
+	.kick-start {
+		padding-top:40px;
+		padding-bottom:20px;			
+		border-bottom:fade(#fff, 20) 1px solid;
+		
+		label {
+			text-align:right;
+			font-weight:bold;
+		}
+	}
+
+	.individual-forms {
+
+		.individual {
+			padding:30px;
+			
+			.head {
+
+				margin-bottom:30px;
+				padding-bottom:20px;
+				border-bottom:fade(#fff, 20) 1px solid;
+		
+				h3 {
+					margin:0;
+					&:first-letter {
+						text-transform:uppercase;
+					}
+				}
+			
+				h4 {
+					margin:0;
+					color:mix(@white, @contributeColor);
+				}
+				
+			}
+			
+		}		
 	}
 }

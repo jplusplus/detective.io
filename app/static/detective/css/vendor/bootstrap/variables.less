@@ -71,9 +71,9 @@
 @paddingSmall:          2px 10px;  // 26px
 @paddingMini:           0 6px;   // 22px
 
-@baseBorderRadius:      0px;
-@borderRadiusLarge:     0px;
-@borderRadiusSmall:     0px;
+@baseBorderRadius:      2px;
+@borderRadiusLarge:     4px;
+@borderRadiusSmall:     2px;
 
 
 // Tables
@@ -86,26 +86,26 @@
 // Buttons
 // -------------------------
 @btnBackground:                     @white;
-@btnBackgroundHighlight:            darken(@white, 10%);
+@btnBackgroundHighlight:            @white;
 @btnBorder:                         #ccc;
 
 @btnPrimaryBackground:              @linkColor;
-@btnPrimaryBackgroundHighlight:     spin(@btnPrimaryBackground, 20%);
+@btnPrimaryBackgroundHighlight:     @linkColor;
 
 @btnInfoBackground:                 #5bc0de;
-@btnInfoBackgroundHighlight:        #2f96b4;
+@btnInfoBackgroundHighlight:        #5bc0de;
 
 @btnSuccessBackground:              #62c462;
-@btnSuccessBackgroundHighlight:     #51a351;
+@btnSuccessBackgroundHighlight:     #62c462;
 
 @btnWarningBackground:              lighten(@orange, 15%);
-@btnWarningBackgroundHighlight:     @orange;
+@btnWarningBackgroundHighlight:     lighten(@orange, 15%);
 
 @btnDangerBackground:               #ee5f5b;
-@btnDangerBackgroundHighlight:      #bd362f;
+@btnDangerBackgroundHighlight:      #ee5f5b;
 
 @btnInverseBackground:              #444;
-@btnInverseBackgroundHighlight:     @grayDarker;
+@btnInverseBackgroundHighlight:     #444;
 
 
 // Forms

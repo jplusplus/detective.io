@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from lxml import etree
 from pprint import pprint
+from app.detective.utils import to_class_name, to_camelcase
 
 
 class Command(BaseCommand):
@@ -59,7 +60,7 @@ class Command(BaseCommand):
             classURI = ontologyClassElement.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about"]
 
             #Finds the name of the class
-            className = self.to_class_name(classURI.split("#")[1])
+            className = to_class_name(classURI.split("#")[1])
 
             # By default, the class has no parent
             parentClass = "models.NodeModel"
@@ -75,7 +76,7 @@ class Command(BaseCommand):
                 if "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource" in subClassElement.attrib:
 
                     parentClassURI = subClassElement.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"]
-                    parentClass = self.to_class_name(parentClassURI.split("#")[1])
+                    parentClass = to_class_name(parentClassURI.split("#")[1])
 
                 else:
 
@@ -88,7 +89,7 @@ class Command(BaseCommand):
                             relationClass = restriction.find("owl:onClass", namespaces) 
                             relation = {}   
                             relation["URI"] = relationClass.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"] 
-                            relation["name"] = self.to_class_name(relation["URI"].split("#")[1])
+                            relation["name"] = to_class_name(relation["URI"].split("#")[1])
 
                             # Exception when the relation's destination is an individual from the same class
                             if relation["name"] == className:
@@ -122,7 +123,7 @@ class Command(BaseCommand):
                             dataType = correspondanceTypes[dataTypeURI.split("#")[1]]
                             
                             prop = {
-                                "name" : self.to_camelcase(propertyType),
+                                "name" : to_camelcase(propertyType),
                                 "type" : dataType
                             }
 
@@ -140,35 +141,6 @@ class Command(BaseCommand):
         models = self.topolgical_sort(models)
         # Output the models file
         self.print_models(models, headers)
-
-    @staticmethod 
-    def to_class_name(value=""):
-        """
-        Class name must:
-            - begin by an uppercase
-            - use camelcase
-        """
-        value = Command.to_camelcase(value)
-        value = list(value)
-        if len(value) > 0:
-            value[0] = value[0].capitalize()
-
-        return "".join(value)
-
-
-
-    @staticmethod 
-    def to_camelcase(value=""):
-
-        def camelcase(): 
-            yield str.lower
-            while True:
-                yield str.capitalize            
-
-        import re
-        value =  re.sub(r'([a-z])([A-Z])', r'\1_\2', value)
-        c = camelcase()
-        return "".join(c.next()(x) if x else '_' for x in value.split("_"))
 
     @staticmethod
     def print_models(models=[], headers=[]):

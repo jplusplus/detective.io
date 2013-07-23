@@ -1,5 +1,8 @@
+{% load detective_extras %}
+{% load widget_tweaks %}
+
 <div id="contribute">
-	<div class="contribute-start contribute-bg contribute-shadow" ng-if="! individuals.length">
+	<div class="contribute-start contribute-bg contribute-shadow" ng-if="showKickStart || !individuals.length">
 		<div class="container">			
 			<h2>Add a new individual to the database</h2>
 			<div class="row-fluid top30">
@@ -85,80 +88,69 @@
 		</div>
 	</div>
 
+	<div class="container tr top20" ng-hide="showKickStart || !individuals.length">
+		<a class="btn btn-large" ng-click="showKickStart = true">
+			<i class="icon-plus right10"></i>
+			Add a new individual
+		</a>		
+	</div>
+
 	<div class="individual-forms container" ng-if="individuals.length">
-		<div class="individual  contribute-bg contribute-shadow top30" ng-repeat="individual in individuals">
-			<div class="head">
-				<h3>[[individual.name]]</h3>	
-				<div class="pull-right">
-					<a ng-click="removeIndividual($index)" href="">
-						<i class="icon-white icon-trash"></i>
+		<div class="individual contribute-bg contribute-shadow"		 
+		     scroll-to="600"    
+			 ng-repeat="individual in individuals" 
+			 ng-class="individual.reduce == true ? 'reduce' : ''">
+			<div class="head">	
+				<div class="btns">
+					<a ng-click="removeIndividual($index)" class="btn btn-danger white">
+						<i class="icon-trash right10"></i>
 						Remove
+					</a>					
+					<a ng-click="toggleReduce(individual)" class="btn" ng-class="individual.reduce == true ? 'active' : ''">
+						<i class="icon-minus right10"></i>
+						Reduce
 					</a>
-				</div>			
+				</div>		
+				<h3>[[individual.name]]</h3>	
 				<h4>Adding a new [[individual.type]]</h4>
 			</div>
 			<div class="form-horizontal">
+				{% for form in forms %}
+					<div ng-if="individual.type.toLowerCase() == '{{form.Meta.model|klass|lower}}'">
+						{% for field in form %}
+							<div class="row-fluid field top20">
+								<div class="span3 tr" for="">{{ field.label_tag }}</div>
+								<div class="span3">
+						    		{% if field.field.widget|klass == "SelectMultiple" %}
 
-				<div class="row-fluid top10">
-					<label class="span3 tr" for="inputName">Name</label>
-					<div class="span4">
-						<input type="text" id="inputName" class="input-block-level" ng-model="individual.name" requried />
-					</div>
-				</div>
+						    			<div ng-init="individual.{{ field.html_name }} = [{name: ''}]">
+											<div ng-repeat="f in individual.{{ field.html_name }}" class="input-append multiple">
+												<input type="text" ng-model="f.name" class="input-block-level" />
+												<a class="add-on" ng-click="removeOne(individual, '{{ field.html_name }}', $index)">
+													<i class="gray-darker icon-remove"></i>	
+												</a>
+											</div>
+										</div>
 
-				<div class="row-fluid top10">
-					<label class="span3 tr" for="inputOwner">Owner(s)</label>
-					<div class="span4">
-						<div ng-repeat="owner in individual.owners" class="bottom10">
-							<input type="text" 
-								id="inputOwner" 
-								class="input-block-level" 
-								ng-model="owner.name" />
-						</div>
-
-						<div class="top10">
-							<a ng-click="addMore(individual, 'owners')">
-								<i class="icon-plus"></i>
-								Add another owner for this project
-							</a>
-						</div>
+										<a ng-click="addOne(individual, '{{ field.html_name }}')">
+											<i class="icon-plus"></i>
+											Add another one
+										</a>
+									
+									{% else %}
+										{{ field|add_class:"input-block-level" }}
+									{% endif %}
+								</div>
+								<span class="span6">
+									<p>{{ field.help_text }}</p>
+								</span>
+							</div>
+						{% endfor %}
 					</div>
-					<span class="span5">
-						<p>The owner or owners of the project. Must be an <em>Organization</em>.</p>
-						<p>In case the project is lead only by individuals, create an Organization with the name of the Project. Read the FAQ for more.</p>
-					</span>
-				</div>
-
-
-				<div class="row-fluid top10">
-					<label class="span3 tr" for="inputTwitter">Twitter</label>
-					<div class="span4 input-prepend">
-						<span class="add-on">@</span>
-						<input type="text" id="inputTwitter" ng-model="individual.twitter" />
-					</div>
-					<span class="span5">
-						<p>Leave blank if the Project has no Twitter account</p>
-					</div>
-				</div>
-
-				<div class="row-fluid top10">
-					<label class="span3 tr" for="inputStarted">Started</label>
-					<div class="span4">
-						<input type="text" id="inputStarted" class="input-block-level" ng-model="individual.twitter" />
-					</div>
-					<div class="span5">
-						<p>
-							Must be a year. Represents the time when the Project was
-							started, even if the start date predates the incorporation of the
-							underlying Organization.
-						</p>
-					</div>
-				</div>
-				
+				{% endfor %}
 			</div>
 		</div>
 	</div>
-
 </div>
 
 

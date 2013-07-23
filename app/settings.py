@@ -155,7 +155,9 @@ INSTALLED_APPS = (
     # Compresses linked and inline JavaScript or CSS into a single cached file.    
     'compressor', 
     'debug_toolbar',
+    'djangular',
     'tastypie',
+    'widget_tweaks',
     # Internal
     'app.detective', 
 )

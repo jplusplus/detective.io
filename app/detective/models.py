@@ -1,4 +1,5 @@
 from neo4django.db import models
+#from app.detective import fields
 # The ontology can be found in its entirety at http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#
 
 class Amount(models.NodeModel):
@@ -43,7 +44,7 @@ class Project(models.NodeModel):
 	started = models.DateTimeProperty()
 	comment = models.StringProperty()
 	ended = models.DateTimeProperty()
-	twitterHandle = models.StringProperty()
+	twitterHandle = models.StringProperty(verbose_name="Twitter Handle")
 	activityin = models.Relationship("Country",rel_type='hasActivityIn')
 	owner = models.Relationship("Organization",rel_type='hasOwner')
 	commentary = models.Relationship("Commentary",rel_type='hasCommentary')
@@ -67,9 +68,9 @@ class InternationalOrganization(Organization):
 	pass
 
 class Person(models.NodeModel):
+	name = models.StringProperty()
 	source = models.URLProperty()
 	websiteUrl = models.StringProperty()
-	name = models.StringProperty()
 	twitterHandle = models.StringProperty()
 	image = models.URLProperty()
 	hasActivityIn = models.Relationship("Organization",rel_type='hasActivityIn')
@@ -89,6 +90,7 @@ class Fund(Organization):
 	pass
 
 class Product(models.NodeModel):
+	name = models.StringProperty()
 	source = models.URLProperty()
 	image = models.URLProperty()
 	price = models.Relationship("Price",rel_type='hasPrice')

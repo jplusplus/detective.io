@@ -203,13 +203,23 @@ header.mini {
 	.individual-forms {
 
 		.individual {
+			margin-top:30px;
+			margin-bottom:30px;
 			padding:30px;
 			
 			.head {
 
+				position:relative;
 				margin-bottom:30px;
 				padding-bottom:20px;
 				border-bottom:fade(#fff, 20) 1px solid;
+				
+				.btns {
+					position:absolute;
+					top:50%;
+					margin-top:-1em;
+					right:0;
+				}
 		
 				h3 {
 					margin:0;
@@ -224,7 +234,27 @@ header.mini {
 				}
 				
 			}
+
+			.multiple {
+				
+				.add-on {
+					cursor:pointer;
+				}
+
+				input {
+					margin-bottom:10px;
+				}
+			}
 			
+			&.reduce {
+				.head {
+					margin-bottom:0;
+					border-width:0;
+				}
+				.form-horizontal {
+					display:none;				
+				}
+			}			
 		}		
 	}
 }

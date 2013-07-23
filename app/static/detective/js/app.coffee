@@ -1,4 +1,4 @@
-Detective = angular
+detective = angular
     .module('detective', [])
     .run(
         [             

@@ -28,6 +28,7 @@ urlpatterns = patterns('',
     url(r'^$', 'app.detective.views.home', name='home'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(v1_api.urls)),
+    url(r'^partial/contribute\.html$', 'app.detective.views.partial_contribute', name='partial'),
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial', name='partial'),
 )
 

@@ -21,7 +21,10 @@ ContributeCtrl = ($scope, $routeParams, $rootScope)->
 
 	# When user submit a kick-start individual form
 	$scope.addIndividual = (scroll=true)->
-		index = $scope.individuals.push($scope.new) - 1
+		# Clones the object to avoid inserting duplicates
+		o = $.extend(true, {}, $scope.new)
+		$scope.individuals.push(o)
+		# Disable kickStart form
 		$scope.showKickStart = false
 
 	$scope.removeIndividual = (index=0)->
@@ -38,15 +41,5 @@ ContributeCtrl = ($scope, $routeParams, $rootScope)->
 
 	$scope.toggleReduce = (individual)->
 		individual.reduce = not individual.reduce
-
-	"""
-	# Watch individuals to scroll to the new one
-	$scope.$watch("individuals", (newValue, oldValue)->
-		# New individuals
-		if newValue.length > oldValue.length
-			# Scroll to the new element
-			$(window).scrollTo ".individual:last", 600 
-	, true)
-	"""
 
 ContributeCtrl.$inject = ['$scope', '$routeParams', '$rootScope']

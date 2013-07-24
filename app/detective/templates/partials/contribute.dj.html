@@ -106,8 +106,8 @@
 						<i class="icon-trash"></i>						
 					</a>					
 					<a ng-click="toggleReduce(individual)" class="btn" ng-class="individual.reduce == true ? 'active' : ''">
-						<i class="icon-collapse-alt right10"></i>
-						Reduce
+						<i class="icon-collapse-alt	 right10"></i>
+						Collapse
 					</a>
 				</div>		
 				<h3>[[individual.name]]</h3>	
@@ -124,12 +124,14 @@
 
 						    			<div ng-init="individual.{{ field.html_name }} = [{name: ''}]">
 											<div ng-repeat="f in individual.{{ field.html_name }}" class="input-append multiple">
-												<input type="text" ng-model="f.name" class="input-block-level" />
+												<input type="text" ng-model="f.name" autocomplete="off" class="input-block-level" />
 												<a class="add-on" ng-click="removeOne(individual, '{{ field.html_name }}', $index)">
 													<i class="gray-darker icon-remove"></i>	
 												</a>
 											</div>
 										</div>
+
+										{{ field|queryset_klass }}
 
 										<a ng-click="addOne(individual, '{{ field.html_name }}')">
 											<i class="icon-plus"></i>

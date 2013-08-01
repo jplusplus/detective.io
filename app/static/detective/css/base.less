@@ -6,18 +6,18 @@
 @import-once 'animations.less';
 @import-once 'bootstrap-overload.less';
 
-@zIndexContext: 10;
-@zIndexContent: @zIndexContext+100;
-@zIndexHeader : @zIndexContent+100;
+@zindex-context: 10;
+@zindex-content: @zindex-context+100;
+@zindex-header : @zindex-content+100;
 
-@understandColor:#FE7878;
-@contributeColor:#00BDA4;
-@exploreColor:#FDE59F;
+@understand-color:#FE7878;
+@contribute-color:#00BDA4;
+@explore-color:#FDE59F;
 
 
 body {
     position:relative;
-    z-index:@zIndexContext;
+    z-index:@zindex-context;
 
     a:hover,
     a:focus,
@@ -25,47 +25,47 @@ body {
         text-decoration:none;
     }
 
-	.understand-color { color:@understandColor; }
+	.understand-color { color:@understand-color; }
     .understand-bg {
-    	background-color:@understandColor;    	
-    	&, a { color:darken(@understandColor, 40%); }
-    	a:hover { color:darken(@understandColor, 60%);}
+    	background-color:@understand-color;    	
+    	&, a { color:darken(@understand-color, 40%); }
+    	a:hover { color:darken(@understand-color, 60%);}
     }
     .understand-shadow {
-    	.box-shadow(0 3px 0 darken(@understandColor, 10));
+    	.box-shadow(0 3px 0 darken(@understand-color, 10));
     }
 
-	.contribute-color { color:@contributeColor; }
+	.contribute-color { color:@contribute-color; }
 	.contribute-bg {
-		background-color:@contributeColor;		
-		&, a { color:darken(@contributeColor, 40%); }
-		a:hover { color:darken(@contributeColor, 60%);}
+		background-color:@contribute-color;		
+		&, a { color:darken(@contribute-color, 40%); }
+		a:hover { color:darken(@contribute-color, 60%);}
 	}
 	.contribute-shadow {
-		.box-shadow(0 3px 0 darken(@contributeColor, 10));
+		.box-shadow(0 3px 0 darken(@contribute-color, 10));
 	}
 
-	.explore-color { color:@exploreColor; }
+	.explore-color { color:@explore-color; }
 	.explore-bg {
-		background-color:@exploreColor;		
-		&, a { color:darken(@exploreColor, 40%); }
-		a:hover { color:darken(@exploreColor, 60%);}
+		background-color:@explore-color;		
+		&, a { color:darken(@explore-color, 40%); }
+		a:hover { color:darken(@explore-color, 60%);}
 	}
 	.explore-shadow {
-		.box-shadow(0 3px 0 darken(@exploreColor, 10));
+		.box-shadow(0 3px 0 darken(@explore-color, 10));
 	}
 
 }
 
 header, header.mini:hover {
-	@openSpeed: 0.4s;
+	@open-speed: 0.4s;
 	position:relative;
-	z-index:@zIndexHeader;
+	z-index:@zindex-header;
 	padding:20px 0;
 	background:fade(#2E2D2A, 90);
 	overflow:hidden;
 	.box-shadow(0 3px 0 fade(#000, 10));
-	.transition(@openSpeed);
+	.transition(@open-speed);
 
 	h1 {
 		background: url("@{staticPath}img/hat.png") no-repeat 0 0;
@@ -109,7 +109,7 @@ header, header.mini:hover {
 					margin:0;
 					margin:40px 0;
 					margin-bottom:20px;
-					.transition(@openSpeed);
+					.transition(@open-speed);
 				}
 
 				p {					
@@ -120,7 +120,7 @@ header, header.mini:hover {
 					color:#fff;	
 					max-height:300px;
 					.opacity(100);
-					.transition(@openSpeed);
+					.transition(@open-speed);
 				}
 			}	
 
@@ -146,7 +146,7 @@ header.mini {
 
 #content {
 	position:relative;
-	z-index:@zIndexContent;
+	z-index:@zindex-content;
 	padding-top:1px/10px;
 	
 	.landing {
@@ -232,7 +232,7 @@ header.mini {
 			
 				h4 {
 					margin:0;
-					color:mix(#FFF, @contributeColor);
+					color:mix(#FFF, @contribute-color);
 				}
 				
 			}

@@ -21,11 +21,12 @@ ContributeCtrl = ($scope, $routeParams, $rootScope)->
 
 	# When user submit a kick-start individual form
 	$scope.addIndividual = (scroll=true)->
-		# Clones the object to avoid inserting duplicates
-		o = $.extend(true, {}, $scope.new)
-		$scope.individuals.push(o)
-		# Disable kickStart form
-		$scope.showKickStart = false
+		unless $scope.new.name is ""
+			# Clones the object to avoid inserting duplicates
+			o = $.extend(true, {}, $scope.new)
+			$scope.individuals.push(o)
+			# Disable kickStart form
+			$scope.showKickStart = false
 
 	$scope.removeIndividual = (index=0)->
 		$scope.individuals.splice(index, 1) if $scope.individuals[index]?
@@ -35,7 +36,7 @@ ContributeCtrl = ($scope, $routeParams, $rootScope)->
 		individual[key].push(name:"")
 
 	$scope.removeOne = (individual, key, index)->
-		if individual[key][index]?
+		if individual[key][index]? and individual[key].length > 1
 			delete individual[key][index]
 			individual[key].splice(index, 1) 
 

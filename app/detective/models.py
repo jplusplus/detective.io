@@ -1,5 +1,5 @@
 from neo4django.db import models
-#from app.detective import fields
+# from app.detective import fields
 # The ontology can be found in its entirety at http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#
 
 class Amount(models.NodeModel):
@@ -48,7 +48,7 @@ class Project(models.NodeModel):
 	activityin = models.Relationship("Country",rel_type='hasActivityIn')
 	owner = models.Relationship("Organization",rel_type='hasOwner')
 	commentary = models.Relationship("Commentary",rel_type='hasCommentary')
-	partner = models.Relationship("Organization",rel_type='hasPartner')
+	partner = models.Relationship("Organization",rel_type='hasPartner', help_text="COUCU")
 	def __unicode__(self):
 		return self.name
 

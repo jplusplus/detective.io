@@ -38,6 +38,6 @@ def partial_contribute(request):
                 model = m      
                 #self.fields.keyOrder = 
         # Add the form to the forms' list
-        locales["forms"].append( Form(scope_prefix='individual') )
+        locales["forms"].append( Form(scope_prefix='individual.fields') )
 
     return render_to_response(template_name, locales, context_instance=RequestContext(request))   

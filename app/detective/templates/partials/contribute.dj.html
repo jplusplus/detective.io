@@ -21,7 +21,7 @@
 					Name of the project
 				</label>
 				<div class="col-9 input-append">
-					<input type="text" class="form-control" ng-model="new.name" />
+					<input type="text" class="form-control" ng-model="new.fields.name" />
 					<button class="btn btn-contribute">Create</button>
 				</div>
 			</form>
@@ -41,7 +41,7 @@
 					Name of the product
 				</label>
 				<div class="col-9 input-append">
-					<input type="text" class="form-control" ng-model="new.name" />
+					<input type="text" class="form-control" ng-model="new.fields.name" />
 					<button class="btn btn-contribute">Create</button>
 				</div>
 			</form>
@@ -61,7 +61,7 @@
 					Name of the organization
 				</label>
 				<div class="col-9 input-append input-append">
-					<input type="text" class="form-control" ng-model="new.name" />
+					<input type="text" class="form-control" ng-model="new.fields.name" />
 					<button class="btn btn-contribute">Create</button>
 				</div>
 			</form>
@@ -81,7 +81,7 @@
 					Name of the person
 				</label>
 				<div class="col-9 input-append">
-					<input type="text" class="form-control" ng-model="new.name" />
+					<input type="text" class="form-control" ng-model="new.fields.name" />
 					<button class="btn btn-contribute">Create</button>
 				</div>
 			</form>
@@ -102,15 +102,18 @@
 			 ng-class="individual.reduce == true ? 'reduce' : ''">
 			<div class="head">	
 				<div class="btns">
-					<a ng-click="removeIndividual($index)" class="btn btn-danger white">
-						<i class="icon-trash"></i>						
+					<a ng-click="save(individual)" class="btn btn-fade">
+						<strong>Save</strong>
 					</a>					
-					<a ng-click="toggleReduce(individual)" class="btn btn-default" ng-class="individual.reduce == true ? 'active' : ''">
+					<a ng-click="removeIndividual($index)" class="btn btn-fade right20">
+						<i class="icon-trash"></i>						
+					</a>
+					<a ng-click="toggleReduce(individual)" class="btn btn-fade" ng-class="individual.reduce == true ? 'active' : ''">
 						<i class="icon-collapse-alt right10"></i>
 						Collapse
 					</a>
 				</div>		
-				<h3>[[individual.name]]</h3>	
+				<h3>[[individual.fields.name]] # [[individual.fields.id]]</h3>	
 				<h4>Adding a new [[individual.type]]</h4>
 			</div>
 			<div class="form-horizontal">
@@ -122,16 +125,21 @@
 								<div class="col-3">
 						    		{% if field.field.widget|klass == "SelectMultiple" %}
 
-						    			<div ng-init="individual.{{ field.html_name }} = [{name: ''}]">
-											<div ng-repeat="f in individual.{{ field.html_name }}" class="input-group multiple">
-												<input type="text" ng-model="f.name" autocomplete="off" class="form-control" />
-												<span class="input-group-addon" ng-click="removeOne(individual, '{{ field.html_name }}', $index)">
-													<i class="gray-darker icon-remove"></i>	
-												</span>
-											</div>
+						    			<!--div ng-init="individual.fields.{{ field.html_name }} = [{name: ''}]"></div-->
+										<div ng-repeat="f in individual.fields.{{ field.html_name }}" class="input-group multiple">
+											<input 
+												type="text" 
+												ng-model="f.name" 
+												typeahead="v.name for v in search('{{field|queryset_klass}}', $viewValue)" 
+												autocomplete="off" 
+												class="form-control" />
+											<span class="input-group-addon" ng-click="removeOne(individual, '{{ field.html_name }}', $index)">
+												<i class="gray-darker icon-remove"></i>	
+											</span>
 										</div>
+										
 
-										<a ng-click="addOne(individual, '{{ field.html_name }}')">
+										<a ng-click="addOne(individual, '{{ field.html_name }}', '{{field|queryset_klass}}')">
 											<i class="icon-plus"></i>
 											Add another one
 										</a>

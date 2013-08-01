@@ -5,83 +5,83 @@
 	<div class="contribute-start contribute-bg contribute-shadow" ng-if="showKickStart || !individuals.length">
 		<div class="container">			
 			<h2>Add a new individual to the database</h2>
-			<div class="row-fluid top30">
-				<div class="span3">
-					<label class="btn input-block-level btn-fade btn-large">
+			<div class="row top30">
+				<div class="col-3">
+					<label class="btn btn-block btn-default btn-large">
 						<input type="radio" value="project" ng-model="new.type" class="hidden" />
 						Project
 					</label>
 				</div>
-				<div class="span9 desc">
+				<div class="col-9 desc">
 					A Project is an endeavor that is carried out by one or several Organizations. Think of "Soccket", which is a project by Uncharted Play, for instance.
 				</div>
 			</div>
-			<form class="row-fluid kick-start" ng-if="new.type == 'project'" ng-submit="addIndividual()">
-				<label class="span3">
+			<form class="row kick-start form-inline" ng-if="new.type == 'project'" ng-submit="addIndividual()">
+				<label class="col-3 control-label top10">
 					Name of the project
 				</label>
-				<div class="span9 input-append">
-					<input type="text" class="input-xlarge" ng-model="new.name" />
+				<div class="col-9 input-append">
+					<input type="text" class="form-control" ng-model="new.name" />
 					<button class="btn btn-contribute">Create</button>
 				</div>
 			</form>
-			<div class="row-fluid top30">
-				<div class="span3">
-					<label class="btn input-block-level btn-fade btn-large">
+			<div class="row top30">
+				<div class="col-3">
+					<label class="btn btn-block btn-default btn-large">
 						<input type="radio" value="product" ng-model="new.type" class="hidden" />
 						Product
 					</label>
 				</div>
-				<div class="span9 desc">
+				<div class="col-9 desc">
 					A Product is an outcome of a Project. A Project can have one (in the case of a building or power plant) or several Products. The Soccket Ball, for instance, is a product of the Soccket project.
 				</div>
 			</div>
-			<form class="row-fluid kick-start" ng-if="new.type == 'product'" ng-submit="addIndividual()">
-				<label class="span3">
+			<form class="row kick-start form-inline" ng-if="new.type == 'product'" ng-submit="addIndividual()">
+				<label class="col-3 control-label top10">
 					Name of the product
 				</label>
-				<div class="span9 input-append">
-					<input type="text" class="input-xlarge" ng-model="new.name" />
+				<div class="col-9 input-append">
+					<input type="text" class="form-control" ng-model="new.name" />
 					<button class="btn btn-contribute">Create</button>
 				</div>
 			</form>
-			<div class="row-fluid top30">
-				<div class="span3">
-					<label class="btn input-block-level btn-fade btn-large">
+			<div class="row top30">
+				<div class="col-3">
+					<label class="btn btn-block btn-default btn-large">
 						<input type="radio" value="organization" ng-model="new.type" class="hidden" />
 						Organization
 					</label>
 				</div>
-				<div class="span9 desc">
+				<div class="col-9 desc">
 					An Organization can be an NGO, a Company, an International Organization or a Venture Fund. Uncharted Play is an Organization.
 				</div>
 			</div>
-			<form class="row-fluid kick-start" ng-if="new.type == 'organization'" ng-submit="addIndividual()">
-				<label class="span3">
+			<form class="row kick-start form-inline" ng-if="new.type == 'organization'" ng-submit="addIndividual()">
+				<label class="col-3 control-label top10">
 					Name of the organization
 				</label>
-				<div class="span9 input-append input-append">
-					<input type="text" class="input-xlarge" ng-model="new.name" />
+				<div class="col-9 input-append input-append">
+					<input type="text" class="form-control" ng-model="new.name" />
 					<button class="btn btn-contribute">Create</button>
 				</div>
 			</form>
-			<div class="row-fluid top30">
-				<div class="span3">
-					<label class="btn input-block-level btn-fade btn-large">
+			<div class="row top30">
+				<div class="col-3">
+					<label class="btn btn-block btn-default btn-large">
 						<input type="radio" value="person" ng-model="new.type" class="hidden" />
 						Person
 					</label>
 				</div>
-				<div class="span9 desc">
+				<div class="col-9 desc">
 					A Person can be any physical person.
 				</div>
 			</div>
-			<form class="row-fluid kick-start" ng-if="new.type == 'person'" ng-submit="addIndividual()">
-				<label class="span3">
+			<form class="row kick-start form-inline" ng-if="new.type == 'person'" ng-submit="addIndividual()">
+				<label class="col-3 control-label top10">
 					Name of the person
 				</label>
-				<div class="span9 input-append">
-					<input type="text" class="input-xlarge" ng-model="new.name" />
+				<div class="col-9 input-append">
+					<input type="text" class="form-control" ng-model="new.name" />
 					<button class="btn btn-contribute">Create</button>
 				</div>
 			</form>
@@ -89,7 +89,7 @@
 	</div>
 
 	<div class="container tr top20" ng-hide="showKickStart || !individuals.length">
-		<a class="btn btn-large" ng-click="showKickStart = true">
+		<a class="btn btn-default btn-large" ng-click="showKickStart = true">
 			<i class="icon-plus right10"></i>
 			Add a new individual
 		</a>		
@@ -105,8 +105,8 @@
 					<a ng-click="removeIndividual($index)" class="btn btn-danger white">
 						<i class="icon-trash"></i>						
 					</a>					
-					<a ng-click="toggleReduce(individual)" class="btn" ng-class="individual.reduce == true ? 'active' : ''">
-						<i class="icon-collapse-alt	 right10"></i>
+					<a ng-click="toggleReduce(individual)" class="btn btn-default" ng-class="individual.reduce == true ? 'active' : ''">
+						<i class="icon-collapse-alt right10"></i>
 						Collapse
 					</a>
 				</div>		
@@ -117,21 +117,19 @@
 				{% for form in forms %}
 					<div ng-if="individual.type.toLowerCase() == '{{form.Meta.model|klass|lower}}'">
 						{% for field in form %}
-							<div class="row-fluid field top20">
-								<div class="span3 tr" for="">{{ field.label_tag }}</div>
-								<div class="span3">
+							<div class="row field top20 form-group">
+								<label class="col-3 tr form-label top05" for="id_{{ field.html_name }}">{{ field.label_tag }}</label>
+								<div class="col-3">
 						    		{% if field.field.widget|klass == "SelectMultiple" %}
 
 						    			<div ng-init="individual.{{ field.html_name }} = [{name: ''}]">
-											<div ng-repeat="f in individual.{{ field.html_name }}" class="input-append multiple">
-												<input type="text" ng-model="f.name" autocomplete="off" class="input-block-level" />
-												<a class="add-on" ng-click="removeOne(individual, '{{ field.html_name }}', $index)">
+											<div ng-repeat="f in individual.{{ field.html_name }}" class="input-group multiple">
+												<input type="text" ng-model="f.name" autocomplete="off" class="form-control" />
+												<span class="input-group-addon" ng-click="removeOne(individual, '{{ field.html_name }}', $index)">
 													<i class="gray-darker icon-remove"></i>	
-												</a>
+												</span>
 											</div>
 										</div>
-
-										{{ field|queryset_klass }}
 
 										<a ng-click="addOne(individual, '{{ field.html_name }}')">
 											<i class="icon-plus"></i>
@@ -139,10 +137,10 @@
 										</a>
 									
 									{% else %}
-										{{ field|add_class:"input-block-level" }}
+										{{ field|add_class:"form-control" }}
 									{% endif %}
 								</div>
-								<span class="span6">
+								<span class="col-6">
 									<p>{{ field.help_text }}</p>
 								</span>
 							</div>

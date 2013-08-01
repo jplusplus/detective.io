@@ -1,17 +1,26 @@
 
-.btn {	
-	color:@gray-darker !important;
-	.box-shadow(~"inset 0 1px 0 rgba(255,255,255,.2), inset 0 -2px 0 rgba(0,0,0,.1)");
+.form-control, .form-control:focus {
+	.box-shadow(none);	
+}
+
+.btn {
+	border:0;
+}
+
+.btn-default {	
+	color:@gray-darker !important;	
+	.box-shadow(~"inset 0 -2px 0 0 rgba(0,0,0,.1)");
 }
 
 // Set the backgrounds
 // -------------------------
 .btn-yellow {
-  .btn-pseudo-states(#FDE59F, #FDE59F, darken(#FDE59F, 10));
+	.btn-pseudo-states(#FDE59F, #FDE59F, darken(#FDE59F, 10));	
 }
 
 .btn.btn-danger {
 	color:white !important;
+	.box-shadow( inset 0 -2px 0 0 darken(@brand-danger, 10) );
 }
 
 .btn-understand {

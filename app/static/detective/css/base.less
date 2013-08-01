@@ -63,6 +63,7 @@ header, header.mini:hover {
 	z-index:@zIndexHeader;
 	padding:20px 0;
 	background:fade(#2E2D2A, 90);
+	overflow:hidden;
 	.box-shadow(0 3px 0 fade(#000, 10));
 	.transition(@openSpeed);
 
@@ -90,41 +91,39 @@ header, header.mini:hover {
 	}
 
 	nav {
-
-		ul {			
-			margin-top:30px;
-			padding:0;
-			li {				
-				display:inline-block;			
-				color:white;
-				overflow:hidden;
+		
+		margin-top:30px;
+		padding:0;
+		
+		div {						
+			color:white;
+			overflow:hidden;
+			
+			a {
+				border-top:fade(#fff, 20) 1px solid;
+				text-shadow:0 3px 0 fade(#000, 10);
+				margin:0 30px;
+				display:block;
 				
-				a {
-					border-top:fade(#fff, 20) 1px solid;
+				h2 {
+					margin:0;
+					margin:40px 0;
+					margin-bottom:20px;
+					.transition(@openSpeed);
+				}
+
+				p {					
 					text-shadow:0 3px 0 fade(#000, 10);
-					margin:0 30px;
-					display:block;
-					
-					h2 {
-						margin:0;
-						margin:40px 0;
-						margin-bottom:20px;
-						.transition(@openSpeed);
-					}
+					padding:10px 0;
+					font-size:110%;
+					line-height:150%;	
+					color:#fff;	
+					max-height:300px;
+					.opacity(100);
+					.transition(@openSpeed);
+				}
+			}	
 
-					p {					
-						text-shadow:0 3px 0 fade(#000, 10);
-						padding:10px 0;
-						font-size:110%;
-						line-height:150%;	
-						color:#fff;	
-						max-height:300px;
-						.opacity(100);
-						.transition(@openSpeed);
-					}
-				}	
-
-			}
 		}
 	}
 	
@@ -197,6 +196,10 @@ header.mini {
 			text-align:right;
 			font-weight:bold;
 		}
+		
+		.form-control {
+			width:200px;
+		}
 	}
 
 	.individual-forms {
@@ -236,12 +239,10 @@ header.mini {
 
 			.multiple {
 				
-				.add-on {
+				margin-bottom:10px;
+				
+				.input-group-addon {
 					cursor:pointer;
-				}
-
-				input {
-					margin-bottom:10px;
 				}
 			}
 			

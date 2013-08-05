@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from app.detective.utils            import to_class_name
 from django.contrib.auth.decorators import login_required
 from django.db.models               import get_app, get_models
 from djangular.forms.angular_model  import NgModelFormMixin
 from django.forms                   import ModelForm
-from django.http                    import Http404, HttpResponse
-from django.shortcuts               import render_to_response, redirect
+from django.http                    import Http404
+from django.shortcuts               import render_to_response
 from django.template                import RequestContext, TemplateDoesNotExist
 
 

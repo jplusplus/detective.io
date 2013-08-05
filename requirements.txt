@@ -1,4 +1,4 @@
-Django==1.4.3
+Django==1.4.4
 argparse==1.2.1
 boto==2.9.6
 distribute==0.6.31
@@ -16,6 +16,6 @@ pytz==2013b
 six==1.3.0
 wadofstuff-django-serializers==1.1.0
 wsgiref==0.1.2
-git+https://github.com/scholrly/neo4django/#egg=neo4django-dev
+git+https://github.com/pirhoo/neo4django/#egg=neo4django-dev
 lxml==3.2.1
 BeautifulSoup<4.0

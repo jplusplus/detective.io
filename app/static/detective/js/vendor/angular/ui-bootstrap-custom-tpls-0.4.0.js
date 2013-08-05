@@ -174,7 +174,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position'])
       };
 
       var getMatchesAsync = function(inputValue) {
-
+        
         var locals = {$viewValue: inputValue};
         isLoadingSetter(originalScope, true);
         $q.when(parserResult.source(scope, locals)).then(function(matches) {

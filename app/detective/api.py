@@ -3,32 +3,56 @@ from django.conf.urls.defaults import *
 from django.core.paginator     import Paginator, InvalidPage
 from django.http               import Http404
 from tastypie                  import fields
-from tastypie.authorization    import DjangoAuthorization, Authorization
+from tastypie.authorization    import Authorization
 from tastypie.resources        import ModelResource
-from tastypie.resources        import ModelResource, ALL, ALL_WITH_RELATIONS
 from tastypie.utils            import trailing_slash
 
-class IndividualResource(ModelResource):
-    class Meta:
-        allowed_methods = ['get', 'post', 'delete', 'put']    
-        always_return_data = True
+class CommonMeta:
+    allowed_methods = ['get', 'post', 'delete', 'put']    
+    always_return_data = True         
+    authorization = Authorization()     
 
-class AmountResource(ModelResource):    
-    class Meta:
-        queryset = Amount.objects.all()                    
+class SearchableResource(ModelResource):    
+    
+    def hydrate(self, bundle): 
+        for field in bundle.data:                        
+            # Transform list field to be more flexible
+            if type(bundle.data[field]) is list:   
+                rels = [] 
+                # For each relation...
+                for rel in bundle.data[field]:   
+                    # Keeps the string
+                    if type(rel) is str:
+                        rels.append(rel)
+                    # Convert object with id to uri
+                    elif type(rel) is dict and "id" in rel:                                                                        
+                        rels.append( Organization.objects.get(id=rel["id"]) )
 
-class CountryResource(ModelResource):
-    class Meta:
-        queryset = Country.objects.all()              
+                bundle.data[field] = rels                                        
+        return bundle
 
-class FundraisingRoundResource(ModelResource):
-    class Meta:
-        queryset = FundraisingRound.objects.all()              
+    def save_m2m(self, bundle): 
+        for field in bundle.data:                        
+            # Transform list field to be more flexible
+            if type(bundle.data[field]) is list:                   
+                rels = bundle.data[field]
+                # Empties the bundle to avoid insert data twice
+                bundle.data[field] = []
+                # Get the field
+                attr = getattr(bundle.obj, field)                                    
+                if attr.count() > 0:
+                    # Clean the field to avoid duplicates
+                    attr.clear()
+                # For each relation...
+                for rel in rels:        
+                    # Add the received obj
+                    attr.add(rel.obj)
 
-class OrganizationResource(ModelResource):
-    class Meta:
-        queryset = Organization.objects.all()   
-        
+        # Save the object with it new relations
+        bundle.obj.save()
+
+        return super(SearchableResource, self).save_m2m(bundle)
+
     def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
@@ -70,63 +94,80 @@ class OrganizationResource(ModelResource):
         }
 
         self.log_throttled_access(request)
-        return self.create_response(request, object_list)           
+        return self.create_response(request, object_list)     
+
+
+
+class AmountResource(ModelResource):    
+    class Meta(CommonMeta):
+        queryset = Amount.objects.all()                    
+
+class CountryResource(SearchableResource):
+    class Meta(CommonMeta):
+        queryset = Country.objects.all()              
+
+class FundraisingRoundResource(ModelResource):
+    class Meta(CommonMeta):
+        queryset = FundraisingRound.objects.all()              
+
+class OrganizationResource(SearchableResource):
+    class Meta(CommonMeta):
+        queryset = Organization.objects.all()         
 
 class PriceResource(ModelResource):
-    class Meta:
+    class Meta(CommonMeta):
         queryset = Price.objects.all()   
 
-class ProjectResource(ModelResource):
+class ProjectResource(SearchableResource):
     activityin = fields.ToManyField("app.detective.api.CountryResource", "activityin", full=True, null=True)
     owner = fields.ToManyField("app.detective.api.OrganizationResource", "owner", full=True, null=True)
     commentary = fields.ToManyField("app.detective.api.CommentaryResource", "commentary", full=True, null=True)
     partner = fields.ToManyField("app.detective.api.OrganizationResource", "partner", full=True, null=True)
 
-    class Meta:
-        queryset = Project.objects.all()              
-        authorization = Authorization()        
+    class Meta(CommonMeta):
+        queryset = Project.objects.all()        
 
 class CommentaryResource(ModelResource):
-    class Meta:
+    class Meta(CommonMeta):
         queryset = Commentary.objects.all()              
 
 class DistributionResource(ModelResource):
-    class Meta:
+    class Meta(CommonMeta):
         queryset = Distribution.objects.all()              
 
-class EnergyProjectResource(ModelResource):
-    class Meta:
+class EnergyProjectResource(SearchableResource):
+    class Meta(CommonMeta):
         queryset = EnergyProject.objects.all()              
 
-class InternationalOrganizationResource(ModelResource):
-    class Meta:
+class InternationalOrganizationResource(SearchableResource):
+    class Meta(CommonMeta):
         queryset = InternationalOrganization.objects.all()              
 
-class PersonResource(ModelResource):
+class PersonResource(SearchableResource):
     organization_set = fields.ToManyField(OrganizationResource, "organization_set", full=False)
-    class Meta:
+    class Meta(CommonMeta):
         queryset = Person.objects.all()              
 
 class RevenueResource(ModelResource):
-    class Meta:
+    class Meta(CommonMeta):
         queryset = Revenue.objects.all()              
 
-class CompanyResource(ModelResource):
-    class Meta:
+class CompanyResource(SearchableResource):
+    class Meta(CommonMeta):
         queryset = Company.objects.all()              
 
 class FundResource(ModelResource):
-    class Meta:
+    class Meta(CommonMeta):
         queryset = Fund.objects.all()              
 
-class ProductResource(ModelResource):
-    class Meta:
+class ProductResource(SearchableResource):
+    class Meta(CommonMeta):
         queryset = Product.objects.all()              
 
-class EnergyProductResource(ModelResource):
-    class Meta:
+class EnergyProductResource(SearchableResource):
+    class Meta(CommonMeta):
         queryset = EnergyProduct.objects.all()              
 
-class NgoResource(ModelResource):
-    class Meta:
+class NgoResource(SearchableResource):
+    class Meta(CommonMeta):
         queryset = Ngo.objects.all()              

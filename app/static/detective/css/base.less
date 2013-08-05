@@ -178,6 +178,36 @@ header.mini {
 		}
 	}
 
+	.tt-hint {
+		.form-control()
+	}
+
+	.tt-hint {
+		color:@input-color-placeholder;
+	}
+
+	.tt-dropdown-menu {
+		width:100%;
+		color:#000;
+		.dropdown-menu()
+	}
+
+	.tt-suggestion {
+		
+		padding:3px 6px;
+		
+		&.tt-is-under-cursor {			
+			background-color: @link-color;
+			color:darken(@link-color, 60);
+		}
+	}
+
+	.triggered-events {
+		float: right;
+		width: 500px;
+		height: 300px;
+	}
+
 }
 
 #contribute {

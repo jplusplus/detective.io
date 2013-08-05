@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
 from lxml import etree
-from pprint import pprint
 from app.detective.utils import to_class_name, to_camelcase
 
 

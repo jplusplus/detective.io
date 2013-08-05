@@ -14,10 +14,13 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual)->
         ]
 
     # A new individual for kick-star forms
-    $scope.new = 
-        type: ""
-        saved: false
-        fields : new Individual name: ""
+    (initNewIndividual = ->
+        $scope.new = 
+            type: ""
+            saved: false
+            fields : new Individual name: ""
+    # Self initiating function
+    )()
 
     # When user submit a kick-start individual form
     $scope.addIndividual = (scroll=true)->
@@ -28,6 +31,8 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual)->
             $scope.individuals.push(o)
             # Disable kickStart form
             $scope.showKickStart = false
+            # Create a new individual object
+            initNewIndividual()
 
     $scope.removeIndividual = (index=0)->
         $scope.individuals.splice(index, 1) if $scope.individuals[index]?

@@ -124,7 +124,10 @@
 								<label class="col-3 tr form-label top05" for="id_{{ field.html_name }}">{{ field.label_tag }}</label>
 								<div class="col-3">
 						    		{% if field.field.widget|klass == "SelectMultiple" %}
-						    			<!--div ng-init="individual.fields.{{ field.html_name }} = [{name: ''}]"></div-->
+
+						    			<div ng-if="!individual.fields.{{ field.html_name }}.length"
+						    				 ng-init="individual.fields.{{ field.html_name }} = [{name: ''}]"></div>
+						    				 
 										<div ng-repeat="f in individual.fields.{{ field.html_name }}" class="input-group multiple">
 											<input 
 												type="text" 

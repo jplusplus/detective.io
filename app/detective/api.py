@@ -6,18 +6,22 @@ from django.core.paginator     import Paginator, InvalidPage
 from django.http               import Http404
 from neo4django.auth.models    import User
 from tastypie                  import fields
-from tastypie.authorization    import Authorization
+from tastypie.authorization    import DjangoAuthorization
+from tastypie.authentication   import SessionAuthentication
 from tastypie.http             import HttpUnauthorized, HttpForbidden
 from tastypie.resources        import ModelResource
 from tastypie.utils            import trailing_slash
+from django.middleware.csrf    import _get_new_csrf_key as get_new_csrf_key
+
 
 class CommonMeta:
     allowed_methods = ['get', 'post', 'delete', 'put']    
     always_return_data = True         
-    authorization = Authorization()     
+    authorization = DjangoAuthorization()     
+    authentication = SessionAuthentication()
 
 class SearchableResource(ModelResource):    
-    
+
     def hydrate(self, bundle): 
         for field in bundle.data:                        
             # Transform list field to be more flexible
@@ -128,19 +132,22 @@ class UserResource(ModelResource):
         if user:
             if user.is_active:
                 login(request, user)
-                return self.create_response(request, {
+                response = self.create_response(request, {
                     'success': True
                 })
+                # Create CSRF token
+                response.set_cookie("csrftoken", get_new_csrf_key())
+                return response
             else:
                 return self.create_response(request, {
                     'success': False,
                     'reason': 'disabled',
-                    }, HttpForbidden )
+                }, HttpForbidden)
         else:
             return self.create_response(request, {
                 'success': False,
                 'reason': 'incorrect',
-                }, HttpUnauthorized )
+                }, HttpUnauthorized)
 
     def logout(self, request, **kwargs):
         self.method_check(request, allowed=['get'])

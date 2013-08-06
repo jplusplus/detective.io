@@ -15,18 +15,21 @@ UserCtrl = ($scope, $http, User) ->
                 "Content-Type": "application/json"
       
         # succefull login
-        $http(config).success( (data, status, headers, config) ->            
-            if data? and data.success
-                User.is_logged = true
-                User.username  = $scope.username
+        $http(config).then( (responce) ->   
+            if responce.data? and responce.data.success
+                User.set
+                    is_logged: true
+                    username : $scope.username
             else
-                User.is_logged = false
-                User.username  = ''
+                User.set
+                    is_logged: false
+                    username : ''
         # failled login
-        ).error (data, status, headers, config) ->
-            User.is_logged = false
-            User.username  = ''
-            
+        , ->
+            User.set
+                is_logged: false
+                username : ''
+        )
 
     $scope.logout = ->
         config = 
@@ -36,10 +39,11 @@ UserCtrl = ($scope, $http, User) ->
                 "Content-Type": "application/json"
 
         # succefull logout
-        $http(config).success (data, status, headers, config) ->            
-            if data? and data.success
-                User.is_logged = false
-                User.username  = '' 
+        $http(config).then (responce) ->            
+            if responce.data? and responce.data.success
+                User.set
+                    is_logged: false
+                    username : ''
 
 
 

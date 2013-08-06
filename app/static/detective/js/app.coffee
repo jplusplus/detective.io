@@ -23,11 +23,14 @@ detective = angular
                         controller: LandingAllCtrl
                         templateUrl: "./partial/landing/all.html",
                     })
+                    .when('/login', {
+                        controller: UserCtrl
+                        templateUrl: "./partial/login.html",
+                    })
                     .when('/:topic/contribute', {
                         controller: ContributeCtrl  
                         templateUrl: "./partial/contribute.html"
                         auth: true
-                        resolve: ["User"]
                     })
                     .otherwise redirectTo: '/'
         ]

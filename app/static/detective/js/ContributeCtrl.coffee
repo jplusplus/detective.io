@@ -1,20 +1,10 @@
 ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)-> 
 
-    console.log User.data
-
     $scope.topic = $routeParams.topic
     # By default, hide the kick-start form
     $scope.showKickStart = false
-    
+    # Individual list
     $scope.individuals = []
-    # Load an individual for test
-    Individual.get {type: "project", id:36}, (project)->        
-        # Every happended inviduals
-        $scope.individuals = [
-            type: "project"
-            saved: false
-            fields: project
-        ]
 
     # A new individual for kick-star forms
     (initNewIndividual = ->

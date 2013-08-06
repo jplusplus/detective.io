@@ -1,13 +1,23 @@
-from neo4django.db import models
+from neo4django.db          import models
+from neo4django.auth.models import User
+
 # from app.detective import fields
 # The ontology can be found in its entirety at http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#
 
-class Amount(models.NodeModel):
+class Individual(models.NodeModel):
+    __status    = models.IntegerProperty(default=0)
+    __author    = models.Relationship(User, rel_type='hasCreated')
+    description = "" # Individual description provided by OWL file
+
+    class Meta:
+        abstract = True
+
+class Amount(Individual):
     source = models.URLProperty(null=True)
     value = models.IntegerProperty(null=True)
     year = models.DateTimeProperty(null=True)
 
-class Country(models.NodeModel):
+class Country(Individual):
     pass
 
 class FundraisingRound(Amount):
@@ -16,7 +26,7 @@ class FundraisingRound(Amount):
     personalpayer = models.Relationship("Person",rel_type='hasPersonalPayer', null=True)
     payer = models.Relationship("Organization",rel_type='hasPayer', null=True)
 
-class Organization(models.NodeModel):
+class Organization(Individual):
     officeAddress = models.StringProperty(null=True)
     websiteUrl = models.URLProperty(null=True)
     address = models.StringProperty(null=True)
@@ -38,7 +48,7 @@ class Organization(models.NodeModel):
 class Price(Amount):
     currency = models.StringProperty(null=True)
 
-class Project(models.NodeModel):
+class Project(Individual):
     name = models.StringProperty()
     source = models.URLProperty(null=True)
     image = models.URLProperty(null=True)
@@ -53,7 +63,7 @@ class Project(models.NodeModel):
     def __unicode__(self):
         return self.name
 
-class Commentary(models.NodeModel):
+class Commentary(Individual):
     year = models.DateTimeProperty(null=True)
     articleUrl = models.URLProperty(null=True)
     title = models.StringProperty(null=True)
@@ -68,7 +78,7 @@ class EnergyProject(Project):
 class InternationalOrganization(Organization):
     pass
 
-class Person(models.NodeModel):
+class Person(Individual):
     name = models.StringProperty()
     source = models.URLProperty(null=True)
     websiteUrl = models.StringProperty(null=True)
@@ -90,7 +100,7 @@ class Company(Organization):
 class Fund(Organization):
     pass
 
-class Product(models.NodeModel):
+class Product(Individual):
     name = models.StringProperty()
     source = models.URLProperty(null=True)
     image = models.URLProperty(null=True)

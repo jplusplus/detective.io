@@ -1,16 +1,18 @@
 # See also :
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
-UserCtrl = ($scope, $http, User) ->
+UserCtrl = ($scope, $http, $location, $routeParams, User) ->
 
     $scope.user = User
+    $scope.next = $routeParams.next or "/"
 
     $scope.login = ->
         config = 
             method: "POST"
             url: "/api/v1/user/login/"
             data: 
-                username: $scope.username
-                password: $scope.password
+                username    : $scope.username
+                password    : $scope.password
+                remember_me : $scope.remember_me or false
             headers:
                 "Content-Type": "application/json"
       
@@ -20,6 +22,8 @@ UserCtrl = ($scope, $http, User) ->
                 User.set
                     is_logged: true
                     username : $scope.username
+                # Redirect to the next URL
+                $location.url($scope.next)
             else
                 User.set
                     is_logged: false
@@ -47,4 +51,4 @@ UserCtrl = ($scope, $http, User) ->
 
 
 
-UserCtrl.$inject = ["$scope", "$http", "User"]
+UserCtrl.$inject = ["$scope", "$http", "$location", "$routeParams", "User"]

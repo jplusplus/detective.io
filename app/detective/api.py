@@ -125,18 +125,24 @@ class UserResource(ModelResource):
 
         data = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
 
-        username = data.get('username', '')
-        password = data.get('password', '')
+        username    = data.get('username', '')
+        password    = data.get('password', '')
+        remember_me = data.get('remember_me', False)
 
         user = authenticate(username=username, password=password)
         if user:
             if user.is_active:
                 login(request, user)
+                
+                # Remember me opt-in
+                if not remember_me: request.session.set_expiry(0)
+
                 response = self.create_response(request, {
                     'success': True
                 })
                 # Create CSRF token
                 response.set_cookie("csrftoken", get_new_csrf_key())
+
                 return response
             else:
                 return self.create_response(request, {

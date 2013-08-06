@@ -2,11 +2,17 @@
 	
 
 	<div ng-controller="UserCtrl">
-		[[user.data]]
 		<form ng-hide="user.is_logged" class="pull-right form-login form-inline" ng-submit="login()">		
-			<input type="text" class="form-control" ng-model="username" placeholder="Email" />
+			<input type="text" class="form-control" ng-model="username" placeholder="Username" />
 			<input type="password" class="form-control" ng-model="password" placeholder="Password" />
 			<button class="btn btn-default">Sign in</button>		
+			<div  class="form-group tr top05">
+				<div class="checkbox">
+			        <label>
+			          <input type="checkbox" ng-model="remember_me"> Remember me
+			        </label>
+			    </div>
+		    </div>
 		</form>
 
 		<div ng-show="user.is_logged" class="pull-right margin20">

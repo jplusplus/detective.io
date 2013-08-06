@@ -57,7 +57,7 @@ body {
 
 }
 
-header, header.mini:hover {
+header, header.mini.DISABLED:hover {
 	@open-speed: 0.4s;
 	position:relative;
 	z-index:@zindex-header;
@@ -156,6 +156,13 @@ header.mini {
 	z-index:@zindex-content;
 	padding-top:1px/10px;
 	
+
+	.login-form {
+		width:500px;
+		margin-left:auto;	
+		margin-right:auto;	
+	}
+
 	.landing {
 		
 		&.all.cards {

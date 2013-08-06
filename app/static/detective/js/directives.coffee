@@ -40,5 +40,7 @@ detective.directive "typeahead", ($parse)->
 detective.directive "watchLoginMandatory", ["$rootScope", "$location", "User", ($root, $location, User) ->
     link: () ->
         $root.$on "$routeChangeStart", (event, current) -> 
-            $location.url("/login") if current.auth and not User.is_logged
+            if current.auth and not User.is_logged                
+                next = $location.url()
+                $location.url("/login?next=#{next}") 
 ]

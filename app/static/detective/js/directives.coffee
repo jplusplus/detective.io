@@ -36,3 +36,9 @@ detective.directive "typeahead", ($parse)->
             if scope.model?
                 scope.model = individual
                 scope.$apply()
+
+detective.directive "checkUser", ["$rootScope", "$location", "UserService", ($root, $location, UserService) ->
+    link: (scope, elem, attrs, ctrl) ->
+        $root.$on "$routeChangeStart", (event, currRoute, prevRoute) ->
+            not prevRoute.access.isFree and not UserService.isLogged
+]

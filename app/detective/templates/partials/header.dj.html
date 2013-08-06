@@ -1,10 +1,27 @@
-<header ng-controller="HeaderCtrl" ng-class="location.path() == '/' ? '' : 'mini'">
+<header ng-class="location.path() == '/' ? '' : 'mini'">
+	
+
+	<div ng-controller="UserCtrl">
+		<form ng-hide="user.is_logged" class="pull-right form-login form-inline" ng-submit="login()">		
+			<input type="text" class="form-control" ng-model="username" placeholder="Email" />
+			<input type="password" class="form-control" ng-model="password" placeholder="Password" />
+			<button class="btn btn-default">Sign in</button>		
+		</form>
+
+		<div ng-show="user.is_logged" class="pull-right margin20">
+			Welcome, [[user.username]]!
+			<a ng-click="logout()" href="#">Sign out</a>
+		</div>
+	</div>
+
+
 	<h1>
 		<a href="#/">
 			Detective<i>.io</i>
 		</a>
-		<em>Leverage the semantic web to investigate</em>
 	</h1>
+
+
 	<nav class="row">
 		<div class="col-4">
 			<a href="">

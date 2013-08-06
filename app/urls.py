@@ -1,9 +1,10 @@
 from django.conf.urls import patterns, include, url
 from neo4django import admin
 from tastypie.api import Api
-from app.detective.api import AmountResource, CountryResource, FundraisingRoundResource, OrganizationResource, PriceResource, ProjectResource, CommentaryResource, DistributionResource, EnergyProjectResource, InternationalOrganizationResource, PersonResource, RevenueResource, CompanyResource, FundResource, ProductResource, EnergyProductResource, NgoResource
+from app.detective.api import AmountResource, CountryResource, FundraisingRoundResource, OrganizationResource, PriceResource, ProjectResource, CommentaryResource, DistributionResource, EnergyProjectResource, InternationalOrganizationResource, PersonResource, RevenueResource, CompanyResource, FundResource, ProductResource, EnergyProductResource, NgoResource, UserResource
 
 v1_api = Api(api_name='v1')
+v1_api.register(UserResource())
 v1_api.register(AmountResource())
 v1_api.register(CommentaryResource())
 v1_api.register(CompanyResource())

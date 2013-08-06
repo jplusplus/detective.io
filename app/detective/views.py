@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-from django.contrib.auth.decorators import login_required
 from django.db.models               import get_app, get_models
 from djangular.forms.angular_model  import NgModelFormMixin
 from django.forms                   import ModelForm
@@ -10,8 +8,6 @@ from django.shortcuts               import render_to_response
 from django.template                import RequestContext, TemplateDoesNotExist
 
 
-
-@login_required
 def home(request):
     locales = {}
     return render_to_response('home.dj.html', locales, context_instance=RequestContext(request))

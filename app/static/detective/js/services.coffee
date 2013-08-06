@@ -25,3 +25,13 @@ angular
             }
         }
     ])
+    .factory('User', ['$http', ($http)->           
+        sdo =
+            is_logged: false
+            username: ''
+            
+        # Sync User object
+        $http.get('/api/v1/user/status/').success (data)-> $.extend sdo, data
+
+        return sdo
+    ])

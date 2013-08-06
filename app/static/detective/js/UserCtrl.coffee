@@ -18,14 +18,15 @@ UserCtrl = ($scope, $http, User) ->
         $http(config).success( (data, status, headers, config) ->            
             if data? and data.success
                 User.is_logged = true
-                User.username   = $scope.username
+                User.username  = $scope.username
             else
                 User.is_logged = false
-                User.username   = ""
+                User.username  = ''
         # failled login
         ).error (data, status, headers, config) ->
             User.is_logged = false
-            User.username   = ""
+            User.username  = ''
+            
 
     $scope.logout = ->
         config = 
@@ -38,7 +39,7 @@ UserCtrl = ($scope, $http, User) ->
         $http(config).success (data, status, headers, config) ->            
             if data? and data.success
                 User.is_logged = false
-                User.username   = ""        
+                User.username  = '' 
 
 
 

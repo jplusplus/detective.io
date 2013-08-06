@@ -1,6 +1,6 @@
 # Services
 angular
-    .module('detectiveServices', ['ngResource'])
+    .module('detectiveServices', ['ngResource', 'ngCookies'])
     .factory("Individual", [ '$resource', '$http', ($resource, $http)->
     	$resource '/api/v1/:type/:id/#', {}, {
             query: {
@@ -25,13 +25,11 @@ angular
             }
         }
     ])
-    .factory('User', ['$http', ($http)->           
-        sdo =
-            is_logged: false
-            username: ''
-            
-        # Sync User object
-        $http.get('/api/v1/user/status/').success (data)-> $.extend sdo, data
-
-        return sdo
+    .factory('User', ['$cookies', ($cookies)->      
+        if $cookies.user__is_logged
+            is_logged: $cookies.user__is_logged 
+            username : $cookies.user__username or ''
+        else
+            is_logged: false 
+            username : ''
     ])

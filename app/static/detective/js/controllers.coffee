@@ -3,4 +3,3 @@ LandingAllCtrl.$inject = ['$scope']
 
 LandingEnergyCtrl = ($scope)->
 LandingEnergyCtrl.$inject = ['$scope']
-

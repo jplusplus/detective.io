@@ -9,7 +9,7 @@
 {% block extrajs %}
     <script type="text/javascript"   src="{% static 'detective/js/vendor/modernizr.custom.js' %}"></script>
     <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-sanitize.js' %}"></script>
+    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-cookies.js' %}"></script>
     <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-resource.js' %}"></script>
     <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/restangular.js' %}"></script>
     <script type="text/javascript"   src="{% static 'detective/js/vendor/jquery.scrollTo.js' %}"></script>
@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block content %}
-    <div ng-app="detective" id="ng-app">        
+    <div ng-app="detective" id="ng-app" watch-login-mandatory>        
     	{% include "partials/header.dj.html" %}
         <div ng-view id="content"></div>
     </div>

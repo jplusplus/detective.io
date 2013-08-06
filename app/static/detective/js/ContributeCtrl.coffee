@@ -1,4 +1,7 @@
-ContributeCtrl = ($scope, $routeParams, $rootScope, Individual)-> 
+ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)-> 
+
+    console.log User.data
+
     $scope.topic = $routeParams.topic
     # By default, hide the kick-start form
     $scope.showKickStart = false
@@ -52,4 +55,4 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual)->
     $scope.save = (individual)->
         individual.fields.$save(type: individual.type)
 
-ContributeCtrl.$inject = ['$scope', '$routeParams', '$rootScope', 'Individual']
+ContributeCtrl.$inject = ['$scope', '$routeParams', '$rootScope', 'Individual', 'User']

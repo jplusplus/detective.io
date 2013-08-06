@@ -104,11 +104,11 @@ class SearchableResource(ModelResource):
 class UserResource(ModelResource):
     class Meta:
         queryset = User.objects.all()
-        fields = ['first_name', 'last_name', 'email']
+        fields = ['first_name', 'last_name', 'username', 'is_staff']
         allowed_methods = ['get', 'post']
         resource_name = 'user'
 
-    def override_urls(self):
+    def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
         return [
             url(r"^(?P<resource_name>%s)/login%s$"  % params, self.wrap_view('login'), name="api_login"),
@@ -150,12 +150,12 @@ class UserResource(ModelResource):
         else:
             return self.create_response(request, { 'success': False }, HttpUnauthorized)  
 
-    def status(self, request, **kwargs):
+    def status(self, request, **kwargs):        
         self.method_check(request, allowed=['get'])
         if request.user and request.user.is_authenticated():
             return self.create_response(request, { 'is_logged': True,  'username': request.user.username })
         else:
-            return self.create_response(request, { 'is_logged': False, 'username': '' }, HttpUnauthorized)  
+            return self.create_response(request, { 'is_logged': False, 'username': '' })  
 
 
 class AmountResource(ModelResource):    

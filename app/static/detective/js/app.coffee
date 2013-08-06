@@ -21,11 +21,13 @@ detective = angular
                 $routeProvider
                     .when('/', {
                         controller: LandingAllCtrl
-                        templateUrl: "./partial/landing/all.html"
+                        templateUrl: "./partial/landing/all.html",
                     })
                     .when('/:topic/contribute', {
                         controller: ContributeCtrl  
                         templateUrl: "./partial/contribute.html"
+                        auth: true
+                        resolve: ["User"]
                     })
                     .otherwise redirectTo: '/'
         ]

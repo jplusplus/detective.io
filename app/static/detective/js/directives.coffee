@@ -37,8 +37,8 @@ detective.directive "typeahead", ($parse)->
                 scope.model = individual
                 scope.$apply()
 
-detective.directive "checkUser", ["$rootScope", "$location", "UserService", ($root, $location, UserService) ->
-    link: (scope, elem, attrs, ctrl) ->
-        $root.$on "$routeChangeStart", (event, currRoute, prevRoute) ->
-            not prevRoute.access.isFree and not UserService.isLogged
+detective.directive "watchLoginMandatory", ["$rootScope", "$location", "User", ($root, $location, User) ->
+    link: () ->
+        $root.$on "$routeChangeStart", (event, current) -> 
+            $location.url("/") if current.auth and not User.is_logged
 ]

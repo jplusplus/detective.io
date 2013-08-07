@@ -124,7 +124,7 @@ class Command(BaseCommand):
                             # Guesses the destination of the relation based on the name. 
                             # Name should be "has_..."
                             if relation["type"].find('has') == 0:
-                                relation["destination"] = relation["type"][3:].lower()
+                                relation["destination"] = pron(relation["type"][3:])
 
                             # Get the property's options
                             options = self.propOptions(relation["type"])                            

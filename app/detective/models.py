@@ -40,7 +40,7 @@ class FundraisingRound(Amount):
     currency = models.StringProperty(null=True,help_text=u'')
     raise_type = models.StringProperty(null=True,help_text=u'')
     payer = models.Relationship("Organization",null=True,rel_type='hasPayer',help_text=u'The Organization that actually pays the amount or contributes the asset considered.')
-    personalpayer = models.Relationship("Person",null=True,rel_type='hasPersonalPayer',help_text=u'The Person that contributes the amount or the asset considered.')
+    personal_payer = models.Relationship("Person",null=True,rel_type='hasPersonalPayer',help_text=u'The Person that contributes the amount or the asset considered.')
 
     class Meta:
         pass
@@ -56,9 +56,9 @@ class Organization(Individual):
     address = models.StringProperty(null=True,help_text=u'')
     partner = models.Relationship("self",null=True,rel_type='hasPartner',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).')
     adviser = models.Relationship("Person",null=True,rel_type='hasAdviser',help_text=u'The list of persons that help the entity.')
-    litigationagainst = models.Relationship("self",null=True,rel_type='hasLitigationAgainst',help_text=u'An entity is said to litigate against another when it is involved in a lawsuit or an out-of-court settlement with the other.')
-    fundraisinground = models.Relationship("FundraisingRound",null=True,rel_type='hasFundraisingRound',help_text=u'A Fundraising Round represents an event when an Organization was able to raise cash or another asset.')
-    boardmember = models.Relationship("Person",null=True,rel_type='hasBoardMember',help_text=u'The list of board members of the Organization, if any.')
+    litigation_against = models.Relationship("self",null=True,rel_type='hasLitigationAgainst',help_text=u'An entity is said to litigate against another when it is involved in a lawsuit or an out-of-court settlement with the other.')
+    fundraising_round = models.Relationship("FundraisingRound",null=True,rel_type='hasFundraisingRound',help_text=u'A Fundraising Round represents an event when an Organization was able to raise cash or another asset.')
+    board_member = models.Relationship("Person",null=True,rel_type='hasBoardMember',help_text=u'The list of board members of the Organization, if any.')
     revenue = models.Relationship("Revenue",null=True,rel_type='hasRevenue',help_text=u'A Revenue represents the quantity of cash that the Organization was able to gather in any given year. It doesn\'t have to be equal to the net sales but can take into account subsidies as well.')
 
     class Meta:
@@ -81,7 +81,7 @@ class Project(Individual):
     twitter_handle = models.StringProperty(null=True,help_text=u'')
     comment = models.StringProperty(null=True,help_text=u'')
     partner = models.Relationship("Organization",null=True,rel_type='hasPartner',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).')
-    activityin = models.Relationship("Country",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ')
+    activity_in = models.Relationship("Country",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ')
     owner = models.Relationship("Organization",null=True,rel_type='hasOwner',help_text=u'The formal Owner of the entity.')
     commentary = models.Relationship("Commentary",null=True,rel_type='hasCommentary',help_text=u'A Commentary is an article, a blog post or a report that assesses the quality of the Project.')
 
@@ -101,7 +101,7 @@ class Commentary(Individual):
 class Distribution(Amount):
     description = u''
     sold = models.StringProperty(null=True,help_text=u'')
-    activityin = models.Relationship("Country",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ')
+    activity_in = models.Relationship("Country",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ')
 
     class Meta:
         pass
@@ -127,9 +127,9 @@ class Person(Individual):
     twitter_handle = models.StringProperty(null=True,help_text=u'')
     website_url = models.StringProperty(null=True,help_text=u'')
     source = models.URLProperty(null=True,help_text=u'')
-    activityin = models.Relationship("Organization",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ')
+    activity_in = models.Relationship("Organization",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ')
     nationality = models.Relationship("Country",null=True,rel_type='hasNationality',help_text=u'The list of nationalities (as appear on his/her passport) of a Person.')
-    previousactivityin = models.Relationship("Organization",null=True,rel_type='hasPreviousActivityIn',help_text=u'Has the entity been active in a specific country or Organization previsously?')
+    previous_activity_in = models.Relationship("Organization",null=True,rel_type='hasPreviousActivityIn',help_text=u'Has the entity been active in a specific country or Organization previsously?')
 
     class Meta:
         verbose_name = u'Person'

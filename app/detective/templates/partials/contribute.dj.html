@@ -99,7 +99,10 @@
 		<div class="individual contribute-bg contribute-shadow"		 
 		     scroll-to="600"    
 			 ng-repeat="individual in individuals" 
-			 ng-class="individual.reduce == true ? 'reduce' : ''">
+			 ng-class="{
+			 	reduce : individual.reduce,
+			 	loading: individual.loading
+			 }">
 			<div class="head">	
 				<div class="btns">
 					<a ng-click="save(individual)" class="btn btn-fade">
@@ -113,50 +116,66 @@
 						Collapse
 					</a>
 				</div>		
-				<h3>[[individual.fields.name]] # [[individual.fields.id]]</h3>	
+				<h3>[[individual.fields.name]]</h3>	
 				<h4>Adding a new [[individual.type]]</h4>
 			</div>
 			<div class="form-horizontal">
 				{% for form in forms %}
-					<div ng-if="individual.type.toLowerCase() == '{{form.Meta.model|klass|lower}}'">
+					<fieldset ng-if="individual.type.toLowerCase() == '{{form.Meta.model|klass|lower}}'">
+
 						{% for field in form %}
 
 							<div class="row field top20 form-group">
-								<label class="col-3 tr form-label top05" for="id_{{ field.html_name }}">{{ field.label_tag }}</label>
+								<label class="col-3 tr form-label top05" for="id_{{field.html_name}}">{{field.label_tag}}</label>
 								<div class="col-3">
 						    		{% if field.field.widget|klass == "SelectMultiple" %}
 
-						    			<div ng-if="!individual.fields.{{ field.html_name }}.length"
-						    				 ng-init="individual.fields.{{ field.html_name }} = [{name: ''}]"></div>
+						    			<div ng-if="!individual.fields.{{field.html_name}}.length"
+						    				 ng-init="individual.fields.{{field.html_name}} = [{name: ''}]"></div>
 						    				 
-										<div ng-repeat="f in individual.fields.{{ field.html_name }}" class="input-group multiple">
+										<div ng-repeat="f in individual.fields.{{field.html_name}}" class="input-group multiple">
 											<input 
 												type="text" 
 												typeahead
-												tt-individual="{{ field|queryset_klass }}"
-												tt-model="individual.fields.{{ field.html_name }}[$index]"
+												tt-individual="{{field|queryset_klass}}"
+												tt-model="individual.fields.{{field.html_name}}[$index]"
+												ng-disabled="individual.loading"
 												class="form-control" />
-											<span class="input-group-addon" ng-click="removeOne(individual, '{{ field.html_name }}', $index)">
+											<span class="input-group-addon" ng-click="removeOne(individual, '{{field.html_name}}', $index)">
 												<i class="gray-darker icon-remove"></i>	
 											</span>
 										</div>
 										
 
-										<a ng-click="addOne(individual, '{{ field.html_name }}', '{{field|queryset_klass}}')">
+										<a ng-if="allowOneMore(individual, '{{field.html_name}}', '{{field|queryset_klass}}')" 
+										   ng-click="addOne(individual, '{{field.html_name}}', '{{field|queryset_klass}}')">
 											<i class="icon-plus"></i>
 											Add another one
-										</a>
+										</a>										
 									
 									{% else %}
-										{{ field|add_class:"form-control" }}
+										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading" }}
 									{% endif %}
 								</div>
 								<span class="col-6">
-									<p>{{ field.help_text }}</p>
+									<p class="top10">{{ field.help_text }}</p>
 								</span>
 							</div>
+
+				    		{% if field.field.widget|klass == "SelectMultiple" %}
+				    			<div class="ask-for-new row" ng-if="askForNew(individual, '{{field.html_name}}', $index)">
+				    				<div class="col-9 col-offset-3 pan">
+				    					<p>Heads Up! The entry you just typed in is new the the base.</p>	    					
+				    					<a class="btn btn-default" 
+				    					   ng-click="setNewFrom(individual, '{{field.html_name}}', $index, '{{field|queryset_klass}}')">
+				    						Create <strong>Datawrapper</strong>
+				    					</a>
+				    				</div>
+				    			</div>
+				    		{% endif %}
+
 						{% endfor %}
-					</div>
+					</fieldset>
 				{% endfor %}
 			</div>
 		</div>

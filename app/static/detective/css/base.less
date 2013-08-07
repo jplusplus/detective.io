@@ -252,6 +252,21 @@ header.mini {
 			margin-top:30px;
 			margin-bottom:30px;
 			padding:30px;
+			position:relative;
+			
+			&.loading:after {
+				content:"";
+				display:block;
+				position:absolute;
+				top:0;
+				bottom:0;
+				left:0;
+				right:0;
+				.progress-striped .progress-bar();
+				.progress-bar-variant(@contribute-color);
+				.progress.active .progress-bar();
+				.opacity(0.4);
+			}
 			
 			.head {
 
@@ -283,7 +298,7 @@ header.mini {
 
 			.multiple {
 				
-				margin-bottom:10px;
+				margin-bottom:5px;
 				
 				.input-group-addon {
 					cursor:pointer;
@@ -298,7 +313,17 @@ header.mini {
 				.form-horizontal {
 					display:none;				
 				}
-			}			
+			}	
+
+			.ask-for-new {
+				margin:10px -30px;
+				padding:10px 0;
+				background:fade(#000, 10);
+				
+				.pan {
+					padding-left:20px;
+				}
+			}		
 		}		
 	}
 }

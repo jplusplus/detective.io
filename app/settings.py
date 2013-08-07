@@ -141,6 +141,15 @@ DEBUG_TOOLBAR_CONFIG = {
     "INTERCEPT_REDIRECTS": False
 }
 
+CACHES = {
+    'default': {
+        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'LOCATION': '/tmp/django_cache/dio',
+    }
+}
+
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',

@@ -4,6 +4,7 @@ detective.directive "scrollTo", ->
             $(window).scrollTo(element, attrs.scrollTo or 0) if v
 
 detective.directive "typeahead", ($parse)->
+    lastDataset = []
     # Use underscore's template 
     # @TODO use $compile from angular
     engine =
@@ -11,7 +12,8 @@ detective.directive "typeahead", ($parse)->
             compiled = _.template(template)
             render: (context)-> compiled(context)
     scope:         
-        model: "=ttModel"        
+        model : "=ttModel"     
+        create: "&ttCreate"  
     link: (scope, element, attrs) ->        
         individual = attrs.ttIndividual.toLowerCase()
         # Set a default value
@@ -27,15 +29,40 @@ detective.directive "typeahead", ($parse)->
                 filter: (response)-> 
                     # Format to datum requirements
                     _.each response.objects, (el, idx)-> el["__value__"] = el["name"]
-                    # Return objects list
-                    response.objects
+                    # Record last dataset and return objects list
+                    lastDataset = response.objects
+
         )
 
         # Watch select event
-        element.on "typeahead:selected", (input, individual)->                        
+        element.on "typeahead:selected", (input, individual)->      
             if scope.model?
                 scope.model = individual
                 scope.$apply()
+
+        # Watch user value event
+        element.on "typeahead:uservalue", ()->                 
+            # Empty selected model
+            delete scope.model.id
+            # Record the value
+            scope.model.name = $(this).val()
+            # Apply the scope change
+            scope.$apply()
+            # Evaluate the 'create' expression
+            scope.create() if typeof(scope.create) is "function"  
+                  
+
+        # Watch change event
+        element.on "change", (input)-> 
+            $input = $(this)
+            # Filter using the current value
+            datum = _.findWhere lastDataset, "__value__": $input.val()            
+            # If datum exist, use the selected event
+            ev = "typeahead:" + (if datum then "selected" else "uservalue")            
+            # Trigger this even
+            $input.trigger ev, datum
+
+
 
 detective.directive "watchLoginMandatory", ["$rootScope", "$location", "User", ($root, $location, User) ->
     link: () ->

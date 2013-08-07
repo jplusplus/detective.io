@@ -51,13 +51,11 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
             delete individual.fields[key][index]
             individual.fields[key].splice(index, 1) 
     
-    $scope.askForNew = (individual, key, index)->
-        el = individual.fields[key][index]
-        if el?
-            el.name? and el.name isnt "" and not el.id?
+    $scope.askForNew = (el)->
+        console.log el
+        el? and el.name? and el.name isnt "" and not el.id?
 
-    $scope.setNewFrom = (individual, key, index, type)->
-        el = individual.fields[key][index]   
+    $scope.setNewFrom = (el, type)->
         # Create the new entry obj
         $scope.new = 
             type    : type

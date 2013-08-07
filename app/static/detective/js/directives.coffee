@@ -41,15 +41,15 @@ detective.directive "typeahead", ($parse)->
                 scope.$apply()
 
         # Watch user value event
-        element.on "typeahead:uservalue", ()->                 
+        element.on "typeahead:uservalue", ()->  
             # Empty selected model
             delete scope.model.id
             # Record the value
             scope.model.name = $(this).val()
-            # Apply the scope change
-            scope.$apply()
             # Evaluate the 'create' expression
             scope.create() if typeof(scope.create) is "function"  
+            # Apply the scope change
+            scope.$apply()
                   
 
         # Watch change event

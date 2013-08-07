@@ -127,23 +127,38 @@
 
 							<div class="row field top20 form-group">
 								<label class="col-3 tr form-label top05" for="id_{{field.html_name}}">{{field.label_tag}}</label>
-								<div class="col-3">
+								<div class="col-4">
 						    		{% if field.field.widget|klass == "SelectMultiple" %}
 
 						    			<div ng-if="!individual.fields.{{field.html_name}}.length"
 						    				 ng-init="individual.fields.{{field.html_name}} = [{name: ''}]"></div>
 						    				 
-										<div ng-repeat="f in individual.fields.{{field.html_name}}" class="input-group multiple">
-											<input 
-												type="text" 
-												typeahead
-												tt-individual="{{field|queryset_klass}}"
-												tt-model="individual.fields.{{field.html_name}}[$index]"
-												ng-disabled="individual.loading"
-												class="form-control" />
-											<span class="input-group-addon" ng-click="removeOne(individual, '{{field.html_name}}', $index)">
-												<i class="gray-darker icon-remove"></i>	
-											</span>
+										<div ng-repeat="f in individual.fields.{{field.html_name}}">
+											<div class="input-group multiple">
+												<input 
+													type="text" 
+													typeahead
+													tt-individual="{{field|queryset_klass}}"
+													tt-model="individual.fields.{{field.html_name}}[$index]"
+													ng-disabled="individual.loading"
+													class="form-control" />
+												<span class="input-group-addon" ng-click="removeOne(individual, '{{field.html_name}}', $index)">
+													<i class="gray-darker icon-remove"></i>	
+												</span>
+											</div>
+
+							    			<div class="ask-for-new" ng-show="askForNew(f)">
+							    				<div class="pan">
+							    					<h4>Heads Up!</h4>
+							    					<p>The entry you just typed in is new the the base.</p>	    					
+							    					<div class="tr">
+								    					<a class="btn btn-default" 
+								    					   ng-click="setNewFrom(f, '{{field|queryset_klass}}')">
+								    						Create <strong>[[f.name]]</strong>
+								    					</a>
+								    				</div>
+							    				</div>
+							    			</div>
 										</div>
 										
 
@@ -151,28 +166,17 @@
 										   ng-click="addOne(individual, '{{field.html_name}}', '{{field|queryset_klass}}')">
 											<i class="icon-plus"></i>
 											Add another one
-										</a>										
-									
+										</a>			
+
 									{% else %}
 										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading" }}
 									{% endif %}
 								</div>
-								<span class="col-6">
+								<span class="col-5">
 									<p class="top10">{{ field.help_text }}</p>
 								</span>
 							</div>
 
-				    		{% if field.field.widget|klass == "SelectMultiple" %}
-				    			<div class="ask-for-new row" ng-if="askForNew(individual, '{{field.html_name}}', $index)">
-				    				<div class="col-9 col-offset-3 pan">
-				    					<p>Heads Up! The entry you just typed in is new the the base.</p>	    					
-				    					<a class="btn btn-default" 
-				    					   ng-click="setNewFrom(individual, '{{field.html_name}}', $index, '{{field|queryset_klass}}')">
-				    						Create <strong>Datawrapper</strong>
-				    					</a>
-				    				</div>
-				    			</div>
-				    		{% endif %}
 
 						{% endfor %}
 					</fieldset>

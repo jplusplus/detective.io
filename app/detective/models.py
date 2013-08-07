@@ -39,8 +39,8 @@ class FundraisingRound(Amount):
     description = u''
     currency = models.StringProperty(null=True,help_text=u'')
     raise_type = models.StringProperty(null=True,help_text=u'')
-    payer = models.Relationship("Organization",null=True,rel_type='hasPayer',help_text=u'The Organization that actually pays the amount or contributes the asset considered.')
-    personal_payer = models.Relationship("Person",null=True,rel_type='hasPersonalPayer',help_text=u'The Person that contributes the amount or the asset considered.')
+    payer = models.Relationship("Organization",null=True,rel_type='hasPayer', related_name="hasPayer+", help_text=u'The Organization that actually pays the amount or contributes the asset considered.')
+    personal_payer = models.Relationship("Person",null=True,rel_type='hasPersonalPayer', related_name="hasPersonalPayer+", help_text=u'The Person that contributes the amount or the asset considered.')
 
     class Meta:
         pass
@@ -54,12 +54,12 @@ class Organization(Individual):
     founded = models.DateTimeProperty(null=True,help_text=u'')
     source = models.URLProperty(null=True,help_text=u'')
     address = models.StringProperty(null=True,help_text=u'')
-    partner = models.Relationship("self",null=True,rel_type='hasPartner',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).')
-    adviser = models.Relationship("Person",null=True,rel_type='hasAdviser',help_text=u'The list of persons that help the entity.')
-    litigation_against = models.Relationship("self",null=True,rel_type='hasLitigationAgainst',help_text=u'An entity is said to litigate against another when it is involved in a lawsuit or an out-of-court settlement with the other.')
-    fundraising_round = models.Relationship("FundraisingRound",null=True,rel_type='hasFundraisingRound',help_text=u'A Fundraising Round represents an event when an Organization was able to raise cash or another asset.')
-    board_member = models.Relationship("Person",null=True,rel_type='hasBoardMember',help_text=u'The list of board members of the Organization, if any.')
-    revenue = models.Relationship("Revenue",null=True,rel_type='hasRevenue',help_text=u'A Revenue represents the quantity of cash that the Organization was able to gather in any given year. It doesn\'t have to be equal to the net sales but can take into account subsidies as well.')
+    partner = models.Relationship("self",null=True,rel_type='hasPartner', related_name="hasPartner+", help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).')
+    adviser = models.Relationship("Person",null=True,rel_type='hasAdviser', related_name="hasAdviser+", help_text=u'The list of persons that help the entity.')
+    litigation_against = models.Relationship("self",null=True,rel_type='hasLitigationAgainst', related_name="hasLitigationAgainst+", help_text=u'An entity is said to litigate against another when it is involved in a lawsuit or an out-of-court settlement with the other.')
+    fundraising_round = models.Relationship("FundraisingRound",null=True,rel_type='hasFundraisingRound', related_name="hasFundraisingRound+", help_text=u'A Fundraising Round represents an event when an Organization was able to raise cash or another asset.')
+    board_member = models.Relationship("Person",null=True,rel_type='hasBoardMember', related_name="hasBoardMember+", help_text=u'The list of board members of the Organization, if any.')
+    revenue = models.Relationship("Revenue",null=True,rel_type='hasRevenue', related_name="hasRevenue+", help_text=u'A Revenue represents the quantity of cash that the Organization was able to gather in any given year. It doesn\'t have to be equal to the net sales but can take into account subsidies as well.')
 
     class Meta:
         verbose_name = u'Organization'
@@ -80,10 +80,10 @@ class Project(Individual):
     ended = models.DateTimeProperty(null=True,help_text=u'')
     twitter_handle = models.StringProperty(null=True,help_text=u'')
     comment = models.StringProperty(null=True,help_text=u'')
-    partner = models.Relationship("Organization",null=True,rel_type='hasPartner',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).')
-    activity_in = models.Relationship("Country",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ')
-    owner = models.Relationship("Organization",null=True,rel_type='hasOwner',help_text=u'The formal Owner of the entity.')
-    commentary = models.Relationship("Commentary",null=True,rel_type='hasCommentary',help_text=u'A Commentary is an article, a blog post or a report that assesses the quality of the Project.')
+    partner = models.Relationship("Organization",null=True,rel_type='hasPartner', related_name="hasPartner+", help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).')
+    activity_in = models.Relationship("Country",null=True,rel_type='hasActivityIn', related_name="hasActivityIn+", help_text=u'The list of countries or territories the entity is active in. ')
+    owner = models.Relationship("Organization",null=True,rel_type='hasOwner', related_name="hasOwner+", help_text=u'The formal Owner of the entity.')
+    commentary = models.Relationship("Commentary",null=True,rel_type='hasCommentary', related_name="hasCommentary+", help_text=u'A Commentary is an article, a blog post or a report that assesses the quality of the Project.')
 
     class Meta:
         pass
@@ -93,7 +93,7 @@ class Commentary(Individual):
     article_url = models.URLProperty(null=True,help_text=u'')
     title = models.StringProperty(null=True,help_text=u'')
     year = models.DateTimeProperty(null=True,help_text=u'')
-    author = models.Relationship("Person",null=True,rel_type='hasAuthor',help_text=u'The author or authors of the document.')
+    author = models.Relationship("Person",null=True,rel_type='hasAuthor', related_name="hasAuthor+", help_text=u'The author or authors of the document.')
 
     class Meta:
         pass
@@ -101,14 +101,14 @@ class Commentary(Individual):
 class Distribution(Amount):
     description = u''
     sold = models.StringProperty(null=True,help_text=u'')
-    activity_in = models.Relationship("Country",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ')
+    activity_in = models.Relationship("Country",null=True,rel_type='hasActivityIn', related_name="hasActivityIn+", help_text=u'The list of countries or territories the entity is active in. ')
 
     class Meta:
         pass
 
 class EnergyProject(Project):
     description = u'An energy Project represents an endeavor to reach a particular aim (e.g. improve access to electricity, produce electricity in a certain way, improve energy efficiency, etc.). A project is the child of an Organization and takes its concrete form most often through Products.'
-    product = models.Relationship("EnergyProduct",null=True,rel_type='hasProduct',help_text=u'A Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.')
+    product = models.Relationship("EnergyProduct",null=True,rel_type='hasProduct', related_name="hasProduct+", help_text=u'A Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.')
 
     class Meta:
         verbose_name = u'Energy project'
@@ -127,9 +127,9 @@ class Person(Individual):
     twitter_handle = models.StringProperty(null=True,help_text=u'')
     website_url = models.StringProperty(null=True,help_text=u'')
     source = models.URLProperty(null=True,help_text=u'')
-    activity_in = models.Relationship("Organization",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ')
-    nationality = models.Relationship("Country",null=True,rel_type='hasNationality',help_text=u'The list of nationalities (as appear on his/her passport) of a Person.')
-    previous_activity_in = models.Relationship("Organization",null=True,rel_type='hasPreviousActivityIn',help_text=u'Has the entity been active in a specific country or Organization previsously?')
+    activity_in = models.Relationship("Organization",null=True,rel_type='hasActivityIn', related_name="hasActivityIn+", help_text=u'The list of countries or territories the entity is active in. ')
+    nationality = models.Relationship("Country",null=True,rel_type='hasNationality', related_name="hasNationality+", help_text=u'The list of nationalities (as appear on his/her passport) of a Person.')
+    previous_activity_in = models.Relationship("Organization",null=True,rel_type='hasPreviousActivityIn', related_name="hasPreviousActivityIn+", help_text=u'Has the entity been active in a specific country or Organization previsously?')
 
     class Meta:
         verbose_name = u'Person'
@@ -162,7 +162,7 @@ class Product(Individual):
     description = u''
     source = models.URLProperty(null=True,help_text=u'')
     image = models.URLProperty(null=True,help_text=u'')
-    price = models.Relationship("Price",null=True,rel_type='hasPrice',help_text=u'The price (use only digits, i.e. 8.99) of the Product at the date considered.')
+    price = models.Relationship("Price",null=True,rel_type='hasPrice', related_name="hasPrice+", help_text=u'The price (use only digits, i.e. 8.99) of the Product at the date considered.')
 
     class Meta:
         pass
@@ -170,8 +170,8 @@ class Product(Individual):
 class EnergyProduct(Product):
     description = u'An energy Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.'
     power_generation_per_unit_in_watt = models.IntegerProperty(null=True,help_text=u'')
-    distribution = models.Relationship("Distribution",null=True,rel_type='hasDistribution',help_text=u'A Distribution represents the batch sales or gift of a product. Companies often communicate in terms of "in year X, Y units of Product Z were sold/distributed in Country A".')
-    operator = models.Relationship("Organization",null=True,rel_type='hasOperator',help_text=u'Products, especially large ones such as power plants, have an Operator, usually a company.')
+    distribution = models.Relationship("Distribution",null=True,rel_type='hasDistribution', related_name="hasDistribution+", help_text=u'A Distribution represents the batch sales or gift of a product. Companies often communicate in terms of "in year X, Y units of Product Z were sold/distributed in Country A".')
+    operator = models.Relationship("Organization",null=True,rel_type='hasOperator', related_name="hasOperator+", help_text=u'Products, especially large ones such as power plants, have an Operator, usually a company.')
 
     class Meta:
         verbose_name = u'Energy product'

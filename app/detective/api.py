@@ -50,9 +50,12 @@ class IndividualResource(ModelResource):
             if type(bundle.data[field]) is list:                   
                 rels = bundle.data[field]
                 # Empties the bundle to avoid insert data twice
-                bundle.data[field] = []
+                bundle.data[field] = []       
+                print field
+                print type(bundle.obj) 
+                print bundle.data
                 # Get the field
-                attr = getattr(bundle.obj, field)                                    
+                attr = getattr(bundle.obj, field)
                 if attr.count() > 0:
                     # Clean the field to avoid duplicates
                     attr.clear()
@@ -178,97 +181,91 @@ class UserResource(IndividualResource):
 
 class AmountResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Amount.objects.filter(_status=1)
 
 class CountryResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Country.objects.filter(_status=1)
 
 class FundraisingRoundResource(IndividualResource):
-
     payer = fields.ToManyField("app.detective.api.OrganizationResource", "payer", full=True, null=True)
     personalpayer = fields.ToManyField("app.detective.api.PersonResource", "personalpayer", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = FundraisingRound.objects.filter(_status=1)
 
 class OrganizationResource(IndividualResource):
-
     partner = fields.ToManyField("app.detective.api.OrganizationResource", "partner", full=True, null=True)
     adviser = fields.ToManyField("app.detective.api.PersonResource", "adviser", full=True, null=True)
-    litigationagainst = fields.ToManyField("app.detective.api.OrganizationResource", "litigationagainst", full=True, null=True)
-    fundraisinground = fields.ToManyField("app.detective.api.FundraisingRoundResource", "fundraisinground", full=True, null=True)
-    boardmember = fields.ToManyField("app.detective.api.PersonResource", "boardmember", full=True, null=True)
+    litigation_against = fields.ToManyField("app.detective.api.OrganizationResource", "litigation_against", full=True, null=True)
+    fundraising_round = fields.ToManyField("app.detective.api.FundraisingRoundResource", "fundraising_round", full=True, null=True)
+    board_member = fields.ToManyField("app.detective.api.PersonResource", "board_member", full=True, null=True)
     revenue = fields.ToManyField("app.detective.api.RevenueResource", "revenue", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Organization.objects.filter(_status=1)
 
 class PriceResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Price.objects.filter(_status=1)
 
 class ProjectResource(IndividualResource):
-    activityin = fields.ToManyField("app.detective.api.CountryResource", "activityin", full=True, null=True)
+    activity_in = fields.ToManyField("app.detective.api.CountryResource", "activity_in", full=True, null=True)
     owner = fields.ToManyField("app.detective.api.OrganizationResource", "owner", full=True, null=True)
     commentary = fields.ToManyField("app.detective.api.CommentaryResource", "commentary", full=True, null=True)
     partner = fields.ToManyField("app.detective.api.OrganizationResource", "partner", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Project.objects.filter(_status=1)
 
 class CommentaryResource(IndividualResource):
-
     author = fields.ToManyField("app.detective.api.PersonResource", "author", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Commentary.objects.filter(_status=1)
 
-class DistributionResource(IndividualResource):
-    
-    activityin = fields.ToManyField("app.detective.api.CountryResource", "activityin", full=True, null=True)
+class DistributionResource(IndividualResource):    
+    activity_in = fields.ToManyField("app.detective.api.CountryResource", "activity_in", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Distribution.objects.filter(_status=1)
 
 class EnergyProjectResource(IndividualResource):
-
     product = fields.ToManyField("app.detective.api.EnergyProductResource", "product", full=True, null=True)
   
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = EnergyProject.objects.filter(_status=1)
 
 class InternationalOrganizationResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = InternationalOrganization.objects.filter(_status=1)
 
-class PersonResource(IndividualResource):
-    
-    activityin = fields.ToManyField("app.detective.api.OrganizationResource", "activityin", full=True, null=True)
+class PersonResource(IndividualResource):    
+    activity_in = fields.ToManyField("app.detective.api.OrganizationResource", "activity_in", full=True, null=True)
     nationality = fields.ToManyField("app.detective.api.CountryResource", "nationality", full=True, null=True)
-    previousactivityin = fields.ToManyField("app.detective.api.OrganizationResource", "previousactivityin", full=True, null=True)
+    previous_activity_in = fields.ToManyField("app.detective.api.OrganizationResource", "previous_activity_in", full=True, null=True)
 
     class Meta(IndividualMeta):
         queryset = Person.objects.filter(_status=1)
 
 class RevenueResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Revenue.objects.filter(_status=1)
 
 class CompanyResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Company.objects.filter(_status=1)
 
 class GovernmentOrganizationResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = GovernmentOrganization.objects.filter(_status=1)
 
 class ProductResource(IndividualResource):
 
     price = fields.ToManyField("app.detective.api.PriceResource", "price", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Product.objects.filter(_status=1)
 
 class EnergyProductResource(IndividualResource):
     
@@ -276,8 +273,57 @@ class EnergyProductResource(IndividualResource):
     operator = fields.ToManyField("app.detective.api.OrganizationResource", "operator", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = EnergyProduct.objects.filter(_status=1)
 
 class NgoResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Person.objects.filter(_status=1)
+        queryset = Ngo.objects.filter(_status=1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

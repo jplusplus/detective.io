@@ -120,6 +120,7 @@
 				{% for form in forms %}
 					<div ng-if="individual.type.toLowerCase() == '{{form.Meta.model|klass|lower}}'">
 						{% for field in form %}
+
 							<div class="row field top20 form-group">
 								<label class="col-3 tr form-label top05" for="id_{{ field.html_name }}">{{ field.label_tag }}</label>
 								<div class="col-3">

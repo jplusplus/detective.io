@@ -1,78 +1,57 @@
 from neo4django import admin
-from app.detective.models import Amount, Country, FundraisingRound, Organization, Price, Project, Commentary, Distribution, EnergyProject, InternationalOrganization, Person, Revenue, Company, Fund, Product, EnergyProduct, Ngo
+from app.detective.models import *
 from neo4django.auth.models import User
 
-class UserAdmin(admin.ModelAdmin):
-	pass
-
-class AmountAdmin(admin.ModelAdmin):
-	pass
-
-class CountryAdmin(admin.ModelAdmin):
-	pass
-
-class FundraisingRoundAdmin(admin.ModelAdmin):
-	pass
-
-class OrganizationAdmin(admin.ModelAdmin):
-	def __unicode__(self):
-		return self.name
-
-class PriceAdmin(admin.ModelAdmin):
-	pass
-
-class ProjectAdmin(admin.ModelAdmin):
-	pass
-
-class CommentaryAdmin(admin.ModelAdmin):
-	pass
-
-class DistributionAdmin(admin.ModelAdmin):
-	pass
-
-class EnergyProjectAdmin(admin.ModelAdmin):
-	pass
-
-class InternationalOrganizationAdmin(admin.ModelAdmin):
-	pass
-
-class PersonAdmin(admin.ModelAdmin):
-	pass
-
-class RevenueAdmin(admin.ModelAdmin):
-	pass
-
-class CompanyAdmin(admin.ModelAdmin):
-	pass
-
-class FundAdmin(admin.ModelAdmin):
-	pass
-
-class ProductAdmin(admin.ModelAdmin):
-	pass
-
-class EnergyProductAdmin(admin.ModelAdmin):
-	pass
-
-class NgoAdmin(admin.ModelAdmin):
-	pass
-
-
+class UserAdmin(admin.ModelAdmin): pass
 admin.site.register(User, UserAdmin)
+
+class AmountAdmin(admin.ModelAdmin): pass
 admin.site.register(Amount, AmountAdmin)
+
+class CountryAdmin(admin.ModelAdmin): pass
 admin.site.register(Country, CountryAdmin)
+
+class FundraisingRoundAdmin(admin.ModelAdmin): pass
 admin.site.register(FundraisingRound, FundraisingRoundAdmin)
+
+class OrganizationAdmin(admin.ModelAdmin): pass
 admin.site.register(Organization, OrganizationAdmin)
+
+class PriceAdmin(admin.ModelAdmin): pass
 admin.site.register(Price, PriceAdmin)
+
+class ProjectAdmin(admin.ModelAdmin): pass
 admin.site.register(Project, ProjectAdmin)
+
+class CommentaryAdmin(admin.ModelAdmin): pass
 admin.site.register(Commentary, CommentaryAdmin)
+
+class DistributionAdmin(admin.ModelAdmin): pass
 admin.site.register(Distribution, DistributionAdmin)
+
+class EnergyProjectAdmin(admin.ModelAdmin): pass
 admin.site.register(EnergyProject, EnergyProjectAdmin)
+
+class InternationalOrganizationAdmin(admin.ModelAdmin): pass
 admin.site.register(InternationalOrganization, InternationalOrganizationAdmin)
+
+class PersonAdmin(admin.ModelAdmin): pass
 admin.site.register(Person, PersonAdmin)
+
+class RevenueAdmin(admin.ModelAdmin): pass
 admin.site.register(Revenue, RevenueAdmin)
+
+class CompanyAdmin(admin.ModelAdmin): pass
 admin.site.register(Company, CompanyAdmin)
-admin.site.register(Fund, FundAdmin)
+
+class GovernmentOrganizationAdmin(admin.ModelAdmin): pass
+admin.site.register(GovernmentOrganization, GovernmentOrganizationAdmin)
+
+class ProductAdmin(admin.ModelAdmin): pass
 admin.site.register(Product, ProductAdmin)
+
+class EnergyProductAdmin(admin.ModelAdmin): pass
 admin.site.register(EnergyProduct, EnergyProductAdmin)
+
+class NgoAdmin(admin.ModelAdmin): pass
 admin.site.register(Ngo, NgoAdmin)

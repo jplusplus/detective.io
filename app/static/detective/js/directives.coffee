@@ -11,7 +11,7 @@ detective.directive "typeahead", ($parse)->
             compiled = _.template(template)
             render: (context)-> compiled(context)
     scope:         
-        model: "=ttModel"
+        model: "=ttModel"        
     link: (scope, element, attrs) ->        
         individual = attrs.ttIndividual.toLowerCase()
         # Set a default value

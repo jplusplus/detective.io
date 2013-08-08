@@ -25,7 +25,7 @@
         {% block content %}{% endblock %}           
 
         {% compress js %}    
-            <script src="{% static 'detective/js/vendor/jquery-1.10.0.js' %}"></script>
+            <script type="text/javascript" src="{% static 'detective/js/vendor/jquery-1.10.0.js' %}"></script>
             {% block extrajs %}{% endblock %}   
         {% endcompress %}
 

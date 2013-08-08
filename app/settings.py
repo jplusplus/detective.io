@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import dj_database_url  
+from urlparse import urlparse
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
 
@@ -17,13 +18,24 @@ DATABASES = {
     'default' : dj_database_url.config()
 }
 
+# Parse url given into environment variable 
+NEO4J_URL  = urlparse( os.getenv('NEO4J_URL') )
+
+# Determines the hostname
+if NEO4J_URL.username and NEO4J_URL.password:
+    NEO4J_HOST = "%s:%s@%s" % (NEO4J_URL.username, NEO4J_URL.password, NEO4J_URL.hostname) 
+else:
+    NEO4J_HOST = NEO4J_URL.hostname
+
 NEO4J_DATABASES = {
     'default' : {
-        'HOST':'localhost',
-        'PORT':7474,
+        # Concatenates username, password and hostname
+        'HOST':'%s' % (NEO4J_HOST,),
+        'PORT': int(NEO4J_URL.port),
         'ENDPOINT':'/db/data'
     }
 }
+
 
 DATABASE_ROUTERS        = ['neo4django.utils.Neo4djangoIntegrationRouter']
 SESSION_ENGINE          = "django.contrib.sessions.backends.file"

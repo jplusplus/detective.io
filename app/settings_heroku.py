@@ -16,7 +16,7 @@ NEO4J_DATABASES = {
     'default' : {
     	# Concatenates username, password and hostname
         'HOST':'%s:%s@%s' % (NEO4J_URL.username, NEO4J_URL.password, NEO4J_URL.hostname),
-        'PORT': NEO4J_URL.port,
+        'PORT': int(NEO4J_URL.port),
         'ENDPOINT':'/db/data'
     }
 }

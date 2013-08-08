@@ -27,6 +27,7 @@ if NEO4J_URL.username and NEO4J_URL.password:
 else:
     NEO4J_HOST = NEO4J_URL.hostname
 
+
 NEO4J_DATABASES = {
     'default' : {
         # Concatenates username, password and hostname

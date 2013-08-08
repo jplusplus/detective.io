@@ -80,6 +80,8 @@ class Command(BaseCommand):
             relations = []
             properties = []
 
+
+            scope = get(ontologyClassElement, "scope").replace("'", "\\'")
             # Class help text
             help_text = get(ontologyClassElement, "help_text").replace("'", "\\'")
             # Verbose names
@@ -177,6 +179,7 @@ class Command(BaseCommand):
 
             models.append({
                 "className"          : className,
+                "scope"              : scope,
                 "help_text"          : help_text,
                 "verbose_name"       : verbose_name,
                 "verbose_name_plural": verbose_name_plural,
@@ -212,6 +215,9 @@ class Command(BaseCommand):
         for m in models:
             # Writes the class in models.py
             modelsContents.append("\nclass "+ m["className"] +"(" + m["parentClass"] + "):")
+
+            if m["scope"] != '' and m["scope"] != None:
+                modelsContents.append("\tscope = u'%s'" % m["scope"])
 
             if m["help_text"] != None:
                 modelsContents.append("\tdescription = u'%s'" % m["help_text"])

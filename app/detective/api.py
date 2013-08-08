@@ -8,7 +8,6 @@ from neo4django.auth.models    import User
 from tastypie                  import fields
 from tastypie.authorization    import DjangoAuthorization
 from tastypie.authentication   import SessionAuthentication
-from tastypie.http             import HttpUnauthorized, HttpForbidden
 from tastypie.resources        import ModelResource
 from tastypie.utils            import trailing_slash
 from django.middleware.csrf    import _get_new_csrf_key as get_new_csrf_key
@@ -159,13 +158,13 @@ class UserResource(IndividualResource):
             else:
                 return self.create_response(request, {
                     'success': False,
-                    'reason': 'disabled',
-                }, HttpForbidden)
+                    'reason': 'Account disabled.',
+                })
         else:
             return self.create_response(request, {
                 'success': False,
-                'reason': 'incorrect',
-                }, HttpUnauthorized)
+                'reason': 'Incorrect password or username.',
+                })
 
     def logout(self, request, **kwargs):
         self.method_check(request, allowed=['get'])

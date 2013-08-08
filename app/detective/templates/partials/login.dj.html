@@ -1,6 +1,7 @@
-<form class="login-form panel top30 black">	
+<form class="login-form panel top30 black" ng-class="{loading:loading}">	
  	<h2 class="panel-heading">Log in</h2>
 
+  <fieldset ng-disabled="loading">
     <div class="form-group">
       <label for="inputUsername">Username</label>
       <input type="text" ng-model="username "class="form-control" id="inputUsername" placeholder="Enter your username">
@@ -19,7 +20,10 @@
       </div>
     </div>
 
-	<div class="tr">
+    <div class="alert alert-danger" ng-if="error">[[error]]</div>
+
+  	<div class="tr">
     	<button type="submit" ng-click="login()" class="btn btn-contribute">Log in</button>
     </div>
+  </fieldset>
 </form>

@@ -19,7 +19,7 @@ detective = angular
                 $interpolateProvider.endSymbol   ']]'
                 # Bind routes to the controllers
                 $routeProvider
-                    .when('/', {
+                    .when('/home', {
                         controller: LandingAllCtrl
                         templateUrl: "./partial/landing/all.html",
                     })
@@ -32,6 +32,6 @@ detective = angular
                         templateUrl: "./partial/contribute.html"
                         auth: true
                     })
-                    .otherwise redirectTo: '/'
+                    .otherwise redirectTo: '/energy/contribute'
         ]
     )

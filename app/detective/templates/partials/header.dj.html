@@ -1,26 +1,32 @@
 <header ng-class="location.path() == '/' ? '' : 'mini'">
 	
-
 	<div ng-controller="UserCtrl">
-		<form ng-hide="user.is_logged" class="pull-right form-login form-inline" ng-submit="login()">		
-			<input type="text" class="form-control" ng-model="username" placeholder="Username" />
-			<input type="password" class="form-control" ng-model="password" placeholder="Password" />
-			<button class="btn btn-default">Sign in</button>		
-			<div  class="form-group tr top05">
-				<div class="checkbox">
-			        <label>
-			          <input type="checkbox" ng-model="remember_me"> Remember me
-			        </label>
+		<form class="pull-right form-login form-inline" 
+			  ng-hide="user.is_logged" 
+			  ng-class="{loading:loading}" 
+			  ng-submit="login()">		
+
+  			<fieldset ng-disabled="loading">
+				<input type="text" class="form-control" ng-model="username" placeholder="Username" />
+				<input type="password" class="form-control" ng-model="password" placeholder="Password" />
+				<button class="btn btn-default">Sign in</button>	
+
+				<div  class="form-group tr top05 bottom10">
+    		    	<span class="label label-danger pull-left top05" ng-if="error">[[error]]</span>	
+					<div class="checkbox">
+				        <label>
+				          <input type="checkbox" ng-model="remember_me"> Remember me
+				        </label>
+				    </div>
 			    </div>
-		    </div>
+			</fieldset>
 		</form>
 
-		<div ng-show="user.is_logged" class="pull-right margin20">
+		<div ng-show="user.is_logged" class="pull-right top10 right20 bottom30">
 			Welcome, [[user.username]]!
 			<a ng-click="logout()" href="#">Sign out</a>
 		</div>
 	</div>
-
 
 	<h1>
 		<a href="#/">
@@ -29,7 +35,7 @@
 	</h1>
 
 
-	<nav class="row">
+	<nav class="row hidden">
 		<div class="col-4">
 			<a href="">
 				<h2 class="understand-color">

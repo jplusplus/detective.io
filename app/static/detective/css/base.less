@@ -55,6 +55,23 @@ body {
 		.box-shadow(0 3px 0 darken(@explore-color, 10));
 	}
 
+	.panel.loading {
+		position:relative;
+		&:after {
+			content:"";
+			display:block;
+			position:absolute;
+			top:0;
+			bottom:0;
+			left:0;
+			right:0;
+			.progress-striped .progress-bar();
+			.progress-bar-variant(#bbb);
+			.progress.active .progress-bar();
+			.opacity(0.4);
+		}
+	}
+
 }
 
 header, header.mini.DISABLED:hover {
@@ -62,7 +79,7 @@ header, header.mini.DISABLED:hover {
 	position:relative;
 	z-index:@zindex-header;
 	padding:20px 0;
-	background:fade(#2E2D2A, 90);
+	background:#2E2D2A;
 	overflow:hidden;
 	.box-shadow(0 3px 0 fade(#000, 10));
 	.transition(@open-speed);
@@ -96,6 +113,20 @@ header, header.mini.DISABLED:hover {
 			font-style:italic;
 		}
 	}
+
+	.loading:after {
+		content:"";
+		display:block;
+		position:absolute;
+		top:0;
+		bottom:0;
+		left:0;
+		right:0;
+		.progress-striped .progress-bar();
+		.progress-bar-variant(#2E2D2A);
+		.progress.active .progress-bar();
+		.opacity(0.4);
+	}	
 
 	nav {
 		

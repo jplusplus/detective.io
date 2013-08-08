@@ -204,6 +204,9 @@ class Command(BaseCommand):
         for p in self.root.findall("owl:ObjectProperty", namespaces):            
             if re.search('#%s$' % name, p.attrib[attr]):                                
                 options = p
+        for p in self.root.findall("owl:DatatypeProperty", namespaces):            
+            if re.search('#%s$' % name, p.attrib[attr]):                                
+                options = p
 
         return options
 

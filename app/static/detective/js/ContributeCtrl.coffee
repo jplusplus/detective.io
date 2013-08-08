@@ -5,13 +5,14 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
     $scope.showKickStart = false
     # Individual list
     $scope.individuals = []
-    """
+    
     $scope.individuals = [{    
         type    : "project"
-        loading : true
-        fields  : Individual.get({type:"project", id: 45},-> $scope.individuals[0].loading = false)
+        loading : false
+        fields  : new Individual(
+            name: "Cool"
+        )
     }] 
-    """   
 
     # A new individual for kick-star forms
     (initNewIndividual = ->

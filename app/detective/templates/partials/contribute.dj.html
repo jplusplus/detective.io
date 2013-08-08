@@ -123,11 +123,12 @@
 				{% for form in forms %}
 					<fieldset ng-if="individual.type.toLowerCase() == '{{form.Meta.model|klass|lower}}'">
 
-						{% for field in form %}
+						{% for field in form %}						
+							{{field|field_to_type}}
 
 							<div class="row field top20 form-group">
 								<label class="col-3 tr form-label top05" for="id_{{field.html_name}}">{{field.label_tag}}</label>
-								<div class="col-4">
+								<div class="col-4">									
 						    		{% if field.field.widget|klass == "SelectMultiple" %}
 
 						    			<div ng-if="!individual.fields.{{field.html_name}}.length"
@@ -167,6 +168,10 @@
 											<i class="icon-plus"></i>
 											Add another one
 										</a>			
+
+									{% elif field.field|klass == 'URLField' %}
+										
+										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"|attr:"placeholder:http://"}}
 
 									{% else %}
 										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading" }}

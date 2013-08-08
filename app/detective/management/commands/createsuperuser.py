@@ -32,6 +32,8 @@ class Command(BaseCommand):
             help='Specifies the username for the superuser.'),
         make_option('--email', dest='email', default=None,
             help='Specifies the email address for the superuser.'),
+        make_option('--password', dest='password', default=None,
+            help='Specifies the password for the superuser.'),
         make_option('--noinput', action='store_false', dest='interactive', default=True,
             help=('Tells Django to NOT prompt the user for input of any kind. '
                   'You must use --username and --email with --noinput, and '
@@ -48,6 +50,7 @@ class Command(BaseCommand):
         interactive = options.get('interactive')
         verbosity = int(options.get('verbosity', 1))
         database = options.get('database')
+        password = options.get('password', None)
 
         # Do quick and dirty validation if --noinput
         if not interactive:
@@ -60,8 +63,6 @@ class Command(BaseCommand):
             except exceptions.ValidationError:
                 raise CommandError("Invalid email address.")
 
-        # If not provided, create the user with an unusable password
-        password = None
 
         # Prompt for username/email/password. Enclose this whole thing in a
         # try/except to trap for a keyboard interrupt and exit gracefully.

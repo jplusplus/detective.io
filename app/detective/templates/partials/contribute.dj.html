@@ -124,12 +124,11 @@
 					<fieldset ng-if="individual.type.toLowerCase() == '{{form.Meta.model|klass|lower}}'">
 
 						{% for field in form %}						
-							{{field|field_to_type}}
 
 							<div class="row field top20 form-group">
 								<label class="col-3 tr form-label top05" for="id_{{field.html_name}}">{{field.label_tag}}</label>
 								<div class="col-4">									
-						    		{% if field.field.widget|klass == "SelectMultiple" %}
+						    		{% if field|field_to_type == 'Relationship' %}
 
 						    			<div ng-if="!individual.fields.{{field.html_name}}.length"
 						    				 ng-init="individual.fields.{{field.html_name}} = [{name: ''}]"></div>
@@ -169,10 +168,10 @@
 											Add another one
 										</a>			
 
-									{% elif field.field|klass == 'URLField' %}
-										
+									{% elif field|field_to_type == 'URLField' %}										
 										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"|attr:"placeholder:http://"}}
-
+									{% elif field|field_to_type == 'DateTimeField' %}
+										DATETIME										
 									{% else %}
 										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading" }}
 									{% endif %}

@@ -6,7 +6,20 @@ Packages required:
     * django-storages
 """
 from settings import *
+from urlparse import urlparse
 import os
+
+# Parse url given into environment variable 
+NEO4J_URL = urlparse( os.getenv('NEO4J_URL') )
+
+NEO4J_DATABASES = {
+    'default' : {
+    	# Concatenates username, password and hostname
+        'HOST':'%s:%s@%s' % (NEO4J_URL.username, NEO4J_URL.password, NEO4J_URL.hostname),
+        'PORT': NEO4J_URL.port,
+        'ENDPOINT':'/db/data'
+    }
+}
 
 # AWS ACCESS
 AWS_ACCESS_KEY_ID          = os.getenv('AWS_ACCESS_KEY_ID')

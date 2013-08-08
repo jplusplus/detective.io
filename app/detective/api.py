@@ -33,16 +33,20 @@ class IndividualResource(ModelResource):
 
         for field in bundle.data:                        
             # Transform list field to be more flexible
-            if type(bundle.data[field]) is list:   
+            if type(bundle.data[field]) is list and len(bundle.data[field]):   
                 rels = [] 
+                # Model associated to that field
+                model = getattr(bundle.obj, field)._rel.relationship.target_model
                 # For each relation...
                 for rel in bundle.data[field]:   
                     # Keeps the string
                     if type(rel) is str:
                         rels.append(rel)
                     # Convert object with id to uri
-                    elif type(rel) is dict and "id" in rel:                                                                        
-                        rels.append( Organization.objects.get(id=rel["id"]) )
+                    elif type(rel) is dict and "id" in rel:                                                
+                        obj = model.objects.get(id=rel["id"])                
+                        # Associated the existing object 
+                        if obj: rels.append(obj)
 
                 bundle.data[field] = rels                                                
         return bundle

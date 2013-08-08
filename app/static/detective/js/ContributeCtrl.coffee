@@ -52,7 +52,6 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
             individual.fields[key].splice(index, 1) 
     
     $scope.askForNew = (el)->
-        console.log el
         el? and el.name? and el.name isnt "" and not el.id?
 
     $scope.setNewFrom = (el, type)->

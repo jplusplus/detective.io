@@ -128,18 +128,18 @@ class Command(BaseCommand):
                             if relation["type"].find('has') == 0:
                                 relation["destination"] = pron(relation["type"][3:])
 
-                            # Get the property's options
-                            options = self.propOptions(relation["type"])                            
-                            
-                            # Help text
-                            relation["help_text"] = get(options, "help_text").replace("'", "\\'")
-                            # Verbose name
-                            relation["verbose_name"] = get(options, "verbose_name")                                                                                     
+                                # Get the property's options
+                                options = self.propOptions(relation["type"])                            
+                                
+                                # Help text
+                                relation["help_text"] = get(options, "help_text").replace("'", "\\'")
+                                # Verbose name
+                                relation["verbose_name"] = get(options, "verbose_name")                                                                                     
 
-                            # Adds the relationship to the array containing all relationships for the class only 
-                            # if the relation has a destination              
-                            if "destination" in relation:
-                                relations.append(relation)
+                                # Adds the relationship to the array containing all relationships for the class only 
+                                # if the relation has a destination              
+                                if "destination" in relation:
+                                    relations.append(relation)
 
                         # If there is a property defined in the subclass
                         elif restriction.find("owl:onDataRange", namespaces) is not None or restriction.find("owl:someValuesFrom", namespaces) is not None:
@@ -157,13 +157,13 @@ class Command(BaseCommand):
 
                             dataTypeURI = dataTypeElement.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"]
 
-                            t = dataTypeURI.split("#")[1]
+                            t = dataTypeURI.split("#")[1]                            
 
                             if t in correspondanceTypes:
                                 dataType = correspondanceTypes[t]
                                 # Get the property's options
                                 options = self.propOptions(propertyType)
-                                 
+
                                 prop = {
                                     "name" : propertyType,
                                     "type" : dataType,
@@ -249,7 +249,7 @@ class Command(BaseCommand):
                 ]
 
                 if prop["verbose_name"] != '':
-                    opt.append("verbose_name=u'%s'" % prop["verbose_name"])
+                    opt.append("verbose_name=u'%s'" % rel["verbose_name"])
 
                 field = "\t%s = models.Relationship(%s)"
                 modelsContents.append(field % (rel["destination"], ",".join(opt) ) )                

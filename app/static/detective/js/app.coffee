@@ -1,5 +1,5 @@
 detective = angular
-    .module('detective', ["detectiveServices"])
+    .module('detective', ["ui.bootstrap", "detectiveServices"])
     .run(
         [             
             '$rootScope', 
@@ -13,7 +13,8 @@ detective = angular
         [
             '$interpolateProvider', 
             '$routeProvider', 
-            ($interpolateProvider, $routeProvider)->                    
+            ($interpolateProvider, $routeProvider)->          
+
                 # Avoid a conflict with Django Template's tags
                 $interpolateProvider.startSymbol '[['
                 $interpolateProvider.endSymbol   ']]'

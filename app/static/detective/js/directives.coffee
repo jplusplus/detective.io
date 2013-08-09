@@ -3,7 +3,7 @@ detective.directive "scrollTo", ->
         scope.$watch "$last", (v) ->
             $(window).scrollTo(element, attrs.scrollTo or 0) if v
 
-detective.directive "typeahead", ($parse)->
+detective.directive "tt-typeahead", ($parse)->
     lastDataset = []
     # Use underscore's template 
     # @TODO use $compile from angular
@@ -14,10 +14,13 @@ detective.directive "typeahead", ($parse)->
     scope:         
         model : "=ttModel"     
         create: "&ttCreate"  
-    link: (scope, element, attrs) ->        
+    link: (scope, element, attrs) ->
+        # Model and individual option required !
+        return unless scope.model? and attrs.ttIndividual?        
+        # Select the individual to look for
         individual = attrs.ttIndividual.toLowerCase()
         # Set a default value
-        element.val scope.model.name if scope.model?
+        element.val scope.model.name
         # Create the typehead
         element.typeahead(        
             name: individual

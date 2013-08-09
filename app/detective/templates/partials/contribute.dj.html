@@ -102,7 +102,7 @@
 			 ng-class="{
 			 	reduce : individual.reduce,
 			 	loading: individual.loading
-			 }">
+			}">
 			<div class="head">	
 				<div class="btns">
 					<a ng-click="save(individual)" class="btn btn-fade">
@@ -137,9 +137,9 @@
 											<div class="input-group multiple">
 												<input 
 													type="text" 
-													typeahead
+													tt-typeahead
 													tt-individual="{{field|queryset_klass}}"
-													tt-model="individual.fields.{{field.html_name}}[$index]"
+													tt-model="individual.fields.{{field.html_name}}[$index]"													
 													ng-disabled="individual.loading"
 													class="form-control" />
 												<span class="input-group-addon" ng-click="removeOne(individual, '{{field.html_name}}', $index)">
@@ -171,9 +171,14 @@
 									{% elif field|field_to_type == 'URLField' %}										
 										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"|attr:"placeholder:http://"}}
 									{% elif field|field_to_type == 'DateTimeField' %}
-										DATETIME										
+										<div class="input-group">
+											<span class="input-group-addon">
+												<i class="gray-darker icon-calendar"></i>	
+											</span>
+											{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"|attr:"datepicker-popup:dd-MMMM-yyyy"|attr:'show-weeks:false'}}
+										</div>
 									{% else %}
-										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading" }}
+										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"}}
 									{% endif %}
 								</div>
 								<span class="col-5">

@@ -21,10 +21,32 @@
 	.btn-pseudo-states(#FDE59F, #FDE59F, darken(#FDE59F, 10));	
 }
 
+
 .btn.btn-danger {
 	color:white !important;
-	.box-shadow( inset 0 -2px 0 0 darken(@brand-danger, 10) );
+	.box-shadow( inset 0 -2px 0 0 darken(@brand-danger, 20) );
 }
+
+.btn.btn-success {
+	color:white !important;
+	.box-shadow( inset 0 -2px 0 0 darken(@brand-success, 20) );
+}
+
+.btn.btn-info {
+	color:white !important;
+	.box-shadow( inset 0 -2px 0 0 darken(@brand-info, 20) );
+}
+
+.btn.btn-warning {
+	color:white !important;
+	.box-shadow( inset 0 -2px 0 0 darken(@brand-warning, 10) );
+}
+
+.btn.btn-inverse {
+	color:white !important;
+	.box-shadow( inset 0 -2px 0 0 #aaa );
+}
+
 
 .btn-understand {
 	@bg: darken(@understand-color, 10%);
@@ -43,4 +65,13 @@
 	@bg: darken(@explore-color, 10%);
 	color:white !important;
   	.btn-pseudo-states(@bg, @bg, darken(@bg, 10));
+}
+
+.dropdown-menu li table {
+	font-size:0.9em;
+	margin:5px 10px;
+	color:#aaa;
+	th {
+		text-align:center;
+	}
 }

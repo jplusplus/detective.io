@@ -17,7 +17,7 @@ class Individual(models.NodeModel):
 
     def __unicode__(self):
         return unicode(self.name) or u''
-
+    
 class Amount(Individual):
     description = u''
     source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
@@ -39,8 +39,8 @@ class FundraisingRound(Amount):
     description = u''
     currency = models.StringProperty(null=True,help_text=u'The currency of the amount, using its 3-letter ISO-4217 code, e.g. USD, EUR, GBP etc.',verbose_name=u'Currency')
     raise_type = models.StringProperty(null=True,help_text=u'Type of the transaction, e.g. equity contribution (cash), preproject expenses, loan.',verbose_name=u'Type of transaction')
-    payer = models.Relationship("Organization",null=True,rel_type='hasPayer',help_text=u'The Organization that actually pays the amount or contributes the asset considered.',verbose_name=u'Type of transaction')
-    personal_payer = models.Relationship("Person",null=True,rel_type='hasPersonalPayer',help_text=u'The Person that contributes the amount or the asset considered.',verbose_name=u'Type of transaction')
+    payer = models.Relationship("Organization",null=True,rel_type='hasPayer',help_text=u'The Organization that actually pays the amount or contributes the asset considered.',verbose_name=u'Payer')
+    personal_payer = models.Relationship("Person",null=True,rel_type='hasPersonalPayer',help_text=u'The Person that contributes the amount or the asset considered.',verbose_name=u'Physical payer')
 
     class Meta:
         pass
@@ -54,12 +54,12 @@ class Organization(Individual):
     founded = models.DateTimeProperty(null=True,help_text=u'The date when the organization was created.',verbose_name=u'Date founded')
     source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
     address = models.StringProperty(null=True,help_text=u'The official address of the organization.',verbose_name=u'Address')
-    partner = models.Relationship("self",null=True,rel_type='hasPartner',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).',verbose_name=u'Address')
-    adviser = models.Relationship("Person",null=True,rel_type='hasAdviser',help_text=u'The list of persons that help the entity.',verbose_name=u'Address')
-    litigation_against = models.Relationship("self",null=True,rel_type='hasLitigationAgainst',help_text=u'An entity is said to litigate against another when it is involved in a lawsuit or an out-of-court settlement with the other.',verbose_name=u'Address')
-    fundraising_round = models.Relationship("FundraisingRound",null=True,rel_type='hasFundraisingRound',help_text=u'A Fundraising Round represents an event when an Organization was able to raise cash or another asset.',verbose_name=u'Address')
-    board_member = models.Relationship("Person",null=True,rel_type='hasBoardMember',help_text=u'The list of board members of the Organization, if any.',verbose_name=u'Address')
-    revenue = models.Relationship("Revenue",null=True,rel_type='hasRevenue',help_text=u'A Revenue represents the quantity of cash that the Organization was able to gather in any given year. It doesn\'t have to be equal to the net sales but can take into account subsidies as well.',verbose_name=u'Address')
+    partner = models.Relationship("self",null=True,rel_type='hasPartner',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).',verbose_name=u'Partner')
+    adviser = models.Relationship("Person",null=True,rel_type='hasAdviser',help_text=u'The list of persons that help the entity.',verbose_name=u'Adviser')
+    litigation_against = models.Relationship("self",null=True,rel_type='hasLitigationAgainst',help_text=u'An entity is said to litigate against another when it is involved in a lawsuit or an out-of-court settlement with the other.',verbose_name=u'Litigation against')
+    fundraising_round = models.Relationship("FundraisingRound",null=True,rel_type='hasFundraisingRound',help_text=u'A Fundraising Round represents an event when an Organization was able to raise cash or another asset.',verbose_name=u'Fundraising round')
+    board_member = models.Relationship("Person",null=True,rel_type='hasBoardMember',help_text=u'The list of board members of the Organization, if any.',verbose_name=u'Board member')
+    revenue = models.Relationship("Revenue",null=True,rel_type='hasRevenue',help_text=u'A Revenue represents the quantity of cash that the Organization was able to gather in any given year. It doesn\'t have to be equal to the net sales but can take into account subsidies as well.',verbose_name=u'Revenue')
 
     class Meta:
         verbose_name = u'Organization'
@@ -80,10 +80,10 @@ class Project(Individual):
     ended = models.DateTimeProperty(null=True,help_text=u'The date when the project or organization ended.',verbose_name=u'End date')
     twitter_handle = models.StringProperty(null=True,help_text=u'The Twitter name of the entity (without the @)',verbose_name=u'Twitter handle')
     comment = models.StringProperty(null=True,help_text=u'Enter a short comment to the entity you are reporting on (max. 500 characters).',verbose_name=u'Comment')
-    partner = models.Relationship("Organization",null=True,rel_type='hasPartner',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).',verbose_name=u'Comment')
-    activity_in = models.Relationship("Country",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ',verbose_name=u'Comment')
-    owner = models.Relationship("Organization",null=True,rel_type='hasOwner',help_text=u'The formal Owner of the entity.',verbose_name=u'Comment')
-    commentary = models.Relationship("Commentary",null=True,rel_type='hasCommentary',help_text=u'A Commentary is an article, a blog post or a report that assesses the quality of the Project.',verbose_name=u'Comment')
+    partner = models.Relationship("Organization",null=True,rel_type='hasPartner',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).',verbose_name=u'Partner')
+    activity_in = models.Relationship("Country",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ',verbose_name=u'Active in')
+    owner = models.Relationship("Organization",null=True,rel_type='hasOwner',help_text=u'The formal Owner of the entity.',verbose_name=u'Owner')
+    commentary = models.Relationship("Commentary",null=True,rel_type='hasCommentary',help_text=u'A Commentary is an article, a blog post or a report that assesses the quality of the Project.',verbose_name=u'Commentary')
 
     class Meta:
         pass
@@ -93,7 +93,7 @@ class Commentary(Individual):
     article_url = models.URLProperty(null=True,help_text=u'The URL (starting with http://) of the link.')
     title = models.StringProperty(null=True,help_text=u'Title of the article or report of this commentary.',verbose_name=u'Title')
     year = models.DateTimeProperty(null=True,help_text=u'',verbose_name=u'Year')
-    author = models.Relationship("Person",null=True,rel_type='hasAuthor',help_text=u'The author or authors of the document.',verbose_name=u'Year')
+    author = models.Relationship("Person",null=True,rel_type='hasAuthor',help_text=u'The author or authors of the document.',verbose_name=u'Author')
 
     class Meta:
         pass
@@ -101,7 +101,7 @@ class Commentary(Individual):
 class Distribution(Amount):
     description = u''
     sold = models.StringProperty(null=True,help_text=u'The type of distribution can be donated, sold, loaned.',verbose_name=u'Type of distribution')
-    activity_in = models.Relationship("Country",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ',verbose_name=u'Type of distribution')
+    activity_in = models.Relationship("Country",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ',verbose_name=u'Active in')
 
     class Meta:
         pass
@@ -109,7 +109,7 @@ class Distribution(Amount):
 class EnergyProject(Project):
     scope = u'energy'
     description = u'An energy Project represents an endeavor to reach a particular aim (e.g. improve access to electricity, produce electricity in a certain way, improve energy efficiency, etc.). A project is the child of an Organization and takes its concrete form most often through Products.'
-    product = models.Relationship("EnergyProduct",null=True,rel_type='hasProduct',help_text=u'A Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.',verbose_name=u'Type of distribution')
+    product = models.Relationship("EnergyProduct",null=True,rel_type='hasProduct',help_text=u'A Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.',verbose_name=u'Product')
 
     class Meta:
         verbose_name = u'Energy project'
@@ -128,9 +128,9 @@ class Person(Individual):
     twitter_handle = models.StringProperty(null=True,help_text=u'The Twitter name of the entity (without the @)',verbose_name=u'Twitter handle')
     website_url = models.StringProperty(null=True,help_text=u'',verbose_name=u'Website URL')
     source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
-    activity_in = models.Relationship("Organization",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ',verbose_name=u'Source')
-    nationality = models.Relationship("Country",null=True,rel_type='hasNationality',help_text=u'The list of nationalities (as appear on his/her passport) of a Person.',verbose_name=u'Source')
-    previous_activity_in = models.Relationship("Organization",null=True,rel_type='hasPreviousActivityIn',help_text=u'Has the entity been active in a specific country or Organization previsously?',verbose_name=u'Source')
+    activity_in = models.Relationship("Organization",null=True,rel_type='hasActivityIn',help_text=u'The list of countries or territories the entity is active in. ',verbose_name=u'Active in')
+    nationality = models.Relationship("Country",null=True,rel_type='hasNationality',help_text=u'The list of nationalities (as appear on his/her passport) of a Person.',verbose_name=u'Nationality')
+    previous_activity_in = models.Relationship("Organization",null=True,rel_type='hasPreviousActivityIn',help_text=u'Has the entity been active in a specific country or Organization previsously?',verbose_name=u'Previous activity in')
 
     class Meta:
         verbose_name = u'Person'
@@ -163,7 +163,7 @@ class Product(Individual):
     description = u''
     source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
     image = models.URLProperty(null=True,help_text=u'The URL (starting with http://) where the image is hosted.',verbose_name=u'Image URL')
-    price = models.Relationship("Price",null=True,rel_type='hasPrice',help_text=u'The price (use only digits, i.e. 8.99) of the Product at the date considered.',verbose_name=u'Image URL')
+    price = models.Relationship("Price",null=True,rel_type='hasPrice',help_text=u'The price (use only digits, i.e. 8.99) of the Product at the date considered.',verbose_name=u'Price')
 
     class Meta:
         pass
@@ -172,8 +172,8 @@ class EnergyProduct(Product):
     scope = u'energy'
     description = u'An energy Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.'
     power_generation_per_unit_in_watt = models.IntegerProperty(null=True,help_text=u'The amount of energy, in watts, that can be generated by each unit of the product.',verbose_name=u'Power generation per unit (in watts)')
-    distribution = models.Relationship("Distribution",null=True,rel_type='hasDistribution',help_text=u'A Distribution represents the batch sales or gift of a product. Companies often communicate in terms of "in year X, Y units of Product Z were sold/distributed in Country A".',verbose_name=u'Power generation per unit (in watts)')
-    operator = models.Relationship("Organization",null=True,rel_type='hasOperator',help_text=u'Products, especially large ones such as power plants, have an Operator, usually a company.',verbose_name=u'Power generation per unit (in watts)')
+    distribution = models.Relationship("Distribution",null=True,rel_type='hasDistribution',help_text=u'A Distribution represents the batch sales or gift of a product. Companies often communicate in terms of "in year X, Y units of Product Z were sold/distributed in Country A".',verbose_name=u'Distribution')
+    operator = models.Relationship("Organization",null=True,rel_type='hasOperator',help_text=u'Products, especially large ones such as power plants, have an Operator, usually a company.',verbose_name=u'Operator')
 
     class Meta:
         verbose_name = u'Energy product'

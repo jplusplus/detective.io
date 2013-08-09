@@ -168,17 +168,23 @@
 											Add another one
 										</a>			
 
-									{% elif field|field_to_type == 'URLField' %}										
-										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"|attr:"placeholder:http://"}}
+									{% elif field|field_to_type == 'URLField' %}	
+
+										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"|attr:"placeholder:http://"|attr:"type:url"}}
+									
 									{% elif field|field_to_type == 'DateTimeField' %}
+									
 										<div class="input-group">
 											<span class="input-group-addon">
 												<i class="gray-darker icon-calendar"></i>	
 											</span>
 											{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"|attr:"datepicker-popup:dd-MMMM-yyyy"|attr:'show-weeks:false'}}
 										</div>
+									
 									{% else %}
+									
 										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"}}
+									
 									{% endif %}
 								</div>
 								<span class="col-5">

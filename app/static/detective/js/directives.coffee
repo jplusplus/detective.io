@@ -25,6 +25,7 @@ detective.directive "ttTypeahead", ($parse)->
             template: "<%= name %>"
             engine: engine
             valueKey: "__value__"
+            prefetch: "/api/v1/#{individual}/mine/"
             remote: 
                 url: "/api/v1/#{individual}/search/?q=%QUERY"
                 filter: (response)-> 

@@ -43,9 +43,10 @@ def partial_contribute(request):
             class Meta:
                 model = m      
                 #self.fields.keyOrder = 
-        form = Form(scope_prefix='individual.fields')        
-        # Remove field terminating by +
-        form.fields = dict( (k, v) for k, v in form.fields.items() if not k.endswith("+") )
+        form = Form(scope_prefix='individual.fields')  
+        print form.fields.items()      
+        # Remove field terminating by + or begining by _
+        form.fields = dict( (k, v) for k, v in form.fields.items() if not k.endswith("+") and  not k.startswith("_") )
         # Add the form to the forms' list
         locales["forms"].append( form )
 

@@ -18,9 +18,10 @@ class IndividualMeta:
     always_return_data = True         
     authorization      = DjangoAuthorization()     
     authentication     = SessionAuthentication()
-    excludes           = ["_author"]
 
-class IndividualResource(ModelResource):        
+class IndividualResource(ModelResource):
+
+    _author = fields.ToManyField("app.detective.api.UserResource", "_author", full=False, null=True)
 
     def obj_create(self, bundle, **kwargs):
         # Add per-user resource
@@ -29,7 +30,7 @@ class IndividualResource(ModelResource):
     def hydrate(self, bundle): 
         # By default, every individual are validated
         bundle.data["_status"] = 1
-
+        
         for field in bundle.data:                        
             # Transform list field to be more flexible
             if type(bundle.data[field]) is list and len(bundle.data[field]):   
@@ -47,7 +48,8 @@ class IndividualResource(ModelResource):
                         # Associated the existing object 
                         if obj: rels.append(obj)
 
-                bundle.data[field] = rels                                                
+                bundle.data[field] = rels   
+
         return bundle
 
     def save_m2m(self, bundle): 
@@ -73,8 +75,10 @@ class IndividualResource(ModelResource):
         return super(IndividualResource, self).save_m2m(bundle)
 
     def override_urls(self):
+        params = (self._meta.resource_name, trailing_slash())
         return [
-            url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
+            url(r"^(?P<resource_name>%s)/search%s$" % params, self.wrap_view('get_search'), name="api_get_search"),
+            url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
         ]
 
     def get_search(self, request, **kwargs):
@@ -106,6 +110,43 @@ class IndividualResource(ModelResource):
             'objects': objects,
             'meta': {
                 'q': query,
+                'page': p,
+                'limit': limit,
+                'total_count': count
+            }
+        }
+
+        self.log_throttled_access(request)
+        return self.create_response(request, object_list)     
+
+    def get_mine(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        limit     = int(request.GET.get('limit', 20))
+        # Do the query.        
+        results   = self._meta.queryset.filter(_author__id=request.user.id)
+        count     = len(results)
+        paginator = Paginator(results, limit)
+
+        try:
+            p     = int(request.GET.get('page', 1))
+            page  = paginator.page(p)
+        except InvalidPage:
+            raise Http404("Sorry, no results on that page.")
+
+        objects = []
+
+        for result in page.object_list:
+            bundle = self.build_bundle(obj=result, request=request)
+            bundle = self.full_dehydrate(bundle)
+            objects.append(bundle)
+
+        object_list = {
+            'objects': objects,
+            'meta': {
+                'author': request.user,
                 'page': p,
                 'limit': limit,
                 'total_count': count

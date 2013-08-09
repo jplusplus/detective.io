@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.core.management.base import BaseCommand, CommandError
 from lxml import etree
 from app.detective.utils import to_class_name, to_camelcase, to_underscores
@@ -32,12 +33,15 @@ class Command(BaseCommand):
         if not args:
             raise CommandError('Please specify path to ontology file.')
         
-        # This string will contain the models.py file
-        headers = ["# -*- coding: utf-8 -*-", "from neo4django.db import models"]
         # Gives the ontology URI. Only needed for documentation purposes
         ontologyURI = "http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#"
-        # Adds a comment in the models.py file
-        headers.append("# The ontology can be found in its entirety at " + ontologyURI)
+        # This string will contain the models.py file
+        headers = [
+            "# -*- coding: utf-8 -*-", 
+            "# The ontology can be found in its entirety at %s" % ontologyURI,
+            "from neo4django.db import models",
+            "from neo4django.auth.models import User",
+        ]
 
 
         # This array contains the correspondance between data types
@@ -74,7 +78,7 @@ class Command(BaseCommand):
             className = to_class_name(classURI.split("#")[1])
 
             # By default, the class has no parent
-            parentClass = "Individual"
+            parentClass = "models.NodeModel"
 
             # Declares an array to store the relationships and properties from this class
             relations = []
@@ -147,9 +151,6 @@ class Command(BaseCommand):
                             propertyTypeURI     = propertyTypeElement.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"]
                             propertyType        = propertyTypeURI.split("#")[1]
 
-                            # Skip name property
-                            if propertyType == "name": continue
-
                             if restriction.find("owl:onDataRange", namespaces) is not None:
                                 dataTypeElement = restriction.find("owl:onDataRange", namespaces)
                             else:
@@ -219,6 +220,28 @@ class Command(BaseCommand):
             # Writes the class in models.py
             modelsContents.append("\nclass "+ m["className"] +"(" + m["parentClass"] + "):")
 
+            # Defines properties that every model have
+            if m["parentClass"] == "models.NodeModel":
+                m["relations"].append(
+                    {
+                        "name" : "User",                    
+                        "destination": "_author",
+                        "type": "hasAuthor+",
+                        # Verbose name
+                        "verbose_name": "author",
+                        "help_text": "People that edited this entity."  
+                    }
+                )
+                m["properties"].append(
+                    {
+                        "name" : "_status",                    
+                        "type": "IntegerProperty",
+                        # Verbose name
+                        "verbose_name": "status",
+                        "help_text": ""
+                    }
+                )
+
             if m["scope"] != '' and m["scope"] != None:
                 modelsContents.append("\tscope = u'%s'" % m["scope"])
 
@@ -264,7 +287,7 @@ class Command(BaseCommand):
             if m["verbose_name"] == '' and m["verbose_name_plural"] == '':
                 modelsContents.append("\t\tpass") 
 
-        print "\r\n".join(modelsContents)
+        print "\r\n".join(modelsContents).encode("UTF-8")
 
     @staticmethod
     def topolgical_sort(graph_unsorted):

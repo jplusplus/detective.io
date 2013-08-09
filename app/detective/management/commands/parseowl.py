@@ -226,7 +226,7 @@ class Command(BaseCommand):
                     {
                         "name" : "User",                    
                         "destination": "_author",
-                        "type": "hasAuthor+",
+                        "type": "hasAuthor",
                         # Verbose name
                         "verbose_name": "author",
                         "help_text": "People that edited this entity."  
@@ -243,10 +243,10 @@ class Command(BaseCommand):
                 )
 
             if m["scope"] != '' and m["scope"] != None:
-                modelsContents.append("\tscope = u'%s'" % m["scope"])
+                modelsContents.append("\t_scope = u'%s'" % m["scope"])
 
             if m["help_text"] != None:
-                modelsContents.append("\tdescription = u'%s'" % m["help_text"])
+                modelsContents.append("\t_description = u'%s'" % m["help_text"])
             
             # Writes the properties 
             for prop in m["properties"]:     
@@ -267,7 +267,7 @@ class Command(BaseCommand):
                 opt = [                  
                     rel["name"], 
                     "null=True",
-                    "rel_type='%s'" % rel["type"], 
+                    "rel_type='%s+'" % rel["type"], 
                     "help_text=u'%s'" % rel["help_text"]
                 ]
 

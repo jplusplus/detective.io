@@ -12,20 +12,20 @@ detective.directive "ttTypeahead", ($parse)->
             compiled = _.template(template)
             render: (context)-> compiled(context)
     scope:         
-        model : "=ttModel"     
+        model : "=ttModel" 
+        individual: "&ttIndividual"  
         create: "&ttCreate"  
     link: (scope, element, attrs) ->
         # Select the individual to look for
-        individual = (attrs.ttIndividual or "").toLowerCase()
+        individual = (scope.individual() or "").toLowerCase()
         # Set a default value
         element.val scope.model.name if scope.model?
         # Create the typehead
-        element.typeahead(        
+        element.typeahead    
             name: individual
             template: "<%= name %>"
             engine: engine
             valueKey: "__value__"
-            prefetch: "/api/v1/#{individual}/mine/"
             remote: 
                 url: "/api/v1/#{individual}/search/?q=%QUERY"
                 filter: (response)-> 
@@ -33,10 +33,7 @@ detective.directive "ttTypeahead", ($parse)->
                     _.each response.objects, (el, idx)-> el["__value__"] = el["name"]
                     # Record last dataset and return objects list
                     lastDataset = response.objects
-        )
         
-        element.on "typeahead:autocompleted", console.log
-
 
         # Watch select event
         element.on "typeahead:selected", (input, individual)->      

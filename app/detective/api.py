@@ -1,16 +1,90 @@
-from app.detective.models      import *
-from django.conf.urls          import url
-from django.conf.urls.defaults import *
-from django.contrib.auth       import authenticate, login, logout
-from django.core.paginator     import Paginator, InvalidPage
-from django.http               import Http404
-from neo4django.auth.models    import User
-from tastypie                  import fields
-from tastypie.authorization    import DjangoAuthorization
-from tastypie.authentication   import SessionAuthentication
-from tastypie.resources        import ModelResource
-from tastypie.utils            import trailing_slash
-from django.middleware.csrf    import _get_new_csrf_key as get_new_csrf_key
+from app.detective.models          import *
+from django.conf.urls              import url
+from django.conf.urls.defaults     import *
+from django.contrib.auth           import authenticate, login, logout
+from django.core.paginator         import Paginator, InvalidPage
+from django.http                   import Http404, HttpResponse
+from django.middleware.csrf        import _get_new_csrf_key as get_new_csrf_key
+from neo4django.auth.models        import User
+from tastypie                      import fields
+from tastypie.api                  import Api
+from tastypie.authentication       import SessionAuthentication
+from tastypie.authorization        import DjangoAuthorization
+from tastypie.resources            import ModelResource
+from tastypie.utils                import trailing_slash
+from tastypie.utils.mime           import determine_format, build_content_type
+
+
+
+class DetailedApi(Api):
+    def top_level(self, request, api_name=None):
+        """
+        A view that returns a serialized list of all resources registers
+        to the ``Api``. Useful for discovery.
+        """
+        available_resources = {}
+
+        if api_name is None: api_name = self.api_name
+
+        for name in sorted(self._registry.keys()):                        
+            resource      = self._registry[name]
+            resourceModel = getattr(resource._meta.queryset, "model", {})      
+            fields        = []
+            verbose_name  = ""
+
+            if hasattr(resourceModel, "_meta"):
+                # Model berbose name
+                verbose_name = getattr(resourceModel._meta, "verbose_name", name).title()
+                # Create field object
+                for f in resourceModel._meta.fields:
+                    # Ignores field terminating by + or begining by _
+                    if not f.name.endswith("+") and not f.name.startswith("_"):             
+                        # Find related model for relation
+                        if hasattr(f, "target_model"):                            
+                            related_model = f.target_model.__name__                
+                        else:
+                            related_model = None                    
+                        # Create the field object
+                        fields.append({
+                            'name': f.name,
+                            'type': f.get_internal_type(),
+                            'help_text': getattr(f, "help_text", ""),
+                            'verbose_name': getattr(f, "verbose_name", f.name).title(),
+                            'related_model': related_model
+                        })
+
+            available_resources[name] = {
+                'list_endpoint': self._build_reverse_url("api_dispatch_list", kwargs={
+                    'api_name': api_name,
+                    'resource_name': name,
+                }),
+                'schema': self._build_reverse_url("api_get_schema", kwargs={
+                    'api_name': api_name,
+                    'resource_name': name,
+                }),
+                'description' : getattr(resourceModel, "_description", None),
+                'scope'       : getattr(resourceModel, "_scope", None),
+                'model'       : getattr(resourceModel, "__name__", ""),
+                'verbose_name': verbose_name,
+                'name'        : name,
+                'fields'      : fields
+            }
+
+        desired_format = determine_format(request, self.serializer)
+
+        options = {}
+
+        if 'text/javascript' in desired_format:
+            callback = request.GET.get('callback', 'callback')
+
+            if not is_valid_jsonp_callback_value(callback):
+                raise BadRequest('JSONP callback name is invalid.')
+
+            options['callback'] = callback
+
+        serialized = self.serializer.serialize(available_resources, desired_format, options)
+        return HttpResponse(content=serialized, content_type=build_content_type(desired_format))
+
 
 
 class IndividualMeta:
@@ -23,14 +97,27 @@ class IndividualResource(ModelResource):
 
     _author = fields.ToManyField("app.detective.api.UserResource", "_author", full=False, null=True)
 
+    def build_schema(self):  
+        """
+        Description and scope for each Resource
+        """
+        schema = super(IndividualResource, self).build_schema()        
+        model  = self._meta.queryset.model
+
+        additionals = {
+            "description": getattr(model, "_description", None),
+            "scope"      : getattr(model, "_scope", None)
+        }
+        return dict(additionals.items() + schema.items())
+
     def obj_create(self, bundle, **kwargs):
         # Add per-user resource
         return super(IndividualResource, self).obj_create(bundle, _author=bundle.request.user)
 
     def hydrate(self, bundle): 
-        # By default, every individual are validated
-        bundle.data["_status"] = 1
-        
+        # By default, every individual from staff are validated
+        bundle.data["_status"] = 1*bundle.request.user.is_staff
+
         for field in bundle.data:                        
             # Transform list field to be more flexible
             if type(bundle.data[field]) is list and len(bundle.data[field]):   
@@ -225,18 +312,18 @@ class UserResource(IndividualResource):
 
 class AmountResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Amount.objects.all()
+        queryset = Amount.objects.filter(_status=1)
 
 class CountryResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Country.objects.all()
+        queryset = Country.objects.filter(_status=1)
 
 class FundraisingRoundResource(IndividualResource):
     payer = fields.ToManyField("app.detective.api.OrganizationResource", "payer", full=True, null=True)
     personalpayer = fields.ToManyField("app.detective.api.PersonResource", "personalpayer", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = FundraisingRound.objects.all()
+        queryset = FundraisingRound.objects.filter(_status=1)
 
 class OrganizationResource(IndividualResource):
     partner = fields.ToManyField("app.detective.api.OrganizationResource", "partner", full=True, null=True)
@@ -247,11 +334,11 @@ class OrganizationResource(IndividualResource):
     revenue = fields.ToManyField("app.detective.api.RevenueResource", "revenue", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Organization.objects.all()
+        queryset = Organization.objects.filter(_status=1)
 
 class PriceResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Price.objects.all()
+        queryset = Price.objects.filter(_status=1)
 
 class ProjectResource(IndividualResource):
     activity_in = fields.ToManyField("app.detective.api.CountryResource", "activity_in", full=True, null=True)
@@ -260,29 +347,29 @@ class ProjectResource(IndividualResource):
     partner = fields.ToManyField("app.detective.api.OrganizationResource", "partner", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Project.objects.all()
+        queryset = Project.objects.filter(_status=1)
 
 class CommentaryResource(IndividualResource):
     author = fields.ToManyField("app.detective.api.PersonResource", "author", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Commentary.objects.all()
+        queryset = Commentary.objects.filter(_status=1)
 
 class DistributionResource(IndividualResource):    
     activity_in = fields.ToManyField("app.detective.api.CountryResource", "activity_in", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Distribution.objects.all()
+        queryset = Distribution.objects.filter(_status=1)
 
 class EnergyProjectResource(IndividualResource):
     product = fields.ToManyField("app.detective.api.EnergyProductResource", "product", full=True, null=True)
   
     class Meta(IndividualMeta):
-        queryset = EnergyProject.objects.all()
+        queryset = EnergyProject.objects.filter(_status=1)
 
 class InternationalOrganizationResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = InternationalOrganization.objects.all()
+        queryset = InternationalOrganization.objects.filter(_status=1)
 
 class PersonResource(IndividualResource):    
     activity_in = fields.ToManyField("app.detective.api.OrganizationResource", "activity_in", full=True, null=True)
@@ -290,26 +377,26 @@ class PersonResource(IndividualResource):
     previous_activity_in = fields.ToManyField("app.detective.api.OrganizationResource", "previous_activity_in", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Person.objects.all()
+        queryset = Person.objects.filter(_status=1)
 
 class RevenueResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Revenue.objects.all()
+        queryset = Revenue.objects.filter(_status=1)
 
 class CompanyResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Company.objects.all()
+        queryset = Company.objects.filter(_status=1)
 
 class GovernmentOrganizationResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = GovernmentOrganization.objects.all()
+        queryset = GovernmentOrganization.objects.filter(_status=1)
 
 class ProductResource(IndividualResource):
 
     price = fields.ToManyField("app.detective.api.PriceResource", "price", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = Product.objects.all()
+        queryset = Product.objects.filter(_status=1)
 
 class EnergyProductResource(IndividualResource):
     
@@ -317,8 +404,8 @@ class EnergyProductResource(IndividualResource):
     operator = fields.ToManyField("app.detective.api.OrganizationResource", "operator", full=True, null=True)
 
     class Meta(IndividualMeta):
-        queryset = EnergyProduct.objects.all()
+        queryset = EnergyProduct.objects.filter(_status=1)
 
 class NgoResource(IndividualResource):
     class Meta(IndividualMeta):
-        queryset = Ngo.objects.all()
+        queryset = Ngo.objects.filter(_status=1)

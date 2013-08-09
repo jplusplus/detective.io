@@ -1,9 +1,9 @@
-from django.conf.urls import patterns, include, url
-from neo4django import admin
-from tastypie.api import Api
-from app.detective.api import UserResource, AmountResource, CountryResource, FundraisingRoundResource, OrganizationResource, PriceResource, ProjectResource, CommentaryResource, DistributionResource, EnergyProjectResource, InternationalOrganizationResource, PersonResource, RevenueResource, CompanyResource, GovernmentOrganizationResource, ProductResource, EnergyProductResource, NgoResource
+from django.conf.urls  import patterns, include, url
+from neo4django        import admin
+from app.detective.api import *
 
-v1_api = Api(api_name='v1')
+
+v1_api = DetailedApi(api_name='v1')
 v1_api.register(UserResource())
 v1_api.register(AmountResource())
 v1_api.register(CountryResource())
@@ -27,9 +27,8 @@ admin.autodiscover()
 
 urlpatterns = patterns('',	
     url(r'^$', 'app.detective.views.home', name='home'),
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^api/', include(v1_api.urls)),
-    url(r'^partial/contribute\.html$', 'app.detective.views.partial_contribute', name='partial'),
+    url(r'^admin/', include(admin.site.urls)),    
+    url(r'^api/', include(v1_api.urls)),    
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial', name='partial'),
 )
 

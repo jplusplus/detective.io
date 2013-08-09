@@ -1,90 +1,31 @@
-{% load detective_extras %}
-{% load widget_tweaks %}
-
 <div id="contribute">
 	<div class="contribute-start contribute-bg contribute-shadow" ng-if="showKickStart || !individuals.length">
 		<div class="container">			
 			<h2>Add a new individual to the database</h2>
-			<div class="row top30">
-				<div class="col-3">
-					<label class="btn btn-block btn-default btn-large">
-						<input type="radio" value="project" ng-model="new.type" class="hidden" />
-						Project
+
+			<div ng-repeat="resource in scopeResources()">
+				<div class="row top30">
+					<div class="col-3">
+						<label class="btn btn-block btn-default btn-large">
+							<input type="radio" value="[[resource.name]]" ng-model="new.type" class="hidden" />
+							[[resource.verbose_name]]
+						</label>
+					</div>
+					<div class="col-9 desc">
+						[[resource.description]]
+					</div>
+				</div>
+				<form class="row kick-start form-inline" ng-if="new.type == resource.name" ng-submit="addIndividual()">
+					<label class="col-3 control-label top10">
+						Name of the [[resource.verbose_name]]
 					</label>
-				</div>
-				<div class="col-9 desc">
-					A Project is an endeavor that is carried out by one or several Organizations. Think of "Soccket", which is a project by Uncharted Play, for instance.
-				</div>
+					<div class="col-9 input-append input-append">
+						<input type="text" class="form-control" ng-model="new.fields.name" />
+						<button class="btn btn-contribute">Create</button>
+					</div>
+				</form>
 			</div>
-			<form class="row kick-start form-inline" ng-if="new.type == 'project'" ng-submit="addIndividual()">
-				<label class="col-3 control-label top10">
-					Name of the project
-				</label>
-				<div class="col-9 input-append">
-					<input type="text" class="form-control" ng-model="new.fields.name" />
-					<button class="btn btn-contribute">Create</button>
-				</div>
-			</form>
-			<div class="row top30">
-				<div class="col-3">
-					<label class="btn btn-block btn-default btn-large">
-						<input type="radio" value="product" ng-model="new.type" class="hidden" />
-						Product
-					</label>
-				</div>
-				<div class="col-9 desc">
-					A Product is an outcome of a Project. A Project can have one (in the case of a building or power plant) or several Products. The Soccket Ball, for instance, is a product of the Soccket project.
-				</div>
-			</div>
-			<form class="row kick-start form-inline" ng-if="new.type == 'product'" ng-submit="addIndividual()">
-				<label class="col-3 control-label top10">
-					Name of the product
-				</label>
-				<div class="col-9 input-append">
-					<input type="text" class="form-control" ng-model="new.fields.name" />
-					<button class="btn btn-contribute">Create</button>
-				</div>
-			</form>
-			<div class="row top30">
-				<div class="col-3">
-					<label class="btn btn-block btn-default btn-large">
-						<input type="radio" value="organization" ng-model="new.type" class="hidden" />
-						Organization
-					</label>
-				</div>
-				<div class="col-9 desc">
-					An Organization can be an NGO, a Company, an International Organization or a Venture Fund. Uncharted Play is an Organization.
-				</div>
-			</div>
-			<form class="row kick-start form-inline" ng-if="new.type == 'organization'" ng-submit="addIndividual()">
-				<label class="col-3 control-label top10">
-					Name of the organization
-				</label>
-				<div class="col-9 input-append input-append">
-					<input type="text" class="form-control" ng-model="new.fields.name" />
-					<button class="btn btn-contribute">Create</button>
-				</div>
-			</form>
-			<div class="row top30">
-				<div class="col-3">
-					<label class="btn btn-block btn-default btn-large">
-						<input type="radio" value="person" ng-model="new.type" class="hidden" />
-						Person
-					</label>
-				</div>
-				<div class="col-9 desc">
-					A Person can be any physical person.
-				</div>
-			</div>
-			<form class="row kick-start form-inline" ng-if="new.type == 'person'" ng-submit="addIndividual()">
-				<label class="col-3 control-label top10">
-					Name of the person
-				</label>
-				<div class="col-9 input-append">
-					<input type="text" class="form-control" ng-model="new.fields.name" />
-					<button class="btn btn-contribute">Create</button>
-				</div>
-			</form>
+
 		</div>
 	</div>
 
@@ -105,13 +46,13 @@
 			}">
 			<div class="head">	
 				<div class="btns">
-					<a ng-click="save(individual)" class="btn btn-fade">
+					<a ng-click="save(individual)" class="btn btn-default">
 						<strong>Save</strong>
 					</a>					
-					<a ng-click="removeIndividual($index)" class="btn btn-fade right20">
+					<a ng-click="removeIndividual($index)" class="btn btn-default right20">
 						<i class="icon-trash"></i>						
 					</a>
-					<a ng-click="toggleReduce(individual)" class="btn btn-fade" ng-class="individual.reduce == true ? 'active' : ''">
+					<a ng-click="toggleReduce(individual)" class="btn btn-default" ng-class="individual.reduce == true ? 'active' : ''">
 						<i class="icon-collapse-alt right10"></i>
 						Collapse
 					</a>
@@ -120,82 +61,93 @@
 				<h4>Adding a new [[individual.type]]</h4>
 			</div>
 			<div class="form-horizontal">
-				{% for form in forms %}
-					<fieldset ng-if="individual.type.toLowerCase() == '{{form.Meta.model|klass|lower}}'">
 
-						{% for field in form %}						
+				<div class="row field top20 form-group" 
+				     ng-show="isAllowedType(field.type)"
+					 ng-repeat="field in resources[individual.type].fields">
 
-							<div class="row field top20 form-group">
-								<label class="col-3 tr form-label top05" for="id_{{field.html_name}}">{{field.label_tag}}</label>
-								<div class="col-4">									
-						    		{% if field|field_to_type == 'Relationship' %}
+					<label class="col-3 tr form-label top05" for="id_[[field.name]]">[[field.verbose_name]]</label>
 
-						    			<div ng-if="!individual.fields.{{field.html_name}}.length"
-						    				 ng-init="individual.fields.{{field.html_name}} = [{name: ''}]"></div>
-						    				 
-										<div ng-repeat="f in individual.fields.{{field.html_name}}">
-											<div class="input-group multiple">
-												<input 
-													type="text" 
-													tt-typeahead
-													tt-individual="{{field|queryset_klass}}"
-													tt-model="individual.fields.{{field.html_name}}[$index]"				
-													ng-disabled="individual.loading"
-													class="form-control" />
-												<span class="input-group-addon" ng-click="removeOne(individual, '{{field.html_name}}', $index)">
-													<i class="gray-darker icon-remove"></i>	
-												</span>
-											</div>
+					<div class="col-4" ng-if="field.type == 'Relationship'">
 
-							    			<div class="ask-for-new" ng-show="askForNew(f)">
-							    				<div class="pan">
-							    					<h4>Heads Up!</h4>
-							    					<p>The entry you just typed in is new the the base.</p>	    					
-							    					<div class="tr">
-								    					<a class="btn btn-default" 
-								    					   ng-click="setNewFrom(f, '{{field|queryset_klass}}')">
-								    						Create <strong>[[f.name]]</strong>
-								    					</a>
-								    				</div>
-							    				</div>
-							    			</div>
-										</div>
-										
-
-										<a ng-if="allowOneMore(individual, '{{field.html_name}}', '{{field|queryset_klass}}')" 
-										   ng-click="addOne(individual, '{{field.html_name}}', '{{field|queryset_klass}}')">
-											<i class="icon-plus"></i>
-											Add another one
-										</a>			
-
-									{% elif field|field_to_type == 'URLField' %}	
-
-										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"|attr:"placeholder:http://"|attr:"type:url"}}
-									
-									{% elif field|field_to_type == 'DateTimeField' %}
-									
-										<div class="input-group">
-											<span class="input-group-addon">
-												<i class="gray-darker icon-calendar"></i>	
-											</span>
-											{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"|attr:"datepicker-popup:dd-MMMM-yyyy"|attr:'show-weeks:false'}}
-										</div>
-									
-									{% else %}
-									
-										{{ field|add_class:"form-control"|attr:"ng-disabled:individual.loading"}}
-									
-									{% endif %}
-								</div>
-								<span class="col-5">
-									<p class="top10">{{ field.help_text }}</p>
+						<div ng-if="!individual.fields[field.name].length"
+		    				 ng-init="individual.fields[field.name] = [{name: ''}]"></div>
+		    				 
+						<div ng-repeat="f in individual.fields[field.name]">
+							<div class="input-group multiple">
+								<input 
+									type="text" 
+									tt-typeahead
+									tt-individual="field.related_model"
+									tt-model="individual.fields[field.name][$index]"				
+									ng-disabled="individual.loading"
+									class="form-control" />
+								<span class="input-group-addon" ng-click="removeOne(individual, field.name, $index)">
+									<i class="gray-darker icon-remove"></i>	
 								</span>
 							</div>
 
+			    			<div class="ask-for-new" ng-show="askForNew(f)">
+			    				<div class="pan">
+			    					<h4>Heads Up!</h4>
+			    					<p>The entry you just typed in is new the the base.</p>	    					
+			    					<div class="tr">
+				    					<a class="btn btn-default" 
+				    					   ng-click="setNewIndividual(f, field.related_model)">
+				    						Create <strong>[[f.name]]</strong>
+				    					</a>
+				    				</div>
+			    				</div>
+			    			</div>
+						</div>						
 
-						{% endfor %}
-					</fieldset>
-				{% endfor %}
+						<a ng-if="isAllowedOneMore(individual.fields[field.name])" 
+						   ng-click="addOne(individual, field.name, field.related_model)">
+							<i class="icon-plus"></i>
+							Add another one
+						</a>
+
+					</div>
+
+
+					<div class="col-4" ng-if="field.type == 'URLField'">
+
+						<input type="url" 
+							   placeholder="http://"
+							   id="id_[[field.name]]" 
+							   ng-model="individual.fields[field.name]" 
+							   class="form-control" />
+					</div>
+
+					<div class="col-4" ng-if="field.type == 'DateTimeField'">										
+						<div class="input-group">
+							<span class="input-group-addon">
+								<i class="gray-darker icon-calendar"></i>	
+							</span>
+							<input type="text" 
+								   id="id_[[field.name]]" 
+								   ng-model="individual.fields[field.name]" 
+								   ng-disabled="individual.loading"
+								   datepicker-popup="dd-MMMM-yyyy"
+								   show-weeks="false"
+								   class="form-control" />
+						</div>
+					</div>
+
+					<div class="col-4" ng-if="field.type == 'CharField'">
+						<input type="text" id="id_[[field.name]]" ng-model="individual.fields[field.name]" class="form-control" />
+					</div>
+
+					<div class="col-4" ng-if="field.type == 'IntegerField'">
+						<input type="number" id="id_[[field.name]]" ng-model="individual.fields[field.name]" class="form-control" />
+					</div>
+
+					<span class="col-5">
+						<p class="top10">[[field.help_text]]</p>
+					</span>
+
+				</div>
+
 			</div>
 		</div>
 	</div>

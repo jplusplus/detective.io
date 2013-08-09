@@ -28,7 +28,7 @@ detective = angular
                         controller: UserCtrl
                         templateUrl: "./partial/login.html",
                     })
-                    .when('/:topic/contribute', {
+                    .when('/:scope/contribute', {
                         controller: ContributeCtrl  
                         templateUrl: "./partial/contribute.html"
                         auth: true

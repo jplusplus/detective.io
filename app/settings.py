@@ -176,7 +176,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'djangular',
     'tastypie',
-    'widget_tweaks',    
+    'widget_tweaks',        
     # Internal
     'app.detective', 
 )

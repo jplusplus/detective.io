@@ -223,8 +223,16 @@ header.mini {
 		}
 	}
 
-	.tt-hint {
-		.form-control()
+	.twitter-typeahead {
+		.form-control();
+		padding:0;
+
+		.tt-query, .tt-hint {
+			padding:8px 12px;
+			width:100%;
+			border:0;
+			background:transparent;
+		}
 	}
 
 	.tt-hint {
@@ -334,6 +342,7 @@ header.mini {
 				.input-group-addon {
 					cursor:pointer;
 				}
+
 			}
 			
 			&.reduce {

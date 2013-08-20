@@ -4,16 +4,22 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
     # By default, hide the kick-start form
     $scope.showKickStart = false
     # Individual list
-    $scope.individuals = []
+    $scope.individuals = [        
+        type       : "price"
+        loading    : false
+        related_to : null
+        fields     : Individual.get(type:"price", id:15)
+    ]
     # Get the list of available resources
     $scope.resources = Individual.get()
 
     # A new individual for kick-star forms
     (initNewIndividual = ->
         $scope.new = 
-            type    : ""
-            loading : false
-            fields  : new Individual name: ""
+            type       : ""
+            loading    : false
+            related_to : null
+            fields     : new Individual name: ""
     # Self initiating function
     )()
 
@@ -40,10 +46,8 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
     # When user submit a kick-start individual form
     $scope.addIndividual = (scroll=true)->
         unless $scope.new.fields.name is ""
-            # Clones the object to avoid inserting duplicates
-            o = $.extend(true, {}, $scope.new)
-            # Add the clone to the objects list
-            $scope.individuals.push(o)
+            # Add the individual to the objects list
+            $scope.individuals.push $scope.new 
             # Disable kickStart form
             $scope.showKickStart = false
             # Create a new individual object
@@ -69,32 +73,53 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
     $scope.askForNew = (el)->
         el? and el.name? and el.name isnt "" and not el.id?
 
-    $scope.setNewIndividual = (el, type)->
+    $scope.setNewIndividual = (el, type, parent, parentField)->        
+        individual = new Individual el
         # Create the new entry obj
         $scope.new = 
-            type    : type.toLowerCase()
-            loading : false
-            fields  : new Individual name: el.name        
-        # Remove name
-        el.name = ""
+            type       : type.toLowerCase()
+            loading    : false
+            related_to : parent
+            fields     : individual
+        # Create for the given parent field
+        parent.fields[parentField] = [] unless parent.fields[parentField]?
+        # Attachs the new element to its parent
+        parent.fields[parentField].push individual
         # Add it to the list
-        $scope.addIndividual()        
+        $scope.addIndividual()  
         # Then init the new form
         initNewIndividual()
 
-
     $scope.toggleReduce = (individual)->
         individual.reduce = not individual.reduce
+
+    # Provides a way to preview the value of the given individual
+    $scope.individualPreview = (i)->
+        i.name or i.value or i.title or i.units or i.label or ""
 
     $scope.save = (individual)->        
         # Do not save a loading individual
         unless individual.loading
             # Loading mode on
             individual.loading = true
+            params    = type: individual.type.toLowerCase()
             # Save the individual and
             # take care to specify the type
-            individual.fields.$save type: individual.type.toLowerCase(), ->
+            individual.fields.$save(params, ->
                 # Loading mode off
                 individual.loading = false
+                # Clean errors
+                delete individual.error_message
+            # Handles error
+            , (response)->
+                data = response.data
+                # Loading mode off
+                individual.loading = false
+                # Add an error message
+                individual.error_message = data.error_message if data.error_message?
+                # Add the traceback
+                individual.error_traceback = data.traceback if data.traceback?
+            )
+
 
 ContributeCtrl.$inject = ['$scope', '$routeParams', '$rootScope', 'Individual', 'User']

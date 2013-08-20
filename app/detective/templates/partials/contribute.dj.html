@@ -57,8 +57,24 @@
 						Collapse
 					</a>
 				</div>		
-				<h3>[[individual.fields.name]]</h3>	
+				<h3>
+					<strong>
+						[[individualPreview(individual.fields)]]
+					</strong>				
+					<span ng-if="individual.related_to">
+						related to [[individual.related_to.fields.name]]
+					</span>
+				</h3>	
 				<h4>Adding a new [[individual.type]]</h4>
+			</div>
+			<div class="alert alert-danger errors" ng-if="individual.error_message">
+				[[individual.error_message]]
+				<div ng-if="individual.error_traceback" class="pull-right">
+					<a class="alert-link btn btn-mini btn-default" ng-click="individual.show_traceback = !individual.show_traceback" href="">
+						Show traceback
+					</a>
+				</div>
+				<div ng-if="individual.show_traceback" ng-bind-html-unsafe="individual.error_traceback|nl2br" class="top10"></div>
 			</div>
 			<div class="form-horizontal">
 
@@ -68,7 +84,25 @@
 
 					<label class="col-3 tr form-label top05" for="id_[[field.name]]">[[field.verbose_name]]</label>
 
-					<div class="col-4" ng-if="field.type == 'Relationship'">
+					<div class="col-4" ng-if="field.type == 'Relationship' && ! field.is_searchable">
+
+						<div ng-repeat="f in individual.fields[field.name]" class="bottom05">							
+							<span class="form-control disabled">
+								[[individualPreview(f)]]								
+								<span ng-hide="f.id">
+									(not saved yet)
+								</span>
+							</span>
+						</div>
+
+    					<a class="btn btn-default" 
+    					   ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
+    						Create a new [[field.verbose_name]]
+    					</a>
+
+					</div>
+
+					<div class="col-4" ng-if="field.type == 'Relationship' && field.is_searchable">
 
 						<div ng-if="!individual.fields[field.name].length"
 		    				 ng-init="individual.fields[field.name] = [{name: ''}]"></div>
@@ -92,7 +126,7 @@
 			    					<p>The entry you just typed in is new the the base.</p>	    					
 			    					<div class="tr">
 				    					<a class="btn btn-default" 
-				    					   ng-click="setNewIndividual(f, field.related_model)">
+				    					   ng-click="setNewIndividual(f, field.related_model, individual, field.name)">
 				    						Create <strong>[[f.name]]</strong>
 				    					</a>
 				    				</div>

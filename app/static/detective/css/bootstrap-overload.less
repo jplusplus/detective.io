@@ -1,6 +1,9 @@
 
 .form-control, .form-control:focus {
 	.box-shadow(none);	
+	&.disabled {
+		background-color:@input-bg-disabled;
+	}
 }
 
 .btn {
@@ -91,4 +94,8 @@
 		.progress.active .progress-bar();
 		.opacity(0.4);
 	}
+}
+
+.alert {
+	padding:15px;
 }

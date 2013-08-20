@@ -64,7 +64,7 @@
 
 				<div class="row field top20 form-group" 
 				     ng-show="isAllowedType(field.type)"
-					 ng-repeat="field in resources[individual.type].fields">
+					 ng-repeat="field in resources[individual.type].fields track by $index">
 
 					<label class="col-3 tr form-label top05" for="id_[[field.name]]">[[field.verbose_name]]</label>
 
@@ -73,7 +73,7 @@
 						<div ng-if="!individual.fields[field.name].length"
 		    				 ng-init="individual.fields[field.name] = [{name: ''}]"></div>
 		    				 
-						<div ng-repeat="f in individual.fields[field.name]">
+						<div ng-repeat="f in individual.fields[field.name] track by $index">
 							<div class="input-group multiple">
 								<input 
 									type="text" 

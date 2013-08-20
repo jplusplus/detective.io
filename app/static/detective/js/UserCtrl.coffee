@@ -10,6 +10,7 @@ UserCtrl = ($scope, $http, $location, $routeParams, User) ->
     loginError = (error)->        
         User.set
             is_logged: false
+            is_staff : false
             username : '' 
         # Record the error
         $scope.error = error if error?        
@@ -36,6 +37,7 @@ UserCtrl = ($scope, $http, $location, $routeParams, User) ->
             if response.data? and response.data.success
                 User.set
                     is_logged: true
+                    is_staff : response.data.is_staff
                     username : $scope.username
                 # Redirect to the next URL
                 $location.url($scope.next)
@@ -63,6 +65,7 @@ UserCtrl = ($scope, $http, $location, $routeParams, User) ->
             if response.data? and response.data.success
                 User.set
                     is_logged: false
+                    is_staff : false
                     username : ''
 
 

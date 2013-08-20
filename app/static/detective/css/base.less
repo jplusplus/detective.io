@@ -5,6 +5,7 @@
 @import-once 'tools.less';
 @import-once 'animations.less';
 @import-once 'bootstrap-overload.less';
+@import-once "bootstrap-switch.less";
 
 @zindex-context: 10;
 @zindex-content: @zindex-context+100;
@@ -55,30 +56,13 @@ body {
 		.box-shadow(0 3px 0 darken(@explore-color, 10));
 	}
 
-	.panel.loading {
-		position:relative;
-		&:after {
-			content:"";
-			display:block;
-			position:absolute;
-			top:0;
-			bottom:0;
-			left:0;
-			right:0;
-			.progress-striped .progress-bar();
-			.progress-bar-variant(#bbb);
-			.progress.active .progress-bar();
-			.opacity(0.4);
-		}
-	}
-
 }
 
-header, header.mini.DISABLED:hover {
+header {
 	@open-speed: 0.4s;
 	position:relative;
 	z-index:@zindex-header;
-	padding:20px 0;
+	padding-top:20px;
 	background:#2E2D2A;
 	overflow:hidden;
 	.box-shadow(0 3px 0 fade(#000, 10));
@@ -129,58 +113,31 @@ header, header.mini.DISABLED:hover {
 	}	
 
 	nav {
-		
-		margin-top:30px;
+	
+		margin-top:20px;	
 		padding:0;
+		border-top:fade(#fff, 10) 1px solid;
 		
-		div {						
+		li {						
 			color:white;
 			overflow:hidden;
+			float:left;
+			font-size: 20px;
+			display:block;
+			line-height:60px;
+			height:60px;			
+			font-family:@headings-font-family;
 			
 			a {
-				border-top:fade(#fff, 20) 1px solid;
 				text-shadow:0 3px 0 fade(#000, 10);
-				margin:0 30px;
-				display:block;
-				
-				h2 {
-					margin:0;
-					margin:40px 0;
-					margin-bottom:20px;
-					.transition(@open-speed);
-				}
-
-				p {					
-					text-shadow:0 3px 0 fade(#000, 10);
-					padding:10px 0;
-					font-size:110%;
-					line-height:150%;	
-					color:#fff;	
-					max-height:300px;
-					.opacity(100);
-					.transition(@open-speed);
-				}
+				padding:0 30px;
+				display:block;	
 			}	
 
 		}
 	}
 	
 }
-
-header.mini {
-	padding-bottom:1px/10px;
-	
-	h2 {
-		margin:15px 0 0;
-	}
-
-	.desc {
-		.opacity(0);
-		padding:0;
-		max-height:0;
-	}
-}
-
 
 #content {
 	position:relative;
@@ -361,5 +318,21 @@ header.mini {
 				margin-bottom:5px;			
 			}		
 		}		
+	}
+}
+
+#explore {
+	
+	.individual-list {
+		
+		.individual {
+			padding-bottom:10px;
+			border-bottom:1px lighten(#2E2D2A, 60) solid;
+		}
+
+		.individual:last-child {
+			padding-bottom:0px;			
+			border-bottom:0;
+		}
 	}
 }

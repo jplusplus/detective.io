@@ -3,6 +3,18 @@ detective.directive "scrollTo", ->
         scope.$watch "$last", (v) ->
             $(window).scrollTo(element, attrs.scrollTo or 0) if v
 
+detective.directive "makeSwitch", ->
+    restrict: "A"
+    scope: 
+        model   : "="
+        onValue : "@"
+        offValue: "@"
+    template:"<input type='checkbox' />"
+    link: (scope, element, attrs) ->
+        element.addClass("make-switch").bootstrapSwitch()
+        element.on "switch-change", console.log
+
+
 detective.directive "ttTypeahead", ($parse)->
     lastDataset = []
     # Use underscore's template 

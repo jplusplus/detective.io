@@ -4,18 +4,7 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
     # By default, hide the kick-start form
     $scope.showKickStart = false
     # Individual list
-    $scope.individuals = [
-        {            
-            type    : "project"
-            loading : false
-            fields  : new Individual name: "TEST"
-        },
-        {            
-            type    : "product"
-            loading : false
-            fields  : new Individual name: "TOAST"
-        }
-    ]
+    $scope.individuals = []
     # Get the list of available resources
     $scope.resources = Individual.get()
 

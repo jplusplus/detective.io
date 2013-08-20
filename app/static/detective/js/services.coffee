@@ -46,10 +46,12 @@ angular
             # Create basic user using cookies
             if $cookies.user__is_logged
                 is_logged: $cookies.user__is_logged 
+                is_staff : $cookies.user__is_staff 
                 username : $cookies.user__username or ''
             # set default values
             else
                 is_logged: false 
+                is_staff : false
                 username : ''
         )
 

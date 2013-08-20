@@ -13,7 +13,7 @@ detective = angular
         [
             '$interpolateProvider', 
             '$routeProvider', 
-            ($interpolateProvider, $routeProvider)->       
+            ($interpolateProvider, $routeProvider)->
                 # Avoid a conflict with Django Template's tags
                 $interpolateProvider.startSymbol '[['
                 $interpolateProvider.endSymbol   ']]'
@@ -30,6 +30,12 @@ detective = angular
                     .when('/:scope/contribute', {
                         controller: ContributeCtrl  
                         templateUrl: "./partial/contribute.html"
+                        auth: true
+                    })
+                    .when('/:scope/explore', {
+                        controller: ExploreCtrl  
+                        templateUrl: "./partial/explore.html"
+                        reloadOnSearch: false
                         auth: true
                     })
                     .otherwise redirectTo: '/energy/contribute'

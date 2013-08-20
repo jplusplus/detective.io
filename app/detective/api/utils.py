@@ -31,10 +31,11 @@ class DetailedApi(Api):
                             model         = f.target_model
                             modelFields   = model._meta.get_all_field_names()                            
                             related_model = model.__name__         
-                            isSearchable  = "name" in modelFields
+                            is_searchable  = "name" in modelFields
+
                         else:
                             related_model = None     
-                            isSearchable  = False  
+                            is_searchable  = False  
                         
                         # Create the field object
                         fields.append({
@@ -43,7 +44,7 @@ class DetailedApi(Api):
                             'help_text': getattr(f, "help_text", ""),
                             'verbose_name': getattr(f, "verbose_name", f.name).title(),
                             'related_model': related_model,
-                            'searchable': isSearchable
+                            'is_searchable': is_searchable
                         })
 
             available_resources[name] = {

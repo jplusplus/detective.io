@@ -20,7 +20,7 @@ detective = angular
                 # Bind routes to the controllers
                 $routeProvider
                     .when('/home', {
-                        controller: LandingAllCtrl
+                        controller: HomeCtrl
                         templateUrl: "./partial/landing/all.html",
                     })
                     .when('/login', {

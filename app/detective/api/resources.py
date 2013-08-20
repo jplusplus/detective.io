@@ -35,38 +35,69 @@ class IndividualResource(ModelResource):
         }
         return dict(additionals.items() + schema.items())
 
+    def dehydrate(self, bundle):
+        # Control that every relationship fields are list        
+        # and that we didn't send hidden field
+        for field in bundle.data:
+            # Is this an "hidden field" ?
+            if field.endswith("_set"):
+                # Set the field to None 'cause we cant change the size 
+                # of the data's bundle
+                bundle.data[field] = None
+                continue
+            # Find the model's field 
+            modelField = getattr(bundle.obj, field, False) 
+            # The current field is a relationship
+            if modelField and hasattr(modelField, "_rel"): 
+                # Wrong type given, relationship field must ouput a list
+                if type(bundle.data[field]) is not list:
+                    # We remove the field from the ouput
+                    bundle.data[field] = []                    
 
-    def obj_create(self, bundle, **kwargs):       
-        # Add per-user resource
-        return super(IndividualResource, self).obj_create(bundle, _author=bundle.request.user)    
+        return bundle
+
+
 
     def hydrate(self, bundle):         
         # By default, every individual from staff are validated
         bundle.data["_status"] = 1*bundle.request.user.is_staff
+        bundle.data["_author"] = [bundle.request.user.id]
 
-        for field in bundle.data:                        
-            # Transform list field to be more flexible
-            if type(bundle.data[field]) is list and len(bundle.data[field]):   
-                rels = [] 
+        for field in bundle.data:   
+            # Find the model's field 
+            modelField = getattr(bundle.obj, field, False) 
+            # The current field is a relationship
+            if modelField and hasattr(modelField, "_rel"):
                 # Model associated to that field
-                model = getattr(bundle.obj, field)._rel.relationship.target_model
-                # For each relation...
-                for rel in bundle.data[field]:   
-                    # Keeps the string
-                    if type(rel) is str:
-                        rels.append(rel)
-                    # Convert object with id to uri
-                    elif type(rel) is dict and "id" in rel:                                                
-                        obj = model.objects.get(id=rel["id"])                
+                model = modelField._rel.relationship.target_model                
+                # Wrong type given
+                if type(bundle.data[field]) is not list:                         
+                    # Empty the field that contain bad
+                    bundle.data[field] = []
+                # Transform list field to be more flexible
+                elif len(bundle.data[field]):   
+                    rels = [] 
+                    # For each relation...
+                    for rel in bundle.data[field]:  
+                        # Keeps the string
+                        if type(rel) is str:
+                            rels.append(rel)
+                        # Convert object with id to uri
+                        elif type(rel) is int:
+                            obj = model.objects.get(id=rel)                                  
+                        elif hasattr(rel, "id"):
+                            obj = model.objects.get(id=rel["id"])
+                        else:                                 
+                            obj = False
                         # Associated the existing object 
                         if obj: rels.append(obj)
 
-                bundle.data[field] = rels   
+                    bundle.data[field] = rels   
 
         return bundle
 
     def save_m2m(self, bundle): 
-        for field in bundle.data:    
+        for field in bundle.data: 
             # Transform list field to be more flexible
             if type(bundle.data[field]) is list:                   
                 rels = bundle.data[field]
@@ -75,14 +106,14 @@ class IndividualResource(ModelResource):
                 # Get the field
                 attr = getattr(bundle.obj, field)
                 if attr.count() > 0:
-                    # Clean the field to avoid duplicates
+                    # Clean the field to avoid duplicates            
                     attr.clear()
                 # For each relation...
                 for rel in rels:                
                     # Add the received obj
                     if hasattr(rel, "obj"):
                         attr.add(rel.obj)
-                    elif type(rel) == object:                        
+                    else:
                         attr.add(rel)
 
         # Save the object with it new relations

@@ -38,12 +38,13 @@ class DetailedApi(Api):
                 # Create field object
                 for f in resourceModel._meta.fields:
                     # Ignores field terminating by + or begining by _
-                    if not f.name.endswith("+") and not f.name.startswith("_"):             
+                    if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):             
                         # Find related model for relation
                         if hasattr(f, "target_model"):                            
                             related_model = f.target_model.__name__                
                         else:
-                            related_model = None                    
+                            related_model = None       
+                        
                         # Create the field object
                         fields.append({
                             'name': f.name,

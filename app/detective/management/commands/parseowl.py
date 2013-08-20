@@ -139,6 +139,7 @@ class Command(BaseCommand):
                                 relation["help_text"] = get(options, "help_text").replace("'", "\\'")
                                 # Verbose name
                                 relation["verbose_name"] = get(options, "verbose_name")                                                                                     
+                                relation["type"] = pron( className + "_" + relation["type"] )
 
                                 # Adds the relationship to the array containing all relationships for the class only 
                                 # if the relation has a destination              
@@ -226,7 +227,7 @@ class Command(BaseCommand):
                     {
                         "name" : "User",                    
                         "destination": "_author",
-                        "type": "hasAuthor",
+                        "type": pron(m["className"]) + "_has_admin_author",
                         # Verbose name
                         "verbose_name": "author",
                         "help_text": "People that edited this entity."  

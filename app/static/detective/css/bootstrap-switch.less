@@ -1,0 +1,166 @@
+
+
+.has-switch {
+  display: inline-block;
+  cursor: pointer;
+  border: 1px solid;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  border-bottom-width:2px;
+  position: relative;
+  text-align: left;
+  overflow: hidden;
+  line-height: 8px;
+  color:#000;
+  vertical-align: middle;
+  min-width: 100px;
+  
+  .border-radius(5px);
+  .user-select(none);
+
+  &.switch-mini {
+    min-width: 72px;
+  }
+  &.switch-mini i.switch-mini-icons {
+    height: 1.20em;
+    line-height: 9px;
+    vertical-align: text-top;
+    text-align: center;
+    transform: scale(0.6);
+    margin-top: -1px;
+    margin-bottom: -1px;
+  }
+  &.switch-small {
+    min-width: 80px;
+  }
+
+  &.switch-large {
+    min-width: 120px;
+  }
+
+  &.deactivate {
+    .opacity(50);
+    cursor: default !important;
+    label, span {
+      cursor: default !important;
+    }
+  }
+  > div {
+    display: inline-block;
+    width: 150%;
+    position: relative;
+    top: 0;
+
+    &.switch-animate {
+      .transition(left 0.5s);
+    }
+    &.switch-off {
+      left: -50%;
+    }
+    &.switch-on {
+      left: 0%;
+    }
+  }
+  
+  input[type=radio],
+  input[type=checkbox] {    
+    display: block;
+    position:absolute;
+    left:60%;
+    top:0;
+    z-index:173;
+  }
+
+  span, label {
+    .box-sizing(border-box);
+
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    height: 100%;
+
+    padding-bottom: 4px;
+    padding-top: 4px;
+    font-size: 14px;
+    line-height: 20px;
+
+    &.switch-mini {
+      padding-bottom: 4px;
+      padding-top: 4px;
+      font-size: 10px;
+      line-height: 9px;
+    }
+
+    &.switch-small {
+      padding-bottom: 3px;
+      padding-top: 3px;
+      font-size: 12px;
+      line-height: 18px;
+    }
+
+    &.switch-large {
+      padding-bottom: 9px;
+      padding-top: 9px;
+      font-size: 16px;
+      line-height: normal;
+    }
+  }
+
+  label {
+    text-align: center;
+    margin-top: -1px;
+    margin-bottom: -1px;
+    z-index: 100;
+    width: 34%;
+    border-left: 1px solid @btn-default-border;
+    border-right: 1px solid @btn-default-border;    
+
+    .btn-pseudo-states(#000, @btn-default-bg, #eee);
+
+    i {
+      color: #fff;
+      text-shadow: 0 1px 0 #fff;
+      line-height: 18px;
+      pointer-events: none;
+    }
+  }
+
+  span {
+    text-align: center;
+    z-index: 1;
+    width: 33%;
+
+    &.switch-left {
+      .border-left-radius(4px);
+    }
+
+    &.switch-right {
+      .btn-pseudo-states(#000, @btn-default-bg, #fff);
+    }
+
+    &.switch-primary, &.switch-left {
+      font-weight:bold;
+      .btn-pseudo-states(#fff, @btn-primary-bg, #fff);
+    }
+
+    &.switch-info {
+      .btn-pseudo-states(#000, @btn-info-bg, #fff);
+    }
+
+    &.switch-success {
+      .btn-pseudo-states(#000, @btn-success-bg, #fff);
+    }
+
+    &.switch-warning {
+      .btn-pseudo-states(#000, @btn-warning-bg, #fff);
+    }
+
+    &.switch-danger {
+      .btn-pseudo-states(#000, @btn-danger-bg, #fff);
+    }
+
+    &.switch-default {
+      .btn-pseudo-states(#000, @btn-default-bg, #fff);
+      .box-shadow( 0 1px 1px rgba(255,255,255,.75) );
+    }
+  }
+}

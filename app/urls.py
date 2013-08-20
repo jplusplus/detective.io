@@ -1,6 +1,7 @@
-from django.conf.urls  import patterns, include, url
-from neo4django        import admin
-from app.detective.api import *
+from app.detective.api.resources import *
+from app.detective.api.utils     import DetailedApi
+from django.conf.urls            import patterns, include, url
+from neo4django                  import admin
 
 
 v1_api = DetailedApi(api_name='v1')

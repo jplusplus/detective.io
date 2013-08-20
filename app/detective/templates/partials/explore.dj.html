@@ -1,0 +1,24 @@
+<div id="explore" class="container">	
+	<div ng-repeat="resource in scopeResources()">
+		<h2>[[resource.verbose_name]]</h2>
+		<div class="individual-list panel black"
+			 ng-class="{
+			 	'loading': !individuals[resource.name].meta
+			}">
+			<div ng-repeat="individual in individuals[resource.name].objects" class="individual">
+				<div make-switch			
+					 model="individual._status"
+					 data-text-label="Status"
+					 data-on="success"
+					 data-on-label="<i class='icon-ok'></i>"
+					 data-off-label="<i class='icon-remove'></i>" 
+					 class="pull-right"></div>
+				<h4>[[individual.name]]</h4>	
+			</div>
+		</div>
+	</div>
+	<div class="tr">
+		<a class="btn btn-default" ng-show="hasPreviousPage()" ng-click="previousPage()">Previous</a>
+		<a class="btn btn-default" ng-show="hasNextPage()"	   ng-click="nextPage()">Next</a>
+	</div>
+</div>

@@ -21,6 +21,11 @@ def get(sets, el):
     else:
         return ""
 
+# Merge 2 list and remove duplicates using the given field as reference
+def merge(first_list, second_list, field):        
+    refs = [ x[field] for x in second_list ]
+    return second_list + [ x for x in first_list if x[field] not in refs ]
+
 
 class Command(BaseCommand):
     help = "Parse the given OWL file to generate its neo4django models."    
@@ -136,10 +141,10 @@ class Command(BaseCommand):
                                 options = self.propOptions(relation["type"])                            
                                 
                                 # Help text
-                                relation["help_text"] = get(options, "help_text").replace("'", "\\'")
+                                relation["help_text"]    = get(options, "help_text").replace("'", "\\'")
                                 # Verbose name
                                 relation["verbose_name"] = get(options, "verbose_name")                                                                                     
-                                relation["type"] = pron( className + "_" + relation["type"] )
+                                relation["type"]         = relation["type"]
 
                                 # Adds the relationship to the array containing all relationships for the class only 
                                 # if the relation has a destination              
@@ -219,29 +224,44 @@ class Command(BaseCommand):
 
         for m in models:
             # Writes the class in models.py
-            modelsContents.append("\nclass "+ m["className"] +"(" + m["parentClass"] + "):")
+            modelsContents.append("\nclass "+ m["className"] +"(models.NodeModel):")
 
-            # Defines properties that every model have
-            if m["parentClass"] == "models.NodeModel":
-                m["relations"].append(
-                    {
-                        "name" : "User",                    
-                        "destination": "_author",
-                        "type": pron(m["className"]) + "_has_admin_author",
-                        # Verbose name
-                        "verbose_name": "author",
-                        "help_text": "People that edited this entity."  
-                    }
-                )
-                m["properties"].append(
-                    {
-                        "name" : "_status",                    
-                        "type": "IntegerProperty",
-                        # Verbose name
-                        "verbose_name": "status",
-                        "help_text": ""
-                    }
-                )
+            # Defines properties and relations that every model have
+            m["relations"].insert(0,
+                {
+                    "name" : "User",                    
+                    "destination": "_author",
+                    "type": pron(m["className"]) + "_has_admin_author",
+                    # Verbose name
+                    "verbose_name": "author",
+                    "help_text": "People that edited this entity."  
+                }
+            )
+            m["properties"].insert(0,
+                {
+                    "name" : "_status",                    
+                    "type": "IntegerProperty",
+                    # Verbose name
+                    "verbose_name": "status",
+                    "help_text": ""
+                }
+            )
+
+            # Since neo4django doesn't support model inheritance correctly
+            # we use models.NodeModel for every model
+            # and duplicates parent's attributes into its child
+            if m["parentClass"] != "models.NodeModel":
+                modelsContents.append("\t_parent = u'%s'" % m["parentClass"])
+                # Find the models that could be the parent of the current one
+                parents = [model for model in models if model["className"] == m["parentClass"] ]                
+                # We found at least one parent
+                if len(parents):
+                    # We take the first one
+                    parent = parents[0]
+                    # We merge the properties and the relationships
+                    m["properties"] = merge(parent["properties"], m["properties"], "name")
+                    m["relations"]  = merge(parent["relations"], m["relations"], "destination")
+
 
             if m["scope"] != '' and m["scope"] != None:
                 modelsContents.append("\t_scope = u'%s'" % m["scope"])
@@ -265,10 +285,12 @@ class Command(BaseCommand):
 
             # Writes the relationships
             for rel in m["relations"]:  
+
                 opt = [                  
                     rel["name"], 
                     "null=True",
-                    "rel_type='%s+'" % rel["type"], 
+                    # Add class name prefix to relation type
+                    "rel_type='%s+'" % pron( m["className"] + "_" + rel["type"] ), 
                     "help_text=u'%s'" % rel["help_text"]
                 ]
 

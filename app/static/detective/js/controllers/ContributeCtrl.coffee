@@ -3,15 +3,22 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
     $scope.scope = $routeParams.scope
     # By default, hide the kick-start form
     $scope.showKickStart = false
-    # Individual list
-    $scope.individuals = [        
-        type       : "price"
-        loading    : false
-        related_to : null
-        fields     : Individual.get(type:"price", id:15)
-    ]
     # Get the list of available resources
     $scope.resources = Individual.get()
+    # Individual list
+    $scope.individuals = []
+    # Individual editing
+    if $routeParams.id? and $routeParams.type?
+        # Params to retreive the individual
+        params = type : $routeParams.type, id : $routeParams.id
+        # Load the given individual
+        $scope.individuals = [
+            type       : $routeParams.type
+            loading    : false
+            related_to : null
+            fields     : Individual.get params                
+        ]
+
 
     # A new individual for kick-star forms
     (initNewIndividual = ->

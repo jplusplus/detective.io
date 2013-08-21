@@ -76,16 +76,17 @@ class IndividualResource(ModelResource):
                     bundle.data[field] = []
                 # Transform list field to be more flexible
                 elif len(bundle.data[field]):   
-                    rels = [] 
+                    rels = []                     
                     # For each relation...
                     for rel in bundle.data[field]:  
+                        print rel
                         # Keeps the string
                         if type(rel) is str:
                             rels.append(rel)
                         # Convert object with id to uri
                         elif type(rel) is int:
                             obj = model.objects.get(id=rel)                                  
-                        elif hasattr(rel, "id"):
+                        elif "id" in rel:
                             obj = model.objects.get(id=rel["id"])
                         else:                                 
                             obj = False

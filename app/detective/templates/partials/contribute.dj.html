@@ -36,6 +36,8 @@
 		</a>		
 	</div>
 
+	[[scrollIdx]]
+
 	<div class="individual-forms container" ng-if="individuals.length">
 		<div class="individual contribute-bg contribute-shadow"		 		     
 			 ng-repeat="individual in individuals" 
@@ -44,7 +46,7 @@
 			 	loading: individual.loading
 			}">
 			
-			<a scroll-to="600" ng-if="scrollTo == $index"></a>
+			<a scroll-to="600" ng-if="scrollIdx == $index"></a>
 
 			<div class="head">	
 				<div class="btns">
@@ -64,7 +66,10 @@
 						[[individualPreview(individual.fields)]]
 					</strong>				
 					<span ng-if="individual.related_to">
-						related to [[individual.related_to.fields.name]]
+						related to 
+						<a ng-click="scrollTo(individual.related_to)" href="">
+							[[individual.related_to.fields.name]]
+						</a>
 					</span>
 				</h3>	
 				<h4>Adding a new [[individual.type]]</h4>
@@ -88,13 +93,19 @@
 
 					<div class="col-4" ng-if="field.type == 'Relationship' && ! field.is_searchable">
 
-						<div ng-repeat="f in individual.fields[field.name]" class="bottom05">							
+						<div ng-repeat="f in individual.fields[field.name]" class="bottom05 input-group">							
 							<span class="form-control disabled">
 								[[individualPreview(f) || "no preview available"]]								
 								<span ng-hide="f.id">
 									(not saved yet)
 								</span>
 							</span>
+							<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
+								<i class="gray-darker icon-remove"></i>	
+							</span>								
+							<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id">
+								<i class="gray-darker icon-edit"></i>	
+							</span>								
 						</div>
 
     					<a class="btn btn-default" 

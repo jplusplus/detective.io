@@ -20,7 +20,7 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
     # ──────────────────────────────────────────────────────────────────────────
     
     # Load an individual
-    $scope.loadIndividual = (type, id)->
+    $scope.loadIndividual = (type, id, related_to=null)->
         index = -1
         # Looks for individual with this id
         _.each $scope.individuals, (i, idx)-> index = idx if i.fields.id is id
@@ -34,7 +34,7 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
         $scope.individuals.push
             type       : type
             loading    : true
-            related_to : null
+            related_to : related_to
             fields     : Individual.get params, =>                 
                 # Disable loading state using the index set previously
                 $scope.individuals[index].loading = false
@@ -65,7 +65,7 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
     $scope.addIndividual = (scroll=true)->
         unless $scope.new.fields.name is ""
             # Scroll to the individual
-            $scope.scrollTo = $scope.individuals.length
+            $scope.scrollIdx = $scope.individuals.length if scroll
             # Add the individual to the objects list
             $scope.individuals.push $scope.new 
             # Disable kickStart form
@@ -97,8 +97,7 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
         # Do the related exists ?
         if related? and related.id?
             # Load it (if needed)
-            $scope.scrollTo = $scope.loadIndividual type.toLowerCase(), related.id
-
+            $scope.scrollIdx = $scope.loadIndividual type.toLowerCase(), related.id, individual
     
     $scope.askForNew = (el)->
         el? and el.name? and el.name isnt "" and not el.id?
@@ -119,6 +118,16 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
         $scope.addIndividual()  
         # Then init the new form
         initNewIndividual()
+
+
+    # Change the scrollIdx to scroll to the given individual
+    $scope.scrollTo = (individual)->
+        index = -1
+        # Looks for individual that match with the given one
+        _.each $scope.individuals, (i, idx)-> index = idx if i == individual
+        # Update the scrollIdx
+        $scope.scrollIdx = index
+
 
     $scope.toggleReduce = (individual)->
         individual.reduce = not individual.reduce
@@ -151,6 +160,14 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
                 individual.error_traceback = data.traceback if data.traceback?
             )
 
+    # When we update scrollIdx, reset its value after 
+    # a short delay to allow scroll again
+    $scope.$watch "scrollIdx", => 
+        setTimeout =>
+            $scope.scrollIdx = -1
+            $scope.$apply()
+        , 1200
+
     # ──────────────────────────────────────────────────────────────────────────
     # Scope attributes
     # ──────────────────────────────────────────────────────────────────────────
@@ -165,10 +182,10 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
     # Received an individual to edit
     if $routeParams.type? and $routeParams.id?
         # Load the inidividual
-        $scope.scrollTo = $scope.loadIndividual $routeParams.type, $routeParams.id
+        $scope.scrollIdx = $scope.loadIndividual $routeParams.type, $routeParams.id
     else
         # Index of the individual where to scroll 
-        $scope.scrollTo  = -1
+        $scope.scrollIdx  = -1
 
 
 

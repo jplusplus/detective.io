@@ -20,21 +20,25 @@ DATABASES = {
 
 # Parse url given into environment variable 
 NEO4J_URL  = urlparse( os.getenv('NEO4J_URL') )
+NEO4J_OPTIONS = {}
 
 # Determines the hostname
 if NEO4J_URL.username and NEO4J_URL.password:
-    NEO4J_HOST = "%s:%s@%s" % (NEO4J_URL.username, NEO4J_URL.password, NEO4J_URL.hostname) 
-else:
-    NEO4J_HOST = NEO4J_URL.hostname
+    NEO4J_OPTIONS = {
+        'username': NEO4J_URL.username,
+        'password': NEO4J_URL.password        
+    }
 
 NEO4J_DATABASES = {
     'default' : {
         # Concatenates username, password and hostname
-        'HOST':'%s' % (NEO4J_HOST,),
+        'HOST': NEO4J_URL.hostname,
         'PORT': int(NEO4J_URL.port),
-        'ENDPOINT':'/db/data'
+        'ENDPOINT':'/db/data',
+        'OPTIONS': NEO4J_OPTIONS
     }
 }
+
 
 DATABASE_ROUTERS        = ['neo4django.utils.Neo4djangoIntegrationRouter']
 SESSION_ENGINE          = "django.contrib.sessions.backends.file"

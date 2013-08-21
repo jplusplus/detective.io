@@ -37,13 +37,15 @@
 	</div>
 
 	<div class="individual-forms container" ng-if="individuals.length">
-		<div class="individual contribute-bg contribute-shadow"		 
-		     scroll-to="600"    
+		<div class="individual contribute-bg contribute-shadow"		 		     
 			 ng-repeat="individual in individuals" 
 			 ng-class="{
 			 	reduce : individual.reduce,
 			 	loading: individual.loading
 			}">
+			
+			<a scroll-to="600" ng-if="scrollTo == $index"></a>
+
 			<div class="head">	
 				<div class="btns">
 					<a ng-click="save(individual)" class="btn btn-default">
@@ -76,7 +78,7 @@
 				</div>
 				<div ng-if="individual.show_traceback" ng-bind-html-unsafe="individual.error_traceback|nl2br" class="top10"></div>
 			</div>
-			<div class="form-horizontal">
+			<form class="form-horizontal">
 
 				<div class="row field top20 form-group" 
 				     ng-show="isAllowedType(field.type)"
@@ -88,7 +90,7 @@
 
 						<div ng-repeat="f in individual.fields[field.name]" class="bottom05">							
 							<span class="form-control disabled">
-								[[individualPreview(f)]]								
+								[[individualPreview(f) || "no preview available"]]								
 								<span ng-hide="f.id">
 									(not saved yet)
 								</span>
@@ -103,9 +105,6 @@
 					</div>
 
 					<div class="col-4" ng-if="field.type == 'Relationship' && field.is_searchable">
-
-						<div ng-if="!individual.fields[field.name].length"
-		    				 ng-init="individual.fields[field.name] = [{name: ''}]"></div>
 		    				 
 						<div ng-repeat="f in individual.fields[field.name] track by $index">
 							<div class="input-group multiple">
@@ -114,10 +113,13 @@
 									tt-typeahead
 									tt-individual="field.related_model"
 									tt-model="individual.fields[field.name][$index]"				
-									ng-disabled="individual.loading"/>
-								<span class="input-group-addon" ng-click="removeOne(individual, field.name, $index)">
+									ng-disabled="individual.loading" />
+								<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
 									<i class="gray-darker icon-remove"></i>	
-								</span>
+								</span>								
+								<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id">
+									<i class="gray-darker icon-edit"></i>	
+								</span>								
 							</div>
 
 			    			<div class="ask-for-new" ng-show="askForNew(f)">
@@ -134,11 +136,14 @@
 			    			</div>
 						</div>						
 
-						<a ng-if="isAllowedOneMore(individual.fields[field.name])" 
-						   ng-click="addOne(individual, field.name, field.related_model)">
-							<i class="icon-plus"></i>
-							Add another one
-						</a>
+						<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">
+							<a ng-click="addRelated(individual, field.name, field.related_model)">
+								<i class="icon-plus"></i>
+								Add 
+								<span ng-if="individual.fields[field.name].length">another</span>
+								one
+							</a>
+						</div>
 
 					</div>
 
@@ -181,7 +186,7 @@
 
 				</div>
 
-			</div>
+			</form>
 		</div>
 	</div>
 </div>

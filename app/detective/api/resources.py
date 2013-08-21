@@ -79,7 +79,6 @@ class IndividualResource(ModelResource):
                     rels = []                     
                     # For each relation...
                     for rel in bundle.data[field]:  
-                        print rel
                         # Keeps the string
                         if type(rel) is str:
                             rels.append(rel)
@@ -99,8 +98,12 @@ class IndividualResource(ModelResource):
 
     def save_m2m(self, bundle): 
         for field in bundle.data: 
+            # Find the model's field 
+            modelField = getattr(bundle.obj, field, False) 
+            # The field doesn't exist
+            if not modelField: setattr(bundle.obj, field, None)
             # Transform list field to be more flexible
-            if type(bundle.data[field]) is list:                   
+            elif type(bundle.data[field]) is list:                   
                 rels = bundle.data[field]
                 # Empties the bundle to avoid insert data twice
                 bundle.data[field] = []                                      

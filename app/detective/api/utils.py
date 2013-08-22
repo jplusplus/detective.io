@@ -2,6 +2,7 @@ from tastypie.utils.mime           import determine_format, build_content_type
 from django.http                   import HttpResponse
 from tastypie.api                  import Api
 from django.conf.urls.defaults     import *
+from django.forms.forms            import pretty_name
 
 class DetailedApi(Api):
     def top_level(self, request, api_name=None):
@@ -21,28 +22,27 @@ class DetailedApi(Api):
 
             if hasattr(resourceModel, "_meta"):
                 # Model berbose name
-                verbose_name = getattr(resourceModel._meta, "verbose_name", name).title()
+                verbose_name = getattr(resourceModel._meta, "verbose_name", name).title()                
                 # Create field object
                 for f in resourceModel._meta.fields:
                     # Ignores field terminating by + or begining by _
                     if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):             
                         # Find related model for relation
                         if hasattr(f, "target_model"):                            
-                            model         = f.target_model
-                            modelFields   = model._meta.get_all_field_names()                            
-                            related_model = model.__name__         
-                            is_searchable  = "name" in modelFields
-
+                            target_model  = f.target_model
+                            modelFields   = target_model._meta.get_all_field_names()                            
+                            related_model = target_model.__name__         
+                            is_searchable = "name" in modelFields
                         else:
                             related_model = None     
-                            is_searchable  = False  
+                            is_searchable  = False
                         
                         # Create the field object
                         fields.append({
                             'name': f.name,
                             'type': f.get_internal_type(),
                             'help_text': getattr(f, "help_text", ""),
-                            'verbose_name': getattr(f, "verbose_name", f.name).title(),
+                            'verbose_name': getattr(f, "verbose_name", pretty_name(f.name)),
                             'related_model': related_model,
                             'is_searchable': is_searchable
                         })

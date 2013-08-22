@@ -72,6 +72,7 @@
 				</h3>	
 				<h4>Adding a new [[individual.type]]</h4>
 			</div>
+			
 			<div class="alert alert-danger errors" ng-if="individual.error_message">
 				[[individual.error_message]]
 				<div ng-if="individual.error_traceback" class="pull-right">
@@ -81,6 +82,17 @@
 				</div>
 				<div ng-if="individual.show_traceback" ng-bind-html-unsafe="individual.error_traceback|nl2br" class="top10"></div>
 			</div>
+
+			<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">				
+				<strong>Individuals already exist with that name!</strong>
+				Switch to 
+				<span ng-repeat="similar in individual.similars">
+					<a class="alert-link" ng-click="replaceIndividual($index, similar.id)" href="">[[similar.name]]</a>
+					<span ng-if="!$last">,</span>
+					<span ng-if="$last">.</span>
+				</span>
+			</div>
+
 			<form class="form-horizontal">
 
 				<div class="row field top20 form-group" 

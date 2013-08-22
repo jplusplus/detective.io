@@ -35,6 +35,7 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
             type       : type
             loading    : true
             related_to : related_to
+            similars   : []            
             fields     : Individual.get params, =>                 
                 # Disable loading state using the index set previously
                 $scope.individuals[index].loading = false
@@ -63,7 +64,12 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
 
     # When user submit a kick-start individual form
     $scope.addIndividual = (scroll=true)->
-        unless $scope.new.fields.name is ""
+        unless $scope.new.fields.name is ""   
+            # Is that field a searchable field ?
+            if $scope.new.fields.name
+                params = type: $scope.new.type, name: $scope.new.fields.name
+                # Look for individual with the same name
+                $scope.new.similars = Individual.query params
             # Scroll to the individual
             $scope.scrollIdx = $scope.individuals.length if scroll
             # Add the individual to the objects list
@@ -75,6 +81,14 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
 
     $scope.removeIndividual = (index=0)->
         $scope.individuals.splice(index, 1) if $scope.individuals[index]?
+
+    $scope.replaceIndividual = (index=0, id)->
+        individual = $scope.individuals[index]
+        individual.loading  = true        
+        individual.similars = [] 
+        individual.fields   = Individual.get {type: individual.type, id: id}, =>                 
+            # Disable loading state using the index set previously
+            $scope.individuals[index].loading = false        
 
     
     # Returns true if the given field accept more related element
@@ -104,20 +118,21 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
 
     $scope.setNewIndividual = (el, type, parent, parentField)->        
         individual = new Individual el
+        # Ensure that the type isn't title-formated
+        type       = type.toLowerCase()
         # Create the new entry obj
         $scope.new = 
-            type       : type.toLowerCase()
+            type       : type
             loading    : false
             related_to : parent
             fields     : individual
+            similars   : []
         # Create for the given parent field
         parent.fields[parentField] = [] unless parent.fields[parentField]?
         # Attachs the new element to its parent
         parent.fields[parentField].push individual
         # Add it to the list
         $scope.addIndividual()  
-        # Then init the new form
-        initNewIndividual()
 
 
     # Change the scrollIdx to scroll to the given individual

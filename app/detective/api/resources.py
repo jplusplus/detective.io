@@ -8,6 +8,7 @@ from neo4django.auth.models        import User
 from tastypie                      import fields
 from tastypie.authentication       import SessionAuthentication
 from tastypie.authorization        import DjangoAuthorization
+from tastypie.constants            import ALL
 from tastypie.resources            import ModelResource
 from tastypie.utils                import trailing_slash
 
@@ -17,6 +18,7 @@ class IndividualMeta:
     always_return_data = True         
     authorization      = DjangoAuthorization()     
     authentication     = SessionAuthentication()
+    filtering          = {'name': ALL}
 
 class IndividualResource(ModelResource):
 

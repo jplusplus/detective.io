@@ -2,7 +2,7 @@
 angular
     .module('detectiveServices', ['ngResource', 'ngCookies'])
     .factory("Individual", [ '$resource', '$http', ($resource, $http)->
-        $resource '/api/v1/:type/:id/#', {}, {
+        $resource '/api/v1/:type/:id/', {}, {
             query: {
                 method : 'GET', 
                 isArray: true,

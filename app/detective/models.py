@@ -44,9 +44,9 @@ class FundraisingRound(models.NodeModel):
 class Organization(models.NodeModel):
 	_description = u'An Organization represents a social entity that implements, funds, takes part in or helps a Project. It can be an NGO, a for-profit company or an international organization.'
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	name = models.StringProperty(null=True,help_text=u'')
 	source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
 	website_url = models.URLProperty(null=True,help_text=u'',verbose_name=u'Website URL')
-	name = models.StringProperty(null=True,help_text=u'')
 	founded = models.DateTimeProperty(null=True,help_text=u'The date when the organization was created.',verbose_name=u'Date founded')
 	twitter_handle = models.StringProperty(null=True,help_text=u'The Twitter name of the entity (without the @)',verbose_name=u'Twitter handle')
 	image = models.URLProperty(null=True,help_text=u'The URL (starting with http://) where the image is hosted.',verbose_name=u'Image URL')

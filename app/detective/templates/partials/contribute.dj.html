@@ -105,7 +105,7 @@
 
 						<div ng-repeat="f in individual.fields[field.name]" class="bottom05 input-group">							
 							<span class="form-control disabled">
-								[[individualPreview(f) || "no preview available"]]								
+								[[f|individualPreview:"no preview available"]]								
 								<span ng-hide="f.id">
 									(not saved yet)
 								</span>
@@ -127,14 +127,21 @@
 
 					<div class="col-sm-4" ng-if="field.type == 'Relationship' && field.is_searchable">
 		    				 
-						<div ng-repeat="f in individual.fields[field.name] track by $index">
+						<div ng-repeat="f in individual.fields[field.name]">
 							<div class="input-group multiple">
 								<input 
 									type="text" 
 									tt-typeahead
 									tt-individual="field.related_model"
 									tt-model="individual.fields[field.name][$index]"				
-									ng-disabled="individual.loading" />
+									ng-disabled="individual.loading"
+									ng-if="relatedState(f) == 'input'" />									
+								<span class="form-control disabled" ng-if="relatedState(f) != 'input'">
+									[[f|individualPreview:"no preview available"]]								
+									<span ng-hide="f.id">
+										(not saved yet)
+									</span>
+								</span>
 								<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
 									<i class="gray-darker icon-remove"></i>	
 								</span>								
@@ -143,18 +150,19 @@
 								</span>								
 							</div>
 
-			    			<div class="ask-for-new" ng-show="askForNew(f)">
+			    			<div class="ask-for-new" ng-show="askForNew(f) && relatedState(f) == 'input'">
 			    				<div class="pan">
 			    					<h4>Heads Up!</h4>
-			    					<p>The entry you just typed in is new the the base.</p>	    					
+			    					<p>The entry you just typed in is new in the base.</p>	    					
 			    					<div class="tr">
 				    					<a class="btn btn-default" 
-				    					   ng-click="setNewIndividual(f, field.related_model, individual, field.name)">
+				    					   ng-click="setNewIndividual({name: f.name}, field.related_model, individual, field.name, $index)">
 				    						Create <strong>[[f.name]]</strong>
 				    					</a>
 				    				</div>
 			    				</div>
 			    			</div>
+
 						</div>						
 
 						<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">

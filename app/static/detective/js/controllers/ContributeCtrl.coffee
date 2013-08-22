@@ -112,12 +112,19 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
         if related? and related.id?
             # Load it (if needed)
             $scope.scrollIdx = $scope.loadIndividual type.toLowerCase(), related.id, individual
-    
-    $scope.askForNew = (el)->
-        el? and el.name? and el.name isnt "" and not el.id?
 
-    $scope.setNewIndividual = (el, type, parent, parentField)->        
-        individual = new Individual el
+    $scope.relatedState = (related)->
+        switch true
+            when related instanceof Individual or related.id? then 'linked'
+            else 'input'
+
+    
+    $scope.askForNew = (related)->            
+        related? and not related instanceof Individual or
+        (related.name? and related.name isnt "" and not related.id?)
+
+    $scope.setNewIndividual = (master, type, parent, parentField, index=-1)->        
+        individual = new Individual master
         # Ensure that the type isn't title-formated
         type       = type.toLowerCase()
         # Create the new entry obj
@@ -127,11 +134,20 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
             related_to : parent
             fields     : individual
             similars   : []
+
         # Create for the given parent field
         parent.fields[parentField] = [] unless parent.fields[parentField]?
-        # Attachs the new element to its parent
-        parent.fields[parentField].push individual
-        # Add it to the list
+        
+
+        if index == -1
+            # Attachs the new element to its parent            
+            parent.fields[parentField].push individual
+        else
+            delete @master
+            # Update the new element with an Individual class            
+            parent.fields[parentField][index] = individual
+
+        # Add it to the list using $scope.new
         $scope.addIndividual()  
 
 

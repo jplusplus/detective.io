@@ -146,10 +146,7 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
 
     $scope.toggleReduce = (individual)->
         individual.reduce = not individual.reduce
-
-    # Provides a way to preview the value of the given individual
-    $scope.individualPreview = (i)->
-        i.name or i.value or i.title or i.units or i.label or ""
+    
 
     $scope.save = (individual)->        
         # Do not save a loading individual

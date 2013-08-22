@@ -61,12 +61,12 @@
 				</div>		
 				<h3>
 					<strong>
-						[[individualPreview(individual.fields)]]
+						[[individual.fields|individualPreview]]
 					</strong>				
 					<span ng-if="individual.related_to">
 						related to 
 						<a ng-click="scrollTo(individual.related_to)" href="">
-							[[individual.related_to.fields.name]]
+							[[individual.related_to.fields|individualPreview:"unkown"]]
 						</a>
 					</span>
 				</h3>	

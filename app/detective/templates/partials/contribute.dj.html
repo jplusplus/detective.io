@@ -54,8 +54,12 @@
 					<a ng-click="removeIndividual($index)" class="btn btn-default right20">
 						<i class="icon-trash"></i>						
 					</a>
-					<a ng-click="toggleReduce(individual)" class="btn btn-default" ng-class="individual.reduce == true ? 'active' : ''">
-						<i class="icon-collapse-alt right10"></i>
+					<a ng-click="toggleReduce(individual)" class="btn btn-default "ng-if="individual.reduce">
+						<i class="icon-expand right10"></i>
+						Expand
+					</a>
+					<a ng-click="toggleReduce(individual)" class="btn btn-default "ng-if="!individual.reduce">
+						<i class="icon-collapse right10"></i>
 						Collapse
 					</a>
 				</div>		

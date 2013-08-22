@@ -7,11 +7,14 @@
 			  ng-submit="login()">		
 
   			<fieldset ng-disabled="loading">
-				<input type="text" class="form-control" ng-model="username" placeholder="Username" />
-				<input type="password" class="form-control" ng-model="password" placeholder="Password" />
-				<button class="btn btn-default">Sign in</button>	
 
-				<div  class="form-group tr top05 bottom10">
+				<div class="form-group">
+					<input type="text" class="form-control" ng-model="username" placeholder="Username" />
+					<input type="password" class="form-control" ng-model="password" placeholder="Password" />
+					<button class="btn btn-default">Sign in</button>	
+				</div>
+
+				<div class="clearfix tr top05 bottom10">
     		    	<span class="label label-danger pull-left top05" ng-if="error">[[error]]</span>	
 					<div class="checkbox">
 				        <label>

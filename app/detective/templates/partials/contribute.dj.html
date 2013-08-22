@@ -5,21 +5,21 @@
 
 			<div ng-repeat="resource in scopeResources()">
 				<div class="row top30">
-					<div class="col-3">
+					<div class="col-sm-3">
 						<label class="btn btn-block btn-default btn-large">
 							<input type="radio" value="[[resource.name]]" ng-model="new.type" class="hidden" />
 							[[resource.verbose_name]]
 						</label>
 					</div>
-					<div class="col-9 desc">
+					<div class="col-sm-9 desc">
 						[[resource.description]]
 					</div>
 				</div>
 				<form class="row kick-start form-inline" ng-if="new.type == resource.name" ng-submit="addIndividual()">
-					<label class="col-3 control-label top10">
+					<label class="col-sm-3 control-label top10">
 						Name of the [[resource.verbose_name]]
 					</label>
-					<div class="col-9 input-append input-append">
+					<div class="col-sm-9 input-append input-append">
 						<input type="text" class="form-control" ng-model="new.fields.name" />
 						<button class="btn btn-contribute">Create</button>
 					</div>
@@ -99,9 +99,9 @@
 				     ng-show="isAllowedType(field.type)"
 					 ng-repeat="field in resources[individual.type].fields track by $index">
 
-					<label class="col-3 tr form-label top05" for="id_[[field.name]]">[[field.verbose_name]]</label>
+					<label class="col-sm-3 tr form-label top05" for="id_[[field.name]]">[[field.verbose_name]]</label>
 
-					<div class="col-4" ng-if="field.type == 'Relationship' && ! field.is_searchable">
+					<div class="col-sm-4" ng-if="field.type == 'Relationship' && ! field.is_searchable">
 
 						<div ng-repeat="f in individual.fields[field.name]" class="bottom05 input-group">							
 							<span class="form-control disabled">
@@ -125,7 +125,7 @@
 
 					</div>
 
-					<div class="col-4" ng-if="field.type == 'Relationship' && field.is_searchable">
+					<div class="col-sm-4" ng-if="field.type == 'Relationship' && field.is_searchable">
 		    				 
 						<div ng-repeat="f in individual.fields[field.name] track by $index">
 							<div class="input-group multiple">
@@ -169,7 +169,7 @@
 					</div>
 
 
-					<div class="col-4" ng-if="field.type == 'URLField'">
+					<div class="col-sm-4" ng-if="field.type == 'URLField'">
 
 						<input type="url" 
 							   placeholder="http://"
@@ -178,7 +178,7 @@
 							   class="form-control" />
 					</div>
 
-					<div class="col-4" ng-if="field.type == 'DateTimeField'">										
+					<div class="col-sm-4" ng-if="field.type == 'DateTimeField'">										
 						<div class="input-group">
 							<span class="input-group-addon">
 								<i class="gray-darker icon-calendar"></i>	
@@ -193,15 +193,15 @@
 						</div>
 					</div>
 
-					<div class="col-4" ng-if="field.type == 'CharField'">
+					<div class="col-sm-4" ng-if="field.type == 'CharField'">
 						<input type="text" id="id_[[field.name]]" ng-model="individual.fields[field.name]" class="form-control" />
 					</div>
 
-					<div class="col-4" ng-if="field.type == 'IntegerField'">
+					<div class="col-sm-4" ng-if="field.type == 'IntegerField'">
 						<input type="number" id="id_[[field.name]]" ng-model="individual.fields[field.name]" class="form-control" />
 					</div>
 
-					<span class="col-5">
+					<span class="col-sm-5">
 						<p class="top10">[[field.help_text]]</p>
 					</span>
 

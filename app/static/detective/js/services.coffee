@@ -10,6 +10,11 @@ angular
                 transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
                     data.objects
                 ])
+            },
+            save: {
+                url:'/api/v1/:type/#',
+                method : 'POST', 
+                isArray: false
             }
         }
     ])

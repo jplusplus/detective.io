@@ -18,6 +18,7 @@ body {
     z-index:@zindex-context;
 
     a {
+    	cursor: pointer;
         text-decoration:underline;        
 
 	    &.btn {
@@ -86,6 +87,7 @@ header {
 		}
 	}
 
+	.loading { position:static; }
 	.loading:after {
 		content:"";
 		display:block;

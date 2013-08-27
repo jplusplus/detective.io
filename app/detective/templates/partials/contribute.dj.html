@@ -1,5 +1,5 @@
 <div id="contribute">
-	<div class="contribute-start panel" ng-if="showKickStart || !individuals.length">
+	<div class="contribute-start panel" ng-show="showKickStart || !individuals.length">
 		<div class="container">			
 			<h2>Add a new individual to the database</h2>
 
@@ -22,7 +22,7 @@
 					<label class="col-sm-3 control-label top10">
 						Name of the [[resource.verbose_name]]
 					</label>
-					<div class="col-sm-9 input-append input-append">
+					<div class="col-sm-9 input-group">
 						<input type="text" class="form-control" ng-model="new.fields.name" />
 						<button class="btn btn-primary">Create</button>
 					</div>

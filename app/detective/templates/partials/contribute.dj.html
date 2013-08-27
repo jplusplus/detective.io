@@ -51,8 +51,8 @@
 					<a ng-click="save(individual)" class="btn btn-default">
 						<strong>Save</strong>
 					</a>					
-					<a ng-click="removeIndividual($index)" class="btn btn-default right20">
-						<i class="icon-trash"></i>						
+					<a ng-click="removeIndividual($index)" class="btn btn-default left20">
+						<i class="icon-remove"></i>						
 					</a>
 					<a ng-click="toggleReduce(individual)" class="btn btn-default "ng-if="individual.reduce">
 						<i class="icon-expand right10"></i>
@@ -124,6 +124,7 @@
 
     					<a class="btn btn-default btn-sm" 
     					   ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
+    					   <i class="icon-plus right05"></i>
     						Create a new [[field.verbose_name]]
     					</a>
 
@@ -170,8 +171,8 @@
 						</div>						
 
 						<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">
-							<a ng-click="addRelated(individual, field.name, field.related_model)">
-								<i class="icon-plus"></i>
+							<a ng-click="addRelated(individual, field.name, field.related_model)" class="btn btn-default btn-sm">
+								<i class="icon-plus right05"></i>
 								Add 
 								<span ng-if="individual.fields[field.name].length">another</span>
 								one

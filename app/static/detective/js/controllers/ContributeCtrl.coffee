@@ -188,6 +188,11 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
                 individual.error_traceback = data.traceback if data.traceback?
             )
 
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Scope watchers
+    # ──────────────────────────────────────────────────────────────────────────
+    
     # When we update scrollIdx, reset its value after 
     # a short delay to allow scroll again
     $scope.$watch "scrollIdx", => 

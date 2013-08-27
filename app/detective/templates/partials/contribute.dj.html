@@ -1,5 +1,5 @@
 <div id="contribute">
-	<div class="contribute-start panel" ng-show="showKickStart || !individuals.length">
+	<div class="contribute-start panel" ng-if="showKickStart || !individuals.length">
 		<div class="container">			
 			<h2>Add a new individual to the database</h2>
 
@@ -9,7 +9,8 @@
 						<label class="btn btn-block btn-default btn-large">
 							<input type="radio" value="[[resource.name]]" ng-model="new.type" class="hidden" />
 							<div class="pull-left left10" ng-style="{color: strToColor(resource.name)}">
-								<i class="icon-stop"></i> 
+								<i class="icon-check" ng-show="new.type == resource.name"></i> 
+								<i class="icon-check-empty" ng-hide="new.type == resource.name"></i> 
 							</div>
 							[[resource.verbose_name]]
 						</label>

@@ -34,6 +34,7 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
         $scope.individuals.push
             type       : type
             loading    : true
+            closed     : false
             related_to : related_to
             similars   : []            
             fields     : Individual.get params, =>                 
@@ -79,8 +80,12 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
             # Create a new individual object
             initNewIndividual()
 
+    $scope.toggleIndividual = (index=0)->
+        if $scope.individuals[index]?
+            $scope.individuals[index].closed = not $scope.individuals[index].closed
+
     $scope.removeIndividual = (index=0)->
-        $scope.individuals.splice(index, 1) if $scope.individuals[index]?
+        $scope.individuals.splice(index, 1) if $scope.individuals[index]?            
 
     $scope.replaceIndividual = (index=0, id)->
         individual = $scope.individuals[index]
@@ -117,7 +122,6 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
         switch true
             when related instanceof Individual or related.id? then 'linked'
             else 'input'
-
     
     $scope.askForNew = (related)->            
         related? and not related instanceof Individual or
@@ -131,6 +135,7 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
         $scope.new = 
             type       : type
             loading    : false
+            closed     : false
             related_to : parent
             fields     : individual
             similars   : []

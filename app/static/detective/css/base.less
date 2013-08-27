@@ -21,11 +21,14 @@ body {
     position:relative;
     z-index:@zindex-context;
 
-    a:hover,
-    a:focus,
-    a:active {
-        text-decoration:none;
+    a {
+        text-decoration:underline;        
+
+	    &.btn {
+        	text-decoration:none;        
+	    }
     }
+
 
 	.understand-color { color:@understand-color; }
     .understand-bg {
@@ -249,7 +252,7 @@ header {
 			margin-top:30px;
 			margin-bottom:30px;
 			padding:30px;
-			position:relative;
+			position:relative;			
 			
 			&.loading:after {
 				content:"";
@@ -264,6 +267,20 @@ header {
 				.progress.active .progress-bar();
 				.opacity(0.4);
 			}
+
+
+
+			&.closed {
+				background:@brand-warning;
+				padding:10px 30px;
+				color:black;
+				.box-shadow( 0 3px 0 darken(@brand-warning, 40) );
+
+				.head, .form-horizontal, .errors {
+					display:none;				
+				}
+			}	
+
 			
 			.head {
 

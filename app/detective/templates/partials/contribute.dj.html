@@ -37,11 +37,13 @@
 	</div>
 
 	<div class="individual-forms container" ng-if="individuals.length">
+		
 		<div class="individual contribute-bg contribute-shadow"		 		     
 			 ng-repeat="individual in individuals" 
 			 ng-class="{
 			 	reduce : individual.reduce,
-			 	loading: individual.loading
+			 	loading: individual.loading,
+			 	closed : individual.closed
 			}">
 			
 			<a scroll-to="600" ng-if="scrollIdx == $index"></a>
@@ -51,7 +53,7 @@
 					<a ng-click="save(individual)" class="btn btn-default">
 						<strong>Save</strong>
 					</a>					
-					<a ng-click="removeIndividual($index)" class="btn btn-default left20">
+					<a ng-click="toggleIndividual($index)" class="btn btn-default left20">
 						<i class="icon-remove"></i>						
 					</a>
 					<a ng-click="toggleReduce(individual)" class="btn btn-default "ng-if="individual.reduce">
@@ -85,6 +87,12 @@
 					</a>
 				</div>
 				<div ng-if="individual.show_traceback" ng-bind-html-unsafe="individual.error_traceback|nl2br" class="top10"></div>
+			</div>
+
+			<div class="restore" ng-show="individual.closed">
+				<strong>[[individual.fields|individualPreview:"unkown"]]</strong> has been closed. 
+				<a class="left10" ng-click="toggleIndividual($index)">Undo</a>
+				<a class="left10" ng-click="removeIndividual($index)">Ignore</a>
 			</div>
 
 			<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">				
@@ -135,7 +143,8 @@
 						<div ng-repeat="f in individual.fields[field.name]">
 							<div class="input-group multiple">
 								<input 
-									type="text" 
+									type="search" 
+									placeholder="Search..."
 									tt-typeahead
 									tt-individual="field.related_model"
 									tt-model="individual.fields[field.name][$index]"				

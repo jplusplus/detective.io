@@ -6,8 +6,35 @@ Packages required:
     * django-storages
 """
 from settings import *
+from urlparse import urlparse
 import os
+import dj_database_url  
 
+
+DATABASES = {
+    'default' : dj_database_url.config()
+}
+
+# Parse url given into environment variable 
+NEO4J_URL  = urlparse( os.getenv('NEO4J_URL') )
+NEO4J_OPTIONS = {}
+
+# Determines the hostname
+if NEO4J_URL.username and NEO4J_URL.password:
+    NEO4J_OPTIONS = {
+        'username': NEO4J_URL.username,
+        'password': NEO4J_URL.password        
+    }
+
+NEO4J_DATABASES = {
+    'default' : {
+        # Concatenates username, password and hostname
+        'HOST': NEO4J_URL.hostname,
+        'PORT': int(NEO4J_URL.port),
+        'ENDPOINT':'/db/data',
+        'OPTIONS': NEO4J_OPTIONS
+    }
+}
 
 # AWS ACCESS
 AWS_ACCESS_KEY_ID          = os.getenv('AWS_ACCESS_KEY_ID')
@@ -17,7 +44,7 @@ AWS_QUERYSTRING_AUTH       = False
 AWS_S3_FILE_OVERWRITE      = True
 
 # Enable debug for minfication
-DEBUG                      = True
+DEBUG                      = False
 # Configure static files for S3
 STATIC_URL                 = os.getenv('STATIC_URL')
 STATIC_ROOT                = here('staticfiles')

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import dj_database_url  
-from urlparse import urlparse
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
 
@@ -15,27 +13,17 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default' : dj_database_url.config()
-}
-
-# Parse url given into environment variable 
-NEO4J_URL  = urlparse( os.getenv('NEO4J_URL') )
-NEO4J_OPTIONS = {}
-
-# Determines the hostname
-if NEO4J_URL.username and NEO4J_URL.password:
-    NEO4J_OPTIONS = {
-        'username': NEO4J_URL.username,
-        'password': NEO4J_URL.password        
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'dev.db'
     }
+}
 
 NEO4J_DATABASES = {
     'default' : {
-        # Concatenates username, password and hostname
-        'HOST': NEO4J_URL.hostname,
-        'PORT': int(NEO4J_URL.port),
-        'ENDPOINT':'/db/data',
-        'OPTIONS': NEO4J_OPTIONS
+        'HOST': "127.0.0.1",
+        'PORT': 7474,
+        'ENDPOINT':'/db/data'
     }
 }
 

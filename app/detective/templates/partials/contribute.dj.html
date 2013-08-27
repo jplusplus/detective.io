@@ -1,5 +1,5 @@
 <div id="contribute">
-	<div class="contribute-start contribute-bg contribute-shadow" ng-if="showKickStart || !individuals.length">
+	<div class="contribute-start panel" ng-if="showKickStart || !individuals.length">
 		<div class="container">			
 			<h2>Add a new individual to the database</h2>
 
@@ -9,6 +9,9 @@
 						<label class="btn btn-block btn-default btn-large">
 							<input type="radio" value="[[resource.name]]" ng-model="new.type" class="hidden" />
 							[[resource.verbose_name]]
+							<div class="pull-left left10" ng-style="{color: strToColor(resource.name)}">
+								<i class="icon-stop"></i> 
+							</div>
 						</label>
 					</div>
 					<div class="col-sm-9 desc">
@@ -21,7 +24,7 @@
 					</label>
 					<div class="col-sm-9 input-append input-append">
 						<input type="text" class="form-control" ng-model="new.fields.name" />
-						<button class="btn btn-contribute">Create</button>
+						<button class="btn btn-primary">Create</button>
 					</div>
 				</form>
 			</div>
@@ -38,8 +41,9 @@
 
 	<div class="individual-forms container" ng-if="individuals.length">
 		
-		<div class="individual contribute-bg contribute-shadow"		 		     
+		<div class="individual"		 		     
 			 ng-repeat="individual in individuals" 
+			 ng-style="individualStyle(individual)"
 			 ng-class="{
 			 	reduce : individual.reduce,
 			 	loading: individual.loading,
@@ -67,7 +71,7 @@
 				</div>		
 				<h3>
 					<strong>
-						[[individual.fields|individualPreview]]
+						[[individual.fields|individualPreview:"unkown"]]
 					</strong>				
 					<span ng-if="individual.related_to">
 						related to 

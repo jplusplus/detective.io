@@ -19,10 +19,11 @@
 // -------------------------
 
 @brand-primary:         #FDE59F;
-@brand-success:         #5cb85c;
+@brand-success:         #00BDA4;
 @brand-warning:         #F9E76D;
-@brand-danger:          #d9534f;
-@brand-info:            #5bc0de;
+@brand-danger:          #FDE59F;
+@brand-info:            #FE7878;
+
 
 // Scaffolding
 // -------------------------
@@ -107,12 +108,12 @@
 @btn-font-weight:                normal;
 
 @btn-default-color:              #333;
-@btn-default-bg:                 #fff;
+@btn-default-bg:                 #fafafa;
 @btn-default-border:             #ccc;
 
-@btn-primary-color:              #fff;
+@btn-primary-color:              darken(@brand-primary, 80%);
 @btn-primary-bg:                 @brand-primary;
-@btn-primary-border:             darken(@btn-primary-bg, 5%);
+@btn-primary-border:             rgba(0,0,0,.2);
 
 @btn-success-color:              #fff;
 @btn-success-bg:                 @brand-success;
@@ -154,7 +155,7 @@
 @legend-border-color:            #e5e5e5;
 
 @input-group-addon-bg:           @gray-lighter;
-@input-group-addon-border-color: transparent;
+@input-group-addon-border-color: #ccc;
 
 
 // Dropdowns

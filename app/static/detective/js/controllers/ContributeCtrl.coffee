@@ -63,6 +63,10 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
             "IntegerField"
         ].indexOf(type) > -1
 
+    # Get the individual style
+    $scope.individualStyle = (individual)->
+        "background-color": strToColor(individual.type)
+
     # When user submit a kick-start individual form
     $scope.addIndividual = (scroll=true)->
         unless $scope.new.fields.name is ""   
@@ -94,7 +98,6 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
         individual.fields   = Individual.get {type: individual.type, id: id}, =>                 
             # Disable loading state using the index set previously
             $scope.individuals[index].loading = false        
-
     
     # Returns true if the given field accept more related element
     $scope.isAllowedOneMore = (field)->       
@@ -193,6 +196,36 @@ ContributeCtrl = ($scope, $routeParams, $rootScope, Individual, User)->
                 individual.error_traceback = data.traceback if data.traceback?
             )
 
+    # Return a unique color with the given string
+    $scope.strToColor = strToColor = (str="", lum=-0.4) ->
+        # @src http://www.sitepoint.com/javascript-generate-lighter-darker-color/
+        colorLuminance = (hex, lum) ->
+            # validate hex string
+            hex = String(hex).replace(/[^0-9a-f]/g, "")
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]  if hex.length < 6            
+            # convert to decimal and change luminosity
+            colour = "#"
+            for i in [0..2]
+                c = parseInt(hex.substr(i * 2, 2), 16)
+                c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16)
+                colour += ("00" + c).substr(c.length)                
+            colour
+
+        # @src http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-jquery-javascript
+        generateColor = (str)->    
+            i = hash = 0
+            while i < str.length
+                # str to hash
+                hash = str.charCodeAt(i++) + ((hash << 5) - hash)
+
+            colour = "#"
+            for i in [0..2]
+                # int/hash to hex
+                colour += ("00" + ((hash >> i++ * 8) & 0xFF).toString(16)).slice(-2)                 
+            colour
+
+        # Combinate color generation and brightness
+        colorLuminance( generateColor( md5(str) ), lum)
 
     # ──────────────────────────────────────────────────────────────────────────
     # Scope watchers

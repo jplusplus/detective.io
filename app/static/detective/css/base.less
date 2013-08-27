@@ -12,10 +12,6 @@
 @zindex-content: @zindex-context+100;
 @zindex-header : @zindex-content+100;
 
-@understand-color:#FE7878;
-@contribute-color:#00BDA4;
-@explore-color:#FDE59F;
-
 
 body {
     position:relative;
@@ -30,34 +26,22 @@ body {
     }
 
 
-	.understand-color { color:@understand-color; }
-    .understand-bg {
-    	background-color:@understand-color;    	
-    	&, a { color:darken(@understand-color, 40%); }
-    	a:hover { color:darken(@understand-color, 60%);}
-    }
-    .understand-shadow {
-    	.box-shadow(0 3px 0 darken(@understand-color, 10));
-    }
-
-	.contribute-color { color:@contribute-color; }
-	.contribute-bg {
-		background-color:@contribute-color;		
-		&, a { color:darken(@contribute-color, 40%); }
-		a:hover { color:darken(@contribute-color, 60%);}
-	}
-	.contribute-shadow {
-		.box-shadow(0 3px 0 darken(@contribute-color, 10));
-	}
-
-	.explore-color { color:@explore-color; }
-	.explore-bg {
-		background-color:@explore-color;		
-		&, a { color:darken(@explore-color, 40%); }
-		a:hover { color:darken(@explore-color, 60%);}
-	}
-	.explore-shadow {
-		.box-shadow(0 3px 0 darken(@explore-color, 10));
+	.loading {
+		position:relative;
+		min-height:100px;	
+		&:after {
+			content:"";
+			display:block;
+			position:absolute;
+			top:0;
+			bottom:0;
+			left:0;
+			right:0;
+			.progress-striped .progress-bar();
+			.progress-bar-variant(#bbb);
+			.progress.active .progress-bar();
+			.opacity(0.4);
+		}
 	}
 
 }
@@ -228,7 +212,6 @@ header {
 	
 	.contribute-start, .individual-forms .individual {		
 		padding:30px;
-		a, & { color:inherit; }
 	}
 		
 	.kick-start {
@@ -253,29 +236,11 @@ header {
 			margin-bottom:30px;
 			padding:30px;
 			position:relative;			
+			.box-shadow( 0 -3px 0 fade(#000, 40) inset);
 			
-			&.loading:after {
-				content:"";
-				display:block;
-				position:absolute;
-				top:0;
-				bottom:0;
-				left:0;
-				right:0;
-				.progress-striped .progress-bar();
-				.progress-bar-variant(@contribute-color);
-				.progress.active .progress-bar();
-				.opacity(0.4);
-			}
-
-
 
 			&.closed {
-				background:@brand-warning;
 				padding:10px 30px;
-				color:black;
-				.box-shadow( 0 3px 0 darken(@brand-warning, 40) );
-
 				.head, .form-horizontal, .errors {
 					display:none;				
 				}
@@ -308,7 +273,7 @@ header {
 			
 				h4 {
 					margin:0;
-					color:mix(#FFF, @contribute-color);
+					color:fade(#FFF, 70);
 				}
 				
 			}

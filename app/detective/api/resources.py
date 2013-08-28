@@ -102,21 +102,23 @@ class IndividualResource(ModelResource):
             # The field doesn't exist
             if not modelField: setattr(bundle.obj, field, None)
             # Transform list field to be more flexible
-            elif type(bundle.data[field]) is list:                   
+            elif type(bundle.data[field]) is list:      
                 rels = bundle.data[field]
-                # Empties the bundle to avoid insert data twice
-                bundle.data[field] = []                                      
-                # Get the field
-                attr = getattr(bundle.obj, field)
-                # Clean the field to avoid duplicates            
-                if attr.count() > 0: attr.clear()
-                # For each relation...
-                for rel in rels:    
-                    # Add the received obj
-                    if hasattr(rel, "obj"):
-                        attr.add(rel.obj)
-                    else:
-                        attr.add(rel)
+                # Avoid working on empty relationships set
+                if len(rels) > 0:
+                    # Empties the bundle to avoid insert data twice
+                    bundle.data[field] = []                                      
+                    # Get the field
+                    attr = getattr(bundle.obj, field)
+                    # Clean the field to avoid duplicates            
+                    if attr.count() > 0: attr.clear()
+                    # For each relation...
+                    for rel in rels:    
+                        # Add the received obj
+                        if hasattr(rel, "obj"):
+                            attr.add(rel.obj)
+                        else:
+                            attr.add(rel)
 
         # Save the object now to avoid duplicated relations 
         bundle.obj.save()

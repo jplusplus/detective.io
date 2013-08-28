@@ -32,26 +32,14 @@ admin.site.register(Distribution, DistributionAdmin)
 class EnergyProjectAdmin(admin.ModelAdmin): pass
 admin.site.register(EnergyProject, EnergyProjectAdmin)
 
-class InternationalOrganizationAdmin(admin.ModelAdmin): pass
-admin.site.register(InternationalOrganization, InternationalOrganizationAdmin)
-
 class PersonAdmin(admin.ModelAdmin): pass
 admin.site.register(Person, PersonAdmin)
 
 class RevenueAdmin(admin.ModelAdmin): pass
 admin.site.register(Revenue, RevenueAdmin)
 
-class CompanyAdmin(admin.ModelAdmin): pass
-admin.site.register(Company, CompanyAdmin)
-
-class GovernmentOrganizationAdmin(admin.ModelAdmin): pass
-admin.site.register(GovernmentOrganization, GovernmentOrganizationAdmin)
-
 class ProductAdmin(admin.ModelAdmin): pass
 admin.site.register(Product, ProductAdmin)
 
 class EnergyProductAdmin(admin.ModelAdmin): pass
 admin.site.register(EnergyProduct, EnergyProductAdmin)
-
-class NgoAdmin(admin.ModelAdmin): pass
-admin.site.register(Ngo, NgoAdmin)

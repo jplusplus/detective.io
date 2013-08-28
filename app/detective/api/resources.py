@@ -56,7 +56,7 @@ class IndividualResource(ModelResource):
                     bundle.data[field] = []                    
 
         return bundle
-        
+
 
     def hydrate(self, bundle):         
         # By default, every individual from staff are validated
@@ -331,10 +331,6 @@ class EnergyProjectResource(IndividualResource):
     class Meta(IndividualMeta):
         queryset = EnergyProject.objects.all()
 
-class InternationalOrganizationResource(IndividualResource):
-    class Meta(IndividualMeta):
-        queryset = InternationalOrganization.objects.all()
-
 class PersonResource(IndividualResource):    
     activity_in = fields.ToManyField("app.detective.api.resources.OrganizationResource", "activity_in", full=True, null=True, use_in="detail")
     nationality = fields.ToManyField("app.detective.api.resources.CountryResource", "nationality", full=True, null=True, use_in="detail")
@@ -346,14 +342,6 @@ class PersonResource(IndividualResource):
 class RevenueResource(IndividualResource):
     class Meta(IndividualMeta):
         queryset = Revenue.objects.all()
-
-class CompanyResource(IndividualResource):
-    class Meta(IndividualMeta):
-        queryset = Company.objects.all()
-
-class GovernmentOrganizationResource(IndividualResource):
-    class Meta(IndividualMeta):
-        queryset = GovernmentOrganization.objects.all()
 
 class ProductResource(IndividualResource):
 
@@ -370,7 +358,3 @@ class EnergyProductResource(IndividualResource):
 
     class Meta(IndividualMeta):
         queryset = EnergyProduct.objects.all()
-
-class NgoResource(IndividualResource):
-    class Meta(IndividualMeta):
-        queryset = Ngo.objects.all()

@@ -1,0 +1,1622 @@
+[
+  { 
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "AFG",
+        "name" : "Afghanistan (AFG)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ALB",
+        "name" : "Albania (ALB)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "DZA",
+        "name" : "Algeria (DZA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "AGO",
+        "name" : "Angola (AGO)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ATG",
+        "name" : "Antigua and Barbuda (ATG)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ARG",
+        "name" : "Argentina (ARG)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ARM",
+        "name" : "Armenia (ARM)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ABW",
+        "name" : "Aruba (ABW)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "AUS",
+        "name" : "Australia (AUS)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "AUT",
+        "name" : "Austria (AUT)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "AZE",
+        "name" : "Azerbaijan (AZE)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BHS",
+        "name" : "Bahamas (BHS)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BHR",
+        "name" : "Bahrain (BHR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BGD",
+        "name" : "Bangladesh (BGD)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BRB",
+        "name" : "Barbados (BRB)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BLR",
+        "name" : "Belarus (BLR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BEL",
+        "name" : "Belgium (BEL)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BLZ",
+        "name" : "Belize (BLZ)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BEN",
+        "name" : "Benin (BEN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BTN",
+        "name" : "Bhutan (BTN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BOL",
+        "name" : "Bolivia (BOL)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BIH",
+        "name" : "Bosnia and Herzegovina (BIH)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BWA",
+        "name" : "Botswana (BWA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BRA",
+        "name" : "Brazil (BRA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BRN",
+        "name" : "Brunei Darussalam (BRN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BGR",
+        "name" : "Bulgaria (BGR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BFA",
+        "name" : "Burkina Faso (BFA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "BDI",
+        "name" : "Burundi (BDI)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "KHM",
+        "name" : "Cambodia (KHM)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CMR",
+        "name" : "Cameroon (CMR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CAN",
+        "name" : "Canada (CAN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CPV",
+        "name" : "Cape Verde (CPV)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CAF",
+        "name" : "Central African Republic (CAF)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "TCD",
+        "name" : "Chad (TCD)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CHL",
+        "name" : "Chile (CHL)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CHN",
+        "name" : "China (CHN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "HKG",
+        "name" : "China - Hong Kong (HKG)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MAC",
+        "name" : "China - Macao (MAC)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "COL",
+        "name" : "Colombia (COL)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "COM",
+        "name" : "Comoros (COM)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "COG",
+        "name" : "Congo (COG)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CRI",
+        "name" : "Costa Rica (CRI)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CIV",
+        "name" : "Cote d'Ivoire (CIV)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "HRV",
+        "name" : "Croatia (HRV)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CYP",
+        "name" : "Cyprus (CYP)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CZE",
+        "name" : "Czech Republic (CZE)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "DNK",
+        "name" : "Denmark (DNK)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "DJI",
+        "name" : "Djibouti (DJI)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "DMA",
+        "name" : "Dominica (DMA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "DOM",
+        "name" : "Dominican Republic (DOM)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ECU",
+        "name" : "Ecuador (ECU)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "EGY",
+        "name" : "Egypt (EGY)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SLV",
+        "name" : "El Salvador (SLV)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GNQ",
+        "name" : "Equatorial Guinea (GNQ)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "EST",
+        "name" : "Estonia (EST)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ETH",
+        "name" : "Ethiopia (ETH)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "FJI",
+        "name" : "Fiji (FJI)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "FIN",
+        "name" : "Finland (FIN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "FRA",
+        "name" : "France (FRA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GAB",
+        "name" : "Gabon (GAB)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GMB",
+        "name" : "Gambia (GMB)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GEO",
+        "name" : "Georgia (GEO)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "DEU",
+        "name" : "Germany (DEU)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GHA",
+        "name" : "Ghana (GHA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GRC",
+        "name" : "Greece (GRC)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GRD",
+        "name" : "Grenada (GRD)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GTM",
+        "name" : "Guatemala (GTM)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GIN",
+        "name" : "Guinea (GIN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GNB",
+        "name" : "Guinea-Bissau (GNB)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GUY",
+        "name" : "Guyana (GUY)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "HTI",
+        "name" : "Haiti (HTI)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "HND",
+        "name" : "Honduras (HND)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "HUN",
+        "name" : "Hungary (HUN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ISL",
+        "name" : "Iceland (ISL)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "IND",
+        "name" : "India (IND)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "IDN",
+        "name" : "Indonesia (IDN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "IRN",
+        "name" : "Iran (IRN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "IRQ",
+        "name" : "Iraq (IRQ)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "IRL",
+        "name" : "Ireland (IRL)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ISR",
+        "name" : "Israel (ISR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ITA",
+        "name" : "Italy (ITA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "JAM",
+        "name" : "Jamaica (JAM)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "JPN",
+        "name" : "Japan (JPN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "JOR",
+        "name" : "Jordan (JOR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "KAZ",
+        "name" : "Kazakhstan (KAZ)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "KEN",
+        "name" : "Kenya (KEN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "KWT",
+        "name" : "Kuwait (KWT)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "KGZ",
+        "name" : "Kyrgyzstan (KGZ)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "LAO",
+        "name" : "Lao People's Democratic Republic (LAO)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "LVA",
+        "name" : "Latvia (LVA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "LBN",
+        "name" : "Lebanon (LBN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "LSO",
+        "name" : "Lesotho (LSO)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "LBR",
+        "name" : "Liberia (LBR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "LBY",
+        "name" : "Libyan Arab Jamahiriya (LBY)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "LTU",
+        "name" : "Lithuania (LTU)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "LUX",
+        "name" : "Luxembourg (LUX)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MKD",
+        "name" : "Macedonia (MKD)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MDG",
+        "name" : "Madagascar (MDG)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MWI",
+        "name" : "Malawi (MWI)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MYS",
+        "name" : "Malaysia (MYS)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MDV",
+        "name" : "Maldives (MDV)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MLI",
+        "name" : "Mali (MLI)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MLT",
+        "name" : "Malta (MLT)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MRT",
+        "name" : "Mauritania (MRT)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MUS",
+        "name" : "Mauritius (MUS)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MEX",
+        "name" : "Mexico (MEX)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MNG",
+        "name" : "Mongolia (MNG)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MNE",
+        "name" : "Montenegro (MNE)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MAR",
+        "name" : "Morocco (MAR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MOZ",
+        "name" : "Mozambique (MOZ)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MMR",
+        "name" : "Myanmar (MMR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "NAM",
+        "name" : "Namibia (NAM)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "NPL",
+        "name" : "Nepal (NPL)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "NLD",
+        "name" : "Netherlands (NLD)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "NZL",
+        "name" : "New Zealand (NZL)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "NIC",
+        "name" : "Nicaragua (NIC)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "NER",
+        "name" : "Niger (NER)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "NGA",
+        "name" : "Nigeria (NGA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "NOR",
+        "name" : "Norway (NOR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "PSE",
+        "name" : "Occupied Palestinian Territory (PSE)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "OMN",
+        "name" : "Oman (OMN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "PAK",
+        "name" : "Pakistan (PAK)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "PAN",
+        "name" : "Panama (PAN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "PNG",
+        "name" : "Papua New Guinea (PNG)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "PRY",
+        "name" : "Paraguay (PRY)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "PER",
+        "name" : "Peru (PER)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "PHL",
+        "name" : "Philippines (PHL)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "POL",
+        "name" : "Poland (POL)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "PRT",
+        "name" : "Portugal (PRT)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "QAT",
+        "name" : "Qatar (QAT)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "KOR",
+        "name" : "Republic of Korea (KOR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "MDA",
+        "name" : "Republic of Moldova (MDA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ROU",
+        "name" : "Romania (ROU)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "RUS",
+        "name" : "Russian Federation (RUS)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "RWA",
+        "name" : "Rwanda (RWA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "KNA",
+        "name" : "Saint Kitts and Nevis (KNA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "LCA",
+        "name" : "Saint Lucia (LCA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "VCT",
+        "name" : "Saint Vincent and the Grenadines (VCT)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "WSM",
+        "name" : "Samoa (WSM)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SMR",
+        "name" : "San Marino (SMR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "STP",
+        "name" : "Sao Tome and Principe (STP)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SAU",
+        "name" : "Saudi Arabia (SAU)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SEN",
+        "name" : "Senegal (SEN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SRB",
+        "name" : "Serbia (SRB)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SYC",
+        "name" : "Seychelles (SYC)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SLE",
+        "name" : "Sierra Leone (SLE)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SGP",
+        "name" : "Singapore (SGP)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SVK",
+        "name" : "Slovakia (SVK)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SVN",
+        "name" : "Slovenia (SVN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SLB",
+        "name" : "Solomon Islands (SLB)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ZAF",
+        "name" : "South Africa (ZAF)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ESP",
+        "name" : "Spain (ESP)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "LKA",
+        "name" : "Sri Lanka (LKA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SDN",
+        "name" : "Sudan (SDN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SUR",
+        "name" : "Suriname (SUR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SWZ",
+        "name" : "Swaziland (SWZ)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SWE",
+        "name" : "Sweden (SWE)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "CHE",
+        "name" : "Switzerland (CHE)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "SYR",
+        "name" : "Syrian Arab Republic (SYR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "TJK",
+        "name" : "Tajikistan (TJK)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "THA",
+        "name" : "Thailand (THA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "TLS",
+        "name" : "Timor-Leste (TLS)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "TGO",
+        "name" : "Togo (TGO)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "TON",
+        "name" : "Tonga (TON)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "TTO",
+        "name" : "Trinidad and Tobago (TTO)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "TUN",
+        "name" : "Tunisia (TUN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "TUR",
+        "name" : "Turkey (TUR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "UGA",
+        "name" : "Uganda (UGA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "UKR",
+        "name" : "Ukraine (UKR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ARE",
+        "name" : "United Arab Emirates (ARE)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "GBR",
+        "name" : "United Kingdom (GBR)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "TZA",
+        "name" : "United Republic of Tanzania (TZA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "USA",
+        "name" : "United States of America (USA)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "URY",
+        "name" : "Uruguay (URY)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "VUT",
+        "name" : "Vanuatu (VUT)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "VEN",
+        "name" : "Venezuela (Bolivarian Republic of) (VEN)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "VNM",
+        "name" : "Viet Nam (VNM)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "YEM",
+        "name" : "Yemen (YEM)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ZMB",
+        "name" : "Zambia (ZMB)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
+        "isoa3" : "ZWE",
+        "name" : "Zimbabwe (ZWE)"   
+    }
+  }
+]

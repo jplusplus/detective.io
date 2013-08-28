@@ -11,6 +11,7 @@ from tastypie.authorization        import DjangoAuthorization
 from tastypie.constants            import ALL
 from tastypie.resources            import ModelResource
 from tastypie.utils                import trailing_slash
+from tastypie.cache                import SimpleCache
 
 
 class IndividualMeta:

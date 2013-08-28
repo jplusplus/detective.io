@@ -102,7 +102,7 @@
 
 
 			<form class="form-horizontal">
-				
+
 				<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">				
 					<strong>Individuals already exist with that name!</strong>
 					Switch to 
@@ -187,8 +187,8 @@
 
 						<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">
 							<a ng-click="addRelated(individual, field.name, field.related_model)" class="btn btn-default btn-sm">
-								<i class="icon-plus right05"></i>
-								Add 
+								<i class="icon-search right05"></i>
+								Search
 								<span ng-if="individual.fields[field.name].length">another</span>
 								one
 							</a>

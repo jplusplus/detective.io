@@ -65,4 +65,11 @@ COMPRESS_CSS_FILTERS       = (
     "compressor.filters.cssmin.CSSMinFilter",
 )
 
+# Activate the cache, for true
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache',
+    }
+}
 

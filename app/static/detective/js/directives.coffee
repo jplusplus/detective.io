@@ -32,21 +32,21 @@ detective.directive "ttTypeahead", ($parse)->
         individual = (scope.individual() or "").toLowerCase()
         # Set a default value
         element.val scope.model.name if scope.model?
+        # Helper to save the search response
+        saveResponse = (response)-> lastDataset = response.objects
         # Create the typehead
         element.typeahead    
             name: individual
             template: "<%= name %>"
             engine: engine
-            valueKey: "__value__"
+            valueKey: "name"
+            prefetch: 
+                url: "/api/v1/#{individual}/mine/"    
+                filter: saveResponse
             remote: 
                 url: "/api/v1/#{individual}/search/?q=%QUERY"
-                filter: (response)-> 
-                    # Format to datum requirements
-                    _.each response.objects, (el, idx)-> el["__value__"] = el["name"]
-                    # Record last dataset and return objects list
-                    lastDataset = response.objects
-        
-
+                filter: saveResponse
+                    
         # Watch select event
         element.on "typeahead:selected", (input, individual)->      
             if scope.model?
@@ -64,12 +64,11 @@ detective.directive "ttTypeahead", ($parse)->
             # Apply the scope change
             scope.$apply()
                   
-
         # Watch change event
         element.on "change", (input)-> 
             $input = $(this)
             # Filter using the current value
-            datum = _.findWhere lastDataset, "__value__": $input.val()            
+            datum = _.findWhere lastDataset, "name": $input.val()            
             # If datum exist, use the selected event
             ev = "typeahead:" + (if datum then "selected" else "uservalue")            
             # Trigger this even

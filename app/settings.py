@@ -104,10 +104,12 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'app.middleware.crossdomainxhr.XsSharing',
+    'app.middleware.crossdomainxhr.XsSharing',    
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -164,6 +166,15 @@ INSTALLED_APPS = (
     # Internal
     'app.detective', 
 )
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'LOCATION': '/tmp/django_cache',
+    }
+}
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

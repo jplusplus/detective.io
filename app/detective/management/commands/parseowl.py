@@ -307,8 +307,13 @@ class Command(BaseCommand):
             if m["verbose_name_plural"] != '':
                 modelsContents.append("\t\tverbose_name_plural = u'%s'" % m["verbose_name_plural"])
 
-            if m["verbose_name"] == '' and m["verbose_name_plural"] == '':
+            if m["verbose_name"] == '' and  m["verbose_name_plural"] == '':
                 modelsContents.append("\t\tpass") 
+
+            if len([p for p in m["properties"] if p["name"] == "name" ]):
+                modelsContents.append("\r\n\tdef __unicode__(self):") 
+                modelsContents.append("\t\treturn self.name") 
+
 
         print "\r\n".join(modelsContents).encode("UTF-8")
 

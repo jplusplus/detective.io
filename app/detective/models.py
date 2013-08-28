@@ -25,6 +25,9 @@ class Country(models.NodeModel):
 		verbose_name = u'Country'
 		verbose_name_plural = u'Countries'
 
+	def __unicode__(self):
+		return self.name
+
 class FundraisingRound(models.NodeModel):
 	_parent = u'Amount'
 	_description = u''
@@ -58,6 +61,9 @@ class Person(models.NodeModel):
 		verbose_name = u'Person'
 		verbose_name_plural = u'Persons'
 
+	def __unicode__(self):
+		return self.name
+
 class Product(models.NodeModel):
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
@@ -69,6 +75,9 @@ class Product(models.NodeModel):
 
 	class Meta:
 		pass
+
+	def __unicode__(self):
+		return self.name
 
 class Revenue(models.NodeModel):
 	_parent = u'Amount'
@@ -113,6 +122,9 @@ class EnergyProduct(models.NodeModel):
 		verbose_name = u'Energy product'
 		verbose_name_plural = u'Energy products'
 
+	def __unicode__(self):
+		return self.name
+
 class Organization(models.NodeModel):
 	_description = u'An Organization represents a social entity that implements, funds, takes part in or helps a Project. It can be an NGO, a for-profit company or an international organization.'
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
@@ -140,6 +152,9 @@ class Organization(models.NodeModel):
 		verbose_name = u'Organization'
 		verbose_name_plural = u'Organizations'
 
+	def __unicode__(self):
+		return self.name
+
 class Project(models.NodeModel):
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
@@ -158,6 +173,9 @@ class Project(models.NodeModel):
 
 	class Meta:
 		pass
+
+	def __unicode__(self):
+		return self.name
 
 class Distribution(models.NodeModel):
 	_parent = u'Amount'
@@ -208,3 +226,6 @@ class EnergyProject(models.NodeModel):
 	class Meta:
 		verbose_name = u'Energy project'
 		verbose_name_plural = u'Energy projects'
+
+	def __unicode__(self):
+		return self.name

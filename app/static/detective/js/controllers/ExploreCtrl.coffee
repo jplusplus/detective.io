@@ -1,4 +1,4 @@
-ExploreCtrl = ($scope, $routeParams, $rootScope, Individual, $location, $timeout)-> 
+ExploreCtrl = ($scope, $routeParams, $rootScope, Individual, $location, $timeout, $filter)-> 
     # Current individual scope
     $scope.scope = $routeParams.scope
     # Get the list of available resources
@@ -19,7 +19,7 @@ ExploreCtrl = ($scope, $routeParams, $rootScope, Individual, $location, $timeout
             _.each resources, (resource, i)->                                                
                 $timeout(-> 
                     key    = resource.name
-                    limit  = 20
+                    limit  = 2
                     params =
                         type  : key
                         limit : limit
@@ -28,10 +28,13 @@ ExploreCtrl = ($scope, $routeParams, $rootScope, Individual, $location, $timeout
                     $scope.individuals[key] = Individual.get params
 
                 , i*1000)
+                
+    # Return a unique color with the given string
+    $scope.strToColor = strToColor = $filter("strToColor")
 
     # Get resources list filtered by the current scope
-    $scope.scopeResources = -> 
-        resources = _.where $scope.resources, { scope: $scope.scope }        
+    $scope.scopeResources = ->
+        resources = _.where $scope.resources, { scope: $scope.scope }                
             
 
     # True if there is a previous page
@@ -60,4 +63,4 @@ ExploreCtrl = ($scope, $routeParams, $rootScope, Individual, $location, $timeout
 
 
 
-ExploreCtrl.$inject = ['$scope', '$routeParams', '$rootScope', 'Individual', '$location', '$timeout'];
+ExploreCtrl.$inject = ['$scope', '$routeParams', '$rootScope', 'Individual', '$location', '$timeout', '$filter'];

@@ -1,19 +1,17 @@
 <div id="explore" class="container">	
 	<div ng-repeat="resource in scopeResources()">
 		<h2>[[resource.verbose_name]]</h2>
-		<div class="individual-list panel black"
+		<div class="individual-list panel"
+	         ng-style="{'background': strToColor(resource.name)}"
 			 ng-class="{
 			 	'loading': !individuals[resource.name].meta
 			}">
-			<div ng-repeat="individual in individuals[resource.name].objects" class="individual">
-				<div make-switch			
-					 model="individual._status"
-					 data-text-label="Status"
-					 data-on="success"
-					 data-on-label="<i class='icon-ok'></i>"
-					 data-off-label="<i class='icon-remove'></i>" 
-					 class="pull-right"></div>
-				<h4>[[individual.name]]</h4>	
+			<div ng-repeat="individual in individuals[resource.name].objects" class="individual white">
+				<div class="pull-right">[[individual._status]]</div>			
+				<h4>[[individual|individualPreview:"Unkown"]]</h4>	
+			</div>
+			<div ng-show="individuals[resource.name].objects.length == 0" class="tc padding20">
+				No result
 			</div>
 		</div>
 	</div>

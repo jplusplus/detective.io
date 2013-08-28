@@ -11,7 +11,6 @@ from tastypie.authorization        import DjangoAuthorization
 from tastypie.constants            import ALL
 from tastypie.resources            import ModelResource
 from tastypie.utils                import trailing_slash
-from tastypie.cache                import SimpleCache
 
 
 class IndividualMeta:
@@ -47,7 +46,6 @@ class IndividualResource(ModelResource):
                 # Set the field to None 'cause we cant change the size 
                 # of the data's bundle
                 bundle.data[field] = None
-                continue
             # Find the model's field 
             modelField = getattr(bundle.obj, field, False) 
             # The current field is a relationship
@@ -58,8 +56,7 @@ class IndividualResource(ModelResource):
                     bundle.data[field] = []                    
 
         return bundle
-
-
+        
 
     def hydrate(self, bundle):         
         # By default, every individual from staff are validated

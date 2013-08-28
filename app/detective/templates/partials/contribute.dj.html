@@ -80,14 +80,14 @@
 							[[individual.related_to.fields|individualPreview:"unkown"]]
 						</a>
 					</span>
-				</h3>	
-				<h4>Adding a new [[individual.type]]</h4>
+				</h3>					
+				<h4>[[resources[individual.type].verbose_name]]</h4>
 			</div>
 			
 			<div class="alert alert-danger errors" ng-if="individual.error_message">
 				[[individual.error_message]]
 				<div ng-if="individual.error_traceback" class="pull-right">
-					<a class="alert-link btn btn-mini btn-default" ng-click="individual.show_traceback = !individual.show_traceback" href="">
+					<a class="btn btn-xs btn-default" ng-click="individual.show_traceback = !individual.show_traceback" href="">
 						Show traceback
 					</a>
 				</div>

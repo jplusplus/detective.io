@@ -118,6 +118,9 @@ class IndividualResource(ModelResource):
                     else:
                         attr.add(rel)
 
+        # Save the object now to avoid duplicated relations 
+        bundle.obj.save()
+
         return bundle
 
     def prepend_urls(self):

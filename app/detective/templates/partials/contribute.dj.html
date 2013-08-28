@@ -100,17 +100,18 @@
 				<a class="left10" ng-click="removeIndividual($index)">Ignore</a>
 			</div>
 
-			<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">				
-				<strong>Individuals already exist with that name!</strong>
-				Switch to 
-				<span ng-repeat="similar in individual.similars">
-					<a class="alert-link" ng-click="replaceIndividual($parent.$index, similar.id)" href="">[[similar.name]]</a>
-					<span ng-if="!$last">,</span>
-					<span ng-if="$last">.</span>
-				</span>
-			</div>
 
 			<form class="form-horizontal">
+				
+				<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">				
+					<strong>Individuals already exist with that name!</strong>
+					Switch to 
+					<span ng-repeat="similar in individual.similars">
+						<a class="alert-link" ng-click="replaceIndividual($parent.$index, similar.id)" href="">[[similar.name]]</a>
+						<span ng-if="!$last">,</span>
+						<span ng-if="$last">.</span>
+					</span>
+				</div>
 
 				<div class="row field top20 form-group" 
 				     ng-show="isAllowedType(field.type)"

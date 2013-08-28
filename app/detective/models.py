@@ -26,7 +26,7 @@ class Country(models.NodeModel):
 		verbose_name_plural = u'Countries'
 
 	def __unicode__(self):
-		return self.name
+		return self.name or u"Unkown"
 
 class FundraisingRound(models.NodeModel):
 	_parent = u'Amount'
@@ -62,7 +62,7 @@ class Person(models.NodeModel):
 		verbose_name_plural = u'Persons'
 
 	def __unicode__(self):
-		return self.name
+		return self.name or u"Unkown"
 
 class Product(models.NodeModel):
 	_description = u''
@@ -77,7 +77,7 @@ class Product(models.NodeModel):
 		pass
 
 	def __unicode__(self):
-		return self.name
+		return self.name or u"Unkown"
 
 class Revenue(models.NodeModel):
 	_parent = u'Amount'
@@ -123,7 +123,7 @@ class EnergyProduct(models.NodeModel):
 		verbose_name_plural = u'Energy products'
 
 	def __unicode__(self):
-		return self.name
+		return self.name or u"Unkown"
 
 class Organization(models.NodeModel):
 	_description = u'An Organization represents a social entity that implements, funds, takes part in or helps a Project. It can be an NGO, a for-profit company or an international organization.'
@@ -153,7 +153,7 @@ class Organization(models.NodeModel):
 		verbose_name_plural = u'Organizations'
 
 	def __unicode__(self):
-		return self.name
+		return self.name or u"Unkown"
 
 class Project(models.NodeModel):
 	_description = u''
@@ -175,7 +175,7 @@ class Project(models.NodeModel):
 		pass
 
 	def __unicode__(self):
-		return self.name
+		return self.name or u"Unkown"
 
 class Distribution(models.NodeModel):
 	_parent = u'Amount'
@@ -228,4 +228,4 @@ class EnergyProject(models.NodeModel):
 		verbose_name_plural = u'Energy projects'
 
 	def __unicode__(self):
-		return self.name
+		return self.name or u"Unkown"

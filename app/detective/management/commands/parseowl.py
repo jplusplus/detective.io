@@ -312,7 +312,7 @@ class Command(BaseCommand):
 
             if len([p for p in m["properties"] if p["name"] == "name" ]):
                 modelsContents.append("\r\n\tdef __unicode__(self):") 
-                modelsContents.append("\t\treturn self.name") 
+                modelsContents.append("\t\treturn self.name or u\"Unkown\"") 
 
 
         print "\r\n".join(modelsContents).encode("UTF-8")

@@ -22,7 +22,6 @@ class IndividualMeta:
 
 class IndividualResource(ModelResource):
 
-
     def build_schema(self):  
         """
         Description and scope for each Resource

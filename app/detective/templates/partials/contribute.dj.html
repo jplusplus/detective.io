@@ -47,25 +47,25 @@
 			 ng-style="individualStyle(individual)"
 			 ng-class="{
 			 	loading: individual.loading,
-			 	reduce : individual.reduced,
-			 	closed : individual.closed
+			 	reduce : individual.isReduced,
+			 	closed : individual.isClosed
 			}">
 			
 			<a scroll-to="600" ng-if="scrollIdx == $index"></a>
 
 			<div class="head">	
 				<div class="btns">
-					<a ng-click="individual.save()" class="btn btn-default">
+					<a ng-click="individual.save()" class="btn btn-default" ng-disabled="individual.isSaved()">
 						<strong>Save</strong>
 					</a>					
-					<a ng-click="individual.toggle()" class="btn btn-default left20">
+					<a ng-click="individual.close()" class="btn btn-default left20">
 						<i class="icon-remove"></i>						
 					</a>
-					<a ng-click="individual.reduce()" class="btn btn-default "ng-if="individual.reduced">
+					<a ng-click="individual.reduce()" class="btn btn-default "ng-if="individual.isReduced">
 						<i class="icon-expand right10"></i>
 						Expand
 					</a>
-					<a ng-click="individual.reduce()" class="btn btn-default "ng-if="!individual.reduced">
+					<a ng-click="individual.reduce()" class="btn btn-default "ng-if="!individual.isReduced">
 						<i class="icon-collapse right10"></i>
 						Collapse
 					</a>
@@ -94,9 +94,9 @@
 				<div ng-if="individual.show_traceback" ng-bind-html-unsafe="individual.error_traceback|nl2br" class="top10"></div>
 			</div>
 
-			<div class="restore" ng-show="individual.closed">
+			<div class="restore" ng-show="individual.isClosed">
 				<strong>[[individual.fields|individualPreview:"unkown"]]</strong> has been closed. 
-				<a class="left10" ng-click="individual.toggle()">Undo</a>
+				<a class="left10" ng-click="individual.close()">Undo</a>
 				<a class="left10" ng-click="removeIndividual($index)">Ignore</a>
 			</div>
 

@@ -71,8 +71,9 @@ class ContributeCtrl
             fields     : new @Individual name: ""
             master     : {}
             save       : @save
-            toggle     : -> @closed = not @closed
-            reduce     : -> @reduced = not @reduced
+            close      : -> @isClosed = not @isClosed
+            reduce     : -> @isReduced = not @isReduced
+            isSaved    : -> @fields.id? and angular.equals @master, @fields
         # Set the new individual
         if set then @scope.new = individual else individual        
 
@@ -92,13 +93,13 @@ class ContributeCtrl
         @scope.individuals.push @initNewIndividual(false)        
         @scope.individuals[index].type       = type
         @scope.individuals[index].loading    = true
-        @scope.individuals[index].related_to = related_to               
+        @scope.individuals[index].related_to = related_to
         # Load the given individual        
         @scope.individuals[index].fields = @Individual.get params, (master)=>  
             # Disable loading state
             @scope.individuals[index].loading = false
             # Record the database version of the individual
-            @scope.individuals[index].master  = master
+            @scope.individuals[index].master  = _.clone master
 
         # Return the index of the new individual
         return index
@@ -155,7 +156,7 @@ class ContributeCtrl
             # Disable loading state
             individual.loading = false
             # Record the database version of the individual
-            individual.master  = master
+            individual.master  = _.clone master
     
     # Returns true if the given field accept more related element
     isAllowedOneMore: (field)=>       
@@ -234,7 +235,7 @@ class ContributeCtrl
                 # Loading mode off
                 @loading = false
                 # Record master
-                @master = master
+                @master = _.clone master
                 # Clean errors
                 delete @error_message
             # Handles error

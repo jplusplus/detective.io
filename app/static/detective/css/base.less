@@ -8,9 +8,10 @@
 
 @import  '//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css';
 
-@zindex-context: 10;
-@zindex-content: @zindex-context+100;
-@zindex-header : @zindex-content+100;
+@zindex-context   : 10;
+@zindex-content   : @zindex-context+100;
+@zindex-breadcrumb: @zindex-content+100;
+@zindex-header    : @zindex-breadcrumb+100;
 
 @header-bg:#2E2D2A;
 
@@ -131,6 +132,11 @@ header {
 	
 }
 
+.breadcrumb {	
+	z-index:@zindex-header;
+	position:relative;
+}
+
 #content {
 	position:relative;
 	z-index:@zindex-content;
@@ -216,6 +222,24 @@ header {
 	
 	.contribute-start, .individual-forms .individual {		
 		padding:30px;
+	}
+
+
+	 @media (min-width: @screen-md) {
+
+		.contribute-start {
+			overflow:hidden;
+			max-height:800px;
+			.transition(max-height 0.7s);
+
+			&.reduced {
+				padding:0 30px;
+				display:block;
+				max-height:0;	
+				.translate(0, -1px);	
+				.transition(max-height 0);
+			}		
+		}
 	}
 		
 	.kick-start {

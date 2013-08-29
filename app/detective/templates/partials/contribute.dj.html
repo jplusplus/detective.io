@@ -1,5 +1,5 @@
 <div id="contribute">
-	<div class="contribute-start panel" ng-if="showKickStart || !individuals.length">
+	<div class="contribute-start panel" ng-class="{ reduced: !showKickStart && individuals.length }">
 		<div class="container">			
 			<h2>Add a new individual to the database</h2>
 
@@ -56,7 +56,8 @@
 			<div class="head">	
 				<div class="btns">
 					<a ng-click="individual.save()" class="btn btn-default" ng-disabled="individual.isSaved()">
-						<strong>Save</strong>
+						<strong ng-if="!individual.isSaved()">Save</strong>
+						<span ng-if="individual.isSaved()">Saved</span>
 					</a>					
 					<a ng-click="individual.close()" class="btn btn-default left20">
 						<i class="icon-remove"></i>						

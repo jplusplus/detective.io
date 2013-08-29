@@ -24,7 +24,7 @@ class FieldRules:
     # Get all registered rules
     def all(self): return self.registered_rules
     # Get one rule
-    def get(self, name): return self.rules().get(name)
+    def get(self, name): return self.all().get(name)
     # Set a rule with key/value pair
     def set(self, name, value): 
         self.registered_rules[name] = value
@@ -72,7 +72,7 @@ class Model:
             def sortkey(field):                                
                 # Each field has a "priority" rule
                 # (use the name by default)
-                return (-field.rule("priority"), field.name, )                        
+                return (-field.get("priority"), field.name, )                        
             # Sor the list
             return sorted(self.registered_fields.values(), key=sortkey)
 

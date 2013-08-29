@@ -10,7 +10,8 @@ def get_model_fields(model):
     modelsRules = register_model_rules().model(model)
     if hasattr(model, "_meta"):          
         # Create field object
-        for f in model._meta.fields:
+        for fieldRules in modelsRules.fields():
+            f = model._meta.get_field(fieldRules.name)
             # Ignores field terminating by + or begining by _
             if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):             
                 # Find related model for relation
@@ -21,16 +22,16 @@ def get_model_fields(model):
                     related_model = None     
                 
                 field = {
-                    'name': f.name,
-                    'type': f.get_internal_type(),
-                    'help_text': getattr(f, "help_text", ""),
-                    'verbose_name': getattr(f, "verbose_name", pretty_name(f.name)),
+                    'name'         : f.name,
+                    'type'         : f.get_internal_type(),
+                    'help_text'    : getattr(f, "help_text", ""),
+                    'verbose_name' : getattr(f, "verbose_name", pretty_name(f.name)),
                     'related_model': related_model
                 }
 
-                field = dict( field.items() + modelsRules.field(f.name).all().items() )
-
+                field = dict( field.items() + fieldRules.all().items() )
                 fields.append(field)
+
 
     return fields
 

@@ -2,15 +2,25 @@
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
 class UserCtrl
 
+    # Injects dependancies    
     @$inject : ["$scope", "$http", "$location", "$routeParams", "User"]
 
-    constructor: (@scope, @http, @location, @routeParams, @User)->
+    constructor: (@scope, @http, @location, @routeParams, @User)-> 
+        # ──────────────────────────────────────────────────────────────────────
+        # Scope attributes
+        # ──────────────────────────────────────────────────────────────────────  
         @scope.user    = @User
         @scope.next    = @routeParams.next or "/"
+        # ──────────────────────────────────────────────────────────────────────
+        # Scope method
+        # ──────────────────────────────────────────────────────────────────────
         @scope.loading = false
         @scope.login   = @login
         @scope.logout  = @logout
 
+    # ──────────────────────────────────────────────────────────────────────────
+    # Class methods
+    # ──────────────────────────────────────────────────────────────────────────
     loginError: (error)=>        
         @User.set
             is_logged: false

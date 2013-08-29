@@ -54,7 +54,7 @@ class Model:
     def register_field(self, field):
         # Check that the field exist
         if field not in self.field_names: 
-            raise Exception("'%s' is not a field from this model." % field)
+            raise Exception("'%s' is not a field from %s." % (field, self.model.__name__) )
         # If the field is not registered yet
         elif field not in self.registered_fields:
             # Register the field
@@ -70,9 +70,11 @@ class Model:
             return self.registered_fields
         else:
             def sortkey(field):                                
-                # Each field has a "priority" rule
-                # (use the name by default)
-                return (-field.get("priority"), field.name, )                        
+                return (
+                    -field.get("visible"), 
+                    -field.get("priority"), 
+                    field.name
+                )                        
             # Sor the list
             return sorted(self.registered_fields.values(), key=sortkey)
 

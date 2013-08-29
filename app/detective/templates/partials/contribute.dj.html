@@ -115,7 +115,7 @@
 				</div>
 
 				<div class="row field top20 form-group" 
-				     ng-show="isAllowedType(field.type)"
+				     ng-hide="!isAllowedType(field.type) || !field.visible"
 					 ng-repeat="field in resources[individual.type].fields track by $index">
 
 					<label class="col-sm-3 tr form-label top05" for="id_[[field.name]]">[[field.verbose_name]]</label>

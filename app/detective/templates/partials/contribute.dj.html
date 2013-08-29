@@ -46,8 +46,8 @@
 			 ng-repeat="individual in individuals" 
 			 ng-style="individualStyle(individual)"
 			 ng-class="{
-			 	reduce : individual.reduce,
 			 	loading: individual.loading,
+			 	reduce : individual.reduced,
 			 	closed : individual.closed
 			}">
 			
@@ -55,17 +55,17 @@
 
 			<div class="head">	
 				<div class="btns">
-					<a ng-click="save(individual)" class="btn btn-default">
+					<a ng-click="individual.save()" class="btn btn-default">
 						<strong>Save</strong>
 					</a>					
-					<a ng-click="toggleIndividual($index)" class="btn btn-default left20">
+					<a ng-click="individual.toggle()" class="btn btn-default left20">
 						<i class="icon-remove"></i>						
 					</a>
-					<a ng-click="toggleReduce(individual)" class="btn btn-default "ng-if="individual.reduce">
+					<a ng-click="individual.reduce()" class="btn btn-default "ng-if="individual.reduced">
 						<i class="icon-expand right10"></i>
 						Expand
 					</a>
-					<a ng-click="toggleReduce(individual)" class="btn btn-default "ng-if="!individual.reduce">
+					<a ng-click="individual.reduce()" class="btn btn-default "ng-if="!individual.reduced">
 						<i class="icon-collapse right10"></i>
 						Collapse
 					</a>
@@ -96,7 +96,7 @@
 
 			<div class="restore" ng-show="individual.closed">
 				<strong>[[individual.fields|individualPreview:"unkown"]]</strong> has been closed. 
-				<a class="left10" ng-click="toggleIndividual($index)">Undo</a>
+				<a class="left10" ng-click="individual.toggle()">Undo</a>
 				<a class="left10" ng-click="removeIndividual($index)">Ignore</a>
 			</div>
 

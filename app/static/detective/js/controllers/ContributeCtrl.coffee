@@ -18,14 +18,11 @@ class ContributeCtrl
         @scope.removeIndividual  = @removeIndividual
         @scope.removeRelated     = @removeRelated
         @scope.replaceIndividual = @replaceIndividual
-        @scope.save              = @save
         @scope.scopeResources    = @scopeResources
         @scope.scrollTo          = @scrollTo
         @scope.setNewIndividual  = @setNewIndividual
         @scope.showKickStart     = @showKickStart
         @scope.strToColor        = @filter("strToColor")
-        @scope.toggleIndividual  = @toggleIndividual
-        @scope.toggleReduce      = @toggleReduce
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
@@ -66,12 +63,19 @@ class ContributeCtrl
     # ──────────────────────────────────────────────────────────────────────────
         
     # A new individual for kick-star forms
-    initNewIndividual: ()=>
-        @scope.new = 
+    initNewIndividual: (set=true)=>
+        individual = 
             type       : ""
             loading    : false
             related_to : null
-            fields     : new @Individual name: ""    
+            fields     : new @Individual name: ""
+            master     : {}
+            save       : @save
+            toggle     : -> @closed = not @closed
+            reduce     : -> @reduced = not @reduced
+        # Set the new individual
+        if set then @scope.new = individual else individual        
+
     
     # Load an individual
     loadIndividual: (type, id, related_to=null)=>
@@ -84,16 +88,18 @@ class ContributeCtrl
         params = type: type, id: id
         # Future index of the new individual
         index  = @scope.individuals.length
-        # Load the given individual
-        @scope.individuals.push
-            type       : type
-            loading    : true
-            closed     : false
-            related_to : related_to
-            similars   : []            
-            fields     : @Individual.get params, =>                 
-                # Disable loading state using the index set previously
-                @scope.individuals[index].loading = false
+        # Create an individual
+        @scope.individuals.push @initNewIndividual(false)        
+        @scope.individuals[index].type       = type
+        @scope.individuals[index].loading    = true
+        @scope.individuals[index].related_to = related_to               
+        # Load the given individual        
+        @scope.individuals[index].fields = @Individual.get params, (master)=>  
+            # Disable loading state
+            @scope.individuals[index].loading = false
+            # Record the database version of the individual
+            @scope.individuals[index].master  = master
+
         # Return the index of the new individual
         return index
 
@@ -138,10 +144,6 @@ class ContributeCtrl
             # Create a new individual object
             @initNewIndividual()
 
-    toggleIndividual: (index=0)=>
-        if @scope.individuals[index]?
-            @scope.individuals[index].closed = not @scope.individuals[index].closed
-
     removeIndividual: (index=0)=>
         @scope.individuals.splice(index, 1) if @scope.individuals[index]?            
 
@@ -149,9 +151,11 @@ class ContributeCtrl
         individual = @scope.individuals[index]
         individual.loading  = true        
         individual.similars = [] 
-        individual.fields   = @Individual.get {type: individual.type, id: id}, =>                 
-            # Disable loading state using the index set previously
-            @scope.individuals[index].loading = false        
+        individual.fields   = @Individual.get {type: individual.type, id: id}, (master)->                 
+            # Disable loading state
+            individual.loading = false
+            # Record the database version of the individual
+            individual.master  = master
     
     # Returns true if the given field accept more related element
     isAllowedOneMore: (field)=>       
@@ -189,13 +193,11 @@ class ContributeCtrl
         # Ensure that the type isn't title-formated
         type       = type.toLowerCase()
         # Create the new entry obj
-        @scope.new = 
-            type       : type
-            loading    : false
-            closed     : false
-            related_to : parent
-            fields     : individual
-            similars   : []
+        @initNewIndividual()   
+        # Complete the new obj     
+        @scope.new.type       = type
+        @scope.new.related_to = parent
+        @scope.new.fields     = individual
 
         # Create for the given parent field
         parent.fields[parentField] = [] unless parent.fields[parentField]?
@@ -218,33 +220,32 @@ class ContributeCtrl
         # Looks for individual that match with the given one
         _.each @scope.individuals, (i, idx)=> index = idx if i == individual
         # Update the scrollIdx
-        @scope.scrollIdx = index
-
-    toggleReduce: (individual)=>
-        individual.reduce = not individual.reduce
+        @scope.scrollIdx = index    
     
-    save: (individual)=>        
+    save: ()->        
         # Do not save a loading individual
-        unless individual.loading
+        unless @loading
             # Loading mode on
-            individual.loading = true
-            params    = type: individual.type.toLowerCase()
+            @loading = true
+            params    = type: @type.toLowerCase()
             # Save the individual and
             # take care to specify the type
-            individual.fields.$save(params, =>
+            @fields.$save(params, (master)=>
                 # Loading mode off
-                individual.loading = false
+                @loading = false
+                # Record master
+                @master = master
                 # Clean errors
-                delete individual.error_message
+                delete @error_message
             # Handles error
             , (response)=>
                 data = response.data
                 # Loading mode off
-                individual.loading = false
+                @loading = false
                 # Add an error message
-                individual.error_message = data.error_message if data.error_message?
+                @error_message = data.error_message if data.error_message?
                 # Add the traceback
-                individual.error_traceback = data.traceback if data.traceback?
+                @error_traceback = data.traceback if data.traceback?
             )
 
 angular.module('detective').controller 'contributeCtrl', ContributeCtrl

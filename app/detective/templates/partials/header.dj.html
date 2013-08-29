@@ -55,9 +55,18 @@
 	
 </header>
 
-<ul class="breadcrumb" ng-controller="BreadcrumbCtrl">
-	<li ng-repeat="p in breadcrumb" ng-class="{active: $last}">
-		<a ng-if="p.path && !$last" ng-href="#[[p.path]]">[[p.name]]</a>
-		<span ng-if="!p.path || $last">[[p.name]]</span>
+<ul class="breadcrumb" ng-controller="BreadcrumbCtrl" ng-hide="isHome()">
+	<li>
+		<a class='icon-home' href="#/">
+			<span class="sr-only">Home</span>
+		</a>
+	</li>
+	<li ng-repeat="p in breadcrumbs" ng-class="{active: $last}" ng-show="p.path != '/'">
+		<a ng-if="p.path && !$last" ng-href="#[[p.path]]">
+			[[p.name]]
+		</a>
+		<span ng-if="!p.path || $last">						
+			[[p.name]]
+		</span>
 	</li>
 </ul>

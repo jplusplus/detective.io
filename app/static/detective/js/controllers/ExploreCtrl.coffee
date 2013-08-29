@@ -2,7 +2,10 @@ class ExploreCtrl
     # Injects dependancies    
     @$inject: ['$scope', '$routeParams', 'Individual', '$location', '$timeout', '$filter']
 
-    constructor: (@scope, @routeParams, @Individual, @location, @timeout, @filter)->        
+    constructor: (@scope, @routeParams, @Individual, @location, @timeout, @filter)->      
+        # ──────────────────────────────────────────────────────────────────────
+        # Scope attributes
+        # ──────────────────────────────────────────────────────────────────────  
         # Current individual scope
         @scope.scope = @routeParams.scope
         # Get the list of available resources
@@ -14,6 +17,9 @@ class ExploreCtrl
         # Return a unique color with the given string
         @scope.strToColor = strToColor = @filter("strToColor")
 
+        # ──────────────────────────────────────────────────────────────────────
+        # Scope method
+        # ──────────────────────────────────────────────────────────────────────
         # Get resources list filtered by the current scope
         @scope.scopeResources = =>
             resources = _.where @scope.resources, { scope: @scope.scope }                            
@@ -32,6 +38,9 @@ class ExploreCtrl
         # Go to the next page
         @scope.nextPage = => @location.search "page", 1*@scope.page+1
 
+        # ──────────────────────────────────────────────────────────────────────
+        # Scope watchers
+        # ──────────────────────────────────────────────────────────────────────
         # When resources list is upadted
         @scope.$watch("resources", @loadResources, true)
         # Watch the location's search to update the scope
@@ -44,6 +53,10 @@ class ExploreCtrl
         # Initial resource loading
         @loadResources()
 
+    # ──────────────────────────────────────────────────────────────────────────
+    # Class methods
+    # ──────────────────────────────────────────────────────────────────────────
+    
     # Load individuals from resources list
     loadResources: =>
         # Get the active resource (for the current scope)

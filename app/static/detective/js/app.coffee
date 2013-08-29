@@ -19,7 +19,7 @@ detective = angular
                 $interpolateProvider.endSymbol   ']]'
                 # Bind routes to the controllers
                 $routeProvider
-                    .when('/', {
+                    .when('/home', {
                         controller: HomeCtrl
                         templateUrl: "./partial/landing/all.html",
                     })

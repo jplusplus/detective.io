@@ -1,54 +1,59 @@
 # See also :
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
-UserCtrl = ($scope, $http, $location, $routeParams, User) ->
+class UserCtrl
 
-    $scope.user = User
-    $scope.next = $routeParams.next or "/"
-    $scope.loading = false
+    @$inject : ["$scope", "$http", "$location", "$routeParams", "User"]
+
+    constructor: (@scope, @http, @location, @routeParams, @User)->
+        @scope.user    = @User
+        @scope.next    = @routeParams.next or "/"
+        @scope.loading = false
+        @scope.login   = @login
+        @scope.logout  = @logout
 
 
-    loginError = (error)->        
-        User.set
+    loginError: (error)=>        
+        @User.set
             is_logged: false
             is_staff : false
             username : '' 
         # Record the error
-        $scope.error = error if error?        
+        @scope.error = error if error?        
 
 
-    $scope.login = ->
+    login: =>
         config = 
             method: "POST"
             url: "/api/v1/user/login/"
             data: 
-                username    : $scope.username
-                password    : $scope.password
-                remember_me : $scope.remember_me or false
+                username    : @scope.username
+                password    : @scope.password
+                remember_me : @scope.remember_me or false
             headers:
                 "Content-Type": "application/json"
        
         # Turn on loading mode
-        $scope.loading = true
+        @scope.loading = true
         # succefull login
-        $http(config).then (response) ->   
+        @http(config).then (response) =>   
             # Turn off loading mode
-            $scope.loading = false
+            @scope.loading = false
             # Interpret the respose            
             if response.data? and response.data.success
-                User.set
+                @User.set
                     is_logged: true
                     is_staff : response.data.is_staff
-                    username : $scope.username
+                    username : @scope.username
                 # Redirect to the next URL
-                $location.url($scope.next)
+                @location.url(@scope.next)
                 # Delete error
-                delete $scope.error
+                delete @scope.error
             else
                 # Error status
                 loginError(response.data.reason)            
 
 
-    $scope.logout = ->
+    logout: =>
         config = 
             method: "GET"
             url: "/api/v1/user/logout/"
@@ -56,19 +61,17 @@ UserCtrl = ($scope, $http, $location, $routeParams, User) ->
                 "Content-Type": "application/json"
 
         # Turn on loading mode
-        $scope.loading = true
+        @scope.loading = true
         # succefull logout
-        $http(config).then (response) ->  
+        @http(config).then (response) =>  
             # Turn off loading mode
-            $scope.loading = false    
+            @scope.loading = false    
             # Interpret the respose                       
             if response.data? and response.data.success
-                User.set
+                @User.set
                     is_logged: false
                     is_staff : false
                     username : ''
 
 
-
-
-UserCtrl.$inject = ["$scope", "$http", "$location", "$routeParams", "User"]
+angular.module('detective').controller 'userCtrl', UserCtrl

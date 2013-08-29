@@ -42,7 +42,7 @@
 		<ul class="list-inline">
 			<li>
 				<a href="" class="contribute-color">
-					Contribute					
+					Contribute				
 				</a>
 			</li>
 			<li>
@@ -55,7 +55,9 @@
 	
 </header>
 
-<ul class="breadcrumb">
-	<li>Energy</li>
-	<li>Contribute</li>
+<ul class="breadcrumb" ng-controller="BreadcrumbCtrl">
+	<li ng-repeat="p in breadcrumb" ng-class="{active: $last}">
+		<a ng-if="p.path && !$last" ng-href="#[[p.path]]">[[p.name]]</a>
+		<span ng-if="!p.path || $last">[[p.name]]</span>
+	</li>
 </ul>

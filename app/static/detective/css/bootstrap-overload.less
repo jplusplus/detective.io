@@ -36,7 +36,21 @@ html body .panel {
 .breadcrumb {
 	background:mix(@header-bg, @brand-primary);
 	margin:0;
-	.border-radius(0);
-	.box-shadow( 0 3px 0 fade(#000, 10) );
+	padding-bottom:5px;
 	border-bottom:3px solid fade(#000, 10);
+	.box-shadow( 0 3px 0 fade(#000, 10) );
+	.border-radius(0);
+
+	.active, & {
+		color:white;
+	}
+	
+	li {
+		text-transform: uppercase;	
+
+		a {
+			font-weight:bold;
+			text-decoration: none;
+		}
+	}	
 }

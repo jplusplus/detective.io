@@ -19,7 +19,7 @@ ExploreCtrl = ($scope, $routeParams, $rootScope, Individual, $location, $timeout
             _.each resources, (resource, i)->                                                
                 $timeout(-> 
                     key    = resource.name
-                    limit  = 2
+                    limit  = 10
                     params =
                         type  : key
                         limit : limit

@@ -12,6 +12,8 @@
 @zindex-content: @zindex-context+100;
 @zindex-header : @zindex-content+100;
 
+@header-bg:#2E2D2A;
+
 
 body {
     position:relative;
@@ -52,7 +54,7 @@ header {
 	position:relative;
 	z-index:@zindex-header;
 	padding-top:20px;
-	background:#2E2D2A;
+	background:@header-bg;
 	overflow:hidden;
 	.box-shadow(0 3px 0 fade(#000, 10));
 	.transition(@open-speed);
@@ -97,7 +99,7 @@ header {
 		left:0;
 		right:0;
 		.progress-striped .progress-bar();
-		.progress-bar-variant(#2E2D2A);
+		.progress-bar-variant(@header-bg);
 		.progress.active .progress-bar();
 		.opacity(0.4);
 	}	

@@ -41,3 +41,6 @@ detective = angular
                     .otherwise redirectTo: '/energy/contribute'
         ]
     )
+
+# Services module
+angular.module('detectiveServices', ['ngResource', 'ngCookies'])

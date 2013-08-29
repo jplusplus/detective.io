@@ -11,7 +11,6 @@ class UserCtrl
         @scope.login   = @login
         @scope.logout  = @logout
 
-
     loginError: (error)=>        
         @User.set
             is_logged: false
@@ -19,7 +18,6 @@ class UserCtrl
             username : '' 
         # Record the error
         @scope.error = error if error?        
-
 
     login: =>
         config = 
@@ -30,8 +28,7 @@ class UserCtrl
                 password    : @scope.password
                 remember_me : @scope.remember_me or false
             headers:
-                "Content-Type": "application/json"
-       
+                "Content-Type": "application/json"       
         # Turn on loading mode
         @scope.loading = true
         # succefull login
@@ -52,14 +49,12 @@ class UserCtrl
                 # Error status
                 loginError(response.data.reason)            
 
-
     logout: =>
         config = 
             method: "GET"
             url: "/api/v1/user/logout/"
             headers:
                 "Content-Type": "application/json"
-
         # Turn on loading mode
         @scope.loading = true
         # succefull logout

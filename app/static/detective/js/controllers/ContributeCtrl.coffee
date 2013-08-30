@@ -127,9 +127,9 @@ class ContributeCtrl
             # This field is always visible
             field.rules.is_visible or 
             # Or the user ask to see it
-            @moreFields.indexOf(field) > -1
+            @moreFields.indexOf(field) > -1 or
             # Or the value of this field ins't empty                
-            # (value? and value != null and value.length)
+            (value? and value != null and value.length)
  
         # Get the individual style
         individualStyle: ()=> "background-color": @scope.strToColor(@type)

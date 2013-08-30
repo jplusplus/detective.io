@@ -1,8 +1,8 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', 'Individual']
+    @$inject: ['$scope', '$routeParams', '$filter', 'Individual', 'IndividualForm']
 
-    constructor: (@scope, @routeParams, @filter, @Individual)-> 
+    constructor: (@scope, @routeParams, @filter, @Individual, @IndividualForm)-> 
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
@@ -47,7 +47,7 @@ class ContributeCtrl
         # Prepare future individual
         @initNewIndividual()
         # Individual list
-        @scope.individuals = []
+        @scope.individuals = @IndividualForm
         # Received an individual to edit
         if @routeParams.type? and @routeParams.id?
             # Load the inidividual

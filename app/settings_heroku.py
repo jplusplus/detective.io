@@ -44,7 +44,7 @@ AWS_QUERYSTRING_AUTH       = False
 AWS_S3_FILE_OVERWRITE      = True
 
 # Enable debug for minfication
-DEBUG                      = False
+DEBUG                      = os.getenv('DEBUG', False)
 # Configure static files for S3
 STATIC_URL                 = os.getenv('STATIC_URL')
 STATIC_ROOT                = here('staticfiles')

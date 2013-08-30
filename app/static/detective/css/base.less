@@ -229,15 +229,16 @@ header {
 
 		.contribute-start {
 			overflow:hidden;
-			max-height:800px;
-			.transition(max-height 0.7s);
+			padding:0 30px;
+			max-height:0;	
+			.translate(0, -1px);	
+			.transition(0);
 
-			&.reduced {
-				padding:0 30px;
-				display:block;
-				max-height:0;	
-				.translate(0, -1px);	
-				.transition(max-height 0);
+
+			&.open {
+				padding:30px;
+				max-height:800px;
+				.transition(max-height 0.7s);
 			}		
 		}
 	}
@@ -306,6 +307,10 @@ header {
 				
 			}
 
+			.help-block {
+				color:fade(#fff, 80);
+			}
+
 			.multiple {				
 				margin-bottom:5px;			
 			}
@@ -329,8 +334,16 @@ header {
 				background:fade(#000, 10);	
 				margin-bottom:5px;			
 			}		
+		}	
+
+		.form-footer {
+			margin:-30px;
+			margin-top:20px;
+			background:fade(#fff, 5);
+			border-top:1px solid fade(#fff, 20);
 		}		
 	}
+
 }
 
 #explore {

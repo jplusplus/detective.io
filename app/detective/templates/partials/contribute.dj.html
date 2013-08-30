@@ -1,5 +1,5 @@
-<div id="contribute">
-	<div class="contribute-start panel" ng-class="{ reduced: !showKickStart && individuals.length }">
+<div id="contribute" ng-cloak>
+	<div class="contribute-start panel" ng-class="{ open: showKickStart || !individuals.length }">
 		<div class="container">			
 			<h2>Add a new individual to the database</h2>
 
@@ -54,11 +54,7 @@
 			<a scroll-to="600" ng-if="scrollIdx == $index"></a>
 
 			<div class="head">	
-				<div class="btns">
-					<a ng-click="individual.save()" class="btn btn-default" ng-disabled="individual.isSaved()">
-						<strong ng-if="!individual.isSaved()">Save</strong>
-						<span ng-if="individual.isSaved()">Saved</span>
-					</a>					
+				<div class="btns">	
 					<a ng-click="individual.close()" class="btn btn-default left20">
 						<i class="icon-remove"></i>						
 					</a>
@@ -233,14 +229,14 @@
 						<input type="number" id="id_[[field.name]]" ng-model="individual.fields[field.name]" class="form-control" />
 					</div>
 
-					<span class="col-sm-5">
+					<span class="col-sm-5 help-block">
 						<p class="top10">[[field.help_text]]</p>
 					</span>
 
 				</div>
 
 				<div class="more-fields row field top20 form-group" 
-				     ng-show="individual.invisibleFields().length > 0">
+				     ng-show="individual.invisibleFields().length">
 
 					<span class="col-sm-3 tr form-label ">
 						Add more information
@@ -254,6 +250,16 @@
 					</div>
 				</div>
 
+				<div class="form-footer">
+					<div class="row">
+						<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+							<a ng-click="individual.save()" class="btn btn-primary left10" ng-disabled="individual.isSaved()">
+								<strong ng-if="!individual.isSaved()">Save</strong>
+								<span ng-if="individual.isSaved()">Saved</span>
+							</a>				
+						</div>	
+					</div>
+				</div>
 			</form>
 		</div>
 	</div>

@@ -1,16 +1,10 @@
 import inspect
 
-class FieldRules:
-    def __init__(self, name, model):
-        self.name = name
-        self.model = model
-        # Default rules for this field
-        self.registered_rules = {
-            # Is this field visible by default?
-            "visible"      : True,
-            # Define the priority of this field that influence its order 
-            "priority"     : 0
-        }
+# Class that manage rules througt a local object name
+class HasRules(object):
+    def __init__(self):
+        # Default rules for this object
+        self.registered_rules = {}
 
     # Add a rule
     def add(self, **kwargs):
@@ -31,9 +25,19 @@ class FieldRules:
         # Allows chaining
         return self
 
+# Field class to register rules associated to a field
+class Field(HasRules):
+    def __init__(self, name, model):
+        self.name = name
+        self.model = model
+        # Call parent constructor
+        super(Field, self).__init__()
+        # Default rules for this models
+        self.registered_rules["is_visible"]  = True
+        self.registered_rules["priority"] = 0
 
-# Model class to register rules into a associated to a model
-class Model:
+# Model class to register rules associated to a model
+class Model(HasRules):
     # Record the associated model
     def __init__(self, model):
         # Check that the model is a class
@@ -42,13 +46,16 @@ class Model:
         self.model = model
         # Get the model fields
         self.field_names = model._meta.get_all_field_names()
-        
+        # Field of the model
         self.registered_fields = {}
         # Register all field
-        for name in self.field_names: self.register_field(name)    
-       
+        for name in self.field_names: self.register_field(name)           
+        # Call parent constructor
+        super(Model, self).__init__()
         # Default rules for this models
-        self.editable = True            
+        self.registered_rules["is_editable"]   = True
+        self.registered_rules["is_searchable"] = True
+          
 
     # Register a field rule
     def register_field(self, field):
@@ -58,7 +65,7 @@ class Model:
         # If the field is not registered yet
         elif field not in self.registered_fields:
             # Register the field
-            self.registered_fields[field] = FieldRules(name=field, model=self.model)
+            self.registered_fields[field] = Field(name=field, model=self.model)
 
         return self.registered_fields[field]
 
@@ -71,7 +78,7 @@ class Model:
         else:
             def sortkey(field):                                
                 return (
-                    -field.get("visible"), 
+                    -field.get("is_visible"), 
                     -field.get("priority"), 
                     field.name
                 )                        

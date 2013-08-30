@@ -44,7 +44,7 @@
 		
 		<div class="individual"		 		     
 			 ng-repeat="individual in individuals" 
-			 ng-style="individualStyle(individual)"
+			 ng-style="individual.individualStyle()"
 			 ng-class="{
 			 	loading: individual.loading,
 			 	reduce : individual.isReduced,
@@ -82,7 +82,7 @@
 						</a>
 					</span>
 				</h3>					
-				<h4>[[resources[individual.type].verbose_name]]</h4>
+				<h4>[[individual.meta.verbose_name]]</h4>
 			</div>
 			
 			<div class="alert alert-danger errors" ng-if="individual.error_message">
@@ -115,12 +115,12 @@
 				</div>
 
 				<div class="row field top20 form-group" 
-				     ng-hide="!isAllowedType(field.type) || !field.visible"
-					 ng-repeat="field in resources[individual.type].fields track by $index">
+				     ng-hide="!isAllowedType(field.type) || !individual.isVisible(field)"
+					 ng-repeat="field in individual.meta.fields track by $index">
 
 					<label class="col-sm-3 tr form-label top05" for="id_[[field.name]]">[[field.verbose_name]]</label>
 
-					<div class="col-sm-4" ng-if="field.type == 'Relationship' && ! field.is_searchable">
+					<div class="col-sm-4" ng-if="field.type == 'Relationship' && !field.rules.is_searchable">
 
 						<div ng-repeat="f in individual.fields[field.name]" class="bottom05 input-group">							
 							<span class="form-control disabled">
@@ -145,7 +145,7 @@
 
 					</div>
 
-					<div class="col-sm-4" ng-if="field.type == 'Relationship' && field.is_searchable">
+					<div class="col-sm-4" ng-if="field.type == 'Relationship' && field.rules.is_searchable">
 		    				 
 						<div ng-repeat="f in individual.fields[field.name]">
 							<div class="input-group multiple">
@@ -166,13 +166,13 @@
 								<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
 									<i class="gray-darker icon-remove"></i>	
 								</span>								
-								<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id">
+								<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable ">
 									<i class="gray-darker icon-edit"></i>	
 								</span>								
 							</div>
 
 			    			<div class="ask-for-new" ng-show="askForNew(f) && relatedState(f) == 'input'">
-			    				<div class="pan">
+			    				<div class="pan" ng-if="field.rules.is_editable">
 			    					<h4>Heads Up!</h4>
 			    					<p>The entry you just typed in is new in the base.</p>	    					
 			    					<div class="tr">
@@ -181,6 +181,9 @@
 				    						Create <strong>[[f.name]]</strong>
 				    					</a>
 				    				</div>
+			    				</div>
+			    				<div class="pan" ng-if="!field.rules.is_editable">
+			    					Please choose an existing entry.
 			    				</div>
 			    			</div>
 
@@ -234,6 +237,21 @@
 						<p class="top10">[[field.help_text]]</p>
 					</span>
 
+				</div>
+
+				<div class="more-fields row field top20 form-group" 
+				     ng-show="individual.invisibleFields().length > 0">
+
+					<span class="col-sm-3 tr form-label ">
+						Add more information
+					</span>
+					
+					<div class="col-sm-9">
+						<span ng-repeat="field in individual.meta.fields" ng-hide="individual.isVisible(field)">
+							<a href="" ng-click="individual.showField(field)">[[field.verbose_name]]</a>
+							<span ng-if="!$last">, </span>
+						</span> 
+					</div>
 				</div>
 
 			</form>

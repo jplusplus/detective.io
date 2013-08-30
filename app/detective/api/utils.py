@@ -26,10 +26,10 @@ def get_model_fields(model):
                     'type'         : f.get_internal_type(),
                     'help_text'    : getattr(f, "help_text", ""),
                     'verbose_name' : getattr(f, "verbose_name", pretty_name(f.name)),
-                    'related_model': related_model
+                    'related_model': related_model,
+                    'rules'        : fieldRules.all()
                 }
-
-                field = dict( field.items() + fieldRules.all().items() )
+                
                 fields.append(field)
 
 
@@ -44,6 +44,9 @@ class DetailedApi(Api):
         available_resources = {}
 
         if api_name is None: api_name = self.api_name
+
+        # Get the model's rules manager
+        rulesManager = register_model_rules()
 
         for name in sorted(self._registry.keys()):                        
             resource      = self._registry[name]
@@ -66,7 +69,7 @@ class DetailedApi(Api):
                 'verbose_name' : verbose_name,
                 'name'         : name,
                 'fields'       : fields,
-                'is_searchable': bool([f for f in fields if f["name"] == 'name'])
+                'rules'        : rulesManager.model(resourceModel).all()
             }
 
         desired_format = determine_format(request, self.serializer)

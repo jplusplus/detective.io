@@ -2,6 +2,7 @@ class ContributeCtrl
     # Injects dependancies
     @$inject: ['$scope', '$routeParams', '$filter', 'Individual', 'IndividualForm']
 
+
     constructor: (@scope, @routeParams, @filter, @Individual, @IndividualForm)-> 
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
@@ -10,7 +11,6 @@ class ContributeCtrl
         @scope.addRelated        = @addRelated
         @scope.askForNew         = @askForNew
         @scope.editRelated       = @editRelated
-        @scope.individualStyle   = @individualStyle
         @scope.isAllowedOneMore  = @isAllowedOneMore
         @scope.isAllowedType     = @isAllowedType
         @scope.loadIndividual    = @loadIndividual
@@ -39,9 +39,11 @@ class ContributeCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @scope.scope = @routeParams.scope
+        @scope.scope = @routeParams.scope        
         # By default, hide the kick-start form
-        showKickStart = false
+        showKickStart = false        
+        # Shortcut for child classes
+        @scope.Individual = @Individual
         # Get the list of available resources
         @scope.resources = @Individual.get()
         # Prepare future individual
@@ -57,27 +59,99 @@ class ContributeCtrl
             @scope.scrollIdx  = -1
 
 
+    # ──────────────────────────────────────────────────────────────────────────
+    # IndividualForm embeded class
+    # ──────────────────────────────────────────────────────────────────────────
+    class IndividualForm
+        loading    : false
+        master     : {}
+        moreFields : []
         
+        constructor: (scope, type="", fields={}, related_to=null)->
+            @Individual = scope.Individual
+            @meta       = scope.resources[type] or {}  
+            @related_to = related_to
+            @scope      = scope
+            @type       = type            
+            # Field param can be a number to load an individual
+            @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
+            # Update meta when resources change
+            @scope.$watch("resources", (value)=>
+                @meta = value[@type] if value[@type]?
+            , true)
+
+        # Save the current individual form
+        save: =>                  
+            # Do not save a loading individual
+            unless @loading
+                # Loading mode on
+                @loading = true
+                params    = type: @type.toLowerCase()
+                # Save the individual and
+                # take care to specify the type
+                @fields.$save(params, (master)=>
+                    # Loading mode off
+                    @loading = false
+                    # Record master
+                    @master = _.clone master
+                    # Clean errors
+                    delete @error_message
+                # Handles error
+                , (response)=>
+                    data = response.data
+                    # Loading mode off
+                    @loading = false
+                    # Add an error message
+                    @error_message = data.error_message if data.error_message?
+                    # Add the traceback
+                    @error_traceback = data.traceback if data.traceback?
+                )
+
+        # Load an individual using its id
+        load: (id, related_to=null)=>
+            @loading    = true
+            @related_to = related_to
+            # Params to retreive the individual
+            params = type: @type, id: id
+            # Load the given individual        
+            @fields = @Individual.get params, (master)=>  
+                # Disable loading state
+                @loading = false
+                # Record the database version of the individual
+                @master  = _.clone master
+
+        # True if the given field is visible
+        isVisible: (field)=>  
+            return false unless field? and field.rules?
+            value = @fields[field.name]
+            # This field is always visible
+            field.rules.is_visible or 
+            # Or the user ask to see it
+            @moreFields.indexOf(field) > -1 or 
+            # Or the value of this field ins't empty                
+            (value? and value != null and value.length)
+ 
+        # Get the individual style
+        individualStyle: ()=> "background-color": @scope.strToColor(@type)
+    
+        # Toggle the close attribute        
+        close: => @isClosed = not @isClosed
+        # Toggle the reduce attribute        
+        reduce: => @isReduced = not @isReduced
+        # Toggle the reduce attribute        
+        invisibleFields: (meta)=> m for m in @meta unless @isVisible(m)
+        showField: (field)=> @moreFields.push field       
+        isSaved: => @fields.id? and angular.equals @master, @fields
+
+
+
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
         
     # A new individual for kick-star forms
-    initNewIndividual: (set=true)=>
-        individual = 
-            type       : ""
-            loading    : false
-            related_to : null
-            fields     : new @Individual name: ""
-            master     : {}
-            save       : @save
-            close      : -> @isClosed = not @isClosed
-            reduce     : -> @isReduced = not @isReduced
-            isSaved    : -> @fields.id? and angular.equals @master, @fields
-        # Set the new individual
-        if set then @scope.new = individual else individual        
-
-    
+    initNewIndividual: (type, fields)=> @scope.new = new IndividualForm(@scope, type, fields)
+        
     # Load an individual
     loadIndividual: (type, id, related_to=null)=>
         index = -1
@@ -85,22 +159,10 @@ class ContributeCtrl
         _.each @scope.individuals, (i, idx)=> index = idx if i.fields.id is id
         # Stop here if we found an existing individual
         return index if index > -1 
-        # Params to retreive the individual
-        params = type: type, id: id
-        # Future index of the new individual
-        index  = @scope.individuals.length
-        # Create an individual
-        @scope.individuals.push @initNewIndividual(false)        
-        @scope.individuals[index].type       = type
-        @scope.individuals[index].loading    = true
-        @scope.individuals[index].related_to = related_to
-        # Load the given individual        
-        @scope.individuals[index].fields = @Individual.get params, (master)=>  
-            # Disable loading state
-            @scope.individuals[index].loading = false
-            # Record the database version of the individual
-            @scope.individuals[index].master  = _.clone master
-
+        # Create the new form        
+        form = new IndividualForm(@scope, type, id, related_to)
+        # Create an individual        
+        @scope.individuals.push form        
         # Return the index of the new individual
         return index
 
@@ -124,26 +186,25 @@ class ContributeCtrl
             "IntegerField"
         ].indexOf(type) > -1
 
-    # Get the individual style
-    individualStyle: (individual)=>
-        "background-color": @scope.strToColor(individual.type)
 
     # When user submit a kick-start individual form
     addIndividual: (scroll=true)=>
         unless @scope.new.fields.name is ""   
+            # Disable kickStart form
+            @scope.showKickStart = false
+            # Create the form
+            form = @initNewIndividual(@scope.new.type, @scope.new.fields)
             # Is that field a searchable field ?
             if @scope.new.fields.name
                 params = type: @scope.new.type, name: @scope.new.fields.name
                 # Look for individual with the same name
-                @scope.new.similars = @Individual.query params
+                form.similars = @Individual.query params
+            # Reset the new field
+            @scope.new = new IndividualForm(@scope)
             # Scroll to the individual
             @scope.scrollIdx = @scope.individuals.length if scroll
             # Add the individual to the objects list
-            @scope.individuals.push @scope.new 
-            # Disable kickStart form
-            @scope.showKickStart = false
-            # Create a new individual object
-            @initNewIndividual()
+            @scope.individuals.push form
 
     removeIndividual: (index=0)=>
         @scope.individuals.splice(index, 1) if @scope.individuals[index]?            
@@ -178,7 +239,7 @@ class ContributeCtrl
         # Do the related exists ?
         if related? and related.id?
             # Load it (if needed)
-            @scope.scrollIdx = @scope.loadIndividual type.toLowerCase(), related.id, individual
+            @scope.scrollIdx = @scope.loadIndividual type.toLowerCase(), related.id,  individual
 
     relatedState: (related)=>
         switch true
@@ -194,12 +255,7 @@ class ContributeCtrl
         # Ensure that the type isn't title-formated
         type       = type.toLowerCase()
         # Create the new entry obj
-        @initNewIndividual()   
-        # Complete the new obj     
-        @scope.new.type       = type
-        @scope.new.related_to = parent
-        @scope.new.fields     = individual
-
+        @initNewIndividual(type, individual, parent)           
         # Create for the given parent field
         parent.fields[parentField] = [] unless parent.fields[parentField]?
         
@@ -214,7 +270,6 @@ class ContributeCtrl
         # Add it to the list using @scope.new
         @scope.addIndividual()  
 
-
     # Change the scrollIdx to scroll to the given individual
     scrollTo: (individual)=>
         index = -1
@@ -222,31 +277,5 @@ class ContributeCtrl
         _.each @scope.individuals, (i, idx)=> index = idx if i == individual
         # Update the scrollIdx
         @scope.scrollIdx = index    
-    
-    save: ()->        
-        # Do not save a loading individual
-        unless @loading
-            # Loading mode on
-            @loading = true
-            params    = type: @type.toLowerCase()
-            # Save the individual and
-            # take care to specify the type
-            @fields.$save(params, (master)=>
-                # Loading mode off
-                @loading = false
-                # Record master
-                @master = _.clone master
-                # Clean errors
-                delete @error_message
-            # Handles error
-            , (response)=>
-                data = response.data
-                # Loading mode off
-                @loading = false
-                # Add an error message
-                @error_message = data.error_message if data.error_message?
-                # Add the traceback
-                @error_traceback = data.traceback if data.traceback?
-            )
 
 angular.module('detective').controller 'contributeCtrl', ContributeCtrl

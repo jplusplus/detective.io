@@ -15,7 +15,7 @@ class ExploreCtrl
         # Current page
         @scope.page = @routeParams.page or 1                
         # Return a unique color with the given string
-        @scope.strToColor = strToColor = @filter("strToColor")
+        @scope.strToColor = @filter("strToColor")
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope method

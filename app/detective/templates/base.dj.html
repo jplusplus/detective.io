@@ -18,6 +18,8 @@
         {% compress css %}
             {% block extracss %}{% endblock %}   
         {% endcompress %}
+
+        <base href="{% url home %}" />
     </head>
     <body>        
         {% block content %}{% endblock %}           

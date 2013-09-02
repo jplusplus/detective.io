@@ -4,7 +4,7 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
     sdo.set = (data)-> 
         $.extend sdo, data, true 
         # Wait a short delay because angular's $cookies
-        # isn't updated in real type
+        # isn't updated in real time
         $timeout ->
             # Add CSRF Token for post request
             if $cookies.csrftoken?

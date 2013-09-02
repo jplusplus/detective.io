@@ -122,7 +122,8 @@ class ContributeCtrl
 
         # True if the given field is visible
         isVisible: (field)=>  
-            return false unless field? and field.rules?            
+            return false unless field? and field.rules?    
+                    
             value = @fields[field.name]
             # This field is always visible
             field.rules.is_visible or 

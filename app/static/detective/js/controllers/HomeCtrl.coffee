@@ -1,2 +1,2 @@
-HomeCtrl = ($scope, $element)->  
-HomeCtrl.$inject = ['$scope', '$element'];
+HomeCtrl = ($scope)->  
+HomeCtrl.$inject = ['$scope'];

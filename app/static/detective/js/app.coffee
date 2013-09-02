@@ -22,26 +22,26 @@ detective = angular
                 $locationProvider.html5Mode true
                 # Bind routes to the controllers
                 $routeProvider
-                    .when('/home', {
+                    .when('/', {
                         controller: HomeCtrl
-                        templateUrl: "/partial/landing/all.html",
+                        templateUrl: "/partial/home.html",
                     })
                     .when('/login', {
                         controller: UserCtrl
                         templateUrl: "/partial/login.html",
+                    })
+                    .when('/:scope', {
+                        controller: ExploreCtrl  
+                        # Allow a dynamic loading by setting the templateUrl within controller
+                        template: "<div ng-include src='templateUrl'></div>"                        
+                        auth: true
                     })
                     .when('/:scope/contribute', {
                         controller: ContributeCtrl  
                         templateUrl: "/partial/contribute.html"
                         auth: true
                     })
-                    .when('/:scope/explore', {
-                        controller: ExploreCtrl  
-                        templateUrl: "/partial/explore.html"
-                        reloadOnSearch: false
-                        auth: true
-                    })
-                    .otherwise redirectTo: '/energy/contribute'
+                    .otherwise redirectTo: '/energy'
         ]
     )
 

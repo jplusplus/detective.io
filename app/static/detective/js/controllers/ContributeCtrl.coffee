@@ -242,7 +242,7 @@ class ContributeCtrl
     # Edit the given related element
     editRelated: (individual, key, index, type)=>
         related = individual.fields[key][index]        
-        # Do the related exists ?
+        # Does the related exist ?
         if related? and related.id?
             # Load it (if needed)
             @scope.scrollIdx = @scope.loadIndividual type.toLowerCase(), related.id,  individual
@@ -258,7 +258,7 @@ class ContributeCtrl
 
     setNewIndividual: (master, type, parent, parentField, index=-1)=>        
         individual = new @Individual master
-        # Ensure that the type isn't title-formated
+        # Ensure that the type isn't title-formatted
         type       = type.toLowerCase()
         # Create the new entry obj
         @initNewIndividual(type, individual, parent)           

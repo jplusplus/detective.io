@@ -14,7 +14,9 @@
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 
         <link href='http://fonts.googleapis.com/css?family=Merriweather:400,700,300|Lato:400,300,700&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+        
         {% load compress %}
+
         {% compress css %}
             {% block extracss %}{% endblock %}   
         {% endcompress %}
@@ -22,21 +24,9 @@
         <base href="{% url home %}" />
     </head>
     <body>        
+        {{ STATIC_URL }}
         {% block content %}{% endblock %}           
 
-        {% compress js %}    
-            <script type="text/javascript" src="{% static 'detective/js/vendor/jquery-1.10.0.js' %}"></script>
-            {% block extrajs %}{% endblock %}   
-        {% endcompress %}
-
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-        <script>
-            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
-            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
-            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
-            e.src='//www.google-analytics.com/analytics.js';
-            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-            ga('create','UA-XXXXX-X');ga('send','pageview');
-        </script>
+        {% block extrajs %}{% endblock %}           
     </body>
 </html>

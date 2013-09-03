@@ -1,5 +1,6 @@
 {% extends "base.dj.html" %}
 {% load staticfiles %}
+{% load compress %}
 {% block title %}Home{% endblock %}
 
 {% block extracss %}
@@ -7,34 +8,38 @@
 {% endblock %}
 
 {% block extrajs %}
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-cookies.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-resource.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/ui-bootstrap-custom-tpls-0.5.0.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/bootstrap-switch.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/jquery.scrollTo.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/md5.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/modernizr.custom.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/typeahead.js' %}"></script>
+    <script type="text/javascript" src="{% static 'detective/js/vendor/jquery-1.10.0.js' %}"></script>
+    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular.min.js' %}"></script>
+    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-cookies.min.js' %}"></script>
+    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-resource.min.js' %}"></script>
     <script type="text/javascript"   src="{% static 'detective/js/vendor/underscore-min.js' %}"></script>
     <script type="text/javascript"   src="{% static 'detective/js/vendor/chroma.min.js' %}"></script>
     <script type="text/javascript"   src="{% static 'detective/js/vendor/kartograph.min.js' %}"></script>
     <script type="text/javascript"   src="{% static 'detective/js/vendor/raphael-min.js' %}"></script>
-    
-    <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>    
-    <script type="text/coffeescript" src="{% static 'detective/js/controllers/BreadcrumbCtrl.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContributeCtrl.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/controllers/ExploreCtrl.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/controllers/HeaderCtrl.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/controllers/HomeCtrl.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserCtrl.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/services/Breadcrumb.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/services/Individual.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/services/IndividualForm.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/services/Search.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/services/User.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/filters.coffee' %}"></script>
-    <script type="text/coffeescript" src="{% static 'detective/js/directives.coffee' %}"></script>
+
+    {% compress js %}    
+        <script type="text/javascript"   src="{% static 'detective/js/vendor/jquery.scrollTo.js' %}"></script>
+        <script type="text/javascript"   src="{% static 'detective/js/vendor/md5.js' %}"></script>
+        <script type="text/javascript"   src="{% static 'detective/js/vendor/modernizr.custom.js' %}"></script>
+        <script type="text/javascript"   src="{% static 'detective/js/vendor/typeahead.js' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>    
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/BreadcrumbCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContributeCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/ExploreCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/HeaderCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/HomeCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/services/Breadcrumb.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/services/Individual.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/services/IndividualForm.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/services/Search.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/services/User.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/filters.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/directives/scrollTo.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/directives/ttTypeahead.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/directives/countryMap.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/directives/watchLoginMandatory.coffee' %}"></script>
+    {% endcompress %}
 {% endblock %}
 
 {% block content %}

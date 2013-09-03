@@ -165,7 +165,9 @@ class ContributeCtrl
         # Looks for individual with this id
         _.each @scope.individuals, (i, idx)=> index = idx if i.fields.id is id
         # Stop here if we found an existing individual
-        return index if index > -1 
+        if index > -1 
+            @scope.individuals[index].isClosed = false
+            return index 
         # Create the new form        
         form = new IndividualForm(@scope, type, id, related_to)
         # Create an individual        

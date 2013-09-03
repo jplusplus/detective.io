@@ -34,9 +34,10 @@ html body .panel {
 }
 
 .breadcrumb {
-	background:mix(@header-bg, @brand-primary);
+	@bg: mix(@header-bg, @brand-primary);
+	background:@bg;
 	margin:0;
-	.box-shadow( 0 -3px 0 fade(#000, 10) inset);
+	.box-shadow( 0 3px 0 fade(@bg, 10) );
 	.border-radius(0);
 
 	.active, & {

@@ -4,7 +4,7 @@ angular
         return (str='')-> (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br />$2')
     ).filter("individualPreview", ->
     	# Provides a way to preview the value of the given individual
-        return (i, alt=false)-> i.name or i.value or i.title or i.units or i.label or alt or ""
+        return (i={}, alt=false)-> i.name or i.value or i.title or i.units or i.label or alt or ""
     # Return a unique color with the given string
     ).filter("strToColor", ->
     	return (str="", lum=-0.4) ->

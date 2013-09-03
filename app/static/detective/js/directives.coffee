@@ -81,5 +81,5 @@ detective.directive "watchLoginMandatory", ["$rootScope", "$location", "User", (
         $root.$on "$routeChangeStart", (event, current) -> 
             if current.auth and not User.is_logged                
                 next = $location.url()
-                $location.url("/login?next={next}") 
+                $location.url("/login?next=#{next}") 
 ]

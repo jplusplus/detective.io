@@ -68,7 +68,7 @@ class ContributeCtrl
         moreFields : []
         
         constructor: (scope, type="", fields={}, related_to=null)->
-            @Individual = scope.Individual
+            @Individual = scope.Individual            
             @meta       = scope.resources[type] or {}  
             @related_to = related_to
             @scope      = scope
@@ -86,7 +86,7 @@ class ContributeCtrl
             unless @loading
                 # Loading mode on
                 @loading = true
-                params    = type: @type.toLowerCase()
+                params   = type: @type.toLowerCase()      
                 # Save the individual and
                 # take care to specify the type
                 @fields.$save(params, (master)=>
@@ -118,7 +118,7 @@ class ContributeCtrl
                 # Disable loading state
                 @loading = false
                 # Record the database version of the individual
-                @master  = _.clone master
+                @master  = angular.copy master
 
         # True if the given field is visible
         isVisible: (field)=>  
@@ -156,7 +156,8 @@ class ContributeCtrl
     # ──────────────────────────────────────────────────────────────────────────
         
     # A new individual for kick-star forms
-    initNewIndividual: (type, fields)=> @scope.new = new IndividualForm(@scope, type, fields)
+    initNewIndividual: (type, fields, related_to)=> 
+        @scope.new = new IndividualForm(@scope, type, fields, related_to)
         
     # Load an individual
     loadIndividual: (type, id, related_to=null)=>
@@ -194,12 +195,12 @@ class ContributeCtrl
 
 
     # When user submit a kick-start individual form
-    addIndividual: (scroll=true)=>
+    addIndividual: (scroll=true, form=null)=>
         unless @scope.new.fields.name is ""   
             # Disable kickStart form
             @scope.showKickStart = false
             # Create the form
-            form = @initNewIndividual(@scope.new.type, @scope.new.fields)
+            form = @initNewIndividual(@scope.new.type, @scope.new.fields) if form is null
             # Is that field a searchable field ?
             if @scope.new.fields.name
                 params = type: @scope.new.type, name: @scope.new.fields.name
@@ -211,6 +212,8 @@ class ContributeCtrl
             @scope.scrollIdx = @scope.individuals.length if scroll
             # Add the individual to the objects list
             @scope.individuals.push form
+            # Return the new form
+            form
 
     removeIndividual: (index=0)=>
         @scope.individuals.splice(index, 1) if @scope.individuals[index]?            
@@ -223,7 +226,7 @@ class ContributeCtrl
             # Disable loading state
             individual.loading = false
             # Record the database version of the individual
-            individual.master  = _.clone master
+            individual.master  = angular.copy master
     
     # Returns true if the given field accept more related element
     isAllowedOneMore: (field)=>       
@@ -256,25 +259,25 @@ class ContributeCtrl
         related? and not related instanceof @Individual or
         (related.name? and related.name isnt "" and not related.id?)
 
-    setNewIndividual: (master, type, parent, parentField, index=-1)=>        
-        individual = new @Individual master
+    setNewIndividual: (master, type, parent, parentField, index=-1)=>                
         # Ensure that the type isn't title-formatted
-        type       = type.toLowerCase()
+        type = type.toLowerCase()
         # Create the new entry obj
-        @initNewIndividual(type, individual, parent)           
+        form = new IndividualForm(@scope, type, master, parent)      
         # Create for the given parent field
         parent.fields[parentField] = [] unless parent.fields[parentField]?
         
+
         if index == -1
             # Attachs the new element to its parent            
-            parent.fields[parentField].push individual
+            parent.fields[parentField].push form.fields
         else
             delete @master
             # Update the new element with an Individual class            
-            parent.fields[parentField][index] = individual
+            parent.fields[parentField][index] = form.fields
 
         # Add it to the list using @scope.new
-        @scope.addIndividual()  
+        @scope.addIndividual(true, form)
 
     # Change the scrollIdx to scroll to the given individual
     scrollTo: (individual)=>

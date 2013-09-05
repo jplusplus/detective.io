@@ -1,4 +1,4 @@
-from app.detective.models          import *
+from app.detective.models          import Amount, Country, FundraisingRound, Person, Product, Revenue, Commentary, EnergyProduct, Organization, Project, Distribution, Price, EnergyProject
 from django.conf.urls              import url
 from django.contrib.auth           import authenticate, login, logout
 from django.core.paginator         import Paginator, InvalidPage
@@ -322,12 +322,13 @@ class EnergyProductResource(IndividualResource):
 
 class OrganizationResource(IndividualResource):        
     revenue = fields.ToManyField("app.detective.api.resources.RevenueResource", "revenue", full=True, null=True, use_in="detail")
-    monitoring_body = fields.ToManyField("app.detective.api.resources.selfResource", "monitoring_body", full=True, null=True, use_in="detail")
+    monitoring_body = fields.ToManyField("app.detective.api.resources.OrganizationResource", "monitoring_body", full=True, null=True, use_in="detail")
     board_member = fields.ToManyField("app.detective.api.resources.PersonResource", "board_member", full=True, null=True, use_in="detail")
-    litigation_against = fields.ToManyField("app.detective.api.resources.selfResource", "litigation_against", full=True, null=True, use_in="detail")
+    litigation_against = fields.ToManyField("app.detective.api.resources.OrganizationResource", "litigation_against", full=True, null=True, use_in="detail")
     adviser = fields.ToManyField("app.detective.api.resources.PersonResource", "adviser", full=True, null=True, use_in="detail")
     fundraising_round = fields.ToManyField("app.detective.api.resources.FundraisingRoundResource", "fundraising_round", full=True, null=True, use_in="detail")
-    partner = fields.ToManyField("app.detective.api.resources.selfResource", "partner", full=True, null=True, use_in="detail")
+    partner = fields.ToManyField("app.detective.api.resources.OrganizationResource", "partner", full=True, null=True, use_in="detail")
+    key_person = fields.ToManyField("app.detective.api.resources.PersonResource", "key_person", full=True, null=True, use_in="detail")
 
     class Meta(IndividualMeta):
         queryset = Organization.objects.all()

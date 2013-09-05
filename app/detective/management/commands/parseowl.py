@@ -46,6 +46,7 @@ class Command(BaseCommand):
             "# The ontology can be found in its entirety at %s" % ontologyURI,
             "from neo4django.db import models",
             "from neo4django.auth.models import User",
+            ""
         ]
 
 

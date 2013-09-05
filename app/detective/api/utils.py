@@ -32,7 +32,6 @@ def get_model_fields(model):
                 
                 fields.append(field)
 
-
     return fields
 
 class DetailedApi(Api):

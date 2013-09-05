@@ -1,19 +1,20 @@
-from app.detective.models          import *
-from django.conf.urls              import url
-from django.contrib.auth           import authenticate, login, logout
-from django.core.paginator         import Paginator, InvalidPage
-from django.http                   import Http404, HttpResponse
-from django.middleware.csrf        import _get_new_csrf_key as get_new_csrf_key
-from neo4django.auth.models        import User
-from tastypie                      import fields
-from tastypie.authentication       import SessionAuthentication
-from tastypie.authorization        import DjangoAuthorization
-from tastypie.constants            import ALL
-from tastypie.exceptions           import ImmediateHttpResponse
-from tastypie.resources            import ModelResource, Resource
-from tastypie.serializers          import Serializer
-from tastypie.utils                import trailing_slash
-from django.db.models.query        import QuerySet
+from app.detective.models               import *
+from django.conf.urls                   import url
+from django.contrib.auth                import authenticate, login, logout
+from django.core.paginator              import Paginator, InvalidPage
+from django.db.models.query             import QuerySet
+from django.http                        import Http404, HttpResponse
+from django.middleware.csrf             import _get_new_csrf_key as get_new_csrf_key
+from neo4django.auth.models             import User
+from neo4django.db.models.relationships import MultipleNodes
+from tastypie                           import fields
+from tastypie.authentication            import SessionAuthentication
+from tastypie.authorization             import DjangoAuthorization
+from tastypie.constants                 import ALL
+from tastypie.exceptions                import ImmediateHttpResponse
+from tastypie.resources                 import ModelResource, Resource
+from tastypie.serializers               import Serializer
+from tastypie.utils                     import trailing_slash
 
 
 class SummaryResource(Resource):
@@ -55,6 +56,16 @@ class IndividualMeta:
 
 class IndividualResource(ModelResource):
 
+    def __init__(self, api_name=None):        
+        super(IndividualResource, self).__init__(api_name)        
+        # For each model field
+        for field in self.get_model_fields():
+            # Limit the definition of the new fields
+            # to the relationships
+            if self.need_to_many_field(field):         
+                # Get the full relationship                           
+                self.fields[field.name] = self.get_to_many_field(field, full=False)
+
     def build_schema(self):  
         """
         Description and scope for each Resource
@@ -68,15 +79,46 @@ class IndividualResource(ModelResource):
         }
         return dict(additionals.items() + schema.items())
 
+    def get_model_fields(self):
+        # Resource must implement a queryset!
+        queryset = getattr(self._meta, "queryset", None)
+        if not isinstance(queryset, QuerySet):
+            raise Exception("The given resource must define a queryset.")
+        # Find fields of the queryset's model        
+        return queryset.model._meta.fields  
+
+    def need_to_many_field(self, field):        
+        # Limit the definition of the new fields
+        # to the relationships
+        if isinstance(field, MultipleNodes):
+            # The resource already define a field for this one
+            # resource_field = self.fields[field.name]
+            # But it's probably still a charfield !
+            # And it's so bad.
+            # if isinstance(resource_field, fields.CharField):                               
+            return True
+        # Return false if not needed
+        return False
+
+    def get_to_many_field(self, field, full=False):
+        resource = "app.detective.api.resources.%sResource" % (field.target_model.__name__, )
+        return fields.ToManyField(resource, field.name, full=full, null=True, use_in='detail')
+
+    def get_detail(self, request, **kwargs):  
+        # For each model field
+        for field in self.get_model_fields():
+            # Limit the definition of the new fields
+            # to the relationships
+            if self.need_to_many_field(field):         
+                # Get the full relationship                           
+                self.fields[field.name] = self.get_to_many_field(field, full=True)
+
+        return super(IndividualResource, self).get_detail(request, **kwargs)
+
     def dehydrate(self, bundle):
         # Control that every relationship fields are list        
         # and that we didn't send hidden field
         for field in bundle.data:
-            # Is this an "hidden field" ?
-            if field.endswith("_set"):
-                # Set the field to None 'cause we cant change the size 
-                # of the data's bundle
-                bundle.data[field] = None
             # Find the model's field 
             modelField = getattr(bundle.obj, field, False) 
             # The current field is a relationship
@@ -84,8 +126,7 @@ class IndividualResource(ModelResource):
                 # Wrong type given, relationship field must ouput a list
                 if type(bundle.data[field]) is not list:
                     # We remove the field from the ouput
-                    bundle.data[field] = []                    
-
+                    bundle.data[field] = []            
         return bundle
 
 
@@ -99,6 +140,7 @@ class IndividualResource(ModelResource):
             modelField = getattr(bundle.obj, field, False) 
             # The current field is a relationship
             if modelField and hasattr(modelField, "_rel"):
+                print field
                 # Model associated to that field
                 model = modelField._rel.relationship.target_model                
                 # Wrong type given
@@ -239,14 +281,21 @@ class IndividualResource(ModelResource):
         self.log_throttled_access(request)
         return self.create_response(request, object_list)     
 
+    def use_in(self, bundle):
+        return self.get_resource_uri() == bundle.request.path
 
-class UserResource(IndividualResource):    
+
+class UserResource(ModelResource):    
     
     class Meta(IndividualMeta):
         queryset = User.objects.all()
         fields = ['first_name', 'last_name', 'username', 'is_staff']
         allowed_methods = ['get', 'post']
         resource_name = 'user'
+        always_return_data = True         
+        authorization      = DjangoAuthorization()     
+        authentication     = SessionAuthentication()
+        filtering          = {'name': ALL}
 
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
@@ -315,23 +364,14 @@ class CountryResource(IndividualResource):
         queryset = Country.objects.all()
     
 class FundraisingRoundResource(IndividualResource):    
-    payer = fields.ToManyField("app.detective.api.resources.OrganizationResource", "payer", full=True, null=True, use_in="detail")
-    personal_payer = fields.ToManyField("app.detective.api.resources.PersonResource", "personal_payer", full=True, null=True, use_in="detail")
-
     class Meta(IndividualMeta):
         queryset = FundraisingRound.objects.all()
     
 class PersonResource(IndividualResource):        
-    activity_in_organization = fields.ToManyField("app.detective.api.resources.OrganizationResource", "activity_in_organization", full=True, null=True, use_in="detail")
-    nationality = fields.ToManyField("app.detective.api.resources.CountryResource", "nationality", full=True, null=True, use_in="detail")
-    previous_activity_in_organization = fields.ToManyField("app.detective.api.resources.OrganizationResource", "previous_activity_in_organization", full=True, null=True, use_in="detail")
-
     class Meta(IndividualMeta):
         queryset = Person.objects.all()
 
 class ProductResource(IndividualResource):        
-    price = fields.ToManyField("app.detective.api.resources.PriceResource", "price", full=True, null=True, use_in="detail")
-
     class Meta(IndividualMeta):
         queryset = Product.objects.all()
         
@@ -340,44 +380,22 @@ class RevenueResource(IndividualResource):
         queryset = Revenue.objects.all()
 
 class CommentaryResource(IndividualResource): 
-    author = fields.ToManyField("app.detective.api.resources.PersonResource", "author", full=True, null=True, use_in="detail")
-
     class Meta(IndividualMeta):
         queryset = Commentary.objects.all()
 
 class EnergyProductResource(IndividualResource):
-    distribution = fields.ToManyField("app.detective.api.resources.DistributionResource", "distribution", full=True, null=True, use_in="detail")
-    operator = fields.ToManyField("app.detective.api.resources.OrganizationResource", "operator", full=True, null=True, use_in="detail")
-    price = fields.ToManyField("app.detective.api.resources.PriceResource", "price", full=True, null=True, use_in="detail")
-
     class Meta(IndividualMeta):
         queryset = EnergyProduct.objects.all()
 
-class OrganizationResource(IndividualResource):        
-    revenue = fields.ToManyField("app.detective.api.resources.RevenueResource", "revenue", full=True, null=True, use_in="detail")
-    monitoring_body = fields.ToManyField("app.detective.api.resources.OrganizationResource", "monitoring_body", full=True, null=True, use_in="detail")
-    board_member = fields.ToManyField("app.detective.api.resources.PersonResource", "board_member", full=True, null=True, use_in="detail")
-    litigation_against = fields.ToManyField("app.detective.api.resources.OrganizationResource", "litigation_against", full=True, null=True, use_in="detail")
-    adviser = fields.ToManyField("app.detective.api.resources.PersonResource", "adviser", full=True, null=True, use_in="detail")
-    fundraising_round = fields.ToManyField("app.detective.api.resources.FundraisingRoundResource", "fundraising_round", full=True, null=True, use_in="detail")
-    partner = fields.ToManyField("app.detective.api.resources.OrganizationResource", "partner", full=True, null=True, use_in="detail")
-    key_person = fields.ToManyField("app.detective.api.resources.PersonResource", "key_person", full=True, null=True, use_in="detail")
-
+class OrganizationResource(IndividualResource):   
     class Meta(IndividualMeta):
         queryset = Organization.objects.all()
 
 class ProjectResource(IndividualResource):        
-    partner = fields.ToManyField("app.detective.api.resources.OrganizationResource", "partner", full=True, null=True, use_in="detail")
-    activity_in_country = fields.ToManyField("app.detective.api.resources.CountryResource", "activity_in_country", full=True, null=True, use_in="detail")
-    owner = fields.ToManyField("app.detective.api.resources.OrganizationResource", "owner", full=True, null=True, use_in="detail")
-    commentary = fields.ToManyField("app.detective.api.resources.CommentaryResource", "commentary", full=True, null=True, use_in="detail")
-
     class Meta(IndividualMeta):
         queryset = Project.objects.all()
 
 class DistributionResource(IndividualResource):    
-    activity_in_country = fields.ToManyField("app.detective.api.resources.CountryResource", "activity_in_country", full=True, null=True, use_in="detail")
-
     class Meta(IndividualMeta):
         queryset = Distribution.objects.all()
 
@@ -386,11 +404,5 @@ class PriceResource(IndividualResource):
         queryset = Price.objects.all()
 
 class EnergyProjectResource(IndividualResource):
-    product = fields.ToManyField("app.detective.api.resources.EnergyProductResource", "product", full=True, null=True, use_in="detail")
-    partner = fields.ToManyField("app.detective.api.resources.OrganizationResource", "partner", full=True, null=True, use_in="detail")
-    activity_in_country = fields.ToManyField("app.detective.api.resources.CountryResource", "activity_in_country", full=True, null=True, use_in="detail")
-    owner = fields.ToManyField("app.detective.api.resources.OrganizationResource", "owner", full=True, null=True, use_in="detail")
-    commentary = fields.ToManyField("app.detective.api.resources.CommentaryResource", "commentary", full=True, null=True, use_in="detail")
-
     class Meta(IndividualMeta):
         queryset = EnergyProject.objects.all()

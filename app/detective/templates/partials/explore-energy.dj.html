@@ -5,7 +5,7 @@
 	
 	<div class="row">
 
-		<div class="col-md-6  bottom20">	
+		<div class="col-md-6 bottom20">	
 			<form class="form-inline" role="search">	
 				<div class="input-group">		
 					<input type="search" class="form-control" id="input-search" placeholder="Search..." />		    				
@@ -46,9 +46,11 @@
 	</div>
 
 
-	<div class="select-a-country">
+	<div class="select-a-country" ng-init="country = {}">
 		<h3>Select a country to know more</h3>
-		<div class="panel" country-map></div>
+		<div class="panel">
+			<div model="country" click="alert" country-map />
+		</div>
 	</div>
 
 </div>

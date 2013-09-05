@@ -19,6 +19,7 @@
 body {
     position:relative;
     z-index:@zindex-context;
+    padding-bottom:60px;
 
     a {
     	cursor: pointer;
@@ -364,5 +365,10 @@ header {
 
 	.select-a-country .panel {
 		padding:20px 0;
+
+		.countries:hover {
+			cursor:pointer;
+			fill:@link-color;
+		}
 	}
 }

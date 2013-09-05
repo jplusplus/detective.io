@@ -50,27 +50,42 @@ class DetailedApi(Api):
 
         for name in sorted(self._registry.keys()):                        
             resource      = self._registry[name]
-            resourceModel = getattr(resource._meta.queryset, "model", {})      
-            fields        = get_model_fields(resourceModel)
-            verbose_name  = getattr(resourceModel._meta, "verbose_name", name).title()      
+            resourceModel = getattr(resource._meta.queryset, "model", None)  
+            # Do this ressource has a model?
+            if resourceModel != None:
+                fields        = get_model_fields(resourceModel)
+                verbose_name  = getattr(resourceModel._meta, "verbose_name", name).title()      
 
-            available_resources[name] = {
-                'list_endpoint': self._build_reverse_url("api_dispatch_list", kwargs={
-                    'api_name': api_name,
-                    'resource_name': name,
-                }),
-                'schema': self._build_reverse_url("api_get_schema", kwargs={
-                    'api_name': api_name,
-                    'resource_name': name,
-                }),
-                'description'  : getattr(resourceModel, "_description", None),
-                'scope'        : getattr(resourceModel, "_scope", None),
-                'model'        : getattr(resourceModel, "__name__", ""),
-                'verbose_name' : verbose_name,
-                'name'         : name,
-                'fields'       : fields,
-                'rules'        : rulesManager.model(resourceModel).all()
-            }
+                available_resources[name] = {
+                    'list_endpoint': self._build_reverse_url("api_dispatch_list", kwargs={
+                        'api_name': api_name,
+                        'resource_name': name,
+                    }),
+                    'schema': self._build_reverse_url("api_get_schema", kwargs={
+                        'api_name': api_name,
+                        'resource_name': name,
+                    }),
+                    'description'  : getattr(resourceModel, "_description", None),
+                    'scope'        : getattr(resourceModel, "_scope", None),
+                    'model'        : getattr(resourceModel, "__name__", ""),
+                    'verbose_name' : verbose_name,
+                    'name'         : name,
+                    'fields'       : fields,
+                    'rules'        : rulesManager.model(resourceModel).all()
+                }
+            # Default description
+            else:                
+                available_resources[name] = {
+                    'list_endpoint': self._build_reverse_url("api_dispatch_list", kwargs={
+                        'api_name': api_name,
+                        'resource_name': name,
+                    }),
+                    'schema': self._build_reverse_url("api_get_schema", kwargs={
+                        'api_name': api_name,
+                        'resource_name': name,
+                    }),
+                    'name': name
+                }
 
         desired_format = determine_format(request, self.serializer)
 

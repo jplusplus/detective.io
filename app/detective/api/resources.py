@@ -1,16 +1,49 @@
-from app.detective.models          import Amount, Country, FundraisingRound, Person, Product, Revenue, Commentary, EnergyProduct, Organization, Project, Distribution, Price, EnergyProject
+from app.detective.models          import *
 from django.conf.urls              import url
 from django.contrib.auth           import authenticate, login, logout
 from django.core.paginator         import Paginator, InvalidPage
-from django.http                   import Http404
+from django.http                   import Http404, HttpResponse
 from django.middleware.csrf        import _get_new_csrf_key as get_new_csrf_key
 from neo4django.auth.models        import User
 from tastypie                      import fields
 from tastypie.authentication       import SessionAuthentication
 from tastypie.authorization        import DjangoAuthorization
 from tastypie.constants            import ALL
-from tastypie.resources            import ModelResource
+from tastypie.exceptions           import ImmediateHttpResponse
+from tastypie.resources            import ModelResource, Resource
+from tastypie.serializers          import Serializer
 from tastypie.utils                import trailing_slash
+from django.db.models.query        import QuerySet
+
+
+class SummaryResource(Resource):
+    # Local serializer
+    serializer = Serializer(formats=["json"]).serialize
+
+    class Meta:
+        allowed_methods = ['get'] 
+        resource_name   = 'summary'
+        object_class    = object
+
+    def obj_get_list(self, request=None, **kwargs):
+        # Nothing yet here!
+        raise Http404("Sorry, no results on that page.") 
+
+    def obj_get(self, request=None, **kwargs):    
+        content = {}
+        # Summary for the country
+        if kwargs["pk"] == "countries": 
+            content["test"] = 1
+        else: 
+            # Stop here, unkown summary type
+            raise Http404("Sorry, no results on that page.")        
+        # Serialize content in json
+        # @TODO implement a better format support
+        content  = self.serializer(content, "application/json")
+        # Create an HTTP response 
+        response = HttpResponse(content=content, content_type="application/json")
+        # We force tastypie to render the response directly 
+        raise ImmediateHttpResponse(response=response)
 
 
 class IndividualMeta:

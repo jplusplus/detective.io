@@ -19,6 +19,7 @@ v1_api.register(PersonResource())
 v1_api.register(RevenueResource())
 v1_api.register(ProductResource())
 v1_api.register(EnergyProductResource())
+v1_api.register(SummaryResource())
 
 admin.autodiscover()
 

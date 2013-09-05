@@ -156,6 +156,8 @@ DEBUG_TOOLBAR_CONFIG = {
     "INTERCEPT_REDIRECTS": False
 }
 
+TASTYPIE_DEFAULT_FORMATS = ['json']
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',

@@ -1,2 +1,1 @@
-detective.io
-============
+![Travis build](https://secure.travis-ci.org/jplusplus/detective.io.png?branch=master)

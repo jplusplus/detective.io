@@ -27,3 +27,4 @@ venv
 app/static/CACHE
 app/media
 staticfiles
+lib

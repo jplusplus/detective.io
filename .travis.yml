@@ -1,0 +1,23 @@
+language: python
+python:
+  - "2.7"
+before_install:
+  - export DJANGO_SETTINGS_MODULE="app.settings_tests"
+  - export NEO4J_PORT="7474"
+  - sudo service neo4j stop || true
+  - sleep 3
+  - ./install_local_neo4j.bash $NEO4J_VERSION
+  - ./lib/neo4j/bin/neo4j start || ( cat ./lib/neo4j/data/log/*.log && exit 1 )
+  - curl http://localhost:$NEO4J_PORT/db/data/
+  - curl -X DELETE 'http://localhost:7474/cleandb/supersecretdebugkey!'
+install: pip install --use-mirrors -r requirements.txt
+env:
+  - NEO4J_VERSION="1.9.1"
+matrix:
+  allow_failures:
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+script:
+  - python ./manage.py test detective

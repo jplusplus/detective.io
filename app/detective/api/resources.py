@@ -8,8 +8,8 @@ from django.middleware.csrf             import _get_new_csrf_key as get_new_csrf
 from neo4django.auth.models             import User
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
-from tastypie.authentication            import SessionAuthentication
-from tastypie.authorization             import DjangoAuthorization
+from tastypie.authentication            import SessionAuthentication, MultiAuthentication, BasicAuthentication
+from tastypie.authorization             import DjangoAuthorization, Authorization
 from tastypie.constants                 import ALL
 from tastypie.exceptions                import ImmediateHttpResponse
 from tastypie.resources                 import ModelResource, Resource
@@ -47,11 +47,24 @@ class SummaryResource(Resource):
         raise ImmediateHttpResponse(response=response)
 
 
+class IndividualAuthorization(Authorization):
+    def read_detail(self, object_list, bundle):
+        return True
+
+    def create_detail(self, object_list, bundle):
+        return True
+
+    def update_detail(self, object_list, bundle):     
+        return bundle.request.user.is_staff
+
+    def delete_detail(self, object_list, bundle):     
+        return bundle.request.user.is_staff
+
 class IndividualMeta:
     allowed_methods    = ['get', 'post', 'delete', 'put']    
     always_return_data = True         
-    authorization      = DjangoAuthorization()     
-    authentication     = SessionAuthentication()
+    authorization      = IndividualAuthorization()     
+    authentication     = MultiAuthentication(SessionAuthentication(), BasicAuthentication())
     filtering          = {'name': ALL}
 
 class IndividualResource(ModelResource):
@@ -216,7 +229,6 @@ class IndividualResource(ModelResource):
 
     def get_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
-        self.is_authenticated(request)
         self.throttle_check(request)
 
         query     = request.GET.get('q', '')

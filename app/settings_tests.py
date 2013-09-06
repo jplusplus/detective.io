@@ -40,7 +40,7 @@ INSTALLED_APPS = (
     'app.detective',   
 )
 
-SECRET_KEY="shutupdjangowe'retryingtotesthere"
+SECRET_KEY="<SET A SECRET KEY HERE>"
 
 DEBUG = True
 

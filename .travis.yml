@@ -10,7 +10,7 @@ before_install:
   - ./lib/neo4j/bin/neo4j start || ( cat ./lib/neo4j/data/log/*.log && exit 1 )
   - curl http://localhost:$NEO4J_PORT/db/data/
   - curl -X DELETE 'http://localhost:7474/cleandb/supersecretdebugkey!'
-install: pip install --use-mirrors -r requirements.txt
+install: pip install --use-mirrors -r test_requirements.txt
 env:
   - NEO4J_VERSION="1.9.1"
 matrix:

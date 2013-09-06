@@ -1,4 +1,5 @@
 import os
+from settings import *
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 AUTHENTICATION_BACKENDS = ('neo4django.auth.backends.NodeModelBackend',)

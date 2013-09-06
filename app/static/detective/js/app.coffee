@@ -41,7 +41,7 @@ detective = angular
                         templateUrl: "/partial/contribute.html"
                         auth: true
                     })
-                    .otherwise redirectTo: '/energy/explore'
+                    .otherwise redirectTo: '/energy/contribute'
         ]
     )
 

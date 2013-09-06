@@ -57,14 +57,9 @@ class IndividualMeta:
 class IndividualResource(ModelResource):
 
     def __init__(self, api_name=None):        
-        super(IndividualResource, self).__init__(api_name)        
-        # For each model field
-        for field in self.get_model_fields():
-            # Limit the definition of the new fields
-            # to the relationships
-            if self.need_to_many_field(field):         
-                # Get the full relationship                           
-                self.fields[field.name] = self.get_to_many_field(field, full=False)
+        super(IndividualResource, self).__init__(api_name)    
+        # Register relationships fields automaticly            
+        self.generate_to_many_fields(True)
 
     def build_schema(self):  
         """
@@ -101,19 +96,35 @@ class IndividualResource(ModelResource):
         return False
 
     def get_to_many_field(self, field, full=False):
-        resource = "app.detective.api.resources.%sResource" % (field.target_model.__name__, )
-        return fields.ToManyField(resource, field.name, full=full, null=True, use_in='detail')
+        resource = "app.detective.api.resources.%sResource" % (field.target_model.__name__, )        
+        return fields.ToManyField(resource, field.name, full=full, null=True, use_in=self.use_in)
 
-    def get_detail(self, request, **kwargs):  
+    def generate_to_many_fields(self, full=False):
         # For each model field
         for field in self.get_model_fields():
             # Limit the definition of the new fields
             # to the relationships
             if self.need_to_many_field(field):         
                 # Get the full relationship                           
-                self.fields[field.name] = self.get_to_many_field(field, full=True)
+                self.fields[field.name] = self.get_to_many_field(field, full=bool(full))
 
+    def use_in(self, bundle=None):
+        # Use in post/put
+        if bundle.request.method in ['POST', 'PUT']:
+            return bundle.request.path == self.get_resource_uri()
+        else:
+            # Use in detail
+            return self.get_resource_uri(bundle) == bundle.request.path
+
+    def get_detail(self, request, **kwargs):  
+        # Register relationships fields automaticly with full detail            
+        self.generate_to_many_fields(True)
         return super(IndividualResource, self).get_detail(request, **kwargs)
+
+    def get_list(self, request, **kwargs):
+        # Register relationships fields automaticly with full detail
+        self.generate_to_many_fields(False)
+        return super(IndividualResource, self).get_list(request, **kwargs)
 
     def dehydrate(self, bundle):
         # Control that every relationship fields are list        
@@ -126,11 +137,10 @@ class IndividualResource(ModelResource):
                 # Wrong type given, relationship field must ouput a list
                 if type(bundle.data[field]) is not list:
                     # We remove the field from the ouput
-                    bundle.data[field] = []            
+                    bundle.data[field] = []         
         return bundle
 
-
-    def hydrate(self, bundle):         
+    def hydrate_m2m(self, bundle):         
         # By default, every individual from staff are validated
         bundle.data["_status"] = 1*bundle.request.user.is_staff
         bundle.data["_author"] = [bundle.request.user.id]
@@ -139,8 +149,7 @@ class IndividualResource(ModelResource):
             # Find the model's field 
             modelField = getattr(bundle.obj, field, False) 
             # The current field is a relationship
-            if modelField and hasattr(modelField, "_rel"):
-                print field
+            if modelField and hasattr(modelField, "_rel"):                
                 # Model associated to that field
                 model = modelField._rel.relationship.target_model                
                 # Wrong type given
@@ -151,7 +160,7 @@ class IndividualResource(ModelResource):
                 elif len(bundle.data[field]):   
                     rels = []                     
                     # For each relation...
-                    for rel in bundle.data[field]:
+                    for rel in bundle.data[field]:                        
                         # Keeps the string
                         if type(rel) is str:
                             rels.append(rel)
@@ -166,7 +175,6 @@ class IndividualResource(ModelResource):
                         if obj: rels.append(obj)
 
                     bundle.data[field] = rels   
-
         return bundle
 
     def save_m2m(self, bundle): 
@@ -187,7 +195,7 @@ class IndividualResource(ModelResource):
                     # Clean the field to avoid duplicates            
                     if attr.count() > 0: attr.clear()
                     # For each relation...
-                    for rel in rels:    
+                    for rel in rels:   
                         # Add the received obj
                         if hasattr(rel, "obj"):
                             attr.add(rel.obj)
@@ -279,11 +287,7 @@ class IndividualResource(ModelResource):
         }
 
         self.log_throttled_access(request)
-        return self.create_response(request, object_list)     
-
-    def use_in(self, bundle):
-        return self.get_resource_uri() == bundle.request.path
-
+        return self.create_response(request, object_list)
 
 class UserResource(ModelResource):    
     

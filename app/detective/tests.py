@@ -1,6 +1,7 @@
+from .models                import EnergyProject, Organization, Country
+from django.core.exceptions import ObjectDoesNotExist
 from neo4django.auth.models import User
 from tastypie.test          import ResourceTestCase
-from .models                import EnergyProject, Organization, Country
 import json
 
 class EnergyProjectResourceTest(ResourceTestCase):
@@ -10,14 +11,24 @@ class EnergyProjectResourceTest(ResourceTestCase):
         # Look for the test user
         self.username = 'tester'
         self.password = 'tester'
-        self.user     = User.objects.get(username=self.username)
-        # Create the user
-        if not self.user:
+        try:
+            self.user = User.objects.get(username=self.username)   
+            jpp       = Organization.objects.get(name="Journalism++")             
+            jg        = Organization.objects.get(name="Journalism Grant")             
+            fra       = Country.objects.get(name="France")             
+        except ObjectDoesNotExist:            
+            # Create the new user
             self.user = User.objects.create_user(self.username, 'tester@detective.io', self.password)
-
-        self.user.is_staff = False
-        self.user.is_superuser = False
-        self.user.save()
+            self.user.is_staff = False
+            self.user.is_superuser = False
+            self.user.save()    
+            # Create related objects
+            jpp = Organization(name="Journalism++")
+            jpp.save()
+            jg  = Organization(name="Journalism Grant")
+            jg.save()
+            fra = Country(name="France")
+            fra.save()
 
         self.post_data_simple = {
             "name": "Lorem ispum TEST",
@@ -27,11 +38,11 @@ class EnergyProjectResourceTest(ResourceTestCase):
         self.post_data_related = {
             "name": "Lorem ispum TEST RELATED",
             "owner": [
-                { "id": Organization.objects.all()[0].id },
-                { "id": Organization.objects.all()[1].id }
+                { "id": jpp.id },
+                { "id": jg.id }
             ],
             "activity_in_country": [
-                { "id": Country.objects.get(isoa3='FRA').id }
+                { "id": fra.id }
             ]
         }
 
@@ -89,4 +100,7 @@ class EnergyProjectResourceTest(ResourceTestCase):
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)        
-        self.assertGreater(len(data["objects"]), 1)
+        self.assertEqual(
+            min(20, len(data["objects"])), 
+            EnergyProject.objects.filter(_author__username="tester").count()
+        )

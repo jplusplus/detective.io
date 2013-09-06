@@ -1,5 +1,5 @@
 detective = angular
-    .module('detective', ["detectiveServices", "detectiveFilters"])
+    .module('detective', ["detectiveServices", "detectiveFilters", "ui.bootstrap"])
     .run(
         [             
             '$rootScope', 

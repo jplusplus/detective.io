@@ -2,9 +2,11 @@ from app.detective.models import *
 from .individual          import IndividualResource, IndividualMeta
 from .user                import UserResource as ParentUserResource
 
+# Ugly patch
+# See also ./individual.py -> IndividualResource -> get_to_many_field()
 class UserResource(ParentUserResource):
     pass
-     
+
 class AmountResource(IndividualResource):
     class Meta(IndividualMeta):
         queryset = Amount.objects.all()

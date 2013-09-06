@@ -1,4 +1,6 @@
 from app.detective.api.resources import *
+from app.detective.api.user      import UserResource
+from app.detective.api.summary   import SummaryResource
 from app.detective.api.utils     import DetailedApi
 from django.conf.urls            import patterns, include, url
 from neo4django                  import admin

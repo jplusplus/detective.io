@@ -18,6 +18,6 @@ env:
 matrix:
   allow_failures:
 script:
-  - coverage run --source=detective ./manage.py test detective
+  - coverage run ./manage.py test detective
 after_success:
   - coveralls

@@ -12,7 +12,7 @@ before_install:
   - curl -X DELETE 'http://localhost:7474/cleandb/supersecretdebugkey!'
 install: 
   - pip install --use-mirrors -r test_requirements.txt
-  - pip install --user-mirrors coveralls
+  - pip install --use-mirrors coveralls
 env:
   - NEO4J_VERSION="1.9.1"
 matrix:

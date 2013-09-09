@@ -106,7 +106,7 @@ class ApiTest(ResourceTestCase):
         )
 
     def test_cypher_unauthenticated(self):
-        self.assertHttpUnauthorized(self.api_client.get('/api/v1/cyper/?q=START%20n=node%28*%29RETURN%20n;', format='json'))
+        self.assertHttpUnauthorized(self.api_client.get('/api/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json'))
 
     def test_cypher_unauthorized(self):
         # Ensure the user isn't authorized to process cypher request
@@ -114,12 +114,11 @@ class ApiTest(ResourceTestCase):
         self.user.is_superuser = False
         self.user.save() 
 
-        self.assertHttpUnauthorized(self.api_client.get('/api/v1/cyper/?q=START%20n=node%28*%29RETURN%20n;', format='json'), authentication=self.get_credentials())
-
+        self.assertHttpUnauthorized(self.api_client.get('/api/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))
 
     def test_cypher_authorized(self):
         # Ensure the user IS authorized to process cypher request
         self.user.is_superuser = True
         self.user.save()
 
-        self.assertValidJSONResponse(self.api_client.get('/api/v1/cyper/?q=START%20n=node%28*%29RETURN%20n;', format='json'), authentication=self.get_credentials())
+        self.assertValidJSONResponse(self.api_client.get('/api/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))

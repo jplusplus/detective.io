@@ -28,11 +28,12 @@ v1_api.register(UserResource())
 admin.autodiscover()
 
 urlpatterns = patterns('',	
-    url(r'^$', 'app.detective.views.home', name='home'),
-    url(r'^\w+/contribute$', 'app.detective.views.home', name='contribute'),
-    url(r'^\w+/explore$', 'app.detective.views.home', name='explore'),
+    url(r'^$', 					  'app.detective.views.home', name='home'),
+    url(r'^\w+/contribute$', 	  'app.detective.views.home', name='contribute'),
+    url(r'^\w+/explore$', 		  'app.detective.views.home', name='explore'),
+    url(r'^\w+/explore/\w+/\w+$', 'app.detective.views.home', name='individual'),
     url(r'^admin/', include(admin.site.urls)),    
-    url(r'^api/', include(v1_api.urls)),    
+    url(r'^api/',   include(v1_api.urls)),    
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial', name='partial'),
 )
 

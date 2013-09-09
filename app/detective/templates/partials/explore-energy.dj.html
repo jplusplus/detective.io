@@ -19,7 +19,7 @@
 		<div class="col-md-6 tc">
 			<div class="col-xs-4">
 				<div class="panel">
-					<div class="lead margin05">12</div>
+					<div class="lead margin05">[[getTypeCount("Project", "EnergyProject")]]</div>
 					<div class="panel-footer">
 						projects
 					</div>
@@ -27,7 +27,7 @@
 			</div>
 			<div class="col-xs-4">
 				<div class="panel">
-					<div class="lead margin05">12</div>
+					<div class="lead margin05">[[getTypeCount("Person")]]</div>
 					<div class="panel-footer">
 						persons
 					</div>
@@ -35,7 +35,7 @@
 			</div>
 			<div class="col-xs-4">
 				<div class="panel">
-					<div class="lead margin05">12</div>
+					<div class="lead margin05">[[getTypeCount("Organization", "EnergyOrganization")]]</div>
 					<div class="panel-footer">
 						organizations
 					</div>
@@ -46,10 +46,10 @@
 	</div>
 
 
-	<div class="select-a-country" ng-init="country = {}; values = {FRA: 10, USA: 1}">
+	<div class="select-a-country">
 		<h3>Select a country to know more</h3>
 		<div class="panel">
-			<div model="country" click="alert" country-map values="values" />
+			<div country-map model="selectedCountry" values="countries" />
 		</div>
 	</div>
 

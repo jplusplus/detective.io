@@ -1,9 +1,11 @@
-from tastypie.utils.mime           import determine_format, build_content_type
-from django.http                   import HttpResponse
-from tastypie.api                  import Api
-from django.conf.urls.defaults     import *
-from django.forms.forms            import pretty_name
-from forms                         import register_model_rules
+from django.conf.urls.defaults import *
+from django.forms.forms        import pretty_name
+from django.http               import HttpResponse
+from forms                     import register_model_rules
+from neo4django.db             import connection
+from tastypie.api              import Api
+from tastypie.utils.mime       import determine_format, build_content_type
+
 
 def get_model_fields(model):
     fields      = []
@@ -33,6 +35,28 @@ def get_model_fields(model):
                 fields.append(field)
 
     return fields
+
+def get_model_nodes():
+    query = """
+        START n=node(*)
+        MATCH n-[r:`<<TYPE>>`]->t
+        WHERE HAS(t.name)
+        RETURN t.name as name, ID(t) as id
+    """
+    return connection.cypher(query).to_dicts()
+    
+
+def get_model_node_id(model):
+    # All node from neo4j that are have ascending <<TYPE>> relationship
+    nodes       = get_model_nodes()
+    try:
+        # Search for the node with the good name
+        model_node  = next(n for n in nodes if n["name"] == "detective:%s" % model.__name__)
+        return model_node["id"] or None
+    # We didn't found the node id
+    except StopIteration:
+        return None
+    
 
 class DetailedApi(Api):
     def top_level(self, request, api_name=None):

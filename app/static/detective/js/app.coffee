@@ -36,6 +36,12 @@ detective = angular
                         template: "<div ng-include src='templateUrl'></div>"                        
                         auth: true
                     })
+                    .when('/:scope/explore/:type/:id', {
+                        controller: ExploreCtrl  
+                        # Allow a dynamic loading by setting the templateUrl within controller
+                        template: "<div ng-include src='templateUrl'></div>"                        
+                        auth: true
+                    })
                     .when('/:scope/contribute', {
                         controller: ContributeCtrl  
                         templateUrl: "/partial/contribute.html"

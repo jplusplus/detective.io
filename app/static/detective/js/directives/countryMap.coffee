@@ -25,14 +25,15 @@ angular.module('detective').directive "countryMap", ($parse)->
         pre: (scope, iElement, iAttrs, controller)->       
             # Draw the values on the map (chloroplete)
             draw = ()->           
-                values     = _.values(scope.values)     
+                values     = _.map scope.values, (d)-> d.count     
                 colorscale = new chroma.ColorScale
                     colors: ["#F2CEBA", "#EA7E44"]    
                     limits: [_.min(values), _.max(values)]
 
                 map.getLayer("countries").style 
                     fill: (country, path) ->
-                        value = scope.values[ country["iso-a3"] ] or 0
+                        item  = _.findWhere scope.values, isoa3: country["iso-a3"]
+                        value = if item then item.count else 0 
                         colorscale.getColor(value) if value
    
             # Create the map within iElement with the same width
@@ -52,10 +53,10 @@ angular.module('detective').directive "countryMap", ($parse)->
                 # Bind layer click
                 map.getLayer('countries').on 'click', (data)->    
                     # Do we received a click function?
-                    scope.click(data) if typeof(scope.click) is "function"                                 
+                    scope.click() if typeof(scope.click) is "function"
                     # Set a model value matching to the clicked country
-                    if scope.model?                       
-                        scope.model = data["iso-a3"]                        
+                    if scope.model? and typeof(scope.model) is "object"              
+                        scope.model["isoa3"] = data["iso-a3"]
                         scope.$apply()
                 # Now the layer exists...
                 # if we have values to draw!

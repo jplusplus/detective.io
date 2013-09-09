@@ -48,7 +48,7 @@ class ApiTestCase(ResourceTestCase):
                 { "id": fra.id }
             ]
         }
-        
+
     def get_credentials(self):        
         return self.create_basic(username=self.username, password=self.password)
 
@@ -168,7 +168,7 @@ class ApiTestCase(ResourceTestCase):
         # Only France is present
         self.assertGreater(len(data), 0)
         # We added 1 relation to France 
-        self.assertEqual("count" in data[0], True)
+        self.assertEqual("count" in data["FRA"], True)
 
     def test_forms_summary(self):
         resp = self.api_client.get('/api/v1/summary/forms/', format='json', authentication=self.get_credentials())  

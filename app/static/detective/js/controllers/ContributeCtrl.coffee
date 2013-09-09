@@ -1,9 +1,9 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', 'Individual', 'IndividualForm']
+    @$inject: ['$scope', '$routeParams', '$filter', 'Individual', 'Summary', 'IndividualForm']
 
 
-    constructor: (@scope, @routeParams, @filter, @Individual, @IndividualForm)-> 
+    constructor: (@scope, @routeParams, @filter, @Individual,  @Summary, @IndividualForm)-> 
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
@@ -45,7 +45,7 @@ class ContributeCtrl
         # Shortcut for child classes
         @scope.Individual = @Individual
         # Get the list of available resources
-        @scope.resources = @Individual.get()
+        @scope.resources = @Summary.get id: "forms"
         # Prepare future individual
         @initNewIndividual()
         # Individual list

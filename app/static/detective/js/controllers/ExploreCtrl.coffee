@@ -32,7 +32,7 @@ class ExploreCtrl
     getTypeCount: ()=>
         tt = 0
         for type in arguments
-            t   = _.findWhere(@scope.types, name: type)
+            t   = @scope.types[type]
             tt += if t? and t.count? then t.count else 0
         tt
 

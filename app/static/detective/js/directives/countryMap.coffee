@@ -25,7 +25,7 @@ angular.module('detective').directive "countryMap", ($parse)->
         pre: (scope, iElement, iAttrs, controller)->       
             # Draw the values on the map (chloroplete)
             draw = ()->           
-                values       = _.map scope.values, (d)-> d.count     
+                values       = _.map _.filter(scope.values, (d)-> d.count?), (d)-> d.count                     
                 disableColor = "#fff" 
                 colorscale   = new chroma.ColorScale
                     colors: ["#F7EAE3", "#EA7E44"]
@@ -33,7 +33,7 @@ angular.module('detective').directive "countryMap", ($parse)->
 
                 map.getLayer("countries").style 
                     fill: (country, path) ->
-                        item  = _.findWhere scope.values, isoa3: country["iso-a3"]
+                        item = scope.values[country["iso-a3"]]
                         if item then colorscale.getColor(item.count) else disableColor
                             
    
@@ -53,8 +53,8 @@ angular.module('detective').directive "countryMap", ($parse)->
                         'fill'        : '#F5F5F5'                                                        
                 # Bind layer click
                 map.getLayer('countries').on 'click', (data)->   
-                    item = _.findWhere scope.values, isoa3: data["iso-a3"]
-                    if item
+                    item = scope.values[data["iso-a3"]]
+                    if item?
                         # Do we received a click function?
                         scope.click() if typeof(scope.click) is "function"
                         # Set a model value matching to the clicked country

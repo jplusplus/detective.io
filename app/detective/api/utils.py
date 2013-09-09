@@ -1,10 +1,7 @@
 from django.conf.urls.defaults import *
 from django.forms.forms        import pretty_name
-from django.http               import HttpResponse
 from forms                     import register_model_rules
 from neo4django.db             import connection
-from tastypie.api              import Api
-from tastypie.utils.mime       import determine_format, build_content_type
 
 
 def get_model_fields(model):
@@ -56,72 +53,3 @@ def get_model_node_id(model):
     # We didn't found the node id
     except StopIteration:
         return None
-    
-
-class DetailedApi(Api):
-    def top_level(self, request, api_name=None):
-        """
-        A view that returns a serialized list of all resources registers
-        to the ``Api``. Useful for discovery.
-        """
-        available_resources = {}
-
-        if api_name is None: api_name = self.api_name
-
-        # Get the model's rules manager
-        rulesManager = register_model_rules()
-
-        for name in sorted(self._registry.keys()):                        
-            resource      = self._registry[name]
-            resourceModel = getattr(resource._meta.queryset, "model", None)  
-            # Do this ressource has a model?
-            if resourceModel != None:
-                fields        = get_model_fields(resourceModel)
-                verbose_name  = getattr(resourceModel._meta, "verbose_name", name).title()      
-
-                available_resources[name] = {
-                    'list_endpoint': self._build_reverse_url("api_dispatch_list", kwargs={
-                        'api_name': api_name,
-                        'resource_name': name,
-                    }),
-                    'schema': self._build_reverse_url("api_get_schema", kwargs={
-                        'api_name': api_name,
-                        'resource_name': name,
-                    }),
-                    'description'  : getattr(resourceModel, "_description", None),
-                    'scope'        : getattr(resourceModel, "_scope", None),
-                    'model'        : getattr(resourceModel, "__name__", ""),
-                    'verbose_name' : verbose_name,
-                    'name'         : name,
-                    'fields'       : fields,
-                    'rules'        : rulesManager.model(resourceModel).all()
-                }
-            # Default description
-            else:                
-                available_resources[name] = {
-                    'list_endpoint': self._build_reverse_url("api_dispatch_list", kwargs={
-                        'api_name': api_name,
-                        'resource_name': name,
-                    }),
-                    'schema': self._build_reverse_url("api_get_schema", kwargs={
-                        'api_name': api_name,
-                        'resource_name': name,
-                    }),
-                    'name': name
-                }
-
-        desired_format = determine_format(request, self.serializer)
-
-        options = {}
-
-        if 'text/javascript' in desired_format:
-            callback = request.GET.get('callback', 'callback')
-
-            if not is_valid_jsonp_callback_value(callback):
-                raise BadRequest('JSONP callback name is invalid.')
-
-            options['callback'] = callback
-
-        serialized = self.serializer.serialize(available_resources, desired_format, options)
-        return HttpResponse(content=serialized, content_type=build_content_type(desired_format))
-

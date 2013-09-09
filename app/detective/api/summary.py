@@ -1,10 +1,13 @@
 from ..models             import Country
-from .utils               import get_model_node_id
+from .utils               import get_model_node_id, get_model_fields
+from django.db.models     import get_app, get_models
 from django.http          import Http404, HttpResponse
+from forms                import register_model_rules
+from neo4django.db        import connection
 from tastypie.exceptions  import ImmediateHttpResponse
 from tastypie.resources   import Resource
 from tastypie.serializers import Serializer
-from neo4django.db        import connection
+
 
 
 class SummaryResource(Resource):
@@ -49,7 +52,14 @@ class SummaryResource(Resource):
             RETURN country.isoa3 as isoa3, ID(country) as id, count(i)-1 as count 
         """ % int(model_id)
         # Get the data and convert it to dictionnary
-        return connection.cypher(query).to_dicts()
+        countries = connection.cypher(query).to_dicts()
+        obj       = {}
+        for country in countries:
+            # Use isoa3 as identifier
+            obj[ country["isoa3"] ] = country
+            # ISOA3 is now useless
+            del country["isoa3"]            
+        return obj
 
     def summary_types(self, bundle):   
         import time
@@ -62,4 +72,36 @@ class SummaryResource(Resource):
             RETURN ID(n) as id, n.model_name as name, count(c) as count
         """
         # Get the data and convert it to dictionnary
-        return connection.cypher(query).to_dicts()
+        types = connection.cypher(query).to_dicts()
+        obj       = {}
+        for t in types:
+            # Use name as identifier
+            obj[ t["name"] ] = t
+            # name is now useless
+            del t["name"]
+        return obj
+
+    def summary_forms(self, bundle):
+        available_resources = {}
+        # Get the model's rules manager
+        rulesManager = register_model_rules()
+        # Get all detective's models        
+        app = get_app('detective')
+        for model in get_models(app):      
+            # Do this ressource has a model?
+            if model != None:
+                name         = model.__name__.lower()
+                fields       = get_model_fields(model)
+                verbose_name = getattr(model._meta, "verbose_name", name).title()      
+
+                available_resources[name] = {
+                    'description'  : getattr(model, "_description", None),
+                    'scope'        : getattr(model, "_scope", None),
+                    'model'        : getattr(model, "__name__", ""),
+                    'verbose_name' : verbose_name,
+                    'name'         : name,
+                    'fields'       : fields,
+                    'rules'        : rulesManager.model(model).all()
+                }
+
+        return available_resources

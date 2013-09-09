@@ -1,8 +1,8 @@
-angular.module('detectiveServices').factory("Summary", [ '$resource', ($resource)->
+angular.module('detectiveServices').factory("Summary", [ '$resource', '$http', ($resource, $http)->
     $resource '/api/v1/summary/:id/', {}, {
         get: {
             method : 'GET', 
-            isArray: true,
+            isArray: false,
             cache  : true
         }
     }

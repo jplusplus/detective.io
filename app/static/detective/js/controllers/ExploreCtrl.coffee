@@ -26,7 +26,7 @@ class ExploreCtrl
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
     selectCountry: (val, old)=> 
-        @location.path "#{@routeParams.scope}/explore/country/#{val.isoa3}" if val.isoa3?
+        @location.path "#{@routeParams.scope}/explore/country/#{val.id}" if val.id?
 
 
     getTypeCount: ()=>

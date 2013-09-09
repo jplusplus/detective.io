@@ -27,7 +27,7 @@ class ApiTestCase(ResourceTestCase):
             jpp.save()
             jg  = Organization(name="Journalism Grant")
             jg.save()
-            fra = Country(name="France")
+            fra = Country(name="France", isoa3="FRA")
             fra.save()
 
         self.post_data_simple = {
@@ -156,3 +156,13 @@ class ApiTestCase(ResourceTestCase):
         self.user.save()
 
         self.assertValidJSONResponse(self.api_client.get('/api/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))
+
+    def test_countries_summary(self):
+        resp = self.api_client.get('/api/v1/summary/countries/', format='json', authentication=self.get_credentials())  
+        self.assertValidJSONResponse(resp)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        # Only France is present
+        self.assertGreater(len(data), 0)
+        # We added 1 relation to France 
+        self.assertEqual("count" in data[0], True)

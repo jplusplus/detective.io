@@ -44,8 +44,9 @@ class SummaryResource(Resource):
         # Query to aggreagte relationships count by country
         query = """
             START n=node(%d)
-            MATCH (i)<-[]->(country)<-[r:`<<INSTANCE>>`]-(n)
-            RETURN country.isoa3 as isoa3, ID(country) as id, count(i) as count
+            MATCH (i)<-[*0..1]->(country)<-[r:`<<INSTANCE>>`]-(n)
+            WHERE HAS(country.isoa3)
+            RETURN country.isoa3 as isoa3, ID(country) as id, count(i)-1 as count 
         """ % int(model_id)
         # Get the data and convert it to dictionnary
         return connection.cypher(query).to_dicts()

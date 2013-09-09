@@ -1,5 +1,6 @@
 from .models                import EnergyProject, Organization, Country
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models       import get_app, get_models
 from neo4django.auth.models import User
 from tastypie.test          import ResourceTestCase
 import json
@@ -8,11 +9,13 @@ class ApiTestCase(ResourceTestCase):
 
     def setUp(self):
         super(ApiTestCase, self).setUp()
+        self.detective = get_app("detective")
+        self.models    = get_models(self.detective)
         # Look for the test user
-        self.username = 'tester'
-        self.password = 'tester'
+        self.username  = 'tester'
+        self.password  = 'tester'
         try:
-            self.user = User.objects.get(username=self.username)   
+            self.user = User.objects.get(username=self.username)  
             jpp       = Organization.objects.get(name="Journalism++")             
             jg        = Organization.objects.get(name="Journalism Grant")             
             fra       = Country.objects.get(name="France")             
@@ -45,7 +48,7 @@ class ApiTestCase(ResourceTestCase):
                 { "id": fra.id }
             ]
         }
-
+        
     def get_credentials(self):        
         return self.create_basic(username=self.username, password=self.password)
 
@@ -166,3 +169,11 @@ class ApiTestCase(ResourceTestCase):
         self.assertGreater(len(data), 0)
         # We added 1 relation to France 
         self.assertEqual("count" in data[0], True)
+
+    def test_forms_summary(self):
+        resp = self.api_client.get('/api/v1/summary/forms/', format='json', authentication=self.get_credentials())  
+        self.assertValidJSONResponse(resp)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        # As many descriptors as models
+        self.assertEqual( len(self.models), len(data.items()) )

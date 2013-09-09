@@ -17,8 +17,13 @@ class CypherResource(Resource):
         resource_name   = 'cypher'
         object_class    = object
 
-    def obj_get_list(self, request=None, **kwargs):         
-        query = kwargs["bundle"].request.GET["q"];
+    def obj_get_list(self, request=None, **kwargs): 
+        request = kwargs["bundle"].request if request == None else request 
+        # Super user only
+        if not request.user.is_superuser:
+            # We force tastypie to render the response directly 
+            raise ImmediateHttpResponse(response=HttpResponse('Unauthorized', status=401))            
+        query = request.GET["q"];
         data  = connection.cypher(query).to_dicts()
         # Serialize content in json
         # @TODO implement a better format support

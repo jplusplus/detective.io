@@ -4,10 +4,10 @@ from neo4django.auth.models import User
 from tastypie.test          import ResourceTestCase
 import json
 
-class EnergyProjectResourceTest(ResourceTestCase):
+class ApiTest(ResourceTestCase):
 
     def setUp(self):
-        super(EnergyProjectResourceTest, self).setUp()
+        super(ApiTest, self).setUp()
         # Look for the test user
         self.username = 'tester'
         self.password = 'tester'
@@ -104,3 +104,22 @@ class EnergyProjectResourceTest(ResourceTestCase):
             min(20, len(data["objects"])), 
             EnergyProject.objects.filter(_author__username="tester").count()
         )
+
+    def test_cypher_unauthenticated(self):
+        self.assertHttpUnauthorized(self.api_client.get('/api/v1/cyper/?q=START%20n=node%28*%29RETURN%20n;', format='json'))
+
+    def test_cypher_unauthorized(self):
+        # Ensure the user isn't authorized to process cypher request
+        self.user.is_staff = True
+        self.user.is_superuser = False
+        self.user.save() 
+
+        self.assertHttpUnauthorized(self.api_client.get('/api/v1/cyper/?q=START%20n=node%28*%29RETURN%20n;', format='json'), authentication=self.get_credentials())
+
+
+    def test_cypher_authorized(self):
+        # Ensure the user IS authorized to process cypher request
+        self.user.is_superuser = True
+        self.user.save()
+
+        self.assertValidJSONResponse(self.api_client.get('/api/v1/cyper/?q=START%20n=node%28*%29RETURN%20n;', format='json'), authentication=self.get_credentials())

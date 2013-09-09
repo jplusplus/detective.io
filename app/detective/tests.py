@@ -4,10 +4,10 @@ from neo4django.auth.models import User
 from tastypie.test          import ResourceTestCase
 import json
 
-class ApiTest(ResourceTestCase):
+class ApiTestCase(ResourceTestCase):
 
     def setUp(self):
-        super(ApiTest, self).setUp()
+        super(ApiTestCase, self).setUp()
         # Look for the test user
         self.username = 'tester'
         self.password = 'tester'
@@ -48,6 +48,40 @@ class ApiTest(ResourceTestCase):
 
     def get_credentials(self):        
         return self.create_basic(username=self.username, password=self.password)
+
+    def test_user_login_succeed(self):
+        auth = dict(username="tester", password="tester")
+        resp = self.api_client.post('/api/v1/user/login/', format='json', data=auth)
+        self.assertValidJSON(resp.content)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)       
+        self.assertEqual(data["success"], True)
+
+    def test_user_login_failed(self):
+        auth = dict(username="tester", password="wrong")
+        resp = self.api_client.post('/api/v1/user/login/', format='json', data=auth)
+        self.assertValidJSON(resp.content)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)       
+        self.assertEqual(data["success"], False)
+
+    def test_user_logout_succeed(self):
+        # First login
+        auth = dict(username="tester", password="tester")
+        self.api_client.post('/api/v1/user/login/', format='json', data=auth)
+        # Then logout
+        resp = self.api_client.get('/api/v1/user/logout/', format='json')
+        self.assertValidJSON(resp.content)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)       
+        self.assertEqual(data["success"], True)
+
+    def test_user_logout_failed(self):
+        resp = self.api_client.get('/api/v1/user/logout/', format='json')
+        self.assertValidJSON(resp.content)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)       
+        self.assertEqual(data["success"], False)
 
     def test_get_list_unauthorzied(self):
         self.assertHttpUnauthorized(self.api_client.get('/api/v1/energyproject/', format='json'))

@@ -62,7 +62,7 @@ class UserResource(ModelResource):
             return self.create_response(request, {
                 'success': False,
                 'reason': 'Incorrect password or username.',
-                })
+            })
 
     def logout(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
@@ -70,7 +70,7 @@ class UserResource(ModelResource):
             logout(request)
             return self.create_response(request, { 'success': True })
         else:
-            return self.create_response(request, { 'success': False }, HttpResponse('Unauthorized', status=401) )  
+            return self.create_response(request, { 'success': False })  
 
     def status(self, request, **kwargs):        
         self.method_check(request, allowed=['get'])

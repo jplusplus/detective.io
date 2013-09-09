@@ -29,6 +29,7 @@ class IndividualMeta:
     authorization      = IndividualAuthorization()     
     authentication     = MultiAuthentication(SessionAuthentication(), BasicAuthentication())
     filtering          = {'name': ALL}
+    ordering           = {'name': ALL}
 
 class IndividualResource(ModelResource):
 
@@ -36,6 +37,7 @@ class IndividualResource(ModelResource):
         super(IndividualResource, self).__init__(api_name)    
         # Register relationships fields automaticly            
         self.generate_to_many_fields(True)
+        # Add default name ordering
 
     def build_schema(self):  
         """

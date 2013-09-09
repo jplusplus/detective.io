@@ -35,5 +35,5 @@ angular
 	            colour
 
 	        # Combinate color generation and brightness
-	        colorLuminance( generateColor( md5(str) ), lum)
+	        colorLuminance( generateColor( md5(str.toLowerCase()) ), lum)
     )

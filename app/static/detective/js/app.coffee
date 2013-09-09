@@ -24,11 +24,11 @@ detective = angular
                 $routeProvider
                     .when('/home', {
                         controller: HomeCtrl
-                        templateUrl: "/partial/home.html",
+                        templateUrl: "/partial/home.html"
                     })
                     .when('/login', {
                         controller: UserCtrl
-                        templateUrl: "/partial/login.html",
+                        templateUrl: "/partial/login.html"
                     })
                     .when('/:scope/explore', {
                         controller: ExploreCtrl  
@@ -38,12 +38,12 @@ detective = angular
                     })
                     .when('/:scope/explore/:type', {
                         controller: IndividualListCtrl  
-                        templateUrl: "/partial/individual-list.html",               
+                        templateUrl: "/partial/individual-list.html"
                         auth: true
                     })
                     .when('/:scope/explore/:type/:id', {
                         controller: IndividualSingleCtrl  
-                        templateUrl: "/partial/individual-single.html",               
+                        templateUrl: "/partial/individual-single.html"         
                         auth: true
                     })
                     .when('/:scope/contribute', {

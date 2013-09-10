@@ -31,7 +31,7 @@
 }
 
 html body .panel {
-	color:@gray-darker;
+	color:@gray-darker;	
 	.border-radius(2px);
 	.box-shadow( 0 -3px 0 fade(#000, 40) inset);
 	border-bottom:0;
@@ -42,8 +42,15 @@ html body .panel {
 		border-bottom:1px solid fade(#fff, 20);
 	}
 
+	a {
+		color:mix(@gray-darker, @link-color);
+	}
+
 	&.panel-colored {
 		color:white;
+		a {
+			color:mix(#fff, @link-color);
+		}
 	}
 }
 
@@ -81,5 +88,9 @@ html body .panel {
 .well {
 	.nav-pills a {
 		color:@gray;
+		i {
+			float:right;
+			text-decoration: none;
+		}
 	}
 }

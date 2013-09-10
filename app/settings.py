@@ -140,7 +140,6 @@ COMPRESS_CSS_FILTERS = (
 )
 
 COMPRESS_JS_FILTERS = (
-    "compressor.filters.jsmin.JSMinFilter",
     "compressor.filters.template.TemplateFilter",
 )
 
@@ -148,7 +147,7 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
 }
 
-COMPRESS_ENABLED = False
+COMPRESS_ENABLED = True
 
 #INTERNAL_IPS = ('127.0.0.1',)
 

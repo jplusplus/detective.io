@@ -11,7 +11,7 @@
 
 	<ul class="list-unstyled clearfix top20">
 		<li ng-repeat="individual in individuals.objects">			
-			<div class="panel individual" ng-style="{'background-color': strToColor(type)}">
+			<div class="panel panel-colored individual" ng-style="{'background-color': strToColor(type)}">
 				<h4 class="panel-heading bottom0">
 					<a ng-href="[[singleUrl(individual)]]">
 						[[individual|individualPreview]]

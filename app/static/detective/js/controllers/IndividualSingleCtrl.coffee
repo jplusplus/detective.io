@@ -33,7 +33,7 @@ class IndividualSingleCtrl
         @anchorScroll()
     singleUrl: (individual, type=false)=> 
         type = (type or @scope.type).toLowerCase()
-        "#{@scope.scope}/explore/#{type}/#{individual.id}/"
+        "/node/#{type}/#{individual.id}/"
     # True if the given type is literal
     isLiteral: (field)=>
         [

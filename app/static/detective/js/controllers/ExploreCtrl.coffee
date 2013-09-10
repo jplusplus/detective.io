@@ -28,10 +28,10 @@ class ExploreCtrl
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
     selectCountry: (val, old)=> 
-        @location.path "#{@routeParams.scope}/explore/country/#{val.id}" if val.id?
+        @location.path "/node/country/#{val.id}" if val.id?
 
     selectIndividual: (val, old)=>
-        @location.path "#{@routeParams.scope}/explore/#{val.model.toLowerCase()}/#{val.id}" if val.id?
+        @location.path "/node/#{val.model.toLowerCase()}/#{val.id}" if val.id?
 
     getTypeCount: ()=>
         tt = 0

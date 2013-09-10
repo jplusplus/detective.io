@@ -40,7 +40,7 @@ class IndividualListCtrl
 
         
     
-    singleUrl: (individual)=> "#{@scope.scope}/explore/#{@scope.type}/#{individual.id}"
+    singleUrl: (individual)=> "/node/#{@scope.type}/#{individual.id}"
     # Pages list
     pages: => 
         # No page yet

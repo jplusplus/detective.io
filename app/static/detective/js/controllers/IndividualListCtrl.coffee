@@ -1,8 +1,8 @@
 class IndividualListCtrl
     # Injects dependancies    
-    @$inject: ['$scope', '$routeParams', 'Individual', '$location', '$filter']
+    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$location', '$filter']
 
-    constructor: (@scope, @routeParams, @Individual, @location, @filter)->              
+    constructor: (@scope, @routeParams, @Individual, @Summary, @location, @filter)->              
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────  
@@ -23,12 +23,21 @@ class IndividualListCtrl
         @scope.page        = @routeParams.page or 1
         @scope.limit       = 20
         @scope.individuals = {}
-        # Get individual from database
-        @scope.individuals = @Individual.get 
-            type    : @scope.type
-            limit   : @scope.limit
-            offset  : @scope.limit * (@scope.page - 1)
-            #order_by: "name"
+        # Get meta information for this type
+        @Summary.get id: "forms", (data)=> @scope.meta = data[@scope.type.toLowerCase()]
+        # ──────────────────────────────────────────────────────────────────────
+        # Scope watchers
+        # ──────────────────────────────────────────────────────────────────────  
+        @scope.$watch "page", =>
+            # Get individual from database
+            @scope.individuals = @Individual.get 
+                type    : @scope.type
+                limit   : @scope.limit
+                offset  : @scope.limit * (@scope.page - 1)
+                order_by: "name"
+        # Update page value
+        @scope.$on "$routeUpdate", => @scope.page = @routeParams.page or 1
+
         
     
     singleUrl: (individual)=> "#{@scope.scope}/explore/#{@scope.type}/#{individual.id}"
@@ -46,9 +55,9 @@ class IndividualListCtrl
     # True if there is a next page
     hasNextPage: => @scope.individuals.meta? and @scope.individuals.meta.next isnt null
     # Go to the previous page
-    previousPage: => @location.search "page", 1*@scope.page-1 if @hasPreviousPage()
+    previousPage: => @goToPage(1*@scope.page-1) if @hasPreviousPage()
     # Go to the next page
-    nextPage: => @location.search "page", 1*@scope.page+1 if @hasNextPage()
+    nextPage: => @goToPage(1*@scope.page+1) if @hasNextPage()
 
 
     

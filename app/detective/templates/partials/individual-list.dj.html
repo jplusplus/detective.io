@@ -1,22 +1,15 @@
 <div class="container" id="individual-list">
 
-	<div class="tr">	
-		<ul class="pagination">
-			<li ng-class="{disabled: !hasPreviousPage()}">
-				<a ng-click="previousPage()">&laquo;</a>
-			</li>
-			<li ng-repeat="p in pages() track by $index" ng-class="{active: $index+1 == page}">
-				<a ng-click="goToPage($index+1)">
-					[[$index+1]] <span class="sr-only">(current)</span>
-				</a>
-			</li>
-			<li ng-class="{disabled: !hasNextPage()}">
-				<a ng-click="nextPage()">&raquo;</a>
-			</li>
-		</ul>	
-	</div>
+	<h2 ng-if="individuals.meta.total_count <= 1">
+		[[individuals.objects.length]] of
+		[[individuals.meta.total_count]] [[meta.verbose_name]]
+	</h2>
+	<h2  ng-if="individuals.meta.total_count > 1">
+		[[individuals.objects.length]] of
+		[[individuals.meta.total_count]] [[meta.verbose_name_plural]]
+	</h2>
 
-	<ul class="list-unstyled clearfix">
+	<ul class="list-unstyled clearfix top20">
 		<li ng-repeat="individual in individuals.objects">			
 			<div class="panel individual" ng-style="{'background-color': strToColor(type)}">
 				<h4 class="panel-heading bottom0">
@@ -32,7 +25,7 @@
 	</ul>
 
 	<div class="tr">	
-		<ul class="pagination">
+		<ul class="pagination top0">
 			<li ng-class="{disabled: !hasPreviousPage()}">
 				<a ng-click="previousPage()">&laquo;</a>
 			</li>

@@ -39,6 +39,7 @@ detective = angular
                     .when('/:scope/explore/:type', {
                         controller: IndividualListCtrl  
                         templateUrl: "/partial/individual-list.html"
+                        reloadOnSearch: false
                         auth: true
                     })
                     .when('/:scope/explore/:type/:id', {

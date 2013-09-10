@@ -92,18 +92,20 @@ class SummaryResource(Resource):
         for model in get_models(app):      
             # Do this ressource has a model?
             if model != None:
-                name         = model.__name__.lower()
-                fields       = get_model_fields(model)
-                verbose_name = getattr(model._meta, "verbose_name", name).title()      
+                name                = model.__name__.lower()
+                fields              = get_model_fields(model)
+                verbose_name        = getattr(model._meta, "verbose_name", name).title()      
+                verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()      
 
                 available_resources[name] = {
-                    'description'  : getattr(model, "_description", None),
-                    'scope'        : getattr(model, "_scope", None),
-                    'model'        : getattr(model, "__name__", ""),
-                    'verbose_name' : verbose_name,
-                    'name'         : name,
-                    'fields'       : fields,
-                    'rules'        : rulesManager.model(model).all()
+                    'description'         : getattr(model, "_description", None),
+                    'scope'               : getattr(model, "_scope", None),
+                    'model'               : getattr(model, "__name__", ""),
+                    'verbose_name'        : verbose_name,
+                    'verbose_name_plural' : verbose_name_plural,
+                    'name'                : name,
+                    'fields'              : fields,
+                    'rules'               : rulesManager.model(model).all()
                 }
 
         return available_resources

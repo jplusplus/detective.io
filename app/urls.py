@@ -31,6 +31,7 @@ scopes = "|".join(["energy", "healt", "politic"])
 
 urlpatterns = patterns('',	
     url(r'^$', 				   'app.detective.views.home', name='home'),
+    url(r'^login/$',	       'app.detective.views.home', name='login'),
     url(r'^%s/\w?/$' % scopes, 'app.detective.views.home', name='scope'),
     url(r'^admin/', include(admin.site.urls)),    
     url(r'^api/',   include(v1_api.urls)),    

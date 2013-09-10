@@ -44,7 +44,8 @@ detective = angular
                     })
                     .when('/:scope/explore/:type/:id', {
                         controller: IndividualSingleCtrl  
-                        templateUrl: "/partial/individual-single.html"         
+                        templateUrl: "/partial/individual-single.html"  
+                        reloadOnSearch: false       
                         auth: true
                     })
                     .when('/:scope/contribute', {
@@ -57,4 +58,4 @@ detective = angular
     )
 
 # Services module
-angular.module('detectiveServices', ['ngResource', 'ngCookies'])
+angular.module('detectiveServices', ['ngResource', 'ngSanitize', 'ngCookies'])

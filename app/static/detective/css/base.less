@@ -49,6 +49,26 @@ body {
 		}
 	}
 
+
+	.color-tag {
+		width:40px;
+		height:40px;
+		display:inline-block;
+		position:relative;
+		.border-radius(@border-radius-small);
+
+		&:after {
+			position:absolute;
+			top:0; left:0;
+			content:"";
+			border:20px transparent solid;
+			border-left-color:fade(white, 20%);
+			border-top-color:transparent;
+			border-right-color:fade(black, 20%);
+			border-bottom-color:fade(black, 40%);
+		}
+	}
+
 }
 
 header {

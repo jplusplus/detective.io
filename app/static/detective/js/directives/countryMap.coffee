@@ -3,7 +3,7 @@ Load Django static tags
 {% load staticfiles %}
 ###
 
-angular.module('detective').directive "countryMap", ($parse)->    
+angular.module('detective').directive "countryMap", ()->    
     scope:
         # What to when clicking a country
         click: "&?"

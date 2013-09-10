@@ -2,6 +2,7 @@ from django.conf.urls.defaults import *
 from django.forms.forms        import pretty_name
 from forms                     import register_model_rules
 from neo4django.db             import connection
+from random                    import randint
 
 
 def get_model_fields(model):
@@ -34,13 +35,21 @@ def get_model_fields(model):
     return fields
 
 def get_model_nodes():
+    # Return buffer values
+    if hasattr(get_model_nodes, "buffer"): 
+        results = get_model_nodes.buffer
+        # Refresh the buffer ~ 1/10 calls
+        if randint(0,10) == 10: del get_model_nodes.buffer
+        return results
     query = """
         START n=node(*)
         MATCH n-[r:`<<TYPE>>`]->t
         WHERE HAS(t.name)
         RETURN t.name as name, ID(t) as id
     """
-    return connection.cypher(query).to_dicts()
+    # Bufferize the result
+    get_model_nodes.buffer = connection.cypher(query).to_dicts()    
+    return get_model_nodes.buffer
     
 
 def get_model_node_id(model):

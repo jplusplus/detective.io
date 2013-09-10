@@ -58,8 +58,8 @@ angular.module('detective').directive "countryMap", ($parse)->
                         # Do we received a click function?
                         scope.click() if typeof(scope.click) is "function"
                         # Set a model value matching to the clicked country
-                        if scope.model? and typeof(scope.model) is "object"              
-                            scope.model["id"] = item["id"]
+                        if scope.model? and typeof(scope.model) is "object"
+                            angular.copy(item, scope.model);
                             scope.$apply()
                 # Now the layer exists...
                 # if we have values to draw!

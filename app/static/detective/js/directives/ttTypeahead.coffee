@@ -20,7 +20,14 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
         # Create the typehead
         element.typeahead    
             name: individual
-            template: "<%= name %>"
+            template: [
+                "<%= name %>",
+                "<% if (typeof(model) != 'undefined') { %>",
+                    "<div class='model'>",
+                        "<%= model %>",
+                    "</div>",
+                "<% } %>"
+            ].join ""
             engine: engine
             valueKey: "name"
             prefetch: 
@@ -33,11 +40,12 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
         # Watch select event
         element.on "typeahead:selected", (input, individual)->      
             if scope.model?
-                scope.model = individual
+                angular.copy(individual, scope.model);
                 scope.$apply()
 
         # Watch user value event
         element.on "typeahead:uservalue", ()->  
+            return unless scope.model?
             # Empty selected model
             delete scope.model.id
             # Record the value

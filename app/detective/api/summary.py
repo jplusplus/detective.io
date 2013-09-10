@@ -1,12 +1,14 @@
-from ..models             import Country
-from .utils               import get_model_node_id, get_model_fields
-from django.db.models     import get_app, get_models
-from django.http          import Http404, HttpResponse
-from forms                import register_model_rules
-from neo4django.db        import connection
-from tastypie.exceptions  import ImmediateHttpResponse
-from tastypie.resources   import Resource
-from tastypie.serializers import Serializer
+from ..models              import Country
+from .utils                import get_model_node_id, get_model_fields
+from django.core.paginator import Paginator, InvalidPage
+from django.db.models      import get_app, get_models
+from django.http           import Http404, HttpResponse
+from forms                 import register_model_rules
+from neo4django.db         import connection
+from tastypie.exceptions   import ImmediateHttpResponse
+from tastypie.resources    import Resource
+from tastypie.serializers  import Serializer
+import re
 
 
 
@@ -105,3 +107,50 @@ class SummaryResource(Resource):
                 }
 
         return available_resources
+
+
+    def summary_search(self, bundle):        
+        request = bundle.request
+        self.method_check(request, allowed=['get'])        
+        self.throttle_check(request)
+
+        if not "q" in request.GET: raise Exception("Missing 'q' parameter")
+
+        limit = int(request.GET.get('limit', 20))
+        match = bundle.request.GET["q"].lower()
+        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match)
+        # Query to get every result
+        query = """
+            START root=node(*)
+            MATCH (root)<-[r:`<<INSTANCE>>`]-(type)
+            WHERE HAS(root.name) 
+            AND type.app_label = "detective"
+            AND LOWER(root.name) =~ '.*(%s).*'
+            RETURN ID(root) as id, root.name as name, type.model_name as model
+        """ % match
+        results   = connection.cypher(query).to_dicts()
+        count     = len(results)
+        paginator = Paginator(results, limit)
+
+        try:
+            p     = int(request.GET.get('page', 1))
+            page  = paginator.page(p)
+        except InvalidPage:
+            raise Http404("Sorry, no results on that page.")
+
+        objects = []
+        for result in page.object_list:    
+            objects.append(result)
+
+        object_list = {
+            'objects': objects,
+            'meta': {
+                'q': match,
+                'page': p,
+                'limit': limit,
+                'total_count': count
+            }
+        }
+
+        self.log_throttled_access(request)
+        return object_list

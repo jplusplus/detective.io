@@ -8,7 +8,13 @@
 		<div class="col-md-6 bottom20">	
 			<form class="form-inline" role="search">	
 				<div class="input-group">		
-					<input type="search" class="form-control" id="input-search" placeholder="Search..." />		    				
+					<input  type="search" 
+						    placeholder="Search..."
+						 	tt-typeahead
+							tt-individual="'summary'"
+							tt-model="selectedIndividual"
+						   	class="form-control" 
+						   	id="input-search" />		    				
 					<div class="input-group-btn">		
 			    		<button type="submit" class="btn btn-primary">Go!</button>					    					
 			    	</div>

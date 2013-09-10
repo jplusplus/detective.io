@@ -17,10 +17,12 @@ class ExploreCtrl
         @scope.types           = @Summary.get id:"types" 
         # Country where the user click
         @scope.selectedCountry = {}
+        @scope.selectedIndividual = {}
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
         @scope.$watch "selectedCountry", @selectCountry, true
+        @scope.$watch "selectedIndividual", @selectIndividual, true
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
@@ -28,6 +30,8 @@ class ExploreCtrl
     selectCountry: (val, old)=> 
         @location.path "#{@routeParams.scope}/explore/country/#{val.id}" if val.id?
 
+    selectIndividual: (val, old)=>
+        @location.path "#{@routeParams.scope}/explore/#{val.model.toLowerCase()}/#{val.id}" if val.id?
 
     getTypeCount: ()=>
         tt = 0

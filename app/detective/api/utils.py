@@ -54,7 +54,7 @@ def get_model_nodes():
 
 def get_model_node_id(model):
     # All node from neo4j that are have ascending <<TYPE>> relationship
-    nodes       = get_model_nodes()
+    nodes = get_model_nodes()
     try:
         # Search for the node with the good name
         model_node  = next(n for n in nodes if n["name"] == "detective:%s" % model.__name__)

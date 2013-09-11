@@ -1,3 +1,6 @@
+from .forms                             import register_model_rules
+from ..neomatch                         import Neomatch
+from ..modelrules                       import ModelRules
 from django.conf.urls                   import url
 from django.core.paginator              import Paginator, InvalidPage
 from django.db.models.query             import QuerySet
@@ -52,18 +55,24 @@ class IndividualResource(ModelResource):
         }
         return dict(additionals.items() + schema.items())
 
-    def get_model_fields(self):
+    def get_queryset(self):        
         # Resource must implement a queryset!
         queryset = getattr(self._meta, "queryset", None)
         if not isinstance(queryset, QuerySet):
             raise Exception("The given resource must define a queryset.")
+        return queryset
+
+    def get_model(self):        
+        return self.get_queryset().model
+
+    def get_model_fields(self):
         # Find fields of the queryset's model        
-        return queryset.model._meta.fields  
+        return self.get_model()._meta.fields  
 
     def need_to_many_field(self, field):        
         # Limit the definition of the new fields
         # to the relationships
-        if isinstance(field, MultipleNodes):
+        if isinstance(field, MultipleNodes) and not field.name.endswith("_set"):
             # The resource already define a field for this one
             # resource_field = self.fields[field.name]
             # But it's probably still a charfield !
@@ -103,6 +112,18 @@ class IndividualResource(ModelResource):
         # Register relationships fields automaticly with full detail
         self.generate_to_many_fields(False)
         return super(IndividualResource, self).get_list(request, **kwargs)
+
+    def alter_detail_data_to_serialize(self, request, bundle):
+        # Show additional field following the model's rules
+        rules = register_model_rules().model(self.get_model()).all()
+        # All additional relationships
+        bundle.data["extension"] = {}
+        for key in rules:
+            # Filter rules to keep only Neomatch
+            if isinstance(rules[key], Neomatch):
+                bundle.data["extension"][key] = rules[key].query(bundle.obj.id)
+        
+        return bundle
 
     def dehydrate(self, bundle):
         # Control that every relationship fields are list        

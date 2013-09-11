@@ -1,8 +1,11 @@
 from ..modelrules     import ModelRules
+from ..neomatch       import Neomatch
 from ..models         import *
 from django.db.models import get_app, get_models
 
 def register_model_rules():
+    # Singleton
+    if hasattr(register_model_rules, "rules"): return register_model_rules.rules
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # Disable editing on some model
@@ -23,8 +26,14 @@ def register_model_rules():
     rules.model(Person).field("website_url").add(is_visible=False)
     rules.model(Project).field("partner").add(is_visible=False)
 
-    # Add now some generic rules
+    rules.model(Country).add(product_set= Neomatch(
+        title="Products distributed in this country",
+        match="""
+            (root)<--()<-[:`energy_product_has_distribution+`]-({select})-[:`<<INSTANCE>>`]-({model})
+        """
+    ))
 
+    # Add now some generic rules
     app = get_app('detective')
     # Set "is_searchable" to true on every model with a name
     for model in get_models(app):
@@ -51,4 +60,6 @@ def register_model_rules():
                 rules.model(model).field(field.name).add(is_searchable=modelRules["is_searchable"])
                 rules.model(model).field(field.name).add(is_editable=modelRules["is_editable"])                            
 
+    # Register the rules
+    register_model_rules.rules = rules
     return rules

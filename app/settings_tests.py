@@ -38,6 +38,17 @@ DATABASE_ROUTERS = ['neo4django.utils.Neo4djangoIntegrationRouter']
 USE_TZ = True
 
 INSTALLED_APPS = (
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',    
+    'django.contrib.admin',
+    'neo4django.contenttypes',
+    'neo4django.admin',
+    'compressor', 
+    'tastypie',
     'app.detective',   
 )
 

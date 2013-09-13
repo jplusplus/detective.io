@@ -1,5 +1,5 @@
 import unittest
-from django.test            import Client
+from django.test import Client
 
 class FrontTestCase(unittest.TestCase):
 
@@ -48,3 +48,5 @@ class FrontTestCase(unittest.TestCase):
         response = self.client.get('/')
         # Ensure the cookie is deleted
         self.assertEqual( hasattr(response.cookies, "user__is_logged"), False )
+
+#EOF

@@ -2,6 +2,7 @@ from django.core.management import call_command
 from django.test            import TestCase
 from StringIO               import StringIO 
 from neo4django.auth.models import User
+from ..models               import Country
 import sys
  
 
@@ -32,3 +33,19 @@ class CommandsTestCase(TestCase):
         # Check that it exists
         user = User.objects.get(username="supertest")
         self.assertEqual(user.is_superuser, True)
+
+
+    def test_loadnodes(self):
+        # Catch output
+        output = StringIO()
+        sys.stdout = output
+        # Must fail without argument
+        with self.assertRaises(SystemExit):
+            call_command('loadnodes')
+        # Import countries
+        args = "./app/detective/fixtures/countries.json"
+        call_command('loadnodes', args)
+        # Does France exists?
+        self.assertGreater(len( Country.objects.filter(isoa3="FRA") ), 0)
+        # Does USA exists?
+        self.assertGreater(len( Country.objects.filter(isoa3="USA") ), 0)

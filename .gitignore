@@ -13,6 +13,7 @@ Thumbs.db
 *.pot
 *.pyc
 
+fabfile.py
 # Users media
 app/media/*
 

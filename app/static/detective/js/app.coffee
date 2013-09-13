@@ -30,6 +30,9 @@ detective = angular
                         controller: UserCtrl
                         templateUrl: "/partial/login.html"
                     })
+                    .when('/', {
+                        redirectTo: "/energy/contribute"
+                    })
                     .when('/node', {
                         redirectTo: "/home"
                     })

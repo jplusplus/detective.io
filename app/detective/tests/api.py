@@ -1,4 +1,4 @@
-from ..models                import EnergyProject, Organization, Country
+from ..models               import EnergyProject, Organization, Country
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models       import get_app, get_models
 from neo4django.auth.models import User

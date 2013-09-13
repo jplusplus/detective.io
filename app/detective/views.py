@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from django.http                    import Http404
-from django.shortcuts               import render_to_response
-from django.template                import TemplateDoesNotExist
+from django.http      import Http404
+from django.shortcuts import render_to_response
+from django.template  import TemplateDoesNotExist
 
 def home(request):    
     # Render template without any argument

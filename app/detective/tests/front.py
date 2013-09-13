@@ -19,6 +19,12 @@ class FrontTestCase(unittest.TestCase):
         # Check that the response is 200 OK.
         self.assertEqual(response.status_code, 200)
 
+    def test_partial_doesnt_exist(self):
+        # Issue a GET request.
+        response = self.client.get('/partial/unkown.html')
+        # Check that the response is 200 OK.
+        self.assertEqual(response.status_code, 404)
+
     def test_login(self):
         from neo4django.auth.models import User
         from django.core.exceptions import ObjectDoesNotExist        

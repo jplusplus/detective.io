@@ -142,6 +142,9 @@ class ApiTestCase(ResourceTestCase):
             EnergyProject.objects.filter(_author__username="tester").count()
         )
 
+    def test_cypher_detail(self):
+        self.assertHttpNotFound(self.api_client.get('/api/v1/cypher/111/', format='json', authentication=self.get_credentials()))
+
     def test_cypher_unauthenticated(self):
         self.assertHttpUnauthorized(self.api_client.get('/api/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json'))
 
@@ -160,6 +163,9 @@ class ApiTestCase(ResourceTestCase):
 
         self.assertValidJSONResponse(self.api_client.get('/api/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))
 
+    def test_summary_list(self):
+        self.assertHttpNotFound(self.api_client.get('/api/v1/summary/', format='json'))
+
     def test_countries_summary(self):
         resp = self.api_client.get('/api/v1/summary/countries/', format='json', authentication=self.get_credentials())  
         self.assertValidJSONResponse(resp)
@@ -177,3 +183,8 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)
         # As many descriptors as models
         self.assertEqual( len(self.models), len(data.items()) )
+
+    def test_types_summary(self):
+        resp = self.api_client.get('/api/v1/summary/types/', format='json', authentication=self.get_credentials())  
+        self.assertValidJSONResponse(resp)
+

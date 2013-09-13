@@ -87,6 +87,24 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)       
         self.assertEqual(data["success"], False)
 
+    def test_user_status_isnt_logged(self):
+        resp = self.api_client.get('/api/v1/user/status/', format='json')
+        self.assertValidJSON(resp.content)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)       
+        self.assertEqual(data["is_logged"], False)
+
+    def test_user_status_is_logged(self):
+        # Log in
+        auth = dict(username="tester", password="tester")
+        self.api_client.post('/api/v1/user/login/', format='json', data=auth)
+
+        resp = self.api_client.get('/api/v1/user/status/', format='json')   
+        self.assertValidJSON(resp.content)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)       
+        self.assertEqual(data["is_logged"], True)
+
     def test_get_list_unauthorzied(self):
         self.assertHttpUnauthorized(self.api_client.get('/api/v1/energyproject/', format='json'))
 

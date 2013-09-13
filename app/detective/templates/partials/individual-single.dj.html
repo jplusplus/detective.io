@@ -29,8 +29,7 @@
 						 </tbody>
 					</table>
 
-
-				 	<div ng-repeat="field in meta.fields|filter:{type:'Relationship'}" ng-show="get(field.name)" id="rels-[[field.name]]">
+				 	<div ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)" id="rels-[[field.name]]">
 				 		<h3>[[field.verbose_name]] <small class="text-muted">[[field.related_model]]</small></h3>
 				 		<ul class="row list-unstyled">
 				 			<li class="col-sm-4" ng-repeat="rel in get(field.name)">
@@ -40,6 +39,8 @@
 				 			</li>
 				 		</ul>
 				 	</div>
+
+
 				</div>
 			</div>
 		</div>
@@ -47,7 +48,7 @@
 		<div class="col-sm-4">
 			<div class="well padding10" ng-show="hasRels()">
 				<ul class="nav nav-pills nav-stacked">
-				 	<li ng-repeat="field in meta.fields|filter:{type:'Relationship'}" ng-show="get(field.name)">
+				 	<li ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)">
 				 		<a ng-click="scrollTo('rels-' + field.name)">
 				 			[[field.verbose_name]] <i class="text-muted">[[field.related_model]]</i>
 				 		</a>

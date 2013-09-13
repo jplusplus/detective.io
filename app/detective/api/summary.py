@@ -1,4 +1,5 @@
 from ..models              import Country
+from ..neomatch            import Neomatch
 from .utils                import get_model_node_id, get_model_fields
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models      import get_app, get_models
@@ -93,9 +94,21 @@ class SummaryResource(Resource):
             # Do this ressource has a model?
             if model != None:
                 name                = model.__name__.lower()
+                rules               = rulesManager.model(model).all()
                 fields              = get_model_fields(model)
                 verbose_name        = getattr(model._meta, "verbose_name", name).title()      
                 verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()      
+
+                for key in rules:
+                    # Filter rules to keep only Neomatch
+                    if isinstance(rules[key], Neomatch):
+                        fields.append({
+                            "name"         : key,
+                            "type"         : "ExtendedRelationship",
+                            "verbose_name" : rules[key].title,
+                            "rules"        : {},
+                            "related_model": rules[key].target_model.__name__
+                        })
 
                 available_resources[name] = {
                     'description'         : getattr(model, "_description", None),
@@ -105,7 +118,7 @@ class SummaryResource(Resource):
                     'verbose_name_plural' : verbose_name_plural,
                     'name'                : name,
                     'fields'              : fields,
-                    'rules'               : rulesManager.model(model).all()
+                    'rules'               : rules
                 }
 
         return available_resources

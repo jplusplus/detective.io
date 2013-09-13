@@ -22,13 +22,16 @@ detective = angular
                 $locationProvider.html5Mode true
                 # Bind routes to the controllers
                 $routeProvider
-                    .when('/', {
+                    .when('/home', {
                         controller: HomeCtrl
                         templateUrl: "/partial/home.html"
                     })
                     .when('/login', {
                         controller: UserCtrl
                         templateUrl: "/partial/login.html"
+                    })
+                    .when('/node', {
+                        redirectTo: "/home"
                     })
                     .when('/node/:type', {
                         controller: IndividualListCtrl  

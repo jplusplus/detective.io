@@ -28,10 +28,21 @@ def register_model_rules():
 
     rules.model(Country).add(product_set= Neomatch(
         title="Products distributed in this country",
+        target_model=EnergyProduct,
         match="""
-            (root)<--()<-[:`energy_product_has_distribution+`]-({select})-[:`<<INSTANCE>>`]-({model})
+            (root)<--()<-[:`energy_product_has_distribution+`]-({select})
         """
     ))
+
+    rules.model(EnergyProduct).add(country_set= Neomatch(
+        title="Countries where this product is distributed",
+        target_model=Country,
+        match="""
+            (root)-[:`energy_product_has_distribution+`]-()-[:`distribution_has_activity_in_country+`]-({select})
+        """
+    ))
+
+    
 
     # Add now some generic rules
     app = get_app('detective')

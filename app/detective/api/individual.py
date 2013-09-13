@@ -116,12 +116,11 @@ class IndividualResource(ModelResource):
     def alter_detail_data_to_serialize(self, request, bundle):
         # Show additional field following the model's rules
         rules = register_model_rules().model(self.get_model()).all()
-        # All additional relationships
-        bundle.data["extension"] = {}
+        # All additional relationships        
         for key in rules:
             # Filter rules to keep only Neomatch
             if isinstance(rules[key], Neomatch):
-                bundle.data["extension"][key] = rules[key].query(bundle.obj.id)
+                bundle.data[key] = rules[key].query(bundle.obj.id)
         
         return bundle
 

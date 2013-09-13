@@ -7,6 +7,7 @@ class IndividualSingleCtrl
         @scope.hasRels    = @hasRels  
         @scope.isLiteral  = @isLiteral
         @scope.isString   = (t)=> ["CharField", "URLField"].indexOf(t) > -1
+        @scope.isRelationship = (d) => ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
         @scope.scrollTo   = @scrollTo  
         @scope.singleUrl  = @singleUrl
         @scope.strToColor = @filter("strToColor")
@@ -26,7 +27,7 @@ class IndividualSingleCtrl
     hasRels: ()=> 
         if @scope.meta? and @scope.individual?
             _.some @scope.meta.fields, (field)=> 
-                field.type is "Relationship" and @scope.individual[field.name].length
+                @scope.isRelationship(field)  and @scope.individual[field.name].length
 
     scrollTo: (id)=> 
         @location.hash(id)

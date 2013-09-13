@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ..models              import Country
 from ..neomatch            import Neomatch
 from .utils                import get_model_node_id, get_model_fields

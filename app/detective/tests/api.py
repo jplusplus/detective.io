@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ..models               import EnergyProject, Organization, Country
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models       import get_app, get_models
@@ -142,6 +143,18 @@ class ApiTestCase(ResourceTestCase):
             EnergyProject.objects.filter(_author__username="tester").count()
         )
 
+    def test_search_organization(self):
+        resp = self.api_client.get('/api/v1/organization/search/?q=Journalism', format='json', authentication=self.get_credentials())  
+        self.assertValidJSONResponse(resp)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        # At least 2 results
+        self.assertGreater( len(data.items()), 1 )
+
+    def test_search_organization_wrong_page(self):
+        resp = self.api_client.get('/api/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_credentials())  
+        self.assertHttpNotFound(resp)
+
     def test_cypher_detail(self):
         self.assertHttpNotFound(self.api_client.get('/api/v1/cypher/111/', format='json', authentication=self.get_credentials()))
 
@@ -188,3 +201,14 @@ class ApiTestCase(ResourceTestCase):
         resp = self.api_client.get('/api/v1/summary/types/', format='json', authentication=self.get_credentials())  
         self.assertValidJSONResponse(resp)
 
+    def test_search_summary(self):
+        resp = self.api_client.get('/api/v1/summary/search/?q=Journalism', format='json', authentication=self.get_credentials())  
+        self.assertValidJSONResponse(resp)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        # At least 2 results
+        self.assertGreater( len(data.items()), 1 )
+
+    def test_search_summary_wrong_page(self):
+        resp = self.api_client.get('/api/v1/summary/search/?q=Journalism&page=-1', format='json', authentication=self.get_credentials())  
+        self.assertHttpNotFound(resp)

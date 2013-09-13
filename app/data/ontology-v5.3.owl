@@ -1,0 +1,1257 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#"
+     xml:base="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#form_hidden -->
+
+    <owl:AnnotationProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#form_hidden"/>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#help_text -->
+
+    <owl:AnnotationProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#help_text"/>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#scope -->
+
+    <owl:AnnotationProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#scope"/>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#verbose_name -->
+
+    <owl:AnnotationProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#verbose_name"/>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#verbose_name_plural -->
+
+    <owl:AnnotationProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#verbose_name_plural"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasActivityIn -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasActivityIn">
+        <verbose_name xml:lang="en">Active in</verbose_name>
+        <help_text xml:lang="en">The list of countries or territories the entity is active in. </help_text>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasAdviser -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasAdviser">
+        <verbose_name xml:lang="en">Adviser</verbose_name>
+        <verbose_name_plural xml:lang="en">Advisers</verbose_name_plural>
+        <help_text xml:lang="en">The list of persons that help the entity.</help_text>
+        <form_hidden xml:lang="en">true</form_hidden>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasAuthor -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasAuthor">
+        <verbose_name xml:lang="en">Author</verbose_name>
+        <verbose_name_plural xml:lang="en">Authors</verbose_name_plural>
+        <help_text xml:lang="en">The author or authors of the document.</help_text>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasBoardMember -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasBoardMember">
+        <verbose_name xml:lang="en">Board member</verbose_name>
+        <verbose_name_plural xml:lang="en">Board members</verbose_name_plural>
+        <help_text xml:lang="en">The list of board members of the Organization, if any.</help_text>
+        <form_hidden xml:lang="en">true</form_hidden>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasCommentary -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasCommentary">
+        <help_text xml:lang="en">A Commentary is an article, a blog post or a report that assesses the quality of the Project.</help_text>
+        <verbose_name_plural xml:lang="en">Commentaries</verbose_name_plural>
+        <verbose_name xml:lang="en">Commentary</verbose_name>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasDistribution -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasDistribution">
+        <help_text xml:lang="en">A Distribution represents the batch sales or gift of a product. Companies often communicate in terms of &quot;in year X, Y units of Product Z were sold/distributed in Country A&quot;.</help_text>
+        <verbose_name xml:lang="en">Distribution</verbose_name>
+        <verbose_name_plural xml:lang="en">Distributions</verbose_name_plural>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasFundraisingRound -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasFundraisingRound">
+        <help_text xml:lang="en">A Fundraising Round represents an event when an Organization was able to raise cash or another asset.</help_text>
+        <verbose_name xml:lang="en">Fundraising round</verbose_name>
+        <verbose_name_plural xml:lang="en">Fundraising rounds</verbose_name_plural>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasLitigationAgainst -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasLitigationAgainst">
+        <form_hidden>true</form_hidden>
+        <help_text xml:lang="en">An entity is said to litigate against another when it is involved in a lawsuit or an out-of-court settlement with the other.</help_text>
+        <verbose_name xml:lang="en">Litigation against</verbose_name>
+        <verbose_name_plural xml:lang="en">Litigations against</verbose_name_plural>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasNationality -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasNationality">
+        <verbose_name_plural xml:lang="en">Nationalities</verbose_name_plural>
+        <verbose_name xml:lang="en">Nationality</verbose_name>
+        <help_text xml:lang="en">The list of nationalities (as appear on his/her passport) of a Person.</help_text>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasOperator -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasOperator">
+        <form_hidden>true</form_hidden>
+        <verbose_name xml:lang="en">Operator</verbose_name>
+        <verbose_name_plural xml:lang="en">Operators</verbose_name_plural>
+        <help_text xml:lang="en">Products, especially large ones such as power plants, have an Operator, usually a company.</help_text>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasOwner -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasOwner">
+        <verbose_name xml:lang="en">Owner</verbose_name>
+        <verbose_name_plural xml:lang="en">Owners</verbose_name_plural>
+        <help_text xml:lang="en">The formal Owner of the entity.</help_text>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPartner -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPartner">
+        <help_text xml:lang="en">An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).</help_text>
+        <form_hidden>true</form_hidden>
+        <verbose_name xml:lang="en">Partner</verbose_name>
+        <verbose_name_plural xml:lang="en">Partners</verbose_name_plural>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPayer -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPayer">
+        <verbose_name xml:lang="en">Payer</verbose_name>
+        <verbose_name_plural xml:lang="en">Payers</verbose_name_plural>
+        <help_text xml:lang="en">The Organization that actually pays the amount or contributes the asset considered.</help_text>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPersonalPayer -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPersonalPayer">
+        <verbose_name xml:lang="en">Physical payer</verbose_name>
+        <verbose_name_plural xml:lang="en">Physical payers</verbose_name_plural>
+        <help_text xml:lang="en">The Person that contributes the amount or the asset considered.</help_text>
+        <form_hidden>true</form_hidden>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPreviousActivityIn -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPreviousActivityIn">
+        <verbose_name xml:lang="en">Previous activity in</verbose_name>
+        <form_hidden>true</form_hidden>
+        <help_text xml:lang="en">Has the entity been active in a specific country or Organization previsously?</help_text>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPrice -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPrice">
+        <verbose_name xml:lang="en">Price</verbose_name>
+        <verbose_name_plural xml:lang="en">Prices</verbose_name_plural>
+        <help_text xml:lang="en">The price (use only digits, i.e. 8.99) of the Product at the date considered.</help_text>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasProduct -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasProduct">
+        <help_text xml:lang="en">A Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.</help_text>
+        <verbose_name xml:lang="en">Product</verbose_name>
+        <verbose_name_plural xml:lang="en">Products</verbose_name_plural>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasRaised -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasRaised">
+        <help_text xml:lang="en">A Fundraising Round represents an event when the Organization was able to secure financing in cash or in another asset.</help_text>
+        <verbose_name xml:lang="en">Fundraising round</verbose_name>
+        <verbose_name_plural xml:lang="en">Fundraising rounds</verbose_name_plural>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasRevenue -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasRevenue">
+        <help_text xml:lang="en">A Revenue represents the quantity of cash that the Organization was able to gather in any given year. It doesn&apos;t have to be equal to the net sales but can take into account subsidies as well.</help_text>
+        <verbose_name xml:lang="en">Revenue</verbose_name>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#address -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#address">
+        <verbose_name xml:lang="en">Address</verbose_name>
+        <verbose_name_plural xml:lang="en">Addresses</verbose_name_plural>
+        <help_text xml:lang="en">The official address of the organization.</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#articleURL -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#articleURL">
+        <help_text xml:lang="en">The URL (starting with http://) of the link.</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#comment -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#comment">
+        <verbose_name xml:lang="en">Comment</verbose_name>
+        <verbose_name_plural xml:lang="en">Comments</verbose_name_plural>
+        <help_text xml:lang="en">Enter a short comment to the entity you are reporting on (max. 500 characters).</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#companyRegisterLink -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#companyRegisterLink">
+        <verbose_name_plural xml:lang="en">Company register links</verbose_name_plural>
+        <help_text xml:lang="en">The URL (starting with http://) to the official company register where the organization is registered.</help_text>
+        <form_hidden>true</form_hidden>
+        <verbose_name xml:lang="en">Company register link</verbose_name>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#companyType -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#companyType">
+        <form_hidden>true</form_hidden>
+        <verbose_name xml:lang="en">Company type</verbose_name>
+        <verbose_name_plural xml:lang="en">Company types</verbose_name_plural>
+        <help_text xml:lang="en">Type of company (e.g. limited liability company, public corporation, unlimited company etc.)</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#currency -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#currency">
+        <verbose_name_plural xml:lang="en">Currencies</verbose_name_plural>
+        <verbose_name xml:lang="en">Currency</verbose_name>
+        <help_text xml:lang="en">The currency of the amount, using its 3-letter ISO-4217 code, e.g. USD, EUR, GBP etc.</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#ended -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#ended">
+        <verbose_name xml:lang="en">End date</verbose_name>
+        <form_hidden>true</form_hidden>
+        <help_text xml:lang="en">The date when the project or organization ended.</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#founded -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#founded">
+        <verbose_name xml:lang="en">Date founded</verbose_name>
+        <help_text xml:lang="en">The date when the organization was created.</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#image -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#image">
+        <verbose_name xml:lang="en">Image URL</verbose_name>
+        <verbose_name_plural xml:lang="en">Images URLs</verbose_name_plural>
+        <help_text xml:lang="en">The URL (starting with http://) where the image is hosted.</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#isoa3 -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#isoa3">
+        <verbose_name xml:lang="en">ISO alpha-3 code</verbose_name>
+        <verbose_name_plural xml:lang="en">ISO alpha-3 codes</verbose_name_plural>
+        <help_text xml:lang="en">The 3-letter ISO code for the country or territory (e.g. FRA for France, DEU for Germany etc.)</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#name -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#name"/>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#officeAddress -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#officeAddress">
+        <verbose_name xml:lang="en">Office address</verbose_name>
+        <verbose_name xml:lang="en">Office addresses</verbose_name>
+        <help_text xml:lang="en">The address or addresses where this organization does business. Do add the country at the end of the address, e.g. Grimmstraße 10A, 10967 Berlin, Germany.</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#powerGenerationPerUnitInWatt -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#powerGenerationPerUnitInWatt">
+        <verbose_name xml:lang="en">Power generation per unit (in watts)</verbose_name>
+        <help_text xml:lang="en">The amount of energy, in watts, that can be generated by each unit of the product.</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#raiseType -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#raiseType">
+        <help_text xml:lang="en">Type of the transaction, e.g. equity contribution (cash), preproject expenses, loan.</help_text>
+        <verbose_name xml:lang="en">Type of transaction</verbose_name>
+        <verbose_name_plural xml:lang="en">Types of transaction</verbose_name_plural>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#sold -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#sold">
+        <help_text xml:lang="en">The type of distribution can be donated, sold, loaned.</help_text>
+        <verbose_name xml:lang="en">Type of distribution</verbose_name>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#source -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#source">
+        <verbose_name xml:lang="en">Source</verbose_name>
+        <verbose_name_plural xml:lang="en">Sources</verbose_name_plural>
+        <help_text xml:lang="en">The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.</help_text>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#started -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#started">
+        <help_text xml:lang="en">Date when the project was started. Can be anterior to the date when the parent organization was created.</help_text>
+        <verbose_name xml:lang="en">Start date</verbose_name>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#title -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#title">
+        <verbose_name xml:lang="en">Title</verbose_name>
+        <help_text xml:lang="en">Title of the article or report of this commentary.</help_text>
+        <verbose_name_plural xml:lang="en">Titles</verbose_name_plural>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#twitterHandle -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#twitterHandle">
+        <help_text xml:lang="en">The Twitter name of the entity (without the @)</help_text>
+        <verbose_name xml:lang="en">Twitter handle</verbose_name>
+        <verbose_name_plural xml:lang="en">Twitter handles</verbose_name_plural>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#units -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#units">
+        <help_text xml:lang="en">The value of the amount.</help_text>
+        <verbose_name xml:lang="en">Value</verbose_name>
+        <verbose_name_plural xml:lang="en">Values</verbose_name_plural>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#unitsProduced -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#unitsProduced">
+        <help_text xml:lang="en">The number of units produced from the start.</help_text>
+        <verbose_name xml:lang="en">Units produced</verbose_name>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#websiteURL -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#websiteURL">
+        <form_hidden xml:lang="en">The URL (starting with http://) of the official website of the entity.</form_hidden>
+        <verbose_name xml:lang="en">Website URL</verbose_name>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#year -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#year">
+        <verbose_name xml:lang="en">Year</verbose_name>
+        <verbose_name_plural xml:lang="en">Years</verbose_name_plural>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Amount -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Amount">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#source"/>
+                <owl:someValuesFrom rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#units"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;int"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#year"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Commentary -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Commentary">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#articleURL"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasAuthor"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Person"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#title"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#year"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Company -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Company">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#companyRegisterLink"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#companyType"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <help_text xml:lang="en">A Company is an Organization whose primary goal is to break even or make a profit. It can be a corporation, a limited liability company etc.</help_text>
+        <verbose_name_plural xml:lang="en">Companies</verbose_name_plural>
+        <verbose_name xml:lang="en">Company</verbose_name>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Country -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Country">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#name"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#isoa3"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <verbose_name_plural xml:lang="en">Countries</verbose_name_plural>
+        <verbose_name xml:lang="en">Country</verbose_name>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Distribution -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Distribution">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Amount"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasActivityIn"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Country"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#sold"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Energy_product -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Energy_product">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Product"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasDistribution"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Distribution"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#powerGenerationPerUnitInWatt"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;int"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasOperator"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <help_text xml:lang="en">An energy Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.</help_text>
+        <verbose_name_plural xml:lang="en">Energy products</verbose_name_plural>
+        <scope>energy</scope>
+        <verbose_name xml:lang="en">Energy product</verbose_name>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Energy_project -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Energy_project">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Project"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasProduct"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Energy_product"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <verbose_name xml:lang="en">Energy project</verbose_name>
+        <verbose_name_plural xml:lang="en">Energy projects</verbose_name_plural>
+        <scope>energy</scope>
+        <help_text xml:lang="en">An energy Project represents an endeavor to reach a particular aim (e.g. improve access to electricity, produce electricity in a certain way, improve energy efficiency, etc.). A project is the child of an Organization and takes its concrete form most often through Products.</help_text>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Fundraising_round -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Fundraising_round">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Amount"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#currency"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPayer"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#raiseType"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPersonalPayer"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Person"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#GovernmentOrganization -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#GovernmentOrganization">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+        <help_text xml:lang="en">A Government Organization is an emanation of a national or local government, such as an Administration, an Authority, a Ministry etc.</help_text>
+        <verbose_name xml:lang="en">Government Organization</verbose_name>
+        <verbose_name_plural xml:lang="en">Government Organizations</verbose_name_plural>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#InternationalOrganization -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#InternationalOrganization">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+        <help_text xml:lang="en">An International Organization is a transnational body with links to governments, whose primary goal is usually not to turn in a profit. Examples of International Organizations include the World Bank, the United Nations and its agencies etc.</help_text>
+        <verbose_name xml:lang="en">International organization</verbose_name>
+        <verbose_name_plural xml:lang="en">International organizations</verbose_name_plural>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#NGO -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#NGO">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+        <help_text xml:lang="en">A Non-Government Organization is a not-for-profit Organization that can be local or global in scope, usually aiming at fulfilling a goal (ex: Greenpeace, Local Energy Network) or managing an asset (ex: the Bill &amp; Melinda Gates Foundation).</help_text>
+        <verbose_name xml:lang="en">NGO</verbose_name>
+        <verbose_name_plural xml:lang="en">NGOs</verbose_name_plural>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#officeAddress"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPartner"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasAdviser"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Person"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasLitigationAgainst"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#image"/>
+                <owl:someValuesFrom rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#twitterHandle"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasFundraisingRound"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Fundraising_round"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasBoardMember"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Person"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#websiteURL"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#founded"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#name"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasRevenue"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Revenue"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#source"/>
+                <owl:someValuesFrom rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#address"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <help_text xml:lang="en">An Organization represents a social entity that implements, funds, takes part in or helps a Project. It can be an NGO, a for-profit company or an international organization.</help_text>
+        <verbose_name xml:lang="en">Organization</verbose_name>
+        <verbose_name_plural xml:lang="en">Organizations</verbose_name_plural>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Person -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Person">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#image"/>
+                <owl:someValuesFrom rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#twitterHandle"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#websiteURL"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasActivityIn"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#name"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasNationality"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Country"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPreviousActivityIn"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#source"/>
+                <owl:someValuesFrom rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <help_text xml:lang="en">A Person represents a physical man or woman that is involved in an Organization, a Project or a Commentary.</help_text>
+        <verbose_name xml:lang="en">Person</verbose_name>
+        <verbose_name_plural xml:lang="en">Persons</verbose_name_plural>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Price -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Price">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Amount"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#currency"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Product -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Product">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#source"/>
+                <owl:someValuesFrom rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPrice"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Price"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#image"/>
+                <owl:someValuesFrom rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Project -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Project">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasPartner"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#image"/>
+                <owl:someValuesFrom rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasActivityIn"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Country"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasOwner"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Organization"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#started"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#hasCommentary"/>
+                <owl:onClass rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Commentary"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#source"/>
+                <owl:someValuesFrom rdf:resource="&xsd;anyURI"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#ended"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#twitterHandle"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#name"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#comment"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Revenue -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Revenue">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Amount"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#currency"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Aaron_Ausland -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Aaron_Ausland">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Person"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Children_International -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Children_International">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#NGO"/>
+        <hasPartner rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Uncharted_Play"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Costa_Rica -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Costa_Rica">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Country"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#El_Salvador -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#El_Salvador">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Country"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Homeless_World_Cup -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Homeless_World_Cup">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#NGO"/>
+        <hasPartner rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Uncharted_Play"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Instituto_Promundo -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Instituto_Promundo">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#NGO"/>
+        <hasPartner rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Uncharted_Play"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Julia_C._Silverman -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Julia_C._Silverman">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Person"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#KickstarterCampaign2013 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#KickstarterCampaign2013">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Fundraising_round"/>
+        <year rdf:datatype="&xsd;dateTime">2013</year>
+        <currency rdf:datatype="&xsd;string">USD</currency>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Mexico -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Mexico">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Country"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Nigeria -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Nigeria">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Country"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Soccket -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Soccket">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Energy_project"/>
+        <powerGenerationPerUnitInWatt rdf:datatype="&xsd;int">6</powerGenerationPerUnitInWatt>
+        <hasCommentary rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#SoccketCommentary-1"/>
+        <hasCommentary rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#SoccketCommentary-2"/>
+        <hasPrice rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#SoccketPrice2011"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#SoccketCommentary-1 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#SoccketCommentary-1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Commentary"/>
+        <year rdf:datatype="&xsd;dateTime">2012</year>
+        <title rdf:datatype="&xsd;string">Deflating the Soccket ball</title>
+        <websiteURL rdf:datatype="&xsd;anyURI">http://stayingfortea.org/2012/06/23/deflating-the-soccket-ball/</websiteURL>
+        <hasAuthor rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Aaron_Ausland"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#SoccketCommentary-2 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#SoccketCommentary-2">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Commentary"/>
+        <year rdf:datatype="&xsd;dateTime">2012</year>
+        <title rdf:datatype="&xsd;string">The SOCCKET ball bounces back?</title>
+        <websiteURL rdf:datatype="&xsd;anyURI">http://stayingfortea.org/2012/07/02/the-soccket-ball-bounces-back/</websiteURL>
+        <hasAuthor rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Julia_C._Silverman"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#SoccketPrice2011 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#SoccketPrice2011">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Price"/>
+        <year rdf:datatype="&xsd;dateTime">2011
+</year>
+        <currency rdf:datatype="&xsd;string">USD</currency>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#State_Farm -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#State_Farm">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Company"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Uncharted_Play -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Uncharted_Play">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Company"/>
+        <websiteURL rdf:datatype="&xsd;anyURI">http://unchartedplay.com/</websiteURL>
+        <hasRaised rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#KickstarterCampaign2013"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Universidad_Pedagogica -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Universidad_Pedagogica">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#NGO"/>
+        <hasPartner rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Uncharted_Play"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Western_Union -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Western_Union">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#Company"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#World_Bank -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#World_Bank">
+        <rdf:type rdf:resource="http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#InternationalOrganization"/>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+

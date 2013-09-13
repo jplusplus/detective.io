@@ -34,9 +34,8 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
-
         if not args:
-            raise CommandError('Please specify path to ontology file.')
+            raise CommandError('Please specify path to ontology file.')            
         
         # Gives the ontology URI. Only needed for documentation purposes
         ontologyURI = "http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#"
@@ -68,10 +67,10 @@ class Command(BaseCommand):
         try :
             # Parses the file with etree
             tree = etree.parse(args[0])                        
-            self.root = tree.getroot()
-        except:         
+        except:                
             raise CommandError('Unable to parse the given file.')
-
+        
+        self.root = tree.getroot()                        
         models = []
 
         # Finds all the Classes

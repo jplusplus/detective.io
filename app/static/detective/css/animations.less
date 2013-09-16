@@ -25,4 +25,25 @@
         .opacity(0);
     }
 
+
+    .fade-leave,
+    .fade-enter,
+    .fade-leave-active,
+    .fade-enter-active  {
+        .transition(5s);
+        position:absolute;
+        top:0;
+        left:0;
+        right:0;
+        z-index: @zindex-content+40;
+    }
+    .fade-enter,
+    .fade-leave-active  {
+        .opacity(0);
+    }
+
+    .fade-leave,
+    .fade-enter-active {
+        .opacity(100);
+    }
 }

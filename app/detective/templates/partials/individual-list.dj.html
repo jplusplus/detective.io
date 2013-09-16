@@ -24,7 +24,7 @@
 		</li>
 	</ul>
 
-	<div class="tr">	
+	<div class="tr" ng-if="hasPreviousPage() || hasNextPage()">	
 		<ul class="pagination top0">
 			<li ng-class="{disabled: !hasPreviousPage()}">
 				<a ng-click="previousPage()">&laquo;</a>

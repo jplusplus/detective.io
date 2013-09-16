@@ -1,8 +1,8 @@
 class IndividualListCtrl
     # Injects dependancies    
-    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$location', '$filter']
+    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$location', '$filter', 'Page']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @location, @filter)->              
+    constructor: (@scope, @routeParams, @Individual, @Summary, @location, @filter, @Page)->              
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────  
@@ -14,6 +14,7 @@ class IndividualListCtrl
         @scope.pages           = @pages
         @scope.goToPage        = @goToPage
         @scope.singleUrl       = @singleUrl
+        @scope.isLoading       = @isLoading
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  
@@ -22,9 +23,12 @@ class IndividualListCtrl
         @scope.type        = @routeParams.type
         @scope.page        = @routeParams.page or 1
         @scope.limit       = 20
-        @scope.individuals = {}
+        @scope.individuals = {}        
         # Get meta information for this type
-        @Summary.get id: "forms", (data)=> @scope.meta = data[@scope.type.toLowerCase()]
+        @Summary.get id: "forms", (data)=> 
+            @scope.meta = data[@scope.type.toLowerCase()]
+            # Set page's title
+            @Page.setTitle @scope.meta.verbose_name_plural
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────  
@@ -39,7 +43,6 @@ class IndividualListCtrl
         @scope.$on "$routeUpdate", => @scope.page = @routeParams.page or 1
 
         
-    
     singleUrl: (individual)=> "/node/#{@scope.type}/#{individual.id}"
     # Pages list
     pages: => 
@@ -51,13 +54,15 @@ class IndividualListCtrl
     # Go to the given page
     goToPage: (page)=> @location.search "page", 1*page
     # True if there is a previous page
-    hasPreviousPage: => @scope.page > 1
+    hasPreviousPage: => @scope.individuals.meta? and @scope.page > 1
     # True if there is a next page
     hasNextPage: => @scope.individuals.meta? and @scope.individuals.meta.next isnt null
     # Go to the previous page
     previousPage: => @goToPage(1*@scope.page-1) if @hasPreviousPage()
     # Go to the next page
     nextPage: => @goToPage(1*@scope.page+1) if @hasNextPage()
+    # Loading state
+    isLoading: => not @scope.individuals.meta?
 
 
     

@@ -1,7 +1,6 @@
 {% extends "base.dj.html" %}
 {% load staticfiles %}
 {% load compress %}
-{% block title %}Home{% endblock %}
 
 {% block extracss %}
     <link rel="stylesheet" type="text/less" href="{% static 'detective/css/base.less' %}">
@@ -32,10 +31,12 @@
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/HomeCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualListCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualSingleCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/PageCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/Breadcrumb.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/Individual.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/IndividualForm.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/services/Page.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/Search.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/Summary.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/User.coffee' %}"></script>
@@ -49,7 +50,7 @@
 {% endblock %}
 
 {% block content %}
-    <div ng-app="detective" id="ng-app" watch-login-mandatory>        
+    <div watch-login-mandatory>        
     	{% include "partials/header.dj.html" %}
         <div ng-view id="content"></div>
     </div>

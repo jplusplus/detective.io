@@ -1,9 +1,11 @@
 class ExploreCtrl
     # Injects dependancies    
-    @$inject: ['$scope', '$routeParams', 'Summary', '$location', '$timeout', '$filter']
+    @$inject: ['$scope', '$routeParams', 'Summary', '$location', '$timeout', '$filter', 'Page']
 
-    constructor: (@scope, @routeParams, @Summary, @location, @timeout, @filter)->      
+    constructor: (@scope, @routeParams, @Summary, @location, @timeout, @filter, @Page)->              
         @scope.getTypeCount = @getTypeCount
+        # Set page's title
+        @Page.setTitle @routeParams.scope
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  
@@ -14,7 +16,7 @@ class ExploreCtrl
         # Countries info
         @scope.countries       = @Summary.get id:"countries"
         # Types info
-        @scope.types           = @Summary.get id:"types" 
+        @scope.types           = @Summary.get id:"types"
         # Country where the user click
         @scope.selectedCountry = {}
         @scope.selectedIndividual = {}

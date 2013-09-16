@@ -3,9 +3,11 @@
 class UserCtrl
 
     # Injects dependancies    
-    @$inject : ["$scope", "$http", "$location", "$routeParams", "User"]
+    @$inject : ["$scope", "$http", "$location", "$routeParams", "User", "Page"]
 
-    constructor: (@scope, @http, @location, @routeParams, @User)-> 
+    constructor: (@scope, @http, @location, @routeParams, @User, @Page)-> 
+        # Set page title with no title-case
+        @Page.setTitle("Login", false)
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  

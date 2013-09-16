@@ -1,9 +1,12 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', 'Individual', 'Summary', 'IndividualForm']
+    @$inject: ['$scope', '$routeParams', '$filter', 'Individual', 'Summary', 'IndividualForm', 'Page']
 
 
-    constructor: (@scope, @routeParams, @filter, @Individual,  @Summary, @IndividualForm)-> 
+    constructor: (@scope, @routeParams, @filter, @Individual,  @Summary, @IndividualForm, @Page)-> 
+
+        @Page.setTitle "Contribute"
+
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────

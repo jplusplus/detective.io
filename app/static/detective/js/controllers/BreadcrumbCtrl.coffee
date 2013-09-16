@@ -1,7 +1,7 @@
 class BreadcrumbCtrl
     @$inject: ['$scope', 'Breadcrumb']
 
-    constructor: (@scope, @Breadcrumb)->  
+    constructor: (@scope, @Breadcrumb)->      	
         @scope.isHome = @isHome
         # Monitor breadcrumb refresh
         @scope.$on "breadcrumbRefresh", => @scope.breadcrumbs = @Breadcrumb.getAll()

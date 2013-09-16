@@ -2,10 +2,10 @@ class ExploreCtrl
     # Injects dependancies    
     @$inject: ['$scope', '$routeParams', 'Summary', '$location', '$timeout', '$filter', 'Page']
 
-    constructor: (@scope, @routeParams, @Summary, @location, @timeout, @filter, @Page)->              
+    constructor: (@scope, @routeParams, @Summary, @location, @timeout, @filter, @Page)->                    
         @scope.getTypeCount = @getTypeCount
         # Set page's title
-        @Page.setTitle @routeParams.scope
+        @Page.title @routeParams.scope
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  

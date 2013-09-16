@@ -54,6 +54,26 @@ body {
 		}
 	}
 
+	.spinner {
+		position:relative;
+		min-height:100px;	
+
+		&.static {
+			position:static;
+		}
+
+		&:after {
+			content:"";
+			display:block;
+			position:absolute;
+			top:0;
+			bottom:0;
+			left:0;
+			right:0;
+			background:url("@{staticPath}img/spinner.gif") no-repeat center center @body-bg;
+		}
+	}
+
 
 	.color-tag {
 		width:40px;

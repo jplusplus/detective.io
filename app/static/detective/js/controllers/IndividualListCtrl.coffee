@@ -2,7 +2,7 @@ class IndividualListCtrl
     # Injects dependancies    
     @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$location', '$filter', 'Page']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @location, @filter, @Page)->              
+    constructor: (@scope, @routeParams, @Individual, @Summary, @location, @filter, @Page)->   
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────  
@@ -28,17 +28,21 @@ class IndividualListCtrl
         @Summary.get id: "forms", (data)=> 
             @scope.meta = data[@scope.type.toLowerCase()]
             # Set page's title
-            @Page.setTitle @scope.meta.verbose_name_plural
+            @Page.title @scope.meta.verbose_name_plural            
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────  
         @scope.$watch "page", =>
+            # Global loading mode
+            Page.loading true           
             # Get individual from database
             @scope.individuals = @Individual.get 
                 type    : @scope.type
                 limit   : @scope.limit
                 offset  : @scope.limit * (@scope.page - 1)
                 order_by: "name"
+            # Turn off loading mode
+            , -> Page.loading false
         # Update page value
         @scope.$on "$routeUpdate", => @scope.page = @routeParams.page or 1
 

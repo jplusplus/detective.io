@@ -7,7 +7,7 @@ class UserCtrl
 
     constructor: (@scope, @http, @location, @routeParams, @User, @Page)-> 
         # Set page title with no title-case
-        @Page.setTitle("Login", false)
+        @Page.title "Login", false
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  

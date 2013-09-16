@@ -22,10 +22,6 @@ detective = angular
                 $locationProvider.html5Mode true
                 # Bind routes to the controllers
                 $routeProvider
-                    .when('/home', {
-                        controller: HomeCtrl
-                        templateUrl: "/partial/home.html"
-                    })
                     .when('/login', {
                         controller: UserCtrl
                         templateUrl: "/partial/login.html"
@@ -34,7 +30,8 @@ detective = angular
                         redirectTo: "/energy/contribute"
                     })
                     .when('/node', {
-                        redirectTo: "/home"
+                        controller: HomeCtrl
+                        templateUrl: "/partial/home.html"
                     })
                     .when('/node/:type', {
                         controller: IndividualListCtrl  

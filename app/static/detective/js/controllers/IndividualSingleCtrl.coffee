@@ -2,7 +2,9 @@ class IndividualSingleCtrl
     # Injects dependancies    
     @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$filter', '$anchorScroll', '$location', 'Page']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @filter, @anchorScroll, @location, @Page)->      
+    constructor: (@scope, @routeParams, @Individual, @Summary, @filter, @anchorScroll, @location, @Page)->  
+        # Global loading mode!
+        Page.loading true
         @scope.get        = (n)=> @scope.individual[n] or false if @scope.individual?
         @scope.hasRels    = @hasRels  
         @scope.isLiteral  = @isLiteral
@@ -22,7 +24,9 @@ class IndividualSingleCtrl
         @Individual.get type: @scope.type, id: @scope.id, (data)=> 
             @scope.individual = data
             # Set page's title
-            @Page.setTitle @filter("individualPreview")(data)
+            @Page.title @filter("individualPreview")(data)       
+             # Global loading off 
+            Page.loading false
         # Get meta information for this type
         @Summary.get id: "forms", (data)=> @scope.meta = data[@scope.type.toLowerCase()]        
         

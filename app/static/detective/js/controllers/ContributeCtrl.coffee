@@ -4,9 +4,9 @@ class ContributeCtrl
 
 
     constructor: (@scope, @routeParams, @filter, @Individual,  @Summary, @IndividualForm, @Page)-> 
-
-        @Page.setTitle "Contribute"
-
+        @Page.title "Contribute"
+        # Global loading mode
+        Page.loading true
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
@@ -48,7 +48,7 @@ class ContributeCtrl
         # Shortcut for child classes
         @scope.Individual = @Individual
         # Get the list of available resources
-        @scope.resources = @Summary.get id: "forms"
+        @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
         # Prepare future individual
         @initNewIndividual()
         # Individual list

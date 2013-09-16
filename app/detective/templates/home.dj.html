@@ -52,7 +52,7 @@
 {% block content %}
     <div watch-login-mandatory>        
     	{% include "partials/header.dj.html" %}
-        <div ng-view id="content"></div>
+        <div ng-view id="content" ng-class="{ spinner: Page.loading() }"></div>
     </div>
 {% endblock %}
 

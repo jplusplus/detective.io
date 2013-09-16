@@ -22,12 +22,16 @@ detective = angular
                 $locationProvider.html5Mode true
                 # Bind routes to the controllers
                 $routeProvider
+                    .when('/', {
+                        redirectTo: "/energy/contribute"
+                    })
                     .when('/login', {
                         controller: UserCtrl
                         templateUrl: "/partial/login.html"
                     })
-                    .when('/', {
-                        redirectTo: "/energy/contribute"
+                    .when('/signup', {
+                        controller: UserCtrl
+                        templateUrl: "/partial/signup.html"
                     })
                     .when('/node', {
                         controller: HomeCtrl

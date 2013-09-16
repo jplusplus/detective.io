@@ -7,7 +7,11 @@ class UserCtrl
 
     constructor: (@scope, @http, @location, @routeParams, @User, @Page)-> 
         # Set page title with no title-case
-        @Page.title "Login", false
+        switch @location.path()
+            when "/signup"
+                @Page.title "Sign up", false   
+            when "/login"
+                @Page.title "Log in", false                
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  
@@ -59,7 +63,32 @@ class UserCtrl
                 delete @scope.error
             else
                 # Error status
-                loginError(response.data.reason)            
+                loginError(response.data.reason)        
+
+    signup: =>
+        config = 
+            method: "POST"
+            url: "/api/v1/user/"
+            data: 
+                username    : @scope.username
+                email       : @scope.email
+                password    : @scope.password
+            headers:
+                "Content-Type": "application/json"       
+        # Turn on loading mode
+        @scope.loading = true
+        # succefull login
+        @http(config).then (response) =>   
+            # Turn off loading mode
+            @scope.loading = false
+            # Interpret the respose            
+            if response.data? and response.data.success
+                @scope.signupSuccedd = true
+                # Delete error
+                delete @scope.error
+            else
+                # Record the error
+                @scope.error = response.data.reason if response.data.reason?    
 
     logout: =>
         config = 

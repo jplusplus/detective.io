@@ -1,6 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from .forms                             import register_model_rules
 from ..neomatch                         import Neomatch
-from ..modelrules                       import ModelRules
 from django.conf.urls                   import url
 from django.core.paginator              import Paginator, InvalidPage
 from django.db.models.query             import QuerySet
@@ -21,7 +22,7 @@ class IndividualAuthorization(Authorization):
         return True
 
     def update_detail(self, object_list, bundle):     
-        return bundle.request.user.is_staff
+        return True
 
     def delete_detail(self, object_list, bundle):     
         return bundle.request.user.is_staff

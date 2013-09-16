@@ -1,22 +1,37 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from django.conf.urls        import url
 from django.contrib.auth     import authenticate, login, logout
 from django.middleware.csrf  import _get_new_csrf_key as get_new_csrf_key
 from neo4django.auth.models  import User
-from tastypie.authentication import SessionAuthentication
-from tastypie.authorization  import DjangoAuthorization
+from tastypie.authorization  import Authorization
 from tastypie.constants      import ALL
 from tastypie.resources      import ModelResource
 from tastypie.utils          import trailing_slash
+
+
+class UserAuthorization(Authorization):
+    def read_detail(self, object_list, bundle):
+        return True
+
+    def create_detail(self, object_list, bundle):
+        return True
+
+    def update_detail(self, object_list, bundle):     
+        return bundle.request.user.is_staff
+
+    def delete_detail(self, object_list, bundle):     
+        return bundle.request.user.is_staff
+
 
 class UserResource(ModelResource):    
     
     class Meta:
         allowed_methods    = ['get', 'post']
-        always_return_data = True         
-        authentication     = SessionAuthentication()
-        authorization      = DjangoAuthorization()     
-        fields             = ['first_name', 'last_name', 'username', 'is_staff']
-        filtering          = {'name': ALL}
+        always_return_data = True
+        authorization      = UserAuthorization()     
+        fields             = ['first_name', 'last_name', 'username', 'email', 'is_staff']
+        filtering          = {'username': ALL, 'email': ALL}
         queryset           = User.objects.all()
         resource_name      = 'user'
 
@@ -62,6 +77,11 @@ class UserResource(ModelResource):
                 'success': False,
                 'reason': 'Incorrect password or username.',
             })
+
+    def dehydrate(self, bundle):
+        bundle.data["email"] = u"☘"
+        return bundle
+
 
     def logout(self, request, **kwargs):
         self.method_check(request, allowed=['get'])

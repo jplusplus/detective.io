@@ -1,0 +1,41 @@
+<form class="login-form panel panel-default top30 black" ng-class="{loading:loading}" name="signupForm" ng-submit="signup()">	
+  <div class="panel-body">
+ 	  <h2>Sign up</h2>
+
+    <fieldset ng-disabled="loading">
+      <div class="form-group">
+        <label for="inputUsername">Username</label>
+        <input required type="text" ng-model="username "class="form-control" id="inputUsername" placeholder="Choose an username">
+      </div>
+
+      <div class="form-group">
+        <label for="inputEmail">Email</label>
+        <input required type="email" ng-model="email "class="form-control" id="inputEmail" placeholder="Enter your email address">
+      </div>
+
+      <div class="form-group">
+        <label for="inputPassword">Password</label>
+        <input required type="password" ng-model="password" class="form-control" ng-minlength="6" id="inputPassword" placeholder="Create a password">
+        <p class="text-muted top05">
+          At least 6 characters. 
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label for="inputPasswordCheck">Password check</label>
+        <input required type="password" ng-model="password2" pw-match with="password" class="form-control" id="inputPasswordCheck" placeholder="Enter this password again">
+        <p class="text-danger top05" ng-show="signupForm.$error.pwmatch">
+          Passwords don't match.
+        </p>
+      </div>
+
+      <div class="alert alert-danger" ng-if="error">
+        [[error]]
+      </div>
+    </div>
+
+  	<div class="tr panel-footer">
+    	<button type="submit" class="btn btn-primary" ng-disabled="!signupForm.$valid">Sign up</button>
+    </div>
+  </fieldset>
+</form>

@@ -29,9 +29,10 @@ admin.autodiscover()
 
 scopes = "|".join(["energy", "healt", "politic"])
 
-urlpatterns = patterns('',	
+urlpatterns = patterns('',
     url(r'^$', 				  		  'app.detective.views.home', name='home'),
     url(r'^login/$',	      		  'app.detective.views.home', name='login'),
+    url(r'^signup/$',	      		  'app.detective.views.home', name='signup'),
     url(r'^node/$',		  		      'app.detective.views.home', name='overview'),
     url(r'^node/\w+/$',	  		      'app.detective.views.home', name='list'),
     url(r'^node/\w+/\d+/$',	  		  'app.detective.views.home', name='single'),

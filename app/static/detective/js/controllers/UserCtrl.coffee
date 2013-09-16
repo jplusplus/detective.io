@@ -25,11 +25,7 @@ class UserCtrl
         @scope.logout  = @logout
         @scope.signup  = @signup
 
-
-        @scope.username  = "bonjour"
-        @scope.email     = "bonjour@jplusplus.org"
-        @scope.password  = "bonjour"
-        @scope.password2 = "bonjour"
+        
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
@@ -73,13 +69,14 @@ class UserCtrl
                 @loginError(response.data.error)        
 
     signup: =>        
+        console.log @scope.username
         config = 
             method: "POST"
             url: "/api/v1/user/"
             data: 
-                username    : @scope.username
-                email       : @scope.email
-                password    : @scope.password
+                username: @scope.username
+                email   : @scope.email
+                password: @scope.password
             headers:
                 "Content-Type": "application/json"       
         # Turn on loading mode

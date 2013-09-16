@@ -1,21 +1,20 @@
-angular.module("detective").directive "uniqueEmail", ["Individual", (Individual)->    
+angular.module("detective").directive "unique", ["Individual", (Individual)->    
     restrict: 'A'
     require: "ngModel"
     link: (scope, elem, attrs, ctrl) ->
-        # Set validity to false temporary 
-        # to avoid submitting the form 
-        # with not-unique value
-        ctrl.$parsers.push -> ctrl.$setValidity "unique-tmp", false
 
         elem.on "change", -> scope.$apply(->
             return if elem.val() is ""
+            # Set validity to false temporary 
+            # to avoid submitting the form 
+            # with not-unique value
+            ctrl.$setValidity "unique-tmp", false
             # Find the user    
-            params = 
-                type  : "user"
-                email : elem.val()
+            params = type: "user"
+            params[attrs.unique] = elem.val()
             # Get the individual
             Individual.get params, (d)->            
                 ctrl.$setValidity "unique", not d.meta.total_count      
                 ctrl.$setValidity "unique-tmp", true
-        )    
+        )         
 ]

@@ -1,13 +1,13 @@
 <form class="login-form panel panel-default top30 black" ng-class="{loading:loading}" ng-hide="signupSucceed" name="form" ng-submit="signup()">	
   <div class="panel-body">
  	  <h2>Sign up</h2>
-
+    [[username]] - [[email]]
     <fieldset ng-disabled="loading">
       <div class="form-group">
         <label for="inputUsername">Username</label>
         <div class="input-group">
           <input required 
-                 unique-username 
+                 unique="username"
                  type="text" 
                  name="username" 
                  ng-model="username"
@@ -19,7 +19,6 @@
             <i class="icon-check-empty"             ng-hide="form.username.$valid"></i>
           </span>   
         </div> 
-
         <p class="text-danger top05" ng-show="form.username.$error.unique">
           This username is already taken.
         </p>
@@ -29,7 +28,7 @@
         <label for="inputEmail">Email</label>
         <div class="input-group">
           <input required 
-                 unique-email
+                 unique="email"
                  type="email" 
                  name="email" 
                  ng-model="email" 

@@ -1,5 +1,7 @@
-angular.module("detective").directive "pwMatch", ->
+angular.module("detective").directive "pwMatch", ->   
+    restrict: 'A'
     require: "ngModel"
+    transclude: true
     scope:
         with: "&"
     link: (scope, elem, attrs, ctrl) ->

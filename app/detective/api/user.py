@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from django.conf.urls        import url
-from django.contrib.auth     import authenticate, login, logout
-from django.middleware.csrf  import _get_new_csrf_key as get_new_csrf_key
-from neo4django.auth.models  import User
-from tastypie.authorization  import Authorization
-from tastypie.constants      import ALL
-from tastypie.resources      import ModelResource
-from tastypie.utils          import trailing_slash
-
+from django.conf.urls            import url
+from django.contrib.auth         import authenticate, login, logout
+from django.middleware.csrf      import _get_new_csrf_key as get_new_csrf_key
+from neo4django.auth.models      import User
+from tastypie.authorization      import Authorization
+from tastypie.constants          import ALL
+from tastypie.resources          import ModelResource
+from tastypie.utils              import trailing_slash
+from django.contrib.auth.hashers import make_password
 
 class UserAuthorization(Authorization):
     def read_detail(self, object_list, bundle):
@@ -30,7 +30,7 @@ class UserResource(ModelResource):
         allowed_methods    = ['get', 'post']
         always_return_data = True
         authorization      = UserAuthorization()     
-        fields             = ['first_name', 'last_name', 'username', 'email', 'is_staff']
+        fields             = ['first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
         filtering          = {'username': ALL, 'email': ALL}
         queryset           = User.objects.all()
         resource_name      = 'user'
@@ -70,16 +70,24 @@ class UserResource(ModelResource):
             else:
                 return self.create_response(request, {
                     'success': False,
-                    'reason': 'Account disabled.',
+                    'error'  : 'Account not activated yet.',
                 })
         else:
             return self.create_response(request, {
                 'success': False,
-                'reason': 'Incorrect password or username.',
+                'error'  : 'Incorrect password or username.',
             })
 
     def dehydrate(self, bundle):
-        bundle.data["email"] = u"☘"
+        bundle.data["email"]    = u"☘"
+        bundle.data["password"] = u"☘"
+        return bundle
+
+    def hydrate(self, bundle):
+        bundle.data["is_staff"]     = False
+        bundle.data["is_active"]    = False
+        bundle.data["is_superuser"] = False
+        bundle.data["password"]     = make_password(bundle.data["password"])
         return bundle
 
 

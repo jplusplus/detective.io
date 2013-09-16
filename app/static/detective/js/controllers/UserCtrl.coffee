@@ -23,6 +23,13 @@ class UserCtrl
         @scope.loading = false
         @scope.login   = @login
         @scope.logout  = @logout
+        @scope.signup  = @signup
+
+
+        @scope.username  = "bonjour"
+        @scope.email     = "bonjour@jplusplus.org"
+        @scope.password  = "bonjour"
+        @scope.password2 = "bonjour"
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
@@ -63,9 +70,9 @@ class UserCtrl
                 delete @scope.error
             else
                 # Error status
-                loginError(response.data.reason)        
+                @loginError(response.data.error)        
 
-    signup: =>
+    signup: =>        
         config = 
             method: "POST"
             url: "/api/v1/user/"
@@ -82,13 +89,13 @@ class UserCtrl
             # Turn off loading mode
             @scope.loading = false
             # Interpret the respose            
-            if response.data? and response.data.success
-                @scope.signupSuccedd = true
+            if response.data?
+                @scope.signupSucceed = true
                 # Delete error
                 delete @scope.error
             else
                 # Record the error
-                @scope.error = response.data.reason if response.data.reason?    
+                @scope.error = response.data.error if response.data.error?    
 
     logout: =>
         config = 

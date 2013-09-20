@@ -27,14 +27,11 @@ angular.module('detective').directive "countryMap", ()->
             draw = ()->           
                 values       = _.map _.filter(scope.values, (d)-> d.count?), (d)-> d.count                     
                 disableColor = "#fff" 
-                colorscale   = new chroma.ColorScale
-                    colors: ["#F7EAE3", "#EA7E44"]
-                    limits: [_.min(values), _.max(values)]
-
+                colorscale   = chroma.scale(["#F7EAE3", "#EA7E44"]).domain([_.min(values), _.max(values)])
                 map.getLayer("countries").style 
                     fill: (country, path) ->
                         item = scope.values[country["iso-a3"]]
-                        if item then colorscale.getColor(item.count) else disableColor
+                        if item then colorscale(item.count) else disableColor
                             
    
             # Create the map within iElement with the same width

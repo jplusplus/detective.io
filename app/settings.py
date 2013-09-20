@@ -82,12 +82,34 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
+BOWER_COMPONENTS_ROOT = here('static/vendor')
+
+BOWER_INSTALLED_APPS = (
+    "angular#1.2.0-rc.2",
+    "angular-cookies#1.2.0-rc.2",
+    "angular-resource#1.2.0-rc.2",
+    "angular-route#1.2.0-rc.2",
+    "angular-sanitize#1.2.0-rc.2",
+    "angular-ui-bootstrap-bower",
+    "bootstrap#3.0.0",
+    "chroma-js#0.5.2",
+    "jquery#1.10.0",
+    "jquery.scrollTo#1.4.6",
+    "js-md5#1.0.3",
+    "modernizr#2.6.2",
+    "raphael#2.1.2",
+    "typeahead.js#0.9.3",
+    "underscore#1.5.2",
+    'git://github.com/kartograph/kartograph.js',
+)
+
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
+    'djangobower.finders.BowerFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -170,7 +192,8 @@ INSTALLED_APPS = (
     # Compresses linked and inline JavaScript or CSS into a single cached file.    
     'compressor', 
     'tastypie',
-    'widget_tweaks',        
+    'widget_tweaks',       
+    'djangobower', 
     # Internal
     'app.detective', 
 )

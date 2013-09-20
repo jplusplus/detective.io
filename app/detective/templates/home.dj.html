@@ -7,22 +7,23 @@
 {% endblock %}
 
 {% block extrajs %}
-    <script type="text/javascript" src="{% static 'detective/js/vendor/jquery-1.10.0.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular.min.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-cookies.min.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-resource.min.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/angular-sanitize.min.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/angular/ui-bootstrap-custom-tpls-0.5.0.min.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/underscore-min.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/chroma.min.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/kartograph.min.js' %}"></script>
-    <script type="text/javascript"   src="{% static 'detective/js/vendor/raphael-min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'angular/angular.js' %}"></script>
+    <script type="text/javascript" src="{% static 'angular-cookies/angular-cookies.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'angular-resource/angular-resource.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'angular-route/angular-route.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'angular-sanitize/angular-sanitize.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'angular-bootstrap/ui-bootstrap-tpls.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'chroma-js/chroma.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'kartograph.js/kartograph.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'raphael/raphael-min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery.scrollTo/jquery.scrollTo.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'blueimp-md5/js/md5.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'modernizr/modernizr.js' %}"></script>
+    <script type="text/javascript" src="{% static 'typeahead.js/dist/typeahead.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'underscore/underscore.js' %}"></script>
 
     {% compress js %}    
-        <script type="text/javascript"   src="{% static 'detective/js/vendor/jquery.scrollTo.js' %}"></script>
-        <script type="text/javascript"   src="{% static 'detective/js/vendor/md5.js' %}"></script>
-        <script type="text/javascript"   src="{% static 'detective/js/vendor/modernizr.custom.js' %}"></script>
-        <script type="text/javascript"   src="{% static 'detective/js/vendor/typeahead.js' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>    
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/BreadcrumbCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContributeCtrl.coffee' %}"></script>

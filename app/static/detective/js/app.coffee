@@ -11,7 +11,7 @@ detective = angular
     )
     .config(
         [
-            '$interpolateProvider', 
+            '$interpolateProvider',
             '$routeProvider', 
             '$locationProvider',
             ($interpolateProvider, $routeProvider, $locationProvider)->
@@ -65,4 +65,4 @@ detective = angular
     )
 
 # Services module
-angular.module('detectiveServices', ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detectiveServices', ['ngResource', 'ngSanitize', 'ngCookies', 'ngRoute'])

@@ -26,6 +26,7 @@ venv
 
 # Generated files
 app/static/CACHE
+app/static/vendor
 app/media
 staticfiles
 lib

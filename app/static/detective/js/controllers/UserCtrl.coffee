@@ -69,7 +69,6 @@ class UserCtrl
                 @loginError(response.data.error)        
 
     signup: =>        
-        console.log @scope.username
         config = 
             method: "POST"
             url: "/api/v1/user/"

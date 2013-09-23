@@ -191,8 +191,7 @@ INSTALLED_APPS = (
     'neo4django.admin',
     # Compresses linked and inline JavaScript or CSS into a single cached file.    
     'compressor', 
-    'tastypie',
-    'widget_tweaks',       
+    'tastypie',      
     'djangobower', 
     # Internal
     'app.detective', 

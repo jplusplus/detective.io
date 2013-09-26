@@ -114,7 +114,7 @@ class SummaryResource(Resource):
                 available_resources[name] = {
                     'description'         : getattr(model, "_description", None),
                     'scope'               : getattr(model, "_scope", None),
-                    'model'               : getattr(model, "__name__", ""),
+                    'model'               : getattr(model, "__name_", ""),
                     'verbose_name'        : verbose_name,
                     'verbose_name_plural' : verbose_name_plural,
                     'name'                : name,
@@ -170,3 +170,168 @@ class SummaryResource(Resource):
 
         self.log_throttled_access(request)
         return object_list
+
+    def get_models_output(self):
+        # Get all detective's models        
+        app    = get_app('detective')
+        # Select only some atribute
+        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title() }
+        return [ output(m) for m in get_models(app) ]
+
+    def summary_syntax(self, bundle):    
+        syntax = {
+            'subject': {
+                'model':  self.get_models_output(),
+                'entity': None
+            },
+            'predicate': {
+                'relationship': [
+                    {
+                        "name"  : "energy_product_has_distribution+", 
+                        "label": "is distributed in",
+                        "subject" : "EnergyProduct"
+                    },
+                    {
+                        "name": "fundraising_round_has_personal_payer+",
+                        "subject": "FundraisingRound",
+                        "label": ""
+                    },
+                    {
+                        "name": "fundraising_round_has_payer+",
+                        "subject": "FundraisingRound",
+                        "label": ""
+                    },
+                    {
+                        "name": "person_has_nationality+",
+                        "subject": "Person",
+                        "label": ""
+                    },
+                    {
+                        "name": "person_has_activity_in_organization+",
+                        "subject": "Person",
+                        "label": ""
+                    },
+                    {
+                        "name": "person_has_previous_activity_in_organization+",
+                        "subject": "Person",
+                        "label": ""
+                    },
+                    {
+                        "name": "product_has_price+",
+                        "subject": "Product",
+                        "label": ""
+                    },
+                    {
+                        "name": "commentary_has_author+",
+                        "subject": "Commentary",
+                        "label": ""
+                    },
+                    {
+                        "name": "energy_product_has_distribution+",
+                        "subject": "EnergyProduct",
+                        "label": ""
+                    },
+                    {
+                        "name": "energy_product_has_operator+",
+                        "subject": "EnergyProduct",
+                        "label": ""
+                    },
+                    {
+                        "name": "energy_product_has_price+",
+                        "subject": "EnergyProduct",
+                        "label": ""
+                    },
+                    {
+                        "name": "organization_has_adviser+",
+                        "subject": "Organization",
+                        "label": ""
+                    },
+                    {
+                        "name": "organization_has_key_person+",
+                        "subject": "Organization",
+                        "label": ""
+                    },
+                    {
+                        "name": "organization_has_partner+",
+                        "subject": "Organization",
+                        "label": ""
+                    },
+                    {
+                        "name": "organization_has_fundraising_round+",
+                        "subject": "Organization",
+                        "label": ""
+                    },
+                    {
+                        "name": "organization_has_monitoring_body+",
+                        "subject": "Organization",
+                        "label": ""
+                    },
+                    {
+                        "name": "organization_has_litigation_against+",
+                        "subject": "Organization",
+                        "label": ""
+                    },
+                    {
+                        "name": "organization_has_revenue+",
+                        "subject": "Organization",
+                        "label": ""
+                    },
+                    {
+                        "name": "organization_has_board_member+",
+                        "subject": "Organization",
+                        "label": ""
+                    },
+                    {
+                        "name": "project_has_commentary+",
+                        "subject": "Project",
+                        "label": ""
+                    },
+                    {
+                        "name": "project_has_owner+",
+                        "subject": "Project",
+                        "label": ""
+                    },
+                    {
+                        "name": "project_has_partner+",
+                        "subject": "Project",
+                        "label": ""
+                    },
+                    {
+                        "name": "project_has_activity_in_country+",
+                        "subject": "Project",
+                        "label": ""
+                    },
+                    {
+                        "name": "distribution_has_activity_in_country+",
+                        "subject": "Distribution",
+                        "label": ""
+                    },
+                    {
+                        "name": "energy_project_has_product+",
+                        "subject": "EnergyProject",
+                        "label": ""
+                    },
+                    {
+                        "name": "energy_project_has_commentary+",
+                        "subject": "EnergyProject",
+                        "label": ""
+                    },
+                    {
+                        "name": "energy_project_has_owner+",
+                        "subject": "EnergyProject",
+                        "label": ""
+                    },
+                    {
+                        "name": "energy_project_has_partner+",
+                        "subject": "EnergyProject",
+                        "label": ""
+                    },
+                    {
+                        "name": "energy_project_has_activity_in_country+",
+                        "subject": "EnergyProject",
+                        "label": ""
+                    }
+                ]
+            }
+        }
+        return syntax

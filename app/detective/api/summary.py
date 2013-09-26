@@ -175,7 +175,7 @@ class SummaryResource(Resource):
         # Get all detective's models        
         app    = get_app('detective')
         # Select only some atribute
-        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title() }
+        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
         return [ output(m) for m in get_models(app) ]
 
     def summary_syntax(self, bundle):    
@@ -186,11 +186,6 @@ class SummaryResource(Resource):
             },
             'predicate': {
                 'relationship': [
-                    {
-                        "name"  : "energy_product_has_distribution+", 
-                        "label": "is distributed in",
-                        "subject" : "EnergyProduct"
-                    },
                     {
                         "name": "fundraising_round_has_personal_payer+",
                         "subject": "FundraisingRound",
@@ -204,32 +199,32 @@ class SummaryResource(Resource):
                     {
                         "name": "person_has_nationality+",
                         "subject": "Person",
-                        "label": ""
+                        "label": "is from"
                     },
                     {
                         "name": "person_has_activity_in_organization+",
                         "subject": "Person",
-                        "label": ""
+                        "label": "has activity in"
                     },
                     {
                         "name": "person_has_previous_activity_in_organization+",
                         "subject": "Person",
-                        "label": ""
+                        "label": "had activity in"
                     },
                     {
                         "name": "product_has_price+",
                         "subject": "Product",
-                        "label": ""
+                        "label": "is sell"
                     },
                     {
                         "name": "commentary_has_author+",
                         "subject": "Commentary",
-                        "label": ""
+                        "label": "is written by"
                     },
                     {
                         "name": "energy_product_has_distribution+",
                         "subject": "EnergyProduct",
-                        "label": ""
+                        "label": "is distributed in"
                     },
                     {
                         "name": "energy_product_has_operator+",
@@ -239,7 +234,7 @@ class SummaryResource(Resource):
                     {
                         "name": "energy_product_has_price+",
                         "subject": "EnergyProduct",
-                        "label": ""
+                        "label": "is sell"
                     },
                     {
                         "name": "organization_has_adviser+",
@@ -254,7 +249,7 @@ class SummaryResource(Resource):
                     {
                         "name": "organization_has_partner+",
                         "subject": "Organization",
-                        "label": ""
+                        "label": "has a patnership with"
                     },
                     {
                         "name": "organization_has_fundraising_round+",
@@ -269,12 +264,12 @@ class SummaryResource(Resource):
                     {
                         "name": "organization_has_litigation_against+",
                         "subject": "Organization",
-                        "label": ""
+                        "label": "has a litigation against"
                     },
                     {
                         "name": "organization_has_revenue+",
                         "subject": "Organization",
-                        "label": ""
+                        "label": "get a revenue from"
                     },
                     {
                         "name": "organization_has_board_member+",
@@ -289,22 +284,22 @@ class SummaryResource(Resource):
                     {
                         "name": "project_has_owner+",
                         "subject": "Project",
-                        "label": ""
+                        "label": "is owned by"
                     },
                     {
                         "name": "project_has_partner+",
                         "subject": "Project",
-                        "label": ""
+                        "label": "has a partnership with"
                     },
                     {
                         "name": "project_has_activity_in_country+",
                         "subject": "Project",
-                        "label": ""
+                        "label": "has activity in"
                     },
                     {
                         "name": "distribution_has_activity_in_country+",
                         "subject": "Distribution",
-                        "label": ""
+                        "label": "has activity in"
                     },
                     {
                         "name": "energy_project_has_product+",
@@ -319,17 +314,17 @@ class SummaryResource(Resource):
                     {
                         "name": "energy_project_has_owner+",
                         "subject": "EnergyProject",
-                        "label": ""
+                        "label": "is owned by"
                     },
                     {
                         "name": "energy_project_has_partner+",
                         "subject": "EnergyProject",
-                        "label": ""
+                        "label": "has partnership with"
                     },
                     {
                         "name": "energy_project_has_activity_in_country+",
                         "subject": "EnergyProject",
-                        "label": ""
+                        "label": "has activity in"
                     }
                 ]
             }

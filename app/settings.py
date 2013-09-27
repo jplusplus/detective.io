@@ -82,7 +82,7 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-BOWER_COMPONENTS_ROOT = here('static')
+BOWER_COMPONENTS_ROOT = here('static/components')
 
 BOWER_INSTALLED_APPS = (
     "angular#1.2.0-rc.2",

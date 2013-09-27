@@ -27,10 +27,26 @@ def register_model_rules():
     rules.model(Project).field("partner").add(is_visible=False)
 
     rules.model(Country).add(product_set= Neomatch(
-        title="Products distributed in this country",
+        title="Energy products distributed in this country",
         target_model=EnergyProduct,
         match="""
             (root)<--()<-[:`energy_product_has_distribution+`]-({select})
+        """
+    ))
+
+    rules.model(Country).add(person_set=Neomatch(
+        title="Persons from this country",
+        target_model=Person,
+        match="""
+            (root)-[:`person_has_nationality+`]-({select})
+        """
+    ))
+
+    rules.model(Country).add(project_set=Neomatch(
+        title="Energy projects active in this country",
+        target_model=EnergyProject,
+        match="""
+            (root)-[:`energy_project_has_activity_in_country+`]-({select})
         """
     ))
 
@@ -41,8 +57,58 @@ def register_model_rules():
             (root)-[:`energy_product_has_distribution+`]-()-[:`distribution_has_activity_in_country+`]-({select})
         """
     ))
-
     
+    rules.model(Organization).add(energyproject_set=Neomatch(
+        title="Energy projects this organization owns",
+        target_model=EnergyProject,
+        match="""
+            (root)-[:`energy_project_has_owner+`]-({select})
+        """
+    ))
+    
+    rules.model(EnergyProject).add(energyproduct_set=Neomatch(
+        title="Energy project this product belongs to",
+        target_model=EnergyProduct,
+        match="""
+            (root)-[:`energy_project_has_product+`]-({select})
+        """
+    ))
+
+
+
+    rules.model(Person).add(organizationkey_set=Neomatch(
+        title="Organizations this person has a key position in",
+        target_model=Organization,
+        match="""
+            (root)-[:`organization_has_key_person+`]-({select})
+        """
+    ))
+
+    rules.model(Person).add(organizationadviser_set=Neomatch(
+        title="Organizations this person is an adviser to",
+        target_model=Organization,
+        match="""
+            (root)-[:`organization_has_adviser+`]-({select})
+        """
+    ))
+
+    rules.model(Person).add(organizationboard_set=Neomatch(
+        title="Organizations this person is a board member of",
+        target_model=Organization,
+        match="""
+            (root)-[:`organization_has_board_member+`]-({select})
+        """
+    ))
+
+    rules.model(Person).add(fundraisinground_set=Neomatch(
+        title="Fundraising rounds this person has contributed to",
+        target_model=FundraisingRound,
+        match="""
+            (root)-[:`fundraising_round_has_personal_payer+`]-({select})
+        """
+    ))
+
+
 
     # Add now some generic rules
     app = get_app('detective')

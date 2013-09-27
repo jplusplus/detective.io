@@ -189,12 +189,12 @@ class SummaryResource(Resource):
                     {
                         "name": "fundraising_round_has_personal_payer+",
                         "subject": "FundraisingRound",
-                        "label": ""
+                        "label": "was financed by"
                     },
                     {
                         "name": "fundraising_round_has_payer+",
                         "subject": "FundraisingRound",
-                        "label": ""
+                        "label": "was financed by"
                     },
                     {
                         "name": "person_has_nationality+",
@@ -209,7 +209,7 @@ class SummaryResource(Resource):
                     {
                         "name": "person_has_previous_activity_in_organization+",
                         "subject": "Person",
-                        "label": "had activity in"
+                        "label": "had previous activity in"
                     },
                     {
                         "name": "product_has_price+",
@@ -219,7 +219,7 @@ class SummaryResource(Resource):
                     {
                         "name": "commentary_has_author+",
                         "subject": "Commentary",
-                        "label": "is written by"
+                        "label": "was written by"
                     },
                     {
                         "name": "energy_product_has_distribution+",
@@ -229,37 +229,37 @@ class SummaryResource(Resource):
                     {
                         "name": "energy_product_has_operator+",
                         "subject": "EnergyProduct",
-                        "label": ""
+                        "label": "has operator"
                     },
                     {
                         "name": "energy_product_has_price+",
                         "subject": "EnergyProduct",
-                        "label": "is sell"
+                        "label": "is sold"
                     },
                     {
                         "name": "organization_has_adviser+",
                         "subject": "Organization",
-                        "label": ""
+                        "label": "has adviser"
                     },
                     {
                         "name": "organization_has_key_person+",
                         "subject": "Organization",
-                        "label": ""
+                        "label": "has key person"
                     },
                     {
                         "name": "organization_has_partner+",
                         "subject": "Organization",
-                        "label": "has a patnership with"
+                        "label": "has a partnership with"
                     },
                     {
                         "name": "organization_has_fundraising_round+",
                         "subject": "Organization",
-                        "label": ""
+                        "label": "fundraised"
                     },
                     {
                         "name": "organization_has_monitoring_body+",
                         "subject": "Organization",
-                        "label": ""
+                        "label": "has monitoring body"
                     },
                     {
                         "name": "organization_has_litigation_against+",
@@ -269,17 +269,17 @@ class SummaryResource(Resource):
                     {
                         "name": "organization_has_revenue+",
                         "subject": "Organization",
-                        "label": "get a revenue from"
+                        "label": "has revenue"
                     },
                     {
                         "name": "organization_has_board_member+",
                         "subject": "Organization",
-                        "label": ""
+                        "label": "has board member"
                     },
                     {
                         "name": "project_has_commentary+",
                         "subject": "Project",
-                        "label": ""
+                        "label": "has commentary/analysis"
                     },
                     {
                         "name": "project_has_owner+",
@@ -304,12 +304,12 @@ class SummaryResource(Resource):
                     {
                         "name": "energy_project_has_product+",
                         "subject": "EnergyProject",
-                        "label": ""
+                        "label": "has product"
                     },
                     {
                         "name": "energy_project_has_commentary+",
                         "subject": "EnergyProject",
-                        "label": ""
+                        "label": "has commentary/analysis"
                     },
                     {
                         "name": "energy_project_has_owner+",

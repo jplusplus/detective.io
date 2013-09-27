@@ -31,3 +31,4 @@ app/static/components
 app/media
 staticfiles
 lib
+node_modules

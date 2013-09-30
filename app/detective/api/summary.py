@@ -2,6 +2,7 @@
 from ..models              import Country
 from ..neomatch            import Neomatch
 from .utils                import get_model_node_id, get_model_fields
+from difflib               import SequenceMatcher
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models      import get_app, get_models
 from django.http           import Http404, HttpResponse
@@ -132,19 +133,9 @@ class SummaryResource(Resource):
 
         if not "q" in request.GET: raise Exception("Missing 'q' parameter")
 
-        limit = int(request.GET.get('limit', 20))
-        match = bundle.request.GET["q"].lower()
-        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match)
-        # Query to get every result
-        query = """
-            START root=node(*)
-            MATCH (root)<-[r:`<<INSTANCE>>`]-(type)
-            WHERE HAS(root.name) 
-            AND type.app_label = "detective"
-            AND LOWER(root.name) =~ '.*(%s).*'
-            RETURN ID(root) as id, root.name as name, type.model_name as model
-        """ % match
-        results   = connection.cypher(query).to_dicts()
+        limit     = int(request.GET.get('limit', 20))
+        query     = bundle.request.GET["q"].lower()
+        results   = self.search(query)
         count     = len(results)
         paginator = Paginator(results, limit)
 
@@ -161,7 +152,7 @@ class SummaryResource(Resource):
         object_list = {
             'objects': objects,
             'meta': {
-                'q': match,
+                'q': query,
                 'page': p,
                 'limit': limit,
                 'total_count': count
@@ -171,6 +162,20 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
+    def search(self, query):
+        match = str(query).lower()
+        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match)
+        # Query to get every result
+        query = """
+            START root=node(*)
+            MATCH (root)<-[r:`<<INSTANCE>>`]-(type)
+            WHERE HAS(root.name) 
+            AND type.app_label = "detective"
+            AND LOWER(root.name) =~ '.*(%s).*'
+            RETURN ID(root) as id, root.name as name, type.model_name as model
+        """ % match
+        return connection.cypher(query).to_dicts()
+
     def get_models_output(self):
         # Get all detective's models        
         app    = get_app('detective')
@@ -178,8 +183,161 @@ class SummaryResource(Resource):
         output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
         return [ output(m) for m in get_models(app) ]
 
-    def summary_syntax(self, bundle):    
-        syntax = {
+
+    def ngrams(self, input):
+        input = input.split(' ')
+        output = []
+        end = len(input)
+        for n in range(1, end+1):
+            for i in range(len(input)-n+1):                
+                output.append(input[i:i+n])
+        return output
+
+    def get_close_labels(self, token, lst, ratio=0.8):
+        """
+            Look for the given token into the list using labels
+        """
+        matches = []
+        for item in lst:
+            cpr = item["label"]
+            if SequenceMatcher(None, token, cpr).ratio() >= ratio:
+                matches.append(item)
+        return matches
+
+    def summary_human(self, bundle):         
+        request = bundle.request
+        self.method_check(request, allowed=['get'])        
+        self.throttle_check(request)
+   
+        if not "q" in request.GET: 
+            raise Exception("Missing 'q' parameter")
+
+        # Find the kown match for the given query
+        matches =  self.find_matches(request.GET["q"])
+        # Build and returns a list of proposal
+        return self.build_propositions(matches, request.GET["q"])     
+
+    def find_matches(self, query):
+        # Group ngram by following string
+        ngrams  = [' '.join(x) for x in self.ngrams(query) ]
+        matches = []
+        models  = self.get_syntax()["subject"]["model"]
+        rels    = self.get_syntax()["predicate"]["relationship"]        
+        # Known models lookup for each ngram
+        for token in ngrams:  
+            obj = {
+                'models'       : self.get_close_labels(token, models),
+                'relationships': self.get_close_labels(token, rels),
+                'token'        : token
+            }          
+            matches.append(obj)
+        return matches
+
+    def build_propositions(self, matches, query):
+        """
+            For now, a proposition follow the form
+            <subject> <predicat> <object>
+            Where a <subject>, is an "Named entity" or a Model
+            a <predicat> is a relationship type
+            and an <object> is a "Named entity" or a Model.
+            Later, as follow RDF standard, an <object> could be a data.
+        """
+        def remove_duplicates(lst):
+            seen = set()
+            new_list = []
+            for item in lst:
+                # Create a hash of the dictionary
+                obj = hash(frozenset(item.items()))
+                if obj not in seen:
+                    seen.add(obj)
+                    new_list.append(item)
+            return new_list
+
+        def is_preposition(token):
+            return str(token).lower() in ["aboard", "about", "above", "across", "after", "against", 
+            "along", "amid", "among", "anti", "around", "as", "at", "before", "behind", "below", 
+            "beneath", "beside", "besides", "between", "beyond", "but", "by", "concerning", 
+            "considering",  "despite", "down", "during", "except", "excepting", "excluding", 
+            "following", "for", "from", "in", "inside", "into", "like", "minus", "near", "of", 
+            "off", "on", "onto", "opposite", "outside", "over", "past", "per", "plus", "regarding", 
+            "round", "save", "since", "than", "through", "to", "toward", "towards", "under", 
+            "underneath", "unlike", "until", "up", "upon", "versus", "via", "with", "within", "without"]
+
+        def previous_word(sentence, base):
+            parts = sentence.split(base)            
+            return parts[0].strip().split(" ")[-1] if len(parts) else None
+
+        predicates    = []
+        subjects      = []
+        objects       = []
+        propositions  = []
+        # Picks candidates for subjects and predicates
+        for match in matches:
+            subjects   += match["models"]
+            predicates += match["relationships"]                 
+            # Objects are detected when they start and end by double quotes
+            if  match["token"].startswith('"') and match["token"].endswith('"'):
+                # Remove the quote from the token
+                token = match["token"].replace('"', '')
+                # Store the token as an object
+                objects += self.search(token)[:5]
+            # Or if the previous word is a preposition
+            elif is_preposition( previous_word(query, match["token"]) ):
+                # Store the token as an object
+                objects += self.search(match["token"])[:5]
+
+        # No subject, no predicate, it might be a classic search
+        if not len(subjects) and not len(predicates):
+            results = self.search(query)            
+            for result in results:
+                # Build the label
+                label = result.get("name", None)
+                propositions.append({
+                    'label': label,
+                    'subject': {
+                        "name": result.get("id", None),
+                        "label": label
+                    },
+                    'predicate': {
+                        "label": "is instance of",
+                        "name": "<<INSTANCE>>"
+                    },
+                    'object': result.get("model", None)
+                })
+        # We find some subjects
+        elif len(subjects) and not len(predicates):
+            rels = self.get_syntax().get("predicate").get("relationship")
+            for subject in subjects:                                 
+                # Gets all available relationship for these subjects
+                predicates += [ rel for rel in rels if rel["subject"] == subject["name"] ]
+
+        # Add a default and irrelevant object
+        if not len(objects): objects = ["..."]
+
+        # Generate proposition using RDF's parts
+        for subject in remove_duplicates(subjects):
+            for predicate in remove_duplicates(predicates):
+                for obj in objects:  
+                    pred_sub = predicate.get("subject", None)
+                    # If the predicate has a subject
+                    # and this matches to the current one 
+                    if pred_sub == None or pred_sub == subject.get("name", None):
+                        # Value to inset into the proposition's label
+                        values      = (subject["label"], predicate["label"], obj,)
+                        # Build the label
+                        label = '%s that %s "%s"' % values
+                        propositions.append({
+                            'label'    : label,
+                            'subject'  : subject,
+                            'predicate': predicate,
+                            'object'   : obj
+                        })
+        
+        # Remove duplicates proposition dicts
+        return propositions
+
+    def get_syntax(self):    
+        return {
             'subject': {
                 'model':  self.get_models_output(),
                 'entity': None
@@ -329,4 +487,3 @@ class SummaryResource(Resource):
                 ]
             }
         }
-        return syntax

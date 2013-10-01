@@ -11,6 +11,7 @@ from neo4django.db         import connection
 from tastypie.exceptions   import ImmediateHttpResponse
 from tastypie.resources    import Resource
 from tastypie.serializers  import Serializer
+import json
 import re
 
 
@@ -162,9 +163,86 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
+    def summary_rdf_search(self, bundle):       
+        request = bundle.request
+        self.method_check(request, allowed=['get'])        
+        self.throttle_check(request)
+
+        limit     = int(request.GET.get('limit', 20))
+        query     = json.loads(request.GET.get('q', 'null'))
+        subject   = query.get("subject", None)
+        predicate = query.get("predicate", None)
+        obj       = query.get("object", None)
+        results   = self.rdf_search(subject, predicate, obj)
+        count     = len(results)
+        paginator = Paginator(results, limit)
+        try:
+            p     = int(request.GET.get('page', 1))
+            page  = paginator.page(p)
+        except InvalidPage:
+            raise Http404("Sorry, no results on that page.")
+        
+        objects = []
+        for result in page.object_list:    
+            objects.append(result)
+
+        object_list = {
+            'objects': objects,
+            'meta': {
+                'q': query,
+                'page': p,
+                'limit': limit,
+                'total_count': count
+            }
+        }
+
+        self.log_throttled_access(request)
+        return object_list
+
+    def summary_human(self, bundle):         
+        request = bundle.request
+        self.method_check(request, allowed=['get'])        
+        self.throttle_check(request)
+   
+        if not "q" in request.GET: 
+            raise Exception("Missing 'q' parameter")
+
+        query        = request.GET["q"]
+        # Find the kown match for the given query
+        matches      = self.find_matches(query)
+        # Build and returns a list of proposal
+        propositions = self.build_propositions(matches, query)   
+        # Build paginator  
+        count        = len(propositions)
+        limit        = int(request.GET.get('limit', 20))
+        paginator    = Paginator(propositions, limit)
+
+        try:
+            p     = int(request.GET.get('page', 1))
+            page  = paginator.page(p)
+        except InvalidPage:
+            raise Http404("Sorry, no results on that page.")
+
+        objects = []
+        for result in page.object_list:    
+            objects.append(result)
+
+        object_list = {
+            'objects': objects,
+            'meta': {
+                'q': query,
+                'page': p,
+                'limit': limit,
+                'total_count': count
+            }
+        }
+
+        self.log_throttled_access(request)
+        return object_list
+
     def search(self, query):
         match = str(query).lower()
-        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match)
+        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()
         # Query to get every result
         query = """
             START root=node(*)
@@ -175,6 +253,22 @@ class SummaryResource(Resource):
             RETURN ID(root) as id, root.name as name, type.model_name as model
         """ % match
         return connection.cypher(query).to_dicts()
+
+    def rdf_search(self, subject, predicate, obj):        
+        # Query to get every result
+        query = """
+            START st=node(*)
+            MATCH (st)<-[`%s`]-(root)<-[`<<INSTANCE>>`]-(type)
+            WHERE HAS(root.name)
+            AND HAS(st.name)
+            AND HAS(type.app_label)
+            AND type.app_label = "detective"
+            AND type.model_name = "%s"
+            AND st.name = "%s"
+            RETURN ID(root) as id, root.name as name, type.model_name as model
+        """ % ( predicate["name"], subject["name"], obj["name"], )        
+        return connection.cypher(query).to_dicts()
+
 
     def get_models_output(self):
         # Get all detective's models        
@@ -193,7 +287,7 @@ class SummaryResource(Resource):
                 output.append(input[i:i+n])
         return output
 
-    def get_close_labels(self, token, lst, ratio=0.8):
+    def get_close_labels(self, token, lst, ratio=0.6):
         """
             Look for the given token into the list using labels
         """
@@ -203,19 +297,6 @@ class SummaryResource(Resource):
             if SequenceMatcher(None, token, cpr).ratio() >= ratio:
                 matches.append(item)
         return matches
-
-    def summary_human(self, bundle):         
-        request = bundle.request
-        self.method_check(request, allowed=['get'])        
-        self.throttle_check(request)
-   
-        if not "q" in request.GET: 
-            raise Exception("Missing 'q' parameter")
-
-        # Find the kown match for the given query
-        matches =  self.find_matches(request.GET["q"])
-        # Build and returns a list of proposal
-        return self.build_propositions(matches, request.GET["q"])     
 
     def find_matches(self, query):
         # Group ngram by following string
@@ -240,7 +321,7 @@ class SummaryResource(Resource):
             Where a <subject>, is an "Named entity" or a Model
             a <predicat> is a relationship type
             and an <object> is a "Named entity" or a Model.
-            Later, as follow RDF standard, an <object> could be a data.
+            Later, as follow RDF standard, an <object> could be any data.
         """
         def remove_duplicates(lst):
             seen = set()
@@ -253,7 +334,7 @@ class SummaryResource(Resource):
                     new_list.append(item)
             return new_list
 
-        def is_preposition(token):
+        def is_preposition(token=""):     
             return str(token).lower() in ["aboard", "about", "above", "across", "after", "against", 
             "along", "amid", "among", "anti", "around", "as", "at", "before", "behind", "below", 
             "beneath", "beside", "besides", "between", "beyond", "but", "by", "concerning", 
@@ -263,7 +344,8 @@ class SummaryResource(Resource):
             "round", "save", "since", "than", "through", "to", "toward", "towards", "under", 
             "underneath", "unlike", "until", "up", "upon", "versus", "via", "with", "within", "without"]
 
-        def previous_word(sentence, base):
+        def previous_word(sentence="", base=""):
+            if base == "" or sentence == "": return ""
             parts = sentence.split(base)            
             return parts[0].strip().split(" ")[-1] if len(parts) else None
 
@@ -312,7 +394,7 @@ class SummaryResource(Resource):
                 predicates += [ rel for rel in rels if rel["subject"] == subject["name"] ]
 
         # Add a default and irrelevant object
-        if not len(objects): objects = ["..."]
+        if not len(objects): objects = [""]
 
         # Generate proposition using RDF's parts
         for subject in remove_duplicates(subjects):
@@ -322,10 +404,14 @@ class SummaryResource(Resource):
                     # If the predicate has a subject
                     # and this matches to the current one 
                     if pred_sub == None or pred_sub == subject.get("name", None):
+                        if type(obj) is dict:
+                            obj_disp = obj["name"] or obj["label"]
+                        else:
+                            obj_disp = obj
                         # Value to inset into the proposition's label
-                        values      = (subject["label"], predicate["label"], obj,)
+                        values = (subject["label"], predicate["label"], obj_disp,)
                         # Build the label
-                        label = '%s that %s "%s"' % values
+                        label = '%s that %s %s' % values
                         propositions.append({
                             'label'    : label,
                             'subject'  : subject,
@@ -370,8 +456,8 @@ class SummaryResource(Resource):
                         "label": "had previous activity in"
                     },
                     {
-                        "name": "product_has_price+",
-                        "subject": "Product",
+                        "name": "energy_product_has_price+",
+                        "subject": "EnergyProduct",
                         "label": "is sell"
                     },
                     {
@@ -435,23 +521,23 @@ class SummaryResource(Resource):
                         "label": "has board member"
                     },
                     {
-                        "name": "project_has_commentary+",
-                        "subject": "Project",
+                        "name": "energy_project_has_commentary+",
+                        "subject": "EnergyProject",
                         "label": "has commentary/analysis"
                     },
                     {
-                        "name": "project_has_owner+",
-                        "subject": "Project",
+                        "name": "energy_project_has_owner+",
+                        "subject": "EnergyProject",
                         "label": "is owned by"
                     },
                     {
-                        "name": "project_has_partner+",
-                        "subject": "Project",
+                        "name": "energy_project_has_partner+",
+                        "subject": "EnergyProject",
                         "label": "has a partnership with"
                     },
                     {
-                        "name": "project_has_activity_in_country+",
-                        "subject": "Project",
+                        "name": "energy_project_has_activity_in_country+",
+                        "subject": "EnergyProject",
                         "label": "has activity in"
                     },
                     {

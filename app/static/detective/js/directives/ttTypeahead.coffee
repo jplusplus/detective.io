@@ -7,9 +7,13 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
             compiled = _.template(template)
             render: (context)-> compiled(context)
     scope:         
-        model : "=ttModel" 
+        model     : "=ttModel" 
         individual: "&ttIndividual"  
-        create: "&ttCreate"  
+        create    : "&ttCreate"
+        remote    : "@"
+        prefetch  : "@"
+        valueKey  : "@"
+        limit     : "@"
     link: (scope, element, attrs) ->
         # Select the individual to look for
         individual = (scope.individual() or "").toLowerCase()
@@ -20,25 +24,35 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
         # Create the typehead
         element.typeahead    
             name: individual
+            limit: scope.limit or 5
             template: [
-                "<%= name %>",
+                "<%= name || label %>",
                 "<% if (typeof(model) != 'undefined') { %>",
                     "<div class='model'>",
                         "<%= model %>",
                     "</div>",
+                "<% } else if (typeof(predicate) != 'undefined' && predicate.name == '<<INSTANCE>>') { %>",
+                    "<div class='model'>",
+                        "<%= object %>",
+                    "</div>",
+                "<% } else if (typeof(subject) != 'undefined') { %>",
+                    "<div class='model'>",
+                        "<i class='icon-list right-05'></i>"
+                        "<%= subject.label %>",
+                    "</div>",
                 "<% } %>"
             ].join ""
             engine: engine
-            valueKey: "name"
+            valueKey: scope.valueKey or "name"
             prefetch: 
-                url: "/api/v1/#{individual}/mine/"    
+                url: scope.prefetch or "/api/v1/#{individual}/mine/"    
                 filter: saveResponse
             remote: 
-                url: "/api/v1/#{individual}/search/?q=%QUERY"
+                url: scope.remote or "/api/v1/#{individual}/search/?q=%QUERY"
                 filter: saveResponse
                     
         # Watch select event
-        element.on "typeahead:selected", (input, individual)->      
+        element.on "typeahead:selected", (input, individual)-> 
             if scope.model?
                 angular.copy(individual, scope.model);
                 scope.$apply()
@@ -56,13 +70,12 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
             scope.$apply()
                   
         # Watch change event
-        element.on "change", (input)-> 
-            $input = $(this)
+        element.on "change", (input)->                        
             # Filter using the current value
-            datum = _.findWhere lastDataset, "name": $input.val()            
+            datum = _.findWhere lastDataset, "name": element.val()            
             # If datum exist, use the selected event
             ev = "typeahead:" + (if datum then "selected" else "uservalue")            
             # Trigger this even
-            $input.trigger ev, datum
+            element.trigger ev, datum
 
 

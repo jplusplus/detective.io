@@ -20,15 +20,10 @@ class IndividualListCtrl
         # ──────────────────────────────────────────────────────────────────────  
         # Read route params
         @scope.scope       = @routeParams.scope
-        @scope.type        = @routeParams.type
+        @scope.type        = @routeParams.type or ""
         @scope.page        = @routeParams.page or 1
         @scope.limit       = 20
-        @scope.individuals = {}        
-        # Get meta information for this type
-        @Summary.get id: "forms", (data)=> 
-            @scope.meta = data[@scope.type.toLowerCase()]
-            # Set page's title
-            @Page.title @scope.meta.verbose_name_plural            
+        @scope.individuals = {}                 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────  
@@ -36,18 +31,37 @@ class IndividualListCtrl
             # Global loading mode
             Page.loading true           
             # Get individual from database
-            @scope.individuals = @Individual.get 
-                type    : @scope.type
-                limit   : @scope.limit
-                offset  : @scope.limit * (@scope.page - 1)
-                order_by: "name"
+            @scope.individuals = @Individual.get @getParams()
             # Turn off loading mode
             , -> Page.loading false
         # Update page value
         @scope.$on "$routeUpdate", => @scope.page = @routeParams.page or 1
+        # ──────────────────────────────────────────────────────────────────────
+        # Page setup
+        # ──────────────────────────────────────────────────────────────────────  
+        @getVerbose()
 
-        
-    singleUrl: (individual)=> "/node/#{@scope.type}/#{individual.id}"
+    # Verbose informations
+    # (loaded contexualy)
+    getVerbose: =>        
+        # Get meta information for this type
+        @Summary.get id: "forms", (data)=> 
+            meta = data[@scope.type.toLowerCase()]
+            if meta?
+                @scope.verbose_name        = meta.verbose_name
+                @scope.verbose_name_plural = meta.verbose_name_plural        
+                # Set page's title
+                @Page.title meta.verbose_name_plural            
+    # List parameters
+    getParams: =>        
+        type    : @scope.type
+        limit   : @scope.limit
+        page    : @scope.page
+        order_by: "name"
+
+    singleUrl: (individual)=> 
+        type = (@scope.type or individual.model).toLowerCase()
+        "/node/#{type}/#{individual.id}"
     # Pages list
     pages: => 
         # No page yet

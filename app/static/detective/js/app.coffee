@@ -23,7 +23,8 @@ detective = angular
                 # Bind routes to the controllers
                 $routeProvider
                     .when('/', {
-                        redirectTo: "/energy/contribute"
+                        controller: HomeCtrl
+                        templateUrl: "/partial/home.html"
                     })
                     .when('/login', {
                         controller: UserCtrl
@@ -34,8 +35,8 @@ detective = angular
                         templateUrl: "/partial/signup.html"
                     })
                     .when('/node', {
-                        controller: HomeCtrl
-                        templateUrl: "/partial/home.html"
+                        controller: IndividualSearchCtrl
+                        templateUrl: "/partial/individual-list.html"
                     })
                     .when('/node/:type', {
                         controller: IndividualListCtrl  

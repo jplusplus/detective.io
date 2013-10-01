@@ -33,7 +33,17 @@ class ExploreCtrl
         @location.path "/node/country/#{val.id}" if val.id?
 
     selectIndividual: (val, old)=>
-        @location.path "/node/#{val.model.toLowerCase()}/#{val.id}" if val.id?
+        # Single entity selected
+        if val.predicate? and val.predicate.name is "<<INSTANCE>>"
+            @location.path "/node/#{val.object.toLowerCase()}/#{val.subject.name}"        
+        # Full RDF-formated research
+        else if val.predicate?
+            # Do not pass the label
+            delete val.label
+            # Create a JSON query to pass though the URL
+            query = angular.toJson val
+            @location.path "/node/"
+            @location.search "q", query
 
     getTypeCount: ()=>
         tt = 0

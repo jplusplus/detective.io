@@ -13,6 +13,9 @@
 						 	tt-typeahead
 							tt-individual="'summary'"
 							tt-model="selectedIndividual"
+							remote="/api/v1/summary/human/?q=%QUERY"
+							value-key="label"
+							limit="10"
 						   	class="form-control" 
 						   	id="input-search" />		    				
 					<div class="input-group-btn">		

@@ -265,7 +265,7 @@ class SummaryResource(Resource):
             AND type.app_label = "detective"
             AND type.model_name = "%s"
             AND st.name = "%s"
-            RETURN ID(root) as id, root.name as name, type.model_name as model
+            RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
         """ % ( predicate["name"], subject["name"], obj["name"], )        
         return connection.cypher(query).to_dicts()
 

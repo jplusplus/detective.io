@@ -37,7 +37,7 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
                     "</div>",
                 "<% } else if (typeof(subject) != 'undefined') { %>",
                     "<div class='model'>",
-                        "<i class='icon-list right-05'></i>"
+                        "<i class='icon-list right05'></i>"
                         "<%= subject.label %>",
                     "</div>",
                 "<% } %>"

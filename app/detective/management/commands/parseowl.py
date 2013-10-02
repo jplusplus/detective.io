@@ -303,7 +303,7 @@ class Command(BaseCommand):
                 field = "\t%s = models.Relationship(%s)"
                 modelsContents.append(field % (rel["destination"], ",".join(opt) ) )                
 
-            modelsContents.append("\r\n\tclass Meta:")
+            modelsContents.append("\n\tclass Meta:")
 
             if m["verbose_name"] != '':
                 modelsContents.append("\t\tverbose_name = u'%s'" % m["verbose_name"])
@@ -314,11 +314,11 @@ class Command(BaseCommand):
                 modelsContents.append("\t\tpass") 
 
             if len([p for p in m["properties"] if p["name"] == "name" ]):
-                modelsContents.append("\r\n\tdef __unicode__(self):") 
+                modelsContents.append("\n\tdef __unicode__(self):") 
                 modelsContents.append("\t\treturn self.name or u\"Unkown\"") 
 
 
-        print "\r\n".join(modelsContents).encode("UTF-8")
+        print "\n".join(modelsContents).encode("UTF-8")
 
     @staticmethod
     def topolgical_sort(graph_unsorted):

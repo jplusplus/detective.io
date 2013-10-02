@@ -1,16 +1,16 @@
-<form class="login-form panel panel-default top30 black" ng-class="{loading:loading}">	
+<form class="login-form panel panel-default top30 black" ng-class="{loading:loading}" ng-submit="login()">	
   <div  class="panel-body">
  	  <h2>Log in</h2>
 
     <fieldset ng-disabled="loading">
       <div class="form-group">
         <label for="inputUsername">Username</label>
-        <input type="text" ng-model="username "class="form-control" id="inputUsername" placeholder="Enter your username">
+        <input type="text" required ng-model="username "class="form-control" id="inputUsername" placeholder="Enter your username">
       </div>
 
       <div class="form-group">
         <label for="inputPassword">Password</label>
-        <input type="password" ng-model="password "class="form-control" id="inputPassword" placeholder="Enter your password">
+        <input type="password" required  ng-model="password "class="form-control" id="inputPassword" placeholder="Enter your password">
       </div>
 
       <div class="form-group">
@@ -25,7 +25,7 @@
     </div>
 
   	<div class="tr panel-footer">
-    	<button type="submit" ng-click="login()" class="btn btn-primary">Log in</button>
+    	<button type="submit" class="btn btn-primary">Log in</button>
     </div>
   </fieldset>
 </form>

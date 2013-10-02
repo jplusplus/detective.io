@@ -85,11 +85,6 @@ STATICFILES_DIRS = (
 BOWER_COMPONENTS_ROOT = here('static')
 
 BOWER_INSTALLED_APPS = (
-    "angular#1.2.*",
-    "angular-cookies#1.2.*",
-    "angular-resource#1.2.*",
-    "angular-route#1.2.*",
-    "angular-sanitize#1.2.*",
     "angular-ui-bootstrap-bower#0.6.0",
     "bootstrap#3.0.0",
     "chroma-js#0.5.2",
@@ -100,6 +95,7 @@ BOWER_INSTALLED_APPS = (
     "raphael#2.1.2",
     "typeahead.js#0.9.3",
     "underscore#1.5.2",
+    "unstable-angular-complete#1.1.5",
     'git://github.com/kartograph/kartograph.js',
 )
 

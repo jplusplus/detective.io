@@ -66,4 +66,4 @@ detective = angular
     )
 
 # Services module
-angular.module('detectiveServices', ['ngResource', 'ngSanitize', 'ngCookies', 'ngRoute'])
+angular.module('detectiveServices', ['ngResource', 'ngSanitize', 'ngCookies'])

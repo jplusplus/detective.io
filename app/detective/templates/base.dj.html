@@ -23,7 +23,7 @@
 
         <base href="{% url home %}" />
     </head>
-    <body>        
+    <body ng-cloak>        
         {{ STATIC_URL }}
         {% block content %}{% endblock %}           
 

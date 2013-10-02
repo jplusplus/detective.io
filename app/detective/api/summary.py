@@ -458,7 +458,7 @@ class SummaryResource(Resource):
                     {
                         "name": "energy_product_has_price+",
                         "subject": "EnergyProduct",
-                        "label": "is sell"
+                        "label": "is sold at"
                     },
                     {
                         "name": "commentary_has_author+",
@@ -478,7 +478,7 @@ class SummaryResource(Resource):
                     {
                         "name": "energy_product_has_price+",
                         "subject": "EnergyProduct",
-                        "label": "is sold"
+                        "label": "is sold at"
                     },
                     {
                         "name": "organization_has_adviser+",

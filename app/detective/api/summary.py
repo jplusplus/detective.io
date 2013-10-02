@@ -458,7 +458,7 @@ class SummaryResource(Resource):
                     {
                         "name": "energy_product_has_price+",
                         "subject": "EnergyProduct",
-                        "label": "is sell"
+                        "label": "is sold at"
                     },
                     {
                         "name": "commentary_has_author+",
@@ -473,22 +473,22 @@ class SummaryResource(Resource):
                     {
                         "name": "energy_product_has_operator+",
                         "subject": "EnergyProduct",
-                        "label": "has operator"
+                        "label": "is operated by"
                     },
                     {
                         "name": "energy_product_has_price+",
                         "subject": "EnergyProduct",
-                        "label": "is sold"
+                        "label": "is sold at"
                     },
                     {
                         "name": "organization_has_adviser+",
                         "subject": "Organization",
-                        "label": "has adviser"
+                        "label": "is advised by"
                     },
                     {
                         "name": "organization_has_key_person+",
                         "subject": "Organization",
-                        "label": "has key person"
+                        "label": "is staffed by"
                     },
                     {
                         "name": "organization_has_partner+",
@@ -498,12 +498,12 @@ class SummaryResource(Resource):
                     {
                         "name": "organization_has_fundraising_round+",
                         "subject": "Organization",
-                        "label": "fundraised"
+                        "label": "was financed by"
                     },
                     {
                         "name": "organization_has_monitoring_body+",
                         "subject": "Organization",
-                        "label": "has monitoring body"
+                        "label": "is monitored by"
                     },
                     {
                         "name": "organization_has_litigation_against+",
@@ -513,17 +513,17 @@ class SummaryResource(Resource):
                     {
                         "name": "organization_has_revenue+",
                         "subject": "Organization",
-                        "label": "has revenue"
+                        "label": "has revenue of"
                     },
                     {
                         "name": "organization_has_board_member+",
                         "subject": "Organization",
-                        "label": "has board member"
+                        "label": "has board of directors with"
                     },
                     {
                         "name": "energy_project_has_commentary+",
                         "subject": "EnergyProject",
-                        "label": "has commentary/analysis"
+                        "label": "is analyzed by"
                     },
                     {
                         "name": "energy_project_has_owner+",
@@ -548,12 +548,12 @@ class SummaryResource(Resource):
                     {
                         "name": "energy_project_has_product+",
                         "subject": "EnergyProject",
-                        "label": "has product"
+                        "label": "has product of"
                     },
                     {
                         "name": "energy_project_has_commentary+",
                         "subject": "EnergyProject",
-                        "label": "has commentary/analysis"
+                        "label": "is analyzed by"
                     },
                     {
                         "name": "energy_project_has_owner+",

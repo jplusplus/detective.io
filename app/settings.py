@@ -90,7 +90,7 @@ BOWER_INSTALLED_APPS = (
     "angular-resource#1.2.0-rc.2",
     "angular-route#1.2.0-rc.2",
     "angular-sanitize#1.2.0-rc.2",
-    "angular-ui-bootstrap-bower",
+    "angular-ui-bootstrap-bower#0.6.0",
     "bootstrap#3.0.0",
     "chroma-js#0.5.2",
     "jquery#1.9.0",

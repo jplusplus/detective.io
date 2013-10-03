@@ -26,8 +26,8 @@ angular.module('detective').directive "countryMap", ()->
             # Draw the values on the map (chloroplete)
             draw = ()->           
                 values       = _.map _.filter(scope.values, (d)-> d.count?), (d)-> d.count                     
-                disableColor = "#fff" 
-                colorscale   = chroma.scale(["#F7EAE3", "#EA7E44"]).domain([_.min(values), _.max(values)])
+                disableColor = "#413C38" 
+                colorscale   = chroma.scale(["#6E5B4D", "#FCDA77"]).domain([_.min(values), _.max(values)])
                 map.getLayer("countries").style 
                     fill: (country, path) ->
                         item = scope.values[country["iso-a3"]]
@@ -45,9 +45,9 @@ angular.module('detective').directive "countryMap", ()->
                 map.addLayer 'countries',
                     'name'  : 'countries'
                     'styles':
-                        'stroke-width': 0.5                              
-                        'stroke'      : '#aaa'
-                        'fill'        : '#F5F5F5'                                                        
+                        'stroke-width': 1                    
+                        'stroke'      : '#21201e'
+                        'fill'        : '#413C38'                                                        
                 # Bind layer click
                 map.getLayer('countries').on 'click', (data)->   
                     item = scope.values[data["iso-a3"]]

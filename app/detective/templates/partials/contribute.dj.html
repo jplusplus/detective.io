@@ -101,7 +101,7 @@
 			<form class="form-horizontal">
 
 				<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">				
-					<strong>Individuals already exist with that name!</strong>
+					<strong>Individuals with similar name already exist!</strong>
 					Switch to 
 					<span ng-repeat="similar in individual.similars">
 						<a class="alert-link" ng-click="replaceIndividual($parent.$index, similar.id)" href="">[[similar.name]]</a>

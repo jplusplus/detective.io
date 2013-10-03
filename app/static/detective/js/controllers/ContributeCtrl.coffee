@@ -208,7 +208,7 @@ class ContributeCtrl
             form = @initNewIndividual(@scope.new.type, @scope.new.fields) if form is null
             # Is that field a searchable field ?
             if @scope.new.fields.name
-                params = type: @scope.new.type, name: @scope.new.fields.name
+                params = type: @scope.new.type, id: "search", name: @scope.new.fields.name
                 # Look for individual with the same name
                 form.similars = @Individual.query params
             # Reset the new field

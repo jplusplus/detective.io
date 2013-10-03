@@ -3,7 +3,9 @@
 {% load compress %}
 
 {% block extracss %}
-    <link rel="stylesheet" type="text/less" href="{% static 'detective/css/base.less' %}">
+    {% compress css %}
+        <link rel="stylesheet" type="text/less" href="{% static 'detective/css/base.less' %}">
+    {% endcompress %}
 {% endblock %}
 
 {% block extrajs %}

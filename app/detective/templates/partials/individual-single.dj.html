@@ -46,11 +46,29 @@
 		</div>
 
 		<div class="col-sm-4">
+			<div class="well padding0 text-right">
+				<a class="btn btn-default pull-left" ng-if="user.is_staff">
+					<i class="icon-edit"></i>
+					Edit
+				</a>
+				<span class="btn-group">
+					<a class="btn btn-default" target="_blank" ng-href="/api/v1/[[type]]/[[individual.id]]/?format=json">
+						<i class="icon-download"></i>
+						JSON
+					</a>
+					<a class="btn btn-default" target="_blank" ng-href="/api/v1/[[type]]/[[individual.id]]/?format=xml">
+						<i class="icon-code"></i>
+						XML
+					</a>
+				</span>
+			</div>
+
 			<div class="well padding10" ng-show="hasRels()">
 				<ul class="nav nav-pills nav-stacked">
 				 	<li ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)">
 				 		<a ng-click="scrollTo('rels-' + field.name)">
-				 			[[field.verbose_name]] <i class="text-muted">[[field.related_model]]</i>
+				 			[[field.verbose_name]]<br />
+				 			<i class="text-muted">[[field.related_model]]</i>
 				 		</a>
 				 	</li>
 				</ul>

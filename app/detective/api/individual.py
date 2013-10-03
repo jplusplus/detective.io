@@ -12,6 +12,7 @@ from tastypie.authentication            import SessionAuthentication, MultiAuthe
 from tastypie.authorization             import Authorization
 from tastypie.constants                 import ALL
 from tastypie.resources                 import ModelResource
+from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
 import re
 
@@ -33,8 +34,9 @@ class IndividualMeta:
     always_return_data = True         
     authorization      = IndividualAuthorization()     
     authentication     = MultiAuthentication(SessionAuthentication(), BasicAuthentication())
-    filtering          = {'name': ALL}
+    filtering          = {'name': ALL}    
     ordering           = {'name': ALL}
+    serializer         = Serializer(formats=['json', 'jsonp', 'xml', 'yaml'])
 
 class IndividualResource(ModelResource):
 

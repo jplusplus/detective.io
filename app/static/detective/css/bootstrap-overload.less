@@ -100,7 +100,7 @@ html body .panel {
 	@bg: mix(#2E2D2A, @body-bg);
 	background:@bg;
 	margin:0;
-	.box-shadow( 0 1px 2px 0 darken(@bg, 5) );
+	.box-shadow( 0 1px 2px 0 fade(darken(@bg, 5), 60) );
 	.border-radius(0);
 
 	.active, & {
@@ -130,8 +130,9 @@ html body .panel {
 .well {
 	.nav-pills a {
 		color:@gray;
+		text-decoration: none;
+		
 		i {
-			float:right;
 			text-decoration: none;
 		}
 	}

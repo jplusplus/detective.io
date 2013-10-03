@@ -4,9 +4,11 @@ detective = angular
         [             
             '$rootScope', 
             '$location',
-            ($rootScope, $location)->
+            'User',
+            ($rootScope, $location, user)->
                 # Location available within templates
                 $rootScope.location = $location;
+                $rootScope.user     = user
         ]
     )
     .config(

@@ -28,12 +28,16 @@ class IndividualListCtrl
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────  
         @scope.$watch "page", =>
-            # Global loading mode
-            Page.loading true           
-            # Get individual from database
-            @scope.individuals = @Individual.get @getParams()
-            # Turn off loading mode
-            , -> Page.loading false
+            # Get parameters from context method (could be overloaded)   
+            params = @getParams()
+            # Only if params are valid
+            if params
+                # Global loading mode
+                @Page.loading true        
+                # Get individual from database
+                @scope.individuals = @Individual.get params
+                # Turn off loading mode
+                , => @Page.loading false
         # Update page value
         @scope.$on "$routeUpdate", => @scope.page = @routeParams.page or 1
         # ──────────────────────────────────────────────────────────────────────

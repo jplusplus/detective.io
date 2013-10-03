@@ -1,4 +1,7 @@
 class IndividualSearchCtrl extends IndividualListCtrl
+    constructor:->
+        super      
+        @location.url("/") unless @routeParams.q?
     # Manage research here
     getVerbose: =>
         @scope.verbose_name = "individual"
@@ -6,6 +9,8 @@ class IndividualSearchCtrl extends IndividualListCtrl
         @Page.title @scope.verbose_name_plural          
     # Define search parameter using route's params
     getParams: =>
+        # No query, no search
+        return false unless @routeParams.q?
         id    : "rdf_search"
         limit : @scope.limit
         offset: @scope.limit * (@scope.page - 1)

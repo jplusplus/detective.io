@@ -1,5 +1,4 @@
 <div class="container top20" id="individual-single">
-
 	<div class="row">
 		<div class="col-sm-8">	
 			<div class="panel">
@@ -13,7 +12,6 @@
 				</div>
 
 				<div class="panel-body">
-
 					<table class="table">
 						<tbody>
 						 	<tr ng-repeat="field in meta.fields|filter:isLiteral" ng-show="get(field.name)">
@@ -47,8 +45,10 @@
 
 		<div class="col-sm-4">
 			<div class="well padding0 text-right">
-				<a class="btn btn-default pull-left" ng-if="user.is_staff">
-					<i class="icon-edit"></i>
+				<a class="btn btn-default pull-left"
+				   ng-if="user.is_staff" 
+				   ng-href="/energy/contribute/?type=[[type]]&amp;id=[[individual.id]]">
+					<i class="icon-edit"/></i>
 					Edit
 				</a>
 				<span class="btn-group">

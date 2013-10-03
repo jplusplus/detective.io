@@ -282,7 +282,8 @@ class ContributeCtrl
             parent.fields[parentField][index] = form.fields
 
         # Add it to the list using @scope.new
-        @scope.addIndividual(true, form)
+        # and save the form a first time
+        @scope.addIndividual(true, form).save()      
 
     # Change the scrollIdx to scroll to the given individual
     scrollTo: (individual)=>

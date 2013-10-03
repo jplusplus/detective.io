@@ -97,14 +97,14 @@ html body .panel {
 }
 
 .breadcrumb {
-	@bg: mix(@header-bg, @brand-primary);
+	@bg: mix(#2E2D2A, @body-bg);
 	background:@bg;
 	margin:0;
-	.box-shadow( 0 3px 0 fade(@bg, 10) );
+	.box-shadow( 0 1px 2px 0 darken(@bg, 5) );
 	.border-radius(0);
 
 	.active, & {
-		color:white;
+		color:gray;
 	}
 	
 	li {

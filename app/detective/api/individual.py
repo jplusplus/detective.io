@@ -13,6 +13,7 @@ from tastypie.authorization             import Authorization
 from tastypie.constants                 import ALL
 from tastypie.resources                 import ModelResource
 from tastypie.utils                     import trailing_slash
+import re
 
 class IndividualAuthorization(Authorization):
     def read_detail(self, object_list, bundle):
@@ -217,7 +218,8 @@ class IndividualResource(ModelResource):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
 
-        query     = request.GET.get('q', '')
+        query     = request.GET.get('q', '').lower()
+        query     = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', query).strip()        
         limit     = int(request.GET.get('limit', 20))
         # Do the query.        
         results   = self._meta.queryset.filter(name__icontains=query)

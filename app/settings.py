@@ -88,7 +88,7 @@ BOWER_INSTALLED_APPS = (
     "angular-ui-bootstrap-bower#0.6.0",
     "bootstrap#3.0.0",
     "chroma-js#0.5.2",
-    "jquery#1.9.1",
+    "jquery#1.9.*",
     "jquery.scrollTo#1.4.6",
     "js-md5#1.0.3",
     "modernizr#2.6.2",

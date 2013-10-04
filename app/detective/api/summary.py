@@ -240,6 +240,8 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
+    def summary_syntax(self, bundle): return self.get_syntax()
+
     def search(self, query):
         match = str(query).lower()
         match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()
@@ -258,7 +260,7 @@ class SummaryResource(Resource):
         # Query to get every result
         query = """
             START st=node(*)
-            MATCH (st)<-[`%s`]-(root)<-[`<<INSTANCE>>`]-(type)
+            MATCH (st)<-[:`%s`]-(root)<-[:`<<INSTANCE>>`]-(type)
             WHERE HAS(root.name)
             AND HAS(st.name)
             AND HAS(type.app_label)
@@ -267,6 +269,7 @@ class SummaryResource(Resource):
             AND st.name = "%s"
             RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
         """ % ( predicate["name"], subject["name"], obj["name"], )        
+        print query
         return connection.cypher(query).to_dicts()
 
 

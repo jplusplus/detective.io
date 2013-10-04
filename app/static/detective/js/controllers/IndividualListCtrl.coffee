@@ -78,7 +78,7 @@ class IndividualListCtrl
     # True if there is a previous page
     hasPreviousPage: => @scope.individuals.meta? and @scope.page > 1
     # True if there is a next page
-    hasNextPage: => @scope.individuals.meta? and @scope.individuals.meta.next isnt null
+    hasNextPage: => @scope.individuals.meta? and @scope.individuals.meta.next? and @scope.individuals.meta.next isnt null
     # Go to the previous page
     previousPage: => @goToPage(1*@scope.page-1) if @hasPreviousPage()
     # Go to the next page

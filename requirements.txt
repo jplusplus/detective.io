@@ -14,7 +14,7 @@ django-filter==0.6
 django-storages==1.1.8
 django-tastypie==0.9.16
 Django==1.4.4
-git+https://github.com/scholrly/neo4django/#egg=neo4django
+git+git://github.com/scholrly/neo4django.git@5c70fb02a16a403b8ece82cd9b820b188863c188
 gunicorn==0.17.4
 httplib2==0.8
 lucene-querybuilder==0.1.6

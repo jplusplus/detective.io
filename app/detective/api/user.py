@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from django.conf.urls            import url
-from django.contrib.auth         import authenticate, login, logout
-from django.middleware.csrf      import _get_new_csrf_key as get_new_csrf_key
-from neo4django.auth.models      import User
-from tastypie.authorization      import Authorization
-from tastypie.constants          import ALL
-from tastypie.resources          import ModelResource
-from tastypie.utils              import trailing_slash
-from django.contrib.auth.hashers import make_password
+from django.conf.urls             import url
+from django.contrib.auth          import authenticate, login, logout
+from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
+from neo4django.auth.models import User
+from tastypie.authorization       import Authorization
+from tastypie.constants           import ALL
+from tastypie.resources           import ModelResource
+from tastypie.utils               import trailing_slash
+from django.contrib.auth.hashers  import make_password
+
 
 class UserAuthorization(Authorization):
     def read_detail(self, object_list, bundle):
@@ -70,12 +71,12 @@ class UserResource(ModelResource):
             else:
                 return self.create_response(request, {
                     'success': False,
-                    'error'  : 'Account not activated yet.',
+                    'error_message': 'Account not activated yet.',
                 })
         else:
             return self.create_response(request, {
                 'success': False,
-                'error'  : 'Incorrect password or username.',
+                'error_message': 'Incorrect password or username.',
             })
 
     def dehydrate(self, bundle):

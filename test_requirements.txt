@@ -3,6 +3,6 @@ Django==1.4.4
 django-tastypie==0.9.16
 django-compressor==1.3
 mimeparse==0.1.3
-git+https://github.com/scholrly/neo4django/#egg=neo4django
+git+https://github.com/scholrly/neo4django/
 wadofstuff-django-serializers==1.1.0
 lxml==3.2.1

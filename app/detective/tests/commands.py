@@ -1,8 +1,8 @@
-from django.core.management import call_command
-from django.test            import TestCase
-from StringIO               import StringIO 
+from django.core.management       import call_command
+from django.test                  import TestCase
+from StringIO                     import StringIO 
 from neo4django.auth.models import User
-from ..models               import Country
+from ..models                     import Country
 import sys
  
 

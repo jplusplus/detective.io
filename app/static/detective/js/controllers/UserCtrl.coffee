@@ -38,7 +38,7 @@ class UserCtrl
         # Record the error
         @scope.error = error if error?        
 
-    login: =>
+    login: =>        
         config = 
             method: "POST"
             url: "/api/v1/user/login/"
@@ -51,7 +51,7 @@ class UserCtrl
         # Turn on loading mode
         @scope.loading = true
         # succefull login
-        @http(config).then (response) =>   
+        @http(config).then( (response) =>   
             # Turn off loading mode
             @scope.loading = false
             # Interpret the respose            
@@ -66,7 +66,9 @@ class UserCtrl
                 delete @scope.error
             else
                 # Error status
-                @loginError(response.data.error)        
+                @loginError(response.data.error_message) 
+        # Error status
+        , (response)=> @loginError(response.data.error_message) )       
 
     signup: =>        
         config = 
@@ -91,7 +93,7 @@ class UserCtrl
                 delete @scope.error
             else
                 # Record the error
-                @scope.error = response.data.error if response.data.error?    
+                @scope.error = response.data.error_message if response.data.error_message?    
 
     logout: =>
         config = 

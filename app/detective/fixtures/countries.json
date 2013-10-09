@@ -346,6 +346,15 @@
     "pk": null,
     "fields": {
         "_status": 1, 
+        "isoa3" : "COD",
+        "name" : "Democratic Republic of the Congo (COD)"
+    }
+  },
+  {
+    "model": "detective.country",
+    "pk": null,
+    "fields": {
+        "_status": 1, 
         "isoa3" : "COL",
         "name" : "Colombia (COL)"
     }

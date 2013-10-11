@@ -13,14 +13,12 @@
 
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 
-        <link href='http://fonts.googleapis.com/css?family=Merriweather:400,700,300|Lato:400,300,700&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+        <link type='text/css' href='http://fonts.googleapis.com/css?family=Merriweather:400,700,300|Lato:400,300,700&amp;subset=latin,latin-ext' rel='stylesheet'>
         {% block extracss %}{% endblock %}           
         <base href="{% url home %}" />
     </head>
     <body ng-cloak>        
-        {{ STATIC_URL }}
         {% block content %}{% endblock %}           
-
         {% block extrajs %}{% endblock %}           
     </body>
 </html>

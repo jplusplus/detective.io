@@ -43,7 +43,7 @@ class IndividualResource(ModelResource):
     def __init__(self, api_name=None):        
         super(IndividualResource, self).__init__(api_name)    
         # Register relationships fields automaticly            
-        self.generate_to_many_fields(True)
+        # self.generate_to_many_fields(True)
         # Add default name ordering
 
     def build_schema(self):  

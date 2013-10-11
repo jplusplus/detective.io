@@ -11,7 +11,7 @@ def register_model_rules():
     rules = ModelRules()
     # Disable editing on some model
     rules.model(Country).add(is_editable=False)    
-    # Records "invisible" fields    
+    # Records "invisible" fields
     rules.model(EnergyProduct).field("operator").add(is_visible=False)
     rules.model(EnergyProject).field("ended").add(is_visible=False)
     rules.model(EnergyProject).field("partner").add(is_visible=False)

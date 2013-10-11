@@ -1,4 +1,4 @@
-from app.detective.models         import *
+from .models import *
 from app.detective.api.individual import IndividualResource, IndividualMeta
 from app.detective.api.user       import UserResource as ParentUserResource
 

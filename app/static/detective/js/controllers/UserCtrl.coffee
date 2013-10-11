@@ -59,7 +59,7 @@ class UserCtrl
                 @User.set
                     is_logged: true
                     is_staff : response.data.is_staff
-                    username : @scope.username
+                    username : response.data.username
                 # Redirect to the next URL
                 @location.url(@scope.next)
                 # Delete error

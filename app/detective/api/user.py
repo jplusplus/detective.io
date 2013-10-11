@@ -62,7 +62,9 @@ class UserResource(ModelResource):
                 if not remember_me: request.session.set_expiry(0)
 
                 response = self.create_response(request, {
-                    'success': True
+                    'success' : True,
+                    'is_staff': user.is_staff,
+                    'username': user.username
                 })
                 # Create CSRF token
                 response.set_cookie("csrftoken", get_new_csrf_key())

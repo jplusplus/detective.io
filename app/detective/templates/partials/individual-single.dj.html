@@ -45,12 +45,19 @@
 
 		<div class="col-sm-4">
 			<div class="well padding0 text-right">
-				<a class="btn btn-default pull-left"
-				   ng-if="user.is_staff" 
-				   ng-href="/energy/contribute/?type=[[type]]&amp;id=[[individual.id]]">
-					<i class="icon-edit"/></i>
-					Edit
-				</a>
+				<span class="btn-group pull-left">
+					<a class="btn btn-default"
+					   ng-if="user.is_staff" 
+					   ng-href="/energy/contribute/?type=[[type]]&amp;id=[[individual.id]]">
+						<i class="icon-edit"></i>
+						Edit
+					</a>
+					<a class="btn btn-default"
+					   ng-if="user.is_staff"
+					   ng-click="deleteNode(type, id)">
+						<i class="icon-trash"></i>											
+					</a>
+				</span>
 				<span class="btn-group">
 					<a class="btn btn-default" target="_blank" ng-href="/api/v1/[[type]]/[[individual.id]]/?format=json">
 						<i class="icon-download"></i>

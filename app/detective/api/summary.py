@@ -244,7 +244,7 @@ class SummaryResource(Resource):
 
     def search(self, query):
         match = str(query).lower()
-        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()
+        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()        
         # Query to get every result
         query = """
             START root=node(*)
@@ -256,7 +256,7 @@ class SummaryResource(Resource):
         """ % match
         return connection.cypher(query).to_dicts()
 
-    def rdf_search(self, subject, predicate, obj):        
+    def rdf_search(self, subject, predicate, obj):                 
         # Query to get every result
         query = """
             START st=node(*)
@@ -268,8 +268,7 @@ class SummaryResource(Resource):
             AND type.model_name = "%s"
             AND st.name = "%s"
             RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
-        """ % ( predicate["name"], subject["name"], obj["name"], )        
-        print query
+        """ % ( predicate["name"], subject["name"], obj["name"], )      
         return connection.cypher(query).to_dicts()
 
 

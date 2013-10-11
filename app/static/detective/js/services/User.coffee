@@ -2,7 +2,7 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
     sdo = {}
     # Function to set the value that update CSRF token and return the object
     sdo.set = (data)-> 
-        $.extend sdo, data, true 
+        $.extend sdo, data, true         
         # Wait a short delay because angular's $cookies
         # isn't updated in real time
         $timeout ->

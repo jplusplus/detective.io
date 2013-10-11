@@ -1,6 +1,6 @@
-from app.detective.models import *
-from .individual          import IndividualResource, IndividualMeta
-from .user                import UserResource as ParentUserResource
+from app.detective.models         import *
+from app.detective.api.individual import IndividualResource, IndividualMeta
+from app.detective.api.user       import UserResource as ParentUserResource
 
 # Ugly patch
 # See also ./individual.py -> IndividualResource -> get_to_many_field()
@@ -35,10 +35,6 @@ class CommentaryResource(IndividualResource):
     class Meta(IndividualMeta):
         queryset = Commentary.objects.all()
 
-class EnergyProductResource(IndividualResource):
-    class Meta(IndividualMeta):
-        queryset = EnergyProduct.objects.all()
-
 class OrganizationResource(IndividualResource):   
     class Meta(IndividualMeta):
         queryset = Organization.objects.all()
@@ -54,7 +50,3 @@ class DistributionResource(IndividualResource):
 class PriceResource(IndividualResource):    
     class Meta(IndividualMeta):
         queryset = Price.objects.all()
-
-class EnergyProjectResource(IndividualResource):
-    class Meta(IndividualMeta):
-        queryset = EnergyProject.objects.all()

@@ -1,6 +1,6 @@
+from app.detective.forms       import register_model_rules
 from django.conf.urls.defaults import *
 from django.forms.forms        import pretty_name
-from forms                     import register_model_rules
 from neo4django.db             import connection
 from random                    import randint
 

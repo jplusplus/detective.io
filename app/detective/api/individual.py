@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from .forms                             import register_model_rules
-from ..neomatch                         import Neomatch
+from app.detective.forms                import register_model_rules
+from app.detective.neomatch             import Neomatch
 from django.conf.urls                   import url
 from django.core.paginator              import Paginator, InvalidPage
 from django.db.models.query             import QuerySet
@@ -87,7 +87,17 @@ class IndividualResource(ModelResource):
         return False
 
     def get_to_many_field(self, field, full=False):
-        resource = "app.detective.api.resources.%sResource" % (field.target_model.__name__, )        
+        def import_class(path):
+            components = path.split('.')
+            klass      = components[-1:]
+            mod        = ".".join(components[0:-1])
+            return getattr(__import__(mod, fromlist=klass), klass[0], None)
+
+        if type(field.target_model) == str:
+            target_model =  import_class(field.target_model)
+            resource     = "app.detective.api.resources.%sResource" % ( target_model.__name__, )        
+        else:
+            resource = "app.detective.api.resources.%sResource" % (field.target_model.__name__, )        
         return fields.ToManyField(resource, field.name, full=full, null=True, use_in=self.use_in)
 
     def generate_to_many_fields(self, full=False):

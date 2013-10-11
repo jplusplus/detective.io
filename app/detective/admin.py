@@ -29,9 +29,6 @@ admin.site.register(Commentary, CommentaryAdmin)
 class DistributionAdmin(admin.ModelAdmin): pass
 admin.site.register(Distribution, DistributionAdmin)
 
-class EnergyProjectAdmin(admin.ModelAdmin): pass
-admin.site.register(EnergyProject, EnergyProjectAdmin)
-
 class PersonAdmin(admin.ModelAdmin): pass
 admin.site.register(Person, PersonAdmin)
 
@@ -40,6 +37,3 @@ admin.site.register(Revenue, RevenueAdmin)
 
 class ProductAdmin(admin.ModelAdmin): pass
 admin.site.register(Product, ProductAdmin)
-
-class EnergyProductAdmin(admin.ModelAdmin): pass
-admin.site.register(EnergyProduct, EnergyProductAdmin)

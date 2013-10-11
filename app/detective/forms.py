@@ -1,7 +1,8 @@
-from ..modelrules     import ModelRules
-from ..neomatch       import Neomatch
-from ..models         import *
-from django.db.models import get_app, get_models
+from app.detective.apps.energy.models   import *
+from app.detective.modelrules           import ModelRules
+from app.detective.neomatch             import Neomatch
+from app.detective.models               import *
+from django.db.models                   import get_app, get_models
 
 def register_model_rules():
     # Singleton

@@ -190,6 +190,7 @@ INSTALLED_APPS = (
     'djangobower', 
     # Internal
     'app.detective', 
+    'app.detective.apps.energy', 
 )
 
 

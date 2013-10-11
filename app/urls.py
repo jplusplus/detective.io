@@ -1,10 +1,11 @@
-from app.detective.api.resources import *
-from app.detective.api.user      import UserResource
-from app.detective.api.summary   import SummaryResource
-from app.detective.api.cypher    import CypherResource
-from tastypie.api                import Api
-from django.conf.urls            import patterns, include, url
-from neo4django                  import admin
+from app.detective.api.resources   import *
+from app.detective.apps.energy.api import *
+from app.detective.api.user        import UserResource
+from app.detective.api.summary     import SummaryResource
+from app.detective.api.cypher      import CypherResource
+from tastypie.api                  import Api
+from django.conf.urls              import patterns, include, url
+from neo4django                    import admin
 
 
 v1_api = Api(api_name='v1')
@@ -13,8 +14,6 @@ v1_api.register(CommentaryResource())
 v1_api.register(CountryResource())
 v1_api.register(CypherResource())
 v1_api.register(DistributionResource())
-v1_api.register(EnergyProductResource())
-v1_api.register(EnergyProjectResource())
 v1_api.register(FundraisingRoundResource())
 v1_api.register(OrganizationResource())
 v1_api.register(PersonResource())
@@ -24,10 +23,13 @@ v1_api.register(ProjectResource())
 v1_api.register(RevenueResource())
 v1_api.register(SummaryResource())
 v1_api.register(UserResource())
+# TODO: Isolate
+v1_api.register(EnergyProductResource())
+v1_api.register(EnergyProjectResource())
 
 admin.autodiscover()
 
-scopes = "|".join(["energy", "healt", "politic"])
+scopes = "|".join(["energy", "health", "politic"])
 
 urlpatterns = patterns('',
     url(r'^$', 				  		  'app.detective.views.home', name='home'),

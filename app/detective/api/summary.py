@@ -2,11 +2,11 @@
 from ..models              import Country
 from ..neomatch            import Neomatch
 from .utils                import get_model_node_id, get_model_fields
+from app.detective.forms   import register_model_rules
 from difflib               import SequenceMatcher
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models      import get_app, get_models
 from django.http           import Http404, HttpResponse
-from forms                 import register_model_rules
 from neo4django.db         import connection
 from tastypie.exceptions   import ImmediateHttpResponse
 from tastypie.resources    import Resource

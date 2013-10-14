@@ -6,16 +6,15 @@ from neo4django                    import admin
 
 admin.autodiscover()
 
-scopes = "|".join(["energy", "health", "politic"])
+scopes = "|".join(["energy", "base"])
 
 urlpatterns = patterns('',
     url(r'^$', 				  		  'app.detective.views.home', name='home'),
     url(r'^login/$',	      		  'app.detective.views.home', name='login'),
     url(r'^signup/$',	      		  'app.detective.views.home', name='signup'),
-    url(r'^node/$',		  		      'app.detective.views.home', name='overview'),
-    url(r'^node/\w+/$',	  		      'app.detective.views.home', name='list'),
-    url(r'^node/\w+/\d+/$',	  		  'app.detective.views.home', name='single'),
     url(r'^%s/$' % scopes, 		      'app.detective.views.home', name='explore'),
+    url(r'^%s/\w+/$' % scopes,        'app.detective.views.home', name='list'),
+    url(r'^%s/\w+/\d+/$' % scopes,    'app.detective.views.home', name='single'),
     url(r'^%s/contribute/$' % scopes, 'app.detective.views.home', name='contribute'),
     url(r'^admin/', 				   include(admin.site.urls)),    
     url(r'^api/base/',                 include('app.detective.apps.base.urls')),

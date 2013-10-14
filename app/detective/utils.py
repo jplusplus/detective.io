@@ -85,13 +85,17 @@ def get_model_node_id(model):
     # All node from neo4j that are have ascending <<TYPE>> relationship
     nodes = get_model_nodes()
     try:
+        app  = get_model_scope(model)
+        name = model.__name__
         # Search for the node with the good name
-        model_node  = next(n for n in nodes if n["name"] == "detective:%s" % model.__name__)
+        model_node  = next(n for n in nodes if n["name"] == "%s:%s" % (app, name) )
         return model_node["id"] or None
     # We didn't found the node id
     except StopIteration:
         return None
 
+def get_model_scope(model):
+    return model.__module__.split(".")[-2]
 
 def to_class_name(value=""):
     """

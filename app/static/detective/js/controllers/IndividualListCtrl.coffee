@@ -59,6 +59,7 @@ class IndividualListCtrl
     # List parameters
     getParams: =>        
         type    : @scope.type
+        scope   : @scope.scope
         limit   : @scope.limit
         page    : @scope.page
         order_by: "name"

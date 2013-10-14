@@ -72,7 +72,7 @@ class ContributeCtrl
         
         constructor: (scope, type="", fields={}, related_to=null)->
             @Individual = scope.Individual            
-            @meta       = scope.resources[type] or {}  
+            @meta       = scope.resources[type] or {}
             @related_to = related_to
             @scope      = scope
             @type       = type            
@@ -89,7 +89,7 @@ class ContributeCtrl
             unless @loading
                 # Loading mode on
                 @loading = true
-                params   = type: @type.toLowerCase()      
+                params   = type: @type.toLowerCase(), scope: @meta.scope
                 # Save the individual and
                 # take care to specify the type
                 @fields.$save(params, (master)=>
@@ -115,7 +115,7 @@ class ContributeCtrl
             @loading    = true
             @related_to = related_to
             # Params to retreive the individual
-            params = type: @type, id: id
+            params = type: @type, id: id, scope: @meta.scope
             # Load the given individual        
             @fields = @Individual.get params, (master)=>  
                 # Disable loading state
@@ -208,7 +208,11 @@ class ContributeCtrl
             form = @initNewIndividual(@scope.new.type, @scope.new.fields) if form is null
             # Is that field a searchable field ?
             if @scope.new.fields.name
-                params = type: @scope.new.type, id: "search", q: @scope.new.fields.name
+                params = 
+                    type:  @scope.new.type
+                    id:    "search"
+                    q:     @scope.new.fields.name
+                    scope: @scope.new.meta.scope
                 # Look for individual with the same name
                 form.similars = @Individual.query params
             # Reset the new field

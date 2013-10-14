@@ -1,5 +1,5 @@
 angular.module('detectiveServices').factory("Individual", [ '$resource', '$http', ($resource, $http)->
-    $resource '/api/v1/:type/:id/', {}, {
+    $resource '/api/:scope/v1/:type/:id/', { scope: "base" }, {
         query: {
             method : 'GET', 
             isArray: true,
@@ -9,9 +9,12 @@ angular.module('detectiveServices').factory("Individual", [ '$resource', '$http'
             ])
         },
         save: {
-            url:'/api/v1/:type/#',
+            url:'/api/:scope/v1/:type/#',
             method : 'POST', 
-            isArray: false
+            isArray: false,
+            paramDefaults: {
+                scope: "base"
+            }
         }
     }
 ])

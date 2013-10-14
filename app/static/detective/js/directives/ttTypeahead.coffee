@@ -8,7 +8,8 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
             render: (context)-> compiled(context)
     scope:         
         model     : "=ttModel" 
-        individual: "&ttIndividual"  
+        individual: "&ttIndividual"
+        scope     : "&ttScope"
         create    : "&ttCreate"
         remote    : "@"
         prefetch  : "@"
@@ -17,6 +18,7 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
     link: (scope, element, attrs) ->
         # Select the individual to look for
         individual = (scope.individual() or "").toLowerCase()
+        iscope     = (scope.scope() or "base").toLowerCase()
         # Set a default value
         element.val scope.model.name if scope.model?
         # Helper to save the search response
@@ -45,10 +47,10 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
             engine: engine
             valueKey: scope.valueKey or "name"
             prefetch: 
-                url: scope.prefetch or "/api/v1/#{individual}/mine/"    
+                url: scope.prefetch or "/api/#{iscope}/v1/#{individual}/mine/"    
                 filter: saveResponse
             remote: 
-                url: scope.remote or "/api/v1/#{individual}/search/?q=%QUERY"
+                url: scope.remote or "/api/#{iscope}/v1/#{individual}/search/?q=%QUERY"
                 filter: saveResponse
                     
         # Watch select event

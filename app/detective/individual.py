@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from app.detective.apps.base.user       import UserResource
 from app.detective.forms                import register_model_rules
 from app.detective.neomatch             import Neomatch
 from django.conf.urls                   import url
@@ -40,11 +41,21 @@ class IndividualMeta:
 
 class IndividualResource(ModelResource):
 
+    # All individual resource have authors
+    _author = fields.ToManyField(UserResource, "_author", full=True, null=True, use_in="detail")
+
     def __init__(self, api_name=None):        
         super(IndividualResource, self).__init__(api_name)    
         # Register relationships fields automaticly            
-        # self.generate_to_many_fields(True)
-        # Add default name ordering
+        self.generate_to_many_fields(True)     
+
+    @staticmethod
+    def import_class(path):
+        components = path.split('.')
+        klass      = components[-1:]
+        mod        = ".".join(components[0:-1])
+        return getattr(__import__(mod, fromlist=klass), klass[0], None)
+
 
     def build_schema(self):  
         """
@@ -86,28 +97,35 @@ class IndividualResource(ModelResource):
         # Return false if not needed
         return False
 
-    def get_to_many_field(self, field, full=False):
-        def import_class(path):
-            components = path.split('.')
-            klass      = components[-1:]
-            mod        = ".".join(components[0:-1])
-            return getattr(__import__(mod, fromlist=klass), klass[0], None)
+    def dummy_class_to_ressource(self, klass):
+        module = klass.__module__.split(".")[0:-1]
+        module = ".".join(module + ["resources", klass.__name__ + "Resource"])
+        try:
+            # Try to import the class
+            self.import_class(module)
+            return module
+        except ImportError:
+            return None
 
+    def get_to_many_field(self, field, full=False):
         if type(field.target_model) == str:
-            target_model =  import_class(field.target_model)
-            resource     = "app.detective.api.resources.%sResource" % ( target_model.__name__, )        
+            target_model = self.import_class(field.target_model)
         else:
-            resource = "app.detective.api.resources.%sResource" % (field.target_model.__name__, )        
-        return fields.ToManyField(resource, field.name, full=full, null=True, use_in=self.use_in)
+            target_model = field.target_model
+        resource = self.dummy_class_to_ressource(target_model)
+        # Do not create a relationship with an empty resource (not resolved)
+        if resource: return fields.ToManyField(resource, field.name, full=full, null=True, use_in=self.use_in)
+        else: return None
 
     def generate_to_many_fields(self, full=False):
         # For each model field
         for field in self.get_model_fields():
             # Limit the definition of the new fields
             # to the relationships
-            if self.need_to_many_field(field):         
+            if self.need_to_many_field(field):   
+                f = self.get_to_many_field(field, full=bool(full))
                 # Get the full relationship                           
-                self.fields[field.name] = self.get_to_many_field(field, full=bool(full))
+                if f: self.fields[field.name] = f
 
     def use_in(self, bundle=None):
         # Use in post/put

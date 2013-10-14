@@ -30,7 +30,7 @@ class ExploreCtrl
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
     selectCountry: (val, old)=> 
-        @location.path "/node/country/#{val.id}" if val.id?
+        @location.path "/base/country/#{val.id}" if val.id?
 
     selectIndividual: (val, old)=>
         # Single entity selected
@@ -42,7 +42,7 @@ class ExploreCtrl
             delete val.label
             # Create a JSON query to pass though the URL
             query = angular.toJson val
-            @location.path "/node/"
+            @location.path "/base/"
             @location.search "q", query
 
     getTypeCount: ()=>

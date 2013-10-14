@@ -36,17 +36,17 @@ detective = angular
                         controller: UserCtrl
                         templateUrl: "/partial/signup.html"
                     })
-                    .when('/node', {
+                    .when('/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"
                     })
-                    .when('/node/:type', {
+                    .when('/:scope/:type', {
                         controller: IndividualListCtrl  
                         templateUrl: "/partial/individual-list.html"
                         reloadOnSearch: false
                         auth: true
                     })
-                    .when('/node/:type/:id', {
+                    .when('/:scope/:type/:id', {
                         controller: IndividualSingleCtrl  
                         templateUrl: "/partial/individual-single.html"  
                         reloadOnSearch: false       

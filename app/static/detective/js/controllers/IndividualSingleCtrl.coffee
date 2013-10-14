@@ -21,8 +21,12 @@ class IndividualSingleCtrl
         @scope.scope = @routeParams.scope
         @scope.type  = @routeParams.type
         @scope.id    = @routeParams.id
+        params =
+            scope: @scope.scope
+            type : @scope.type
+            id   : @scope.id
         # Get individual from database
-        @Individual.get type: @scope.type, id: @scope.id, (data)=> 
+        @Individual.get params, (data)=> 
             @scope.individual = data
             # Set page's title
             @Page.title @filter("individualPreview")(data)       
@@ -56,10 +60,10 @@ class IndividualSingleCtrl
     deleteNode: (type, id, msg='Are you sure you want to delete this node?')=>
         # Ask user for confirmation
         if confirm(msg) 
-            @Individual.delete(type: type, id: id)
+            @Individual.delete(type: type, id: id, scope: @scope.scope)
             # Redirect to the type list
             setTimeout (=>
-                @location.url("/node/#{type}")
+                @location.url("/#{scope}/#{type}")
             ), 500
 
     

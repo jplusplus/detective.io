@@ -1,4 +1,4 @@
-from .api             import *
+from .resources       import *
 from .summary         import SummaryResource
 from .user            import UserResource
 from .cypher          import CypherResource

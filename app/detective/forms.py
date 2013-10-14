@@ -1,3 +1,4 @@
+from app.detective.apps.base.models     import *
 from app.detective.apps.energy.models   import *
 from app.detective.modelrules           import ModelRules
 from app.detective.neomatch             import Neomatch

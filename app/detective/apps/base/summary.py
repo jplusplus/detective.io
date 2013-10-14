@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-from ..models              import Country
-from ..neomatch            import Neomatch
-from .utils                import get_model_node_id, get_model_fields
-from app.detective.forms   import register_model_rules
-from difflib               import SequenceMatcher
-from django.core.paginator import Paginator, InvalidPage
-from django.db.models      import get_app, get_models
-from django.http           import Http404, HttpResponse
-from neo4django.db         import connection
-from tastypie.exceptions   import ImmediateHttpResponse
-from tastypie.resources    import Resource
-from tastypie.serializers  import Serializer
+from .models                import Country
+from app.detective.forms    import register_model_rules
+from app.detective.neomatch import Neomatch
+from app.detective.utils    import get_model_node_id, get_model_fields, get_registered_models
+from difflib                import SequenceMatcher
+from django.core.paginator  import Paginator, InvalidPage
+from django.db.models       import get_app, get_models
+from django.http            import Http404, HttpResponse
+from neo4django.db          import connection
+from tastypie.exceptions    import ImmediateHttpResponse
+from tastypie.resources     import Resource
+from tastypie.serializers   import Serializer
 import json
 import re
 
@@ -87,20 +87,23 @@ class SummaryResource(Resource):
             del t["name"]
         return obj
 
-    def summary_forms(self, bundle):
+    def summary_forms(self, bundle):        
         available_resources = {}
         # Get the model's rules manager
-        rulesManager = register_model_rules()
-        # Get all detective's models        
-        app = get_app('detective')
-        for model in get_models(app):      
+        rulesManager = register_model_rules()        
+        # Fetch every registered model 
+        # to print out its rules
+        for model in get_registered_models():                                      
             # Do this ressource has a model?
-            if model != None:
+            # Do this ressource is a part of apps?
+            if model != None and model.__module__.startswith("app.detective.apps"):
                 name                = model.__name__.lower()
                 rules               = rulesManager.model(model).all()
                 fields              = get_model_fields(model)
                 verbose_name        = getattr(model._meta, "verbose_name", name).title()      
                 verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()      
+                # Extract the model parent to find its scope
+                scope               = model.__module__.split(".")[-2]
 
                 for key in rules:
                     # Filter rules to keep only Neomatch
@@ -115,7 +118,7 @@ class SummaryResource(Resource):
 
                 available_resources[name] = {
                     'description'         : getattr(model, "_description", None),
-                    'scope'               : getattr(model, "_scope", None),
+                    'scope'               : getattr(model, "_scope", scope),
                     'model'               : getattr(model, "__name_", ""),
                     'verbose_name'        : verbose_name,
                     'verbose_name_plural' : verbose_name_plural,

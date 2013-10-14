@@ -14,9 +14,9 @@ class EnergyProduct(models.NodeModel):
 	name = models.StringProperty(null=True,help_text=u'')
 	image = models.URLProperty(null=True,help_text=u'The URL (starting with http://) where the image is hosted.',verbose_name=u'Image URL')
 	_author = models.Relationship(User,null=True,rel_type='energy_product_energy_product_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
-	distribution = models.Relationship("app.detective.models.Distribution",null=True,rel_type='energy_product_has_distribution+',help_text=u'A Distribution represents the batch sales or gift of a product. Companies often communicate in terms of "in year X, Y units of Product Z were sold/distributed in Country A".',verbose_name=u'Distribution')
-	operator = models.Relationship("app.detective.models.Organization",null=True,rel_type='energy_product_has_operator+',help_text=u'Products, especially large ones such as power plants, have an Operator, usually a company.',verbose_name=u'Operator')
-	price = models.Relationship("app.detective.models.Price",null=True,rel_type='energy_product_has_price+',help_text=u'The price (use only digits, i.e. 8.99) of the Product at the date considered.',verbose_name=u'Price')
+	distribution = models.Relationship("app.detective.apps.base.models.Distribution",null=True,rel_type='energy_product_has_distribution+',help_text=u'A Distribution represents the batch sales or gift of a product. Companies often communicate in terms of "in year X, Y units of Product Z were sold/distributed in Country A".',verbose_name=u'Distribution')
+	operator = models.Relationship("app.detective.apps.base.models.Organization",null=True,rel_type='energy_product_has_operator+',help_text=u'Products, especially large ones such as power plants, have an Operator, usually a company.',verbose_name=u'Operator')
+	price = models.Relationship("app.detective.apps.base.models.Price",null=True,rel_type='energy_product_has_price+',help_text=u'The price (use only digits, i.e. 8.99) of the Product at the date considered.',verbose_name=u'Price')
 
 	class Meta: 
 		verbose_name = u'Energy product'
@@ -40,10 +40,10 @@ class EnergyProject(models.NodeModel):
 	name = models.StringProperty(null=True,help_text=u'')
 	_author = models.Relationship(User,null=True,rel_type='energy_project_energy_project_has_admin_author+',help_text=u'People that edited this entity.')
 	product = models.Relationship("EnergyProduct",null=True,rel_type='energy_project_has_product+',help_text=u'A Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.')
-	partner = models.Relationship("app.detective.models.Organization",null=True,rel_type='energy_project_has_partner+',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).')
-	commentary = models.Relationship("app.detective.models.Commentary",null=True,rel_type='energy_project_has_commentary+',help_text=u'A Commentary is an article, a blog post or a report that assesses the quality of the Project.')
-	activity_in_country = models.Relationship("app.detective.models.Country",null=True,rel_type='energy_project_has_activity_in_country+',help_text=u'The list of countries or territories the entity is active in. ')
-	owner = models.Relationship("app.detective.models.Organization",null=True,rel_type='energy_project_has_owner+',help_text=u'The formal Owner of the entity.')
+	partner = models.Relationship("app.detective.apps.base.models.Organization",null=True,rel_type='energy_project_has_partner+',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).')
+	commentary = models.Relationship("app.detective.apps.base.models.Commentary",null=True,rel_type='energy_project_has_commentary+',help_text=u'A Commentary is an article, a blog post or a report that assesses the quality of the Project.')
+	activity_in_country = models.Relationship("app.detective.apps.base.models.Country",null=True,rel_type='energy_project_has_activity_in_country+',help_text=u'The list of countries or territories the entity is active in. ')
+	owner = models.Relationship("app.detective.apps.base.models.Organization",null=True,rel_type='energy_project_has_owner+',help_text=u'The formal Owner of the entity.')
 
 	class Meta:
 		verbose_name = u'Energy project'

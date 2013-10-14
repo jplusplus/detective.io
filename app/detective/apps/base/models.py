@@ -3,7 +3,6 @@
 from neo4django.db import models
 from neo4django.auth.models import User
 
-
 class Amount(models.NodeModel):
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')

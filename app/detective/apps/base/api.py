@@ -1,6 +1,6 @@
-from .models import *
-from app.detective.api.individual import IndividualResource, IndividualMeta
-from app.detective.api.user       import UserResource as ParentUserResource
+from .models                  import *
+from .user                    import UserResource as ParentUserResource
+from app.detective.individual import IndividualResource, IndividualMeta
 
 # Ugly patch
 # See also ./individual.py -> IndividualResource -> get_to_many_field()

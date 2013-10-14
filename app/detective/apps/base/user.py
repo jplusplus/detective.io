@@ -3,7 +3,7 @@
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
 from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
-from neo4django.auth.models import User
+from neo4django.auth.models       import User
 from tastypie.authorization       import Authorization
 from tastypie.constants           import ALL
 from tastypie.resources           import ModelResource

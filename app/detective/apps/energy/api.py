@@ -1,5 +1,5 @@
-from .models import *
-from app.detective.api.individual import IndividualResource, IndividualMeta
+from .models     import *
+from app.detective.individual import IndividualResource, IndividualMeta
 
 class EnergyProductResource(IndividualResource):
     class Meta(IndividualMeta):

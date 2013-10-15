@@ -40,6 +40,11 @@ detective = angular
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"
                     })
+                    .when('/:scope/contribute', {
+                        controller: ContributeCtrl  
+                        templateUrl: "/partial/contribute.html"
+                        auth: true
+                    })
                     .when('/:scope/:type', {
                         controller: IndividualListCtrl  
                         templateUrl: "/partial/individual-list.html"
@@ -56,11 +61,6 @@ detective = angular
                         controller: ExploreCtrl  
                         # Allow a dynamic loading by setting the templateUrl within controller
                         template: "<div ng-include src='templateUrl'></div>"                        
-                        auth: true
-                    })
-                    .when('/:scope/contribute', {
-                        controller: ContributeCtrl  
-                        templateUrl: "/partial/contribute.html"
                         auth: true
                     })
                     .otherwise redirectTo: '/energy/contribute'

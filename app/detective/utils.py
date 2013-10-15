@@ -7,6 +7,13 @@ from random                    import randint
 import re
 import app.settings as settings
 
+
+def import_class(path):
+    components = path.split('.')
+    klass      = components[-1:]
+    mod        = ".".join(components[0:-1])
+    return getattr(__import__(mod, fromlist=klass), klass[0], None)
+
 def get_registered_models():
     mdls = []
     for app in settings.INSTALLED_APPS:

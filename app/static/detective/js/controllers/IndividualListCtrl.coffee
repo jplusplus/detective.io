@@ -66,7 +66,7 @@ class IndividualListCtrl
 
     singleUrl: (individual)=> 
         type = (@scope.type or individual.model).toLowerCase()
-        "/node/#{type}/#{individual.id}"
+        "/#{@scope.scope}/#{type}/#{individual.id}"
     # Pages list
     pages: => 
         # No page yet

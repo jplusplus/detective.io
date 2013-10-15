@@ -48,7 +48,7 @@
 				<span class="btn-group pull-left">
 					<a class="btn btn-default"
 					   ng-if="user.is_staff" 
-					   ng-href="/energy/contribute/?type=[[type]]&amp;id=[[individual.id]]">
+					   ng-href="/[[scope]]/contribute/?type=[[type]]&amp;id=[[individual.id]]">
 						<i class="icon-edit"></i>
 						Edit
 					</a>
@@ -59,11 +59,11 @@
 					</a>
 				</span>
 				<span class="btn-group">
-					<a class="btn btn-default" target="_blank" ng-href="/api/v1/[[type]]/[[individual.id]]/?format=json">
+					<a class="btn btn-default" target="_blank" ng-href="/api/[[scope]]/v1/[[type]]/[[individual.id]]/?format=json">
 						<i class="icon-download"></i>
 						JSON
 					</a>
-					<a class="btn btn-default" target="_blank" ng-href="/api/v1/[[type]]/[[individual.id]]/?format=xml">
+					<a class="btn btn-default" target="_blank" ng-href="/api/[[scope]]/v1/[[type]]/[[individual.id]]/?format=xml">
 						<i class="icon-code"></i>
 						XML
 					</a>

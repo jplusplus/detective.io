@@ -3,7 +3,6 @@ from app.detective.apps.energy.models   import *
 from app.detective.modelrules           import ModelRules
 from app.detective.neomatch             import Neomatch
 from app.detective.models               import *
-from django.db.models                   import get_app, get_models
 
 def register_model_rules():
     # Singleton
@@ -77,7 +76,6 @@ def register_model_rules():
     ))
 
 
-
     rules.model(Person).add(organizationkey_set=Neomatch(
         title="Organizations this person has a key position in",
         target_model=Organization,
@@ -111,11 +109,14 @@ def register_model_rules():
     ))
 
 
-
-    # Add now some generic rules
-    app = get_app('detective')
+    # We can import this early to avoid bi-directional dependancies
+    from app.detective.utils import get_registered_models, import_class
+    # Get all registered models
+    models = get_registered_models()
+    # Them filter the list to the detective's apps
+    models = [m for m in models if m.__module__.startswith("app.detective.apps")]    
     # Set "is_searchable" to true on every model with a name
-    for model in get_models(app):
+    for model in models:
         # If the current model has a name
         if "name" in rules.model(model).field_names:
             field_names = rules.model(model).field_names
@@ -126,13 +127,16 @@ def register_model_rules():
         # This model isn't searchable
         else: rules.model(model).add(is_searchable=False)
 
+
     # Check now that each "Relationship"
     # match with a searchable model
-    for model in get_models(app):
-        for field in model._meta.fields:         
+    for model in models:
+        for field in model._meta.fields:  
             # Find related model for relation
             if hasattr(field, "target_model"):                       
                 target_model  = field.target_model         
+                # Load class path
+                if type(target_model) is str: target_model = import_class(target_model)
                 # It's a searchable field !
                 modelRules = rules.model(target_model).all()
                 # Set it into the rules

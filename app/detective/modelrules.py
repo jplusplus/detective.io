@@ -41,6 +41,7 @@ class Model(HasRules):
     # Record the associated model
     def __init__(self, model):
         # Check that the model is a class
+        if not inspect.isclass(model): print model
         if not inspect.isclass(model) or not hasattr(model, "_meta"): 
             raise Exception("You can only registed model's class.")
         self.model = model

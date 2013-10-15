@@ -3,6 +3,7 @@
 from app.detective.apps.base.user       import UserResource
 from app.detective.forms                import register_model_rules
 from app.detective.neomatch             import Neomatch
+from app.detective.utils                import import_class
 from django.conf.urls                   import url
 from django.core.paginator              import Paginator, InvalidPage
 from django.db.models.query             import QuerySet
@@ -49,14 +50,6 @@ class IndividualResource(ModelResource):
         # Register relationships fields automaticly            
         self.generate_to_many_fields(True)     
 
-    @staticmethod
-    def import_class(path):
-        components = path.split('.')
-        klass      = components[-1:]
-        mod        = ".".join(components[0:-1])
-        return getattr(__import__(mod, fromlist=klass), klass[0], None)
-
-
     def build_schema(self):  
         """
         Description and scope for each Resource
@@ -102,14 +95,14 @@ class IndividualResource(ModelResource):
         module = ".".join(module + ["resources", klass.__name__ + "Resource"])
         try:
             # Try to import the class
-            self.import_class(module)
+            import_class(module)
             return module
         except ImportError:
             return None
 
     def get_to_many_field(self, field, full=False):
         if type(field.target_model) == str:
-            target_model = self.import_class(field.target_model)
+            target_model = import_class(field.target_model)
         else:
             target_model = field.target_model
         resource = self.dummy_class_to_ressource(target_model)

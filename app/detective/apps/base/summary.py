@@ -2,10 +2,9 @@
 from .models                import Country
 from app.detective.forms    import register_model_rules
 from app.detective.neomatch import Neomatch
-from app.detective.utils    import get_model_node_id, get_model_fields, get_registered_models
+from app.detective.utils    import get_model_node_id, get_model_fields, get_registered_models, get_model_scope
 from difflib                import SequenceMatcher
 from django.core.paginator  import Paginator, InvalidPage
-from django.db.models       import get_app, get_models
 from django.http            import Http404, HttpResponse
 from neo4django.db          import connection
 from tastypie.exceptions    import ImmediateHttpResponse
@@ -254,7 +253,7 @@ class SummaryResource(Resource):
             MATCH (root)<-[r:`<<INSTANCE>>`]-(type)
             WHERE HAS(root.name) 
             AND LOWER(root.name) =~ '.*(%s).*'
-            RETURN ID(root) as id, root.name as name, type.model_name as model
+            RETURN ID(root) as id, root.name as name, type.name as model
         """ % match
         return connection.cypher(query).to_dicts()
 
@@ -265,16 +264,16 @@ class SummaryResource(Resource):
             MATCH (st)<-[:`%s`]-(root)<-[:`<<INSTANCE>>`]-(type)
             WHERE HAS(root.name)
             AND HAS(st.name)
-            AND type.model_name = "%s"
+            AND type.name = "%s"
             AND st.name = "%s"
-            RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+            RETURN DISTINCT ID(root) as id, root.name as name, type.name as model
         """ % ( predicate["name"], subject["name"], obj["name"], )      
         return connection.cypher(query).to_dicts()
 
 
     def get_models_output(self):     
         # Select only some atribute
-        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
+        output = lambda m: {'name': get_model_scope(m) + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
         return [ output(m) for m in get_registered_models() ]
 
 
@@ -432,142 +431,142 @@ class SummaryResource(Resource):
                 'relationship': [
                     {
                         "name": "fundraising_round_has_personal_payer+",
-                        "subject": "FundraisingRound",
+                        "subject": "base:FundraisingRound",
                         "label": "was financed by"
                     },
                     {
                         "name": "fundraising_round_has_payer+",
-                        "subject": "FundraisingRound",
+                        "subject": "base:FundraisingRound",
                         "label": "was financed by"
                     },
                     {
                         "name": "person_has_nationality+",
-                        "subject": "Person",
+                        "subject": "base:Person",
                         "label": "is from"
                     },
                     {
                         "name": "person_has_activity_in_organization+",
-                        "subject": "Person",
+                        "subject": "base:Person",
                         "label": "has activity in"
                     },
                     {
                         "name": "person_has_previous_activity_in_organization+",
-                        "subject": "Person",
+                        "subject": "base:Person",
                         "label": "had previous activity in"
                     },
                     {
                         "name": "energy_product_has_price+",
-                        "subject": "EnergyProduct",
+                        "subject": "energy:EnergyProduct",
                         "label": "is sold at"
                     },
                     {
                         "name": "commentary_has_author+",
-                        "subject": "Commentary",
+                        "subject": "base:Commentary",
                         "label": "was written by"
                     },
                     {
                         "name": "energy_product_has_distribution+",
-                        "subject": "EnergyProduct",
+                        "subject": "energy:EnergyProduct",
                         "label": "is distributed in"
                     },
                     {
                         "name": "energy_product_has_operator+",
-                        "subject": "EnergyProduct",
+                        "subject": "energy:EnergyProduct",
                         "label": "is operated by"
                     },
                     {
                         "name": "energy_product_has_price+",
-                        "subject": "EnergyProduct",
+                        "subject": "energy:EnergyProduct",
                         "label": "is sold at"
                     },
                     {
                         "name": "organization_has_adviser+",
-                        "subject": "Organization",
+                        "subject": "base:Organization",
                         "label": "is advised by"
                     },
                     {
                         "name": "organization_has_key_person+",
-                        "subject": "Organization",
+                        "subject": "base:Organization",
                         "label": "is staffed by"
                     },
                     {
                         "name": "organization_has_partner+",
-                        "subject": "Organization",
+                        "subject": "base:Organization",
                         "label": "has a partnership with"
                     },
                     {
                         "name": "organization_has_fundraising_round+",
-                        "subject": "Organization",
+                        "subject": "base:Organization",
                         "label": "was financed by"
                     },
                     {
                         "name": "organization_has_monitoring_body+",
-                        "subject": "Organization",
+                        "subject": "base:Organization",
                         "label": "is monitored by"
                     },
                     {
                         "name": "organization_has_litigation_against+",
-                        "subject": "Organization",
+                        "subject": "base:Organization",
                         "label": "has a litigation against"
                     },
                     {
                         "name": "organization_has_revenue+",
-                        "subject": "Organization",
+                        "subject": "base:Organization",
                         "label": "has revenue of"
                     },
                     {
                         "name": "organization_has_board_member+",
-                        "subject": "Organization",
+                        "subject": "base:Organization",
                         "label": "has board of directors with"
                     },
                     {
                         "name": "energy_project_has_commentary+",
-                        "subject": "EnergyProject",
+                        "subject": "energy:EnergyProject",
                         "label": "is analyzed by"
                     },
                     {
                         "name": "energy_project_has_owner+",
-                        "subject": "EnergyProject",
+                        "subject": "energy:EnergyProject",
                         "label": "is owned by"
                     },
                     {
                         "name": "energy_project_has_partner+",
-                        "subject": "EnergyProject",
+                        "subject": "energy:EnergyProject",
                         "label": "has a partnership with"
                     },
                     {
                         "name": "energy_project_has_activity_in_country+",
-                        "subject": "EnergyProject",
+                        "subject": "energy:EnergyProject",
                         "label": "has activity in"
                     },
                     {
                         "name": "distribution_has_activity_in_country+",
-                        "subject": "Distribution",
+                        "subject": "base:Distribution",
                         "label": "has activity in"
                     },
                     {
                         "name": "energy_project_has_product+",
-                        "subject": "EnergyProject",
+                        "subject": "energy:EnergyProject",
                         "label": "has product of"
                     },
                     {
                         "name": "energy_project_has_commentary+",
-                        "subject": "EnergyProject",
+                        "subject": "energy:EnergyProject",
                         "label": "is analyzed by"
                     },
                     {
                         "name": "energy_project_has_owner+",
-                        "subject": "EnergyProject",
+                        "subject": "energy:EnergyProject",
                         "label": "is owned by"
                     },
                     {
                         "name": "energy_project_has_partner+",
-                        "subject": "EnergyProject",
+                        "subject": "energy:EnergyProject",
                         "label": "has partnership with"
                     },
                     {
                         "name": "energy_project_has_activity_in_country+",
-                        "subject": "EnergyProject",
+                        "subject": "energy:EnergyProject",
                         "label": "has activity in"
                     }
                 ]

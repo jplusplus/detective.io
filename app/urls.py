@@ -10,6 +10,7 @@ scopes = "|".join(["energy", "base"])
 
 urlpatterns = patterns('',
     url(r'^$', 				  		  'app.detective.views.home', name='home'),
+    url(r'^404/$',                    'app.detective.views.home', name='404'),
     url(r'^login/$',                  'app.detective.views.home', name='login'),
     url(r'^search/$',	      		  'app.detective.views.home', name='search'),
     url(r'^signup/$',	      		  'app.detective.views.home', name='signup'),

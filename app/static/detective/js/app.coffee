@@ -4,7 +4,7 @@ detective = angular
         [             
             '$rootScope', 
             '$location',
-            'User',
+            'User'
             ($rootScope, $location, user)->
                 # Location available within templates
                 $rootScope.location = $location;
@@ -15,7 +15,7 @@ detective = angular
         [
             '$interpolateProvider',
             '$routeProvider', 
-            '$locationProvider',
+            '$locationProvider'
             ($interpolateProvider, $routeProvider, $locationProvider)->
                 # Avoid a conflict with Django Template's tags
                 $interpolateProvider.startSymbol '[['
@@ -27,6 +27,10 @@ detective = angular
                     .when('/', {
                         controller: HomeCtrl
                         templateUrl: "/partial/home.html"
+                    })
+                    .when('/404', {
+                        controller: NotFoundCtrl
+                        templateUrl: "/partial/404.html"
                     })
                     .when('/login', {
                         controller: UserCtrl
@@ -44,6 +48,8 @@ detective = angular
                         controller: ContributeCtrl  
                         templateUrl: "/partial/contribute.html"
                         auth: true
+                        # Resolve the Summary service before load this page
+                        resolve: data: (Summary)-> Summary.get("forms")
                     })
                     .when('/:scope/:type', {
                         controller: IndividualListCtrl  

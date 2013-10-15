@@ -5,15 +5,15 @@ class IndividualSingleCtrl
     constructor: (@scope, @routeParams, @Individual, @Summary, @filter, @anchorScroll, @location, @Page)->  
         # Global loading mode!
         Page.loading true
-        @scope.get        = (n)=> @scope.individual[n] or false if @scope.individual?
-        @scope.hasRels    = @hasRels  
-        @scope.isLiteral  = @isLiteral
-        @scope.isString   = (t)=> ["CharField", "URLField"].indexOf(t) > -1
+        @scope.get            = (n)=> @scope.individual[n] or false if @scope.individual?
+        @scope.hasRels        = @hasRels  
+        @scope.isLiteral      = @isLiteral
+        @scope.isString       = (t)=> ["CharField", "URLField"].indexOf(t) > -1
         @scope.isRelationship = (d) => ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
-        @scope.scrollTo   = @scrollTo  
-        @scope.singleUrl  = @singleUrl
-        @scope.strToColor = @filter("strToColor")
-        @scope.deleteNode = @deleteNode
+        @scope.scrollTo       = @scrollTo  
+        @scope.singleUrl      = @singleUrl
+        @scope.strToColor     = @filter("strToColor")
+        @scope.deleteNode     = @deleteNode
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  
@@ -32,8 +32,12 @@ class IndividualSingleCtrl
             @Page.title @filter("individualPreview")(data)       
              # Global loading off 
             Page.loading false
+        # Not found
+        , => @location.path "/404"
         # Get meta information for this type
-        @Summary.get id: "forms", (data)=> @scope.meta = data[@scope.type.toLowerCase()]        
+        @Summary.get id: "forms", (data)=> 
+            @scope.resource = data
+            @scope.meta     = data[@scope.type.toLowerCase()]        
         
 
     hasRels: ()=> 
@@ -45,7 +49,8 @@ class IndividualSingleCtrl
         @location.hash(id)
         @anchorScroll()
     singleUrl: (individual, type=false)=> 
-        type = (type or @scope.type).toLowerCase()
+        type  = (type or @scope.type).toLowerCase()
+        scope = (@scope.resource[type] and @scope.resource[type].scope) or @scope.scope
         "/#{scope}/#{type}/#{individual.id}/"
     # True if the given type is literal
     isLiteral: (field)=>

@@ -43,7 +43,7 @@ class CommandsTestCase(TestCase):
         with self.assertRaises(SystemExit):
             call_command('loadnodes')
         # Import countries
-        args = "./app/detective/fixtures/countries.json"
+        args = "./app/detective/apps/common/fixtures/countries.json"
         call_command('loadnodes', args)
         # Does France exists?
         self.assertGreater(len( Country.objects.filter(isoa3="FRA") ), 0)

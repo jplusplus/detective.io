@@ -13,8 +13,8 @@
 						 	tt-typeahead
 							tt-individual="'summary'"
 							tt-model="selectedIndividual"
-							remote="/api/base/v1/summary/human/?q=%QUERY"
-							prefetch="/api/base/v1/summary/mine/"
+							remote="/api/common/v1/summary/human/?q=%QUERY"
+							prefetch="/api/common/v1/summary/mine/"
 							value-key="label"
 							limit="10"
 						   	class="form-control" 
@@ -39,7 +39,7 @@
 				<div class="panel">
 					<div class="lead margin05">[[getTypeCount("Person")]]</div>
 					<div class="panel-footer">
-						<a  ng-href="/base/person">persons</a>
+						<a  ng-href="/common/person">persons</a>
 					</div>
 				</div>
 			</div>
@@ -47,7 +47,7 @@
 				<div class="panel">
 					<div class="lead margin05">[[getTypeCount("Organization", "EnergyOrganization")]]</div>
 					<div class="panel-footer">
-						<a  ng-href="/base/organization">organizations</a>
+						<a  ng-href="/common/organization">organizations</a>
 					</div>
 				</div>
 			</div>

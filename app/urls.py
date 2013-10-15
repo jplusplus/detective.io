@@ -6,7 +6,7 @@ from neo4django                    import admin
 
 admin.autodiscover()
 
-scopes = "|".join(["energy", "base"])
+scopes = "|".join(["energy", "common"])
 
 urlpatterns = patterns('',
     url(r'^$', 				  		  'app.detective.views.home', name='home'),
@@ -19,7 +19,7 @@ urlpatterns = patterns('',
     url(r'^%s/\w+/\d+/$' % scopes,    'app.detective.views.home', name='single'),
     url(r'^%s/contribute/$' % scopes, 'app.detective.views.home', name='contribute'),
     url(r'^admin/', 				   include(admin.site.urls)),    
-    url(r'^api/base/',                 include('app.detective.apps.base.urls')),
+    url(r'^api/common/',               include('app.detective.apps.common.urls')),
     url(r'^api/energy/',               include('app.detective.apps.energy.urls')),
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial', name='partial'),
 )

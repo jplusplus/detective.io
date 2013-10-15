@@ -1,13 +1,13 @@
-# Convert every "detective:EnergyModel" into "base:EnergyModel"
+# Convert every "detective:EnergyModel" into "energy:EnergyModel"
 START root=node(*) 
 WHERE HAS(root.model_name)
 AND root.name =~ '^detective:Energy.*'
 SET root.app_label = 'energy', root.name = 'energy:' + root.model_name
 RETURN root, root.name, root.model_name, root.app_label;
 
-# Convert every "detective:Model" into "base:Model"
+# Convert every "detective:Model" into "common:Model"
 START root=node(*)
 WHERE HAS(root.model_name)
 AND root.name =~ '^detective.*'
-SET root.app_label = 'base', root.name = 'base:' + root.model_name
+SET root.app_label = 'common', root.name = 'common:' + root.model_name
 RETURN root, root.name, root.model_name, root.app_label;

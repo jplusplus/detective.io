@@ -431,27 +431,27 @@ class SummaryResource(Resource):
                 'relationship': [
                     {
                         "name": "fundraising_round_has_personal_payer+",
-                        "subject": "base:FundraisingRound",
+                        "subject": "common:FundraisingRound",
                         "label": "was financed by"
                     },
                     {
                         "name": "fundraising_round_has_payer+",
-                        "subject": "base:FundraisingRound",
+                        "subject": "common:FundraisingRound",
                         "label": "was financed by"
                     },
                     {
                         "name": "person_has_nationality+",
-                        "subject": "base:Person",
+                        "subject": "common:Person",
                         "label": "is from"
                     },
                     {
                         "name": "person_has_activity_in_organization+",
-                        "subject": "base:Person",
+                        "subject": "common:Person",
                         "label": "has activity in"
                     },
                     {
                         "name": "person_has_previous_activity_in_organization+",
-                        "subject": "base:Person",
+                        "subject": "common:Person",
                         "label": "had previous activity in"
                     },
                     {
@@ -461,7 +461,7 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "commentary_has_author+",
-                        "subject": "base:Commentary",
+                        "subject": "common:Commentary",
                         "label": "was written by"
                     },
                     {
@@ -481,42 +481,42 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "organization_has_adviser+",
-                        "subject": "base:Organization",
+                        "subject": "common:Organization",
                         "label": "is advised by"
                     },
                     {
                         "name": "organization_has_key_person+",
-                        "subject": "base:Organization",
+                        "subject": "common:Organization",
                         "label": "is staffed by"
                     },
                     {
                         "name": "organization_has_partner+",
-                        "subject": "base:Organization",
+                        "subject": "common:Organization",
                         "label": "has a partnership with"
                     },
                     {
                         "name": "organization_has_fundraising_round+",
-                        "subject": "base:Organization",
+                        "subject": "common:Organization",
                         "label": "was financed by"
                     },
                     {
                         "name": "organization_has_monitoring_body+",
-                        "subject": "base:Organization",
+                        "subject": "common:Organization",
                         "label": "is monitored by"
                     },
                     {
                         "name": "organization_has_litigation_against+",
-                        "subject": "base:Organization",
+                        "subject": "common:Organization",
                         "label": "has a litigation against"
                     },
                     {
                         "name": "organization_has_revenue+",
-                        "subject": "base:Organization",
+                        "subject": "common:Organization",
                         "label": "has revenue of"
                     },
                     {
                         "name": "organization_has_board_member+",
-                        "subject": "base:Organization",
+                        "subject": "common:Organization",
                         "label": "has board of directors with"
                     },
                     {
@@ -541,7 +541,7 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "distribution_has_activity_in_country+",
-                        "subject": "base:Distribution",
+                        "subject": "common:Distribution",
                         "label": "has activity in"
                     },
                     {

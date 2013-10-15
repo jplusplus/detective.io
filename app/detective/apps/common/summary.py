@@ -89,7 +89,7 @@ class SummaryResource(Resource):
     def summary_forms(self, bundle):        
         available_resources = {}
         # Get the model's rules manager
-        rulesManager = register_model_rules()        
+        rulesManager = register_model_rules()     
         # Fetch every registered model 
         # to print out its rules
         for model in get_registered_models():                                      
@@ -271,10 +271,10 @@ class SummaryResource(Resource):
         return connection.cypher(query).to_dicts()
 
 
-    def get_models_output(self):     
+    def get_models_output(self):        
         # Select only some atribute
         output = lambda m: {'name': get_model_scope(m) + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
-        return [ output(m) for m in get_registered_models() ]
+        return [ output(m) for m in get_registered_models() if m.__module__.startswith("app.detective.apps") ]
 
 
     def ngrams(self, input):
@@ -431,27 +431,27 @@ class SummaryResource(Resource):
                 'relationship': [
                     {
                         "name": "fundraising_round_has_personal_payer+",
-                        "subject": "common:FundraisingRound",
+                        "subject": "commona:FundraisingRound",
                         "label": "was financed by"
                     },
                     {
                         "name": "fundraising_round_has_payer+",
-                        "subject": "common:FundraisingRound",
+                        "subject": "commona:FundraisingRound",
                         "label": "was financed by"
                     },
                     {
                         "name": "person_has_nationality+",
-                        "subject": "common:Person",
+                        "subject": "commona:Person",
                         "label": "is from"
                     },
                     {
                         "name": "person_has_activity_in_organization+",
-                        "subject": "common:Person",
+                        "subject": "commona:Person",
                         "label": "has activity in"
                     },
                     {
                         "name": "person_has_previous_activity_in_organization+",
-                        "subject": "common:Person",
+                        "subject": "commona:Person",
                         "label": "had previous activity in"
                     },
                     {
@@ -461,7 +461,7 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "commentary_has_author+",
-                        "subject": "common:Commentary",
+                        "subject": "commona:Commentary",
                         "label": "was written by"
                     },
                     {
@@ -481,42 +481,42 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "organization_has_adviser+",
-                        "subject": "common:Organization",
+                        "subject": "commona:Organization",
                         "label": "is advised by"
                     },
                     {
                         "name": "organization_has_key_person+",
-                        "subject": "common:Organization",
+                        "subject": "commona:Organization",
                         "label": "is staffed by"
                     },
                     {
                         "name": "organization_has_partner+",
-                        "subject": "common:Organization",
+                        "subject": "commona:Organization",
                         "label": "has a partnership with"
                     },
                     {
                         "name": "organization_has_fundraising_round+",
-                        "subject": "common:Organization",
+                        "subject": "commona:Organization",
                         "label": "was financed by"
                     },
                     {
                         "name": "organization_has_monitoring_body+",
-                        "subject": "common:Organization",
+                        "subject": "commona:Organization",
                         "label": "is monitored by"
                     },
                     {
                         "name": "organization_has_litigation_against+",
-                        "subject": "common:Organization",
+                        "subject": "commona:Organization",
                         "label": "has a litigation against"
                     },
                     {
                         "name": "organization_has_revenue+",
-                        "subject": "common:Organization",
+                        "subject": "commona:Organization",
                         "label": "has revenue of"
                     },
                     {
                         "name": "organization_has_board_member+",
-                        "subject": "common:Organization",
+                        "subject": "commona:Organization",
                         "label": "has board of directors with"
                     },
                     {
@@ -541,7 +541,7 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "distribution_has_activity_in_country+",
-                        "subject": "common:Distribution",
+                        "subject": "commona:Distribution",
                         "label": "has activity in"
                     },
                     {

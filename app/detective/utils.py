@@ -24,7 +24,7 @@ def get_registered_models():
             for attr in attributes:
                 try:
                     attrib = models_module.__getattribute__(attr)
-                    if issubclass(attrib, models.Model) and attrib.__module__== models_name:                        
+                    if issubclass(attrib, models.Model) and attrib.__module__== models_name:                           
                         mdls.append(attrib)
                 except TypeError:
                     pass

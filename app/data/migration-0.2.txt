@@ -2,7 +2,7 @@
 START root=node(*) 
 WHERE HAS(root.model_name)
 AND root.name =~ '^detective:Energy.*'
-SET root.app_label = 'base', root.name = 'energy:' + root.model_name
+SET root.app_label = 'energy', root.name = 'energy:' + root.model_name
 RETURN root, root.name, root.model_name, root.app_label;
 
 # Convert every "detective:Model" into "base:Model"

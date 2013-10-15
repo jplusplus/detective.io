@@ -70,7 +70,7 @@ class IndividualResource(ModelResource):
             raise Exception("The given resource must define a queryset.")
         return queryset
 
-    def get_model(self):        
+    def get_model(self):      
         return self.get_queryset().model
 
     def get_model_fields(self):
@@ -104,7 +104,7 @@ class IndividualResource(ModelResource):
         if type(field.target_model) == str:
             target_model = import_class(field.target_model)
         else:
-            target_model = field.target_model
+            target_model = field.target_model        
         resource = self.dummy_class_to_ressource(target_model)
         # Do not create a relationship with an empty resource (not resolved)
         if resource: return fields.ToManyField(resource, field.name, full=full, null=True, use_in=self.use_in)
@@ -117,7 +117,7 @@ class IndividualResource(ModelResource):
             # to the relationships
             if self.need_to_many_field(field):   
                 f = self.get_to_many_field(field, full=bool(full))
-                # Get the full relationship                           
+                # Get the full relationship                                           
                 if f: self.fields[field.name] = f
 
     def use_in(self, bundle=None):

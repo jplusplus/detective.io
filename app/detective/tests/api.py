@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from ..models               import EnergyProject, Organization, Country
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models       import get_app, get_models
-from neo4django.auth.models import User
-from tastypie.test          import ResourceTestCase
+from app.detective.apps.common.models import Organization, Country
+from app.detective.apps.energy.models import EnergyProject
+from django.core.exceptions           import ObjectDoesNotExist
+from django.db.models                 import get_app, get_models
+from neo4django.auth.models           import User
+from tastypie.test                    import ResourceTestCase
 import json
 
 class ApiTestCase(ResourceTestCase):

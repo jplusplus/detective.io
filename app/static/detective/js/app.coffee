@@ -51,6 +51,12 @@ detective = angular
                         # Resolve the Summary service before load this page
                         resolve: data: (Summary)-> Summary.get("forms")
                     })
+                    .when('/:scope', {
+                        controller: ExploreCtrl  
+                        # Allow a dynamic loading by setting the templateUrl within controller
+                        template: "<div ng-include src='templateUrl'></div>"                        
+                        auth: true
+                    })
                     .when('/:scope/:type', {
                         controller: IndividualListCtrl  
                         templateUrl: "/partial/individual-list.html"
@@ -63,13 +69,7 @@ detective = angular
                         reloadOnSearch: false       
                         auth: true
                     })
-                    .when('/:scope', {
-                        controller: ExploreCtrl  
-                        # Allow a dynamic loading by setting the templateUrl within controller
-                        template: "<div ng-include src='templateUrl'></div>"                        
-                        auth: true
-                    })
-                    .otherwise redirectTo: '/energy/contribute'
+                    .otherwise redirectTo: '/404'
         ]
     )
 

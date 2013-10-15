@@ -13,8 +13,6 @@ from tastypie.serializers   import Serializer
 import json
 import re
 
-
-
 class SummaryResource(Resource):
     # Local serializer
     serializer = Serializer(formats=["json"]).serialize

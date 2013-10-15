@@ -61,7 +61,7 @@ class IndividualListCtrl
         type    : @scope.type
         scope   : @scope.scope
         limit   : @scope.limit
-        page    : @scope.page
+        offset  : (@scope.page-1)*@scope.limit
         order_by: "name"
 
     singleUrl: (individual)=> 

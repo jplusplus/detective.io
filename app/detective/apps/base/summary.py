@@ -214,7 +214,7 @@ class SummaryResource(Resource):
         # Find the kown match for the given query
         matches      = self.find_matches(query)
         # Build and returns a list of proposal
-        propositions = self.build_propositions(matches, query)   
+        propositions = self.build_propositions(matches, query)
         # Build paginator  
         count        = len(propositions)
         limit        = int(request.GET.get('limit', 20))
@@ -253,7 +253,6 @@ class SummaryResource(Resource):
             START root=node(*)
             MATCH (root)<-[r:`<<INSTANCE>>`]-(type)
             WHERE HAS(root.name) 
-            AND type.app_label = "detective"
             AND LOWER(root.name) =~ '.*(%s).*'
             RETURN ID(root) as id, root.name as name, type.model_name as model
         """ % match
@@ -266,8 +265,6 @@ class SummaryResource(Resource):
             MATCH (st)<-[:`%s`]-(root)<-[:`<<INSTANCE>>`]-(type)
             WHERE HAS(root.name)
             AND HAS(st.name)
-            AND HAS(type.app_label)
-            AND type.app_label = "detective"
             AND type.model_name = "%s"
             AND st.name = "%s"
             RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
@@ -275,12 +272,10 @@ class SummaryResource(Resource):
         return connection.cypher(query).to_dicts()
 
 
-    def get_models_output(self):
-        # Get all detective's models        
-        app    = get_app('detective')
+    def get_models_output(self):     
         # Select only some atribute
         output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
-        return [ output(m) for m in get_models(app) ]
+        return [ output(m) for m in get_registered_models() ]
 
 
     def ngrams(self, input):
@@ -308,7 +303,7 @@ class SummaryResource(Resource):
         ngrams  = [' '.join(x) for x in self.ngrams(query) ]
         matches = []
         models  = self.get_syntax()["subject"]["model"]
-        rels    = self.get_syntax()["predicate"]["relationship"]        
+        rels    = self.get_syntax()["predicate"]["relationship"]                
         # Known models lookup for each ngram
         for token in ngrams:  
             obj = {

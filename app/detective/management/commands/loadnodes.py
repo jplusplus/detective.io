@@ -21,13 +21,15 @@ class Command(BaseCommand):
         saved = 0
         for node in nodes:
             # Get the model of the fixture
-            model = get_model ( *node["model"].split('.', 1) )
-            # Create an object with its fields
-            obj = model(**node["fields"])
-            # Then save the obj
-            obj.save()
-            # Increment the saved count
-            saved += 1
+            model = get_model( *node["model"].split('.', 1) )   
+            # Callable model
+            if hasattr(model, '__call__'):
+                # Create an object with its fields
+                obj = model(**node["fields"])
+                # Then save the obj
+                obj.save()
+                # Increment the saved count
+                saved += 1
 
         if saved <= 1:       
             print "%s object saved from file!" % saved

@@ -2,7 +2,6 @@
 from app.detective.apps.common.models import Organization, Country
 from app.detective.apps.energy.models import EnergyProject
 from django.core.exceptions           import ObjectDoesNotExist
-from django.db.models                 import get_app, get_models
 from neo4django.auth.models           import User
 from tastypie.test                    import ResourceTestCase
 import json
@@ -11,8 +10,6 @@ class ApiTestCase(ResourceTestCase):
 
     def setUp(self):
         super(ApiTestCase, self).setUp()
-        self.detective = get_app("detective")
-        self.models    = get_models(self.detective)
         # Look for the test user
         self.username  = 'tester'
         self.password  = 'tester'
@@ -214,7 +211,7 @@ class ApiTestCase(ResourceTestCase):
         # Parse data to check the number of result
         data = json.loads(resp.content)
         # As many descriptors as models
-        self.assertEqual( len(self.models), len(data.items()) )
+        self.assertEqual( 13, len(data.items()) )
 
     def test_types_summary(self):
         resp = self.api_client.get('/api/common/v1/summary/types/', format='json', authentication=self.get_credentials())  

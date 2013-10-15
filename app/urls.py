@@ -1,14 +1,9 @@
-from django.conf.urls              import patterns, include, url
-from neo4django                    import admin
-from os                            import listdir
-from os.path                       import isdir, join
+from django.conf.urls    import patterns, include, url
+from neo4django          import admin
+from app.detective.utils import get_apps
 
 admin.autodiscover()
-
-# Load apps' names 
-appsdir = "./app/detective/apps"
-apps    = [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
-apps    = "|".join(apps)
+apps = "|".join( get_apps() )
 
 urlpatterns = patterns('',
     url(r'^admin/', 				   include(admin.site.urls)),    

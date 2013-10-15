@@ -91,15 +91,13 @@ class Model(HasRules):
 # @src http://stackoverflow.com/questions/42558/python-and-the-singleton-pattern
 class ModelRules(object):    
 
-    def __init__(self):
-        # List of registered model
-        self.registered_models = {}    
-
     __instance = None
     # Override __new__ to avoid create new instance (singleton)
     def __new__(self, *args, **kwargs):
         if not self.__instance:
-            self.__instance = super(ModelRules, self).__new__(self, *args, **kwargs)
+            self.__instance = super(ModelRules, self).__new__(self, *args, **kwargs)            
+            # List of registered model
+            self.registered_models = {} 
         return self.__instance
 
     # This method will add the given model to the register list
@@ -115,6 +113,6 @@ class ModelRules(object):
     # Get model (shortcut to register_model)
     model = register_model
     # List of registered model
-    def models(self): self.registered_models
+    def models(self): return self.registered_models
 
 

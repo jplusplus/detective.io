@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective.apps.common.user       import UserResource
+from app.detective.apps.common.user     import UserResource
 from app.detective.forms                import register_model_rules
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class

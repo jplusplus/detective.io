@@ -4,6 +4,8 @@ from django.db                 import models
 from django.forms.forms        import pretty_name
 from neo4django.db             import connection
 from random                    import randint
+from os                        import listdir
+from os.path                   import isdir, join
 import re
 import app.settings as settings
 
@@ -13,6 +15,11 @@ def import_class(path):
     klass      = components[-1:]
     mod        = ".".join(components[0:-1])
     return getattr(__import__(mod, fromlist=klass), klass[0], None)
+
+def get_apps():    
+    # Load apps' names 
+    appsdir = "./app/detective/apps"
+    return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]    
 
 def get_registered_models():
     mdls = []

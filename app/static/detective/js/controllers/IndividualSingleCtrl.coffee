@@ -9,11 +9,12 @@ class IndividualSingleCtrl
         @scope.hasRels        = @hasRels  
         @scope.isLiteral      = @isLiteral
         @scope.isString       = (t)=> ["CharField", "URLField"].indexOf(t) > -1
-        @scope.isRelationship = (d) => ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
+        @scope.isRelationship = (d)=> ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
         @scope.scrollTo       = @scrollTo  
         @scope.singleUrl      = @singleUrl
         @scope.strToColor     = @filter("strToColor")
         @scope.deleteNode     = @deleteNode
+        @scope.hasAddr        = (name)=> name.toLowerCase().indexOf('address') > -1
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  

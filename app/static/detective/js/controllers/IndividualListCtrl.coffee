@@ -52,7 +52,7 @@ class IndividualListCtrl
     getVerbose: =>        
         # Get meta information for this type
         @Summary.get id: "forms", (data)=> 
-            meta = data[@scope.type.toLowerCase()]
+            @scope.meta = meta = data[@scope.type.toLowerCase()]
             if meta?
                 @scope.verbose_name        = meta.verbose_name
                 @scope.verbose_name_plural = meta.verbose_name_plural        
@@ -63,7 +63,8 @@ class IndividualListCtrl
         type    : @scope.type
         scope   : @scope.scope
         limit   : @scope.limit
-        offset  : (@scope.page-1)*@scope.limit        
+        offset  : (@scope.page-1)*@scope.limit  
+        order_by: "name"
 
     singleUrl: (individual)=> 
         type = (@scope.type or individual.model).toLowerCase()

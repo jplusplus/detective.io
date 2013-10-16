@@ -50,6 +50,15 @@ class IndividualResource(ModelResource):
         # Register relationships fields automaticly            
         self.generate_to_many_fields(True)     
 
+    def apply_sorting(self, obj_list, options=None):        
+        options_copy = options.copy()
+        # No failling sorting, 
+        if "order_by" in options and not options["order_by"] in self.fields:
+            # remove invalid order_by key
+            options_copy.pop("order_by", None)
+        return super(IndividualResource, self).apply_sorting(obj_list, options_copy)
+        
+
     def build_schema(self):  
         """
         Description and scope for each Resource

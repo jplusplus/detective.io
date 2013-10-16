@@ -49,7 +49,7 @@ detective = angular
                         templateUrl: "/partial/contribute.html"
                         auth: true
                         # Resolve the Summary service before load this page
-                        resolve: data: (Summary)-> Summary.get("forms")
+                        resolve: data: (Summary)-> Summary.get(id: "forms")
                     })
                     .when('/:scope', {
                         controller: ExploreCtrl  
@@ -62,12 +62,16 @@ detective = angular
                         templateUrl: "/partial/individual-list.html"
                         reloadOnSearch: false
                         auth: true
+                        # Resolve the Summary service before load this page
+                        resolve: data: (Summary)-> Summary.get(id: "forms")
                     })
                     .when('/:scope/:type/:id', {
                         controller: IndividualSingleCtrl  
                         templateUrl: "/partial/individual-single.html"  
                         reloadOnSearch: false       
                         auth: true
+                        # Resolve the Summary service before load this page
+                        resolve: data: (Summary)-> Summary.get(id: "forms")
                     })
                     .otherwise redirectTo: '/404'
         ]

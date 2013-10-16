@@ -47,5 +47,3 @@ class CommandsTestCase(TestCase):
         call_command('loadnodes', args)
         # Does France exists?
         self.assertGreater(len( Country.objects.filter(isoa3="FRA") ), 0)
-        # Does USA exists?
-        self.assertGreater(len( Country.objects.filter(isoa3="USA") ), 0)

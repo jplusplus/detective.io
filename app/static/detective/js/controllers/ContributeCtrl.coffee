@@ -26,6 +26,7 @@ class ContributeCtrl
         @scope.setNewIndividual  = @setNewIndividual
         @scope.showKickStart     = @showKickStart
         @scope.strToColor        = @filter("strToColor")
+        @scope.modelScope        = (m)=> if @scope.resources? then @scope.resources[m.toLowerCase()].scope
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
@@ -181,7 +182,6 @@ class ContributeCtrl
 
     # Get resources list filtered by the current scope
     scopeResources: => 
-        console.log @scope.scope, @scope.resources
         resources = _.where @scope.resources, { scope: @scope.scope }
         # Add generic resources
         for r in ["organization", "person"]         

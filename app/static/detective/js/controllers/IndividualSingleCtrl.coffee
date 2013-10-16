@@ -14,7 +14,9 @@ class IndividualSingleCtrl
         @scope.singleUrl      = @singleUrl
         @scope.strToColor     = @filter("strToColor")
         @scope.deleteNode     = @deleteNode
-        @scope.hasAddr        = (name)=> name.toLowerCase().indexOf('address') > -1
+        @scope.isAddr         = (f)=> f.name.toLowerCase().indexOf('address') > -1
+        @scope.isImg          = (f)=> f.name is 'image'
+        @scope.isMono         = (f)=> @scope.isAddr(f) or @scope.isImg(f) 
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  

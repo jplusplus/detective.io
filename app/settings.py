@@ -28,7 +28,6 @@ NEO4J_DATABASES = {
     }
 }
 
-
 DATABASE_ROUTERS        = ['neo4django.utils.Neo4djangoIntegrationRouter']
 SESSION_ENGINE          = "django.contrib.sessions.backends.file"
 AUTHENTICATION_BACKENDS = ('neo4django.auth.backends.NodeModelBackend',)

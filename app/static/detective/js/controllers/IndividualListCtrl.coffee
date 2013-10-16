@@ -37,7 +37,9 @@ class IndividualListCtrl
                 # Get individual from database
                 @scope.individuals = @Individual.get params
                 # Turn off loading mode
-                , => @Page.loading false
+                , => @Page.loading false        
+        # Not found
+        , => @location.path "/404"
         # Update page value
         @scope.$on "$routeUpdate", => @scope.page = @routeParams.page or 1
         # ──────────────────────────────────────────────────────────────────────
@@ -59,13 +61,13 @@ class IndividualListCtrl
     # List parameters
     getParams: =>        
         type    : @scope.type
+        scope   : @scope.scope
         limit   : @scope.limit
-        page    : @scope.page
-        order_by: "name"
+        offset  : (@scope.page-1)*@scope.limit        
 
     singleUrl: (individual)=> 
         type = (@scope.type or individual.model).toLowerCase()
-        "/node/#{type}/#{individual.id}"
+        "/#{@scope.scope}/#{type}/#{individual.id}"
     # Pages list
     pages: => 
         # No page yet

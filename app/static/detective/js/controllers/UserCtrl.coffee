@@ -41,7 +41,7 @@ class UserCtrl
     login: =>        
         config = 
             method: "POST"
-            url: "/api/v1/user/login/"
+            url: "/api/base/v1/user/login/"
             data: 
                 username    : @scope.username
                 password    : @scope.password
@@ -73,7 +73,7 @@ class UserCtrl
     signup: =>        
         config = 
             method: "POST"
-            url: "/api/v1/user/"
+            url: "/api/base/v1/user/"
             data: 
                 username: @scope.username
                 email   : @scope.email
@@ -98,7 +98,7 @@ class UserCtrl
     logout: =>
         config = 
             method: "GET"
-            url: "/api/v1/user/logout/"
+            url: "/api/base/v1/user/logout/"
             headers:
                 "Content-Type": "application/json"
         # Turn on loading mode

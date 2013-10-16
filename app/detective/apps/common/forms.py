@@ -1,19 +1,14 @@
-from ..modelrules     import ModelRules
-from ..neomatch       import Neomatch
-from ..models         import *
-from django.db.models import get_app, get_models
+from app.detective.apps.common.models import *
+from app.detective.modelrules         import ModelRules
+from app.detective.neomatch           import Neomatch
+from app.detective.models             import *
 
 def register_model_rules():
-    # Singleton
-    if hasattr(register_model_rules, "rules"): return register_model_rules.rules
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # Disable editing on some model
-    rules.model(Country).add(is_editable=False)    
-    # Records "invisible" fields    
-    rules.model(EnergyProduct).field("operator").add(is_visible=False)
-    rules.model(EnergyProject).field("ended").add(is_visible=False)
-    rules.model(EnergyProject).field("partner").add(is_visible=False)
+    rules.model(Country).add(is_editable=False)
+    # Records "invisible" fields 
     rules.model(FundraisingRound).field("personal_payer").add(is_visible=False)
     rules.model(Organization).field("adviser").add(is_visible=False)
     rules.model(Organization).field("board_member").add(is_visible=False)
@@ -26,13 +21,6 @@ def register_model_rules():
     rules.model(Person).field("website_url").add(is_visible=False)
     rules.model(Project).field("partner").add(is_visible=False)
 
-    rules.model(Country).add(product_set= Neomatch(
-        title="Energy products distributed in this country",
-        target_model=EnergyProduct,
-        match="""
-            (root)<--()<-[:`energy_product_has_distribution+`]-({select})
-        """
-    ))
 
     rules.model(Country).add(person_set=Neomatch(
         title="Persons from this country",
@@ -41,40 +29,6 @@ def register_model_rules():
             (root)-[:`person_has_nationality+`]-({select})
         """
     ))
-
-    rules.model(Country).add(project_set=Neomatch(
-        title="Energy projects active in this country",
-        target_model=EnergyProject,
-        match="""
-            (root)-[:`energy_project_has_activity_in_country+`]-({select})
-        """
-    ))
-
-    rules.model(EnergyProduct).add(country_set= Neomatch(
-        title="Countries where this product is distributed",
-        target_model=Country,
-        match="""
-            (root)-[:`energy_product_has_distribution+`]-()-[:`distribution_has_activity_in_country+`]-({select})
-        """
-    ))
-    
-    rules.model(Organization).add(energyproject_set=Neomatch(
-        title="Energy projects this organization owns",
-        target_model=EnergyProject,
-        match="""
-            (root)-[:`energy_project_has_owner+`]-({select})
-        """
-    ))
-    
-    rules.model(EnergyProject).add(energyproduct_set=Neomatch(
-        title="Energy project this product belongs to",
-        target_model=EnergyProduct,
-        match="""
-            (root)-[:`energy_project_has_product+`]-({select})
-        """
-    ))
-
-
 
     rules.model(Person).add(organizationkey_set=Neomatch(
         title="Organizations this person has a key position in",
@@ -100,20 +54,14 @@ def register_model_rules():
         """
     ))
 
-    rules.model(Person).add(fundraisinground_set=Neomatch(
-        title="Fundraising rounds this person has contributed to",
-        target_model=FundraisingRound,
-        match="""
-            (root)-[:`fundraising_round_has_personal_payer+`]-({select})
-        """
-    ))
-
-
-
-    # Add now some generic rules
-    app = get_app('detective')
+    # We can import this early to avoid bi-directional dependancies
+    from app.detective.utils import get_registered_models, import_class
+    # Get all registered models
+    models = get_registered_models()
+    # Them filter the list to the detective's apps
+    models = [m for m in models if m.__module__.startswith("app.detective.apps")]    
     # Set "is_searchable" to true on every model with a name
-    for model in get_models(app):
+    for model in models:
         # If the current model has a name
         if "name" in rules.model(model).field_names:
             field_names = rules.model(model).field_names
@@ -126,17 +74,17 @@ def register_model_rules():
 
     # Check now that each "Relationship"
     # match with a searchable model
-    for model in get_models(app):
-        for field in model._meta.fields:         
+    for model in models:
+        for field in model._meta.fields:  
             # Find related model for relation
             if hasattr(field, "target_model"):                       
                 target_model  = field.target_model         
+                # Load class path
+                if type(target_model) is str: target_model = import_class(target_model)
                 # It's a searchable field !
                 modelRules = rules.model(target_model).all()
                 # Set it into the rules
                 rules.model(model).field(field.name).add(is_searchable=modelRules["is_searchable"])
                 rules.model(model).field(field.name).add(is_editable=modelRules["is_editable"])                            
 
-    # Register the rules
-    register_model_rules.rules = rules
     return rules

@@ -3,7 +3,7 @@
 		<div class="container">			
 			<h2>Add a new individual to the database</h2>
 
-			<div ng-repeat="resource in scopeResources()">
+			<div ng-repeat="resource in scopeResources() track by $index" ng-show="resource.description">
 				<div class="row top30">
 					<div class="col-sm-3">
 						<label class="btn btn-block btn-default btn-large">

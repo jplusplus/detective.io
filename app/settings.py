@@ -5,6 +5,7 @@ here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+TASTYPIE_FULL_DEBUG = DEBUG
 
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com')
@@ -190,6 +191,8 @@ INSTALLED_APPS = (
     'djangobower', 
     # Internal
     'app.detective', 
+    'app.detective.apps.common', 
+    'app.detective.apps.energy', 
 )
 
 

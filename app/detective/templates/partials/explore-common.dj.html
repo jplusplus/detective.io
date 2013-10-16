@@ -1,7 +1,7 @@
 <div class="container" id="explore">
 
 	<h2>Welcome to <a href="/[[scope]]">detective.io/[[scope]]</a></h2>
-	<p class="lead">Information about innovative energy projects in developing countries.</p>			
+	<p class="lead">Detective.io tries to connect knowledge entities in order to leverage online investigation.</p>			
 	
 	<div class="row">
 
@@ -29,9 +29,9 @@
 		<div class="col-md-6 tc">
 			<div class="col-xs-4">
 				<div class="panel">
-					<div class="lead margin05">[[getTypeCount("EnergyProject")]]</div>
+					<div class="lead margin05">[[getTypeCount("Project")]]</div>
 					<div class="panel-footer">
-						<a ng-href="/energy/energyproject">projects</a>
+						<a ng-href="/common/project">projects</a>
 					</div>
 				</div>
 			</div>
@@ -45,29 +45,17 @@
 			</div>
 			<div class="col-xs-4">
 				<div class="panel">
-					<div class="lead margin05">[[getTypeCount("Organization", "EnergyOrganization")]]</div>
+					<div class="lead margin05">[[getTypeCount("Organization")]]</div>
 					<div class="panel-footer">
 						<a  ng-href="/common/organization">organizations</a>
 					</div>
 				</div>
 			</div>
 		</div>
-
 	</div>
-
-
 </div>
 
 <div class="select-a-country">
 	<h3 class="container bottoùm-20">Select a country to know more</h3>
 	<div country-map model="selectedCountry" values="countries" />		
-</div>
-
-<div class="container">
-
-	<h3>About the project</h3>
-	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</p>
-	<p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</p>
-	<p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla.</p>
-
 </div>

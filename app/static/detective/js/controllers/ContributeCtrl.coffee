@@ -45,8 +45,9 @@ class ContributeCtrl
         @scope.scope = @routeParams.scope        
         # By default, hide the kick-start form
         showKickStart = false        
-        # Shortcut for child classes
-        @scope.Individual = @Individual
+        # Shortcuts for child classes
+        @scope.Individual  = @Individual
+        @scope.routeParams = @routeParams
         # Get the list of available resources
         @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
         # Prepare future individual
@@ -72,7 +73,7 @@ class ContributeCtrl
         
         constructor: (scope, type="", fields={}, related_to=null)->
             @Individual = scope.Individual            
-            @meta       = scope.resources[type] or {}  
+            @meta       = scope.resources[type] or {}
             @related_to = related_to
             @scope      = scope
             @type       = type            
@@ -89,7 +90,7 @@ class ContributeCtrl
             unless @loading
                 # Loading mode on
                 @loading = true
-                params   = type: @type.toLowerCase()      
+                params   = type: @type.toLowerCase(), scope: @meta.scope or @scope.routeParams.scope
                 # Save the individual and
                 # take care to specify the type
                 @fields.$save(params, (master)=>
@@ -115,7 +116,7 @@ class ContributeCtrl
             @loading    = true
             @related_to = related_to
             # Params to retreive the individual
-            params = type: @type, id: id
+            params = type: @type, id: id, scope: @meta.scope or @scope.routeParams.scope
             # Load the given individual        
             @fields = @Individual.get params, (master)=>  
                 # Disable loading state
@@ -180,12 +181,13 @@ class ContributeCtrl
 
     # Get resources list filtered by the current scope
     scopeResources: => 
+        console.log @scope.scope, @scope.resources
         resources = _.where @scope.resources, { scope: @scope.scope }
         # Add generic resources
-        for r in ["organization", "person"]      
-            if @scope.resources[r]? 
+        for r in ["organization", "person"]         
+            hasResource = !! _.findWhere resources, name: r 
+            if @scope.resources[r]? and not hasResource
                 resources.push( @scope.resources[r] )
-
         return resources
 
     # True if the given type is allowed
@@ -208,7 +210,11 @@ class ContributeCtrl
             form = @initNewIndividual(@scope.new.type, @scope.new.fields) if form is null
             # Is that field a searchable field ?
             if @scope.new.fields.name
-                params = type: @scope.new.type, id: "search", q: @scope.new.fields.name
+                params = 
+                    type:  @scope.new.type
+                    id:    "search"
+                    q:     @scope.new.fields.name
+                    scope: @scope.new.meta.scope
                 # Look for individual with the same name
                 form.similars = @Individual.query params
             # Reset the new field
@@ -226,8 +232,14 @@ class ContributeCtrl
     replaceIndividual: (index=0, id)=>
         individual = @scope.individuals[index]
         individual.loading  = true        
-        individual.similars = [] 
-        individual.fields   = @Individual.get {type: individual.type, id: id}, (master)->                 
+        individual.similars = []         
+        # Build parameters to load the individual from database        
+        params = 
+            type : individual.type
+            id   : id
+            scope: @scope.resources[individual.type].scope
+        # Then load the individual
+        individual.fields   = @Individual.get params, (master)->                 
             # Disable loading state
             individual.loading = false
             # Record the database version of the individual
@@ -271,8 +283,7 @@ class ContributeCtrl
         form = new IndividualForm(@scope, type, master, parent)      
         # Create for the given parent field
         parent.fields[parentField] = [] unless parent.fields[parentField]?
-        
-
+        # Individual not found
         if index == -1
             # Attachs the new element to its parent            
             parent.fields[parentField].push form.fields
@@ -280,7 +291,6 @@ class ContributeCtrl
             delete @master
             # Update the new element with an Individual class            
             parent.fields[parentField][index] = form.fields
-
         # Add it to the list using @scope.new
         # and save the form a first time
         @scope.addIndividual(true, form).save()      

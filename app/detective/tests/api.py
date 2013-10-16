@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
-from ..models               import EnergyProject, Organization, Country
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models       import get_app, get_models
-from neo4django.auth.models import User
-from tastypie.test          import ResourceTestCase
+from app.detective.apps.common.models import Organization, Country
+from app.detective.apps.energy.models import EnergyProject
+from django.core.exceptions           import ObjectDoesNotExist
+from neo4django.auth.models           import User
+from tastypie.test                    import ResourceTestCase
 import json
 
 class ApiTestCase(ResourceTestCase):
 
     def setUp(self):
         super(ApiTestCase, self).setUp()
-        self.detective = get_app("detective")
-        self.models    = get_models(self.detective)
         # Look for the test user
         self.username  = 'tester'
         self.password  = 'tester'
@@ -55,7 +53,7 @@ class ApiTestCase(ResourceTestCase):
 
     def test_user_login_succeed(self):
         auth = dict(username="tester", password="tester")
-        resp = self.api_client.post('/api/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)       
@@ -63,7 +61,7 @@ class ApiTestCase(ResourceTestCase):
 
     def test_user_login_failed(self):
         auth = dict(username="tester", password="wrong")
-        resp = self.api_client.post('/api/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)       
@@ -72,23 +70,23 @@ class ApiTestCase(ResourceTestCase):
     def test_user_logout_succeed(self):
         # First login
         auth = dict(username="tester", password="tester")
-        self.api_client.post('/api/v1/user/login/', format='json', data=auth)
+        self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
         # Then logout
-        resp = self.api_client.get('/api/v1/user/logout/', format='json')
+        resp = self.api_client.get('/api/common/v1/user/logout/', format='json')
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)       
         self.assertEqual(data["success"], True)
 
     def test_user_logout_failed(self):
-        resp = self.api_client.get('/api/v1/user/logout/', format='json')
+        resp = self.api_client.get('/api/common/v1/user/logout/', format='json')
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)       
         self.assertEqual(data["success"], False)
 
     def test_user_status_isnt_logged(self):
-        resp = self.api_client.get('/api/v1/user/status/', format='json')
+        resp = self.api_client.get('/api/common/v1/user/status/', format='json')
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)       
@@ -97,32 +95,32 @@ class ApiTestCase(ResourceTestCase):
     def test_user_status_is_logged(self):
         # Log in
         auth = dict(username="tester", password="tester")
-        self.api_client.post('/api/v1/user/login/', format='json', data=auth)
+        self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
 
-        resp = self.api_client.get('/api/v1/user/status/', format='json')   
+        resp = self.api_client.get('/api/common/v1/user/status/', format='json')   
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)       
         self.assertEqual(data["is_logged"], True)
 
     def test_get_list_unauthorzied(self):
-        self.assertHttpUnauthorized(self.api_client.get('/api/v1/energyproject/', format='json'))
+        self.assertHttpUnauthorized(self.api_client.get('/api/energy/v1/energyproject/', format='json'))
 
     def test_get_list_json(self):
-        resp = self.api_client.get('/api/v1/energyproject/?limit=20', format='json', authentication=self.get_credentials())   
+        resp = self.api_client.get('/api/energy/v1/energyproject/?limit=20', format='json', authentication=self.get_credentials())   
         self.assertValidJSONResponse(resp)
         # Number of element on the first page
         count = min(20, EnergyProject.objects.count() )        
         self.assertEqual( len(self.deserialize(resp)['objects']), count)
 
     def test_post_list_unauthenticated(self):
-        self.assertHttpUnauthorized(self.api_client.post('/api/v1/energyproject/', format='json', data=self.post_data_simple))
+        self.assertHttpUnauthorized(self.api_client.post('/api/energy/v1/energyproject/', format='json', data=self.post_data_simple))
 
     def test_post_list(self):
         # Check how many are there first.
         count = EnergyProject.objects.count()
         self.assertHttpCreated(
-            self.api_client.post('/api/v1/energyproject/', 
+            self.api_client.post('/api/energy/v1/energyproject/', 
                 format='json',
                 data=self.post_data_simple,
                 authentication=self.get_credentials()
@@ -135,7 +133,7 @@ class ApiTestCase(ResourceTestCase):
         # Check how many are there first.
         count = EnergyProject.objects.count()
         # Record API response to extract data
-        resp  = self.api_client.post('/api/v1/energyproject/', 
+        resp  = self.api_client.post('/api/energy/v1/energyproject/', 
             format='json',
             data=self.post_data_related,
             authentication=self.get_credentials()
@@ -152,7 +150,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual(len(data["activity_in_country"]), len(self.post_data_related["activity_in_country"]))
 
     def test_mine(self):
-        resp = self.api_client.get('/api/v1/energyproject/mine/', format='json', authentication=self.get_credentials())                   
+        resp = self.api_client.get('/api/energy/v1/energyproject/mine/', format='json', authentication=self.get_credentials())                   
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)        
@@ -162,7 +160,7 @@ class ApiTestCase(ResourceTestCase):
         )
 
     def test_search_organization(self):
-        resp = self.api_client.get('/api/v1/organization/search/?q=Journalism', format='json', authentication=self.get_credentials())  
+        resp = self.api_client.get('/api/common/v1/organization/search/?q=Journalism', format='json', authentication=self.get_credentials())  
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -170,14 +168,14 @@ class ApiTestCase(ResourceTestCase):
         self.assertGreater( len(data.items()), 1 )
 
     def test_search_organization_wrong_page(self):
-        resp = self.api_client.get('/api/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_credentials())  
+        resp = self.api_client.get('/api/common/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_credentials())  
         self.assertHttpNotFound(resp)
 
     def test_cypher_detail(self):
-        self.assertHttpNotFound(self.api_client.get('/api/v1/cypher/111/', format='json', authentication=self.get_credentials()))
+        self.assertHttpNotFound(self.api_client.get('/api/common/v1/cypher/111/', format='json', authentication=self.get_credentials()))
 
     def test_cypher_unauthenticated(self):
-        self.assertHttpUnauthorized(self.api_client.get('/api/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json'))
+        self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json'))
 
     def test_cypher_unauthorized(self):
         # Ensure the user isn't authorized to process cypher request
@@ -185,20 +183,20 @@ class ApiTestCase(ResourceTestCase):
         self.user.is_superuser = False
         self.user.save() 
 
-        self.assertHttpUnauthorized(self.api_client.get('/api/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))
+        self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))
 
     def test_cypher_authorized(self):
         # Ensure the user IS authorized to process cypher request
         self.user.is_superuser = True
         self.user.save()
 
-        self.assertValidJSONResponse(self.api_client.get('/api/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))
+        self.assertValidJSONResponse(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))
 
     def test_summary_list(self):
-        self.assertHttpNotFound(self.api_client.get('/api/v1/summary/', format='json'))
+        self.assertHttpNotFound(self.api_client.get('/api/common/v1/summary/', format='json'))
 
     def test_countries_summary(self):
-        resp = self.api_client.get('/api/v1/summary/countries/', format='json', authentication=self.get_credentials())  
+        resp = self.api_client.get('/api/common/v1/summary/countries/', format='json', authentication=self.get_credentials())  
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -208,19 +206,19 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual("count" in data["FRA"], True)
 
     def test_forms_summary(self):
-        resp = self.api_client.get('/api/v1/summary/forms/', format='json', authentication=self.get_credentials())  
+        resp = self.api_client.get('/api/common/v1/summary/forms/', format='json', authentication=self.get_credentials())  
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
         # As many descriptors as models
-        self.assertEqual( len(self.models), len(data.items()) )
+        self.assertEqual( 13, len(data.items()) )
 
     def test_types_summary(self):
-        resp = self.api_client.get('/api/v1/summary/types/', format='json', authentication=self.get_credentials())  
+        resp = self.api_client.get('/api/common/v1/summary/types/', format='json', authentication=self.get_credentials())  
         self.assertValidJSONResponse(resp)
 
     def test_search_summary(self):
-        resp = self.api_client.get('/api/v1/summary/search/?q=Journalism', format='json', authentication=self.get_credentials())  
+        resp = self.api_client.get('/api/common/v1/summary/search/?q=Journalism', format='json', authentication=self.get_credentials())  
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -228,5 +226,5 @@ class ApiTestCase(ResourceTestCase):
         self.assertGreater( len(data.items()), 1 )
 
     def test_search_summary_wrong_page(self):
-        resp = self.api_client.get('/api/v1/summary/search/?q=Journalism&page=-1', format='json', authentication=self.get_credentials())  
+        resp = self.api_client.get('/api/common/v1/summary/search/?q=Journalism&page=-1', format='json', authentication=self.get_credentials())  
         self.assertHttpNotFound(resp)

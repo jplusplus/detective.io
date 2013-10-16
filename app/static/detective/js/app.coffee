@@ -4,7 +4,7 @@ detective = angular
         [             
             '$rootScope', 
             '$location',
-            'User',
+            'User'
             ($rootScope, $location, user)->
                 # Location available within templates
                 $rootScope.location = $location;
@@ -15,7 +15,7 @@ detective = angular
         [
             '$interpolateProvider',
             '$routeProvider', 
-            '$locationProvider',
+            '$locationProvider'
             ($interpolateProvider, $routeProvider, $locationProvider)->
                 # Avoid a conflict with Django Template's tags
                 $interpolateProvider.startSymbol '[['
@@ -28,6 +28,10 @@ detective = angular
                         controller: HomeCtrl
                         templateUrl: "/partial/home.html"
                     })
+                    .when('/404', {
+                        controller: NotFoundCtrl
+                        templateUrl: "/partial/404.html"
+                    })
                     .when('/login', {
                         controller: UserCtrl
                         templateUrl: "/partial/login.html"
@@ -36,21 +40,16 @@ detective = angular
                         controller: UserCtrl
                         templateUrl: "/partial/signup.html"
                     })
-                    .when('/node', {
+                    .when('/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"
                     })
-                    .when('/node/:type', {
-                        controller: IndividualListCtrl  
-                        templateUrl: "/partial/individual-list.html"
-                        reloadOnSearch: false
+                    .when('/:scope/contribute', {
+                        controller: ContributeCtrl  
+                        templateUrl: "/partial/contribute.html"
                         auth: true
-                    })
-                    .when('/node/:type/:id', {
-                        controller: IndividualSingleCtrl  
-                        templateUrl: "/partial/individual-single.html"  
-                        reloadOnSearch: false       
-                        auth: true
+                        # Resolve the Summary service before load this page
+                        resolve: data: (Summary)-> Summary.get("forms")
                     })
                     .when('/:scope', {
                         controller: ExploreCtrl  
@@ -58,12 +57,19 @@ detective = angular
                         template: "<div ng-include src='templateUrl'></div>"                        
                         auth: true
                     })
-                    .when('/:scope/contribute', {
-                        controller: ContributeCtrl  
-                        templateUrl: "/partial/contribute.html"
+                    .when('/:scope/:type', {
+                        controller: IndividualListCtrl  
+                        templateUrl: "/partial/individual-list.html"
+                        reloadOnSearch: false
                         auth: true
                     })
-                    .otherwise redirectTo: '/energy/contribute'
+                    .when('/:scope/:type/:id', {
+                        controller: IndividualSingleCtrl  
+                        templateUrl: "/partial/individual-single.html"  
+                        reloadOnSearch: false       
+                        auth: true
+                    })
+                    .otherwise redirectTo: '/404'
         ]
     )
 

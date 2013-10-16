@@ -14,7 +14,7 @@
 				<div class="panel-body">
 					<table class="table">
 						<tbody>
-						 	<tr ng-repeat="field in meta.fields|filter:isLiteral" ng-show="get(field.name)">
+						 	<tr ng-repeat="field in meta.fields|filter:isLiteral" ng-show="get(field.name) && field.name != 'name'">
 						 		<td>
 						 			<strong>[[field.verbose_name]]</strong><br />
 						 			<i class="text-muted">[[field.type]]</i>

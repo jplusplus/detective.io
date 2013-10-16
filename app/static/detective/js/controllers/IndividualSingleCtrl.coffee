@@ -59,7 +59,6 @@ class IndividualSingleCtrl
             "DateTimeField",
             "URLField",
             "IntegerField"
-            "AutoField"
         ].indexOf(field.type) > -1
 
     deleteNode: (type, id, msg='Are you sure you want to delete this node?')=>

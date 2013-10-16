@@ -95,8 +95,7 @@ BOWER_INSTALLED_APPS = (
     "typeahead.js#0.9.3",
     "underscore#1.5.2",
     "unstable-angular-complete#1.1.5",
-    'git://github.com/kartograph/kartograph.js',
-    "jquery#1.9",
+    'git://github.com/kartograph/kartograph.js'
 )
 
 # List of finder classes that know how to find static files in

@@ -221,8 +221,12 @@
 						</div>
 					</div>
 
-					<div class="col-sm-4" ng-if="field.type == 'CharField'">
+					<div class="col-sm-4" ng-if="field.type == 'CharField' && field.name != 'comment'">
 						<input type="text" id="id_[[field.name]]" ng-model="individual.fields[field.name]" class="form-control" />
+					</div>
+
+					<div class="col-sm-4" ng-if="field.type == 'CharField' && field.name == 'comment'">
+						<textarea rows="5" id="id_[[field.name]]" ng-model="individual.fields[field.name]" class="form-control"></textarea>
 					</div>
 
 					<div class="col-sm-4" ng-if="field.type == 'IntegerField'">

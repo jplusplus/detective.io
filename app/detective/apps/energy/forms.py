@@ -44,9 +44,9 @@ def register_model_rules():
         """
     ))
     
-    rules.model(EnergyProject).add(energyproduct_set=Neomatch(
+    rules.model(EnergyProduct).add(energyproduct_set=Neomatch(
         title="Energy project this product belongs to",
-        target_model=EnergyProduct,
+        target_model=EnergyProject,
         match="""
             (root)-[:`energy_project_has_product+`]-({select})
         """

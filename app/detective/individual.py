@@ -10,7 +10,7 @@ from django.db.models.query             import QuerySet
 from django.http                        import Http404
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
-from tastypie.authentication            import SessionAuthentication, MultiAuthentication, BasicAuthentication
+from tastypie.authentication            import SessionAuthentication
 from tastypie.authorization             import Authorization
 from tastypie.constants                 import ALL
 from tastypie.resources                 import ModelResource
@@ -35,7 +35,7 @@ class IndividualMeta:
     allowed_methods    = ['get', 'post', 'delete', 'put']    
     always_return_data = True         
     authorization      = IndividualAuthorization()     
-    authentication     = MultiAuthentication(SessionAuthentication(), BasicAuthentication())
+    authentication     = SessionAuthentication()
     filtering          = {'name': ALL}    
     ordering           = {'name': ALL}
     serializer         = Serializer(formats=['json', 'jsonp', 'xml', 'yaml'])

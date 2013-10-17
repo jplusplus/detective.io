@@ -1,6 +1,6 @@
 from django.http             import Http404, HttpResponse
 from tastypie.exceptions     import ImmediateHttpResponse
-from tastypie.authentication import SessionAuthentication, MultiAuthentication, BasicAuthentication
+from tastypie.authentication import SessionAuthentication
 from tastypie.authorization  import Authorization
 from tastypie.resources      import Resource
 from tastypie.serializers    import Serializer
@@ -12,7 +12,7 @@ class CypherResource(Resource):
 
     class Meta:
         authorization   = Authorization()
-        authentication  = MultiAuthentication(SessionAuthentication(), BasicAuthentication())
+        authentication  = SessionAuthentication()
         allowed_methods = ['get'] 
         resource_name   = 'cypher'
         object_class    = object

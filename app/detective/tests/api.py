@@ -3,13 +3,15 @@ from app.detective.apps.common.models import Organization, Country
 from app.detective.apps.energy.models import EnergyProject
 from django.core.exceptions           import ObjectDoesNotExist
 from neo4django.auth.models           import User
-from tastypie.test                    import ResourceTestCase
+from tastypie.test                    import ResourceTestCase, TestApiClient
 import json
 
 class ApiTestCase(ResourceTestCase):
 
     def setUp(self):
         super(ApiTestCase, self).setUp()
+        # Use custom api client
+        self.api_client = TestApiClient()
         # Look for the test user
         self.username  = 'tester'
         self.password  = 'tester'
@@ -49,7 +51,7 @@ class ApiTestCase(ResourceTestCase):
         }
 
     def get_credentials(self):        
-        return self.create_basic(username=self.username, password=self.password)
+        return self.api_client.client.login(username=self.username, password=self.password)
 
     def test_user_login_succeed(self):
         auth = dict(username="tester", password="tester")

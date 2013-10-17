@@ -1,4 +1,4 @@
-from .models                  import *
+from .models import *
 from app.detective.individual import IndividualResource, IndividualMeta
     
 class AmountResource(IndividualResource):

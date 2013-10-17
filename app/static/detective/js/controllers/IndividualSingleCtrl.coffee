@@ -64,13 +64,20 @@ class IndividualSingleCtrl
             "IntegerField"
         ].indexOf(field.type) > -1
 
-    deleteNode: (type, id, msg='Are you sure you want to delete this node?')=>
+    deleteNode: (msg='Are you sure you want to delete this node?')=>
         # Ask user for confirmation
         if confirm(msg) 
-            @Individual.delete(type: type, id: id, scope: @scope.scope)
+            console.log 
+                id   : @scope.id
+                scope: @scope.scope
+                type : @scope.type
+            @Individual.delete
+                id   : @scope.id
+                scope: @scope.scope
+                type : @scope.type
             # Redirect to the type list
             setTimeout (=>
-                @location.url("/#{scope}/#{type}")
+                @location.url("/#{@scope.scope}/#{@scope.type}")
             ), 500
 
     

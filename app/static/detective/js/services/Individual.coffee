@@ -9,12 +9,17 @@ angular.module('detectiveServices').factory("Individual", [ '$resource', '$http'
             ])
         },
         save: {
-            url:'/api/:scope/v1/:type/#',
+            url:'/api/:scope/v1/:type/?',
             method : 'POST', 
             isArray: false,
             paramDefaults: {
                 scope: "common"
             }
+        },
+        delete: {
+            url:'/api/:scope/v1/:type/:id/?',
+            method : 'DELETE', 
+            isArray: false
         }
     }
 ])

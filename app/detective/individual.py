@@ -16,20 +16,31 @@ from tastypie.constants                 import ALL
 from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
+from tastypie.exceptions                import Unauthorized
 import re
 
 class IndividualAuthorization(Authorization):
     def read_detail(self, object_list, bundle):
         return True
-
-    def create_detail(self, object_list, bundle):
+        
+    def create_detail(self, object_list, bundle):   
+        if not (bundle.request.user and bundle.request.user.is_staff): 
+            raise Unauthorized("Sorry, only staff is authorized to create resource.")
         return True
-
+        
     def update_detail(self, object_list, bundle):     
+        if not (bundle.request.user and bundle.request.user.is_staff): 
+            raise Unauthorized("Sorry, only staff is authorized to update resource.")
         return True
 
-    def delete_detail(self, object_list, bundle):     
-        return bundle.request.user.is_staff
+    def delete_detail(self, object_list, bundle):   
+        if not (bundle.request.user and bundle.request.user.is_staff): 
+            raise Unauthorized("Sorry, only staff is authorized to delete resource.")
+        return True             
+        
+    def delete_list(self, object_list, bundle):           
+        if not (bundle.request.user and bundle.request.user.is_staff): 
+            raise Unauthorized("Sorry, only staff is authorized to delete resource.")             
 
 class IndividualMeta:
     allowed_methods    = ['get', 'post', 'delete', 'put']    
@@ -46,7 +57,7 @@ class IndividualResource(ModelResource):
     _author = fields.ToManyField(UserResource, "_author", full=True, null=True, use_in="detail")
 
     def __init__(self, api_name=None):        
-        super(IndividualResource, self).__init__(api_name)    
+        super(IndividualResource, self).__init__(api_name)  
         # Register relationships fields automaticly            
         self.generate_to_many_fields(True)     
 

@@ -14,13 +14,13 @@ from django.contrib.auth.hashers  import make_password
 class UserAuthorization(Authorization):
     def read_detail(self, object_list, bundle):
         return True
-
+    
     def create_detail(self, object_list, bundle):
         return True
 
     def update_detail(self, object_list, bundle):     
         return bundle.request.user.is_staff
-
+        
     def delete_detail(self, object_list, bundle):     
         return bundle.request.user.is_staff
 

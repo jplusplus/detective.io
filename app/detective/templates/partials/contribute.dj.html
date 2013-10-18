@@ -251,7 +251,7 @@
 					</span>
 					
 					<div class="col-sm-9">
-						<span ng-repeat="field in individual.meta.fields" ng-hide="individual.isVisible(field)">
+						<span ng-repeat="field in individual.meta.fields" ng-hide="individual.isVisible(field) || !isAllowedType(field.type)">
 							<a href="" ng-click="individual.showField(field)">[[field.verbose_name]]</a>
 							<span ng-if="!$last">, </span>
 						</span> 

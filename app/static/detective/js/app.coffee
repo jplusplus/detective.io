@@ -43,7 +43,9 @@ detective = angular
                     .when('/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"
-                    })
+                    })  
+                    # Disable common endpoints
+                    .when('/common', redirectTo: '/')
                     .when('/:scope/contribute', {
                         controller: ContributeCtrl  
                         templateUrl: "/partial/contribute.html"

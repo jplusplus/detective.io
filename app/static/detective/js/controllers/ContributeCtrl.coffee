@@ -25,7 +25,6 @@ class ContributeCtrl
         @scope.scrollTo          = @scrollTo
         @scope.setNewIndividual  = @setNewIndividual
         @scope.showKickStart     = @showKickStart
-        @scope.strToColor        = @filter("strToColor")
         @scope.modelScope        = (m)=> if @scope.resources? then @scope.resources[m.toLowerCase()].scope
 
         # ──────────────────────────────────────────────────────────────────────
@@ -136,9 +135,6 @@ class ContributeCtrl
             @moreFields.indexOf(field) > -1 or
             # Or the value of this field ins't empty                
             (value? and value != null and value.length)
- 
-        # Get the individual style
-        individualStyle: ()=> "background-color": @scope.strToColor(@type)
     
         # Toggle the close attribute        
         close: => @isClosed = not @isClosed

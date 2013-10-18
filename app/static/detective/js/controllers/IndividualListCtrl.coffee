@@ -1,12 +1,11 @@
 class IndividualListCtrl
     # Injects dependancies    
-    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$location', '$filter', 'Page']
+    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$location',  'Page']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @location, @filter, @Page)->   
+    constructor: (@scope, @routeParams, @Individual, @Summary, @location, @Page)->   
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────  
-        @scope.strToColor      = @filter("strToColor")
         @scope.hasPreviousPage = @hasPreviousPage
         @scope.hasNextPage     = @hasNextPage
         @scope.previousPage    = @previousPage

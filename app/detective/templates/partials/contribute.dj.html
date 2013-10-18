@@ -42,9 +42,8 @@
 
 	<div class="individual-forms container" ng-if="individuals.length">
 		
-		<div class="individual"		 		     
+		<div class="individual panel panel-default"		 		     
 			 ng-repeat="individual in individuals" 
-			 ng-style="individual.individualStyle()"
 			 ng-class="{
 			 	loading: individual.loading,
 			 	reduce : individual.isReduced,
@@ -53,21 +52,25 @@
 			
 			<a scroll-to="600" ng-if="scrollIdx == $index"></a>
 
-			<div class="head">	
+			<div class="head panel-heading">	
 				<div class="btns">	
-					<a ng-click="individual.close()" class="btn btn-default left20">
+					<button ng-click="individual.close()" class="btn btn-default left20">
 						<i class="icon-remove"></i>						
-					</a>
-					<a ng-click="individual.reduce()" class="btn btn-default "ng-if="individual.isReduced">
+					</button>
+					<button ng-click="individual.reduce()" class="btn btn-default "ng-if="individual.isReduced">
 						<i class="icon-expand right10"></i>
 						Expand
-					</a>
-					<a ng-click="individual.reduce()" class="btn btn-default "ng-if="!individual.isReduced">
+					</button>
+					<button ng-click="individual.reduce()" class="btn btn-default "ng-if="!individual.isReduced">
 						<i class="icon-collapse right10"></i>
 						Collapse
-					</a>
+					</button>
 				</div>		
 				<h3>
+
+					<div class="pull-left">
+						<div color-tag ref="individual.type" />
+					</div>
 					<strong>
 						[[individual.fields|individualPreview:"unkown"]]
 					</strong>				
@@ -84,9 +87,9 @@
 			<div class="alert alert-danger errors" ng-if="individual.error_message">
 				[[individual.error_message]]
 				<div ng-if="individual.error_traceback" class="pull-right">
-					<a class="btn btn-xs btn-default" ng-click="individual.show_traceback = !individual.show_traceback" href="">
+					<button class="btn btn-xs btn-default" ng-click="individual.show_traceback = !individual.show_traceback" href="">
 						Show traceback
-					</a>
+					</button>
 				</div>
 				<div ng-if="individual.show_traceback" ng-bind-html-unsafe="individual.error_traceback|nl2br" class="top10"></div>
 			</div>
@@ -98,7 +101,7 @@
 			</div>
 
 
-			<form class="form-horizontal">
+			<form class="form-horizontal panel-body">
 
 				<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">				
 					<strong>Individuals with similar name already exist!</strong>
@@ -133,11 +136,11 @@
 							</span>								
 						</div>
 
-    					<a class="btn btn-default btn-sm" 
+    					<button class="btn btn-default btn-sm" 
     					   ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
     					   <i class="icon-plus right05"></i>
     						Create a new [[field.verbose_name]]
-    					</a>
+    					</button>
 
 					</div>
 
@@ -173,10 +176,10 @@
 			    					<h4>Heads Up!</h4>
 			    					<p>The entry you just typed in is new in the base.</p>	    					
 			    					<div class="tr">
-				    					<a class="btn btn-default btn-sm" 
+				    					<button class="btn btn-default btn-sm" 
 				    					   ng-click="setNewIndividual({name: f.name}, field.related_model, individual, field.name, $index)">
 				    						Create <strong>[[f.name]]</strong>
-				    					</a>
+				    					</button>
 				    				</div>
 			    				</div>
 			    				<div class="pan" ng-if="!field.rules.is_editable">
@@ -187,12 +190,12 @@
 						</div>						
 
 						<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">
-							<a ng-click="addRelated(individual, field.name, field.related_model)" class="btn btn-default btn-sm">
+							<button ng-click="addRelated(individual, field.name, field.related_model)" class="btn btn-default btn-sm">
 								<i class="icon-search right05"></i>
 								Search
 								<span ng-if="individual.fields[field.name].length">another</span>
 								one
-							</a>
+							</button>
 						</div>
 
 					</div>

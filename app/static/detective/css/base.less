@@ -272,11 +272,6 @@ header {
 }
 
 #contribute {
-	
-	.contribute-start, .individual-forms .individual {		
-		padding:30px;
-	}
-
 
 	 @media (min-width: @screen-md) {
 
@@ -316,7 +311,6 @@ header {
 		.individual {
 			margin-top:30px;
 			margin-bottom:30px;
-			padding:30px;
 			position:relative;			
 			.box-shadow( 0 -3px 0 fade(#000, 40) inset);
 			
@@ -328,23 +322,26 @@ header {
 				}
 			}	
 
-			
 			.head {
-
 				position:relative;
-				margin-bottom:30px;
+				padding:30px;
 				padding-bottom:20px;
-				border-bottom:fade(#fff, 20) 1px solid;
+				border-bottom:fade(#000, 10) 1px solid;
+
+				.color-tag {
+					margin-right:10px;
+				}
 				
 				.btns {
 					position:absolute;
 					top:50%;
 					margin-top:-1em;
-					right:0;
+					right:30px;
 				}
 		
 				h3 {
 					margin:0;
+					margin-right:200px;
 					&:first-letter {
 						text-transform:uppercase;
 					}
@@ -355,13 +352,13 @@ header {
 			
 				h4 {
 					margin:0;
-					color:fade(#FFF, 70);
+					color:mix(#000, white);
 				}
 				
 			}
 
 			.help-block {
-				color:fade(#fff, 80);
+				color:mix(#000, white);
 			}
 
 			.multiple {				
@@ -387,13 +384,16 @@ header {
 				background:fade(#000, 10);	
 				margin-bottom:5px;			
 			}		
+
+			label:first-letter {
+				text-transform: uppercase;
+			}
 		}	
 
 		.form-footer {
-			margin:-30px;
 			margin-top:20px;
-			background:fade(#fff, 5);
-			border-top:1px solid fade(#fff, 20);
+			background:#fefefe;
+			border-top:1px solid #eee;
 		}		
 	}
 
@@ -402,9 +402,36 @@ header {
 	
 #individual-list {
 
-	.individual.panel {
-		color:white;	
+
+	.individual {
+		position:relative;
+		padding-left:100px;		
+		overflow:hidden;
+
+		.thumb {
+			position:absolute;
+			top:0;
+			bottom:4px;
+			left:0;
+			width:100px;			
+			overflow:hidden;
+			background:fade(#000, 5);
+
+			img {
+				width:100%;
+				height:auto;
+			}
+		}
+
+		h4 {
+			padding-left:10px;
+
+			 a {	
+				text-decoration: none;
+			}
+		}
 	}
+
 }
 
 

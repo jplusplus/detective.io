@@ -35,14 +35,19 @@
 
 		<ul class="list-unstyled top10" ng-class="{'col-md-9': query}">
 			<li ng-repeat="individual in individuals.objects">			
-				<div class="panel panel-colored individual" ng-style="{'background-color': strToColor(type)}">
-					<h4 class="panel-heading bottom0">
-						<a ng-href="[[singleUrl(individual)]]">
-							[[individual|individualPreview]]
-						</a>
-					</h4>
-					<div class="panel-body text-right">
-						<a ng-href="[[singleUrl(individual)]]">See more</a>
+				<div class="panel individual">
+					<div class="thumb">
+						<img ng-src="[[individual.image]]" ng-if="individual.image" />					
+					</div>
+					<div class="panel-heading">
+						<div class="pull-right top10">
+							<a ng-href="[[singleUrl(individual)]]">See more</a>
+						</div>
+						<h4>
+							<a ng-href="[[singleUrl(individual)]]">
+								[[individual|individualPreview]]
+							</a>
+						</h4>
 					</div>
 				</div>
 			</li>

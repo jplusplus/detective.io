@@ -43,7 +43,7 @@ class IndividualAuthorization(Authorization):
             raise Unauthorized("Sorry, only staff is authorized to delete resource.")             
 
 class IndividualMeta:
-    list_allowed_methods   = ['get']
+    list_allowed_methods   = ['get', 'post', 'put']
     detail_allowed_methods = ['get', 'post', 'delete', 'put']    
     always_return_data     = True         
     authorization          = IndividualAuthorization()     

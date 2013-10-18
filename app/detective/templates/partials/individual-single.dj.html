@@ -42,12 +42,15 @@
 					</table>
 
 				 	<div ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)" id="rels-[[field.name]]">
-				 		<h3>[[field.verbose_name]] <small class="text-muted">[[field.related_model]]</small></h3>
-				 		<ul class="row list-unstyled">
-				 			<li class="col-sm-4" ng-repeat="rel in get(field.name)">
-				 				<div ng-style="{background: strToColor(field.related_model)}" class="panel panel-colored bottom0 padding20 text-center">
-				 					<a ng-href="[[singleUrl(rel, field.related_model)]]">[[rel|individualPreview]]</a>
-				 				</div>
+				 		<h3>
+							<div color-tag ref="field.related_model" class="pull-left small right10" />
+				 			[[field.verbose_name]] <small class="text-muted">[[field.related_model]]</small>
+				 		</h3>
+				 		<ul class="list-inline">
+				 			<li ng-repeat="rel in get(field.name)" class="bottom10">
+				 				<a ng-href="[[singleUrl(rel, field.related_model)]]" class="btn btn-default">
+				 					[[rel|individualPreview]]
+				 				</a>				 				
 				 			</li>
 				 		</ul>
 				 	</div>
@@ -84,12 +87,12 @@
 				</span>
 			</div>
 
+			<h3>Jump to...</h3>
 			<div class="well padding10" ng-show="hasRels()">
 				<ul class="nav nav-pills nav-stacked">
 				 	<li ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)">
 				 		<a ng-click="scrollTo('rels-' + field.name)">
-				 			[[field.verbose_name]]<br />
-				 			<i class="text-muted">[[field.related_model]]</i>
+				 			[[field.verbose_name]]
 				 		</a>
 				 	</li>
 				</ul>

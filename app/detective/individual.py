@@ -43,13 +43,14 @@ class IndividualAuthorization(Authorization):
             raise Unauthorized("Sorry, only staff is authorized to delete resource.")             
 
 class IndividualMeta:
-    allowed_methods    = ['get', 'post', 'delete', 'put']    
-    always_return_data = True         
-    authorization      = IndividualAuthorization()     
-    authentication     = SessionAuthentication()
-    filtering          = {'name': ALL}    
-    ordering           = {'name': ALL}
-    serializer         = Serializer(formats=['json', 'jsonp', 'xml', 'yaml'])
+    list_allowed_methods   = ['get']
+    detail_allowed_methods = ['get', 'post', 'delete', 'put']    
+    always_return_data     = True         
+    authorization          = IndividualAuthorization()     
+    authentication         = SessionAuthentication()
+    filtering              = {'name': ALL}    
+    ordering               = {'name': ALL}
+    serializer             = Serializer(formats=['json', 'jsonp', 'xml', 'yaml'])
 
 class IndividualResource(ModelResource):
 

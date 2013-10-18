@@ -7,8 +7,8 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
         # isn't updated in real time
         $timeout ->
             # Add CSRF Token for post request
-            if $cookies.csrftoken?
-                $http.defaults.headers.post['X-CSRFToken'] = $cookies.csrftoken             
+            if $cookies.csrftoken?          
+                $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken             
         , 250
         # Return sdo explicitely
         return sdo

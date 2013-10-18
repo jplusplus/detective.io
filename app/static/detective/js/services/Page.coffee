@@ -19,7 +19,7 @@ angular.module('detective').factory "Page", ->
     # ──────────────────────────────────────────────────────────────────────────  
     title: (newTitle, titleCase=true)->    
         if newTitle?
-            title = if titleCase then toTitleCase(newTitle) else newTitle
+            title = if titleCase then toTitleCase( "" + newTitle ) else newTitle
         # Always return the title 
         if loading then "Loading..." else title
 

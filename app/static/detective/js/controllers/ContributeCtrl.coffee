@@ -10,22 +10,23 @@ class ContributeCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
-        @scope.addIndividual     = @addIndividual
-        @scope.addRelated        = @addRelated
-        @scope.askForNew         = @askForNew
-        @scope.editRelated       = @editRelated
-        @scope.isAllowedOneMore  = @isAllowedOneMore
-        @scope.isAllowedType     = @isAllowedType
-        @scope.loadIndividual    = @loadIndividual
-        @scope.relatedState      = @relatedState
-        @scope.removeIndividual  = @removeIndividual
-        @scope.removeRelated     = @removeRelated
-        @scope.replaceIndividual = @replaceIndividual
-        @scope.scopeResources    = @scopeResources
-        @scope.scrollTo          = @scrollTo
-        @scope.setNewIndividual  = @setNewIndividual
-        @scope.showKickStart     = @showKickStart
-        @scope.modelScope        = (m)=> if @scope.resources? then @scope.resources[m.toLowerCase()].scope
+        @scope.addIndividual       = @addIndividual
+        @scope.addRelated          = @addRelated
+        @scope.askForNew           = @askForNew
+        @scope.editRelated         = @editRelated
+        @scope.isAllowedOneMore    = @isAllowedOneMore
+        @scope.isAllowedType       = @isAllowedType
+        @scope.loadIndividual      = @loadIndividual
+        @scope.relatedState        = @relatedState
+        @scope.removeIndividual    = @removeIndividual
+        @scope.removeRelated       = @removeRelated
+        @scope.replaceIndividual   = @replaceIndividual
+        @scope.scopeResources      = @scopeResources
+        @scope.scrollTo            = @scrollTo
+        @scope.setNewIndividual    = @setNewIndividual
+        @scope.showKickStart       = @showKickStart
+        @scope.isVisibleAdditional = @isVisibleAdditional
+        @scope.modelScope          = (m)=> if @scope.resources? then @scope.resources[m.toLowerCase()].scope
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
@@ -145,7 +146,8 @@ class ContributeCtrl
             fields = []
             if @meta.fields?
                 for f in @meta.fields 
-                    fields.push(f) unless @isVisible(f)
+                    console.log @scope.isVisibleAdditional(@)(f)
+                    fields.push(f) if @scope.isVisibleAdditional(@)(f)
             fields
         showField: (field)=> @moreFields.push field       
         isSaved: => @fields.id? and angular.equals @master, @fields
@@ -298,5 +300,11 @@ class ContributeCtrl
         _.each @scope.individuals, (i, idx)=> index = idx if i == individual
         # Update the scrollIdx
         @scope.scrollIdx = index    
+
+    # Closure filter
+    isVisibleAdditional: (individual)=>
+        # True if the given field must be show into the inidividual
+        (field)=> 
+            not individual.isVisible(field) and @isAllowedType(field.type)
 
 angular.module('detective').controller 'contributeCtrl', ContributeCtrl

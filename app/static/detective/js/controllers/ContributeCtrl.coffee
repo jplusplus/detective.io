@@ -77,13 +77,18 @@ class ContributeCtrl
             @meta       = scope.resources[type] or {}
             @related_to = related_to
             @scope      = scope
-            @type       = type            
+            @type       = type.toLowerCase()
             # Field param can be a number to load an individual
             @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
             # Update meta when resources change
             @scope.$watch("resources", (value)=>
                 @meta = value[@type] if value[@type]?
             , true)
+
+        # Generates the permalink to this individual
+        permalink: =>
+            return false unless @isSaved() and @meta.scope
+            return "/#{@meta.scope}/#{@type}/#{@fields.id}"
 
         # Save the current individual form
         save: =>                  
@@ -163,7 +168,8 @@ class ContributeCtrl
     loadIndividual: (type, id, related_to=null)=>
         index = -1
         # Looks for individual with this id
-        _.each @scope.individuals, (i, idx)=> index = idx if i.fields.id is id
+        _.each @scope.individuals, (i, idx)=>             
+            index = idx if parseInt(i.fields.id) is parseInt(id)            
         # Stop here if we found an existing individual
         if index > -1 
             @scope.individuals[index].isClosed = false

@@ -53,12 +53,12 @@
 
 			<div class="head panel-heading">	
 				<div class="btns">	
-					<button ng-click="individual.close()" class="btn btn-default left20">
+					<a class="left10" ng-if="individual.permalink()" ng-href="[[individual.permalink()]]">See in detail</a>
+					<button ng-click="individual.close()" class="btn btn-default left10">
 						<i class="icon-remove"></i>						
 					</button>
 				</div>		
 				<h3>
-
 					<div class="pull-left">
 						<div color-tag ref="individual.type" />
 					</div>

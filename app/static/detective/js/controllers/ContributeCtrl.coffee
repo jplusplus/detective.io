@@ -35,7 +35,6 @@ class ContributeCtrl
         # When we update scrollIdx, reset its value after 
         # a short delay to allow scroll again
         @scope.$watch "scrollIdx", (v)=> 
-            console.log v
             setTimeout =>
                 @scope.scrollIdx = -1
                 @scope.$apply()

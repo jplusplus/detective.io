@@ -46,7 +46,6 @@
 			 ng-repeat="individual in individuals" 
 			 ng-class="{
 			 	loading: individual.loading,
-			 	reduce : individual.isReduced,
 			 	closed : individual.isClosed
 			}">
 			
@@ -56,14 +55,6 @@
 				<div class="btns">	
 					<button ng-click="individual.close()" class="btn btn-default left20">
 						<i class="icon-remove"></i>						
-					</button>
-					<button ng-click="individual.reduce()" class="btn btn-default "ng-if="individual.isReduced">
-						<i class="icon-expand right10"></i>
-						Expand
-					</button>
-					<button ng-click="individual.reduce()" class="btn btn-default "ng-if="!individual.isReduced">
-						<i class="icon-collapse right10"></i>
-						Collapse
 					</button>
 				</div>		
 				<h3>

@@ -34,7 +34,8 @@ class ContributeCtrl
         
         # When we update scrollIdx, reset its value after 
         # a short delay to allow scroll again
-        @scope.$watch "scrollIdx", => 
+        @scope.$watch "scrollIdx", (v)=> 
+            console.log v
             setTimeout =>
                 @scope.scrollIdx = -1
                 @scope.$apply()
@@ -139,14 +140,11 @@ class ContributeCtrl
     
         # Toggle the close attribute        
         close: => @isClosed = not @isClosed
-        # Toggle the reduce attribute        
-        reduce: => @isReduced = not @isReduced
-        # Toggle the reduce attribute        
+        # Get invisible field with this individual
         invisibleFields: (meta)=>
             fields = []
             if @meta.fields?
                 for f in @meta.fields 
-                    console.log @scope.isVisibleAdditional(@)(f)
                     fields.push(f) if @scope.isVisibleAdditional(@)(f)
             fields
         showField: (field)=> @moreFields.push field       
@@ -174,7 +172,7 @@ class ContributeCtrl
         # Create the new form        
         form = new IndividualForm(@scope, type, id, related_to)
         # Create an individual        
-        @scope.individuals.push form        
+        index = @scope.individuals.push(form) - 1
         # Return the index of the new individual
         return index
 
@@ -263,7 +261,7 @@ class ContributeCtrl
         # Does the related exist ?
         if related? and related.id?
             # Load it (if needed)
-            @scope.scrollIdx = @scope.loadIndividual type.toLowerCase(), related.id,  individual
+            @scope.scrollIdx = @scope.loadIndividual type.toLowerCase(), related.id,  individual            
 
     relatedState: (related)=>
         switch true

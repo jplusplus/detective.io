@@ -54,7 +54,7 @@ class ContributeCtrl
         # Prepare future individual
         @initNewIndividual()
         # Individual list
-        @scope.individuals = @IndividualForm
+        @scope.individuals = []
         # Received an individual to edit
         if @routeParams.type? and @routeParams.id?
             # Load the inidividual
@@ -89,6 +89,11 @@ class ContributeCtrl
             @scope.$watch("resources", (value)=>
                 @meta = value[@type] if value[@type]?
             , true)
+            # The data change
+            #@scope.$watch "individuals", ()=> 
+            # Check if we update this individual
+            # console.log angular.equals()
+                      
 
         # Generates the permalink to this individual
         permalink: =>

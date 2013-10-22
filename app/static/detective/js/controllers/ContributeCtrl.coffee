@@ -68,37 +68,44 @@ class ContributeCtrl
     # IndividualForm embeded class
     # ──────────────────────────────────────────────────────────────────────────
     class IndividualForm
-        loading    : false
-        master     : {}
-        moreFields : []
+        # True if the individual is loading
+        loading   : false
+        # List of field that are updating
+        updating  : {}
+        # Copy of the database's fields
+        master    : {}
+        # List of additional visible fields
+        moreFields: []
         
         constructor: (scope, type="", fields={}, related_to=null)->
             @Individual = scope.Individual            
             @meta       = scope.resources[type] or {}
             @related_to = related_to
             @scope      = scope
-            @type       = type.toLowerCase()
+            @type       = type.toLowerCase()            
             # Field param can be a number to load an individual
             @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
             # Update meta when resources change
             @scope.$watch("resources", (value)=>
                 @meta = value[@type] if value[@type]?
-            , true)                        
+            , true)
 
         # Generates the permalink to this individual
         permalink: =>
-            return false unless @isSaved() and @meta.scope
+            return false unless @fields.id? and @meta.scope
             return "/#{@meta.scope}/#{@type}/#{@fields.id}"
 
-        # Event when a field change
-        change: (individual, field)=>  
-            return
+        # Event when fields changed
+        change: (fields)=>              
             params = type: @type, scope: @getScope(), id: @fields.id
-            data   = {}
-            # Add a parameter for the field to update
-            data[field] = individual.fields[field]
+            # Notice that the field is loading
+            @updating[field] = true
             # Patch the current individual
-            @Individual.update(params, data)
+            @Individual.update params, fields, (master)=>
+                # Record master
+                @master = _.clone master
+                # Notices that we stop to load the field
+                delete @updating[field]
 
         # Returns individual's scope
         getScope: => @meta.scope or @scope.routeParams.scope

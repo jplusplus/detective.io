@@ -185,7 +185,8 @@ class IndividualResource(ModelResource):
         return bundle
 
     def hydrate(self, bundle):
-        if bundle.data.has_key("id"): bundle.data["id"] = None
+        # Avoid neo4django conflict with Tastypie update policies
+        # if bundle.data.has_key("id"): bundle.data["id"] = None
         return bundle
 
     def hydrate_m2m(self, bundle):            

@@ -8,7 +8,8 @@
 
 @zindex-context   : 10;
 @zindex-content   : @zindex-context+100;
-@zindex-breadcrumb: @zindex-content+100;
+@zindex-loading   : @zindex-context+100;
+@zindex-breadcrumb: @zindex-loading+100;
 @zindex-header    : @zindex-breadcrumb+100;
 
 @header-bg:#2E2D2A;
@@ -31,13 +32,14 @@ body {
 
 	.loading {
 		position:relative;
-		min-height:100px;	
+		min-height:20px;
 
 		&.static {
 			position:static;
 		}
 
-		&:after {
+		&:not(.after):before, &.before:after {
+			z-index: @zindex-loading;
 			content:"";
 			display:block;
 			position:absolute;
@@ -365,6 +367,20 @@ header {
 					color:mix(#000, white);
 				}
 				
+			}
+
+			.field.loading {
+				min-height:auto;
+				
+				input, button {					
+					.progress-striped .progress-bar();
+					.progress-bar-variant(#eee);
+					.progress.active .progress-bar();
+				}
+
+				&:before {
+					background:white;
+				}
 			}
 
 			.help-block {

@@ -15,6 +15,7 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
         prefetch  : "@"
         valueKey  : "@"
         limit     : "@"
+        change    : "&"
     link: (scope, element, attrs) ->
         # Select the individual to look for
         individual = (scope.individual() or "").toLowerCase()
@@ -58,6 +59,7 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
             if scope.model?
                 angular.copy(individual, scope.model);
                 scope.$apply()
+            scope.change() if scope.change?
 
         # Watch user value event
         element.on "typeahead:uservalue", ()->  

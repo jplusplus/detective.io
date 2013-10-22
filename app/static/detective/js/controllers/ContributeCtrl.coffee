@@ -83,12 +83,25 @@ class ContributeCtrl
             # Update meta when resources change
             @scope.$watch("resources", (value)=>
                 @meta = value[@type] if value[@type]?
-            , true)
+            , true)                        
 
         # Generates the permalink to this individual
         permalink: =>
             return false unless @isSaved() and @meta.scope
             return "/#{@meta.scope}/#{@type}/#{@fields.id}"
+
+        # Event when a field change
+        change: (individual, field)=>  
+            return
+            params = type: @type, scope: @getScope(), id: @fields.id
+            data   = {}
+            # Add a parameter for the field to update
+            data[field] = individual.fields[field]
+            # Patch the current individual
+            @Individual.update(params, data)
+
+        # Returns individual's scope
+        getScope: => @meta.scope or @scope.routeParams.scope
 
         # Save the current individual form
         save: =>                  
@@ -96,7 +109,7 @@ class ContributeCtrl
             unless @loading
                 # Loading mode on
                 @loading = true
-                params   = type: @type.toLowerCase(), scope: @meta.scope or @scope.routeParams.scope
+                params   = type: @type, scope: @getScope()
                 # Save the individual and
                 # take care to specify the type
                 @fields.$save(params, (master)=>
@@ -122,7 +135,7 @@ class ContributeCtrl
             @loading    = true
             @related_to = related_to
             # Params to retreive the individual
-            params = type: @type, id: id, scope: @meta.scope or @scope.routeParams.scope
+            params = type: @type, id: id, scope: @getScope()
             # Load the given individual        
             @fields = @Individual.get params, (master)=>  
                 # Disable loading state

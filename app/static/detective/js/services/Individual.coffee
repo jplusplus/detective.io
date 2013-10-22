@@ -19,7 +19,14 @@ angular.module('detectiveServices').factory("Individual", [ '$resource', '$http'
         delete: {
             url:'/api/:scope/v1/:type/:id/?',
             method : 'DELETE', 
-            isArray: false
+        },
+        update: {
+            url:'/api/:scope/v1/:type/:id/?',            
+            method : 'PATCH', 
+            isArray: false,
+            paramDefaults: {
+                scope: "common"
+            }
         }
     }
 ])

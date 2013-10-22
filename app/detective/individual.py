@@ -44,7 +44,7 @@ class IndividualAuthorization(Authorization):
 
 class IndividualMeta:
     list_allowed_methods   = ['get', 'post', 'put']
-    detail_allowed_methods = ['get', 'post', 'delete', 'put']    
+    detail_allowed_methods = ['get', 'post', 'delete', 'put', 'patch']    
     always_return_data     = True         
     authorization          = IndividualAuthorization()     
     authentication         = SessionAuthentication()
@@ -184,7 +184,10 @@ class IndividualResource(ModelResource):
                     bundle.data[field] = []         
         return bundle
 
-    def hydrate_m2m(self, bundle):         
+    def hydrate(self, bundle):
+        return bundle
+
+    def hydrate_m2m(self, bundle):            
         # By default, every individual from staff are validated
         bundle.data["_status"] = 1*bundle.request.user.is_staff
         bundle.data["_author"] = [bundle.request.user.id]

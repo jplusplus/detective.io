@@ -197,6 +197,8 @@
 						<input type="url" 
 							   placeholder="http://"
 							   id="id_[[field.name]]" 
+							   change-on-blur
+							   ng-change="individual.change(individual, field.name)"
 							   ng-model="individual.fields[field.name]" 
 							   class="form-control" />
 					</div>
@@ -208,6 +210,8 @@
 							</span>
 							<input type="text" 
 								   id="id_[[field.name]]" 
+								   change-on-blur
+								   ng-change="individual.change(individual, field.name)"
 								   ng-model="individual.fields[field.name]" 
 								   ng-disabled="individual.loading"
 								   datepicker-popup="dd-MMMM-yyyy"
@@ -217,15 +221,30 @@
 					</div>
 
 					<div class="col-sm-4" ng-if="field.type == 'CharField' && field.name != 'comment'">
-						<input type="text" id="id_[[field.name]]" ng-model="individual.fields[field.name]" class="form-control" />
+						<input  type="text" 
+								class="form-control" 
+								ng-model="individual.fields[field.name]" 
+								change-on-blur
+								ng-change="individual.change(individual, field.name)"
+								id="id_[[field.name]]" />
 					</div>
 
 					<div class="col-sm-4" ng-if="field.type == 'CharField' && field.name == 'comment'">
-						<textarea rows="5" id="id_[[field.name]]" ng-model="individual.fields[field.name]" class="form-control"></textarea>
+						<textarea rows="5" 
+						          id="id_[[field.name]]"						          
+								  change-on-blur
+								  ng-change="individual.change(individual, field.name)"
+						          ng-model="individual.fields[field.name]" 
+						          class="form-control"></textarea>
 					</div>
 
 					<div class="col-sm-4" ng-if="field.type == 'IntegerField'">
-						<input type="number" id="id_[[field.name]]" ng-model="individual.fields[field.name]" class="form-control" />
+						<input  type="number" 
+								id="id_[[field.name]]" 
+							    change-on-blur
+							    ng-change="individual.change(individual, field.name)"
+								ng-model="individual.fields[field.name]" 
+								class="form-control" />
 					</div>
 
 					<span class="col-sm-5 help-block">

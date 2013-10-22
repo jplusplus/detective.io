@@ -186,7 +186,7 @@ class IndividualResource(ModelResource):
 
     def hydrate(self, bundle):
         # Avoid neo4django conflict with Tastypie update policies
-        # if bundle.data.has_key("id"): bundle.data["id"] = None
+        if bundle.data.has_key("id"): bundle.data["id"] = None
         return bundle
 
     def hydrate_m2m(self, bundle):            
@@ -238,7 +238,7 @@ class IndividualResource(ModelResource):
                 # Avoid working on empty relationships set
                 if len(rels) > 0:
                     # Empties the bundle to avoid insert data twice
-                    bundle.data[field] = []                                      
+                    bundle.data[field] = []                                                          
                     # Get the field
                     attr = getattr(bundle.obj, field)
                     # Clean the field to avoid duplicates            

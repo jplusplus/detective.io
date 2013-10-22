@@ -86,14 +86,44 @@ class ContributeCtrl
             # Field param can be a number to load an individual
             @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
             # Update meta when resources change
-            @scope.$watch("resources", (value)=>
+            @scope.$watch "resources", (value)=>
                 @meta = value[@type] if value[@type]?
-            , true)
+            , true            
             # The data change
-            #@scope.$watch "individuals", ()=> 
-            # Check if we update this individual
-            # console.log angular.equals()
+            @scope.$watch (=>@fields), ()=>
+                # Only if master is completed
+                unless _.isEmpty(@master)
+                    changes = @getChanges()
+                    # Looks for the differences and update the db if needed             
+                    @update(changes) unless _.isEmpty(changes)
+                        
+            , true
                       
+
+        getChanges: (prev=@master, now=@fields)=>
+            changes = {}
+            # Function to remove nested resources without id
+            clean   = (val)->                
+                # copy the current value
+                val = angular.copy val
+                if typeof(val) is "object"
+                    # Fetch each nested value 
+                    for pc of val     
+                        # Remove the nested values without id
+                        unless val[pc].id?                                                  
+                            delete val[pc]                    
+                            # Apply splice only on array
+                            val.splice(pc) if val instanceof Array  
+                else if val == ""
+                    # Empty input must be null
+                    val = null                            
+                val
+            for prop of now   
+                val = clean(now[prop])
+                # Previous and new value are different
+                unless angular.equals clean(prev[prop]), val                    
+                    changes[prop] = val
+            changes
 
         # Generates the permalink to this individual
         permalink: =>
@@ -101,16 +131,16 @@ class ContributeCtrl
             return "/#{@meta.scope}/#{@type}/#{@fields.id}"
 
         # Event when fields changed
-        change: (fields)=>              
-            params = type: @type, scope: @getScope(), id: @fields.id
-            # Notice that the field is loading
-            @updating[field] = true
+        update: (data)=>              
+            params = type: @type, scope: @getScope(), id: @fields.id            
+            # Notice that the field is loading             
+            @updating = _.extend @updating, data
             # Patch the current individual
-            @Individual.update params, fields, (master)=>
+            @Individual.update params, data, (master)=>
                 # Record master
                 @master = _.clone master
                 # Notices that we stop to load the field
-                delete @updating[field]
+                @updating = _.omit(@updating, _.keys(data) ) 
 
         # Returns individual's scope
         getScope: => @meta.scope or @scope.routeParams.scope

@@ -1,0 +1,6 @@
+# Convert old user model to a new one (need reindex)
+START root=node(*)
+WHERE HAS(root.model_name)
+AND root.name = 'neo_auth:User'
+SET root.app_label = 'graph_auth', root.name = 'graph_auth:User'
+RETURN root, root.name, root.model_name, root.app_label;

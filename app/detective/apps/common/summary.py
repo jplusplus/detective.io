@@ -65,8 +65,6 @@ class SummaryResource(Resource):
         return obj
 
     def summary_types(self, bundle):   
-        import time
-        time.sleep(0.5) 
         # Query to aggreagte relationships count by country
         query = """
             START n=node(*)
@@ -88,7 +86,7 @@ class SummaryResource(Resource):
         available_resources = {}
         # Get the model's rules manager
         rulesManager = register_model_rules()     
-        # Fetch every registered model 
+        # Fetch every registered model  
         # to print out its rules
         for model in get_registered_models():                                      
             # Do this ressource has a model?

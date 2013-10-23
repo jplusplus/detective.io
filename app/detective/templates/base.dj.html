@@ -15,7 +15,7 @@
 
         <link type='text/css' href='http://fonts.googleapis.com/css?family=Merriweather:400,700,300|Lato:400,300,700&amp;subset=latin,latin-ext' rel='stylesheet'>
         {% block extracss %}{% endblock %}           
-        <base href="{% url home %}" />
+        <base href="{% url 'home' %}" />
     </head>
     <body ng-cloak>        
         {% block content %}{% endblock %}           

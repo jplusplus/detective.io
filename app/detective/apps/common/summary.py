@@ -64,7 +64,7 @@ class SummaryResource(Resource):
             del country["isoa3"]            
         return obj
 
-    def summary_types(self, bundle):   
+    def summary_types(self, bundle):    
         # Query to aggreagte relationships count by country
         query = """
             START n=node(*)
@@ -236,7 +236,7 @@ class SummaryResource(Resource):
         }
 
         self.log_throttled_access(request)
-        return object_list
+        return object_list    
 
     def summary_syntax(self, bundle): return self.get_syntax()
 

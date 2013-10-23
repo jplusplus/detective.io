@@ -19,6 +19,7 @@ from tastypie.utils                     import trailing_slash
 from tastypie.exceptions                import Unauthorized
 import re
 
+
 class IndividualAuthorization(Authorization):
     def read_detail(self, object_list, bundle):
         return True
@@ -84,7 +85,7 @@ class IndividualResource(ModelResource):
         }
         return dict(additionals.items() + schema.items())
 
-    def get_queryset(self):        
+    def get_queryset(self): 
         # Resource must implement a queryset!
         queryset = getattr(self._meta, "queryset", None)
         if not isinstance(queryset, QuerySet):

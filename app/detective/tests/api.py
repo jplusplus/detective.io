@@ -2,7 +2,7 @@
 from app.detective.apps.common.models import Organization, Country
 from app.detective.apps.energy.models import EnergyProject
 from django.core.exceptions           import ObjectDoesNotExist
-from neo4django.auth.models           import User
+from neo4django.graph_auth.models           import User
 from tastypie.test                    import ResourceTestCase, TestApiClient
 import json
 

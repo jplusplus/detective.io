@@ -6,7 +6,7 @@ from django.core                    import exceptions
 from django.core.management.base    import BaseCommand, CommandError
 from django.db                      import DEFAULT_DB_ALIAS
 from django.utils.translation       import ugettext as _
-from neo4django.auth.models   import User
+from neo4django.graph_auth.models   import User
 from optparse                       import make_option
 
 import sys

@@ -43,6 +43,21 @@ class SummaryResource(Resource):
         # We force tastypie to render the response directly 
         raise ImmediateHttpResponse(response=response)
 
+    def summary_test(self, bundle):      
+        from models import Person  
+
+        # from neo4django.graph_auth.models import User  
+        from tastypie.compat import User 
+        
+        for u in User.objects.all():
+            if u.username == 'pirhoo':
+                u.save()
+
+        queryset = Person.objects.all()
+        return {
+            'objects': queryset
+        }
+
     def summary_countries(self, bundle):    
         model_id = get_model_node_id(Country)
         # The Country isn't set yet in neo4j

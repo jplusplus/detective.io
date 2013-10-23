@@ -26,7 +26,7 @@ class FrontTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_login(self):
-        from neo4django.auth.models import User
+        from neo4django.graph_auth.models import User
         from django.core.exceptions import ObjectDoesNotExist        
         # Look for the test user
         self.username  = 'tester'

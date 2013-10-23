@@ -2,7 +2,7 @@ import os
 from settings import *
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-AUTHENTICATION_BACKENDS = ('neo4django.auth.backends.NodeModelBackend',)
+AUTHENTICATION_BACKENDS = ('neo4django.graph_auth.backends.NodeModelBackend',)
 
 NEO4J_DATABASES = {
     'default' : {

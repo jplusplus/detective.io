@@ -30,8 +30,8 @@ NEO4J_DATABASES = {
 
 DATABASE_ROUTERS        = ['neo4django.utils.Neo4djangoIntegrationRouter']
 SESSION_ENGINE          = "django.contrib.sessions.backends.file"
-AUTHENTICATION_BACKENDS = ('neo4django.auth.backends.NodeModelBackend',)
-AUTH_USER_MODEL         = 'auth.User'
+AUTHENTICATION_BACKENDS = ('neo4django.graph_auth.backends.NodeModelBackend',)
+AUTH_USER_MODEL         = 'graph_auth.User'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -177,11 +177,11 @@ DEBUG_TOOLBAR_CONFIG = {
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
 INSTALLED_APPS = (
-    'neo4django.admin',
-    'neo4django.auth',
+    #'neo4django.admin',
+    'neo4django.graph_auth',
     'neo4django.contenttypes',
-    'django.contrib.admin',
-    'django.contrib.contenttypes',
+    #'django.contrib.admin',
+    #'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',    
@@ -203,6 +203,8 @@ CACHES = {
         'LOCATION': '/tmp/django_cache',
     }
 }
+
+
 
 
 # A sample logging configuration. The only tangible logging

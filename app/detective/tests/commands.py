@@ -1,7 +1,7 @@
 from django.core.management           import call_command
 from django.test                      import TestCase
 from StringIO                         import StringIO 
-from neo4django.auth.models           import User
+from neo4django.graph_auth.models           import User
 from app.detective.apps.common.models import Country
 import sys
  

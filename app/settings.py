@@ -78,26 +78,11 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
+    # Bower components
+    here('static/components'),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-)
-
-BOWER_COMPONENTS_ROOT = here('static')
-
-BOWER_INSTALLED_APPS = (
-    "angular-ui-bootstrap-bower#0.6.0",
-    "bootstrap#3.0.0",
-    "chroma-js#0.5.2",
-    "jquery.scrollTo#1.4.6",
-    "js-md5#1.0.3",
-    "modernizr#2.6.2",
-    "raphael#2.1.2",
-    "typeahead.js#0.9.3",
-    "underscore#1.5.2",
-    "unstable-angular-complete#1.1.5",
-    'git://github.com/kartograph/kartograph.js',
-    'jquery#1.9.0   '
 )
 
 # List of finder classes that know how to find static files in
@@ -106,7 +91,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
-    'djangobower.finders.BowerFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -188,7 +172,6 @@ INSTALLED_APPS = (
     # Compresses linked and inline JavaScript or CSS into a single cached file.    
     'compressor', 
     'tastypie',      
-    'djangobower', 
     # Internal
     'app.detective', 
     'app.detective.apps.common', 

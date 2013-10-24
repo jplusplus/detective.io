@@ -97,7 +97,7 @@ BOWER_INSTALLED_APPS = (
     "underscore#1.5.2",
     "unstable-angular-complete#1.1.5",
     'git://github.com/kartograph/kartograph.js',
-    'jquery#1.9.0'
+    'jquery#1.9.0   '
 )
 
 # List of finder classes that know how to find static files in
@@ -178,7 +178,7 @@ TASTYPIE_DEFAULT_FORMATS = ['json']
 
 INSTALLED_APPS = (
     #'neo4django.admin',
-    # 'neo4django.graph_auth',
+    'neo4django.graph_auth',
     'neo4django.contenttypes',
     #'django.contrib.admin',
     'django.contrib.contenttypes',

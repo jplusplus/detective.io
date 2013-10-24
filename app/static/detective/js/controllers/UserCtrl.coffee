@@ -106,9 +106,12 @@ class UserCtrl
         # succefull logout
         @http(config).then (response) =>  
             # Turn off loading mode
-            @scope.loading = false    
+            @scope.loading = false                
             # Interpret the respose                       
             if response.data? and response.data.success
+                # Redirect to login form
+                @location.path("/login")
+                # Update user data
                 @User.set
                     is_logged: false
                     is_staff : false

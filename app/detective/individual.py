@@ -112,6 +112,7 @@ class IndividualResource(ModelResource):
         # Return false if not needed
         return False
 
+    # TODO: Find another way!
     def dummy_class_to_ressource(self, klass):
         module = klass.__module__.split(".")[0:-1]
         module = ".".join(module + ["resources", klass.__name__ + "Resource"])
@@ -122,7 +123,7 @@ class IndividualResource(ModelResource):
         except ImportError:
             return None
 
-    def get_to_many_field(self, field, full=False):
+    def get_to_many_field(self, field, full=False):        
         if type(field.target_model) == str:
             target_model = import_class(field.target_model)
         else:
@@ -188,9 +189,12 @@ class IndividualResource(ModelResource):
     def hydrate(self, bundle):
         # Avoid neo4django conflict with Tastypie update policies
         if bundle.data.has_key("id"): bundle.data["id"] = None
+        # Avoid try to insert automatic relationship
+        for name in bundle.data:            
+            if name.endswith("_set"): bundle.data[name] = []
         return bundle
 
-    def hydrate_m2m(self, bundle):            
+    def hydrate_m2m(self, bundle): 
         # By default, every individual from staff are validated
         bundle.data["_status"] = 1*bundle.request.user.is_staff
         bundle.data["_author"] = [bundle.request.user.id]

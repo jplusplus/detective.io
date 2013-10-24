@@ -266,6 +266,17 @@
 				</div>
 
 			</form>
+
+ 			<div class="form-footer">
+ 				<div class="row">
+ 					<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+ 						<a ng-click="individual.save()" class="btn btn-primary left10" ng-disabled="individual.isSaved()">
+ 							<strong ng-if="!individual.isSaved()">Save</strong>
+ 							<span ng-if="individual.isSaved()">Saved</span>
+ 						</a>				
+ 					</div>	
+ 				</div>
+ 			</div>
 		</div>
 	</div>
 </div>

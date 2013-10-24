@@ -91,6 +91,7 @@ class ContributeCtrl
             , true            
             # The data change
             @scope.$watch (=>@fields), ()=>
+                return;
                 # Only if master is completed
                 unless _.isEmpty(@master)
                     changes = @getChanges()

@@ -181,7 +181,7 @@ INSTALLED_APPS = (
     'neo4django.graph_auth',
     'neo4django.contenttypes',
     #'django.contrib.admin',
-    #'django.contrib.contenttypes',
+    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',    

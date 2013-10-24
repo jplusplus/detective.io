@@ -117,5 +117,4 @@ class UserCtrl
                     is_staff : false
                     username : ''
 
-
 angular.module('detective').controller 'userCtrl', UserCtrl

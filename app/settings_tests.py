@@ -39,6 +39,7 @@ USE_TZ = True
 
 INSTALLED_APPS = (
     #'neo4django.admin',
+    'neo4django.graph_auth',
     'neo4django.contenttypes',
     #'django.contrib.admin',
     #'django.contrib.contenttypes',

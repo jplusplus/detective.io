@@ -12,6 +12,7 @@
 		"typeahead.js": "0.9.3",
 		"underscore": "1.5.2",
 		"unstable-angular-complete": "1.1.5",
-		"kartograph.js": "git://github.com/kartograph/kartograph.js"
+		"kartograph.js": "git://github.com/kartograph/kartograph.js",
+		"jquery": "1.9.1"
     }
 }

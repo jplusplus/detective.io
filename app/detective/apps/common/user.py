@@ -55,6 +55,12 @@ class UserResource(ModelResource):
         password    = data.get('password', '')
         remember_me = data.get('remember_me', False)
 
+        if username == '' or password == '':
+            return self.create_response(request, {
+                'success': False,
+                'error_message': 'Missing username or password',
+            })
+
         user = authenticate(username=username, password=password)
         if user:
             if user.is_active:

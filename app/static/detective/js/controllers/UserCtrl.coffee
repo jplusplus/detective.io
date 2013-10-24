@@ -3,9 +3,9 @@
 class UserCtrl
 
     # Injects dependancies    
-    @$inject : ["$scope", "$http", "$location", "$routeParams", "User", "Page"]
+    @$inject : ["$scope", "$http", "$location", "$routeParams", "User", "Page", "$rootElement"]
 
-    constructor: (@scope, @http, @location, @routeParams, @User, @Page)-> 
+    constructor: (@scope, @http, @location, @routeParams, @User, @Page, @rootElement)-> 
         # Set page title with no title-case
         switch @location.path()
             when "/signup"
@@ -38,7 +38,13 @@ class UserCtrl
         # Record the error
         @scope.error = error if error?        
 
-    login: =>        
+    login: (el)=>    
+        # Catch a bug with angular and browser autofill
+        # Open issue https://github.com/angular/angular.js/issues/1460
+        unless @scope.username? or @scope.password?            
+            @scope.username = @rootElement.find("[ng-model=username]").val()
+            @scope.password = @rootElement.find("[ng-model=password]").val()
+
         config = 
             method: "POST"
             url: "/api/common/v1/user/login/"

@@ -3,7 +3,6 @@ angular.module('detectiveServices').factory("Individual", [ '$resource', '$http'
         query: {
             method : 'GET', 
             isArray: true,
-            cache  : true,
             transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
                 data.objects
             ])

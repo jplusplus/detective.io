@@ -26,7 +26,7 @@
 					 			<td ng-if="isMono(field) && get(field.name)" colspan="2">
 					 				<div ng-if="isAddr(field)">
 							 			<strong>[[field.verbose_name]]</strong>						 			
-							 			<a class="map" ng-href="https://www.google.fr/maps/preview#!q=[[get(field.name)]]" target="_blank">
+							 			<a class="map" ng-href="https://www.google.fr/maps/?q=[[get(field.name)]]" target="_blank">
 							 				<span class="lab">
 							 					[[get(field.name)]]
 							 				</span>

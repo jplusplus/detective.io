@@ -34,11 +34,11 @@ class IndividualListCtrl
                 # Global loading mode
                 @Page.loading true        
                 # Get individual from database
-                @scope.individuals = @Individual.get params
-                # Turn off loading mode
-                , => @Page.loading false        
-        # Not found
-        , => @location.path "/404"
+                @scope.individuals = @Individual.get(params, => 
+                    # Turn off loading mode
+                    @Page.loading false        
+                # Not found
+                , => @location.path "/404")
         # Update page value
         @scope.$on "$routeUpdate", => @scope.page = @routeParams.page or 1
         # ──────────────────────────────────────────────────────────────────────

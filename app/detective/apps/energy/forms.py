@@ -1,4 +1,4 @@
-from app.detective.apps.common.models import *
+from app.detective.apps.common.models import Country
 from app.detective.apps.energy.models import *
 from app.detective.modelrules         import ModelRules
 from app.detective.neomatch           import Neomatch
@@ -21,6 +21,14 @@ def register_model_rules():
     rules.model(EnergyProduct).field("operator").add(is_visible=False)
     rules.model(EnergyProject).field("ended").add(is_visible=False)
     rules.model(EnergyProject).field("partner").add(is_visible=False)
+
+    rules.model(Country).add(person_set=Neomatch(
+        title="Persons from this country",
+        target_model=Person,
+        match="""
+            (root)-[:`person_has_nationality+`]-({select})
+        """
+    ))
 
     rules.model(Person).add(organizationkey_set=Neomatch(
         title="Organizations this person has a key position in",

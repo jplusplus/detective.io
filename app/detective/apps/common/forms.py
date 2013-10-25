@@ -1,22 +1,11 @@
-from app.detective.apps.common.models import *
+from app.detective.apps.common.models import Country
 from app.detective.modelrules         import ModelRules
-from app.detective.neomatch           import Neomatch
-from app.detective.models             import *
 
 def register_model_rules():
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # Disable editing on some model
     rules.model(Country).add(is_editable=False)
-
-    rules.model(Country).add(person_set=Neomatch(
-        title="Persons from this country",
-        target_model=Person,
-        match="""
-            (root)-[:`person_has_nationality+`]-({select})
-        """
-    ))
-
     # We can import this early to avoid bi-directional dependancies
     from app.detective.utils import get_registered_models, import_class
     # Get all registered models

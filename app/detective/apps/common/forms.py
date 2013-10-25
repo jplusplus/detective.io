@@ -8,49 +8,12 @@ def register_model_rules():
     rules = ModelRules()
     # Disable editing on some model
     rules.model(Country).add(is_editable=False)
-    # Records "invisible" fields 
-    rules.model(FundraisingRound).field("personal_payer").add(is_visible=False)
-    rules.model(Organization).field("adviser").add(is_visible=False)
-    rules.model(Organization).field("board_member").add(is_visible=False)
-    rules.model(Organization).field("company_register_link").add(is_visible=False)
-    rules.model(Organization).field("litigation_against").add(is_visible=False)
-    rules.model(Organization).field("monitoring_body").add(is_visible=False)
-    rules.model(Organization).field("partner").add(is_visible=False)
-    rules.model(Organization).field("website_url").add(is_visible=False)
-    rules.model(Person).field("previous_activity_in_organization").add(is_visible=False)
-    rules.model(Person).field("website_url").add(is_visible=False)
-    rules.model(Project).field("partner").add(is_visible=False)
-
 
     rules.model(Country).add(person_set=Neomatch(
         title="Persons from this country",
         target_model=Person,
         match="""
             (root)-[:`person_has_nationality+`]-({select})
-        """
-    ))
-
-    rules.model(Person).add(organizationkey_set=Neomatch(
-        title="Organizations this person has a key position in",
-        target_model=Organization,
-        match="""
-            (root)-[:`organization_has_key_person+`]-({select})
-        """
-    ))
-
-    rules.model(Person).add(organizationadviser_set=Neomatch(
-        title="Organizations this person is an adviser to",
-        target_model=Organization,
-        match="""
-            (root)-[:`organization_has_adviser+`]-({select})
-        """
-    ))
-
-    rules.model(Person).add(organizationboard_set=Neomatch(
-        title="Organizations this person is a board member of",
-        target_model=Organization,
-        match="""
-            (root)-[:`organization_has_board_member+`]-({select})
         """
     ))
 

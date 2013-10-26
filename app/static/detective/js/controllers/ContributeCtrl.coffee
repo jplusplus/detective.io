@@ -91,7 +91,6 @@ class ContributeCtrl
             , true            
             # The data change
             @scope.$watch (=>@fields), ()=>
-                return;
                 # Only if master is completed
                 unless _.isEmpty(@master)
                     changes = @getChanges()
@@ -137,9 +136,9 @@ class ContributeCtrl
             # Notice that the field is loading             
             @updating = _.extend @updating, data
             # Patch the current individual
-            @Individual.update params, data, (master)=>
+            @Individual.update params, data, (res)=>                
                 # Record master
-                @master = _.clone master
+                @master = _.extend @master, res
                 # Notices that we stop to load the field
                 @updating = _.omit(@updating, _.keys(data) ) 
 

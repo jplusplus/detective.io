@@ -18,6 +18,7 @@ from tastypie.exceptions                import Unauthorized
 from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
+import json
 import re
 
 
@@ -351,26 +352,52 @@ class IndividualResource(ModelResource):
         #self.is_authenticated(request)
         self.throttle_check(request)
 
+        model = self.get_model()        
         try:
-            node = self.get_queryset().get(id=kwargs["pk"])            
+            node = model.objects.select_related(depth=1).get(id=kwargs["pk"])            
         except ObjectDoesNotExist:
             raise Http404("Sorry, unkown node.")
 
-        data = request.GET.copy()
-        for field in request.GET:
+        # Copy data to allow dictionary resizing        
+        data = json.loads(request.body)
+        for field in json.loads(request.body):
             # If the field exists into our model
-            if hasattr(node, field):
-                value = data[field]
-                # Set the new value
-                setattr(node, field, value)
+            if hasattr(node, field) and not field.startswith("_"):
+                value = data[field]                
+                # Get the field
+                attr = getattr(node, field)
+                # It's a relationship
+                if hasattr(attr, "_rel"): 
+                    related_model = attr._rel.relationship.target_model                                                                                       
+                    # Clean the field to avoid duplicates            
+                    if attr.count() > 0: attr.clear()  
+                    # Load the json-formated relationships
+                    data[field] = rels = json.loads(value)
+                    # For each relation...
+                    for idx, rel in enumerate(rels):
+                        if type(rel) in [str, int]: rel = dict(id=rel)
+                        # We receied an object with an id
+                        if rel.has_key("id"):
+                            # Get the related object
+                            try:
+                                related = related_model.objects.get(id=rel["id"])       
+                                # Creates the relationship between the two objects
+                                attr.add(related)
+                            except ObjectDoesNotExist:
+                                del data[field][idx]
+                                # Too bad! Go to the next related object
+                                continue
+                # It's a literal value
+                else:
+                    # Set the new value
+                    setattr(node, field, value)
+                # Continue to not deleted the field
+                continue
             # Remove the field
-            else: del data[field]
-                
+            del data[field]
+
         if len(data) > 0: 
             # Save the node
-            node.save()
-        # Prepare the not for output
-        bundle = self.build_bundle(obj=node, request=request)
-        bundle = self.full_dehydrate(bundle, for_list=True)       
+            node.save()    
         return self.create_response(request, data)
         

@@ -9,8 +9,8 @@
 						<label class="btn btn-block btn-default btn-large">
 							<input type="radio" value="[[resource.name]]" ng-model="new.type" class="hidden" />
 							<div class="pull-left left10" ng-style="{color: strToColor(resource.name)}">
-								<i class="icon-check" ng-show="new.type == resource.name"></i> 
-								<i class="icon-check-empty" ng-hide="new.type == resource.name"></i> 
+								<i class="fa fa-check-square" ng-show="new.type == resource.name"></i> 
+								<i class="fa fa-square-o" ng-hide="new.type == resource.name"></i> 
 							</div>
 							[[resource.verbose_name]]
 						</label>
@@ -21,7 +21,7 @@
 				</div>
 				<form class="row kick-start form-inline" 
 					  ng-if="new.type == resource.name"
-					  ng-submit="addIndividual()">
+					  ng-submit="addIndividual().save()">
 					<label class="col-sm-3 control-label top10">
 						Name of the [[resource.verbose_name]]
 					</label>
@@ -37,7 +37,7 @@
 
 	<div class="container tr top20" ng-hide="showKickStart || !individuals.length">
 		<a class="btn btn-default btn-large" ng-click="showKickStart = true">
-			<i class="icon-plus right10"></i>
+			<i class="fa fa-plus right10"></i>
 			Add a new individual
 		</a>		
 	</div>
@@ -47,8 +47,9 @@
 		<div class="individual panel panel-default"		 		     
 			 ng-repeat="individual in individuals" 
 			 ng-class="{
-			 	loading: individual.loading,
-			 	closed : individual.isClosed
+			 	'loading': individual.loading,
+			 	'closed': individual.isClosed,
+			 	'saved': individual.isSaved()
 			}">
 			
 			<a scroll-to="600" ng-if="scrollIdx == $index"></a>
@@ -57,7 +58,7 @@
 				<div class="btns">	
 					<a class="left10" ng-if="individual.permalink()" ng-href="[[individual.permalink()]]">See in detail</a>
 					<button ng-click="individual.close()" class="btn btn-default left10">
-						<i class="icon-remove"></i>						
+						<i class="fa fa-times"></i>						
 					</button>
 				</div>		
 				<h3>
@@ -107,7 +108,7 @@
 				</div>
 
 				<div class="row field top20 form-group" 
-					 ng-class="{loading: individual.updating[field.name]}"
+					 ng-class="{loading: individual.updating[field.name] && !individual.loading}"
 				     ng-hide="!isAllowedType(field.type) || !individual.isVisible(field)"
 					 ng-repeat="field in individual.meta.fields track by $index">
 
@@ -125,16 +126,16 @@
 								</span>
 							</span>
 							<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
-								<i class="gray-darker icon-remove"></i>	
+								<i class="gray-darker fa fa-times"></i>	
 							</span>								
 							<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id">
-								<i class="gray-darker icon-edit"></i>	
+								<i class="gray-darker fa fa-edit"></i>	
 							</span>								
 						</div>
 
     					<button class="btn btn-default btn-sm" 
     					   ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
-    					   <i class="icon-plus right05"></i>
+    					   <i class="fa fa-plus right05"></i>
     						Create a new [[field.verbose_name]]
     					</button>
 
@@ -160,10 +161,10 @@
 									</span>
 								</span>
 								<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
-									<i class="gray-darker icon-remove"></i>	
+									<i class="gray-darker fa fa-times"></i>	
 								</span>								
 								<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable ">
-									<i class="gray-darker icon-edit"></i>	
+									<i class="gray-darker fa fa-edit"></i>	
 								</span>								
 							</div>
 
@@ -187,7 +188,7 @@
 
 						<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">
 							<button ng-click="addRelated(individual, field.name, field.related_model)" class="btn btn-default btn-sm">
-								<i class="icon-search right05"></i>
+								<i class="fa fa-search right05"></i>
 								Search
 								<span ng-if="individual.fields[field.name].length">another</span>
 								one
@@ -210,7 +211,7 @@
 					<div class="col-sm-4" ng-if="field.type == 'DateTimeField'">										
 						<div class="input-group">
 							<span class="input-group-addon">
-								<i class="gray-darker icon-calendar"></i>	
+								<i class="gray-darker fa fa-calendar"></i>	
 							</span>
 							<input type="text" 
 								   id="id_[[field.name]]" 
@@ -269,13 +270,19 @@
 
 			</form>
 
- 			<div class="form-footer">
+ 			<div class="form-footer panel-footer">
  				<div class="row">
- 					<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
- 						<a ng-click="individual.save()" class="btn btn-primary left10" ng-disabled="individual.isSaved()">
- 							<strong ng-if="!individual.isSaved()">Save</strong>
- 							<span ng-if="individual.isSaved()">Saved</span>
- 						</a>				
+ 					<div class="col-sm-offset-3 col-sm-9 top20 bottom20"> 						
+ 						<span ng-if="!individual.isSaved() && individual.loading">
+ 							Loading...
+ 						</span>
+ 						<span ng-if="!individual.isSaved() && !individual.loading">
+ 							Saving changes...
+ 						</span>
+ 						<span ng-if="individual.isSaved()">
+ 							<i class="fa fa-check right05"></i>
+ 							Changes saved!
+ 						</span>
  					</div>	
  				</div>
  			</div>

@@ -66,22 +66,22 @@
 					<a class="btn btn-default"
 					   ng-if="user.is_staff" 
 					   ng-href="/[[scope]]/contribute/?type=[[type]]&amp;id=[[individual.id]]">
-						<i class="icon-edit"></i>
+						<i class="fa fa-edit"></i>
 						Edit
 					</a>
 					<a class="btn btn-default"
 					   ng-if="user.is_staff"
 					   ng-click="deleteNode()">
-						<i class="icon-trash"></i>											
+						<i class="fa fa-trash-o"></i>											
 					</a>
 				</span>
 				<span class="btn-group">
 					<a class="btn btn-default" target="_blank" ng-href="/api/[[scope]]/v1/[[type]]/[[individual.id]]/?format=json">
-						<i class="icon-download"></i>
+						<i class="fa fa-download"></i>
 						JSON
 					</a>
 					<a class="btn btn-default" target="_blank" ng-href="/api/[[scope]]/v1/[[type]]/[[individual.id]]/?format=xml">
-						<i class="icon-code"></i>
+						<i class="fa fa-code"></i>
 						XML
 					</a>
 				</span>

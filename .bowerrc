@@ -3,6 +3,5 @@
 	"interactive": false,
 	"storage":{
 		"packages":"/app/tmp"
-	},
-	"tmp": "/app/tmp"
+	}
 }

@@ -122,9 +122,11 @@ class ContributeCtrl
                 val
             for prop of now   
                 val = clean(now[prop])
-                # Previous and new value are different
-                unless angular.equals clean(prev[prop]), val                    
-                    changes[prop] = val
+                # Remove resource method                
+                if typeof(val) isnt "function"
+                    # Previous and new value are different
+                    unless angular.equals clean(prev[prop]), val                    
+                        changes[prop] = val
             changes
 
         # Generates the permalink to this individual
@@ -208,7 +210,7 @@ class ContributeCtrl
                     fields.push(f) if @scope.isVisibleAdditional(@)(f)
             fields
         showField: (field)=> @moreFields.push field       
-        isSaved: => @fields.id? and angular.equals @master, @fields
+        isSaved: => @fields.id? and _.isEmpty( @getChanges() ) 
 
 
 

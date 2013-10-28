@@ -93,7 +93,7 @@ class ContributeCtrl
             @scope.$watch (=>@fields), @onChange, true
                       
         onChange: ()=>
-            return
+            return "not implemented yet!"
             # Individual not created yet
             return unless @fields.id?
             # Only if master is completed

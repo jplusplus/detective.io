@@ -26,6 +26,7 @@ class ContributeCtrl
         @scope.setNewIndividual    = @setNewIndividual
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
+        @scope.strToColor          = @filter("strToColor")
         @scope.modelScope          = (m)=> if @scope.resources? then @scope.resources[m.toLowerCase()].scope
 
         # ──────────────────────────────────────────────────────────────────────

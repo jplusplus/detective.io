@@ -69,23 +69,29 @@ class ContributeCtrl
     # IndividualForm embeded class
     # ──────────────────────────────────────────────────────────────────────────
     class IndividualForm
-        # True if the individual is loading
-        loading   : false
-        # List of field that are updating
-        updating  : {}
-        # Copy of the database's fields
-        master    : {}
-        # List of additional visible fields
-        moreFields: []
 
-        constructor: (scope, type="", fields={}, related_to=null)->
+        constructor: (scope, type="", fields={}, related_to=null)->            
+            # Class default attributes
+            # ──────────────────────────────────────────────────────────────────
+            # True if the individual is loading
+            @loading    = false
+            # List of field that are updating
+            @updating   = {}
+            # Copy of the database's fields
+            @master     = {}
+            # List of additional visible fields
+            @moreFields = []
+            # Class attributes from parameters
+            # ──────────────────────────────────────────────────────────────────
             @Individual = scope.Individual            
             @meta       = scope.resources[type] or {}
             @related_to = related_to
             @scope      = scope
             @type       = type.toLowerCase()            
             # Field param can be a number to load an individual
-            @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
+            @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)            
+            # Class watchers
+            # ──────────────────────────────────────────────────────────────────
             # Update meta when resources change
             @scope.$watch "resources", (value)=>
                 @meta = value[@type] if value[@type]?
@@ -116,9 +122,14 @@ class ContributeCtrl
                             delete val[pc]                    
                             # Apply splice only on array
                             val.splice(pc) if val instanceof Array  
+                            # Go to the next value
+                            continue
+                        # Create a new object that only contains an id
+                        val[pc] = id: val[pc].id
+                        
                 else if val == ""
                     # Empty input must be null
-                    val = null                            
+                    val = null        
                 val
             for prop of now   
                 val = clean(now[prop])
@@ -144,7 +155,9 @@ class ContributeCtrl
                 # Record master
                 @master = _.extend @master, res
                 # Notices that we stop to load the field
-                @updating = _.omit(@updating, _.keys(data) ) 
+                @updating = _.omit(@updating, _.keys(data)) 
+                # Prevent communications between forms
+                @updating = angular.copy @updating
 
         # Returns individual's scope
         getScope: => @meta.scope or @scope.routeParams.scope

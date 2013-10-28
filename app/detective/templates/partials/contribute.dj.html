@@ -108,7 +108,7 @@
 				</div>
 
 				<div class="row field top20 form-group" 
-					 ng-class="{loading: individual.updating[field.name]}"
+					 ng-class="{loading: individual.updating[field.name] && !individual.loading}"
 				     ng-hide="!isAllowedType(field.type) || !individual.isVisible(field)"
 					 ng-repeat="field in individual.meta.fields track by $index">
 

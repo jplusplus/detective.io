@@ -26,6 +26,7 @@ class ContributeCtrl
         @scope.setNewIndividual    = @setNewIndividual
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
+        @scope.strToColor          = @filter("strToColor")
         @scope.modelScope          = (m)=> if @scope.resources? then @scope.resources[m.toLowerCase()].scope
 
         # ──────────────────────────────────────────────────────────────────────
@@ -68,32 +69,37 @@ class ContributeCtrl
     # IndividualForm embeded class
     # ──────────────────────────────────────────────────────────────────────────
     class IndividualForm
-        # True if the individual is loading
-        loading   : false
-        # List of field that are updating
-        updating  : {}
-        # Copy of the database's fields
-        master    : {}
-        # List of additional visible fields
-        moreFields: []
 
-        constructor: (scope, type="", fields={}, related_to=null)->
+        constructor: (scope, type="", fields={}, related_to=null)->            
+            # Class default attributes
+            # ──────────────────────────────────────────────────────────────────
+            # True if the individual is loading
+            @loading    = false
+            # List of field that are updating
+            @updating   = {}
+            # Copy of the database's fields
+            @master     = {}
+            # List of additional visible fields
+            @moreFields = []
+            # Class attributes from parameters
+            # ──────────────────────────────────────────────────────────────────
             @Individual = scope.Individual            
             @meta       = scope.resources[type] or {}
             @related_to = related_to
             @scope      = scope
             @type       = type.toLowerCase()            
             # Field param can be a number to load an individual
-            @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
+            @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)            
+            # Class watchers
+            # ──────────────────────────────────────────────────────────────────
             # Update meta when resources change
             @scope.$watch "resources", (value)=>
                 @meta = value[@type] if value[@type]?
             , true            
-            # The data change
+            # The data changed
             @scope.$watch (=>@fields), @onChange, true
                       
         onChange: ()=>
-            return "not implemented yet!"
             # Individual not created yet
             return unless @fields.id?
             # Only if master is completed
@@ -116,15 +122,22 @@ class ContributeCtrl
                             delete val[pc]                    
                             # Apply splice only on array
                             val.splice(pc) if val instanceof Array  
+                            # Go to the next value
+                            continue
+                        # Create a new object that only contains an id
+                        val[pc] = id: val[pc].id
+                        
                 else if val == ""
                     # Empty input must be null
-                    val = null                            
+                    val = null        
                 val
             for prop of now   
                 val = clean(now[prop])
-                # Previous and new value are different
-                unless angular.equals clean(prev[prop]), val                    
-                    changes[prop] = val
+                # Remove resource method                
+                if typeof(val) isnt "function"
+                    # Previous and new value are different
+                    unless angular.equals clean(prev[prop]), val                    
+                        changes[prop] = val
             changes
 
         # Generates the permalink to this individual
@@ -142,7 +155,9 @@ class ContributeCtrl
                 # Record master
                 @master = _.extend @master, res
                 # Notices that we stop to load the field
-                @updating = _.omit(@updating, _.keys(data) ) 
+                @updating = _.omit(@updating, _.keys(data)) 
+                # Prevent communications between forms
+                @updating = angular.copy @updating
 
         # Returns individual's scope
         getScope: => @meta.scope or @scope.routeParams.scope
@@ -208,7 +223,7 @@ class ContributeCtrl
                     fields.push(f) if @scope.isVisibleAdditional(@)(f)
             fields
         showField: (field)=> @moreFields.push field       
-        isSaved: => @fields.id? and angular.equals @master, @fields
+        isSaved: => @fields.id? and _.isEmpty( @getChanges() ) 
 
 
 
@@ -273,7 +288,11 @@ class ContributeCtrl
                     q:     @scope.new.fields.name
                     scope: @scope.new.meta.scope
                 # Look for individual with the same name
-                form.similars = @Individual.query params
+                @Individual.query params, (d)=>
+                    # Remove the one we just created
+                    d = _.filter d, (e)=> e.id isnt form.fields.id
+                    # Similar entries
+                    form.similars = d
             # Reset the new field
             @scope.new = new IndividualForm(@scope)
             # Scroll to the individual
@@ -290,17 +309,26 @@ class ContributeCtrl
         individual = @scope.individuals[index]
         individual.loading  = true        
         individual.similars = []         
+        scope = @scope.resources[individual.type].scope
+        # Parameters of the individual to delete
+        toDelete =
+            type : individual.type
+            id   : individual.fields.id
+            scope: scope        
+        # Remove the node we're about to replace
+        # (no feedback)
+        @Individual.delete(toDelete)
         # Build parameters to load the individual from database        
         params = 
             type : individual.type
             id   : id
-            scope: @scope.resources[individual.type].scope
+            scope: scope
         # Then load the individual
-        individual.fields   = @Individual.get params, (master)->                 
+        individual.fields = @Individual.get params, (master)->                 
             # Disable loading state
             individual.loading = false
             # Record the database version of the individual
-            individual.master  = angular.copy master
+            individual.master  = angular.copy master            
     
     # Returns true if the given field accept more related element
     isAllowedOneMore: (field)=>       

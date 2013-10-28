@@ -76,7 +76,7 @@ class ContributeCtrl
         master    : {}
         # List of additional visible fields
         moreFields: []
-        
+
         constructor: (scope, type="", fields={}, related_to=null)->
             @Individual = scope.Individual            
             @meta       = scope.resources[type] or {}
@@ -90,16 +90,17 @@ class ContributeCtrl
                 @meta = value[@type] if value[@type]?
             , true            
             # The data change
-            @scope.$watch (=>@fields), ()=>
-                return;
-                # Only if master is completed
-                unless _.isEmpty(@master)
-                    changes = @getChanges()
-                    # Looks for the differences and update the db if needed             
-                    @update(changes) unless _.isEmpty(changes)
-                        
-            , true
+            @scope.$watch (=>@fields), @onChange, true
                       
+        onChange: ()=>
+            return "not implemented yet!"
+            # Individual not created yet
+            return unless @fields.id?
+            # Only if master is completed
+            unless _.isEmpty(@master) or @loading 
+                changes = @getChanges()
+                # Looks for the differences and update the db if needed             
+                @update(changes) unless _.isEmpty(changes)                                    
 
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
@@ -137,9 +138,9 @@ class ContributeCtrl
             # Notice that the field is loading             
             @updating = _.extend @updating, data
             # Patch the current individual
-            @Individual.update params, data, (master)=>
+            @Individual.update params, data, (res)=>                
                 # Record master
-                @master = _.clone master
+                @master = _.extend @master, res
                 # Notices that we stop to load the field
                 @updating = _.omit(@updating, _.keys(data) ) 
 
@@ -188,8 +189,7 @@ class ContributeCtrl
 
         # True if the given field is visible
         isVisible: (field)=>  
-            return false unless field? and field.rules?    
-                    
+            return false unless field? and field.rules?                        
             value = @fields[field.name]
             # This field is always visible
             field.rules.is_visible or 
@@ -279,7 +279,7 @@ class ContributeCtrl
             # Scroll to the individual
             @scope.scrollIdx = @scope.individuals.length if scroll
             # Add the individual to the objects list
-            @scope.individuals.push form
+            @scope.individuals.push form     
             # Return the new form
             form
 
@@ -358,7 +358,7 @@ class ContributeCtrl
         # Looks for individual that match with the given one
         _.each @scope.individuals, (i, idx)=> index = idx if i == individual
         # Update the scrollIdx
-        @scope.scrollIdx = index    
+        @scope.scrollIdx = index
 
     # Closure filter
     isVisibleAdditional: (individual)=>

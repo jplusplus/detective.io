@@ -20,8 +20,8 @@ angular.module('detectiveServices').factory("Individual", [ '$resource', '$http'
             method : 'DELETE', 
         },
         update: {
-            url:'/api/:scope/v1/:type/:id/?',            
-            method : 'PATCH', 
+            url:'/api/:scope/v1/:type/:id/patch/?',            
+            method : 'POST', 
             isArray: false,
             paramDefaults: {
                 scope: "common"

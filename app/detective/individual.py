@@ -5,6 +5,7 @@ from app.detective.forms                import register_model_rules
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class
 from django.conf.urls                   import url
+from django.core.exceptions             import ObjectDoesNotExist
 from django.core.paginator              import Paginator, InvalidPage
 from django.db.models.query             import QuerySet
 from django.http                        import Http404
@@ -13,10 +14,11 @@ from tastypie                           import fields
 from tastypie.authentication            import SessionAuthentication
 from tastypie.authorization             import Authorization
 from tastypie.constants                 import ALL
+from tastypie.exceptions                import Unauthorized
 from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
-from tastypie.exceptions                import Unauthorized
+import json
 import re
 
 
@@ -266,7 +268,9 @@ class IndividualResource(ModelResource):
         return [
             url(r"^(?P<resource_name>%s)/search%s$" % params, self.wrap_view('get_search'), name="api_get_search"),
             url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
         ]
+
 
     def get_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
@@ -342,3 +346,58 @@ class IndividualResource(ModelResource):
 
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
+
+    def get_patch(self, request, **kwargs):
+        self.method_check(request, allowed=['post'])
+        #self.is_authenticated(request)
+        self.throttle_check(request)
+
+        model = self.get_model()        
+        try:
+            node = model.objects.select_related(depth=1).get(id=kwargs["pk"])            
+        except ObjectDoesNotExist:
+            raise Http404("Sorry, unkown node.")
+
+        # Copy data to allow dictionary resizing        
+        data = json.loads(request.body)
+        for field in json.loads(request.body):
+            # If the field exists into our model
+            if hasattr(node, field) and not field.startswith("_"):
+                value = data[field]                
+                # Get the field
+                attr = getattr(node, field)
+                # It's a relationship
+                if hasattr(attr, "_rel"): 
+                    related_model = attr._rel.relationship.target_model                                                                                       
+                    # Clean the field to avoid duplicates            
+                    if attr.count() > 0: attr.clear()  
+                    # Load the json-formated relationships
+                    data[field] = rels = json.loads(value)
+                    # For each relation...
+                    for idx, rel in enumerate(rels):
+                        if type(rel) in [str, int]: rel = dict(id=rel)
+                        # We receied an object with an id
+                        if rel.has_key("id"):
+                            # Get the related object
+                            try:
+                                related = related_model.objects.get(id=rel["id"])       
+                                # Creates the relationship between the two objects
+                                attr.add(related)
+                            except ObjectDoesNotExist:
+                                del data[field][idx]
+                                # Too bad! Go to the next related object
+                                continue
+                # It's a literal value
+                else:
+                    # Set the new value
+                    setattr(node, field, value)
+                # Continue to not deleted the field
+                continue
+            # Remove the field
+            del data[field]
+
+        if len(data) > 0: 
+            # Save the node
+            node.save()    
+        return self.create_response(request, data)
+        

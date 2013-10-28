@@ -21,7 +21,7 @@
 				</div>
 				<form class="row kick-start form-inline" 
 					  ng-if="new.type == resource.name"
-					  ng-submit="addIndividual()">
+					  ng-submit="addIndividual().save()">
 					<label class="col-sm-3 control-label top10">
 						Name of the [[resource.verbose_name]]
 					</label>

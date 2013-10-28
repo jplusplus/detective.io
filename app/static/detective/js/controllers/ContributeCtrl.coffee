@@ -89,11 +89,10 @@ class ContributeCtrl
             @scope.$watch "resources", (value)=>
                 @meta = value[@type] if value[@type]?
             , true            
-            # The data change
+            # The data changed
             @scope.$watch (=>@fields), @onChange, true
                       
         onChange: ()=>
-            return "not implemented yet!"
             # Individual not created yet
             return unless @fields.id?
             # Only if master is completed
@@ -273,7 +272,11 @@ class ContributeCtrl
                     q:     @scope.new.fields.name
                     scope: @scope.new.meta.scope
                 # Look for individual with the same name
-                form.similars = @Individual.query params
+                @Individual.query params, (d)=>
+                    # Remove the one we just created
+                    d = _.filter d, (e)=> e.id isnt form.fields.id
+                    # Similar entries
+                    form.similars = d
             # Reset the new field
             @scope.new = new IndividualForm(@scope)
             # Scroll to the individual
@@ -290,17 +293,26 @@ class ContributeCtrl
         individual = @scope.individuals[index]
         individual.loading  = true        
         individual.similars = []         
+        scope = @scope.resources[individual.type].scope
+        # Parameters of the individual to delete
+        toDelete =
+            type : individual.type
+            id   : individual.fields.id
+            scope: scope        
+        # Remove the node we're about to replace
+        # (no feedback)
+        @Individual.delete(toDelete)
         # Build parameters to load the individual from database        
         params = 
             type : individual.type
             id   : id
-            scope: @scope.resources[individual.type].scope
+            scope: scope
         # Then load the individual
-        individual.fields   = @Individual.get params, (master)->                 
+        individual.fields = @Individual.get params, (master)->                 
             # Disable loading state
             individual.loading = false
             # Record the database version of the individual
-            individual.master  = angular.copy master
+            individual.master  = angular.copy master            
     
     # Returns true if the given field accept more related element
     isAllowedOneMore: (field)=>       

@@ -5,7 +5,7 @@ here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-TASTYPIE_FULL_DEBUG = False
+TASTYPIE_FULL_DEBUG = DEBUG
 
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com')

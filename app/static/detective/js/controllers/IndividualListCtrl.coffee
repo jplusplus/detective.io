@@ -51,12 +51,15 @@ class IndividualListCtrl
     getVerbose: =>        
         # Get meta information for this type
         @Summary.get id: "forms", (data)=> 
-            @scope.meta = meta = data[@scope.type.toLowerCase()]
-            if meta?
-                @scope.verbose_name        = meta.verbose_name
-                @scope.verbose_name_plural = meta.verbose_name_plural        
-                # Set page's title
-                @Page.title meta.verbose_name_plural            
+            # Avoid set the wrong title
+            # (when the controller is destroyed)
+            unless @scope.$$destroyed
+                @scope.meta = meta = data[@scope.type.toLowerCase()]
+                if meta? 
+                    @scope.verbose_name        = meta.verbose_name
+                    @scope.verbose_name_plural = meta.verbose_name_plural        
+                    # Set page's title
+                    @Page.title meta.verbose_name_plural            
     # List parameters
     getParams: =>        
         type    : @scope.type

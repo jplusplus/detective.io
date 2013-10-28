@@ -30,11 +30,14 @@ class IndividualSingleCtrl
             id   : @scope.id
         # Get individual from database
         @Individual.get params, (data)=> 
-            @scope.individual = data
-            # Set page's title
-            @Page.title @filter("individualPreview")(data)       
-             # Global loading off 
-            Page.loading false
+            # Avoid set the wrong title
+            # (when the controller is destroyed)
+            unless @scope.$$destroyed
+                @scope.individual = data
+                # Set page's title
+                @Page.title @filter("individualPreview")(data)      
+                 # Global loading off 
+                Page.loading false        
         # Not found
         , => @location.path "/404"
         # Get meta information for this type

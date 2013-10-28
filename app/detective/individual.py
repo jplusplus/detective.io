@@ -356,9 +356,11 @@ class IndividualResource(ModelResource):
         except ObjectDoesNotExist:
             raise Http404("Sorry, unkown node.")
 
-        # Copy data to allow dictionary resizing        
-        data = json.loads(request.body)
-        for field in json.loads(request.body):
+        # Parse only body string
+        body = json.loads(request.body) if type(request.body) is str else request.body
+        # Copy data to allow dictionary resizing                
+        data = body.copy()
+        for field in body:
             # If the field exists into our model
             if hasattr(node, field) and not field.startswith("_"):
                 value = data[field]                
@@ -370,7 +372,7 @@ class IndividualResource(ModelResource):
                     # Clean the field to avoid duplicates            
                     if attr.count() > 0: attr.clear()  
                     # Load the json-formated relationships
-                    data[field] = rels = json.loads(value)
+                    data[field] = rels = value
                     # For each relation...
                     for idx, rel in enumerate(rels):
                         if type(rel) in [str, int]: rel = dict(id=rel)

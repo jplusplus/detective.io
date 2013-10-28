@@ -189,8 +189,6 @@ class IndividualResource(ModelResource):
         return bundle
 
     def hydrate(self, bundle):
-        # Avoid neo4django conflict with Tastypie update policies
-        if bundle.data.has_key("id"): bundle.data["id"] = None
         # Avoid try to insert automatic relationship
         for name in bundle.data:            
             if name.endswith("_set"): bundle.data[name] = []

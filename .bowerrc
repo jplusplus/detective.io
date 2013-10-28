@@ -1,7 +1,4 @@
 {
 	"directory" : "app/static/components",
-	"interactive": false,
-	"storage":{
-		"packages":"/app/tmp"
-	}
+	"interactive": false
 }

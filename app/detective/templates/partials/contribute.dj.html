@@ -47,8 +47,9 @@
 		<div class="individual panel panel-default"		 		     
 			 ng-repeat="individual in individuals" 
 			 ng-class="{
-			 	loading: individual.loading,
-			 	closed : individual.isClosed
+			 	'loading': individual.loading,
+			 	'closed': individual.isClosed,
+			 	'saved': individual.isSaved()
 			}">
 			
 			<a scroll-to="600" ng-if="scrollIdx == $index"></a>
@@ -269,13 +270,19 @@
 
 			</form>
 
- 			<div class="form-footer">
+ 			<div class="form-footer panel-footer">
  				<div class="row">
- 					<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
- 						<a ng-click="individual.save()" class="btn btn-primary left10" ng-disabled="individual.isSaved()">
- 							<strong ng-if="!individual.isSaved()">Save</strong>
- 							<span ng-if="individual.isSaved()">Saved</span>
- 						</a>				
+ 					<div class="col-sm-offset-3 col-sm-9 top20 bottom20"> 						
+ 						<span ng-if="!individual.isSaved() && individual.loading">
+ 							Loading...
+ 						</span>
+ 						<span ng-if="!individual.isSaved() && !individual.loading">
+ 							Saving modifications...
+ 						</span>
+ 						<span ng-if="individual.isSaved()">
+ 							<i class="icon-check right05"></i>
+ 							Modifications saved!
+ 						</span>
  					</div>	
  				</div>
  			</div>

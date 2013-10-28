@@ -4,7 +4,7 @@
 @import-once 'animations.less';
 @import-once 'bootstrap-overload.less';
 
-@import  '//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css';
+@import  '//netdna.bootstrapcdn.com/font-awesome/3.0.1/css/font-awesome.css';
 
 @zindex-context   : 10;
 @zindex-content   : @zindex-context+100;
@@ -409,6 +409,12 @@ header {
 			background:#fefefe;
 			border-top:1px solid #eee;
 		}		
+
+		.saved .form-footer {	
+		 	color: @panel-success-text;
+			background: @panel-success-heading-bg;
+			border-color: darken(@panel-success-border, 5);
+		}
 	}
 
 }

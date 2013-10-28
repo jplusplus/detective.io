@@ -37,7 +37,7 @@ class IndividualSingleCtrl
                 # Set page's title
                 @Page.title @filter("individualPreview")(data)      
                  # Global loading off 
-                Page.loading false        
+                Page.loading false
         # Not found
         , => @location.path "/404"
         # Get meta information for this type

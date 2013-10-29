@@ -27,7 +27,6 @@ venv
 # Generated files
 app/static/CACHE
 app/static/components
-app/media
 staticfiles
 lib
 node_modules

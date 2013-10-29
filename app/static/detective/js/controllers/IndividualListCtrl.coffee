@@ -18,14 +18,16 @@ class IndividualListCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  
         # Read route params
-        @scope.scope       = @routeParams.scope
-        @scope.type        = @routeParams.type or ""
-        @scope.page        = @routeParams.page or 1
-        @scope.limit       = 20
-        @scope.individuals = {}                 
+        @scope.scope              = @routeParams.scope
+        @scope.type               = @routeParams.type or ""
+        @scope.page               = @routeParams.page or 1
+        @scope.limit              = 20
+        @scope.individuals        = {}
+        @scope.selectedIndividual = {}             
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────  
+        @scope.$watch "selectedIndividual", @selectIndividual, true
         @scope.$watch "page", =>
             # Get parameters from context method (could be overloaded)   
             params = @getParams()
@@ -45,6 +47,11 @@ class IndividualListCtrl
         # Page setup
         # ──────────────────────────────────────────────────────────────────────  
         @getVerbose()
+
+    selectIndividual: (val, old)=>
+        # Single entity selected
+        if val.id?
+            @location.path "/#{@scope.scope}/#{@scope.type.toLowerCase()}/#{val.id}"                
 
     # Verbose informations
     # (loaded contexualy)

@@ -57,16 +57,21 @@ class IndividualListCtrl
     # (loaded contexualy)
     getVerbose: =>        
         # Get meta information for this type
-        @Summary.get id: "forms", (data)=> 
+        @Summary.get id: "forms", (data)=>         
             # Avoid set the wrong title
             # (when the controller is destroyed)
             unless @scope.$$destroyed
                 @scope.meta = meta = data[@scope.type.toLowerCase()]
                 if meta? 
+                    # Redirect "unlistable" resource
+                    return @location.path "/#{@scope.scope}" unless meta.rules.is_searchable
                     @scope.verbose_name        = meta.verbose_name
                     @scope.verbose_name_plural = meta.verbose_name_plural        
                     # Set page's title
                     @Page.title meta.verbose_name_plural            
+                # Unkown type
+                else @location.path "/404"
+
     # List parameters
     getParams: =>        
         type    : @scope.type

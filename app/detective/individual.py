@@ -165,7 +165,7 @@ class IndividualResource(ModelResource):
 
     def alter_detail_data_to_serialize(self, request, bundle):
         # Show additional field following the model's rules
-        rules = register_model_rules().model(self.get_model()).all()
+        rules = register_model_rules().model(self.get_model()).all()        
         # All additional relationships        
         for key in rules:
             # Filter rules to keep only Neomatch
@@ -174,7 +174,21 @@ class IndividualResource(ModelResource):
         
         return bundle
 
+
     def dehydrate(self, bundle):
+        # Show additional field following the model's rules
+        rules = register_model_rules().model( self.get_model() )
+        # Get the output transformation for this model
+        transform = rules.get("transform")
+        # This is just a string
+        # For complex formating use http://docs.python.org/2/library/string.html#formatspec
+        if type(transform) is str: 
+            transform = transform.format(**bundle.data)
+        # We can also receive a function
+        elif callable(transform): 
+            transform = transform(bundle.data)
+
+        bundle.data["_transform"] = transform or getattr(bundle.data, 'name', None)
         # Control that every relationship fields are list        
         # and that we didn't send hidden field
         for field in bundle.data:
@@ -185,7 +199,16 @@ class IndividualResource(ModelResource):
                 # Wrong type given, relationship field must ouput a list
                 if type(bundle.data[field]) is not list:
                     # We remove the field from the ouput
-                    bundle.data[field] = []         
+                    bundle.data[field] = []          
+            # Get the output transformation for this field
+            transform = rules.field(field).get("transform")
+            # This is just a string
+            # For complex formating use http://docs.python.org/2/library/string.html#formatspec
+            if type(transform) is str: 
+                bundle.data[field] = transform.format(**bundle.data)
+            # We can also receive a function
+            elif callable(transform): 
+                bundle.data[field] = transform(bundle.data, field)
         return bundle
 
     def hydrate(self, bundle):

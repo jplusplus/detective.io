@@ -87,15 +87,17 @@
 				</span>
 			</div>
 
-			<h3 ng-show="hasRels()">Jump to...</h3>
-			<div class="well padding10" ng-show="hasRels()">
-				<ul class="nav nav-pills nav-stacked">
-				 	<li ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)">
-				 		<a ng-click="scrollTo('rels-' + field.name)">
-				 			[[field.verbose_name]]
-				 		</a>
-				 	</li>
-				</ul>
+			<div ng-show="hasRels()">
+				<h3>Jump to...</h3>
+				<div class="well padding10">
+					<ul class="nav nav-pills nav-stacked">
+					 	<li ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)">
+					 		<a ng-click="scrollTo('rels-' + field.name)">
+					 			[[field.verbose_name]]
+					 		</a>
+					 	</li>
+					</ul>
+				</div>
 			</div>
 		</div>
 	</div>

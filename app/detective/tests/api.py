@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from app.detective.apps.common.models import Organization, Country
-from app.detective.apps.energy.models import EnergyProject
+from app.detective.apps.common.models import Country
+from app.detective.apps.energy.models import Organization,EnergyProject
 from django.core.exceptions           import ObjectDoesNotExist
-from neo4django.graph_auth.models           import User
+from neo4django.graph_auth.models     import User
 from tastypie.test                    import ResourceTestCase, TestApiClient
 import json
 
@@ -162,7 +162,7 @@ class ApiTestCase(ResourceTestCase):
         )
 
     def test_search_organization(self):
-        resp = self.api_client.get('/api/common/v1/organization/search/?q=Journalism', format='json', authentication=self.get_credentials())  
+        resp = self.api_client.get('/api/energy/v1/organization/search/?q=Journalism', format='json', authentication=self.get_credentials())  
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -170,7 +170,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertGreater( len(data.items()), 1 )
 
     def test_search_organization_wrong_page(self):
-        resp = self.api_client.get('/api/common/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_credentials())  
+        resp = self.api_client.get('/api/energy/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_credentials())  
         self.assertHttpNotFound(resp)
 
     def test_cypher_detail(self):
@@ -213,7 +213,7 @@ class ApiTestCase(ResourceTestCase):
         # Parse data to check the number of result
         data = json.loads(resp.content)
         # As many descriptors as models
-        self.assertEqual( 13, len(data.items()) )
+        self.assertEqual( 11, len(data.items()) )
 
     def test_types_summary(self):
         resp = self.api_client.get('/api/common/v1/summary/types/', format='json', authentication=self.get_credentials())  

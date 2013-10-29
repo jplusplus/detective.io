@@ -8,7 +8,8 @@
 
 @zindex-context   : 10;
 @zindex-content   : @zindex-context+100;
-@zindex-loading   : @zindex-context+100;
+@zindex-tooltips  : @zindex-content+100;
+@zindex-loading   : @zindex-tooltips+100;
 @zindex-breadcrumb: @zindex-loading+100;
 @zindex-header    : @zindex-breadcrumb+100;
 
@@ -504,3 +505,59 @@ header {
 	}
 }
 
+
+.individual-card.panel {
+	margin-bottom:0px;
+	position:relative;
+	
+	.details {
+		z-index:@zindex-tooltips;
+		position:absolute;
+		display:none;
+		left:50%;
+		top:105%;
+		margin-left:300px/-2px;
+		background:#eee;		
+  		border: rgba(0,0,0,.05) 1px solid;
+  		border-bottom-width:2px;
+  		border-top:0;
+  		width:300px;
+  		font-size:12px;
+  		.box-shadow(0 0 10px 0 rgba(0,0,0,.1));
+  		
+
+  		&:before {
+  			content:"";  			
+  			display:block;
+  			position:absolute;
+  			left:50%;
+  			bottom:100%;
+  			margin-bottom:-1px;
+  			margin-left:-10px;
+  			border:10px transparent solid;
+  			border-bottom-color:#F9F9F9;
+  		}
+
+  		&:after {
+  			content:"";
+  			width:150px;
+  			margin-left:150px/-2px;
+  			height:10px;
+  			display:block;
+  			position:absolute;
+  			left:50%;
+  			bottom:100%;
+  		}
+  		
+  		table {
+  			margin:0;
+  			width:300px;
+  		}
+	}
+
+	&:hover {
+		.details {
+			display:block;
+		}
+	}
+}

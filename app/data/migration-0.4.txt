@@ -1,0 +1,6 @@
+START root=node(*)
+WHERE HAS(root.model_name)
+AND root.name =~ '^common.*'
+AND root.model_name <> 'Country'
+SET root.app_label = 'energy', root.name = 'energy:' + root.model_name
+RETURN root, root.name, root.model_name, root.app_label;

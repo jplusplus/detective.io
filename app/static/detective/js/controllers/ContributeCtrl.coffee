@@ -78,7 +78,7 @@ class ContributeCtrl
             # List of field that are updating
             @updating   = {}
             # Copy of the database's fields
-            @master     = {}
+            @master     = angular.copy fields,
             # List of additional visible fields
             @moreFields = []
             # Class attributes from parameters
@@ -91,7 +91,7 @@ class ContributeCtrl
             # Field param can be a number to load an individual
             @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)            
             # Class watchers
-            # ──────────────────────────────────────────────────────────────────
+            # ──────────────────────────────────────────────────────────────────                        
             # Update meta when resources change
             @scope.$watch "resources", (value)=>
                 @meta = value[@type] if value[@type]?
@@ -104,7 +104,7 @@ class ContributeCtrl
             return unless @fields.id?
             # Only if master is completed
             unless _.isEmpty(@master) or @loading 
-                changes = @getChanges()
+                changes = @getChanges()                
                 # Looks for the differences and update the db if needed             
                 @update(changes) unless _.isEmpty(changes)                                    
 
@@ -151,7 +151,7 @@ class ContributeCtrl
             # Notice that the field is loading             
             @updating = _.extend @updating, data
             # Patch the current individual
-            @Individual.update params, data, (res)=>                
+            @Individual.update params, data, (res)=> 
                 # Record master
                 @master = _.extend @master, res
                 # Notices that we stop to load the field
@@ -175,7 +175,7 @@ class ContributeCtrl
                     # Loading mode off
                     @loading = false
                     # Record master
-                    @master = _.clone master
+                    @master = angular.copy master
                     # Clean errors
                     delete @error_message
                 # Handles error
@@ -274,7 +274,7 @@ class ContributeCtrl
 
 
     # When user submit a kick-start individual form
-    addIndividual: (scroll=true, form=null)=>
+    addIndividual: (scroll=true, form=null)=>        
         unless @scope.new.fields.name is ""   
             # Disable kickStart form
             @scope.showKickStart = false
@@ -361,11 +361,13 @@ class ContributeCtrl
         related? and not related instanceof @Individual or
         (related.name? and related.name isnt "" and not related.id?)
 
-    setNewIndividual: (master, type, parent, parentField, index=-1)=>                
+    setNewIndividual: (fields, type, parent, parentField, index=-1)=>          
+        # Avoid object sharing
+        fields = angular.copy(fields)
         # Ensure that the type isn't title-formatted
         type = type.toLowerCase()
         # Create the new entry obj
-        form = new IndividualForm(@scope, type, master, parent)      
+        form = new IndividualForm(@scope, type, fields, parent)      
         # Create for the given parent field
         parent.fields[parentField] = [] unless parent.fields[parentField]?
         # Individual not found
@@ -373,7 +375,6 @@ class ContributeCtrl
             # Attachs the new element to its parent            
             parent.fields[parentField].push form.fields
         else
-            delete @master
             # Update the new element with an Individual class            
             parent.fields[parentField][index] = form.fields
         # Add it to the list using @scope.new

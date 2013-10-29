@@ -13,7 +13,7 @@
 		</h5>
 		<div class="details">
 			<table class="table table-striped table-condensed">			
-				<tr ng-repeat="field in meta.fields|filter:isLiteral" ng-show="get(field.name) && field.name != 'name'">
+				<tr ng-repeat="field in meta.fields|filter:isLiteral|filter:hasValue">
 					<td>
 						[[field.verbose_name]]						
 					</td>

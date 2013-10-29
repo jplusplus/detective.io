@@ -26,7 +26,8 @@ angular.module('detective').directive "card", ['Summary', (Summary)->
                 "URLField",
                 "IntegerField"
             ].indexOf(field.type) > -1    
-        scope.isString = (t)=> ["CharField", "URLField"].indexOf(t) > -1        
+        scope.isString = (t)=> ["CharField", "URLField"].indexOf(t) > -1       
+        scope.hasValue = (f)=> f.name != 'name' and scope.get(f.name)
         Summary.get {id:'forms'}, (d)->         
             scope.meta = d[scope.type]
 ]

@@ -273,13 +273,13 @@
  			<div class="form-footer panel-footer">
  				<div class="row">
  					<div class="col-sm-offset-3 col-sm-9 top20 bottom20"> 						
- 						<span ng-if="!individual.isSaved() && individual.loading">
+ 						<span ng-if="individual.loading">
  							Loading...
  						</span>
  						<span ng-if="!individual.isSaved() && !individual.loading">
  							Saving changes...
  						</span>
- 						<span ng-if="individual.isSaved()">
+ 						<span ng-if="individual.isSaved() && !individual.loading">
  							<i class="fa fa-check right05"></i>
  							Changes saved!
  						</span>

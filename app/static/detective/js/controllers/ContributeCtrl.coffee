@@ -133,8 +133,9 @@ class ContributeCtrl
                 val
             for prop of now   
                 val = clean(now[prop])
-                # Remove resource method                
-                if typeof(val) isnt "function"
+                # Remove resource methods
+                # and angular properties (that start with $)
+                if typeof(val) isnt "function" and prop.indexOf("$") != 0
                     # Previous and new value are different
                     unless angular.equals clean(prev[prop]), val                    
                         changes[prop] = val

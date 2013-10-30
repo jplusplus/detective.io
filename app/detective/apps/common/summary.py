@@ -427,27 +427,27 @@ class SummaryResource(Resource):
                 'relationship': [
                     {
                         "name": "fundraising_round_has_personal_payer+",
-                        "subject": "common:FundraisingRound",
+                        "subject": "energy:FundraisingRound",
                         "label": "was financed by"
                     },
                     {
                         "name": "fundraising_round_has_payer+",
-                        "subject": "common:FundraisingRound",
+                        "subject": "energy:FundraisingRound",
                         "label": "was financed by"
                     },
                     {
                         "name": "person_has_nationality+",
-                        "subject": "common:Person",
+                        "subject": "energy:Person",
                         "label": "is from"
                     },
                     {
                         "name": "person_has_activity_in_organization+",
-                        "subject": "common:Person",
+                        "subject": "energy:Person",
                         "label": "has activity in"
                     },
                     {
                         "name": "person_has_previous_activity_in_organization+",
-                        "subject": "common:Person",
+                        "subject": "energy:Person",
                         "label": "had previous activity in"
                     },
                     {
@@ -457,7 +457,7 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "commentary_has_author+",
-                        "subject": "common:Commentary",
+                        "subject": "energy:Commentary",
                         "label": "was written by"
                     },
                     {
@@ -477,42 +477,42 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "organization_has_adviser+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "is advised by"
                     },
                     {
                         "name": "organization_has_key_person+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "is staffed by"
                     },
                     {
                         "name": "organization_has_partner+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "has a partnership with"
                     },
                     {
                         "name": "organization_has_fundraising_round+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "was financed by"
                     },
                     {
                         "name": "organization_has_monitoring_body+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "is monitored by"
                     },
                     {
                         "name": "organization_has_litigation_against+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "has a litigation against"
                     },
                     {
                         "name": "organization_has_revenue+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "has revenue of"
                     },
                     {
                         "name": "organization_has_board_member+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "has board of directors with"
                     },
                     {
@@ -537,7 +537,7 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "distribution_has_activity_in_country+",
-                        "subject": "common:Distribution",
+                        "subject": "energy:Distribution",
                         "label": "has activity in"
                     },
                     {

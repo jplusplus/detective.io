@@ -436,9 +436,14 @@ class SummaryResource(Resource):
                         "label": "was financed by"
                     },
                     {
-                        "name": "person_has_nationality+",
+                        "name": "person_has_educated_in+",
                         "subject": "energy:Person",
-                        "label": "is from"
+                        "label": "was educated in"
+                    },
+                    {
+                        "name": "person_has_based_in+",
+                        "subject": "energy:Person",
+                        "label": "is based in"
                     },
                     {
                         "name": "person_has_activity_in_organization+",

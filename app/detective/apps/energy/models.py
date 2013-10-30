@@ -46,7 +46,8 @@ class Person(models.NodeModel):
 	image = models.URLProperty(null=True,help_text=u'The URL (starting with http://) where the image is hosted.',verbose_name=u'Image URL')
 	_author = models.Relationship(User,null=True,rel_type='person_person_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 	previous_activity_in_organization = models.Relationship("Organization",null=True,rel_type='person_has_previous_activity_in_organization+',help_text=u'Has the entity been active in a specific Organization previsously?',verbose_name=u'Previous activity in')
-	nationality = models.Relationship(Country,null=True,rel_type='person_has_nationality+',help_text=u'The list of nationalities (as appear on his/her passport) of a Person.',verbose_name=u'Nationality')
+	educated_in  = models.Relationship(Country,null=True,rel_type='person_has_educated_in+',help_text=u'The list of nationalities (as appear on his/her passport) of a Person.',verbose_name=u'Nationality')
+	based_in  = models.Relationship(Country,null=True,rel_type='person_has_based_in+',help_text=u'The list of nationalities (as appear on his/her passport) of a Person.',verbose_name=u'Nationality')
 	activity_in_organization = models.Relationship("Organization",null=True,rel_type='person_has_activity_in_organization+',help_text=u'The Organization(s) this Person is active in.',verbose_name=u'Activity in Organizations')
 
 	class Meta:

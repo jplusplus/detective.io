@@ -27,7 +27,6 @@ class Neomatch(object):
             ),
             select=self.select,
         )
-        print query
         # Execute the query and returnt the result as a dictionnary
         return self.transform(connection.cypher(query).to_dicts())
     # Transform neo4j result to a more understable list 

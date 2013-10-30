@@ -134,6 +134,7 @@
 						</div>
 
     					<button class="btn btn-default btn-sm" 
+    					   type="button"
     					   ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
     					   <i class="fa fa-plus right05"></i>
     						Create a new [[field.verbose_name]]
@@ -174,6 +175,7 @@
 			    					<p>The entry you just typed in is new in the base.</p>	    					
 			    					<div class="tr">
 				    					<button class="btn btn-default btn-sm" 
+    					   				   type="button"
 				    					   ng-click="setNewIndividual({name: f.name}, field.related_model, individual, field.name, $index)">
 				    						Create <strong>[[f.name]]</strong>
 				    					</button>
@@ -187,7 +189,10 @@
 						</div>						
 
 						<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">
-							<button ng-click="addRelated(individual, field.name, field.related_model)" class="btn btn-default btn-sm">
+							<button 
+    					   		type="button"
+								ng-click="addRelated(individual, field.name, field.related_model)" 
+								class="btn btn-default btn-sm">
 								<i class="fa fa-search right05"></i>
 								Search
 								<span ng-if="individual.fields[field.name].length">another</span>

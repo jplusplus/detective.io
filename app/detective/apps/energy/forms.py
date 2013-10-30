@@ -23,10 +23,10 @@ def register_model_rules():
     rules.model(EnergyProject).field("partner").add(is_visible=False)
 
     rules.model(Country).add(person_set=Neomatch(
-        title="Persons from this country",
+        title="Persons educated or based in this country",
         target_model=Person,
         match="""
-            (root)-[:`person_has_nationality+`]-({select})
+            (root)<-[r:`person_has_based_in+`|`person_has_educated_in+`]-({select})
         """
     ))
 

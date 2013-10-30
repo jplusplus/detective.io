@@ -1,5 +1,4 @@
 from neo4django.db    import connection
-from django.db.models import get_app, get_models
 
 class Neomatch(object):
 
@@ -14,7 +13,7 @@ class Neomatch(object):
         self.query_str = """
             START root=node({root})
             MATCH {match}
-            RETURN {select}, ID({select}) as id
+            RETURN DISTINCT({select}) as end_obj, ID({select}) as id
         """
     # Process the query to the database
     def query(self, root="*"):
@@ -28,6 +27,7 @@ class Neomatch(object):
             ),
             select=self.select,
         )
+        print query
         # Execute the query and returnt the result as a dictionnary
         return self.transform(connection.cypher(query).to_dicts())
     # Transform neo4j result to a more understable list 

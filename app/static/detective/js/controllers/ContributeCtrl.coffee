@@ -114,7 +114,10 @@ class ContributeCtrl
             clean   = (val)->                
                 # copy the current value
                 val = angular.copy val
-                if typeof(val) is "object"
+                if val instanceof Date
+                    # Convert date object to string
+                    val = val.toJSON()                    
+                else if typeof(val) is "object"
                     # Fetch each nested value 
                     for pc of val     
                         # Remove the nested values without id

@@ -3,7 +3,7 @@
 
 ## Installation
 
-**1. Prerequired**
+**1. Prerequisite**
 ```bash
 sudo apt-get install build-essential git-core python python-pip python-dev
 sudo pip install virtualenv

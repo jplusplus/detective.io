@@ -140,7 +140,7 @@ class Price(models.NodeModel):
 	currency = models.StringProperty(null=True,help_text=u'The currency of the amount, using its 3-letter ISO-4217 code, e.g. USD, EUR, GBP etc.',verbose_name=u'Currency')
 	year = models.DateTimeProperty(null=True,help_text=u'',verbose_name=u'Year')
 	source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
-	units = models.IntegerProperty(null=True,help_text=u'The value of the amount.',verbose_name=u'Value')
+	units = models.StringProperty(null=True,help_text=u'The value of the amount.',verbose_name=u'Value')
 	_author = models.Relationship(User,null=True,rel_type='price_price_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 
 	class Meta:

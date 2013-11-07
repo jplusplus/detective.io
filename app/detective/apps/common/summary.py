@@ -74,7 +74,7 @@ class SummaryResource(Resource):
         """
         # Get the data and convert it to dictionnary
         types = connection.cypher(query).to_dicts()
-        obj       = {}
+        obj   = {}
         for t in types:
             # Use name as identifier
             obj[ t["name"] ] = t
@@ -123,6 +123,58 @@ class SummaryResource(Resource):
                 }
 
         return available_resources
+
+    def summary_mine(self, bundle): 
+        request = bundle.request
+        self.method_check(request, allowed=['get'])        
+        self.throttle_check(request)
+
+        query = """
+            START root=node(*)
+            MATCH (type)-[`<<INSTANCE>>`]->(root)-[]->(author)
+            WHERE HAS(root.name)
+            AND ID(author) = %d
+            AND HAS(type.model_name)
+            RETURN DISTINCT ID(root) as id, root.name as name, type.name as model
+        """ % request.user.id
+
+        matches      = connection.cypher(query).to_dicts()
+        count        = len(matches)
+        limit        = int(request.GET.get('limit', 20))
+        paginator    = Paginator(matches, limit)
+
+        try:
+            p     = int(request.GET.get('page', 1))
+            page  = paginator.page(p)
+        except InvalidPage:
+            raise Http404("Sorry, no results on that page.")
+
+        objects = []
+        for result in page.object_list:                
+            label = result.get("name", None)
+            objects.append({
+                'label': label,
+                'subject': {
+                    "name": result.get("id", None),
+                    "label": label
+                },
+                'predicate': {
+                    "label": "is instance of",
+                    "name": "<<INSTANCE>>"
+                },
+                'object': result.get("model", None)
+            })
+
+        object_list = {
+            'objects': objects,
+            'meta': {
+                'page': p,
+                'limit': limit,
+                'total_count': count
+            }
+        }
+
+        return object_list
 
 
     def summary_search(self, bundle):        

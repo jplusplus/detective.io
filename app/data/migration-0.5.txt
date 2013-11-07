@@ -1,0 +1,6 @@
+START root=node(*)
+MATCH (root)<-[r:`person_has_nationality+`]-(n)
+CREATE (root)<-[:`person_has_educated_in+`]-(n)
+CREATE (root)<-[:`person_has_based_in+`]-(n)
+DELETE r
+RETURN n, n.name

@@ -18,14 +18,16 @@ class IndividualListCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  
         # Read route params
-        @scope.scope       = @routeParams.scope
-        @scope.type        = @routeParams.type or ""
-        @scope.page        = @routeParams.page or 1
-        @scope.limit       = 20
-        @scope.individuals = {}                 
+        @scope.scope              = @routeParams.scope
+        @scope.type               = @routeParams.type or ""
+        @scope.page               = @routeParams.page or 1
+        @scope.limit              = 20
+        @scope.individuals        = {}
+        @scope.selectedIndividual = {}             
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────  
+        @scope.$watch "selectedIndividual", @selectIndividual, true
         @scope.$watch "page", =>
             # Get parameters from context method (could be overloaded)   
             params = @getParams()
@@ -46,17 +48,30 @@ class IndividualListCtrl
         # ──────────────────────────────────────────────────────────────────────  
         @getVerbose()
 
+    selectIndividual: (val, old)=>
+        # Single entity selected
+        if val.id?
+            @location.path "/#{@scope.scope}/#{@scope.type.toLowerCase()}/#{val.id}"                
+
     # Verbose informations
     # (loaded contexualy)
     getVerbose: =>        
         # Get meta information for this type
-        @Summary.get id: "forms", (data)=> 
-            @scope.meta = meta = data[@scope.type.toLowerCase()]
-            if meta?
-                @scope.verbose_name        = meta.verbose_name
-                @scope.verbose_name_plural = meta.verbose_name_plural        
-                # Set page's title
-                @Page.title meta.verbose_name_plural            
+        @Summary.get id: "forms", (data)=>         
+            # Avoid set the wrong title
+            # (when the controller is destroyed)
+            unless @scope.$$destroyed
+                @scope.meta = meta = data[@scope.type.toLowerCase()]
+                if meta? 
+                    # Redirect "unlistable" resource
+                    return @location.path "/#{@scope.scope}" unless meta.rules.is_searchable
+                    @scope.verbose_name        = meta.verbose_name
+                    @scope.verbose_name_plural = meta.verbose_name_plural        
+                    # Set page's title
+                    @Page.title meta.verbose_name_plural            
+                # Unkown type
+                else @location.path "/404"
+
     # List parameters
     getParams: =>        
         type    : @scope.type

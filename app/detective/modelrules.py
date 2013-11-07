@@ -60,11 +60,8 @@ class Model(HasRules):
 
     # Register a field rule
     def register_field(self, field):
-        # Check that the field exist
-        if field not in self.field_names: 
-            raise Exception("'%s' is not a field from %s." % (field, self.model.__name__) )
         # If the field is not registered yet
-        elif field not in self.registered_fields:
+        if field not in self.registered_fields:
             # Register the field
             self.registered_fields[field] = Field(name=field, model=self.model)
 

@@ -46,6 +46,7 @@ detective = angular
                     })  
                     # Disable common endpoints
                     .when('/common', redirectTo: '/')
+                    .when('/common/contribute', redirectTo: '/')
                     .when('/:scope/contribute', {
                         controller: ContributeCtrl  
                         templateUrl: "/partial/contribute.html"

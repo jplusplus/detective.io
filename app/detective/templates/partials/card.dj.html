@@ -1,0 +1,29 @@
+<div class="individual-card panel panel-default">		
+	<div ng-if="meta.rules.is_searchable">
+		<h5 class="panel-heading">
+			<a ng-href="[[singleUrl()]]">		
+				[[individual|individualPreview]]
+			</a>
+		</h5>
+	</div>
+	<div ng-if="! meta.rules.is_searchable">
+		<h5 class="panel-heading">
+			<i class="fa fa-info-circle pull-right left05"></i>	
+			[[individual|individualPreview]]		
+		</h5>
+		<div class="details">
+			<table class="table table-striped table-condensed">			
+				<tr ng-repeat="field in meta.fields|filter:isLiteral|filter:hasValue">
+					<td>
+						[[field.verbose_name]]						
+					</td>
+					<td>
+						<span ng-bind="get(field.name) | date:'longDate'" ng-if="field.type == 'DateTimeField'"></span>
+						<span ng-bind="get(field.name)" ng-if="!isString(field.type) && field.type != 'DateTimeField'"></span>
+						<span ng-bind-html="get(field.name) | linky:'_blank'" ng-if="isString(field.type) && field.name != 'imageURL'"></span>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>

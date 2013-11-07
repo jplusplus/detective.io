@@ -1,10 +1,19 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from app.detective.apps.common.models import Country
-from app.detective.apps.energy.models import Organization,EnergyProject
+from app.detective.apps.energy.models import EnergyProject,Organization,Person
 from django.core.exceptions           import ObjectDoesNotExist
 from neo4django.graph_auth.models     import User
 from tastypie.test                    import ResourceTestCase, TestApiClient
 import json
+import urllib
+
+def find(function, iterable):
+    for el in iterable:
+        if function(el) is True:
+            return el
+    return None
 
 class ApiTestCase(ResourceTestCase):
 
@@ -13,26 +22,39 @@ class ApiTestCase(ResourceTestCase):
         # Use custom api client
         self.api_client = TestApiClient()
         # Look for the test user
-        self.username  = 'tester'
-        self.password  = 'tester'
+        self.username = u'tester'
+        self.password = u'tester'
         try:
-            self.user = User.objects.get(username=self.username)  
-            jpp       = Organization.objects.get(name="Journalism++")             
-            jg        = Organization.objects.get(name="Journalism Grant")             
-            fra       = Country.objects.get(name="France")             
+            self.user = User.objects.get(username=self.username) 
+            jpp       = Organization.objects.get(name=u"Journalism++")             
+            jg        = Organization.objects.get(name=u"Journalism Grant")             
+            fra       = Country.objects.get(name=u"France")      
+            self.pr = pr = Person.objects.get(name=u"Pierre Roméra")       
+            self.pb = pb = Person.objects.get(name=u"Pierre Bellon")
+
         except ObjectDoesNotExist:            
             # Create the new user
-            self.user = User.objects.create_user(self.username, 'tester@detective.io', self.password)
+            self.user = User.objects.create_user(self.username,'tester@detective.io', self.password)
             self.user.is_staff = False
             self.user.is_superuser = False
             self.user.save()    
             # Create related objects
-            jpp = Organization(name="Journalism++")
+            jpp = Organization(name=u"Journalism++")
             jpp.save()
-            jg  = Organization(name="Journalism Grant")
+            jg  = Organization(name=u"Journalism Grant")
             jg.save()
-            fra = Country(name="France", isoa3="FRA")
+            fra = Country(name=u"France", isoa3=u"FRA")
             fra.save()
+
+            self.pr = pr = Person(name=u"Pierre Roméra")
+            pr.based_in.add(fra)
+            pr.activity_in_organization.add(jpp)
+            pr.save()
+
+            self.pb = pb = Person(name=u"Pierre Bellon")
+            pb.based_in.add(fra)
+            pb.activity_in_organization.add(jpp)
+            pb.save()
 
         self.post_data_simple = {
             "name": "Lorem ispum TEST",
@@ -49,12 +71,29 @@ class ApiTestCase(ResourceTestCase):
                 { "id": fra.id }
             ]
         }
+        self.rdf_jpp = {
+            "label": u"Person that has activity in Journalism++",
+            "object": {
+                "id": 283,
+                "model": u"common:Organization",
+                "name": u"Journalism++"
+            },
+            "predicate": {
+                "label": u"has activity in",
+                "name": u"person_has_activity_in_organization+",
+                "subject": u"energy:Person"
+            },
+            "subject": {
+                "label": u"Person",
+                "name": u"energy:Person"
+            }
+        }
 
     def get_credentials(self):        
         return self.api_client.client.login(username=self.username, password=self.password)
 
     def test_user_login_succeed(self):
-        auth = dict(username="tester", password="tester")
+        auth = dict(username=u"tester", password=u"tester")
         resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
@@ -62,7 +101,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual(data["success"], True)
 
     def test_user_login_failed(self):
-        auth = dict(username="tester", password="wrong")
+        auth = dict(username=u"tester", password=u"wrong")
         resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
@@ -71,7 +110,7 @@ class ApiTestCase(ResourceTestCase):
 
     def test_user_logout_succeed(self):
         # First login
-        auth = dict(username="tester", password="tester")
+        auth = dict(username=u"tester", password=u"tester")
         self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
         # Then logout
         resp = self.api_client.get('/api/common/v1/user/logout/', format='json')
@@ -96,7 +135,7 @@ class ApiTestCase(ResourceTestCase):
 
     def test_user_status_is_logged(self):
         # Log in
-        auth = dict(username="tester", password="tester")
+        auth = dict(username=u"tester", password=u"tester")
         self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
 
         resp = self.api_client.get('/api/common/v1/user/status/', format='json')   
@@ -158,7 +197,7 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)        
         self.assertEqual(
             min(20, len(data["objects"])), 
-            EnergyProject.objects.filter(_author__username="tester").count()
+            EnergyProject.objects.filter(_author__username=u"tester").count()
         )
 
     def test_search_organization(self):
@@ -197,6 +236,7 @@ class ApiTestCase(ResourceTestCase):
     def test_summary_list(self):
         self.assertHttpNotFound(self.api_client.get('/api/common/v1/summary/', format='json'))
 
+
     def test_countries_summary(self):
         resp = self.api_client.get('/api/common/v1/summary/countries/', format='json', authentication=self.get_credentials())  
         self.assertValidJSONResponse(resp)
@@ -230,3 +270,27 @@ class ApiTestCase(ResourceTestCase):
     def test_search_summary_wrong_page(self):
         resp = self.api_client.get('/api/common/v1/summary/search/?q=Journalism&page=-1', format='json', authentication=self.get_credentials())  
         self.assertHttpNotFound(resp)
+
+    def test_summary_human_search(self):
+        query = "Person activity in Journalism"
+        expected  = "Person that has activity in Journalism++"
+        expected2 = "Person that had activity previous in Journalism++"
+        resp  = self.api_client.get('/api/common/v1/summary/human/?q=%s' % query, format='json', authentication=self.get_credentials())
+        self.assertValidJSONResponse(resp)
+        data = json.loads(resp.content)
+        self.assertGreater(len(data['objects']), 1)    
+
+    def test_rdf_search(self):
+        # RDF object for persons that have activity in J++, we need to urlencode
+        # the JSON string to avoid '+' loss 
+        rdf_str = urllib.quote(json.dumps(self.rdf_jpp)) 
+        url = '/api/common/v1/summary/rdf_search/?limit=20&offset=0&q=%s' % rdf_str
+        resp = self.api_client.get(url, format='json', authentication=self.get_credentials())
+        self.assertValidJSONResponse(resp)
+        data = json.loads(resp.content)
+        objects = data['objects']
+        pr_t = find(lambda x: x['name'] == self.pr.name, objects)
+        pb_t = find(lambda x: x['name'] == self.pb.name, objects)
+        self.assertIsNotNone(pr_t)
+        self.assertIsNotNone(pb_t)
+

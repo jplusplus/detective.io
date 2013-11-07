@@ -51,7 +51,8 @@ class ApiTestCase(ResourceTestCase):
         }
 
     def get_credentials(self):
-        return self.api_client.client.login(username=self.username, password=self.password)
+        return self.create_basic(username=self.username, password=self.password)
+
 
     def test_user_login_succeed(self):
         auth = dict(username="tester", password="tester")

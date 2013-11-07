@@ -5,6 +5,7 @@ from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User
 from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
 from tastypie.authorization       import Authorization
+from tastypie.authentication      import SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.constants           import ALL
 from tastypie.resources           import ModelResource
 from tastypie.utils               import trailing_slash
@@ -29,6 +30,7 @@ class UserResource(ModelResource):
     class Meta:
         allowed_methods    = ['get', 'post']
         always_return_data = True
+        authentication     = MultiAuthentication(BasicAuthentication(), SessionAuthentication())
         authorization      = UserAuthorization()
         fields             = ['first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
         filtering          = {'username': ALL, 'email': ALL}

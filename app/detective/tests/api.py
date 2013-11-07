@@ -23,8 +23,8 @@ class ApiTestCase(ResourceTestCase):
         except ObjectDoesNotExist:
             # Create the new user
             self.user = User.objects.create_user(self.username, 'tester@detective.io', self.password)
-            self.user.is_staff = False
-            self.user.is_superuser = False
+            self.user.is_staff = True
+            self.user.is_superuser = True
             self.user.save()
             # Create related objects
             jpp = Organization(name="Journalism++")

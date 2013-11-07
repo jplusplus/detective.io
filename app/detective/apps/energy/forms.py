@@ -23,10 +23,10 @@ def register_model_rules():
     rules.model(EnergyProject).field("partner").add(is_visible=False)
 
     rules.model(Country).add(person_set=Neomatch(
-        title="Persons from this country",
+        title="Persons educated or based in this country",
         target_model=Person,
         match="""
-            (root)-[:`person_has_nationality+`]-({select})
+            (root)<-[r:`person_has_based_in+`|`person_has_educated_in+`]-({select})
         """
     ))
 
@@ -93,6 +93,24 @@ def register_model_rules():
         match="""
             (root)-[:`energy_project_has_product+`]-({select})
         """
-    ))                  
+    ))   
+
+    rules.model(Price).add(transform='{currency} {units}')               
+    rules.model(FundraisingRound).add(transform='{currency} {units}')       
+
+    def to_twitter_profile_url(data, field=None):
+        th = data["twitter_handle"]
+        if not th: 
+            return th
+        elif th.startswith("http://") or th.startswith("https://"):
+            return th
+        elif th.startswith("@"):
+            return "http://twitter.com/%s" % th[1:]
+        else:
+            return "http://twitter.com/%s" % th
+
+    rules.model(Organization).field("twitter_handle").add(transform=to_twitter_profile_url)               
+    rules.model(Person).field("twitter_handle").add(transform=to_twitter_profile_url)               
+    rules.model(EnergyProject).field("twitter_handle").add(transform=to_twitter_profile_url)               
 
     return rules

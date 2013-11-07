@@ -1,5 +1,17 @@
 <div class="container" id="individual-list">
 
+	<form class="form-inline pull-right left20 top20" role="search">	
+		<input  type="search" 
+			    placeholder="Search..."
+			 	tt-typeahead
+				tt-scope="scope"
+				tt-individual="type"
+				tt-model="selectedIndividual"
+				limit="10"
+			   	class="form-control" 
+			   	id="input-search" />		
+    </form>
+
 	<h2 ng-if="individuals.meta.total_count <= 1">
 		<span ng-if="individuals.meta.total_count > limit">
 			[[individuals.objects.length]] of
@@ -12,6 +24,7 @@
 		</span>
 		[[individuals.meta.total_count]] [[verbose_name_plural]]
 	</h2>
+
 
 	<div ng-class="{'row': query}">
 

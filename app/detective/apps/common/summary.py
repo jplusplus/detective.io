@@ -74,7 +74,7 @@ class SummaryResource(Resource):
         """
         # Get the data and convert it to dictionnary
         types = connection.cypher(query).to_dicts()
-        obj       = {}
+        obj   = {}
         for t in types:
             # Use name as identifier
             obj[ t["name"] ] = t
@@ -123,6 +123,58 @@ class SummaryResource(Resource):
                 }
 
         return available_resources
+
+    def summary_mine(self, bundle): 
+        request = bundle.request
+        self.method_check(request, allowed=['get'])        
+        self.throttle_check(request)
+
+        query = """
+            START root=node(*)
+            MATCH (type)-[`<<INSTANCE>>`]->(root)-[]->(author)
+            WHERE HAS(root.name)
+            AND ID(author) = %d
+            AND HAS(type.model_name)
+            RETURN DISTINCT ID(root) as id, root.name as name, type.name as model
+        """ % request.user.id
+
+        matches      = connection.cypher(query).to_dicts()
+        count        = len(matches)
+        limit        = int(request.GET.get('limit', 20))
+        paginator    = Paginator(matches, limit)
+
+        try:
+            p     = int(request.GET.get('page', 1))
+            page  = paginator.page(p)
+        except InvalidPage:
+            raise Http404("Sorry, no results on that page.")
+
+        objects = []
+        for result in page.object_list:                
+            label = result.get("name", None)
+            objects.append({
+                'label': label,
+                'subject': {
+                    "name": result.get("id", None),
+                    "label": label
+                },
+                'predicate': {
+                    "label": "is instance of",
+                    "name": "<<INSTANCE>>"
+                },
+                'object': result.get("model", None)
+            })
+
+        object_list = {
+            'objects': objects,
+            'meta': {
+                'page': p,
+                'limit': limit,
+                'total_count': count
+            }
+        }
+
+        return object_list
 
 
     def summary_search(self, bundle):        
@@ -427,27 +479,32 @@ class SummaryResource(Resource):
                 'relationship': [
                     {
                         "name": "fundraising_round_has_personal_payer+",
-                        "subject": "common:FundraisingRound",
+                        "subject": "energy:FundraisingRound",
                         "label": "was financed by"
                     },
                     {
                         "name": "fundraising_round_has_payer+",
-                        "subject": "common:FundraisingRound",
+                        "subject": "energy:FundraisingRound",
                         "label": "was financed by"
                     },
                     {
-                        "name": "person_has_nationality+",
-                        "subject": "common:Person",
-                        "label": "is from"
+                        "name": "person_has_educated_in+",
+                        "subject": "energy:Person",
+                        "label": "was educated in"
+                    },
+                    {
+                        "name": "person_has_based_in+",
+                        "subject": "energy:Person",
+                        "label": "is based in"
                     },
                     {
                         "name": "person_has_activity_in_organization+",
-                        "subject": "common:Person",
+                        "subject": "energy:Person",
                         "label": "has activity in"
                     },
                     {
                         "name": "person_has_previous_activity_in_organization+",
-                        "subject": "common:Person",
+                        "subject": "energy:Person",
                         "label": "had previous activity in"
                     },
                     {
@@ -457,7 +514,7 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "commentary_has_author+",
-                        "subject": "common:Commentary",
+                        "subject": "energy:Commentary",
                         "label": "was written by"
                     },
                     {
@@ -477,42 +534,42 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "organization_has_adviser+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "is advised by"
                     },
                     {
                         "name": "organization_has_key_person+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "is staffed by"
                     },
                     {
                         "name": "organization_has_partner+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "has a partnership with"
                     },
                     {
                         "name": "organization_has_fundraising_round+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "was financed by"
                     },
                     {
                         "name": "organization_has_monitoring_body+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "is monitored by"
                     },
                     {
                         "name": "organization_has_litigation_against+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "has a litigation against"
                     },
                     {
                         "name": "organization_has_revenue+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "has revenue of"
                     },
                     {
                         "name": "organization_has_board_member+",
-                        "subject": "common:Organization",
+                        "subject": "energy:Organization",
                         "label": "has board of directors with"
                     },
                     {
@@ -537,7 +594,7 @@ class SummaryResource(Resource):
                     },
                     {
                         "name": "distribution_has_activity_in_country+",
-                        "subject": "common:Distribution",
+                        "subject": "energy:Distribution",
                         "label": "has activity in"
                     },
                     {

@@ -22,7 +22,7 @@ angular.module('detective').factory "Page", ->
             title = if titleCase then toTitleCase( "" + newTitle ) else newTitle
         # Always return the title 
         if loading then "Loading..." else title
-
+    # Set a new loading state if newLoading is set. Return the loading value
     loading: (newLoading)->
         if newLoading?
             loading = newLoading

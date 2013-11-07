@@ -44,13 +44,11 @@
 				 	<div ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)" id="rels-[[field.name]]">
 				 		<h3>
 							<div color-tag ref="field.related_model" class="pull-left small right10" />
-				 			[[field.verbose_name]] <small class="text-muted">[[field.related_model]]</small>
+				 			[[field.verbose_name]]
 				 		</h3>
 				 		<ul class="list-inline">
-				 			<li ng-repeat="rel in get(field.name)" class="bottom10">
-				 				<a ng-href="[[singleUrl(rel, field.related_model)]]" class="btn btn-default">
-				 					[[rel|individualPreview]]
-				 				</a>				 				
+				 			<li ng-repeat="rel in get(field.name)">
+				 				<card ng-model="rel" type="field.related_model"></card>				 				
 				 			</li>
 				 		</ul>
 				 	</div>
@@ -87,15 +85,17 @@
 				</span>
 			</div>
 
-			<h3 ng-show="hasRels()">Jump to...</h3>
-			<div class="well padding10" ng-show="hasRels()">
-				<ul class="nav nav-pills nav-stacked">
-				 	<li ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)">
-				 		<a ng-click="scrollTo('rels-' + field.name)">
-				 			[[field.verbose_name]]
-				 		</a>
-				 	</li>
-				</ul>
+			<div ng-show="hasRels()">
+				<h3>Jump to...</h3>
+				<div class="well padding10">
+					<ul class="nav nav-pills nav-stacked">
+					 	<li ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)">
+					 		<a ng-click="scrollTo('rels-' + field.name)">
+					 			[[field.verbose_name]]
+					 		</a>
+					 	</li>
+					</ul>
+				</div>
 			</div>
 		</div>
 	</div>

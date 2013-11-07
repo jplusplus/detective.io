@@ -1,6 +1,7 @@
 from app.detective.forms       import register_model_rules
 from django.conf.urls.defaults import *
 from django.db                 import models
+from django.db.models.fields   import FieldDoesNotExist
 from django.forms.forms        import pretty_name
 from neo4django.db             import connection
 from random                    import randint
@@ -45,7 +46,11 @@ def get_model_fields(model):
     if hasattr(model, "_meta"):          
         # Create field object
         for fieldRules in modelsRules.fields():
-            f = model._meta.get_field(fieldRules.name)
+            try:
+                f = model._meta.get_field(fieldRules.name)
+            except FieldDoesNotExist:
+                # This is rule field. Ignore it!
+                continue
             # Ignores field terminating by + or begining by _
             if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):             
                 # Find related model for relation

@@ -29,7 +29,7 @@ NEO4J_DATABASES = {
 }
 
 DATABASE_ROUTERS        = ['neo4django.utils.Neo4djangoIntegrationRouter']
-SESSION_ENGINE          = "django.contrib.sessions.backends.file"
+SESSION_ENGINE          = "django.contrib.sessions.backends.db"
 AUTHENTICATION_BACKENDS = ('neo4django.graph_auth.backends.NodeModelBackend',)
 AUTH_USER_MODEL         = 'graph_auth.User'
 
@@ -163,11 +163,11 @@ TASTYPIE_DEFAULT_FORMATS = ['json']
 INSTALLED_APPS = (
     #'neo4django.admin',
     'neo4django.graph_auth',
+    'django.contrib.sessions',
+    'django.contrib.messages',
     'neo4django.contenttypes',
     #'django.contrib.admin',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',    
     # Compresses linked and inline JavaScript or CSS into a single cached file.    
     'compressor', 

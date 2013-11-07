@@ -342,7 +342,7 @@ class IndividualResource(ModelResource):
 
         # Do the query.
         limit     = int(request.GET.get('limit', 20))
-        results   = self._meta.queryset.filter(_author__id=request.user.id)
+        results   = self._meta.queryset.filter(_author__contains=request.user.id)
         count     = len(results)
         paginator = Paginator(results, limit)
 

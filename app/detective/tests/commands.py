@@ -1,8 +1,8 @@
+from django.contrib.auth.models       import User
 from django.core.management           import call_command
 from django.core.management.base      import CommandError
 from django.test                      import TestCase
-from StringIO                         import StringIO 
-from neo4django.graph_auth.models     import User
+from StringIO                         import StringIO
 from app.detective.apps.common.models import Country
 
 import sys

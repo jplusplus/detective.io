@@ -232,13 +232,6 @@ class Command(BaseCommand):
             # Defines properties and relations that every model have
             m["properties"].insert(0,
                 {
-                    "name" : "_status",
-                    "type": "IntegerProperty",
-                    # Verbose name
-                    "verbose_name": "status",
-                    "help_text": ""
-                },
-                {
                     "name" : "_author",
                     "type": "IntArrayProperty",
                     # Verbose name
@@ -246,7 +239,15 @@ class Command(BaseCommand):
                     "help_text": "People that edited this entity."
                 }
             )
-
+            m["properties"].insert(1,
+                {
+                    "name" : "_status",
+                    "type": "IntegerProperty",
+                    # Verbose name
+                    "verbose_name": "status",
+                    "help_text": ""
+                }
+            )
             # Since neo4django doesn't support model inheritance correctly
             # we use models.NodeModel for every model
             # and duplicates parent's attributes into its child

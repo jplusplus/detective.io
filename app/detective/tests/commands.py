@@ -1,4 +1,3 @@
-from django.contrib.auth.models       import User
 from django.core.management           import call_command
 from django.core.management.base      import CommandError
 from django.test                      import TestCase
@@ -6,8 +5,6 @@ from StringIO                         import StringIO
 from app.detective.apps.common.models import Country
 
 import sys
-
-
 
 class CommandsTestCase(TestCase):
 
@@ -25,25 +22,6 @@ class CommandsTestCase(TestCase):
         sys.stdout = output
         args = "./app/data/ontology-v5.3.owl"
         call_command('parseowl', args)
-
-    def test_createsuperuser_fail(self):
-        # Catch output
-        output = StringIO()
-        sys.stdout = output
-        # Must fail without argument
-        with self.assertRaises(CommandError):
-            call_command('createsuperuser', interactive=False)
-
-    def test_createsuperuser(self):
-        # Catch output
-        output = StringIO()
-        sys.stdout = output
-        # Create the user
-        call_command('createsuperuser', username="supertest", password="supersecret", email="super@email.com")
-        # Check that it exists
-        user = User.objects.get(username="supertest")
-        self.assertEqual(user.is_superuser, True)
-
 
     def test_loadnodes_fail(self):
         # Catch output

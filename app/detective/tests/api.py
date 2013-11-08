@@ -8,6 +8,7 @@ from tastypie.test                    import ResourceTestCase, TestApiClient
 import json
 import urllib
 
+
 def find(function, iterable):
     for el in iterable:
         if function(el) is True:

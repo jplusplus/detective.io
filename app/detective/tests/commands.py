@@ -49,3 +49,11 @@ class CommandsTestCase(TestCase):
         sys.stdout = output
         # Import users
         call_command('importusers')
+
+    def test_reindex(self):
+        # Catch output
+        output = StringIO()
+        sys.stdout = output
+        # Reindex countries
+        args = 'common.Country'
+        call_command('reindex', args)

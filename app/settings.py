@@ -171,13 +171,18 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     # Compresses linked and inline JavaScript or CSS into a single cached file.
     'compressor',
+    # API generator
     'tastypie',
+    # Email backend
+    "djrill",
     # Internal
     'app.detective',
     'app.detective.apps.common',
     'app.detective.apps.energy',
 )
 
+MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")
+EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
 
 CACHES = {
     'default': {

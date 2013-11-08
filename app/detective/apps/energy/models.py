@@ -9,25 +9,25 @@ class Amount(models.NodeModel):
 	_scope = u'energy'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
 	year = models.DateTimeProperty(null=True,help_text=u'',verbose_name=u'Year')
 	source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
 	units = models.IntegerProperty(null=True,help_text=u'The value of the amount.',verbose_name=u'Value')
-	_author = models.Relationship(User,null=True,rel_type='amount_amount_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 
 	class Meta:
 		pass
 
-class FundraisingRound(models.NodeModel):	
+class FundraisingRound(models.NodeModel):
 	_scope = u'energy'
 	_parent = u'Amount'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
 	currency = models.StringProperty(null=True,help_text=u'The currency of the amount, using its 3-letter ISO-4217 code, e.g. USD, EUR, GBP etc.',verbose_name=u'Currency')
 	raise_type = models.StringProperty(null=True,help_text=u'Type of the transaction, e.g. equity contribution (cash), preproject expenses, loan.',verbose_name=u'Type of transaction')
 	year = models.DateTimeProperty(null=True,help_text=u'',verbose_name=u'Year')
 	source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
 	units = models.IntegerProperty(null=True,help_text=u'The value of the amount.',verbose_name=u'Value')
-	_author = models.Relationship(User,null=True,rel_type='fundraising_round_fundraising_round_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 	payer = models.Relationship("Organization",null=True,rel_type='fundraising_round_has_payer+',help_text=u'The Organization that actually pays the amount or contributes the asset considered.',verbose_name=u'Payer')
 	personal_payer = models.Relationship("Person",null=True,rel_type='fundraising_round_has_personal_payer+',help_text=u'The Person that contributes the amount or the asset considered.',verbose_name=u'Physical payer')
 
@@ -38,13 +38,13 @@ class Person(models.NodeModel):
 	_scope = u'energy'
 	_description = u'A Person represents a physical man or woman that is involved in an Organization, a Project or a Commentary.'
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
 	position = models.StringProperty(null=True,help_text=u'Current position within the Organization (e.g. CEO, CFO, spokesperson etc.)',verbose_name=u'Position')
 	twitter_handle = models.StringProperty(null=True,help_text=u'The Twitter name of the entity (without the @)',verbose_name=u'Twitter handle')
 	name = models.StringProperty(null=True,help_text=u'')
 	source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
 	website_url = models.StringProperty(null=True,help_text=u'',verbose_name=u'Website URL')
 	image = models.URLProperty(null=True,help_text=u'The URL (starting with http://) where the image is hosted.',verbose_name=u'Image URL')
-	_author = models.Relationship(User,null=True,rel_type='person_person_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 	previous_activity_in_organization = models.Relationship("Organization",null=True,rel_type='person_has_previous_activity_in_organization+',help_text=u'Has the entity been active in a specific Organization previsously?',verbose_name=u'Previous activity in')
 	educated_in  = models.Relationship(Country,null=True,rel_type='person_has_educated_in+',help_text=u'',verbose_name=u'Educated in')
 	based_in  = models.Relationship(Country,null=True,rel_type='person_has_based_in+',help_text=u'',verbose_name=u'Based in')
@@ -62,11 +62,11 @@ class Revenue(models.NodeModel):
 	_parent = u'Amount'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
 	currency = models.StringProperty(null=True,help_text=u'The currency of the amount, using its 3-letter ISO-4217 code, e.g. USD, EUR, GBP etc.',verbose_name=u'Currency')
 	year = models.DateTimeProperty(null=True,help_text=u'',verbose_name=u'Year')
 	source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
 	units = models.IntegerProperty(null=True,help_text=u'The value of the amount.',verbose_name=u'Value')
-	_author = models.Relationship(User,null=True,rel_type='revenue_revenue_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 
 	class Meta:
 		pass
@@ -75,10 +75,10 @@ class Commentary(models.NodeModel):
 	_scope = u'energy'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
 	year = models.DateTimeProperty(null=True,help_text=u'',verbose_name=u'Year')
 	article_url = models.URLProperty(null=True,help_text=u'The URL (starting with http://) of the link.')
 	title = models.StringProperty(null=True,help_text=u'Title of the article or report of this commentary.',verbose_name=u'Title')
-	_author = models.Relationship(User,null=True,rel_type='commentary_commentary_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 	author = models.Relationship("Person",null=True,rel_type='commentary_has_author+',help_text=u'The author or authors of the document.',verbose_name=u'Author')
 
 	class Meta:
@@ -88,6 +88,7 @@ class Organization(models.NodeModel):
 	_scope = u'energy'
 	_description = u'An Organization represents a social entity that implements, funds, takes part in or helps a Project. It can be an NGO, a university, a governement organization, a for-profit company or an international organization.'
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
 	founded = models.DateTimeProperty(null=True,help_text=u'The date when the organization was created.',verbose_name=u'Date founded')
 	company_type = models.StringProperty(null=True,help_text=u'If the organization is a company, type of company (e.g. limited liability company, public corporation, unlimited company etc.)',verbose_name=u'Company type')
 	company_register_link = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to the official company register where the organization is registered.',verbose_name=u'Company register link')
@@ -99,7 +100,6 @@ class Organization(models.NodeModel):
 	organization_type = models.StringProperty(null=True,help_text=u'Type of organization. Can be Company, Government Organization, International Organization, University or NGO',verbose_name=u'Organization type')
 	image = models.URLProperty(null=True,help_text=u'The URL (starting with http://) where the image is hosted.',verbose_name=u'Image URL')
 	office_address = models.StringProperty(null=True,help_text=u'The address or addresses where this organization does business. Do add the country at the end of the address, e.g. Grimmstraße 10A, 10967 Berlin, Germany.',verbose_name=u'Office address')
-	_author = models.Relationship(User,null=True,rel_type='organization_organization_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 	adviser = models.Relationship("Person",null=True,rel_type='organization_has_adviser+',help_text=u'The list of persons that help the entity.',verbose_name=u'Adviser')
 	revenue = models.Relationship("Revenue",null=True,rel_type='organization_has_revenue+',help_text=u'A Revenue represents the quantity of cash that the Organization was able to gather in any given year. It doesn\'t have to be equal to the net sales but can take into account subsidies as well.',verbose_name=u'Revenue')
 	board_member = models.Relationship("Person",null=True,rel_type='organization_has_board_member+',help_text=u'The list of board members of the Organization, if any.',verbose_name=u'Board member')
@@ -122,11 +122,11 @@ class Distribution(models.NodeModel):
 	_parent = u'Amount'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
 	sold = models.StringProperty(null=True,help_text=u'The type of distribution can be donated, sold, loaned.',verbose_name=u'Type of distribution')
 	year = models.DateTimeProperty(null=True,help_text=u'',verbose_name=u'Year')
 	source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
 	units = models.IntegerProperty(null=True,help_text=u'The value of the amount.',verbose_name=u'Value')
-	_author = models.Relationship(User,null=True,rel_type='distribution_distribution_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 	activity_in_country = models.Relationship(Country,null=True,rel_type='distribution_has_activity_in_country+',help_text=u'The list of countries or territories the entity is active in. ',verbose_name=u'Active in countries')
 
 	class Meta:
@@ -137,11 +137,11 @@ class Price(models.NodeModel):
 	_parent = u'Amount'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
 	currency = models.StringProperty(null=True,help_text=u'The currency of the amount, using its 3-letter ISO-4217 code, e.g. USD, EUR, GBP etc.',verbose_name=u'Currency')
 	year = models.DateTimeProperty(null=True,help_text=u'',verbose_name=u'Year')
 	source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
 	units = models.StringProperty(null=True,help_text=u'The value of the amount.',verbose_name=u'Value')
-	_author = models.Relationship(User,null=True,rel_type='price_price_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 
 	class Meta:
 		pass
@@ -151,17 +151,17 @@ class EnergyProduct(models.NodeModel):
 	_scope = u'energy'
 	_description = u'An energy Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.'
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
 	power_generation_per_unit_in_watt = models.IntegerProperty(null=True,help_text=u'The amount of energy, in watts, that can be generated by each unit of the product.',verbose_name=u'Power generation per unit (in watts)')
 	households_served = models.StringProperty(null=True,help_text=u'The number of households that can use the product. E.g. an oven is for 1 household, a lamp is for 0.25 households, a power plant is for (power / average household consumption in the region) households. Leave blank if you\'re unsure.',verbose_name=u'Households served')
 	source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
 	name = models.StringProperty(null=True,help_text=u'')
 	image = models.URLProperty(null=True,help_text=u'The URL (starting with http://) where the image is hosted.',verbose_name=u'Image URL')
-	_author = models.Relationship(User,null=True,rel_type='energy_product_energy_product_has_admin_author+',help_text=u'People that edited this entity.',verbose_name=u'author')
 	distribution = models.Relationship("Distribution",null=True,rel_type='energy_product_has_distribution+',help_text=u'A Distribution represents the batch sales or gift of a product. Companies often communicate in terms of "in year X, Y units of Product Z were sold/distributed in Country A".',verbose_name=u'Distribution')
 	operator = models.Relationship("Organization",null=True,rel_type='energy_product_has_operator+',help_text=u'Products, especially large ones such as power plants, have an Operator, usually a company.',verbose_name=u'Operator')
 	price = models.Relationship("Price",null=True,rel_type='energy_product_has_price+',help_text=u'The price (use only digits, i.e. 8.99) of the Product at the date considered.',verbose_name=u'Price')
 
-	class Meta: 
+	class Meta:
 		verbose_name = u'Energy product'
 		verbose_name_plural = u'Energy products'
 
@@ -173,6 +173,7 @@ class EnergyProject(models.NodeModel):
 	_scope = u'energy'
 	_description = u'An energy Project represents an endeavor to reach a particular aim (e.g. improve access to electricity, produce electricity in a certain way, improve energy efficiency, etc.). A project is the child of an Organization and takes its concrete form most often through Products.'
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
+	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
 	source = models.URLProperty(null=True,help_text=u'The URL (starting with http://) to your source. If the source is a book, enter the URL to the book at Google Books or Amazon.',verbose_name=u'Source')
 	twitter_handle = models.StringProperty(null=True,help_text=u'The Twitter name of the entity (without the @)',verbose_name=u'Twitter handle')
 	ended = models.DateTimeProperty(null=True,help_text=u'The date when the project or organization ended.',verbose_name=u'End date')
@@ -180,7 +181,6 @@ class EnergyProject(models.NodeModel):
 	comment = models.StringProperty(null=True,help_text=u'Enter a short comment to the entity you are reporting on (max. 500 characters).',verbose_name=u'Comment')
 	image = models.URLProperty(null=True,help_text=u'The URL (starting with http://) where the image is hosted.',verbose_name=u'Image URL')
 	name = models.StringProperty(null=True,help_text=u'')
-	_author = models.Relationship(User,null=True,rel_type='energy_project_energy_project_has_admin_author+',help_text=u'People that edited this entity.')
 	product = models.Relationship("EnergyProduct",null=True,rel_type='energy_project_has_product+',help_text=u'A Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.')
 	partner = models.Relationship("Organization",null=True,rel_type='energy_project_has_partner+',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).')
 	commentary = models.Relationship("Commentary",null=True,rel_type='energy_project_has_commentary+',help_text=u'A Commentary is an article, a blog post or a report that assesses the quality of the Project.')

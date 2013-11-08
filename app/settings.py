@@ -30,8 +30,7 @@ NEO4J_DATABASES = {
 
 DATABASE_ROUTERS        = ['neo4django.utils.Neo4djangoIntegrationRouter']
 SESSION_ENGINE          = "django.contrib.sessions.backends.db"
-AUTHENTICATION_BACKENDS = ('neo4django.graph_auth.backends.NodeModelBackend',)
-AUTH_USER_MODEL         = 'graph_auth.User'
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -112,7 +111,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'app.middleware.crossdomainxhr.XsSharing',    
+    'app.middleware.crossdomainxhr.XsSharing',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -162,20 +161,21 @@ TASTYPIE_DEFAULT_FORMATS = ['json']
 
 INSTALLED_APPS = (
     #'neo4django.admin',
-    'neo4django.graph_auth',
+    #'neo4django.graph_auth',
+    'neo4django.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'neo4django.contenttypes',
-    #'django.contrib.admin',
+    'django.contrib.admin',
     'django.contrib.contenttypes',
-    'django.contrib.staticfiles',    
-    # Compresses linked and inline JavaScript or CSS into a single cached file.    
-    'compressor', 
-    'tastypie',      
+    'django.contrib.staticfiles',
+    'django.contrib.auth',
+    # Compresses linked and inline JavaScript or CSS into a single cached file.
+    'compressor',
+    'tastypie',
     # Internal
-    'app.detective', 
-    'app.detective.apps.common', 
-    'app.detective.apps.energy', 
+    'app.detective',
+    'app.detective.apps.common',
+    'app.detective.apps.energy',
 )
 
 

@@ -29,7 +29,7 @@ NEO4J_TEST_DATABASES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db', 'test_database.sqlite3')
+        'NAME': 'test.db'
     }
 }
 
@@ -38,17 +38,16 @@ DATABASE_ROUTERS = ['neo4django.utils.Neo4djangoIntegrationRouter']
 USE_TZ = True
 
 INSTALLED_APPS = (
-    #'neo4django.admin',
-    'neo4django.graph_auth',
     'neo4django.contenttypes',
-    #'django.contrib.admin',
-    #'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',  
-    'compressor', 
+    'django.contrib.admin',
+    'django.contrib.contenttypes',
+    'django.contrib.staticfiles',
+    'django.contrib.auth',
+    'compressor',
     'tastypie',
-    'app.detective',   
+    'app.detective',
 )
 
 SECRET_KEY="<SET A SECRET KEY HERE>"

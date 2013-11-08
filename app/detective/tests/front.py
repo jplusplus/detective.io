@@ -26,18 +26,18 @@ class FrontTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_login(self):
-        from neo4django.graph_auth.models import User
-        from django.core.exceptions import ObjectDoesNotExist        
+        from django.contrib.auth.models import User
+        from django.core.exceptions import ObjectDoesNotExist
         # Look for the test user
         self.username  = 'tester'
         self.password  = 'tester'
         try:
-            self.user = User.objects.get(username=self.username)             
-        except ObjectDoesNotExist:            
+            self.user = User.objects.get(username=self.username)
+        except ObjectDoesNotExist:
             # Create the new user
             self.user = User.objects.create_user(self.username, 'tester@detective.io', self.password)
             self.user.is_staff = True
-            self.user.save()  
+            self.user.save()
 
         self.client.login(username=self.username, password=self.password)
         # Issue a GET request.
@@ -49,7 +49,7 @@ class FrontTestCase(unittest.TestCase):
         # Check that the username is correct
         self.assertEqual( response.cookies["user__username"].value, self.user.username )
         # Logout the user
-        self.client.logout()        
+        self.client.logout()
         # Issue a GET request.
         response = self.client.get('/')
         # Ensure the cookie is deleted

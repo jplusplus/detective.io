@@ -48,6 +48,8 @@ INSTALLED_APPS = (
     'compressor',
     'tastypie',
     'app.detective',
+    'app.detective.apps.common',
+    'app.detective.apps.energy'
 )
 
 SECRET_KEY="<SET A SECRET KEY HERE>"

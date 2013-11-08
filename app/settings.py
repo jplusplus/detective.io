@@ -11,6 +11,8 @@ ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com')
 )
 
+DEFAULT_FROM_EMAIL = 'Detective.io <contact@detective.io>'
+
 MANAGERS = ADMINS
 
 DATABASES = {
@@ -169,6 +171,8 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
     'django.contrib.auth',
+    # Sign up activation
+    'registration',
     # Compresses linked and inline JavaScript or CSS into a single cached file.
     'compressor',
     # API generator
@@ -183,6 +187,8 @@ INSTALLED_APPS = (
 
 MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")
 EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
+# One-week activation window
+ACCOUNT_ACTIVATION_DAYS = 7
 
 CACHES = {
     'default': {

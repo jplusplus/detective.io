@@ -62,7 +62,7 @@ class UserResource(ModelResource):
 
         user = authenticate(username=username, password=password)
         if user:
-            if user.is_active:
+            if user.is_active and user.is_staff:
                 login(request, user)
 
                 # Remember me opt-in
@@ -77,10 +77,15 @@ class UserResource(ModelResource):
                 response.set_cookie("csrftoken", get_new_csrf_key())
 
                 return response
-            else:
+            elif not user.is_active:
                 return self.create_response(request, {
                     'success': False,
                     'error_message': 'Account not activated yet.',
+                })
+            else:
+                return self.create_response(request, {
+                    'success': False,
+                    'error_message': 'Account not authorized yet.',
                 })
         else:
             return self.create_response(request, {

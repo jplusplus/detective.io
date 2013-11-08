@@ -6,6 +6,13 @@ from django.contrib.auth.models       import User
 from django.core.exceptions           import ObjectDoesNotExist
 from tastypie.test                    import ResourceTestCase, TestApiClient
 import json
+import urllib
+
+def find(function, iterable):
+    for el in iterable:
+        if function(el) is True:
+            return el
+    return None
 
 class ApiTestCase(ResourceTestCase):
 
@@ -262,3 +269,27 @@ class ApiTestCase(ResourceTestCase):
     def test_search_summary_wrong_page(self):
         resp = self.api_client.get('/api/common/v1/summary/search/?q=Journalism&page=-1', format='json', authentication=self.get_credentials())
         self.assertHttpNotFound(resp)
+
+    def test_summary_human_search(self):
+        query = "Person activity in Journalism"
+        expected = "Person that has activity in Journalism++"
+        expected2 = "Person that had activity previous in Journalism++"
+        resp = self.api_client.get('/api/common/v1/summary/human/?q=%s' % query, format='json', authentication=self.get_credentials())
+        self.assertValidJSONResponse(resp)
+        data = json.loads(resp.content)
+        self.assertGreater(len(data['objects']), 1)
+
+    def test_rdf_search(self):
+        # RDF object for persons that have activity in J++, we need to urlencode
+        # the JSON string to avoid '+' loss
+        rdf_str = urllib.quote(json.dumps(self.rdf_jpp))
+        url = '/api/common/v1/summary/rdf_search/?limit=20&offset=0&q=%s' % rdf_str
+        resp = self.api_client.get(url, format='json', authentication=self.get_credentials())
+        self.assertValidJSONResponse(resp)
+        data = json.loads(resp.content)
+        objects = data['objects']
+        pr_t = find(lambda x: x['name'] == self.pr.name, objects)
+        pb_t = find(lambda x: x['name'] == self.pb.name, objects)
+        self.assertIsNotNone(pr_t)
+        self.assertIsNotNone(pb_t)
+

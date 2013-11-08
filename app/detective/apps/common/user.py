@@ -6,7 +6,7 @@ from django.contrib.auth.models   import User
 from django.contrib.sites.models  import RequestSite
 from django.db                    import IntegrityError
 from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
-from registration.models          import RegistrationProfile
+from registration.models          import RegistrationProfile, RegistrationManager, SHA1_RE
 from tastypie.authentication      import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization       import ReadOnlyAuthorization
 from tastypie.constants           import ALL
@@ -42,6 +42,7 @@ class UserResource(ModelResource):
             url(r'^(?P<resource_name>%s)/logout%s$' % params, self.wrap_view('logout'), name='api_logout'),
             url(r'^(?P<resource_name>%s)/status%s$' % params, self.wrap_view('status'), name='api_status'),
             url(r'^(?P<resource_name>%s)/signup%s$' % params, self.wrap_view('signup'), name='api_signup'),
+            url(r'^(?P<resource_name>%s)/activate%s$' % params, self.wrap_view('activate'), name='api_activate'),
         ]
 
     def login(self, request, **kwargs):
@@ -84,7 +85,7 @@ class UserResource(ModelResource):
             else:
                 return self.create_response(request, {
                     'success': False,
-                    'error_message': 'Account not authorized yet.',
+                    'error_message': 'Account activated but not authorized yet.',
                 })
         else:
             return self.create_response(request, {
@@ -129,6 +130,30 @@ class UserResource(ModelResource):
         if isinstance(username, unicode):
             username = username.encode('utf-8')
         return hashlib.sha1(salt+username).hexdigest()
+
+
+    def activate(self, request, **kwargs):
+        token = request.GET.get("token", None)
+        success = False
+        # Make sure the key we're trying conforms to the pattern of a
+        # SHA1 hash; if it doesn't, no point trying to look it up in
+        # the database.
+        if SHA1_RE.search(token):
+            try:
+                profile = RegistrationProfile.objects.get(activation_key=token)
+                if not profile.activation_key_expired():
+                    user = profile.user
+                    user.is_active = True
+                    user.save()
+                    profile.activation_key = RegistrationProfile.ACTIVATED
+                    profile.save()
+                    success = True
+            except RegistrationProfile.DoesNotExist:
+                success = False
+
+        return self.create_response(request, {
+            "success": success
+        })
 
 
     def logout(self, request, **kwargs):

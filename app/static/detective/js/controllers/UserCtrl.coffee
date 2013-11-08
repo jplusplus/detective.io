@@ -6,12 +6,6 @@ class UserCtrl
     @$inject : ["$scope", "$http", "$location", "$routeParams", "User", "Page", "$rootElement"]
 
     constructor: (@scope, @http, @location, @routeParams, @User, @Page, @rootElement)->
-        # Set page title with no title-case
-        switch @location.path()
-            when "/signup"
-                @Page.title "Sign up", false
-            when "/login"
-                @Page.title "Log in", false
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -24,6 +18,15 @@ class UserCtrl
         @scope.login   = @login
         @scope.logout  = @logout
         @scope.signup  = @signup
+        # Set page title with no title-case
+        switch @location.path()
+            when "/signup"
+                @Page.title "Sign up", false
+            when "/login"
+                @Page.title "Log in", false
+            when "/account/activate"
+                @Page.title "Activate your account", false
+                @readToken()
 
 
 
@@ -122,5 +125,16 @@ class UserCtrl
                     is_logged: false
                     is_staff : false
                     username : ''
+    readToken: =>
+        @Page.loading(true)
+        config =
+            method: "GET"
+            url: "/api/common/v1/user/activate/"
+            params:
+                token: @routeParams.token
+        # Submits the token for activation
+        @http(config).then (response) =>
+            @Page.loading false
+            @scope.state = response.data? and response.data.success
 
 angular.module('detective').controller 'userCtrl', UserCtrl

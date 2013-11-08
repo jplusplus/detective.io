@@ -2,6 +2,7 @@ BeautifulSoup==3.2.1
 Django==1.5.4
 django-tastypie==0.10.0
 django-compressor==1.3
+django-registration==1.0
 mimeparse==0.1.3
 git+git://github.com/scholrly/neo4django.git#egg=neo4django
 wadofstuff-django-serializers==1.1.0

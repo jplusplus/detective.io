@@ -189,7 +189,7 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)
         self.assertEqual(
             min(20, len(data["objects"])),
-            EnergyProject.objects.filter(_author__username=u"tester").count()
+            EnergyProject.objects.filter(_author__contains=self.user.id).count()
         )
 
     def test_search_organization(self):

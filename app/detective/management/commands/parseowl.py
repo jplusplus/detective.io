@@ -6,8 +6,8 @@ import re
 
 # Defines the owl and rdf namespaces
 namespaces = {
-    'owl': 'http://www.w3.org/2002/07/owl#', 
-    'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#', 
+    'owl': 'http://www.w3.org/2002/07/owl#',
+    'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
     'rdfs': 'http://www.w3.org/2000/01/rdf-schema#'
 }
 # transform property name
@@ -22,26 +22,26 @@ def get(sets, el):
         return ""
 
 # Merge 2 list and remove duplicates using the given field as reference
-def merge(first_list, second_list, field):        
+def merge(first_list, second_list, field):
     refs = [ x[field] for x in second_list ]
     return second_list + [ x for x in first_list if x[field] not in refs ]
 
 
 class Command(BaseCommand):
-    help = "Parse the given OWL file to generate its neo4django models."    
+    help = "Parse the given OWL file to generate its neo4django models."
     args = 'filename.owl'
     root = None
 
 
     def handle(self, *args, **options):
         if not args:
-            raise CommandError('Please specify path to ontology file.')            
-        
+            raise CommandError('Please specify path to ontology file.')
+
         # Gives the ontology URI. Only needed for documentation purposes
         ontologyURI = "http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#"
         # This string will contain the models.py file
         headers = [
-            "# -*- coding: utf-8 -*-", 
+            "# -*- coding: utf-8 -*-",
             "# The ontology can be found in its entirety at %s" % ontologyURI,
             "from neo4django.db import models",
             "from neo4django.graph_auth.models import User",
@@ -60,7 +60,7 @@ class Command(BaseCommand):
             "NegativeInteger" : "IntegerProperty",
             # Looking forward the neo4django float support!
             # See also: https://github.com/scholrly/neo4django/issues/197
-            "float" : "IntegerProperty", 
+            "float" : "IntegerProperty",
             "integer" : "IntegerProperty",
             "dateTimeStamp" : "DateTimeProperty",
             "dateTime" : "DateTimeProperty",
@@ -69,11 +69,11 @@ class Command(BaseCommand):
 
         try :
             # Parses the file with etree
-            tree = etree.parse(args[0])                        
-        except:                
+            tree = etree.parse(args[0])
+        except:
             raise CommandError('Unable to parse the given file.')
-        
-        self.root = tree.getroot()                        
+
+        self.root = tree.getroot()
         models = []
 
         # Finds all the Classes
@@ -99,10 +99,10 @@ class Command(BaseCommand):
             # Verbose names
             verbose_name = get(ontologyClassElement, "verbose_name").replace("'", "\\'")
             verbose_name_plural = get(ontologyClassElement, "verbose_name_plural").replace("'", "\\'")
-            
+
             # Finds all the subClasses of the Class
             for subClassElement in ontologyClassElement.findall("rdfs:subClassOf", namespaces):
-                
+
                 # If the Class is actually an extension of another Class
                 if "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource" in subClassElement.attrib:
 
@@ -116,41 +116,41 @@ class Command(BaseCommand):
                         # If there is a relationship defined in the subclass
                         if restriction.find("owl:onClass", namespaces) is not None:
 
-                            # Finds the relationship and its elements 
+                            # Finds the relationship and its elements
                             # (destination Class and type)
-                            relationClass    = restriction.find("owl:onClass", namespaces) 
-                            relation         = {}   
-                            relation["URI"]  = relationClass.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"] 
+                            relationClass    = restriction.find("owl:onClass", namespaces)
+                            relation         = {}
+                            relation["URI"]  = relationClass.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"]
                             relation["name"] = to_class_name(relation["URI"].split("#")[1])
 
-                            # Exception when the relation's destination is 
+                            # Exception when the relation's destination is
                             # an individual from the same class
                             if relation["name"] == className:
                                 relation["name"] = '"self"'
                             else:
-                                relation["name"] = '"%s"' % relation["name"]    
+                                relation["name"] = '"%s"' % relation["name"]
 
 
                             relationType     = restriction.find("owl:onProperty", namespaces)
                             relationTypeURI  = relationType.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"]
                             relation["type"] = relationTypeURI.split("#")[1]
 
-                            # Guesses the destination of the relation based on the name. 
+                            # Guesses the destination of the relation based on the name.
                             # Name should be "has_..."
                             if relation["type"].find('has') == 0:
                                 relation["destination"] = pron(relation["type"][3:])
 
                                 # Get the property's options
-                                options = self.propOptions(relation["type"])                            
-                                
+                                options = self.propOptions(relation["type"])
+
                                 # Help text
                                 relation["help_text"]    = get(options, "help_text").replace("'", "\\'")
                                 # Verbose name
-                                relation["verbose_name"] = get(options, "verbose_name")                                                                                     
+                                relation["verbose_name"] = get(options, "verbose_name")
                                 relation["type"]         = relation["type"]
 
-                                # Adds the relationship to the array containing all relationships for the class only 
-                                # if the relation has a destination              
+                                # Adds the relationship to the array containing all relationships for the class only
+                                # if the relation has a destination
                                 if "destination" in relation:
                                     relations.append(relation)
 
@@ -167,7 +167,7 @@ class Command(BaseCommand):
 
                             dataTypeURI = dataTypeElement.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"]
 
-                            t = dataTypeURI.split("#")[1]                            
+                            t = dataTypeURI.split("#")[1]
 
                             if t in correspondanceTypes:
                                 dataType = correspondanceTypes[t]
@@ -183,9 +183,9 @@ class Command(BaseCommand):
                                     "verbose_name": get(options, "verbose_name")
                                 }
 
-                                properties.append(prop)     
+                                properties.append(prop)
                             else:
-                                raise CommandError("Property '%s' of '%s' using unkown type: %s" % (propertyType, className, t) )                                
+                                raise CommandError("Property '%s' of '%s' using unkown type: %s" % (propertyType, className, t) )
 
             models.append({
                 "className"          : className,
@@ -207,15 +207,15 @@ class Command(BaseCommand):
 
     # option of the given property
     def propOptions(self, name):
-        
+
         options = None
         attr    = "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about"
 
-        for p in self.root.findall("owl:ObjectProperty", namespaces):            
-            if re.search('#%s$' % name, p.attrib[attr]):                                
+        for p in self.root.findall("owl:ObjectProperty", namespaces):
+            if re.search('#%s$' % name, p.attrib[attr]):
                 options = p
-        for p in self.root.findall("owl:DatatypeProperty", namespaces):            
-            if re.search('#%s$' % name, p.attrib[attr]):                                
+        for p in self.root.findall("owl:DatatypeProperty", namespaces):
+            if re.search('#%s$' % name, p.attrib[attr]):
                 options = p
 
         return options
@@ -230,33 +230,31 @@ class Command(BaseCommand):
             modelsContents.append("\nclass "+ m["className"] +"(models.NodeModel):")
 
             # Defines properties and relations that every model have
-            m["relations"].insert(0,
-                {
-                    "name" : "User",                    
-                    "destination": "_author",
-                    "type": pron(m["className"]) + "_has_admin_author",
-                    # Verbose name
-                    "verbose_name": "author",
-                    "help_text": "People that edited this entity."  
-                }
-            )
             m["properties"].insert(0,
                 {
-                    "name" : "_status",                    
+                    "name" : "_author",
+                    "type": "IntArrayProperty",
+                    # Verbose name
+                    "verbose_name": "author",
+                    "help_text": "People that edited this entity."
+                }
+            )
+            m["properties"].insert(1,
+                {
+                    "name" : "_status",
                     "type": "IntegerProperty",
                     # Verbose name
                     "verbose_name": "status",
                     "help_text": ""
                 }
             )
-
             # Since neo4django doesn't support model inheritance correctly
             # we use models.NodeModel for every model
             # and duplicates parent's attributes into its child
             if m["parentClass"] != "models.NodeModel":
                 modelsContents.append("\t_parent = u'%s'" % m["parentClass"])
                 # Find the models that could be the parent of the current one
-                parents = [model for model in models if model["className"] == m["parentClass"] ]                
+                parents = [model for model in models if model["className"] == m["parentClass"] ]
                 # We found at least one parent
                 if len(parents):
                     # We take the first one
@@ -271,29 +269,29 @@ class Command(BaseCommand):
 
             if m["help_text"] != None:
                 modelsContents.append("\t_description = u'%s'" % m["help_text"])
-            
-            # Writes the properties 
-            for prop in m["properties"]:     
-                opt = [                 
+
+            # Writes the properties
+            for prop in m["properties"]:
+                opt = [
                     "null=True",
-                    "help_text=u'%s'" % prop["help_text"] 
+                    "help_text=u'%s'" % prop["help_text"]
                 ]
 
                 if prop["verbose_name"] != '':
                     opt.append("verbose_name=u'%s'" % prop["verbose_name"])
 
                 field = "\t%s = models.%s(%s)"
-                opt = ( pron(prop["name"]), prop["type"],  ",".join(opt)) 
-                modelsContents.append(field % opt )               
+                opt = ( pron(prop["name"]), prop["type"],  ",".join(opt))
+                modelsContents.append(field % opt )
 
             # Writes the relationships
-            for rel in m["relations"]:  
+            for rel in m["relations"]:
 
-                opt = [                  
-                    rel["name"], 
+                opt = [
+                    rel["name"],
                     "null=True",
                     # Add class name prefix to relation type
-                    "rel_type='%s+'" % pron( m["className"] + "_" + rel["type"] ), 
+                    "rel_type='%s+'" % pron( m["className"] + "_" + rel["type"] ),
                     "help_text=u'%s'" % rel["help_text"]
                 ]
 
@@ -301,7 +299,7 @@ class Command(BaseCommand):
                     opt.append("verbose_name=u'%s'" % rel["verbose_name"])
 
                 field = "\t%s = models.Relationship(%s)"
-                modelsContents.append(field % (rel["destination"], ",".join(opt) ) )                
+                modelsContents.append(field % (rel["destination"], ",".join(opt) ) )
 
             modelsContents.append("\n\tclass Meta:")
 
@@ -311,11 +309,11 @@ class Command(BaseCommand):
                 modelsContents.append("\t\tverbose_name_plural = u'%s'" % m["verbose_name_plural"])
 
             if m["verbose_name"] == '' and  m["verbose_name_plural"] == '':
-                modelsContents.append("\t\tpass") 
+                modelsContents.append("\t\tpass")
 
             if len([p for p in m["properties"] if p["name"] == "name" ]):
-                modelsContents.append("\n\tdef __unicode__(self):") 
-                modelsContents.append("\t\treturn self.name or u\"Unkown\"") 
+                modelsContents.append("\n\tdef __unicode__(self):")
+                modelsContents.append("\t\treturn self.name or u\"Unkown\"")
 
 
         print "\n".join(modelsContents).encode("UTF-8")
@@ -324,7 +322,7 @@ class Command(BaseCommand):
     def topolgical_sort(graph_unsorted):
         """
         :src http://blog.jupo.org/2012/04/06/topological-sorting-acyclic-directed-graphs/
-            
+
         Repeatedly go through all of the nodes in the graph, moving each of
         the nodes that has all its edges resolved, onto a sequence that
         forms our sorted graph. A node has all of its edges resolved and
@@ -352,13 +350,13 @@ class Command(BaseCommand):
             # not, we need to bail out as the graph therefore can't be
             # sorted.
             acyclic = False
-            for index, item in enumerate(graph_unsorted):      
+            for index, item in enumerate(graph_unsorted):
                 edges = item["dependencies"]
-                
+
                 node_unsorted = [item_unsorted["className"] for item_unsorted in graph_unsorted]
 
                 for edge in edges:
-                    if edge in node_unsorted:                                
+                    if edge in node_unsorted:
                         break
                 else:
                     acyclic = True

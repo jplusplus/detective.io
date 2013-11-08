@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective.apps.common.user     import UserResource
 from app.detective.forms                import register_model_rules
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class
@@ -11,7 +10,7 @@ from django.db.models.query             import QuerySet
 from django.http                        import Http404
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
-from tastypie.authentication            import SessionAuthentication
+from tastypie.authentication            import SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization             import Authorization
 from tastypie.constants                 import ALL
 from tastypie.exceptions                import Unauthorized
@@ -25,60 +24,57 @@ import re
 class IndividualAuthorization(Authorization):
     def read_detail(self, object_list, bundle):
         return True
-        
-    def create_detail(self, object_list, bundle):   
-        if not (bundle.request.user and bundle.request.user.is_staff): 
+
+    def create_detail(self, object_list, bundle):
+        if not (bundle.request.user and bundle.request.user.is_staff):
             raise Unauthorized("Sorry, only staff is authorized to create resource.")
         return True
-        
-    def update_detail(self, object_list, bundle):     
-        if not (bundle.request.user and bundle.request.user.is_staff): 
+
+    def update_detail(self, object_list, bundle):
+        if not (bundle.request.user and bundle.request.user.is_staff):
             raise Unauthorized("Sorry, only staff is authorized to update resource.")
         return True
 
-    def delete_detail(self, object_list, bundle):   
-        if not (bundle.request.user and bundle.request.user.is_staff): 
+    def delete_detail(self, object_list, bundle):
+        if not (bundle.request.user and bundle.request.user.is_staff):
             raise Unauthorized("Sorry, only staff is authorized to delete resource.")
-        return True             
-        
-    def delete_list(self, object_list, bundle):           
-        if not (bundle.request.user and bundle.request.user.is_staff): 
-            raise Unauthorized("Sorry, only staff is authorized to delete resource.")             
+        return True
+
+    def delete_list(self, object_list, bundle):
+        if not (bundle.request.user and bundle.request.user.is_staff):
+            raise Unauthorized("Sorry, only staff is authorized to delete resource.")
 
 class IndividualMeta:
     list_allowed_methods   = ['get', 'post', 'put']
-    detail_allowed_methods = ['get', 'post', 'delete', 'put', 'patch']    
-    always_return_data     = True         
-    authorization          = IndividualAuthorization()     
-    authentication         = SessionAuthentication()
-    filtering              = {'name': ALL}    
+    detail_allowed_methods = ['get', 'post', 'delete', 'put', 'patch']
+    always_return_data     = True
+    authorization          = IndividualAuthorization()
+    authentication         = MultiAuthentication(BasicAuthentication(), SessionAuthentication())
+    filtering              = {'name': ALL}
     ordering               = {'name': ALL}
     serializer             = Serializer(formats=['json', 'jsonp', 'xml', 'yaml'])
 
 class IndividualResource(ModelResource):
 
-    # All individual resource have authors
-    _author = fields.ToManyField(UserResource, "_author", full=True, null=True, use_in="detail")
+    def __init__(self, api_name=None):
+        super(IndividualResource, self).__init__(api_name)
+        # Register relationships fields automaticly
+        self.generate_to_many_fields(True)
 
-    def __init__(self, api_name=None):        
-        super(IndividualResource, self).__init__(api_name)  
-        # Register relationships fields automaticly            
-        self.generate_to_many_fields(True)     
-
-    def apply_sorting(self, obj_list, options=None):        
+    def apply_sorting(self, obj_list, options=None):
         options_copy = options.copy()
-        # No failling sorting, 
+        # No failling sorting,
         if "order_by" in options and not options["order_by"] in self.fields:
             # remove invalid order_by key
             options_copy.pop("order_by", None)
         return super(IndividualResource, self).apply_sorting(obj_list, options_copy)
-        
 
-    def build_schema(self):  
+
+    def build_schema(self):
         """
         Description and scope for each Resource
         """
-        schema = super(IndividualResource, self).build_schema()        
+        schema = super(IndividualResource, self).build_schema()
         model  = self._meta.queryset.model
 
         additionals = {
@@ -87,21 +83,21 @@ class IndividualResource(ModelResource):
         }
         return dict(additionals.items() + schema.items())
 
-    def get_queryset(self): 
+    def get_queryset(self):
         # Resource must implement a queryset!
         queryset = getattr(self._meta, "queryset", None)
         if not isinstance(queryset, QuerySet):
             raise Exception("The given resource must define a queryset.")
         return queryset
 
-    def get_model(self):      
+    def get_model(self):
         return self.get_queryset().model
 
     def get_model_fields(self):
-        # Find fields of the queryset's model        
-        return self.get_model()._meta.fields  
+        # Find fields of the queryset's model
+        return self.get_model()._meta.fields
 
-    def need_to_many_field(self, field):        
+    def need_to_many_field(self, field):
         # Limit the definition of the new fields
         # to the relationships
         if isinstance(field, MultipleNodes) and not field.name.endswith("_set"):
@@ -109,7 +105,7 @@ class IndividualResource(ModelResource):
             # resource_field = self.fields[field.name]
             # But it's probably still a charfield !
             # And it's so bad.
-            # if isinstance(resource_field, fields.CharField):                               
+            # if isinstance(resource_field, fields.CharField):
             return True
         # Return false if not needed
         return False
@@ -125,11 +121,11 @@ class IndividualResource(ModelResource):
         except ImportError:
             return None
 
-    def get_to_many_field(self, field, full=False):        
+    def get_to_many_field(self, field, full=False):
         if type(field.target_model) == str:
             target_model = import_class(field.target_model)
         else:
-            target_model = field.target_model        
+            target_model = field.target_model
         resource = self.dummy_class_to_ressource(target_model)
         # Do not create a relationship with an empty resource (not resolved)
         if resource: return fields.ToManyField(resource, field.name, full=full, null=True, use_in=self.use_in)
@@ -140,9 +136,9 @@ class IndividualResource(ModelResource):
         for field in self.get_model_fields():
             # Limit the definition of the new fields
             # to the relationships
-            if self.need_to_many_field(field):   
+            if self.need_to_many_field(field):
                 f = self.get_to_many_field(field, full=bool(full))
-                # Get the full relationship                                           
+                # Get the full relationship
                 if f: self.fields[field.name] = f
 
     def use_in(self, bundle=None):
@@ -153,8 +149,8 @@ class IndividualResource(ModelResource):
             # Use in detail
             return self.get_resource_uri(bundle) == bundle.request.path
 
-    def get_detail(self, request, **kwargs):  
-        # Register relationships fields automaticly with full detail            
+    def get_detail(self, request, **kwargs):
+        # Register relationships fields automaticly with full detail
         self.generate_to_many_fields(True)
         return super(IndividualResource, self).get_detail(request, **kwargs)
 
@@ -165,13 +161,13 @@ class IndividualResource(ModelResource):
 
     def alter_detail_data_to_serialize(self, request, bundle):
         # Show additional field following the model's rules
-        rules = register_model_rules().model(self.get_model()).all()        
-        # All additional relationships        
+        rules = register_model_rules().model(self.get_model()).all()
+        # All additional relationships
         for key in rules:
             # Filter rules to keep only Neomatch
             if isinstance(rules[key], Neomatch):
                 bundle.data[key] = rules[key].query(bundle.obj.id)
-        
+
         return bundle
 
 
@@ -182,104 +178,112 @@ class IndividualResource(ModelResource):
         transform = rules.get("transform")
         # This is just a string
         # For complex formating use http://docs.python.org/2/library/string.html#formatspec
-        if type(transform) is str: 
+        if type(transform) is str:
             transform = transform.format(**bundle.data)
         # We can also receive a function
-        elif callable(transform): 
+        elif callable(transform):
             transform = transform(bundle.data)
 
         bundle.data["_transform"] = transform or getattr(bundle.data, 'name', None)
-        # Control that every relationship fields are list        
+        # Control that every relationship fields are list
         # and that we didn't send hidden field
         for field in bundle.data:
-            # Find the model's field 
-            modelField = getattr(bundle.obj, field, False) 
+            # Find the model's field
+            modelField = getattr(bundle.obj, field, False)
             # The current field is a relationship
-            if modelField and hasattr(modelField, "_rel"): 
+            if modelField and hasattr(modelField, "_rel"):
                 # Wrong type given, relationship field must ouput a list
                 if type(bundle.data[field]) is not list:
                     # We remove the field from the ouput
-                    bundle.data[field] = []          
+                    bundle.data[field] = []
+            # The field is a list of literal values
+            elif type(modelField) in (list, tuple):
+                # For tuple serialization
+                bundle.data[field] = modelField
             # Get the output transformation for this field
             transform = rules.field(field).get("transform")
             # This is just a string
             # For complex formating use http://docs.python.org/2/library/string.html#formatspec
-            if type(transform) is str: 
+            if type(transform) is str:
                 bundle.data[field] = transform.format(**bundle.data)
             # We can also receive a function
-            elif callable(transform): 
+            elif callable(transform):
                 bundle.data[field] = transform(bundle.data, field)
+
         return bundle
 
     def hydrate(self, bundle):
+        # Convert author to set to avoid duplicate
+        bundle.obj._author = set(bundle.obj._author)
+        bundle.obj._author.add(bundle.request.user.id)
+        bundle.obj._author = list(bundle.obj._author)
         # Avoid try to insert automatic relationship
-        for name in bundle.data:            
+        for name in bundle.data:
             if name.endswith("_set"): bundle.data[name] = []
         return bundle
 
-    def hydrate_m2m(self, bundle): 
+    def hydrate_m2m(self, bundle):
         # By default, every individual from staff are validated
         bundle.data["_status"] = 1*bundle.request.user.is_staff
-        bundle.data["_author"] = [bundle.request.user.id]
 
-        for field in bundle.data:   
-            # Find the model's field 
-            modelField = getattr(bundle.obj, field, False) 
+        for field in bundle.data:
+            # Find the model's field
+            modelField = getattr(bundle.obj, field, False)
             # The current field is a relationship
-            if modelField and hasattr(modelField, "_rel"):                
+            if modelField and hasattr(modelField, "_rel"):
                 # Model associated to that field
-                model = modelField._rel.relationship.target_model                
+                model = modelField._rel.relationship.target_model
                 # Wrong type given
-                if type(bundle.data[field]) is not list:                         
+                if type(bundle.data[field]) is not list:
                     # Empty the field that contain bad
                     bundle.data[field] = []
                 # Transform list field to be more flexible
-                elif len(bundle.data[field]):   
-                    rels = []                     
+                elif len(bundle.data[field]):
+                    rels = []
                     # For each relation...
-                    for rel in bundle.data[field]:                        
+                    for rel in bundle.data[field]:
                         # Keeps the string
                         if type(rel) is str:
                             rels.append(rel)
                         # Convert object with id to uri
                         elif type(rel) is int:
                             obj = model.objects.get(id=rel)
-                        elif "id" in rel:       
+                        elif "id" in rel:
                             obj = model.objects.get(id=rel["id"])
-                        else:                                 
+                        else:
                             obj = False
-                        # Associated the existing object 
+                        # Associated the existing object
                         if obj: rels.append(obj)
 
-                    bundle.data[field] = rels   
+                    bundle.data[field] = rels
         return bundle
 
-    def save_m2m(self, bundle): 
-        for field in bundle.data: 
-            # Find the model's field 
-            modelField = getattr(bundle.obj, field, False) 
+    def save_m2m(self, bundle):
+        for field in bundle.data:
+            # Find the model's field
+            modelField = getattr(bundle.obj, field, False)
             # The field doesn't exist
             if not modelField: setattr(bundle.obj, field, None)
             # Transform list field to be more flexible
-            elif type(bundle.data[field]) is list:      
+            elif type(bundle.data[field]) is list:
                 rels = bundle.data[field]
                 # Avoid working on empty relationships set
                 if len(rels) > 0:
                     # Empties the bundle to avoid insert data twice
-                    bundle.data[field] = []                                                          
+                    bundle.data[field] = []
                     # Get the field
                     attr = getattr(bundle.obj, field)
-                    # Clean the field to avoid duplicates            
+                    # Clean the field to avoid duplicates
                     if attr.count() > 0: attr.clear()
                     # For each relation...
-                    for rel in rels:   
+                    for rel in rels:
                         # Add the received obj
                         if hasattr(rel, "obj"):
                             attr.add(rel.obj)
                         else:
                             attr.add(rel)
 
-        # Save the object now to avoid duplicated relations 
+        # Save the object now to avoid duplicated relations
         bundle.obj.save()
 
         return bundle
@@ -298,9 +302,9 @@ class IndividualResource(ModelResource):
         self.throttle_check(request)
 
         query     = request.GET.get('q', '').lower()
-        query     = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', query).strip()        
+        query     = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', query).strip()
         limit     = int(request.GET.get('limit', 20))
-        # Do the query.        
+        # Do the query.
         results   = self._meta.queryset.filter(name__icontains=query)
         count     = len(results)
         paginator = Paginator(results, limit)
@@ -315,7 +319,7 @@ class IndividualResource(ModelResource):
 
         for result in page.object_list:
             bundle = self.build_bundle(obj=result, request=request)
-            bundle = self.full_dehydrate(bundle, for_list=True)        
+            bundle = self.full_dehydrate(bundle, for_list=True)
             objects.append(bundle)
 
         object_list = {
@@ -329,19 +333,19 @@ class IndividualResource(ModelResource):
         }
 
         self.log_throttled_access(request)
-        return self.create_response(request, object_list)     
+        return self.create_response(request, object_list)
 
     def get_mine(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
         self.is_authenticated(request)
         self.throttle_check(request)
-        
-        # Do the query.        
+
+        # Do the query.
         limit     = int(request.GET.get('limit', 20))
-        results   = self._meta.queryset.filter(_author__id=request.user.id)
+        results   = self._meta.queryset.filter(_author__contains=request.user.id)
         count     = len(results)
         paginator = Paginator(results, limit)
-        
+
         try:
             p     = int(request.GET.get('page', 1))
             page  = paginator.page(p)
@@ -349,11 +353,11 @@ class IndividualResource(ModelResource):
             raise Http404("Sorry, no results on that page.")
 
         objects = []
-        
+
         for result in page.object_list:
             bundle = self.build_bundle(obj=result, request=request)
-            bundle = self.full_dehydrate(bundle, for_list=True)        
-            objects.append(bundle) 
+            bundle = self.full_dehydrate(bundle, for_list=True)
+            objects.append(bundle)
 
         object_list = {
             'objects': objects,
@@ -373,27 +377,27 @@ class IndividualResource(ModelResource):
         #self.is_authenticated(request)
         self.throttle_check(request)
 
-        model = self.get_model()        
+        model = self.get_model()
         try:
-            node = model.objects.select_related(depth=1).get(id=kwargs["pk"])            
+            node = model.objects.select_related(depth=1).get(id=kwargs["pk"])
         except ObjectDoesNotExist:
             raise Http404("Sorry, unkown node.")
 
         # Parse only body string
         body = json.loads(request.body) if type(request.body) is str else request.body
-        # Copy data to allow dictionary resizing                
+        # Copy data to allow dictionary resizing
         data = body.copy()
         for field in body:
             # If the field exists into our model
             if hasattr(node, field) and not field.startswith("_"):
-                value = data[field]                
+                value = data[field]
                 # Get the field
                 attr = getattr(node, field)
                 # It's a relationship
-                if hasattr(attr, "_rel"): 
-                    related_model = attr._rel.relationship.target_model                                                                                       
-                    # Clean the field to avoid duplicates            
-                    if attr.count() > 0: attr.clear()  
+                if hasattr(attr, "_rel"):
+                    related_model = attr._rel.relationship.target_model
+                    # Clean the field to avoid duplicates
+                    if attr.count() > 0: attr.clear()
                     # Load the json-formated relationships
                     data[field] = rels = value
                     # For each relation...
@@ -403,7 +407,7 @@ class IndividualResource(ModelResource):
                         if rel.has_key("id"):
                             # Get the related object
                             try:
-                                related = related_model.objects.get(id=rel["id"])       
+                                related = related_model.objects.get(id=rel["id"])
                                 # Creates the relationship between the two objects
                                 attr.add(related)
                             except ObjectDoesNotExist:
@@ -419,8 +423,11 @@ class IndividualResource(ModelResource):
             # Remove the field
             del data[field]
 
-        if len(data) > 0: 
+        if len(data) > 0:
+            # Convert author to set to avoid duplicate
+            node._author = set(node._author)
+            node._author.add(request.user.id)
+            node._author = list(node._author)
             # Save the node
-            node.save()    
+            node.save()
         return self.create_response(request, data)
-        

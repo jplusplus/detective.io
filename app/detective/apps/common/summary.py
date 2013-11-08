@@ -18,32 +18,32 @@ class SummaryResource(Resource):
     serializer = Serializer(formats=["json"]).serialize
 
     class Meta:
-        allowed_methods = ['get'] 
+        allowed_methods = ['get']
         resource_name   = 'summary'
         object_class    = object
 
     def obj_get_list(self, request=None, **kwargs):
         # Nothing yet here!
-        raise Http404("Sorry, not implemented yet!") 
+        raise Http404("Sorry, not implemented yet!")
 
-    def obj_get(self, request=None, **kwargs):   
+    def obj_get(self, request=None, **kwargs):
         content = {}
         # Check for an optional method to do further dehydration.
         method = getattr(self, "summary_%s" % kwargs["pk"], None)
         if method:
             content = method(kwargs["bundle"])
-        else: 
+        else:
             # Stop here, unkown summary type
-            raise Http404("Sorry, not implemented yet!")        
+            raise Http404("Sorry, not implemented yet!")
         # Serialize content in json
         # @TODO implement a better format support
         content  = self.serializer(content, "application/json")
-        # Create an HTTP response 
+        # Create an HTTP response
         response = HttpResponse(content=content, content_type="application/json")
-        # We force tastypie to render the response directly 
+        # We force tastypie to render the response directly
         raise ImmediateHttpResponse(response=response)
 
-    def summary_countries(self, bundle):    
+    def summary_countries(self, bundle):
         model_id = get_model_node_id(Country)
         # The Country isn't set yet in neo4j
         if model_id == None: raise Http404()
@@ -52,7 +52,7 @@ class SummaryResource(Resource):
             START n=node(%d)
             MATCH (i)<-[*0..1]->(country)<-[r:`<<INSTANCE>>`]-(n)
             WHERE HAS(country.isoa3)
-            RETURN country.isoa3 as isoa3, ID(country) as id, count(i)-1 as count 
+            RETURN country.isoa3 as isoa3, ID(country) as id, count(i)-1 as count
         """ % int(model_id)
         # Get the data and convert it to dictionnary
         countries = connection.cypher(query).to_dicts()
@@ -61,15 +61,15 @@ class SummaryResource(Resource):
             # Use isoa3 as identifier
             obj[ country["isoa3"] ] = country
             # ISOA3 is now useless
-            del country["isoa3"]            
+            del country["isoa3"]
         return obj
 
-    def summary_types(self, bundle):    
+    def summary_types(self, bundle):
         # Query to aggreagte relationships count by country
         query = """
             START n=node(*)
             MATCH (c)<-[r:`<<INSTANCE>>`]-(n)
-            WHERE HAS(n.model_name) 
+            WHERE HAS(n.model_name)
             RETURN ID(n) as id, n.model_name as name, count(c) as count
         """
         # Get the data and convert it to dictionnary
@@ -82,21 +82,21 @@ class SummaryResource(Resource):
             del t["name"]
         return obj
 
-    def summary_forms(self, bundle):        
+    def summary_forms(self, bundle):
         available_resources = {}
         # Get the model's rules manager
-        rulesManager = register_model_rules()     
-        # Fetch every registered model  
+        rulesManager = register_model_rules()
+        # Fetch every registered model
         # to print out its rules
-        for model in get_registered_models():                                      
+        for model in get_registered_models():
             # Do this ressource has a model?
             # Do this ressource is a part of apps?
             if model != None and model.__module__.startswith("app.detective.apps"):
                 name                = model.__name__.lower()
                 rules               = rulesManager.model(model).all()
                 fields              = get_model_fields(model)
-                verbose_name        = getattr(model._meta, "verbose_name", name).title()      
-                verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()      
+                verbose_name        = getattr(model._meta, "verbose_name", name).title()
+                verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()
                 # Extract the model parent to find its scope
                 scope               = model.__module__.split(".")[-2]
 
@@ -124,19 +124,20 @@ class SummaryResource(Resource):
 
         return available_resources
 
-    def summary_mine(self, bundle): 
+    def summary_mine(self, bundle):
         request = bundle.request
-        self.method_check(request, allowed=['get'])        
+        self.method_check(request, allowed=['get'])
         self.throttle_check(request)
 
         query = """
             START root=node(*)
-            MATCH (type)-[`<<INSTANCE>>`]->(root)-[]->(author)
+            MATCH (type)-[`<<INSTANCE>>`]->(root)
             WHERE HAS(root.name)
-            AND ID(author) = %d
+            AND HAS(root._author)
             AND HAS(type.model_name)
+            AND %s IN root._author
             RETURN DISTINCT ID(root) as id, root.name as name, type.name as model
-        """ % request.user.id
+        """ % int(request.user.id)
 
         matches      = connection.cypher(query).to_dicts()
         count        = len(matches)
@@ -150,7 +151,7 @@ class SummaryResource(Resource):
             raise Http404("Sorry, no results on that page.")
 
         objects = []
-        for result in page.object_list:                
+        for result in page.object_list:
             label = result.get("name", None)
             objects.append({
                 'label': label,
@@ -177,9 +178,9 @@ class SummaryResource(Resource):
         return object_list
 
 
-    def summary_search(self, bundle):        
+    def summary_search(self, bundle):
         request = bundle.request
-        self.method_check(request, allowed=['get'])        
+        self.method_check(request, allowed=['get'])
         self.throttle_check(request)
 
         if not "q" in request.GET: raise Exception("Missing 'q' parameter")
@@ -197,7 +198,7 @@ class SummaryResource(Resource):
             raise Http404("Sorry, no results on that page.")
 
         objects = []
-        for result in page.object_list:    
+        for result in page.object_list:
             objects.append(result)
 
         object_list = {
@@ -213,9 +214,9 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
-    def summary_rdf_search(self, bundle):       
+    def summary_rdf_search(self, bundle):
         request = bundle.request
-        self.method_check(request, allowed=['get'])        
+        self.method_check(request, allowed=['get'])
         self.throttle_check(request)
 
         limit     = int(request.GET.get('limit', 20))
@@ -231,9 +232,9 @@ class SummaryResource(Resource):
             page  = paginator.page(p)
         except InvalidPage:
             raise Http404("Sorry, no results on that page.")
-        
+
         objects = []
-        for result in page.object_list:    
+        for result in page.object_list:
             objects.append(result)
 
         object_list = {
@@ -249,12 +250,12 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
-    def summary_human(self, bundle):         
+    def summary_human(self, bundle):
         request = bundle.request
-        self.method_check(request, allowed=['get'])        
+        self.method_check(request, allowed=['get'])
         self.throttle_check(request)
-   
-        if not "q" in request.GET: 
+
+        if not "q" in request.GET:
             raise Exception("Missing 'q' parameter")
 
         query        = request.GET["q"]
@@ -262,7 +263,7 @@ class SummaryResource(Resource):
         matches      = self.find_matches(query)
         # Build and returns a list of proposal
         propositions = self.build_propositions(matches, query)
-        # Build paginator  
+        # Build paginator
         count        = len(propositions)
         limit        = int(request.GET.get('limit', 20))
         paginator    = Paginator(propositions, limit)
@@ -274,7 +275,7 @@ class SummaryResource(Resource):
             raise Http404("Sorry, no results on that page.")
 
         objects = []
-        for result in page.object_list:    
+        for result in page.object_list:
             objects.append(result)
 
         object_list = {
@@ -288,24 +289,24 @@ class SummaryResource(Resource):
         }
 
         self.log_throttled_access(request)
-        return object_list    
+        return object_list
 
     def summary_syntax(self, bundle): return self.get_syntax()
 
     def search(self, query):
         match = str(query).lower()
-        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()        
+        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()
         # Query to get every result
         query = """
             START root=node(*)
             MATCH (root)<-[r:`<<INSTANCE>>`]-(type)
-            WHERE HAS(root.name) 
+            WHERE HAS(root.name)
             AND LOWER(root.name) =~ '.*(%s).*'
             RETURN ID(root) as id, root.name as name, type.name as model
         """ % match
         return connection.cypher(query).to_dicts()
 
-    def rdf_search(self, subject, predicate, obj):                 
+    def rdf_search(self, subject, predicate, obj):
         # Query to get every result
         query = """
             START st=node(*)
@@ -315,11 +316,11 @@ class SummaryResource(Resource):
             AND type.name = "%s"
             AND st.name = "%s"
             RETURN DISTINCT ID(root) as id, root.name as name, type.name as model
-        """ % ( predicate["name"], subject["name"], obj["name"], )      
+        """ % ( predicate["name"], subject["name"], obj["name"], )
         return connection.cypher(query).to_dicts()
 
 
-    def get_models_output(self):        
+    def get_models_output(self):
         # Select only some atribute
         output = lambda m: {'name': get_model_scope(m) + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
         return [ output(m) for m in get_registered_models() if m.__module__.startswith("app.detective.apps") ]
@@ -330,7 +331,7 @@ class SummaryResource(Resource):
         output = []
         end = len(input)
         for n in range(1, end+1):
-            for i in range(len(input)-n+1):                
+            for i in range(len(input)-n+1):
                 output.append(input[i:i+n])
         return output
 
@@ -350,14 +351,14 @@ class SummaryResource(Resource):
         ngrams  = [' '.join(x) for x in self.ngrams(query) ]
         matches = []
         models  = self.get_syntax()["subject"]["model"]
-        rels    = self.get_syntax()["predicate"]["relationship"]                
+        rels    = self.get_syntax()["predicate"]["relationship"]
         # Known models lookup for each ngram
-        for token in ngrams:  
+        for token in ngrams:
             obj = {
                 'models'       : self.get_close_labels(token, models),
                 'relationships': self.get_close_labels(token, rels),
                 'token'        : token
-            }          
+            }
             matches.append(obj)
         return matches
 
@@ -381,19 +382,19 @@ class SummaryResource(Resource):
                     new_list.append(item)
             return new_list
 
-        def is_preposition(token=""):     
-            return str(token).lower() in ["aboard", "about", "above", "across", "after", "against", 
-            "along", "amid", "among", "anti", "around", "as", "at", "before", "behind", "below", 
-            "beneath", "beside", "besides", "between", "beyond", "but", "by", "concerning", 
-            "considering",  "despite", "down", "during", "except", "excepting", "excluding", 
-            "following", "for", "from", "in", "inside", "into", "like", "minus", "near", "of", 
-            "off", "on", "onto", "opposite", "outside", "over", "past", "per", "plus", "regarding", 
-            "round", "save", "since", "than", "through", "to", "toward", "towards", "under", 
+        def is_preposition(token=""):
+            return str(token).lower() in ["aboard", "about", "above", "across", "after", "against",
+            "along", "amid", "among", "anti", "around", "as", "at", "before", "behind", "below",
+            "beneath", "beside", "besides", "between", "beyond", "but", "by", "concerning",
+            "considering",  "despite", "down", "during", "except", "excepting", "excluding",
+            "following", "for", "from", "in", "inside", "into", "like", "minus", "near", "of",
+            "off", "on", "onto", "opposite", "outside", "over", "past", "per", "plus", "regarding",
+            "round", "save", "since", "than", "through", "to", "toward", "towards", "under",
             "underneath", "unlike", "until", "up", "upon", "versus", "via", "with", "within", "without"]
 
         def previous_word(sentence="", base=""):
             if base == "" or sentence == "": return ""
-            parts = sentence.split(base)            
+            parts = sentence.split(base)
             return parts[0].strip().split(" ")[-1] if len(parts) else None
 
         predicates    = []
@@ -403,7 +404,7 @@ class SummaryResource(Resource):
         # Picks candidates for subjects and predicates
         for match in matches:
             subjects   += match["models"]
-            predicates += match["relationships"]                 
+            predicates += match["relationships"]
             # Objects are detected when they start and end by double quotes
             if  match["token"].startswith('"') and match["token"].endswith('"'):
                 # Remove the quote from the token
@@ -417,7 +418,7 @@ class SummaryResource(Resource):
 
         # No subject, no predicate, it might be a classic search
         if not len(subjects) and not len(predicates):
-            results = self.search(query)            
+            results = self.search(query)
             for result in results:
                 # Build the label
                 label = result.get("name", None)
@@ -436,7 +437,7 @@ class SummaryResource(Resource):
         # We find some subjects
         elif len(subjects) and not len(predicates):
             rels = self.get_syntax().get("predicate").get("relationship")
-            for subject in subjects:                                 
+            for subject in subjects:
                 # Gets all available relationship for these subjects
                 predicates += [ rel for rel in rels if rel["subject"] == subject["name"] ]
 
@@ -446,10 +447,10 @@ class SummaryResource(Resource):
         # Generate proposition using RDF's parts
         for subject in remove_duplicates(subjects):
             for predicate in remove_duplicates(predicates):
-                for obj in objects:  
+                for obj in objects:
                     pred_sub = predicate.get("subject", None)
                     # If the predicate has a subject
-                    # and this matches to the current one 
+                    # and this matches to the current one
                     if pred_sub == None or pred_sub == subject.get("name", None):
                         if type(obj) is dict:
                             obj_disp = obj["name"] or obj["label"]
@@ -465,11 +466,11 @@ class SummaryResource(Resource):
                             'predicate': predicate,
                             'object'   : obj
                         })
-        
+
         # Remove duplicates proposition dicts
         return propositions
 
-    def get_syntax(self):    
+    def get_syntax(self):
         return {
             'subject': {
                 'model':  self.get_models_output(),

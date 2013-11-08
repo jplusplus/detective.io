@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
+from django.contrib.auth.models   import User
 from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
-from neo4django.graph_auth.models import User
-from tastypie                     import fields
 from tastypie.authorization       import Authorization
+from tastypie.authentication      import SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.constants           import ALL
 from tastypie.resources           import ModelResource
 from tastypie.utils               import trailing_slash
@@ -15,24 +15,23 @@ from django.contrib.auth.hashers  import make_password
 class UserAuthorization(Authorization):
     def read_detail(self, object_list, bundle):
         return True
-    
+
     def create_detail(self, object_list, bundle):
         return True
 
-    def update_detail(self, object_list, bundle):     
-        return bundle.request.user.is_staff
-        
-    def delete_detail(self, object_list, bundle):     
+    def update_detail(self, object_list, bundle):
         return bundle.request.user.is_staff
 
+    def delete_detail(self, object_list, bundle):
+        return bundle.request.user.is_staff
 
-class UserResource(ModelResource):    
-    id = fields.IntegerField('id', readonly=True) 
 
+class UserResource(ModelResource):
     class Meta:
         allowed_methods    = ['get', 'post']
         always_return_data = True
-        authorization      = UserAuthorization()     
+        authentication     = MultiAuthentication(BasicAuthentication(), SessionAuthentication())
+        authorization      = UserAuthorization()
         fields             = ['first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
         filtering          = {'username': ALL, 'email': ALL}
         queryset           = User.objects.all()
@@ -65,7 +64,7 @@ class UserResource(ModelResource):
         if user:
             if user.is_active:
                 login(request, user)
-                
+
                 # Remember me opt-in
                 if not remember_me: request.session.set_expiry(0)
 
@@ -108,11 +107,11 @@ class UserResource(ModelResource):
             logout(request)
             return self.create_response(request, { 'success': True })
         else:
-            return self.create_response(request, { 'success': False })  
+            return self.create_response(request, { 'success': False })
 
-    def status(self, request, **kwargs):        
+    def status(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
         if request.user and request.user.is_authenticated():
             return self.create_response(request, { 'is_logged': True,  'username': request.user.username })
         else:
-            return self.create_response(request, { 'is_logged': False, 'username': '' })  
+            return self.create_response(request, { 'is_logged': False, 'username': '' })

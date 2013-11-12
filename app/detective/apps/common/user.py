@@ -189,7 +189,7 @@ class UserResource(ModelResource):
         recover = Recover()
         recover.user = user
         recover.request = request
-        recover.email_template_name = 'reset-password.html'
+        recover.email_template_name = 'email-reset-password.html'
         recover.send_notification()
 
         return self.create_response(request, { 'success': True })

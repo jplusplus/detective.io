@@ -18,7 +18,7 @@ class UserCtrl
         @scope.login   = @login
         @scope.logout  = @logout
         @scope.signup  = @signup
- 		@scope.reset_password = @reset_password
+        @scope.reset_password = @reset_password
         @scope.reset_password_confirm = @reset_password_confirm
         # Set page title with no title-case
         switch @location.path()

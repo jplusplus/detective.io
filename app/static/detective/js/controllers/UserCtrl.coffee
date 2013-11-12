@@ -11,7 +11,12 @@ class UserCtrl
             when "/signup"
                 @Page.title "Sign up", false   
             when "/login"
-                @Page.title "Log in", false                
+                @Page.title "Log in", false
+            when "/reset_password"
+                @Page.title "Reset password", false     
+            when "/reset_password_confirm/"
+                @Page.title "Enter a new password", false     
+
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────  
@@ -21,11 +26,11 @@ class UserCtrl
         # Scope method
         # ──────────────────────────────────────────────────────────────────────
         @scope.loading = false
-        @scope.login   = @login
-        @scope.logout  = @logout
-        @scope.signup  = @signup
-
-        
+        @scope.login = @login
+        @scope.logout = @logout
+        @scope.signup = @signup
+        @scope.reset_password = @reset_password
+        @scope.reset_password_confirm = @reset_password_confirm
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
@@ -74,32 +79,81 @@ class UserCtrl
                 # Error status
                 @loginError(response.data.error_message) 
         # Error status
-        , (response)=> @loginError(response.data.error_message) )       
+        , (response)=> @loginError(response.data.error_message))
 
-    signup: =>        
+    signup: =>
         config = 
             method: "POST"
-            url: "/api/common/v1/user/"
-            data: 
+            url: "#{@API_URL}"
+            data:
                 username: @scope.username
                 email   : @scope.email
                 password: @scope.password
             headers:
-                "Content-Type": "application/json"       
+                "Content-Type": "application/json"
         # Turn on loading mode
         @scope.loading = true
         # succefull login
         @http(config).then (response) =>   
             # Turn off loading mode
             @scope.loading = false
-            # Interpret the respose            
+            # Interpret the response            
             if response.data?
                 @scope.signupSucceed = true
                 # Delete error
                 delete @scope.error
             else
                 # Record the error
-                @scope.error = response.data.error_message if response.data.error_message?    
+                @scope.error = response.data.error_message if response.data.error_message?
+
+    reset_password: =>
+        config = 
+            method: "POST"
+            url: "/api/common/v1/user/reset_password/"
+            data:
+                email: @scope.email
+            headers:
+                "Content-Type": "application/json"
+        # Turn on loading mode
+        @scope.loading = true
+        @http(config).then (response)=>
+            data = response.data
+            # Turn off loading mode
+            @scope.loading = false
+            if data? and data.success
+                @scope.mailSent = data.success
+            else
+                @scope.error = data.error_message if data.error_message?
+
+
+    reset_password_confirm: =>
+        token = @location.search()['token']
+        if !token?
+            @scope.invalidURL = true
+            @scope.error = "Invalid URL, please use the link contained in your password reset email."
+        else
+            delete @scope.invalidURL
+            config =
+                method: "POST"
+                url: "/api/common/v1/user/reset_password_confirm/"
+                data: 
+                    password: @scope.newPassword
+                    token: token
+                headers:
+                    "Content-Type": "application/json"
+
+            # Turn on loading mode
+            @scope.loading = true
+            @http(config).then (response)=>
+                data = response.data
+                # Turn off loading mode
+                @scope.loading = false
+                if data? and data.success
+                    delete @scope.error
+                    @scope.passwordReset = true 
+                else
+                    @scope.error = data.error_message if data.error_message?
+
 
     logout: =>
         config = 
@@ -112,7 +166,7 @@ class UserCtrl
         # succefull logout
         @http(config).then (response) =>  
             # Turn off loading mode
-            @scope.loading = false                
+            @scope.loading = false     
             # Interpret the respose                       
             if response.data? and response.data.success
                 # Redirect to login form

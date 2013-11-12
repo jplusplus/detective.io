@@ -184,16 +184,22 @@ class UserResource(ModelResource):
         Send the reset password email to user with the proper URL.
         """ 
         self.method_check(request, allowed=['post'])
-        data    = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
-        user    = User.objects.get(email=data['email'])
-        recover = Recover()
-        recover.user = user
-        recover.request = request
-        recover.email_template_name = 'email-reset-password.html'
-        recover.send_notification()
-
-        return self.create_response(request, { 'success': True })
-
+        data = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
+        try:
+            email   = data['email']
+            if len(email) is 0:
+                raise KeyError('email')
+            user    = User.objects.get(email=email)
+            recover = Recover()
+            recover.user = user
+            recover.request = request
+            recover.email_template_name = 'email-reset-password.html'
+            recover.send_notification()
+            return self.create_response(request, { 'success': True })
+        except User.DoesNotExist:
+            return self.create_response(request, { 'success': False, 'error_message': 'The specified email doesn\'t match with any user' } )
+        except KeyError:
+            return self.create_response(request, { 'success': False, 'error_message': 'User email is required.' } )
     def reset_password_confirm(self, request, **kwargs):
         """
         Reset the password if the POST's token parameter is a valid token

@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective.apps.common.models import Country
-from app.detective.apps.energy.models import Organization, EnergyProject, Person
-from django.contrib.auth.models       import User
-from django.core.exceptions           import ObjectDoesNotExist
-from tastypie.test                    import ResourceTestCase, TestApiClient
+from app.detective.apps.common.message import SaltMixin
+from app.detective.apps.common.models  import Country
+from app.detective.apps.energy.models  import Organization, EnergyProject, Person
+from django.contrib.auth.models        import User
+from django.core                       import signing
+from django.core.exceptions            import ObjectDoesNotExist
+from tastypie.test                     import ResourceTestCase, TestApiClient
 import json
 import urllib
 
@@ -24,6 +26,7 @@ class ApiTestCase(ResourceTestCase):
         # Look for the test user
         self.username = u'tester'
         self.password = u'tester'
+        self.salt     = SaltMixin.salt
         try:
             self.user = User.objects.get(username=self.username)
             jpp       = Organization.objects.get(name=u"Journalism++")
@@ -152,13 +155,39 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)
         self.assertTrue(data['success'])
 
-    def test_reset_password_fail(self):
+    def test_reset_password_wrong_email(self):
         email = dict(email="wrong_email@detective.io")
         resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=email)
         self.assertValidJSON(resp.content)
         data = json.loads(resp.content)
         self.assertIsNotNone(data['error_message'])
         self.assertFalse(data['success'])
+
+    def test_reset_password_no_data(self):
+        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json')
+        self.assertValidJSON(resp.content)
+        data = json.loads(resp.content)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error_message'], 'User email is required.')    
+
+    def test_reset_password_empty_email(self):
+        email = dict(email="")
+        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json')
+        self.assertValidJSON(resp.content)
+        data = json.loads(resp.content)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error_message'], 'User email is required.')
+
+    def test_reset_password_confirm_succes(self):
+        token = signing.dumps(self.user.pk, salt=self.salt)
+        password = "testtest"
+        auth = dict(password=password, token=token)
+        resp = self.api_client.post('/api/common/v1/user/reset_password_confirm/', format='json', data=auth)
+        self.assertValidJSON(resp.content)
+        data = json.loads(resp.content)
+        self.assertTrue(data['success'])
+        user = User.objects.get(email=self.user.email)
+        self.assertTrue(user.check_password(password))
 
     def test_get_list_unauthorzied(self):
         self.assertHttpUnauthorized(self.api_client.get('/api/energy/v1/energyproject/', format='json'))

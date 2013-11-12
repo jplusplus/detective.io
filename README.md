@@ -26,3 +26,7 @@ make run
 ```
 
 Then visit [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+## License
+
+This software is under the [GNU GENERAL PUBLIC LICENSE v3](./LICENSE).

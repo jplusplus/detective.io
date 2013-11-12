@@ -144,6 +144,22 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)
         self.assertEqual(data["is_logged"], True)
 
+    def test_reset_password_success(self):
+        email = dict(email="tester@detective.io")
+        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=email)
+        self.assertValidJSON(resp.content)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        self.assertTrue(data['success'])
+
+    def test_reset_password_fail(self):
+        email = dict(email="wrong_email@detective.io")
+        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=email)
+        self.assertValidJSON(resp.content)
+        data = json.loads(resp.content)
+        self.assertIsNotNone(data['error_message'])
+        self.assertFalse(data['success'])
+
     def test_get_list_unauthorzied(self):
         self.assertHttpUnauthorized(self.api_client.get('/api/energy/v1/energyproject/', format='json'))
 
@@ -293,4 +309,3 @@ class ApiTestCase(ResourceTestCase):
         pb_t = find(lambda x: x['name'] == self.pb.name, objects)
         self.assertIsNotNone(pr_t)
         self.assertIsNotNone(pb_t)
-

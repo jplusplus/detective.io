@@ -51,7 +51,8 @@ class CommandsTestCase(TestCase):
         call_command('importusers')
 
     def test_reindex(self):
-        Country.objects.create(name="France", isoa3="FRA")
+        c = Country(name="France", isoa3="FRA")
+        c.save()
         # Catch output
         output = StringIO()
         sys.stdout = output

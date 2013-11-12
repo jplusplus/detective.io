@@ -153,6 +153,7 @@ class UserResource(ModelResource):
         
         user = User.objects.get(pk=pk)
         user.set_password(raw_password)
+        user.save()
         return self.create_response(request, { 'success': True })
 
 

@@ -14,15 +14,17 @@
 					<button class="btn btn-primary">Sign in</button>	
 				</div>
 
-				<div class="clearfix tr top05 bottom10">
+				<div class="clearfix tl top05 bottom10 login-controls">
     		    	<span class="label label-danger pull-left top05" ng-if="error">[[error]]</span>	
-					<div class="checkbox">
+					<div class="login-control" class="checkbox">
 				        <label>
-				          <input type="checkbox" ng-model="remember_me"> Remember me
+				        	<input type="checkbox" ng-model="remember_me"> Remember me
 				        </label>
 				    </div>
-				    <a href="reset_password"> Password forgot?</a>
-			    </div>
+					<div class="login-control">
+			    		<label><a href="reset_password"> Password forgot?</a></label>
+			    	</div>
+		    	</div>
 			</fieldset>
 		</form>
 

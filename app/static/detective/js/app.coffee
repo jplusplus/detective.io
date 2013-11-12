@@ -44,6 +44,14 @@ detective = angular
                         controller: UserCtrl
                         templateUrl: "/partial/signup.html"
                     })
+                    .when('/reset_password', {
+                        controller: UserCtrl
+                        templateUrl: "/partial/reset-password.html"  
+                    })
+                    .when('/reset_password_confirm', {
+                        controller: UserCtrl
+                        templateUrl: "/partial/reset-password-confirm.html"  
+                    })
                     .when('/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"

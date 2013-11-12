@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from django.core                  import signing
+from django.core.urlresolvers     import reverse
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User
@@ -15,6 +17,8 @@ from tastypie.utils               import trailing_slash
 import hashlib
 import random
 
+from password_reset.views import Reset
+from .message import Recover 
 
 class UserAuthorization(ReadOnlyAuthorization):
     def update_detail(self, object_list, bundle):
@@ -30,6 +34,8 @@ class UserResource(ModelResource):
         authorization      = UserAuthorization()
         allowed_methods    = ['get', 'post']
         always_return_data = True
+        authentication     = MultiAuthentication(BasicAuthentication(), SessionAuthentication())
+        authorization      = UserAuthorization()
         fields             = ['first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
         filtering          = {'username': ALL, 'email': ALL}
         queryset           = User.objects.all()
@@ -43,6 +49,8 @@ class UserResource(ModelResource):
             url(r'^(?P<resource_name>%s)/status%s$' % params, self.wrap_view('status'), name='api_status'),
             url(r'^(?P<resource_name>%s)/signup%s$' % params, self.wrap_view('signup'), name='api_signup'),
             url(r'^(?P<resource_name>%s)/activate%s$' % params, self.wrap_view('activate'), name='api_activate'),
+            url(r'^(?P<resource_name>%s)/reset_password%s$'         % params, self.wrap_view('reset_password'),         name='api_reset_password'),
+            url(r'^(?P<resource_name>%s)/reset_password_confirm%s$' % params, self.wrap_view('reset_password_confirm'), name='api_reset_password_confirm'),
         ]
 
     def login(self, request, **kwargs):
@@ -170,3 +178,40 @@ class UserResource(ModelResource):
             return self.create_response(request, { 'is_logged': True,  'username': request.user.username })
         else:
             return self.create_response(request, { 'is_logged': False, 'username': '' })
+
+    def reset_password(self, request, **kwargs):
+        """
+        Send the reset password email to user with the proper URL.
+        """ 
+        self.method_check(request, allowed=['post'])
+        data    = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
+        user    = User.objects.get(email=data['email'])
+        recover = Recover()
+        recover.user = user
+        recover.request = request
+        recover.email_template_name = 'email-reset-password.html'
+        recover.send_notification()
+
+        return self.create_response(request, { 'success': True })
+
+    def reset_password_confirm(self, request, **kwargs):
+        """
+        Reset the password if the POST's token parameter is a valid token
+        """
+        self.method_check(request, allowed=['post'])
+        reset        = Reset()
+        data         = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
+        tok          = data['token']
+        raw_password = data['password']
+        try:
+            pk = signing.loads(tok, max_age=reset.token_expires,salt=reset.salt)
+        except signing.BadSignature:
+            return self.create_response(request, { 'success': False, 'error_message': 'Wrong signature, your token may had expired (valid for 48 hours)' })
+        
+        user = User.objects.get(pk=pk)
+        user.set_password(raw_password)
+        user.save()
+        return self.create_response(request, { 'success': True })
+
+
+

@@ -101,7 +101,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', '#_o0^tt=lv1k8k-h=n%^=e&amp;vnvcxpnl=6+%&am
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -183,6 +183,7 @@ INSTALLED_APPS = (
     'app.detective',
     'app.detective.apps.common',
     'app.detective.apps.energy',
+    'password_reset',
 )
 
 MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")

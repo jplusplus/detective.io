@@ -49,6 +49,8 @@ class CommandsTestCase(TestCase):
         call_command('importusers')
 
     def test_reindex(self):
+        c = Country(name="France", isoa3="FRA")
+        c.save()
         # Catch output
         output = StringIO()
         sys.stdout = output

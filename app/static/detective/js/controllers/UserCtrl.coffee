@@ -18,6 +18,8 @@ class UserCtrl
         @scope.login   = @login
         @scope.logout  = @logout
         @scope.signup  = @signup
+        @scope.reset_password = @reset_password
+        @scope.reset_password_confirm = @reset_password_confirm
         # Set page title with no title-case
         switch @location.path()
             when "/signup"
@@ -27,6 +29,10 @@ class UserCtrl
             when "/account/activate"
                 @Page.title "Activate your account", false
                 @readToken()
+            when "/reset_password"
+                @Page.title "Reset password", false     
+            when "/reset_password_confirm/"
+                @Page.title "Enter a new password", false
 
 
 
@@ -103,6 +109,55 @@ class UserCtrl
             else
                 # Record the error
                 @scope.error = response.data.error_message if response.data.error_message?
+
+    reset_password: =>
+        config = 
+            method: "POST"
+            url: "/api/common/v1/user/reset_password/"
+            data:
+                email: @scope.email
+            headers:
+                "Content-Type": "application/json"
+        # Turn on loading mode
+        @scope.loading = true
+        @http(config).then (response)=>
+            data = response.data
+            # Turn off loading mode
+            @scope.loading = false
+            if data? and data.success
+                @scope.mailSent = data.success
+            else
+                @scope.error = data.error_message if data.error_message?
+
+
+    reset_password_confirm: =>
+        token = @location.search()['token']
+        if !token?
+            @scope.invalidURL = true
+            @scope.error = "Invalid URL, please use the link contained in your password reset email."
+        else
+            delete @scope.invalidURL
+            config =
+                method: "POST"
+                url: "/api/common/v1/user/reset_password_confirm/"
+                data: 
+                    password: @scope.newPassword
+                    token: token
+                headers:
+                    "Content-Type": "application/json"
+
+            # Turn on loading mode
+            @scope.loading = true
+            @http(config).then (response)=>
+                data = response.data
+                # Turn off loading mode
+                @scope.loading = false
+                if data? and data.success
+                    delete @scope.error
+                    @scope.passwordReset = true 
+                else
+                    @scope.error = data.error_message if data.error_message?
+
 
     logout: =>
         config =

@@ -1,0 +1,8 @@
+{% load i18n %}
+{% blocktrans %}Hi,
+
+Follow this link to activate your account:{% endblocktrans %}
+http://{{ site.domain }}{% url 'registration_activate' %}?token={{activation_key}}
+
+—
+{% blocktrans %}This link is valid for {{ expiration_days }} days.{% endblocktrans %}

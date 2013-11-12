@@ -47,7 +47,10 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'compressor',
     'tastypie',
+    'registration',
     'app.detective',
+    'app.detective.apps.common',
+    'app.detective.apps.energy'
 )
 
 SECRET_KEY="<SET A SECRET KEY HERE>"

@@ -1,8 +1,8 @@
 detective = angular
     .module('detective', ["detectiveServices", "detectiveFilters", "ui.bootstrap"])
     .run(
-        [             
-            '$rootScope', 
+        [
+            '$rootScope',
             '$location',
             'User'
             ($rootScope, $location, user)->
@@ -28,6 +28,10 @@ detective = angular
                         controller: HomeCtrl
                         templateUrl: "/partial/home.html"
                     })
+                    .when('/account/activate', {
+                        controller: UserCtrl
+                        templateUrl: "/partial/account-activation.html"
+                    })
                     .when('/404', {
                         controller: NotFoundCtrl
                         templateUrl: "/partial/404.html"
@@ -51,25 +55,25 @@ detective = angular
                     .when('/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"
-                    })  
+                    })
                     # Disable common endpoints
                     .when('/common', redirectTo: '/')
                     .when('/common/contribute', redirectTo: '/')
                     .when('/:scope/contribute', {
-                        controller: ContributeCtrl  
+                        controller: ContributeCtrl
                         templateUrl: "/partial/contribute.html"
                         auth: true
                         # Resolve the Summary service before load this page
                         resolve: data: (Summary)-> Summary.get(id: "forms")
                     })
                     .when('/:scope', {
-                        controller: ExploreCtrl  
+                        controller: ExploreCtrl
                         # Allow a dynamic loading by setting the templateUrl within controller
-                        template: "<div ng-include src='templateUrl'></div>"                        
+                        template: "<div ng-include src='templateUrl'></div>"
                         auth: true
                     })
                     .when('/:scope/:type', {
-                        controller: IndividualListCtrl  
+                        controller: IndividualListCtrl
                         templateUrl: "/partial/individual-list.html"
                         reloadOnSearch: false
                         auth: true
@@ -77,9 +81,9 @@ detective = angular
                         resolve: data: (Summary)-> Summary.get(id: "forms")
                     })
                     .when('/:scope/:type/:id', {
-                        controller: IndividualSingleCtrl  
-                        templateUrl: "/partial/individual-single.html"  
-                        reloadOnSearch: false       
+                        controller: IndividualSingleCtrl
+                        templateUrl: "/partial/individual-single.html"
+                        reloadOnSearch: false
                         auth: true
                         # Resolve the Summary service before load this page
                         resolve: data: (Summary)-> Summary.get(id: "forms")

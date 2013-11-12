@@ -2,70 +2,74 @@
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
 class UserCtrl
 
-    # Injects dependancies    
+    # Injects dependancies
     @$inject : ["$scope", "$http", "$location", "$routeParams", "User", "Page", "$rootElement"]
 
-    constructor: (@scope, @http, @location, @routeParams, @User, @Page, @rootElement)-> 
-        # Set page title with no title-case
-        switch @location.path()
-            when "/signup"
-                @Page.title "Sign up", false   
-            when "/login"
-                @Page.title "Log in", false
-            when "/reset_password"
-                @Page.title "Reset password", false     
-            when "/reset_password_confirm/"
-                @Page.title "Enter a new password", false     
-
+    constructor: (@scope, @http, @location, @routeParams, @User, @Page, @rootElement)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
-        # ──────────────────────────────────────────────────────────────────────  
+        # ──────────────────────────────────────────────────────────────────────
         @scope.user    = @User
         @scope.next    = @routeParams.next or "/"
         # ──────────────────────────────────────────────────────────────────────
         # Scope method
         # ──────────────────────────────────────────────────────────────────────
         @scope.loading = false
-        @scope.login = @login
-        @scope.logout = @logout
-        @scope.signup = @signup
-        @scope.reset_password = @reset_password
+        @scope.login   = @login
+        @scope.logout  = @logout
+        @scope.signup  = @signup
+ 		@scope.reset_password = @reset_password
         @scope.reset_password_confirm = @reset_password_confirm
+        # Set page title with no title-case
+        switch @location.path()
+            when "/signup"
+                @Page.title "Sign up", false
+            when "/login"
+                @Page.title "Log in", false
+            when "/account/activate"
+                @Page.title "Activate your account", false
+                @readToken()
+            when "/reset_password"
+                @Page.title "Reset password", false     
+            when "/reset_password_confirm/"
+                @Page.title "Enter a new password", false
+
+
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
-    loginError: (error)=>        
+    loginError: (error)=>
         @User.set
             is_logged: false
             is_staff : false
-            username : '' 
+            username : ''
         # Record the error
-        @scope.error = error if error?        
+        @scope.error = error if error?
 
-    login: (el)=>    
+    login: (el)=>
         # Catch a bug with angular and browser autofill
         # Open issue https://github.com/angular/angular.js/issues/1460
-        unless @scope.username? or @scope.password?            
+        unless @scope.username? or @scope.password?
             @scope.username = @rootElement.find("[ng-model=username]").val()
             @scope.password = @rootElement.find("[ng-model=password]").val()
 
-        config = 
+        config =
             method: "POST"
             url: "/api/common/v1/user/login/"
-            data: 
+            data:
                 username    : @scope.username
                 password    : @scope.password
                 remember_me : @scope.remember_me or false
             headers:
-                "Content-Type": "application/json"       
+                "Content-Type": "application/json"
         # Turn on loading mode
         @scope.loading = true
         # succefull login
-        @http(config).then( (response) =>   
+        @http(config).then( (response) =>
             # Turn off loading mode
             @scope.loading = false
-            # Interpret the respose            
+            # Interpret the respose
             if response.data? and response.data.success
                 @User.set
                     is_logged: true
@@ -77,14 +81,14 @@ class UserCtrl
                 delete @scope.error
             else
                 # Error status
-                @loginError(response.data.error_message) 
+                @loginError(response.data.error_message)
         # Error status
-        , (response)=> @loginError(response.data.error_message))
+        , (response)=> @loginError(response.data.error_message) )
 
     signup: =>
-        config = 
+        config =
             method: "POST"
-            url: "#{@API_URL}"
+            url: "/api/common/v1/user/signup/"
             data:
                 username: @scope.username
                 email   : @scope.email
@@ -94,10 +98,10 @@ class UserCtrl
         # Turn on loading mode
         @scope.loading = true
         # succefull login
-        @http(config).then (response) =>   
+        @http(config).then (response) =>
             # Turn off loading mode
             @scope.loading = false
-            # Interpret the response            
+            # Interpret the respose
             if response.data?
                 @scope.signupSucceed = true
                 # Delete error
@@ -156,7 +160,7 @@ class UserCtrl
 
 
     logout: =>
-        config = 
+        config =
             method: "GET"
             url: "/api/common/v1/user/logout/"
             headers:
@@ -164,10 +168,10 @@ class UserCtrl
         # Turn on loading mode
         @scope.loading = true
         # succefull logout
-        @http(config).then (response) =>  
+        @http(config).then (response) =>
             # Turn off loading mode
-            @scope.loading = false     
-            # Interpret the respose                       
+            @scope.loading = false
+            # Interpret the respose
             if response.data? and response.data.success
                 # Redirect to login form
                 @location.path("/login")
@@ -176,5 +180,16 @@ class UserCtrl
                     is_logged: false
                     is_staff : false
                     username : ''
+    readToken: =>
+        @Page.loading(true)
+        config =
+            method: "GET"
+            url: "/api/common/v1/user/activate/"
+            params:
+                token: @routeParams.token
+        # Submits the token for activation
+        @http(config).then (response) =>
+            @Page.loading false
+            @scope.state = response.data? and response.data.success
 
 angular.module('detective').controller 'userCtrl', UserCtrl

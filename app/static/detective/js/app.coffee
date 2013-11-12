@@ -14,7 +14,7 @@ detective = angular
     .config(
         [
             '$interpolateProvider',
-            '$routeProvider', 
+            '$routeProvider',
             '$locationProvider'
             ($interpolateProvider, $routeProvider, $locationProvider)->
                 # Avoid a conflict with Django Template's tags
@@ -39,6 +39,14 @@ detective = angular
                     .when('/signup', {
                         controller: UserCtrl
                         templateUrl: "/partial/signup.html"
+                    })
+                    .when('/reset_password', {
+                        controller: UserCtrl
+                        templateUrl: "/partial/reset-password.html"  
+                    })
+                    .when('/reset_password_confirm', {
+                        controller: UserCtrl
+                        templateUrl: "/partial/reset-password-confirm.html"  
                     })
                     .when('/search', {
                         controller: IndividualSearchCtrl

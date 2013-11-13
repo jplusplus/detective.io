@@ -6,6 +6,7 @@ from app.detective.apps.energy.models  import Organization, EnergyProject, Perso
 from django.contrib.auth.models        import User
 from django.core                       import signing
 from django.core.exceptions            import ObjectDoesNotExist
+from registration.models               import RegistrationProfile
 from tastypie.test                     import ResourceTestCase, TestApiClient
 import json
 import urllib
@@ -26,6 +27,7 @@ class ApiTestCase(ResourceTestCase):
         # Look for the test user
         self.username = u'tester'
         self.password = u'tester'
+        self.email    = u'tester@detective.io' 
         self.salt     = SaltMixin.salt
         try:
             self.user = User.objects.get(username=self.username)
@@ -37,7 +39,7 @@ class ApiTestCase(ResourceTestCase):
 
         except ObjectDoesNotExist:
             # Create the new user
-            self.user = User.objects.create_user(self.username, 'tester@detective.io', self.password)
+            self.user = User.objects.create_user(self.username, self.email, self.password)
             self.user.is_staff = True
             self.user.is_superuser = True
             self.user.save()
@@ -94,6 +96,51 @@ class ApiTestCase(ResourceTestCase):
 
     def get_credentials(self):
         return self.api_client.client.login(username=self.username, password=self.password)
+
+    def signup_user(self, user_dict): 
+        return self.api_client.post('/api/common/v1/user/signup/', format='json', data=user_dict)
+
+    def test_user_signup_succeed(self):
+        user_dict = dict(username=u"newuser", password=u"newuser", email=u"newuser@detective.io")
+        resp = self.signup_user(user_dict)
+        self.assertHttpCreated(resp)
+
+    def test_user_signup_empty_data(self):
+        user_dict = dict(username=u"", password=u"", email=u"")
+        resp = self.signup_user(user_dict)
+        self.assertHttpBadRequest(resp)
+
+    def test_user_signup_no_data(self):
+        resp = self.api_client.post('/api/common/v1/user/signup/', format='json')
+        self.assertHttpBadRequest(resp)
+
+    def test_user_signup_existing_user(self):
+        user_dict = dict(username=self.username, password=self.password, email=self.email)
+        resp = self.signup_user(user_dict)
+        self.assertHttpForbidden(resp)
+
+    def test_user_activate_succeed(self):
+        user_dict = dict(username='myuser', password='mypassword', email='myuser@mywebsite.com')
+        self.assertHttpCreated(self.signup_user(user_dict))
+        innactive_user = User.objects.get(email=user_dict.get('email'))
+        activation_profile = RegistrationProfile.objects.get(user=innactive_user)
+        activation_key = activation_profile.activation_key
+        resp_activate = self.api_client.get('/api/common/v1/user/activate/?token=%s' % activation_key)
+        self.assertHttpOK(resp_activate)
+        user = User.objects.get(email=user_dict.get('email'))
+        self.assertTrue(user.is_active)
+
+    def test_user_activate_fake_token(self):
+        resp = self.api_client.get('/api/common/v1/user/activate/?token=FAKE')
+        self.assertHttpForbidden(resp)
+
+    def test_user_activate_no_token(self):
+        resp = self.api_client.get('/api/common/v1/user/activate/')
+        self.assertHttpBadRequest(resp)
+
+    def test_user_activate_empty_token(self):
+        resp = self.api_client.get('/api/common/v1/user/activate/?token')
+        self.assertHttpBadRequest(resp)
 
     def test_user_login_succeed(self):
         auth = dict(username=u"tester", password=u"tester")
@@ -158,36 +205,91 @@ class ApiTestCase(ResourceTestCase):
     def test_reset_password_wrong_email(self):
         email = dict(email="wrong_email@detective.io")
         resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=email)
-        self.assertValidJSON(resp.content)
-        data = json.loads(resp.content)
-        self.assertIsNotNone(data['error_message'])
-        self.assertFalse(data['success'])
+        self.assertHttpNotFound(resp)
 
     def test_reset_password_no_data(self):
         resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json')
-        self.assertValidJSON(resp.content)
-        data = json.loads(resp.content)
-        self.assertFalse(data['success'])
-        self.assertEqual(data['error_message'], 'User email is required.')    
+        self.assertHttpBadRequest(resp)
 
     def test_reset_password_empty_email(self):
-        email = dict(email="")
-        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json')
-        self.assertValidJSON(resp.content)
-        data = json.loads(resp.content)
-        self.assertFalse(data['success'])
-        self.assertEqual(data['error_message'], 'User email is required.')
+        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=dict(email=''))
+        self.assertHttpBadRequest(resp)
 
     def test_reset_password_confirm_succes(self):
+        """
+        Test to successfuly reset a password with a new one. 
+        Expected:
+            HTTP 200 - OK
+        """
         token = signing.dumps(self.user.pk, salt=self.salt)
         password = "testtest"
         auth = dict(password=password, token=token)
-        resp = self.api_client.post('/api/common/v1/user/reset_password_confirm/', format='json', data=auth)
+        resp = self.api_client.post(
+                '/api/common/v1/user/reset_password_confirm/', 
+                format='json', 
+                data=auth
+            )
         self.assertValidJSON(resp.content)
         data = json.loads(resp.content)
         self.assertTrue(data['success'])
-        user = User.objects.get(email=self.user.email)
+        # we query users to get the latest user object (updated with password)
+        user = User.objects.get(email=self.user.email) 
         self.assertTrue(user.check_password(password))
+
+    def test_reset_password_confirm_no_data(self):
+        """
+        Test on reset_password_confirm API endpoint without any data. 
+        Expected response: 
+            HTTP 400 (BadRequest). 
+        Explanation: 
+            Every request on /reset_password_confirm/ must have a JSON data payload. 
+            { 
+                password: ... // the password to reset"
+                token:    ... // the reset password token (received by emai) 
+            }
+        """
+        resp = self.api_client.post('/api/common/v1/user/reset_password_confirm/', format='json')
+        self.assertHttpBadRequest(resp)
+        self.assertIsNotNone(resp.content)
+
+    def test_reset_password_confirm_empty_data(self):
+        """
+        Test on reset_password_confirm API endpoint with empty data:
+        { 
+            password: ""
+            token: ""
+        }
+        Expected result:
+            HTTP 400 (BadRequest)
+        Explanation:
+            A reset_password_confirm request must have a password and should be 
+            authenticated with a token.
+        """ 
+        auth = dict(password='', token='')
+        resp = self.api_client.post('/api/common/v1/user/reset_password_confirm/', format='json', data=auth)
+        self.assertHttpBadRequest(resp)
+
+    def test_reset_password_confirm_fake_token(self):
+        """
+        Test on reset_password_confirm API endpoint with empty data:
+        {
+            password: ""
+            token: ""
+        }
+        Expected result:
+            HTTP 403 (Forbidden)
+        Explanation:
+            A reset_password_confirm request should be authenticated with a valid
+            token. 
+        """ 
+        fake_token = 'f4k:t0k3N'
+        auth = dict(password='newpassword', token=fake_token)
+        resp = self.api_client.post(
+                '/api/common/v1/user/reset_password_confirm/', 
+                format='json', 
+                data=auth
+            )
+        self.assertHttpForbidden(resp)
 
     def test_get_list_unauthorzied(self):
         self.assertHttpUnauthorized(self.api_client.get('/api/energy/v1/energyproject/', format='json'))

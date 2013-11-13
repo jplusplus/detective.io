@@ -9,6 +9,7 @@ from django.contrib.sites.models  import RequestSite
 from django.db                    import IntegrityError
 from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
 from registration.models          import RegistrationProfile, RegistrationManager, SHA1_RE
+from tastypie                     import http
 from tastypie.authentication      import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization       import ReadOnlyAuthorization
 from tastypie.constants           import ALL
@@ -19,6 +20,11 @@ import random
 
 from password_reset.views import Reset
 from .message import Recover 
+
+
+class MalformedRequestError(KeyError):
+    pass
+
 
 class UserAuthorization(ReadOnlyAuthorization):
     def update_detail(self, object_list, bundle):
@@ -34,8 +40,6 @@ class UserResource(ModelResource):
         authorization      = UserAuthorization()
         allowed_methods    = ['get', 'post']
         always_return_data = True
-        authentication     = MultiAuthentication(BasicAuthentication(), SessionAuthentication())
-        authorization      = UserAuthorization()
         fields             = ['first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
         filtering          = {'username': ALL, 'email': ALL}
         queryset           = User.objects.all()
@@ -106,11 +110,18 @@ class UserResource(ModelResource):
         bundle.data["password"] = u"☘"
         return bundle
 
+    def get_activation_key(self, username=""):
+        salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
+        if isinstance(username, unicode):
+            username = username.encode('utf-8')
+        return hashlib.sha1(salt+username).hexdigest()
+
     def signup(self, request, **kwargs):
         self.method_check(request, allowed=['post'])
         data = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
 
         try:
+            self.validate_request(data, ['username', 'email', 'password'])
             user = User.objects.create_user(
                 data.get("username"),
                 data.get("email"),
@@ -119,35 +130,26 @@ class UserResource(ModelResource):
             # Create an inactive user
             setattr(user, "is_active", False)
             user.save()
+            # Send activation key by email
+            activation_key = self.get_activation_key(user.username)
+            rp = RegistrationProfile.objects.create(user=user, activation_key=activation_key)
+            rp.send_activation_email( RequestSite(request) )
+            # Output the answer
+            return http.HttpCreated()
+        except MalformedRequestError as e:
+            return http.HttpBadRequest(e)
         except IntegrityError as e:
-            return self.create_response(request, {
-                'success': False,
-                'error': e
-            })
-        # Send activation key by email
-        activation_key = self.get_activation_key(user.username)
-        rp = RegistrationProfile.objects.create(user=user, activation_key=activation_key)
-        rp.send_activation_email( RequestSite(request) )
-        # Output the answer
-        return self.create_response(request, {
-            'success': True
-        })
-
-    def get_activation_key(self, username=""):
-        salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-        if isinstance(username, unicode):
-            username = username.encode('utf-8')
-        return hashlib.sha1(salt+username).hexdigest()
-
-
+            return http.HttpForbidden("%s in request payload (JSON)" % e)
+        
     def activate(self, request, **kwargs):
-        token = request.GET.get("token", None)
-        success = False
-        # Make sure the key we're trying conforms to the pattern of a
-        # SHA1 hash; if it doesn't, no point trying to look it up in
-        # the database.
-        if SHA1_RE.search(token):
-            try:
+        try:
+            self.validate_request(request.GET, ['token'])
+            token = request.GET.get("token", None)
+            success = False
+            # Make sure the key we're trying conforms to the pattern of a
+            # SHA1 hash; if it doesn't, no point trying to look it up in
+            # the database.
+            if SHA1_RE.search(token):
                 profile = RegistrationProfile.objects.get(activation_key=token)
                 if not profile.activation_key_expired():
                     user = profile.user
@@ -155,14 +157,19 @@ class UserResource(ModelResource):
                     user.save()
                     profile.activation_key = RegistrationProfile.ACTIVATED
                     profile.save()
-                    success = True
-            except RegistrationProfile.DoesNotExist:
-                success = False
+                    return self.create_response(request, {
+                            "success": True
+                        })
+                else:
+                    return http.HttpForbidden('Your activation token is no longer active or valid')
+            else:
+                return http.HttpForbidden('Your activation token  is no longer active or valid')
 
-        return self.create_response(request, {
-            "success": success
-        })
+        except RegistrationProfile.DoesNotExist:
+            return http.HttpNotFound('Your activation token is no longer active or valid')
 
+        except MalformedRequestError as e:
+            return http.HttpBadRequest("%s as request GET parameters" % e)
 
     def logout(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
@@ -186,9 +193,8 @@ class UserResource(ModelResource):
         self.method_check(request, allowed=['post'])
         data = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
         try:
+            self.validate_request(data, ['email'])
             email   = data['email']
-            if len(email) is 0:
-                raise KeyError('email')
             user    = User.objects.get(email=email)
             recover = Recover()
             recover.user = user
@@ -198,27 +204,51 @@ class UserResource(ModelResource):
             recover.send_notification()
             return self.create_response(request, { 'success': True })
         except User.DoesNotExist:
-            return self.create_response(request, { 'success': False, 'error_message': 'The specified email doesn\'t match with any user' } )
-        except KeyError:
-            return self.create_response(request, { 'success': False, 'error_message': 'User email is required.' } )
+            message = 'The specified email (%s) doesn\'t match with any user' % email
+            return http.HttpNotFound(message)
+        except MalformedRequestError as error:
+            return http.HttpBadRequest("%s in request payload (JSON)" % error)
+    
     def reset_password_confirm(self, request, **kwargs):
         """
         Reset the password if the POST's token parameter is a valid token
         """
         self.method_check(request, allowed=['post'])
-        reset        = Reset()
-        data         = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
-        tok          = data['token']
-        raw_password = data['password']
+        reset = Reset()
+        data  = self.deserialize(
+                    request, 
+                    request.raw_post_data, 
+                    format=request.META.get('CONTENT_TYPE', 'application/json')
+                )
         try:
+            self.validate_request(data, ['token', 'password'])
+            tok          = data['token']
+            raw_password = data['password']
             pk = signing.loads(tok, max_age=reset.token_expires,salt=reset.salt)
+            user = User.objects.get(pk=pk)
+            user.set_password(raw_password)
+            user.save()
+            return self.create_response(request, { 'success': True })
         except signing.BadSignature:
-            return self.create_response(request, { 'success': False, 'error_message': 'Wrong signature, your token may had expired (valid for 48 hours)' })
-        
-        user = User.objects.get(pk=pk)
-        user.set_password(raw_password)
-        user.save()
-        return self.create_response(request, { 'success': True })
+            return http.HttpForbidden('Wrong signature, your token may had expired (valid for 48 hours).')
+        except MalformedRequestError as e:
+            return http.HttpBadRequest(e)
 
+     
+    def validate_request(self, data, fields):
+        """ 
+        Validate passed `data` based on the required `fields`.
+        """
+        missing_fields = []
+        for field in fields:
+            if field not in data.keys() or data[field] is None or data[field] == "":
+                missing_fields.append(field)
+
+        if len(missing_fields) > 0:
+            message = "Malformed request. The following fields are required: %s" % ', '.join(missing_fields)
+            raise MalformedRequestError(message)
+
+
+            
 
 

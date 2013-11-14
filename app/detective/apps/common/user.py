@@ -20,10 +20,7 @@ import random
 
 from password_reset.views import Reset
 from .message import Recover 
-
-
-class MalformedRequestError(KeyError):
-    pass
+from .errors  import *
 
 
 class UserAuthorization(ReadOnlyAuthorization):
@@ -60,7 +57,7 @@ class UserResource(ModelResource):
     def login(self, request, **kwargs):
         self.method_check(request, allowed=['post'])
 
-        data = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
+        data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
 
         username    = data.get('username', '')
         password    = data.get('password', '')
@@ -118,7 +115,7 @@ class UserResource(ModelResource):
 
     def signup(self, request, **kwargs):
         self.method_check(request, allowed=['post'])
-        data = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
+        data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
 
         try:
             self.validate_request(data, ['username', 'email', 'password'])
@@ -191,7 +188,7 @@ class UserResource(ModelResource):
         Send the reset password email to user with the proper URL.
         """ 
         self.method_check(request, allowed=['post'])
-        data = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
+        data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
         try:
             self.validate_request(data, ['email'])
             email   = data['email']
@@ -217,7 +214,7 @@ class UserResource(ModelResource):
         reset = Reset()
         data  = self.deserialize(
                     request, 
-                    request.raw_post_data, 
+                    request.body, 
                     format=request.META.get('CONTENT_TYPE', 'application/json')
                 )
         try:

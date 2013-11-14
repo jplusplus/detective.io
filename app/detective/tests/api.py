@@ -31,11 +31,11 @@ class ApiTestCase(ResourceTestCase):
         self.salt     = SaltMixin.salt
         try:
             self.user = User.objects.get(username=self.username)
-            jpp       = Organization.objects.get(name=u"Journalism++")
-            jg        = Organization.objects.get(name=u"Journalism Grant")
-            fra       = Country.objects.get(name=u"France")
-            self.pr = pr = Person.objects.get(name=u"Pierre Roméra")
-            self.pb = pb = Person.objects.get(name=u"Pierre Bellon")
+            self.jpp  = jpp = Organization.objects.get(name=u"Journalism++")
+            self.jg   = jg  = Organization.objects.get(name=u"Journalism Grant")
+            self.fra  = fra = Country.objects.get(name=u"France")
+            self.pr   = pr  = Person.objects.get(name=u"Pierre Roméra")
+            self.pb   = pb  = Person.objects.get(name=u"Pierre Bellon")
 
         except ObjectDoesNotExist:
             # Create the new user
@@ -44,9 +44,11 @@ class ApiTestCase(ResourceTestCase):
             self.user.is_superuser = True
             self.user.save()
             # Create related objects
-            jpp = Organization(name=u"Journalism++")
+            self.jpp = jpp = Organization(name=u"Journalism++")
+            jpp._author = [self.user.pk]
             jpp.save()
-            jg  = Organization(name=u"Journalism Grant")
+            self.jg = jg  = Organization(name=u"Journalism Grant")
+            jg._author = [self.user.pk]
             jg.save()
             fra = Country(name=u"France", isoa3=u"FRA")
             fra.save()
@@ -383,6 +385,19 @@ class ApiTestCase(ResourceTestCase):
     def test_summary_list(self):
         self.assertHttpNotFound(self.api_client.get('/api/common/v1/summary/', format='json'))
 
+    def test_summary_mine_success(self):
+        resp = self.api_client.get('/api/common/v1/summary/mine/', authentication=self.get_credentials(), format='json')
+        self.assertValidJSONResponse(resp)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        objects = data['objects']
+        jpp_t = find(lambda x: x['label'] == self.jpp.name, objects)
+        jg_t  = find(lambda x: x['label'] == self.jg.name,  objects)
+        self.assertIsNotNone(jpp_t)
+        self.assertIsNotNone(jg_t)
+
+    def test_summary_mine_unauthenticated(self):
+        self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/summary/mine/', format='json'))
 
     def test_countries_summary(self):
         resp = self.api_client.get('/api/common/v1/summary/countries/', format='json', authentication=self.get_credentials())

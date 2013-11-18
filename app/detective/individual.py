@@ -8,7 +8,6 @@ from django.core.exceptions             import ObjectDoesNotExist
 from django.core.paginator              import Paginator, InvalidPage
 from django.db.models.query             import QuerySet
 from django.http                        import Http404
-from django.utils.formats               import ISO_INPUT_FORMATS
 from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
@@ -23,6 +22,7 @@ from datetime                           import datetime
 import json
 import re
 
+# inspired from django.utils.formats.ISO_FORMATS['DATE_INPUT_FORMATS'][1]
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
@@ -224,7 +224,6 @@ class IndividualResource(ModelResource):
         return bundle
 
     def hydrate(self, bundle):
-        print "hydrate"
         # Convert author to set to avoid duplicate
         bundle.obj._author = set(bundle.obj._author)
         bundle.obj._author.add(bundle.request.user.id)
@@ -235,7 +234,6 @@ class IndividualResource(ModelResource):
         return bundle
 
     def hydrate_m2m(self, bundle):
-        print "hydrate_m2m"
         # By default, every individual from staff are validated
         bundle.data["_status"] = 1*bundle.request.user.is_staff
 
@@ -443,14 +441,10 @@ class IndividualResource(ModelResource):
 
         if len(data) > 0:
             val = (getattr(node, field), field)
-            # print "node patched, let's save it"
             # Convert author to set to avoid duplicate
             node._author = set(node._author)
             node._author.add(request.user.id)
             node._author = list(node._author)
-            # print "pre-save value: %s, field: %s" % (getattr(node, field), field)
-            # print "type of field value: ", type(val)
             # Save the node
             node.save()
-            # print "post-save value: %s, field: %s" % (getattr(node, field), field)
         return self.create_response(request, data)

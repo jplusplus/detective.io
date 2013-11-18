@@ -8,6 +8,8 @@ from django.core.exceptions             import ObjectDoesNotExist
 from django.core.paginator              import Paginator, InvalidPage
 from django.db.models.query             import QuerySet
 from django.http                        import Http404
+from django.utils.formats               import ISO_INPUT_FORMATS
+from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
 from tastypie.authentication            import SessionAuthentication, BasicAuthentication, MultiAuthentication
@@ -17,9 +19,11 @@ from tastypie.exceptions                import Unauthorized
 from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
+from datetime                           import datetime
 import json
 import re
 
+RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
     def read_detail(self, object_list, bundle):
@@ -97,6 +101,14 @@ class IndividualResource(ModelResource):
         # Find fields of the queryset's model
         return self.get_model()._meta.fields
 
+    def get_model_field(self, name):
+        target = None 
+        fields = self.get_model_fields()
+        for field in fields:
+            if field.name == name:
+                target = field
+        return target
+
     def need_to_many_field(self, field):
         # Limit the definition of the new fields
         # to the relationships
@@ -170,7 +182,6 @@ class IndividualResource(ModelResource):
 
         return bundle
 
-
     def dehydrate(self, bundle):
         # Show additional field following the model's rules
         rules = register_model_rules().model( self.get_model() )
@@ -213,6 +224,7 @@ class IndividualResource(ModelResource):
         return bundle
 
     def hydrate(self, bundle):
+        print "hydrate"
         # Convert author to set to avoid duplicate
         bundle.obj._author = set(bundle.obj._author)
         bundle.obj._author.add(bundle.request.user.id)
@@ -223,6 +235,7 @@ class IndividualResource(ModelResource):
         return bundle
 
     def hydrate_m2m(self, bundle):
+        print "hydrate_m2m"
         # By default, every individual from staff are validated
         bundle.data["_status"] = 1*bundle.request.user.is_staff
 
@@ -378,6 +391,7 @@ class IndividualResource(ModelResource):
         self.throttle_check(request)
 
         model = self.get_model()
+        fields = self.get_model_fields()
         try:
             node = model.objects.select_related(depth=1).get(id=kwargs["pk"])
         except ObjectDoesNotExist:
@@ -416,6 +430,10 @@ class IndividualResource(ModelResource):
                                 continue
                 # It's a literal value
                 else:
+                    field_prop = self.get_model_field(field)._property
+                    if isinstance(field_prop, DateProperty):
+                        # It's a date and therefor `value` should be converted as it 
+                        value  = datetime.strptime(value, RFC_DATETIME_FORMAT)
                     # Set the new value
                     setattr(node, field, value)
                 # Continue to not deleted the field
@@ -424,10 +442,15 @@ class IndividualResource(ModelResource):
             del data[field]
 
         if len(data) > 0:
+            val = (getattr(node, field), field)
+            # print "node patched, let's save it"
             # Convert author to set to avoid duplicate
             node._author = set(node._author)
             node._author.add(request.user.id)
             node._author = list(node._author)
+            # print "pre-save value: %s, field: %s" % (getattr(node, field), field)
+            # print "type of field value: ", type(val)
             # Save the node
             node.save()
+            # print "post-save value: %s, field: %s" % (getattr(node, field), field)
         return self.create_response(request, data)

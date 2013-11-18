@@ -18,6 +18,13 @@ class IndividualSearchCtrl extends IndividualListCtrl
         @scope.verbose_name = "individual"
         @scope.verbose_name_plural = "individuals"
         @Page.title @scope.verbose_name_plural     
+
+    singleUrl: (individual)=>
+        console.log 'singleUrl: individual = ', individual 
+        model = individual.model.split(':')
+        type  = model[1].toLowerCase()
+        "/#{model[0]}/#{type}/#{individual.id}"
+
     # Define search parameter using route's params
     getParams: =>
         # No query, no search

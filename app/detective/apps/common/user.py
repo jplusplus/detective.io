@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from django.core                  import signing
-from django.core.urlresolvers     import reverse
+from .errors                      import *
+from .message                     import Recover
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User
 from django.contrib.sites.models  import RequestSite
+from django.core                  import signing
 from django.db                    import IntegrityError
 from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
-from registration.models          import RegistrationProfile, RegistrationManager, SHA1_RE
+from password_reset.views         import Reset
+from registration.models          import RegistrationProfile, SHA1_RE
 from tastypie                     import http
 from tastypie.authentication      import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization       import ReadOnlyAuthorization
@@ -18,9 +20,6 @@ from tastypie.utils               import trailing_slash
 import hashlib
 import random
 
-from password_reset.views import Reset
-from .message import Recover 
-from .errors  import *
 
 
 class UserAuthorization(ReadOnlyAuthorization):
@@ -137,7 +136,7 @@ class UserResource(ModelResource):
             return http.HttpBadRequest(e)
         except IntegrityError as e:
             return http.HttpForbidden("%s in request payload (JSON)" % e)
-        
+
     def activate(self, request, **kwargs):
         try:
             self.validate_request(request.GET, ['token'])
@@ -186,7 +185,7 @@ class UserResource(ModelResource):
     def reset_password(self, request, **kwargs):
         """
         Send the reset password email to user with the proper URL.
-        """ 
+        """
         self.method_check(request, allowed=['post'])
         data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
         try:
@@ -205,7 +204,7 @@ class UserResource(ModelResource):
             return http.HttpNotFound(message)
         except MalformedRequestError as error:
             return http.HttpBadRequest("%s in request payload (JSON)" % error)
-    
+
     def reset_password_confirm(self, request, **kwargs):
         """
         Reset the password if the POST's token parameter is a valid token
@@ -213,8 +212,8 @@ class UserResource(ModelResource):
         self.method_check(request, allowed=['post'])
         reset = Reset()
         data  = self.deserialize(
-                    request, 
-                    request.body, 
+                    request,
+                    request.body,
                     format=request.META.get('CONTENT_TYPE', 'application/json')
                 )
         try:
@@ -231,9 +230,9 @@ class UserResource(ModelResource):
         except MalformedRequestError as e:
             return http.HttpBadRequest(e)
 
-     
+
     def validate_request(self, data, fields):
-        """ 
+        """
         Validate passed `data` based on the required `fields`.
         """
         missing_fields = []
@@ -246,6 +245,6 @@ class UserResource(ModelResource):
             raise MalformedRequestError(message)
 
 
-            
+
 
 

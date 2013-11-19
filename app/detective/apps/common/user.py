@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from django.core                  import signing
-from django.core.urlresolvers     import reverse
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User
@@ -196,8 +195,8 @@ class UserResource(ModelResource):
             recover = Recover()
             recover.user = user
             recover.request = request
-            recover.email_template_name = 'email-reset-password.html'
-            recover.email_subject_template_name = 'reset-email-subject.txt'
+            recover.email_template_name = 'reset_password_email.txt'
+            recover.email_subject_template_name = 'reset_password_email_subject.txt'
             recover.send_notification()
             return self.create_response(request, { 'success': True })
         except User.DoesNotExist:

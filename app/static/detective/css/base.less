@@ -19,7 +19,6 @@
 body {
     position:relative;
     z-index:@zindex-context;
-    padding-bottom:60px;
 
     a {
     	cursor: pointer;
@@ -614,4 +613,40 @@ header {
 		}
 	}
 
+}
+
+
+footer {
+    margin-top:80px;
+    font-size:90%;
+
+	.links {
+		@bg:lighten(@body-bg, 5);
+		background:@bg;
+
+		ul, li {
+			margin:0;
+			padding:0;
+
+			a {
+				text-transform: uppercase;
+				text-decoration: none;
+				font-size:80%;
+				display:inline-block;
+				padding:0 30px;
+				height:70px;
+				line-height:70px;
+				border-left:1px @body-bg solid;
+				color:mix(@link-color, @bg);
+			}
+
+			.last a {
+				border-right:1px @body-bg solid;
+			}
+		}
+	}
+
+	.legals {
+		padding:10px;
+	}
 }

@@ -63,9 +63,33 @@
     	{% include "partials/header.dj.html" %}
         <div ng-view id="content" ng-class="{ spinner: Page.loading() }"></div>
     </div>
+    <footer>
+        <div class="links">
+            <div class="container">
+                <ul class="pull-right list-inline logos">
+                    <li>
+                        <a href="http://journalismgrants.org" target="_blank">
+                            <img src="{% static 'detective/img/jg.png' %}" alt="Journalism Grant" />
+                        </a>
+                    </li>
+                    <li class="last">
+                        <a href="http://jplusplus.org" target="_blank">
+                            <img src="{% static 'detective/img/jpp.png' %}" alt="Journalism++" />
+                        </a>
+                    </li>
+                </ul>
+                <ul class="list-inline">
+                    <li><a>About</a></li>
+                    <li><a href="mailto:contact@detective.io"> Contact</a></li>
+                    <li><a href="https://github.com/jplusplus/detective.io" target="_blank">Github</a></li>
+                    <li class="last"><a>Facebook</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="legals">
+            <div class="container text-muted">
+                Software under GNU GPLv3
+            </div>
+        </div>
+    </footer>
 {% endblock %}
-
-
-
-
-

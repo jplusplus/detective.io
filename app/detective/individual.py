@@ -387,9 +387,9 @@ class IndividualResource(ModelResource):
         self.method_check(request, allowed=['post'])
         #self.is_authenticated(request)
         self.throttle_check(request)
+        self.is_authenticated(request)
 
         model = self.get_model()
-        fields = self.get_model_fields()
         try:
             node = model.objects.select_related(depth=1).get(id=kwargs["pk"])
         except ObjectDoesNotExist:

@@ -3,14 +3,15 @@
 from app.detective.apps.common.message import SaltMixin
 from app.detective.apps.common.models  import Country
 from app.detective.apps.energy.models  import Organization, EnergyProject, Person
+from datetime                          import datetime 
 from django.contrib.auth.models        import User
 from django.core                       import signing
+from tastypie.utils                    import timezone
 from django.core.exceptions            import ObjectDoesNotExist
 from registration.models               import RegistrationProfile
 from tastypie.test                     import ResourceTestCase, TestApiClient
 import json
 import urllib
-
 
 def find(function, iterable):
     for el in iterable:
@@ -46,11 +47,15 @@ class ApiTestCase(ResourceTestCase):
             # Create related objects
             self.jpp = jpp = Organization(name=u"Journalism++")
             jpp._author = [self.user.pk]
+            jpp.founded = datetime(2011, 4, 3)
+            jpp.website_url = 'http://jplusplus.com'
             jpp.save()
+            
             self.jg = jg  = Organization(name=u"Journalism Grant")
             jg._author = [self.user.pk]
             jg.save()
-            fra = Country(name=u"France", isoa3=u"FRA")
+
+            self.fra = fra = Country(name=u"France", isoa3=u"FRA")
             fra.save()
 
             self.pr = pr = Person(name=u"Pierre Roméra")
@@ -96,6 +101,21 @@ class ApiTestCase(ResourceTestCase):
             }
         }
 
+    def tearDown(self):
+        if self.user:
+            self.user.delete()
+        if self.jpp:
+            self.jpp.delete()
+        if self.jg:
+            self.jg.delete()
+        if self.fra:
+            self.fra.delete()
+        if self.pr:
+            self.pr.delete()
+        if self.pb:
+            self.pb.delete()
+
+    # Utility functions (Auth, operation etc.) 
     def get_credentials(self):
         return self.api_client.client.login(username=self.username, password=self.password)
 
@@ -103,10 +123,18 @@ class ApiTestCase(ResourceTestCase):
         """ Utility method to signup through API """ 
         return self.api_client.post('/api/common/v1/user/signup/', format='json', data=user_dict)
 
+    def patch_individual(self, scope=None, model_name=None, model_id=None,
+                         patch_data=None, auth=None, skipAuth=False):
+        if not skipAuth and not auth:
+            auth = self.get_credentials()
+        url = '/api/%s/v1/%s/%d/patch/' % (scope, model_name, model_id)
+        return self.api_client.post(url, format='json', data=patch_data, authentication=auth)
+
+    # All test functions
     def test_user_signup_succeed(self):
         """
         Test with proper data to signup user
-        Expected: success
+        Expected: HTTT 201 (Created)
         """
         user_dict = dict(username=u"newuser", password=u"newuser", email=u"newuser@detective.io")
         resp = self.signup_user(user_dict)
@@ -464,3 +492,60 @@ class ApiTestCase(ResourceTestCase):
         pb_t = find(lambda x: x['name'] == self.pb.name, objects)
         self.assertIsNotNone(pr_t)
         self.assertIsNotNone(pb_t)
+
+    def test_patch_individual_date(self):
+        """
+        Test a patch request on an invidividual's date attribute
+        Expected: HTTP 200 (OK)
+        """  
+        # date are subject to special process with patch method.
+        new_date  = datetime(2011, 4, 1, 0, 0, 0, 0)
+        data = {
+            'founded': new_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpOK(resp)
+        self.assertValidJSONResponse(resp)
+        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        self.assertEqual(timezone.make_naive(updated_jpp.founded), new_date)
+
+
+
+    def test_patch_individual_name(self):
+        jpp_url  = 'http://jplusplus.org'
+        data = {
+            'website_url': jpp_url,
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpOK(resp)
+        self.assertValidJSONResponse(resp)
+        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        self.assertEqual(updated_jpp.website_url, jpp_url)
+    
+    def test_patch_individual_unauthorized(self):
+        jpp_url  = 'http://jplusplus.org'
+        data = {
+            'website_url': jpp_url,
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data,
+            'skipAuth'   : True,
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpUnauthorized(resp)
+

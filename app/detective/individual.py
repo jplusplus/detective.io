@@ -387,6 +387,7 @@ class IndividualResource(ModelResource):
         self.method_check(request, allowed=['post'])
         #self.is_authenticated(request)
         self.throttle_check(request)
+        self.is_authenticated(request)
 
         model = self.get_model()
         fields = self.get_model_fields()

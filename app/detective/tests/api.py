@@ -11,7 +11,6 @@ from django.core.exceptions            import ObjectDoesNotExist
 from registration.models               import RegistrationProfile
 from tastypie.test                     import ResourceTestCase, TestApiClient
 import json
-import pytz
 import urllib
 
 def find(function, iterable):

@@ -1,73 +1,67 @@
-<div class="container" id="explore">
+{% load staticfiles %}
 
-	<h2>Welcome to <a href="/[[scope]]">detective.io/[[scope]]</a></h2>
-	<p class="lead">Information about innovative energy projects in developing countries.</p>			
-	
-	<div class="row">
+<div id="energy">
 
-		<div class="col-md-6 bottom20">	
-			<form class="form-inline" role="search">	
-				<div class="input-group">		
-					<input  type="search" 
-						    placeholder="Search..."
-						 	tt-typeahead
-							tt-individual="'summary'"
-							tt-model="selectedIndividual"
-							remote="/api/common/v1/summary/human/?q=%QUERY"
-							prefetch="/api/common/v1/summary/mine/"
-							value-key="label"
-							limit="10"
-						   	class="form-control" 
-						   	id="input-search" />		    				
-					<div class="input-group-btn">		
-			    		<button type="submit" class="btn btn-primary">Go!</button>					    					
-			    	</div>
-			    </div>
-			</form>
-		</div>
-
-		<div class="col-md-6 tc">
-			<div class="col-xs-4">
-				<div class="panel">
-					<div class="lead margin05">[[getTypeCount("EnergyProject")]]</div>
-					<div class="panel-footer">
-						<a ng-href="/energy/energyproject">projects</a>
-					</div>
-				</div>
-			</div>
-			<div class="col-xs-4">
-				<div class="panel">
-					<div class="lead margin05">[[getTypeCount("Person")]]</div>
-					<div class="panel-footer">
-						<a  ng-href="/energy/person">persons</a>
-					</div>
-				</div>
-			</div>
-			<div class="col-xs-4">
-				<div class="panel">
-					<div class="lead margin05">[[getTypeCount("Organization", "EnergyOrganization")]]</div>
-					<div class="panel-footer">
-						<a  ng-href="/energy/organization">organizations</a>
-					</div>
+	<div class="banner banner-big" parallax=".bg" speed="0.9">
+		<img src="{% static 'detective/img/energy-heading.jpg' %}" class="bg" />
+		<div class="container fg top90">
+			<div class="row">
+				<div class="col-sm-6">
+					<h2>Innovative energy projects in developing countries</h2>
+					<p class="lead">Information about innovative energy projects in developing countries.</p>
+					<p class="top40">
+						<a class="btn btn-stroke btn-lg right20" ng-if="user.is_staff" ng-href="/energy/contribute">Contribute</a>
+						<a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">Start to explore</a>
+					</p>
 				</div>
 			</div>
 		</div>
-
 	</div>
 
+	<div class="bg-primary">
+		<div class="container">
+			<a scroll-to="600" ng-if="scrollToExplore == true" reset="scrollToExplore"></a>
+			<div class="top50 bottom40">
+				<div class="row">
+					<form class="col-sm-8 col-sm-push-2" role="search">
+						<div class="input-group">
+	  						<span class="input-group-addon"><i class="fa fa-search"></i></span>
+							<input type="search"
+								    placeholder="Search linked individuals in our graph database..."
+								 	tt-typeahead
+									tt-individual="'summary'"
+									tt-model="selectedIndividual"
+									remote="/api/common/v1/summary/human/?q=%QUERY"
+									prefetch="/api/common/v1/summary/mine/"
+									value-key="label"
+									limit="10"
+								   	class="form-control"
+								   	id="input-search" />
+					    </div>
+					</form>
+					<div class="col-sm-8 col-sm-push-2 lead top20">
+						Navigate through
+						<a ng-href="/energy/energyproject"><strong>[[getTypeCount("EnergyProject")]]</strong> projects</a>,
+						<a ng-href="/energy/person"><strong>[[getTypeCount("Person")]]</strong> persons</a> and
+						<a ng-href="/energy/organization"><strong>[[getTypeCount("Organization")]]</strong> organizations</a>.
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<hr class="hr-primary" />
 
-</div>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-4">
+				<h3>About the project</h3>
+				<p>This comprehensive knowledge base draws up an inventory of innovative energy projects in developing countries. It rigorously lists <a href="energy/energyproject/">projects</a>, their <a href="energy/organization/">owners</a> and <a href="energy/person/">key persons</a> and the relationships that link them. Journalists, investors and development professionals now have access to a wide range of sourced and structured data. It will enable them to make better informed decision in a field that dramatically lacks scrutiny. </p>
+				<p>The project was funded by a grant by the European Journalism Center in cooperation with the Bill &amp; Melinda Gates Foundation.</p>is aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla.</p>
+			</div>
 
-<div class="select-a-country">
-	<h3 class="container bottoùm-20">Select a country to know more</h3>
-	<div country-map model="selectedCountry" values="countries" />		
-</div>
-
-<div class="container">
-
-	<h3>About the project</h3>
-	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</p>
-	<p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</p>
-	<p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla.</p>
-
+			<div class="col-sm-8 select-a-country">
+				<div country-map model="selectedCountry" values="countries" class="top60" />
+			</div>
+		</div>
+	</div>
 </div>

@@ -24,8 +24,8 @@
     <script type="text/javascript" src="{% static 'typeahead.js/dist/typeahead.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'underscore/underscore.js' %}"></script>
 
-    {% compress js %}    
-        <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>    
+    {% compress js %}
+        <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/BreadcrumbCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContributeCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ExploreCtrl.coffee' %}"></script>
@@ -49,6 +49,7 @@
         <script type="text/coffeescript" src="{% static 'detective/js/directives/colorTag.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/countryMap.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/changeOnBlur.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/directives/parallax.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/pwMatch.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/scrollTo.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/ttTypeahead.coffee' %}"></script>
@@ -58,7 +59,7 @@
 {% endblock %}
 
 {% block content %}
-    <div watch-login-mandatory>        
+    <div watch-login-mandatory>
     	{% include "partials/header.dj.html" %}
         <div ng-view id="content" ng-class="{ spinner: Page.loading() }"></div>
     </div>

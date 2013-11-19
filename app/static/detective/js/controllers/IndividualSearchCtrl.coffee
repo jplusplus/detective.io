@@ -1,6 +1,6 @@
 class IndividualSearchCtrl extends IndividualListCtrl
     constructor:->
-        super      
+        super
         return @location.url("/") unless @routeParams.q?
         # Parse the JSON query
         @scope.query  = angular.fromJson @routeParams.q
@@ -8,7 +8,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
         @scope.syntax = @Individual.get type: "summary", id: "syntax"
         # Watch query change to reload the search
         @scope.search = =>
-            @location.search 'q', angular.toJson(@scope.query)                
+            @location.search 'q', angular.toJson(@scope.query)
         # Custom filter to display only subject related relationship
         @scope.currentSubject = (rel)=> rel.subject? and rel.subject == @scope.query.subject.name
 
@@ -17,7 +17,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
     getVerbose: =>
         @scope.verbose_name = "individual"
         @scope.verbose_name_plural = "individuals"
-        @Page.title @scope.verbose_name_plural     
+        @Page.title @scope.verbose_name_plural
     # Define search parameter using route's params
     getParams: =>
         # No query, no search

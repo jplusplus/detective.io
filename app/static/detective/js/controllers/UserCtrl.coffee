@@ -29,9 +29,9 @@ class UserCtrl
             when "/account/activate"
                 @Page.title "Activate your account", false
                 @readToken()
-            when "/reset_password"
+            when "/account/reset-password"
                 @Page.title "Reset password", false     
-            when "/reset_password_confirm/"
+            when "/account/reset-password-confirm"
                 @Page.title "Enter a new password", false
 
     # ──────────────────────────────────────────────────────────────────────────

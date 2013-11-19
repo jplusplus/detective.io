@@ -4,11 +4,13 @@ detective = angular
         [
             '$rootScope',
             '$location',
-            'User'
-            ($rootScope, $location, user)->
+            'User',
+            'Page',
+            ($rootScope, $location, user, Page)->
                 # Location available within templates
                 $rootScope.location = $location;
                 $rootScope.user     = user
+                $rootScope.Page     = Page
         ]
     )
     .config(
@@ -46,18 +48,24 @@ detective = angular
                     })
                     .when('/reset_password', {
                         controller: UserCtrl
-                        templateUrl: "/partial/reset-password.html"  
+                        templateUrl: "/partial/reset-password.html"
                     })
                     .when('/reset_password_confirm', {
                         controller: UserCtrl
-                        templateUrl: "/partial/reset-password-confirm.html"  
+                        templateUrl: "/partial/reset-password-confirm.html"
                     })
                     .when('/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"
                     })
+                    .when('/page/:slug', {
+                        controller: PageCtrl
+                        # Allow a dynamic loading by setting the templateUrl within controller
+                        template: "<div ng-include src='templateUrl'></div>"
+                    })
                     # Disable common endpoints
                     .when('/common', redirectTo: '/')
+                    .when('/page',   redirectTo: '/')
                     .when('/common/contribute', redirectTo: '/')
                     .when('/:scope/contribute', {
                         controller: ContributeCtrl

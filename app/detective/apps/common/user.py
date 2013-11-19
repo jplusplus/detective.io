@@ -195,8 +195,8 @@ class UserResource(ModelResource):
             recover = Recover()
             recover.user = user
             recover.request = request
-            recover.email_template_name = 'email-reset-password.html'
-            recover.email_subject_template_name = 'reset-email-subject.txt'
+            recover.email_template_name = 'reset_password_email.txt'
+            recover.email_subject_template_name = 'reset_password_email_subject.txt'
             recover.send_notification()
             return self.create_response(request, { 'success': True })
         except User.DoesNotExist:
@@ -243,8 +243,3 @@ class UserResource(ModelResource):
         if len(missing_fields) > 0:
             message = "Malformed request. The following fields are required: %s" % ', '.join(missing_fields)
             raise MalformedRequestError(message)
-
-
-
-
-

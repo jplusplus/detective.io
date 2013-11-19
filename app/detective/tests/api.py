@@ -99,15 +99,24 @@ class ApiTestCase(ResourceTestCase):
     def get_credentials(self):
         return self.api_client.client.login(username=self.username, password=self.password)
 
-    def signup_user(self, user_dict): 
+    def signup_user(self, user_dict):
+        """ Utility method to signup through API """ 
         return self.api_client.post('/api/common/v1/user/signup/', format='json', data=user_dict)
 
     def test_user_signup_succeed(self):
+        """
+        Test with proper data to signup user
+        Expected: success
+        """
         user_dict = dict(username=u"newuser", password=u"newuser", email=u"newuser@detective.io")
         resp = self.signup_user(user_dict)
         self.assertHttpCreated(resp)
 
     def test_user_signup_empty_data(self):
+        """
+        Test with empty data to signup user
+        Expected: HTTP 400 (BadRequest)
+        """
         user_dict = dict(username=u"", password=u"", email=u"")
         resp = self.signup_user(user_dict)
         self.assertHttpBadRequest(resp)

@@ -89,9 +89,15 @@
 			</div>
 
 			<div class="restore" ng-show="individual.isClosed">
-				<strong>[[individual.fields|individualPreview:"unkown"]]</strong> has been closed.
-				<a class="left10" ng-click="individual.close()">Undo</a>
-				<a class="left10" ng-click="removeIndividual($index)">Ignore</a>
+				<strong>[[individual.fields|individualPreview:"unkown"]]</strong>
+				<span ng-if="!individual.isRemoved">
+					 has been closed.
+					<a class="left10" ng-click="individual.close()">Undo</a>
+					<a class="left10" ng-click="removeIndividual($index)">Ignore</a>
+				</span>
+				<span ng-if="individual.isRemoved" class="text-danger">
+					 has been removed. Your changes have not been registered.
+				</span>
 			</div>
 
 

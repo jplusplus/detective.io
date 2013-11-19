@@ -162,6 +162,10 @@ class ContributeCtrl
                 @updating = _.omit(@updating, _.keys(data))
                 # Prevent communications between forms
                 @updating = angular.copy @updating
+            , (error)=>
+                if error.status == 404
+                    @isRemoved = true
+                    @isClosed  = true
 
         # Returns individual's scope
         getScope: => @meta.scope or @scope.routeParams.scope

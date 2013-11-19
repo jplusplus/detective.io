@@ -3,14 +3,16 @@
 from app.detective.apps.common.message import SaltMixin
 from app.detective.apps.common.models  import Country
 from app.detective.apps.energy.models  import Organization, EnergyProject, Person
+from datetime                          import datetime 
 from django.contrib.auth.models        import User
 from django.core                       import signing
+from tastypie.utils                    import timezone
 from django.core.exceptions            import ObjectDoesNotExist
 from registration.models               import RegistrationProfile
 from tastypie.test                     import ResourceTestCase, TestApiClient
 import json
+import pytz
 import urllib
-
 
 def find(function, iterable):
     for el in iterable:
@@ -46,6 +48,7 @@ class ApiTestCase(ResourceTestCase):
             # Create related objects
             self.jpp = jpp = Organization(name=u"Journalism++")
             jpp._author = [self.user.pk]
+            jpp.founded = datetime(2011, 4, 3)
             jpp.website_url = 'http://jplusplus.com'
             jpp.save()
             
@@ -490,6 +493,30 @@ class ApiTestCase(ResourceTestCase):
         pb_t = find(lambda x: x['name'] == self.pb.name, objects)
         self.assertIsNotNone(pr_t)
         self.assertIsNotNone(pb_t)
+
+    def test_patch_individual_date(self):
+        """
+        Test a patch request on an invidividual's date attribute
+        Expected: HTTP 200 (OK)
+        """  
+        # date are subject to special process with patch method.
+        new_date  = datetime(2011, 4, 1, 0, 0, 0, 0)
+        data = {
+            'founded': new_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpOK(resp)
+        self.assertValidJSONResponse(resp)
+        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        self.assertEqual(timezone.make_naive(updated_jpp.founded), new_date)
+
+
 
     def test_patch_individual_name(self):
         jpp_url  = 'http://jplusplus.org'

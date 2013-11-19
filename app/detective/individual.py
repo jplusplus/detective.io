@@ -390,7 +390,6 @@ class IndividualResource(ModelResource):
         self.is_authenticated(request)
 
         model = self.get_model()
-        fields = self.get_model_fields()
         try:
             node = model.objects.select_related(depth=1).get(id=kwargs["pk"])
         except ObjectDoesNotExist:

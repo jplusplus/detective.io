@@ -20,7 +20,6 @@ class IndividualSearchCtrl extends IndividualListCtrl
         @Page.title @scope.verbose_name_plural
 
     singleUrl: (individual)=>
-        console.log 'singleUrl: individual = ', individual
         model = individual.model.split(':')
         type  = model[1].toLowerCase()
         "/#{model[0]}/#{type}/#{individual.id}"

@@ -89,8 +89,14 @@
 			</div>
 
 			<div class="restore" ng-show="individual.isClosed">
-				<strong>[[individual.fields|individualPreview:"unkown"]]</strong>
-				<span ng-if="!individual.isRemoved">
+				<div class="btns">
+						<button ng-click="removeIndividual($index)" class="btn btn-default left10">
+							<i class="fa fa-times"></i>
+						</button>
+				</div>
+				<!-- [[ individual.fields ]] -->
+				<strong ng-hide="individual.isNotFound">[[individual.fields|individualPreview:"unkown"]]</strong>
+				<span ng-if="!individual.isRemoved && !individual.isNotFound">
 					 has been closed.
 					<a class="left10" ng-click="individual.close()">Undo</a>
 					<a class="left10" ng-click="removeIndividual($index)">Ignore</a>
@@ -98,6 +104,13 @@
 				<span ng-if="individual.isRemoved" class="text-danger">
 					 has been removed. Your changes have not been registered.
 				</span>
+				<span ng-if="individual.isNotFound">
+					<h4>Requested element cannot be found, <strong>don't panic</strong>.</h4>
+					<p>
+						You can go back to <a href="{% url 'home' %}">home page</a>.
+					</p>
+				</span>
+				<div class="clearfix"></div>
 			</div>
 
 

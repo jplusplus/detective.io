@@ -18,8 +18,8 @@ class UserCtrl
         @scope.login   = @login
         @scope.logout  = @logout
         @scope.signup  = @signup
-        @scope.reset_password = @reset_password
-        @scope.reset_password_confirm = @reset_password_confirm
+        @scope.resetPassword = @resetPassword
+        @scope.resetPasswordConfirm = @resetPasswordConfirm
         # Set page title with no title-case
         switch @location.path()
             when "/signup"
@@ -110,7 +110,7 @@ class UserCtrl
                 # Record the error
                 @scope.error = message if message?
 
-    reset_password: =>
+    resetPassword: =>
         config = 
             method: "POST"
             url: "/api/common/v1/user/reset_password/"
@@ -124,9 +124,10 @@ class UserCtrl
             .success (response)=>
                 # Turn off loading mode
                 @scope.loading = false
-                @scope.mailSent = true
+                @scope.resetEmailSent = true
                 delete @scope.error
             .error (message)=>
+                @scope.resetEmailSent = false
                 @scope.loading = false
                 if message?
                     @scope.error = message
@@ -134,7 +135,7 @@ class UserCtrl
                     @unknownError()
 
 
-    reset_password_confirm: =>
+    resetPasswordConfirm: =>
         token = @location.search()['token']
         if !token?
             @scope.invalidURL = true
@@ -158,9 +159,9 @@ class UserCtrl
                     # Turn off loading mode
                     @scope.loading = false
                     delete @scope.error
-                    @scope.passwordReset = true 
+                    @scope.resetPasswordSucceed = true 
                 .error (response, error)=>
-                    @scope.passwordReset = false
+                    @scope.resetPasswordSucceed = false 
                     @scope.error = response.data.error_message if response.data.error_message?
 
 

@@ -57,18 +57,17 @@
 				</div>
 			</div>
 		</div>
-
 		<div class="col-sm-4">
 			<div class="well padding0 text-right">
 				<span class="btn-group pull-left">
 					<a class="btn btn-default"
-					   ng-if="user.is_staff" 
+					   ng-if="user.hasPermission(scope, 'update')"
 					   ng-href="/[[scope]]/contribute/?type=[[type]]&amp;id=[[individual.id]]">
 						<i class="fa fa-edit"></i>
 						Edit
 					</a>
 					<a class="btn btn-default"
-					   ng-if="user.is_staff"
+					   ng-if="user.hasPermission(scope, 'delete')"
 					   ng-click="deleteNode()">
 						<i class="fa fa-trash-o"></i>											
 					</a>

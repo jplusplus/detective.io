@@ -26,27 +26,38 @@ import re
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
+
+    def check_contribution_permission(self, object_list, bundle):
+        authorized = False 
+        user = bundle.request.user
+        if user:
+            if user.is_staff or user.has_perm("%s.contribute" % object_list._app_label):
+                authorized = True
+        return True
+
     def read_detail(self, object_list, bundle):
         return True
 
     def create_detail(self, object_list, bundle):
-        if not (bundle.request.user and bundle.request.user.is_staff):
-            raise Unauthorized("Sorry, only staff is authorized to create resource.")
+        app_permission = has_perm("%s.contribute" % object_list)
+        if not self.check_contribution_permission(object_list, bundle):
+            raise Unauthorized("Sorry, only staff or contributors can create resource.")
         return True
 
     def update_detail(self, object_list, bundle):
-        if not (bundle.request.user and bundle.request.user.is_staff):
-            raise Unauthorized("Sorry, only staff is authorized to update resource.")
+        if not self.check_contribution_permission(object_list, bundle):
+            raise Unauthorized("Sorry, only staff or contributors can update resource.")
         return True
 
     def delete_detail(self, object_list, bundle):
-        if not (bundle.request.user and bundle.request.user.is_staff):
-            raise Unauthorized("Sorry, only staff is authorized to delete resource.")
+        if not self.check_contribution_permission(object_list, bundle):
+            raise Unauthorized("Sorry, only staff or contributors can delete resource.")
         return True
 
     def delete_list(self, object_list, bundle):
-        if not (bundle.request.user and bundle.request.user.is_staff):
-            raise Unauthorized("Sorry, only staff is authorized to delete resource.")
+        if not self.check_contribution_permission(object_list, bundle):
+            raise Unauthorized("Sorry, only staff or contributors can delete resource.")
+        return True 
 
 class IndividualMeta:
     list_allowed_methods   = ['get', 'post', 'put']

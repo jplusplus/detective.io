@@ -67,12 +67,14 @@ class UserCtrl
         @http(config).then( (response) =>
             # Turn off loading mode
             @scope.loading = false
+            data = response.data
             # Interpret the respose
-            if response.data? and response.data.success
+            if data? and data.success
                 @User.set
-                    is_logged: true
-                    is_staff : response.data.is_staff
-                    username : response.data.username
+                    is_logged   : true
+                    is_staff    : data.is_staff
+                    username    : data.username
+                    permissions : data.permissions
                 # Redirect to the next URL
                 @location.url(@scope.next)
                 # Delete error

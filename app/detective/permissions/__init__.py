@@ -7,8 +7,6 @@ from django.db        import DEFAULT_DB_ALIAS, IntegrityError
 from django.db.models import signals
 
 
-LOCAL_APPS = 'app.detective.apps'
-
 OPERATIONS = (
     ('add', 'Add an individual to {app_name}'),
     ('delete', 'Delete an individual from {app_name}'),

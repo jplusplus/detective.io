@@ -33,13 +33,12 @@ class IndividualAuthorization(Authorization):
         if user:
             if user.is_staff or user.has_perm("%s.contribute" % object_list._app_label):
                 authorized = True
-        return True
+        return authorized
 
     def read_detail(self, object_list, bundle):
         return True
 
     def create_detail(self, object_list, bundle):
-        app_permission = has_perm("%s.contribute" % object_list)
         if not self.check_contribution_permission(object_list, bundle):
             raise Unauthorized("Sorry, only staff or contributors can create resource.")
         return True

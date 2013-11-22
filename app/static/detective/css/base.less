@@ -14,6 +14,7 @@
 @zindex-header    : @zindex-breadcrumb+100;
 
 @header-bg:#2E2D2A;
+@brand-secondary: #BFB8A6;
 
 
 body {
@@ -36,6 +37,16 @@ body {
 			color:mix(contrast(@brand-primary), @brand-primary);
 		}
 	}
+
+
+	.bg-secondary {
+		background:@brand-secondary;
+		color:contrast(@brand-secondary);
+		a {
+			color:mix(contrast(@brand-secondary), @brand-secondary);
+		}
+	}
+
 
 	.hr-primary {
 		margin-top:0;
@@ -136,14 +147,26 @@ header {
 	.box-shadow(0 3px 0 fade(#000, 10));
 	.transition(@open-speed);
 
+	&.no-breadcrumb {
+		background:@body-bg;
+		.box-shadow(0 3px 0 fade(#000, 0));
+	}
+
 	.form-login {
+		.opacity(0.4);
+		.transition(0.7s);
 		padding:0 20px;
+
 		.form-control {
 			width:160px;
 		}
 		.login-control {
 			display: inline-block;
 			width: 160px;
+		}
+
+		&:hover {
+			.opacity(1);
 		}
 	}
 
@@ -570,9 +593,23 @@ header {
 
 #home {
 
+	.bg-light {
+		.box-shadow(0 -2px 1px 0 fade(@body-bg, 10) );
+		position:relative;
+  		z-index:10;
+	}
+
 	.boxes {
 
-		margin-left:30px;
+		@box-height:240px;
+		@box-width:380px;
+  		.make-row();
+  		position:relative;
+  		z-index:5;
+  		padding:0 20px;
+  		padding-top:10px;
+
+  		.border-radius(@border-radius-base @border-radius-base 0 0);
 
 		.box {
 			overflow: hidden;
@@ -583,13 +620,12 @@ header {
 			margin-top:10px;
 			margin-bottom:20px;
 			text-align:left;
-			border:1px solid darken(#BCB5A6, 50%);
+			border:1px solid darken(#BCB5A6, 10%);
 			border-bottom-width:3px;
-			height:340px;
-			width:300px;
+			height:@box-height;
+			width:@box-width;
 			background:#BCB5A6;
 			color:@text-color;
-			.box-shadow(0 3px 0 0 fade(#000, 10));
 
 			&.bg-primary .fg {
 				background: @brand-primary;
@@ -606,11 +642,11 @@ header {
 			}
 
 			.bg {
-				margin-top:-340px/2px;
+				margin-top:-@box-height/2px;
 				position:absolute;
 				top:50%;
 				left:0;
-				min-height:340px;
+				min-height:@box-height;
 				height:auto;
 				min-width: 100%;
 				max-width: auto;

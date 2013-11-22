@@ -69,6 +69,11 @@ class UserResource(ModelResource):
             })
 
         user = authenticate(username=username, password=password)
+        def get_perm_name(permission): 
+            ct = permission.content_type
+            return "%s.%s" % (ct.app_label, permission.codename)
+            
+        user_permissions = map(get_perm_name, user.user_permissions.all())
         if user:
             if user.is_active:
                 login(request, user)
@@ -79,6 +84,7 @@ class UserResource(ModelResource):
                 response = self.create_response(request, {
                     'success' : True,
                     'is_staff': user.is_staff,
+                    'permissions': user_permissions,
                     'username': user.username
                 })
                 # Create CSRF token

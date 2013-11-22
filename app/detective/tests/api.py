@@ -472,8 +472,6 @@ class ApiTestCase(ResourceTestCase):
 
     def test_summary_human_search(self):
         query = "Person activity in Journalism"
-        expected = "Person that has activity in Journalism++"
-        expected2 = "Person that had activity previous in Journalism++"
         resp = self.api_client.get('/api/common/v1/summary/human/?q=%s' % query, format='json', authentication=self.get_credentials())
         self.assertValidJSONResponse(resp)
         data = json.loads(resp.content)
@@ -495,7 +493,8 @@ class ApiTestCase(ResourceTestCase):
 
     def test_patch_individual_date(self):
         """
-        Test a patch request on an invidividual's date attribute
+        Test a patch request on an invidividual's date attribute.
+        Request: /api/energy/v1/organization/
         Expected: HTTP 200 (OK)
         """  
         # date are subject to special process with patch method.
@@ -517,7 +516,8 @@ class ApiTestCase(ResourceTestCase):
 
 
 
-    def test_patch_individual_name(self):
+    def test_patch_individual_website(self):
+
         jpp_url  = 'http://jplusplus.org'
         data = {
             'website_url': jpp_url,
@@ -549,3 +549,16 @@ class ApiTestCase(ResourceTestCase):
         resp = self.patch_individual(**args)
         self.assertHttpUnauthorized(resp)
 
+    def test_patch_individual_not_found(self):
+        jpp_url  = 'http://jplusplus.org'
+        data = {
+            'website_url': jpp_url,
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : 1337,
+            'model_name' : 'organization',
+            'patch_data' : data,
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpNotFound(resp)

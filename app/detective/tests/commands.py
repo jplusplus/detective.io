@@ -3,7 +3,7 @@ from django.core.management           import call_command
 from django.core.management.base      import CommandError
 from django.test                      import TestCase
 from neo4django.graph_auth.models     import User as GraphUser
-from django.contrib.auth.models       import User, Permission
+from django.contrib.auth.models       import User
 from StringIO                         import StringIO
 import sys
 
@@ -71,11 +71,3 @@ class CommandsTestCase(TestCase):
         # Reindex countries
         args = 'common.Country'
         call_command('reindex', args)
-
-    def test_createpermissions(self):
-        local_apps = ['energy']
-        call_command('createpermissions')
-        for app in local_apps:
-            perm = Permission.objects.get(content_type__app_label=app, codename='contribute')
-            self.assertIsNotNone(perm)
-

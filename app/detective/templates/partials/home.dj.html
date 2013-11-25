@@ -3,7 +3,7 @@
 <div id="home">
     <div class="container">
         <div class="row bottom90 top90">
-            <div class="col-md-3 hidden-sm text-center">
+            <div class="col-md-3 hidden-sm hidden-xs text-center">
                 <img src="{% static 'detective/img/projects-frontpage.png' %}" class="top70" />
             </div>
             <div class="col-md-9">
@@ -11,25 +11,25 @@
                     Structure your investigation<br />&amp; mine your data
                 </h1>
                 <div class="lead">
-                    <p class="text-muted">Throw away you Moleskine!</p>
-                    <p>Detective.io is a platform that hosts your investigation and lets you mine it with powerful queries.</p>
+                    <p><span class="text-muted">Throw away you Moleskine!</span> Detective.io is a platform that hosts your investigation and lets you mine it with powerful queries.</p>
                     <p>Simply describe your field of study and Detective.io builds the input interface as well as a state of the art front-end.</p>
                 </div>
-                <div class="top20 lead text-right">
-                    <strong>Want to know more?</strong>
-                    <a class="btn btn-stroke btn-lg left10" href="mailto:contact@detective.io">
-                        <i class="fa fa-envelope-o right05"></i>
+                <p class="lead">
+                    <a class="btn btn-primary pull-right" ng-click="scrollToBoxes = true">See all open investigations!</a>
+                    Want to know more?
+                    <a href="mailto:contact@detective.io">
                         Contact us
                     </a>
-                </div>
+                </p>
             </div>
         </div>
     </div>
-    <h2 class="container">Open topics</h2>
+    <h2 class="container">Open investigations</h2>
     <div class="bg-secondary">
         <div class="container">
             <div class="boxes">
-                <div class="col-md-4 col-sm-6">
+                <a scroll-to="600" ng-if="scrollToBoxes == true" reset="scrollToBoxes"></a>
+                <div class="col-sm-4">
                     <div class="box">
                         <div class="fg">
                             <h3>
@@ -45,7 +45,20 @@
                         <img src="{% static 'detective/img/energy-heading-thumb.jpg' %}" class="bg" />
                     </div>
                 </div>
-                <div class="col-md-4 col-sm-6">
+                <div class="col-sm-4">
+                    <div class="box">
+                        <div class="fg">
+                            <h3>
+                                Microfinance<br />in the DRC
+                            </h3>
+                            <span class="label padding0">
+                                Coming soon
+                            </span>
+                        </div>
+                        <img src="{% static 'detective/img/microfinance-drc-thumb.jpg' %}" class="bg" />
+                    </div>
+                </div>
+                <div class="col-sm-4">
                     <div class="box bg-primary">
                         <div class="fg">
                             <h3>

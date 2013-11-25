@@ -64,14 +64,13 @@ class UserResource(ModelResource):
                 return group.permissions.all()
             
             user_permissions = map(_get_perm_name, user.user_permissions.all())
+            all_groups_permissions = map(_group_permissions, user.groups.all()) or list()
             groups_permissions = map(
                 _get_perm_name,
                 reduce(
                     list.__add__, 
-                    map(
-                        _group_permissions, 
-                        user.groups.all()
-                    )
+                    all_groups_permissions,
+                    list()
                 )
             )
             return user_permissions + groups_permissions
@@ -166,7 +165,6 @@ class UserResource(ModelResource):
         try:
             self.validate_request(request.GET, ['token'])
             token = request.GET.get("token", None)
-            success = False
             # Make sure the key we're trying conforms to the pattern of a
             # SHA1 hash; if it doesn't, no point trying to look it up in
             # the database.

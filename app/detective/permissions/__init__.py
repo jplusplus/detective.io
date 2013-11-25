@@ -14,9 +14,7 @@ OPERATIONS = (
     ('change', 'Edit an individual of {app_name}'),
 )
 GROUPS = (
-    dict(name='{app_name}_editor',      description='Supervisor of a thematic (e.g. energy)',                               permissions=('add', 'delete', 'change')),
-    dict(name='{app_name}_moderator',   description='The moderator of an application, can delete and change contributions', permissions=('delete', 'change')),
-    dict(name='{app_name}_contributor', description='Contributors of an application, can create',                           permissions=('change', 'add'))
+    dict(name='{app_name}_contributor', description='Contributors of an application, can create', permissions=('change', 'add', 'delete')),
 )
 
 def _create_groups(app_label):
@@ -28,7 +26,7 @@ def _create_groups(app_label):
             group = Group.objects.get(name=group_name)
             group.permissions.clear()
         for permission in group_dict['permissions']:
-            perm = Permission.objects.filter(codename="contribute_%s" % permission, content_type__app_label=app_label)
+            perm = Permission.objects.filter(content_type__app_label=app_label, codename="contribute_%s" % permission)
             if perm:
                 group.permissions.add(perm[0])
 

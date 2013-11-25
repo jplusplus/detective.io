@@ -54,11 +54,28 @@ class UserResource(ModelResource):
         ]
 
     def login(self, request, **kwargs):
-        def get_perm_name(permission):
-            # little snippet to extract permission names from user permissions
-            ct = permission.content_type
-            return "%s.%s" % (ct.app_label, permission.codename)
-        
+        def get_user_permissions(user):
+            def _get_perm_name(permission):
+                # little snippet to extract permission names from user permissions
+                ct = permission.content_type
+                return "%s.%s" % (ct.app_label, permission.codename)
+
+            def _group_permissions(group):
+                return group.permissions.all()
+            
+            user_permissions = map(_get_perm_name, user.user_permissions.all())
+            groups_permissions = map(
+                _get_perm_name,
+                reduce(
+                    list.__add__, 
+                    map(
+                        _group_permissions, 
+                        user.groups.all()
+                    )
+                )
+            )
+            return user_permissions + groups_permissions
+
         self.method_check(request, allowed=['post'])
 
         data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
@@ -77,7 +94,7 @@ class UserResource(ModelResource):
         
         if user:
             if user.is_active:
-                user_permissions = map(get_perm_name, user.user_permissions.all())
+                user_permissions = get_user_permissions(user)
                 login(request, user)
 
                 # Remember me opt-in

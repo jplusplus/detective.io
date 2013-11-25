@@ -13,24 +13,28 @@ OPERATIONS = (
     ('delete', 'Delete an individual from {app_name}'),
     ('change', 'Edit an individual of {app_name}'),
 )
+
 GROUPS = (
     dict(name='{app_name}_contributor', description='Contributors of an application, can create', permissions=('change', 'add', 'delete')),
 )
 
 def _create_groups(app_label):
+    groups = []
     for group_dict in GROUPS:
         group_name = group_dict['name'].format(app_name=app_label)
         try:
             group = Group.objects.create(name=group_name)
         except IntegrityError:
+            print "Could not create group %s" % group_name
             group = Group.objects.get(name=group_name)
             group.permissions.clear()
         for permission in group_dict['permissions']:
             perm = Permission.objects.filter(content_type__app_label=app_label, codename="contribute_%s" % permission)
             if perm:
                 group.permissions.add(perm[0])
-
         group.save()
+        groups.append(group)
+    return groups
 
 
 def _create_permission(app_label, permission_args):
@@ -38,7 +42,7 @@ def _create_permission(app_label, permission_args):
     Create or get a single permission based on its application label, its name 
     and codename
 
-    @see: _get_permission_args(app_label, operation) 
+    @see: _get_permission_args(app_label, operation)
     """  
     try:
         perm = AppPermission(**permission_args)

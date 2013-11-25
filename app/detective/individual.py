@@ -31,8 +31,8 @@ class IndividualAuthorization(Authorization):
         authorized = False 
         user = bundle.request.user
         if user:
-            if user.is_staff or user.has_perm("%s.contribute_%s" % (object_list._app_label, operation)):
-                authorized = True
+            perm_name  = "%s.contribute_%s" % (object_list._app_label, operation)
+            authorized = user.is_staff or user.has_perm(perm_name)
         return authorized
 
     def read_detail(self, object_list, bundle):
@@ -398,7 +398,8 @@ class IndividualResource(ModelResource):
         #self.is_authenticated(request)
         self.throttle_check(request)
         self.is_authenticated(request)
-
+        bundle = self.build_bundle(request=request)
+        self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
         model = self.get_model()
         try:
             node = model.objects.select_related(depth=1).get(id=kwargs["pk"])

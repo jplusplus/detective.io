@@ -1,28 +1,49 @@
 """
 Creates permissions for all installed apps that need permissions.
 """
-from .models          import AppPermission
-from app.detective    import apps 
-from django.db        import DEFAULT_DB_ALIAS, IntegrityError
-from django.db.models import signals
+from .models                    import AppPermission
+from app.detective              import apps 
+from django.db                  import DEFAULT_DB_ALIAS, IntegrityError
+from django.db.models           import signals
+from django.contrib.auth.models import Group, Permission
 
 
 OPERATIONS = (
     ('add', 'Add an individual to {app_name}'),
     ('delete', 'Delete an individual from {app_name}'),
-    ('edit', 'Edit an individual of {app_name}'),
-    ('update', 'Update an individual of {app_name}'),
+    ('change', 'Edit an individual of {app_name}'),
 )
+GROUPS = (
+    dict(name='{app_name}_editor',      description='Supervisor of a thematic (e.g. energy)',                               permissions=('add', 'delete', 'change')),
+    dict(name='{app_name}_moderator',   description='The moderator of an application, can delete and change contributions', permissions=('delete', 'change')),
+    dict(name='{app_name}_contributor', description='Contributors of an application, can create',                           permissions=('change', 'add'))
+)
+
+def _create_groups(app_label):
+    for group_dict in GROUPS:
+        group_name = group_dict['name'].format(app_name=app_label)
+        try:
+            group = Group.objects.create(name=group_name)
+        except IntegrityError:
+            group = Group.objects.get(name=group_name)
+            group.permissions.clear()
+        for permission in group_dict['permissions']:
+            perm = Permission.objects.filter(codename="contribute_%s" % permission, content_type__app_label=app_label)
+            if perm:
+                group.permissions.add(perm[0])
+
+        group.save()
+
 
 def _create_permission(app_label, permission_args):
     try:
         perm = AppPermission(**permission_args)
         perm.app_label(app_label)
         perm.save()
-
     except IntegrityError:
         perm = AppPermission.objects.get(**permission_args)
     return perm
+
 
 def _get_permission_args(app_label, operation):
     return {
@@ -37,6 +58,7 @@ def create_permissions(app, created_models, verbosity, db=DEFAULT_DB_ALIAS, **kw
         for op in OPERATIONS:
             perm_args = _get_permission_args(app_label, op)
             _create_permission(app_label, perm_args)
+        _create_groups(app_label)
 
 
 # will be trigger for each created app

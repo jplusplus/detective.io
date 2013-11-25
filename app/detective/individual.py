@@ -27,11 +27,11 @@ RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
 
-    def check_contribution_permission(self, object_list, bundle):
+    def check_contribution_permission(self, object_list, bundle, operation):
         authorized = False 
         user = bundle.request.user
         if user:
-            if user.is_staff or user.has_perm("%s.contribute" % object_list._app_label):
+            if user.is_staff or user.has_perm("%s.contribute_%s" % (object_list._app_label, operation)):
                 authorized = True
         return authorized
 
@@ -39,24 +39,25 @@ class IndividualAuthorization(Authorization):
         return True
 
     def create_detail(self, object_list, bundle):
-        if not self.check_contribution_permission(object_list, bundle):
+        if not self.check_contribution_permission(object_list, bundle, 'add'):
             raise Unauthorized("Sorry, only staff or contributors can create resource.")
         return True
 
     def update_detail(self, object_list, bundle):
-        if not self.check_contribution_permission(object_list, bundle):
+        if not self.check_contribution_permission(object_list, bundle, 'change'):
             raise Unauthorized("Sorry, only staff or contributors can update resource.")
         return True
 
     def delete_detail(self, object_list, bundle):
-        if not self.check_contribution_permission(object_list, bundle):
+        if not self.check_contribution_permission(object_list, bundle, 'delete'):
             raise Unauthorized("Sorry, only staff or contributors can delete resource.")
         return True
 
     def delete_list(self, object_list, bundle):
-        if not self.check_contribution_permission(object_list, bundle):
-            raise Unauthorized("Sorry, only staff or contributors can delete resource.")
-        return True 
+        return False
+        # if not self.check_contribution_permission(object_list, bundle, 'delete'):
+        #     raise Unauthorized("Sorry, only staff or contributors can delete resource.")
+        # return True 
 
 class IndividualMeta:
     list_allowed_methods   = ['get', 'post', 'put']
@@ -113,8 +114,7 @@ class IndividualResource(ModelResource):
 
     def get_model_field(self, name):
         target = None 
-        fields = self.get_model_fields()
-        for field in fields:
+        for field in self.get_model_fields():
             if field.name == name:
                 target = field
         return target

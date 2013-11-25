@@ -378,7 +378,7 @@ class ApiTestCase(ResourceTestCase):
     def test_post_list_unauthenticated(self):
         self.assertHttpUnauthorized(self.api_client.post('/api/energy/v1/energyproject/', format='json', data=self.post_data_simple))
 
-    def test_post_list(self):
+    def test_post_list_staff(self):
         # Check how many are there first.
         count = EnergyProject.objects.count()
         self.assertHttpCreated(
@@ -390,6 +390,28 @@ class ApiTestCase(ResourceTestCase):
         )
         # Verify a new one has been added.
         self.assertEqual(EnergyProject.objects.count(), count+1)
+
+    def test_post_list_contributor(self):
+        # Check how many are there first.
+        count = EnergyProject.objects.count()
+        self.assertHttpCreated(
+            self.api_client.post('/api/energy/v1/energyproject/',
+                format='json',
+                data=self.post_data_simple,
+                authentication=self.get_contrib_credentials()
+            )
+        )
+        # Verify a new one has been added.
+        self.assertEqual(EnergyProject.objects.count(), count+1)
+
+    def test_post_list_lambda(self):
+        self.assertHttpUnauthorized(
+            self.api_client.post('/api/energy/v1/energyproject/',
+                format='json',
+                data=self.post_data_simple,
+                authentication=self.get_lambda_credentials()
+            )
+        )
 
     def test_post_list_related(self):
         # Check how many are there first.

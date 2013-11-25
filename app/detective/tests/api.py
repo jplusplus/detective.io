@@ -4,7 +4,7 @@ from app.detective.apps.common.message import SaltMixin
 from app.detective.apps.common.models  import Country
 from app.detective.apps.energy.models  import Organization, EnergyProject, Person
 from datetime                          import datetime 
-from django.contrib.auth.models        import User
+from django.contrib.auth.models        import User, Group
 from django.core                       import signing
 from tastypie.utils                    import timezone
 from django.core.exceptions            import ObjectDoesNotExist
@@ -25,13 +25,30 @@ class ApiTestCase(ResourceTestCase):
         super(ApiTestCase, self).setUp()
         # Use custom api client
         self.api_client = TestApiClient()
-        # Look for the test user
-        self.username = u'tester'
-        self.password = u'tester'
-        self.email    = u'tester@detective.io' 
-        self.salt     = SaltMixin.salt
+        self.salt       = SaltMixin.salt
+
+
+        self.super_username = u'tester'
+        self.super_password = u'tester'
+        self.super_email    = u'tester@detective.io'
+
+        self.contrib_username = u'tester1'
+        self.contrib_password = u'tester1'
+        self.contrib_email    = u'tester1@detective.io'
+
+        self.lambda_username = u'tester2'
+        self.lambda_password = u'tester2'
+        self.lambda_email    = u'tester2@detective.io'
+
+        contributors = Group.objects.get(name='energy_contributor')
+
+        # Look for the test users 
         try:
-            self.user = User.objects.get(username=self.username)
+            # get users (superuser, contributor, moderator & lambda user)
+            self.super_user   = User.objects.get(username=self.super_username)
+            self.lambda_user  = User.objects.get(username=self.lambda_username)
+            self.contrib_user = User.objects.get(username=self.contrib_username)
+            
             self.jpp  = jpp = Organization.objects.get(name=u"Journalism++")
             self.jg   = jg  = Organization.objects.get(name=u"Journalism Grant")
             self.fra  = fra = Country.objects.get(name=u"France")
@@ -40,19 +57,28 @@ class ApiTestCase(ResourceTestCase):
 
         except ObjectDoesNotExist:
             # Create the new user
-            self.user = User.objects.create_user(self.username, self.email, self.password)
-            self.user.is_staff = True
-            self.user.is_superuser = True
-            self.user.save()
+            self.super_user = User.objects.create_user(self.super_username, self.super_email, self.super_password)
+            self.super_user.is_staff = True
+            self.super_user.is_superuser = True
+            self.super_user.save()
+
+            # Create a contributor
+            self.contrib_user = User.objects.create_user(self.contrib_username, self.contrib_email, self.contrib_password)
+            self.contrib_user.save()
+            self.contrib_user.groups.add(contributors)
+
+            self.lambda_user = User.objects.create_user(self.lambda_username, self.lambda_email, self.lambda_password)
+            self.lambda_user.save()
+
             # Create related objects
             self.jpp = jpp = Organization(name=u"Journalism++")
-            jpp._author = [self.user.pk]
+            jpp._author = [self.super_user.pk]
             jpp.founded = datetime(2011, 4, 3)
             jpp.website_url = 'http://jplusplus.com'
             jpp.save()
             
             self.jg = jg  = Organization(name=u"Journalism Grant")
-            jg._author = [self.user.pk]
+            jg._author = [self.super_user.pk]
             jg.save()
 
             self.fra = fra = Country(name=u"France", isoa3=u"FRA")
@@ -102,8 +128,8 @@ class ApiTestCase(ResourceTestCase):
         }
 
     def tearDown(self):
-        if self.user:
-            self.user.delete()
+        if self.super_user:
+            self.super_user.delete()
         if self.jpp:
             self.jpp.delete()
         if self.jg:
@@ -115,9 +141,18 @@ class ApiTestCase(ResourceTestCase):
         if self.pb:
             self.pb.delete()
 
-    # Utility functions (Auth, operation etc.) 
-    def get_credentials(self):
-        return self.api_client.client.login(username=self.username, password=self.password)
+    # Utility functions (Auth, operation etc.)
+    def get_credentials(self, login, password):
+        return self.api_client.client.login(username=login, password=password)
+        
+    def get_super_credentials(self):
+        return self.get_credentials(self.super_username, self.super_password)
+
+    def get_contrib_credentials(self):
+        return self.get_credentials(self.contrib_username, self.contrib_password)
+
+    def get_lambda_credentials(self):
+        return self.get_credentials(self.lambda_username, self.lambda_password)
 
     def signup_user(self, user_dict):
         """ Utility method to signup through API """ 
@@ -126,7 +161,7 @@ class ApiTestCase(ResourceTestCase):
     def patch_individual(self, scope=None, model_name=None, model_id=None,
                          patch_data=None, auth=None, skipAuth=False):
         if not skipAuth and not auth:
-            auth = self.get_credentials()
+            auth = self.get_super_credentials()
         url = '/api/%s/v1/%s/%d/patch/' % (scope, model_name, model_id)
         return self.api_client.post(url, format='json', data=patch_data, authentication=auth)
 
@@ -154,7 +189,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertHttpBadRequest(resp)
 
     def test_user_signup_existing_user(self):
-        user_dict = dict(username=self.username, password=self.password, email=self.email)
+        user_dict = dict(username=self.super_username, password=self.super_password, email=self.super_email)
         resp = self.signup_user(user_dict)
         self.assertHttpForbidden(resp)
 
@@ -260,7 +295,7 @@ class ApiTestCase(ResourceTestCase):
         Expected:
             HTTP 200 - OK
         """
-        token = signing.dumps(self.user.pk, salt=self.salt)
+        token = signing.dumps(self.super_user.pk, salt=self.salt)
         password = "testtest"
         auth = dict(password=password, token=token)
         resp = self.api_client.post(
@@ -272,7 +307,7 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)
         self.assertTrue(data['success'])
         # we query users to get the latest user object (updated with password)
-        user = User.objects.get(email=self.user.email) 
+        user = User.objects.get(email=self.super_user.email) 
         self.assertTrue(user.check_password(password))
 
     def test_reset_password_confirm_no_data(self):
@@ -334,7 +369,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertHttpUnauthorized(self.api_client.get('/api/energy/v1/energyproject/', format='json'))
 
     def test_get_list_json(self):
-        resp = self.api_client.get('/api/energy/v1/energyproject/?limit=20', format='json', authentication=self.get_credentials())
+        resp = self.api_client.get('/api/energy/v1/energyproject/?limit=20', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Number of element on the first page
         count = min(20, EnergyProject.objects.count() )
@@ -350,7 +385,7 @@ class ApiTestCase(ResourceTestCase):
             self.api_client.post('/api/energy/v1/energyproject/',
                 format='json',
                 data=self.post_data_simple,
-                authentication=self.get_credentials()
+                authentication=self.get_super_credentials()
             )
         )
         # Verify a new one has been added.
@@ -363,7 +398,7 @@ class ApiTestCase(ResourceTestCase):
         resp  = self.api_client.post('/api/energy/v1/energyproject/',
             format='json',
             data=self.post_data_related,
-            authentication=self.get_credentials()
+            authentication=self.get_super_credentials()
         )
         # Vertify the request status
         self.assertHttpCreated(resp)
@@ -377,17 +412,17 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual(len(data["activity_in_country"]), len(self.post_data_related["activity_in_country"]))
 
     def test_mine(self):
-        resp = self.api_client.get('/api/energy/v1/energyproject/mine/', format='json', authentication=self.get_credentials())
+        resp = self.api_client.get('/api/energy/v1/energyproject/mine/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
         self.assertEqual(
             min(20, len(data["objects"])),
-            EnergyProject.objects.filter(_author__contains=self.user.id).count()
+            EnergyProject.objects.filter(_author__contains=self.super_user.id).count()
         )
 
     def test_search_organization(self):
-        resp = self.api_client.get('/api/energy/v1/organization/search/?q=Journalism', format='json', authentication=self.get_credentials())
+        resp = self.api_client.get('/api/energy/v1/organization/search/?q=Journalism', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -395,35 +430,35 @@ class ApiTestCase(ResourceTestCase):
         self.assertGreater( len(data.items()), 1 )
 
     def test_search_organization_wrong_page(self):
-        resp = self.api_client.get('/api/energy/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_credentials())
+        resp = self.api_client.get('/api/energy/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_super_credentials())
         self.assertHttpNotFound(resp)
 
     def test_cypher_detail(self):
-        self.assertHttpNotFound(self.api_client.get('/api/common/v1/cypher/111/', format='json', authentication=self.get_credentials()))
+        self.assertHttpNotFound(self.api_client.get('/api/common/v1/cypher/111/', format='json', authentication=self.get_super_credentials()))
 
     def test_cypher_unauthenticated(self):
         self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json'))
 
     def test_cypher_unauthorized(self):
         # Ensure the user isn't authorized to process cypher request
-        self.user.is_staff = True
-        self.user.is_superuser = False
-        self.user.save()
+        self.super_user.is_staff = True
+        self.super_user.is_superuser = False
+        self.super_user.save()
 
-        self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))
+        self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_super_credentials()))
 
     def test_cypher_authorized(self):
         # Ensure the user IS authorized to process cypher request
-        self.user.is_superuser = True
-        self.user.save()
+        self.super_user.is_superuser = True
+        self.super_user.save()
 
-        self.assertValidJSONResponse(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))
+        self.assertValidJSONResponse(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_super_credentials()))
 
     def test_summary_list(self):
         self.assertHttpNotFound(self.api_client.get('/api/common/v1/summary/', format='json'))
 
     def test_summary_mine_success(self):
-        resp = self.api_client.get('/api/common/v1/summary/mine/', authentication=self.get_credentials(), format='json')
+        resp = self.api_client.get('/api/common/v1/summary/mine/', authentication=self.get_super_credentials(), format='json')
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -437,7 +472,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/summary/mine/', format='json'))
 
     def test_countries_summary(self):
-        resp = self.api_client.get('/api/common/v1/summary/countries/', format='json', authentication=self.get_credentials())
+        resp = self.api_client.get('/api/common/v1/summary/countries/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -447,7 +482,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual("count" in data["FRA"], True)
 
     def test_forms_summary(self):
-        resp = self.api_client.get('/api/common/v1/summary/forms/', format='json', authentication=self.get_credentials())
+        resp = self.api_client.get('/api/common/v1/summary/forms/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -455,11 +490,11 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual( 11, len(data.items()) )
 
     def test_types_summary(self):
-        resp = self.api_client.get('/api/common/v1/summary/types/', format='json', authentication=self.get_credentials())
+        resp = self.api_client.get('/api/common/v1/summary/types/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
 
     def test_search_summary(self):
-        resp = self.api_client.get('/api/common/v1/summary/search/?q=Journalism', format='json', authentication=self.get_credentials())
+        resp = self.api_client.get('/api/common/v1/summary/search/?q=Journalism', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -467,12 +502,12 @@ class ApiTestCase(ResourceTestCase):
         self.assertGreater( len(data.items()), 1 )
 
     def test_search_summary_wrong_page(self):
-        resp = self.api_client.get('/api/common/v1/summary/search/?q=Journalism&page=-1', format='json', authentication=self.get_credentials())
+        resp = self.api_client.get('/api/common/v1/summary/search/?q=Journalism&page=-1', format='json', authentication=self.get_super_credentials())
         self.assertHttpNotFound(resp)
 
     def test_summary_human_search(self):
         query = "Person activity in Journalism"
-        resp = self.api_client.get('/api/common/v1/summary/human/?q=%s' % query, format='json', authentication=self.get_credentials())
+        resp = self.api_client.get('/api/common/v1/summary/human/?q=%s' % query, format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         data = json.loads(resp.content)
         self.assertGreater(len(data['objects']), 1)
@@ -482,16 +517,14 @@ class ApiTestCase(ResourceTestCase):
         # the JSON string to avoid '+' loss
         rdf_str = urllib.quote(json.dumps(self.rdf_jpp))
         url = '/api/common/v1/summary/rdf_search/?limit=20&offset=0&q=%s' % rdf_str
-        resp = self.api_client.get(url, format='json', authentication=self.get_credentials())
+        resp = self.api_client.get(url, format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         data = json.loads(resp.content)
         objects = data['objects']
-        pr_t = find(lambda x: x['name'] == self.pr.name, objects)
-        pb_t = find(lambda x: x['name'] == self.pb.name, objects)
-        self.assertIsNotNone(pr_t)
-        self.assertIsNotNone(pb_t)
+        self.assertIsNotNone(find(lambda x: x['name'] == self.pr.name, objects))
+        self.assertIsNotNone(find(lambda x: x['name'] == self.pb.name, objects))
 
-    def test_patch_individual_date(self):
+    def test_patch_individual_date_staff(self):
         """
         Test a patch request on an invidividual's date attribute.
         Request: /api/energy/v1/organization/
@@ -514,10 +547,7 @@ class ApiTestCase(ResourceTestCase):
         updated_jpp = Organization.objects.get(name=self.jpp.name)
         self.assertEqual(timezone.make_naive(updated_jpp.founded), new_date)
 
-
-
-    def test_patch_individual_website(self):
-
+    def test_patch_individual_website_staff(self):
         jpp_url  = 'http://jplusplus.org'
         data = {
             'website_url': jpp_url,
@@ -533,8 +563,8 @@ class ApiTestCase(ResourceTestCase):
         self.assertValidJSONResponse(resp)
         updated_jpp = Organization.objects.get(name=self.jpp.name)
         self.assertEqual(updated_jpp.website_url, jpp_url)
-    
-    def test_patch_individual_unauthorized(self):
+
+    def test_patch_individual_website_unauthenticated(self):
         jpp_url  = 'http://jplusplus.org'
         data = {
             'website_url': jpp_url,
@@ -548,6 +578,40 @@ class ApiTestCase(ResourceTestCase):
         }
         resp = self.patch_individual(**args)
         self.assertHttpUnauthorized(resp)
+
+    def test_patch_individual_website_contributor(self):
+        jpp_url  = 'http://www.jplusplus.org'
+        data = {
+            'website_url': jpp_url,
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data,
+            'auth'       : self.get_contrib_credentials(),
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpOK(resp)
+        self.assertValidJSONResponse(resp)
+        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        self.assertEqual(updated_jpp.website_url, jpp_url)
+
+    def test_patch_individual_website_lambda(self):
+        jpp_url  = 'http://bam.jplusplus.org'
+        data = {
+            'website_url': jpp_url,
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data,
+            'auth'       : self.get_lambda_credentials(),
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpUnauthorized(resp)
+
 
     def test_patch_individual_not_found(self):
         jpp_url  = 'http://jplusplus.org'

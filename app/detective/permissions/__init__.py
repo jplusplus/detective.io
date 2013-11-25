@@ -2,7 +2,7 @@
 Creates permissions for all installed apps that need permissions.
 """
 from .models                    import AppPermission
-from app.detective              import apps 
+from app.detective              import apps as LOCAL_APPS
 from django.db                  import DEFAULT_DB_ALIAS, IntegrityError
 from django.db.models           import signals
 from django.contrib.auth.models import Group, Permission
@@ -34,6 +34,12 @@ def _create_groups(app_label):
 
 
 def _create_permission(app_label, permission_args):
+    """
+    Create or get a single permission based on its application label, its name 
+    and codename
+
+    @see: _get_permission_args(app_label, operation) 
+    """  
     try:
         perm = AppPermission(**permission_args)
         perm.app_label(app_label)
@@ -50,9 +56,15 @@ def _get_permission_args(app_label, operation):
     }
 
 def create_permissions(app, created_models, verbosity, db=DEFAULT_DB_ALIAS, **kwargs):
+    """
+    Entry point for permission creation. Will be called after DB synchronisation
+    for every installed app (see settings.INSTALLED_APPS)
+    """
     app_name  = app.__name__
     app_label = app_name.split('.')[-2]
-    if apps.__name__ in app_name:
+
+    # we check if the received signal come from a local installed application
+    if LOCAL_APPS.__name__ in app_name:
         for op in OPERATIONS:
             perm_args = _get_permission_args(app_label, op)
             _create_permission(app_label, perm_args)

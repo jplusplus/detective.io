@@ -58,6 +58,9 @@ body {
 	.bg-light {
 		background:contrast(@header-bg);
 		color:@header-bg;
+		a {
+			color:mix(contrast(@brand-secondary), @header-bg);
+		}
 	}
 
 
@@ -171,7 +174,7 @@ header {
 	}
 
 	h1 {
-		background: url("@{staticPath}img/hat.png") no-repeat 0 0;
+		background: url("@{staticPath}img/white-hat.png") no-repeat 0 0;
 		padding-left:80px;
 		margin:0 25px;
 		text-shadow:0 3px 0 fade(#000, 10);
@@ -603,7 +606,6 @@ header {
 	.boxes {
 
 		@box-height:240px;
-		@box-width:380px;
   		.make-row();
   		position:relative;
   		z-index:5;
@@ -615,16 +617,14 @@ header {
 		.box {
 			overflow: hidden;
 			position:relative;
-			float:left;
 			display:block;
-			margin-right:30px;
+			margin-right:10px;
 			margin-top:10px;
 			margin-bottom:20px;
 			text-align:left;
 			border:1px solid darken(#BCB5A6, 10%);
 			border-bottom-width:3px;
 			height:@box-height;
-			width:@box-width;
 			background:#BCB5A6;
 			color:@text-color;
 
@@ -674,6 +674,13 @@ header {
 		}
 	}
 
+	.features .illustration {
+		img {
+			margin:20px 10px;
+			max-width: 100%;
+		}
+	}
+
 }
 
 #energy {
@@ -682,6 +689,23 @@ header {
 		.opacity(0.7);
 	}
 
+	.intro {
+		position:relative;
+		max-width: 600px;
+		padding-left:120px;
+
+		.logo {
+			position:absolute;
+			top:0;
+			left:0;
+			height:123px;
+			width:100px;
+			display:block;
+			img {
+				max-width:100%;
+			}
+		}
+	}
 
 	.select-a-country {
 		padding-bottom:30px;

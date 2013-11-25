@@ -1,9 +1,9 @@
 class HomeCtrl
-    # Injects dependancies    
+    # Injects dependancies
     @$inject: ['$scope', 'Page']
     constructor: (@scope, @Page)->
     	# Set page title with no title-case
-    	@Page.title "Thematics overview", false
-    	
+    	@Page.title "Structure your investigation and mine your data", false
+
 
 angular.module('detective').controller 'homeCtrl', HomeCtrl

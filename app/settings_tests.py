@@ -48,7 +48,7 @@ INSTALLED_APPS = (
     'compressor',
     'tastypie',
     'registration',
-    'password_reset'
+    'password_reset',
     'app.detective',
     'app.detective.permissions',
     'app.detective.apps.common',

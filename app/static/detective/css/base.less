@@ -603,8 +603,8 @@ header {
 
 #home {
 
-	.bg-light {
-		.box-shadow(0 -2px 1px 0 fade(@body-bg, 10) );
+	.bg-light, .bg-secondary {
+		.box-shadow(0 -2px 4px 0 fade(@body-bg, 20) );
 		position:relative;
   		z-index:10;
 	}
@@ -617,8 +617,6 @@ header {
   		z-index:5;
   		padding:0 20px;
   		padding-top:10px;
-
-  		.border-radius(@border-radius-base @border-radius-base 0 0);
 
 		.box {
 			overflow: hidden;

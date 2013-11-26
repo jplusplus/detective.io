@@ -8,14 +8,14 @@ Packages required:
 from settings import *
 from urlparse import urlparse
 import os
-import dj_database_url  
+import dj_database_url
 
 
 DATABASES = {
     'default' : dj_database_url.config()
 }
 
-# Parse url given into environment variable 
+# Parse url given into environment variable
 NEO4J_URL  = urlparse( os.getenv('NEO4J_URL') )
 NEO4J_OPTIONS = {}
 
@@ -23,7 +23,7 @@ NEO4J_OPTIONS = {}
 if NEO4J_URL.username and NEO4J_URL.password:
     NEO4J_OPTIONS = {
         'username': NEO4J_URL.username,
-        'password': NEO4J_URL.password        
+        'password': NEO4J_URL.password
     }
 
 NEO4J_DATABASES = {

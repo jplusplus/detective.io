@@ -9,9 +9,8 @@
                 <h1>
                     Structure your investigation<br />&amp; mine your data
                 </h1>
-                <div class="lead">
-                    <p><span class="text-muted">Throw away your Moleskine!</span> Detective.io is a platform that hosts your investigation and lets you mine it with powerful queries.</p>
-                    <p>Simply describe your field of study and Detective.io builds the input interface as well as a state of the art front-end.</p>
+                <div class="">
+                    <p><span class="text-muted">Throw away your Moleskine!</span> Detective.io is a platform that hosts your investigation and lets you mine it with powerful queries. Simply describe your field of study and Detective.io builds the input interface as well as a state of the art front-end.</p>
                 </div>
                 <p class="lead">
                     <a class="btn btn-primary pull-right" ng-click="scrollToBoxes = true">See all open investigations!</a>
@@ -26,9 +25,9 @@
             <img src="{% static 'detective/img/detective-preview.png' %}" />
         </div>
     </div>
-    <h2 class="container">Open investigations</h2>
     <div class="bg-secondary">
         <div class="container">
+            <h2 class="container">Open investigations</h2>
             <div class="boxes">
                 <a scroll-to="600" ng-if="scrollToBoxes == true" reset="scrollToBoxes"></a>
                 <div class="col-sm-4">

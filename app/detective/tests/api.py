@@ -27,27 +27,26 @@ class ApiTestCase(ResourceTestCase):
         self.api_client = TestApiClient()
         self.salt       = SaltMixin.salt
 
+        self.super_username = 'super_user'
+        self.super_password = 'super_user'
+        self.super_email    = 'super_user@detective.io'
 
-        self.super_username = u'tester0'
-        self.super_password = u'tester0'
-        self.super_email    = u'tester0@detective.io'
+        self.contrib_username = 'contrib_user'
+        self.contrib_password = 'contrib_user'
+        self.contrib_email    = 'contrib_user@detective.io'
 
-        self.contrib_username = u'tester1'
-        self.contrib_password = u'tester1'
-        self.contrib_email    = u'tester1@detective.io'
-
-        self.lambda_username = u'tester2'
-        self.lambda_password = u'tester2'
-        self.lambda_email    = u'tester2@detective.io'
+        self.lambda_username = 'lambda_user'
+        self.lambda_password = 'lambda_user'
+        self.lambda_email    = 'lambda_user@detective.io'
 
         contributors = Group.objects.get(name='energy_contributor')
 
         # Look for the test users 
         try:
             # get users (superuser, contributor & lambda user)
-            self.super_user   = User.objects.get(username=self.super_username)
-            self.contrib_user = User.objects.get(username=self.contrib_username)
-            self.lambda_user  = User.objects.get(username=self.lambda_username)
+            super_user   = User.objects.get(username=self.super_username)
+            contrib_user = User.objects.get(username=self.contrib_username)
+            lambda_user  = User.objects.get(username=self.lambda_username)
             
             # fixtures & test data
             self.jpp  = Organization.objects.filter(name=u"Journalism++")[0]
@@ -55,45 +54,69 @@ class ApiTestCase(ResourceTestCase):
             self.fra  = Country.objects.get(name=u"France")
             self.pr   = Person.objects.get(name=u"Pierre Roméra")
             self.pb   = Person.objects.get(name=u"Pierre Bellon")
-
+            
         except ObjectDoesNotExist:
-            # Create the new user
-            self.super_user = User.objects.create_user(self.super_username, self.super_email, self.super_password)
-            self.super_user.is_staff = True
-            self.super_user.is_superuser = True
-            self.super_user.save()
+            # Create the new user users 
+            super_user = User.objects.create(
+                username=self.super_username, 
+                email=self.super_email, 
+            )
+            super_user.set_password(self.super_password)
+            super_user.save()
 
-            # Create a contributor
-            self.contrib_user = User.objects.create_user(self.contrib_username, self.contrib_email, self.contrib_password)
-            self.contrib_user.groups.add(contributors)
-            self.contrib_user.save()
+            contrib_user = User.objects.create(
+                username=self.contrib_username, 
+                email=self.contrib_email, 
+            )
+            contrib_user.set_password(self.contrib_password)
+            contrib_user.save()
 
-            self.lambda_user = User.objects.create_user(self.lambda_username, self.lambda_email, self.lambda_password)
-            self.lambda_user.save()
+            lambda_user = User.objects.create(
+                username=self.lambda_username, 
+                email=self.lambda_email, 
+            )
+            lambda_user.set_password(self.lambda_password)
+            lambda_user.save()
 
             # Create related objects
             self.jpp = Organization(name=u"Journalism++")
-            self.jpp._author = [self.super_user.pk]
-            self.jpp.founded = datetime(2011, 4, 3)
-            self.jpp.website_url = 'http://jplusplus.com'
             self.jpp.save()
-            
-            self.jg = Organization(name=u"Journalism Grant")
-            self.jg._author = [self.super_user.pk]
+            self.jg  = Organization(name=u"Journalism Grant")
             self.jg.save()
-
             self.fra = Country(name=u"France", isoa3=u"FRA")
             self.fra.save()
-
             self.pr = Person(name=u"Pierre Roméra")
-            self.pr.based_in.add(self.fra)
-            self.pr.activity_in_organization.add(self.jpp)
             self.pr.save()
-
             self.pb = Person(name=u"Pierre Bellon")
-            self.pb.based_in.add(self.fra)
-            self.pb.activity_in_organization.add(self.jpp)
             self.pb.save()
+
+        super_user.is_staff = True
+        super_user.is_superuser = True
+        super_user.save()
+        
+        contrib_user.is_active = True
+        contrib_user.groups.add(contributors)
+        contrib_user.save()
+    
+        self.jpp._author = [super_user.pk]
+        self.jpp.founded = datetime(2011, 4, 3)
+        self.jpp.website_url = 'http://jplusplus.com'
+        self.jpp.save()
+        
+        self.jg._author = [super_user.pk]
+        self.jg.save()
+
+        self.pr.based_in.add(self.fra)
+        self.pr.activity_in_organization.add(self.jpp)
+        self.pr.save()
+
+        self.pb.based_in.add(self.fra)
+        self.pb.activity_in_organization.add(self.jpp)
+        self.pb.save()
+
+        self.super_user = super_user 
+        self.contrib_user = contrib_user 
+        self.lambda_user = lambda_user 
 
         self.post_data_simple = {
             "name": "Lorem ispum TEST",
@@ -128,6 +151,10 @@ class ApiTestCase(ResourceTestCase):
             }
         }
 
+    def cleanModel(self,model_instance):
+        if model_instance:
+            model_instance.delete()
+
     def tearDown(self):
         # Clean & delete generated data
         # users 
@@ -140,23 +167,20 @@ class ApiTestCase(ResourceTestCase):
         self.cleanModel(self.fra)  # country
         self.cleanModel(self.pr)   # people 
         self.cleanModel(self.pb)   # people
+    
 
-    def cleanModel(self,model_instance):
-        if model_instance:
-            model_instance.delete()
-
-    # Utility functions (Auth, operation etc.)
-    def get_credentials(self, login, password):
-        return self.api_client.client.login(username=login, password=password)
+      # Utility functions (Auth, operation etc.)
+    def login(self, username, password):
+        return self.api_client.client.login(username=username, password=password)
         
     def get_super_credentials(self):
-        return self.get_credentials(self.super_username, self.super_password)
+        return self.login(self.super_username, self.super_password)
 
     def get_contrib_credentials(self):
-        return self.get_credentials(self.contrib_username, self.contrib_password)
+        return self.login(self.contrib_username, self.contrib_password)
 
     def get_lambda_credentials(self):
-        return self.get_credentials(self.lambda_username, self.lambda_password)
+        return self.login(self.lambda_username, self.lambda_password)
 
     def signup_user(self, user_dict):
         """ Utility method to signup through API """ 
@@ -220,6 +244,20 @@ class ApiTestCase(ResourceTestCase):
         resp = self.api_client.get('/api/common/v1/user/activate/?token')
         self.assertHttpBadRequest(resp)
 
+    def test_user_contrib_login_succeed(self):
+        auth = dict(username=self.contrib_username, password=self.contrib_password)
+        resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        self.assertValidJSON(resp.content)
+        data = json.loads(resp.content)
+        permissions = data.get("permissions")
+        self.assertTrue(data["success"])
+        self.assertIsNotNone(permissions)
+        # all permission for energy contribution 
+        self.assertTrue('energy.contribute_add'    in permissions)
+        self.assertTrue('energy.contribute_delete' in permissions)
+        self.assertTrue('energy.contribute_change' in permissions)
+
+        
     def test_user_login_succeed(self):
         auth = dict(username=self.super_username, password=self.super_password)
         resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
@@ -264,7 +302,10 @@ class ApiTestCase(ResourceTestCase):
     def test_user_status_is_logged(self):
         # Log in
         auth = dict(username=self.super_username, password=self.super_password)
-        self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        self.assertValidJSON(resp.content)
+        data = json.loads(resp.content)
+        self.assertTrue(data['success'])
 
         resp = self.api_client.get('/api/common/v1/user/status/', format='json')
         self.assertValidJSON(resp.content)
@@ -275,8 +316,12 @@ class ApiTestCase(ResourceTestCase):
 
     def test_contrib_user_status_is_logged(self):
         # Log in
-        auth = dict(username=self.contrib_username, password=self.contrib_password)
-        self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        auth = dict(username=self.contrib_username, password=self.contrib_password, remember_me=True)
+        resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        self.assertValidJSON(resp.content)
+        data = json.loads(resp.content)
+        self.assertTrue(data['success'])
+
         resp = self.api_client.get('/api/common/v1/user/status/', format='json')
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result

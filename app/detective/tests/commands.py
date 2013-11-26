@@ -13,12 +13,14 @@ class CommandsTestCase(TestCase):
         try:
             self.toto = GraphUser.objects.get(email='toto@detective.io')
         except GraphUser.DoesNotExist:
-            self.toto = GraphUser.objects.create(username='toto', email='toto@detective.io', password='tttooo')
+            self.toto = GraphUser.objects.create(username='toto', email='toto@detective.io')
+            self.toto.set_password('tttooo')
             self.toto.save()
 
     def tearDown(self): 
         if self.toto:
             self.toto.delete()
+
     def test_parseowl_fail(self):
         # Catch output
         output = StringIO()

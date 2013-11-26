@@ -44,11 +44,12 @@ class ApiTestCase(ResourceTestCase):
 
         # Look for the test users 
         try:
-            # get users (superuser, contributor, moderator & lambda user)
+            # get users (superuser, contributor & lambda user)
             self.super_user   = User.objects.get(username=self.super_username)
-            self.lambda_user  = User.objects.get(username=self.lambda_username)
             self.contrib_user = User.objects.get(username=self.contrib_username)
+            self.lambda_user  = User.objects.get(username=self.lambda_username)
             
+            # fixtures & test data
             self.jpp  = jpp = Organization.objects.get(name=u"Journalism++")
             self.jg   = jg  = Organization.objects.get(name=u"Journalism Grant")
             self.fra  = fra = Country.objects.get(name=u"France")
@@ -64,8 +65,8 @@ class ApiTestCase(ResourceTestCase):
 
             # Create a contributor
             self.contrib_user = User.objects.create_user(self.contrib_username, self.contrib_email, self.contrib_password)
-            self.contrib_user.save()
             self.contrib_user.groups.add(contributors)
+            self.contrib_user.save()
 
             self.lambda_user = User.objects.create_user(self.lambda_username, self.lambda_email, self.lambda_password)
             self.lambda_user.save()
@@ -485,10 +486,8 @@ class ApiTestCase(ResourceTestCase):
         # Parse data to check the number of result
         data = json.loads(resp.content)
         objects = data['objects']
-        jpp_t = find(lambda x: x['label'] == self.jpp.name, objects)
-        jg_t  = find(lambda x: x['label'] == self.jg.name,  objects)
-        self.assertIsNotNone(jpp_t)
-        self.assertIsNotNone(jg_t)
+        self.assertIsNotNone(find(lambda x: x['label'] == self.jpp.name, objects))
+        self.assertIsNotNone(find(lambda x: x['label'] == self.jg.name,  objects))
 
     def test_summary_mine_unauthenticated(self):
         self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/summary/mine/', format='json'))

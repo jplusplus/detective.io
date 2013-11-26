@@ -13,7 +13,7 @@ before_install:
 install:
   - pip install --use-mirrors -r test_requirements.txt
   - pip install --use-mirrors coveralls
-  - python ./manage.py syncdb --pythonpath=. --noinput --traceback --verbosity=2
+  - python ./manage.py syncdb --pythonpath=. --noinput
 env:
   - NEO4J_VERSION="1.9.1"
 matrix:

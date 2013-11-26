@@ -11,10 +11,11 @@ class ContactUsCtrl
         @scope.records_sizes = [
             [0, "Less than 200"],
             [200, "Between 200 and 1000"],
-            [1000, "Between 1000 & 10k"],
+            [1000, "Between 1000 and 10k"],
             [10000, "More than 10k"],
             [-1, "I don't know yet"],
         ]
+
         @scope.users_sizes = [
             [1, "1"],
             [5, "1-5"],

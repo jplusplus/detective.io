@@ -2,6 +2,7 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
     sdo = {}
     # Function to set the value that update CSRF token and return the object
     sdo.set = (data)-> 
+        console.log 'User.set(',data,')'
         $.extend sdo, data, true         
         # Wait a short delay because angular's $cookies
         # isn't updated in real time
@@ -12,9 +13,19 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
         , 250
         # Return sdo explicitely
         return sdo
+    
     sdo.hasPermission = (scope, operation)->
-        authorized = sdo.is_staff or _.contains(sdo.permissions,"#{scope}.contribute_#{operation}")
-        return authorized
+        sdo.is_staff or _.contains(sdo.permissions,"#{scope}.contribute_#{operation}")
+
+    sdo.hasDeletePermission = (scope)->
+        sdo.hasPermission scope, 'delete'
+
+    sdo.hasChangePermission = (scope)->
+        sdo.hasPermission scope, 'change'
+
+    sdo.hasAddPermission = (scope)->
+        sdo.hasPermission scope, 'add'
+
 
     # Set user's values and returns it
     sdo.set(

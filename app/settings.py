@@ -7,6 +7,8 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 TASTYPIE_FULL_DEBUG = DEBUG
 
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com')
 )

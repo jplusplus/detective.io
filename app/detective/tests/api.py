@@ -580,7 +580,7 @@ class ApiTestCase(ResourceTestCase):
         resp = self.patch_individual(**args)
         self.assertHttpOK(resp)
         self.assertValidJSONResponse(resp)
-        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        updated_jpp = Organization.objects.filter(name=self.jpp.name)[0]
         self.assertEqual(timezone.make_naive(updated_jpp.founded), new_date)
 
     def test_patch_individual_website_staff(self):

@@ -83,13 +83,11 @@ detective = angular
                         controller: ExploreCtrl
                         # Allow a dynamic loading by setting the templateUrl within controller
                         template: "<div ng-include src='templateUrl'></div>"
-                        auth: true
                     })
                     .when('/:scope/:type', {
                         controller: IndividualListCtrl
                         templateUrl: "/partial/individual-list.html"
                         reloadOnSearch: false
-                        auth: true
                         # Resolve the Summary service before load this page
                         resolve: data: (Summary)-> Summary.get(id: "forms")
                     })
@@ -97,7 +95,6 @@ detective = angular
                         controller: IndividualSingleCtrl
                         templateUrl: "/partial/individual-single.html"
                         reloadOnSearch: false
-                        auth: true
                         # Resolve the Summary service before load this page
                         resolve: data: (Summary)-> Summary.get(id: "forms")
                     })

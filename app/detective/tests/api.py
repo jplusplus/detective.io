@@ -12,6 +12,8 @@ from registration.models               import RegistrationProfile
 from tastypie.test                     import ResourceTestCase, TestApiClient
 import json
 import urllib
+import collections
+
 
 def find(function, iterable):
     for el in iterable:
@@ -252,6 +254,8 @@ class ApiTestCase(ResourceTestCase):
         permissions = data.get("permissions")
         self.assertTrue(data["success"])
         self.assertIsNotNone(permissions)
+        # check if permissions is an array (not a string)
+        self.assertEqual(len(permissions), 3)
         # all permission for energy contribution 
         self.assertTrue('energy.contribute_add'    in permissions)
         self.assertTrue('energy.contribute_delete' in permissions)

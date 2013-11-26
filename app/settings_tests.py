@@ -61,3 +61,16 @@ DEBUG = False
 
 NEO4DJANGO_PROFILE_REQUESTS = False
 NEO4DJANGO_DEBUG_GREMLIN = False
+
+SESSION_ENGINE          = "django.contrib.sessions.backends.db"
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache',
+    }
+}
+
+

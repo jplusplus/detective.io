@@ -1,0 +1,92 @@
+<div class="container">
+  <div class="row">
+    <form novalidate class="top30 col-md-6 col-md-push-3 black"  name="form" ng-submit="submit()" ng-hide="requestSucceed">
+      <fieldset class="panel panel-default" ng-class="{loading:loading}" ng-disabled="loading">
+        <div class="panel-body">
+          <h2>Contact us</h2>
+          <p>Tell us more about your field of investigation and we'll come back to you to discuss your project in details!</p>
+
+          <h3 class="top50">About your investigation</h3>
+
+          <div class="form-group required">
+            <label for="inputDomain">Which domain do you want to investigate on?</label>
+            <textarea required msd-elastic ng-model="qr.domain" class="form-control" id="inputDomain" placeholder="Enter a description">
+            </textarea>
+          </div>
+
+          <div class="form-group required">
+            <label for="inputDomain">How many entities do you plan to store?</label>
+            <select required ng-model="qr.records_size" class="form-control" ng-options="s[0] as s[1] for s in records_sizes">
+              <option value="">Choose...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="inputDomain">How many people will work on the investigation?</label>
+            <select ng-model="qr.users_size" class="form-control" ng-options="s[0] as s[1] for s in users_sizes">
+              <option value="">Choose...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Will the data be public?</label>
+            <div>
+              <label class="radio">
+                <input type="radio" ng-model="qr.public" value="1" />
+                Yes, public
+              </label>
+              <label class="radio">
+                <input type="radio" ng-model="qr.public" value="0" />
+                No, just for a small group of users
+              </label>
+            </div>
+          </div>
+
+          <h3 class="top50">About you</h3>
+
+          <div class="form-group required">
+            <label for="inputName">Name</label>
+            <input type="text" required ng-model="qr.name" class="form-control" id="inputName" placeholder="Enter your name">
+          </div>
+
+          <div class="form-group required">
+            <label for="inputEmail">Email</label>
+            <input type="email" required ng-model="qr.email" class="form-control" id="inputEmail" placeholder="Enter your email">
+          </div>
+
+          <div class="form-group required">
+            <label for="inputEmployer">Company</label>
+            <input type="text"   ng-model="qr.employer" class="form-control" id="inputEmployer" placeholder="Enter your employer">
+          </div>
+
+          <div class="form-group">
+            <label for="inputPhone">Phone</label>
+            <input type="text" ng-model="qr.phone" class="form-control" id="inputPhone" placeholder="Enter your phone number">
+          </div>
+
+          <h3 class="top50">Anything else?</h3>
+
+          <div class="form-group">
+            <label for="inputComment" class="sr-only">Something else you want to tell us?</label>
+            <textarea msd-elastic ng-model="qr.comment" class="form-control" id="inputComment" placeholder="Enter additional information, comments, ...">
+            </textarea>
+          </div>
+
+        </div>
+
+        <div class="alert alert-danger" ng-if="error">[[error]]</div>
+
+        <div class="tr panel-footer">
+            <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Send</button>
+        </div>
+      </fieldset>
+    </form>
+
+    <div class="panel top30 col-md-6 col-md-push-3  panel-success" ng-show="requestSucceed">
+      <div class="panel-heading">
+        <h2>Thanks!</h2>
+        <p>We'll be in touch soon.</p>
+      </div>
+    </div>
+  </div>
+</div>

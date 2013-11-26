@@ -30,6 +30,17 @@ body {
 	    }
     }
 
+    label.radio {
+    	font-weight:normal;
+    }
+
+    .required label, label.required {
+    	&:after {
+    		content:"*";
+    		color:red;
+    	}
+    }
+
 	.bg-primary {
 		background:@brand-primary;
 		color:contrast(@brand-primary);

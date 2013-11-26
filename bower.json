@@ -2,6 +2,7 @@
 	"name": "detective",
 	"version": "0.0.6",
 	"dependencies": {
+		"angular-elastic": "2.2.0",
 		"angular-ui-bootstrap-bower": "0.6.0",
 		"bootstrap": "3.0.0",
 		"chroma-js": "0.5.2",

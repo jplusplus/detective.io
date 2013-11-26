@@ -1,5 +1,5 @@
 detective = angular
-    .module('detective', ["detectiveServices", "detectiveFilters", "ui.bootstrap"])
+    .module('detective', ["detectiveServices", "detectiveFilters", "ui.bootstrap", "monospaced.elastic"])
     .run(
         [
             '$rootScope',
@@ -57,6 +57,10 @@ detective = angular
                     .when('/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"
+                    })
+                    .when('/contact-us', {
+                        controller: ContactUsCtrl
+                        templateUrl: "/partial/contact-us.html"
                     })
                     .when('/page/:slug', {
                         controller: PageCtrl

@@ -83,7 +83,7 @@ class UserResource(ModelResource):
                 response = self.create_response(request, {
                     'success' : True,
                     'is_staff': user.is_staff,
-                    'permissions': user.get_all_permissions(),
+                    'permissions': list(user.get_all_permissions()),
                     'username': user.username
                 })
                 # Create CSRF token

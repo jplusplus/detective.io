@@ -33,7 +33,6 @@ class ExploreCtrl
         @location.path "/common/country/#{val.id}" if val.id?
 
     selectIndividual: (val, old)=>
-        console.log(val)
         # Single entity selected
         if val.predicate? and val.predicate.name is "<<INSTANCE>>"
             vals = val.object.split(":")

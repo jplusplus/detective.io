@@ -28,9 +28,9 @@ class ApiTestCase(ResourceTestCase):
         self.salt       = SaltMixin.salt
 
 
-        self.super_username = u'tester'
-        self.super_password = u'tester'
-        self.super_email    = u'tester@detective.io'
+        self.super_username = u'tester0'
+        self.super_password = u'tester0'
+        self.super_email    = u'tester0@detective.io'
 
         self.contrib_username = u'tester1'
         self.contrib_password = u'tester1'
@@ -218,7 +218,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertHttpBadRequest(resp)
 
     def test_user_login_succeed(self):
-        auth = dict(username=u"tester", password=u"tester")
+        auth = dict(username=self.super_username, password=self.super_password)
         resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
@@ -226,7 +226,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual(data["success"], True)
 
     def test_user_login_failed(self):
-        auth = dict(username=u"tester", password=u"wrong")
+        auth = dict(username=self.super_username, password=u"awrongpassword")
         resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
@@ -235,7 +235,7 @@ class ApiTestCase(ResourceTestCase):
 
     def test_user_logout_succeed(self):
         # First login
-        auth = dict(username=u"tester", password=u"tester")
+        auth = dict(username=self.super_username, password=self.super_password)
         self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
         # Then logout
         resp = self.api_client.get('/api/common/v1/user/logout/', format='json')
@@ -260,7 +260,7 @@ class ApiTestCase(ResourceTestCase):
 
     def test_user_status_is_logged(self):
         # Log in
-        auth = dict(username=u"tester", password=u"tester")
+        auth = dict(username=self.super_username, password=self.super_password)
         self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
 
         resp = self.api_client.get('/api/common/v1/user/status/', format='json')
@@ -269,8 +269,20 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)
         self.assertEqual(data["is_logged"], True)
 
+
+    def test_contrib_user_status_is_logged(self):
+        # Log in
+        auth = dict(username=self.contrib_username, password=self.contrib_password)
+        self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.get('/api/common/v1/user/status/', format='json')
+        self.assertValidJSON(resp.content)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        self.assertEqual(data["is_logged"], True)
+
+
     def test_reset_password_success(self):
-        email = dict(email="tester@detective.io")
+        email = dict(email=self.super_email)
         resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=email)
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
@@ -373,7 +385,7 @@ class ApiTestCase(ResourceTestCase):
         resp = self.api_client.get('/api/energy/v1/energyproject/?limit=20', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Number of element on the first page
-        count = min(20, EnergyProject.objects.count() )
+        count = min(20, EnergyProject.objects.count())
         self.assertEqual( len(self.deserialize(resp)['objects']), count)
 
     def test_post_list_unauthenticated(self):

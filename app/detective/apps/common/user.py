@@ -21,13 +21,18 @@ import hashlib
 import random
 
 
-
 class UserAuthorization(ReadOnlyAuthorization):
     def update_detail(self, object_list, bundle):
-        return bundle.request.user and bundle.request.user.is_staff
+        authorized = False
+        if bundle.request:
+            authorized = ((bundle.obj.user == bundle.request.user) or bundle.request.user.is_staff)
+        return authorized
 
     def delete_detail(self, object_list, bundle):
-        return bundle.request.user and bundle.request.user.is_staff
+        authorized = False
+        if bundle.request:
+            authorized = ((bundle.obj.user == bundle.request.user) or bundle.request.user.is_staff)
+        return authorized
 
 
 class UserResource(ModelResource):
@@ -69,14 +74,12 @@ class UserResource(ModelResource):
             })
 
         user = authenticate(username=username, password=password)
-        
         if user:
             if user.is_active:
                 login(request, user)
 
                 # Remember me opt-in
                 if not remember_me: request.session.set_expiry(0)
-
                 response = self.create_response(request, {
                     'success' : True,
                     'is_staff': user.is_staff,

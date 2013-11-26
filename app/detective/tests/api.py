@@ -50,11 +50,11 @@ class ApiTestCase(ResourceTestCase):
             self.lambda_user  = User.objects.get(username=self.lambda_username)
             
             # fixtures & test data
-            self.jpp  = jpp = Organization.objects.get(name=u"Journalism++")
-            self.jg   = jg  = Organization.objects.get(name=u"Journalism Grant")
-            self.fra  = fra = Country.objects.get(name=u"France")
-            self.pr   = pr  = Person.objects.get(name=u"Pierre Roméra")
-            self.pb   = pb  = Person.objects.get(name=u"Pierre Bellon")
+            self.jpp  = Organization.objects.filter(name=u"Journalism++")[0]
+            self.jg   = Organization.objects.filter(name=u"Journalism Grant")[0]
+            self.fra  = Country.objects.get(name=u"France")
+            self.pr   = Person.objects.get(name=u"Pierre Roméra")
+            self.pb   = Person.objects.get(name=u"Pierre Bellon")
 
         except ObjectDoesNotExist:
             # Create the new user
@@ -72,28 +72,28 @@ class ApiTestCase(ResourceTestCase):
             self.lambda_user.save()
 
             # Create related objects
-            self.jpp = jpp = Organization(name=u"Journalism++")
-            jpp._author = [self.super_user.pk]
-            jpp.founded = datetime(2011, 4, 3)
-            jpp.website_url = 'http://jplusplus.com'
-            jpp.save()
+            self.jpp = Organization(name=u"Journalism++")
+            self.jpp._author = [self.super_user.pk]
+            self.jpp.founded = datetime(2011, 4, 3)
+            self.jpp.website_url = 'http://jplusplus.com'
+            self.jpp.save()
             
-            self.jg = jg  = Organization(name=u"Journalism Grant")
-            jg._author = [self.super_user.pk]
-            jg.save()
+            self.jg = Organization(name=u"Journalism Grant")
+            self.jg._author = [self.super_user.pk]
+            self.jg.save()
 
-            self.fra = fra = Country(name=u"France", isoa3=u"FRA")
-            fra.save()
+            self.fra = Country(name=u"France", isoa3=u"FRA")
+            self.fra.save()
 
-            self.pr = pr = Person(name=u"Pierre Roméra")
-            pr.based_in.add(fra)
-            pr.activity_in_organization.add(jpp)
-            pr.save()
+            self.pr = Person(name=u"Pierre Roméra")
+            self.pr.based_in.add(self.fra)
+            self.pr.activity_in_organization.add(self.jpp)
+            self.pr.save()
 
-            self.pb = pb = Person(name=u"Pierre Bellon")
-            pb.based_in.add(fra)
-            pb.activity_in_organization.add(jpp)
-            pb.save()
+            self.pb = Person(name=u"Pierre Bellon")
+            self.pb.based_in.add(self.fra)
+            self.pb.activity_in_organization.add(self.jpp)
+            self.pb.save()
 
         self.post_data_simple = {
             "name": "Lorem ispum TEST",
@@ -103,11 +103,11 @@ class ApiTestCase(ResourceTestCase):
         self.post_data_related = {
             "name": "Lorem ispum TEST RELATED",
             "owner": [
-                { "id": jpp.id },
-                { "id": jg.id }
+                { "id": self.jpp.id },
+                { "id": self.jg.id }
             ],
             "activity_in_country": [
-                { "id": fra.id }
+                { "id": self.fra.id }
             ]
         }
         self.rdf_jpp = {
@@ -129,18 +129,21 @@ class ApiTestCase(ResourceTestCase):
         }
 
     def tearDown(self):
-        if self.super_user:
-            self.super_user.delete()
-        if self.jpp:
-            self.jpp.delete()
-        if self.jg:
-            self.jg.delete()
-        if self.fra:
-            self.fra.delete()
-        if self.pr:
-            self.pr.delete()
-        if self.pb:
-            self.pb.delete()
+        # Clean & delete generated data
+        # users 
+        self.cleanModel(self.super_user)
+        self.cleanModel(self.contrib_user)
+        self.cleanModel(self.lambda_user)
+        # individuals 
+        self.cleanModel(self.jpp)  # organization
+        self.cleanModel(self.jg)   # organization
+        self.cleanModel(self.fra)  # country
+        self.cleanModel(self.pr)   # people 
+        self.cleanModel(self.pb)   # people
+
+    def cleanModel(self,model_instance):
+        if model_instance:
+            model_instance.delete()
 
     # Utility functions (Auth, operation etc.)
     def get_credentials(self, login, password):
@@ -594,7 +597,7 @@ class ApiTestCase(ResourceTestCase):
         resp = self.patch_individual(**args)
         self.assertHttpOK(resp)
         self.assertValidJSONResponse(resp)
-        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        updated_jpp = Organization.objects.filter(name=self.jpp.name)[0]
         self.assertEqual(updated_jpp.website_url, jpp_url)
 
     def test_patch_individual_website_unauthenticated(self):
@@ -627,7 +630,7 @@ class ApiTestCase(ResourceTestCase):
         resp = self.patch_individual(**args)
         self.assertHttpOK(resp)
         self.assertValidJSONResponse(resp)
-        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        updated_jpp = Organization.objects.filter(name=self.jpp.name)[0]
         self.assertEqual(updated_jpp.website_url, jpp_url)
 
     def test_patch_individual_website_lambda(self):

@@ -74,6 +74,8 @@ def create_permissions(app, created_models, verbosity, db=DEFAULT_DB_ALIAS, **kw
             _create_permission(app_label, perm_args)
         _create_groups(app_label)
 
+    print "Permissions and groups created!"
+
 
 # will be trigger for each created app
 signals.post_syncdb.connect(create_permissions,

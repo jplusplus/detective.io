@@ -16,14 +16,14 @@
 
           <div class="form-group required">
             <label for="inputDomain">How many entities do you plan to store?</label>
-            <select required ng-model="qr.records_size" class="form-control" ng-options="s[0] as s[1] for s in records_sizes">
+            <select required ng-model="qr.records" class="form-control" ng-options="s[0] as s[1] for s in records_sizes">
               <option value="">Choose...</option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="inputDomain">How many people will work on the investigation?</label>
-            <select ng-model="qr.users_size" class="form-control" ng-options="s[0] as s[1] for s in users_sizes">
+            <select ng-model="qr.users" class="form-control" ng-options="s[0] as s[1] for s in users_sizes">
               <option value="">Choose...</option>
             </select>
           </div>

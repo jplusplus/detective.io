@@ -2,8 +2,6 @@ import os
 from settings import *
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-AUTHENTICATION_BACKENDS = ('neo4django.graph_auth.backends.NodeModelBackend',)
-
 NEO4J_DATABASES = {
     'default' : {
         'HOST':'localhost',
@@ -61,16 +59,3 @@ DEBUG = False
 
 NEO4DJANGO_PROFILE_REQUESTS = False
 NEO4DJANGO_DEBUG_GREMLIN = False
-
-SESSION_ENGINE          = "django.contrib.sessions.backends.db"
-AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache',
-    }
-}
-
-

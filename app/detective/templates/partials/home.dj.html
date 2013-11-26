@@ -2,26 +2,25 @@
 
 <div id="home">
     <div class="container">
-        <div class="row bottom40 top90">
-            <div class="col-md-3 hidden-sm hidden-xs text-center">
-            </div>
-            <div class="col-md-9">
+        <div class="row bottom40">
+            <div class="col-md-8 col-md-push-2 text-center">
                 <h1>
-                    Structure your investigation<br />&amp; mine your data
-                </h1>
-                <div class="">
-                    <p><span class="text-muted">Throw away your Moleskine!</span> Detective.io is a platform that hosts your investigation and lets you mine it with powerful queries. Simply describe your field of study and Detective.io builds the input interface as well as a state of the art front-end.</p>
-                </div>
-                <p class="lead">
-                    <a class="btn btn-primary pull-right" ng-click="scrollToBoxes = true">See all open investigations!</a>
-                    Want to set up your own investigation?<br />
-                    <a ng-href="/contact-us">
-                        Get a quote!
+                    <img src="{% static 'detective/img/white-hat.png' %}" />
+                    <a href="#/">
+                        Detective<i>.io</i>
                     </a>
-                </p>
+                </h1>
+                <div class="lead">
+                    <p class="bold">Structure your investigation &amp; mine your data</p>
+                    <p>Throw away your Moleskine! Detective.io is a platform that hosts your investigation and lets you mine it with powerful queries.</p>
+                    <p class="text-muted">
+                        Want to set up your own investigation?<br />
+                        <a ng-href="/contact-us">Get a quote</a> or <a ng-click="scrollToBoxes = true">See all open investigations</a>!
+                    </p>
+                </div>
             </div>
         </div>
-        <div class="text-center">
+        <div class="text-center detective-preview">
             <img src="{% static 'detective/img/detective-preview.png' %}" />
         </div>
     </div>
@@ -84,7 +83,16 @@
         <div class="container">
             <div class="row">
                 <div class="col-sm-offset-1 col-sm-10 top50 bottom50">
-                    <div class="row bottom20">
+
+                    <div class="text-center stack-stripe">
+                        <h3>Simply describe your field of study</h3>
+                        <p class="lead text-muted">
+                            and Detective.io builds the input interface<br />
+                            as well as a state of the art front-end.
+                        </p>
+                    </div>
+
+                    <div class="row stack-stripe">
                         <div class="col-md-6 illustration">
                             <img src="{% static 'detective/img/mobile.png' %}" />
                         </div>
@@ -94,17 +102,17 @@
                         </div>
                     </div>
 
-                    <div class="row bottom20">
-                        <div class="col-md-6 illustration col-md-push-6">
+                    <div class="row stack-stripe">
+                        <div class="col-md-6 illustration col-md-push-6 top20">
                             <img src="{% static 'detective/img/semantic.png' %}" />
                         </div>
-                        <div class="col-md-6 col-md-pull-6">
+                        <div class="col-md-6 col-md-pull-6 text-right">
                             <h3>Semantic</h3>
                             <p class="lead text-muted">Detective.io relies on purpose-built ontologies for each topic. They can be plugged to other ontologies to unleash the power of linked data.</p>
                         </div>
                     </div>
 
-                    <div class="row bottom20">
+                    <div class="row stack-stripe">
                         <div class="col-md-6 illustration">
                             <img src="{% static 'detective/img/journo-tools.png' %}" />
                         </div>
@@ -114,25 +122,26 @@
                         </div>
                     </div>
 
-                    <div class="row bottom20">
+                    <div class="row stack-stripe">
                         <div class="col-md-6 illustration col-md-push-6">
+                            <img src="{% static 'detective/img/open-source.png' %}" />
+                        </div>
+                        <div class="col-md-6 col-md-pull-6 text-right">
+                            <h3>Open source</h3>
+                            <p class="lead text-muted">And best of all, detective.io is all open source. You can install and run it yourself. <a href="http://github.com/jplusplus/detective.io" target="_blank">Grab the code on Github</a>!</p>
+                        </div>
+                    </div>
+
+                    <div class="row bottom10">
+                        <div class="col-md-6 illustration">
                             <img src="{% static 'detective/img/network.png' %}" />
                         </div>
-                        <div class="col-md-6 col-md-pull-6">
+                        <div class="col-md-6">
                             <h3>Graph search</h3>
                             <p class="lead text-muted">Your own graph search module for each investigation. Make complex queries in a breeze and find hidden patterns in your data.</p>
                         </div>
                     </div>
 
-                    <div class="row bottom20">
-                        <div class="col-md-6 illustration">
-                            <img src="{% static 'detective/img/open-source.png' %}" />
-                        </div>
-                        <div class="col-md-6">
-                            <h3>Open source</h3>
-                            <p class="lead text-muted">And best of all, detective.io is all open source. You can install and run it yourself. <a href="http://github.com/jplusplus/detective.io" target="_blank">Grab the code on Github</a>!</p>
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="bottom50 text-center top20">

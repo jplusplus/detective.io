@@ -8,6 +8,11 @@ class IndividualSearchCtrl extends IndividualListCtrl
         @scope.syntax = @Individual.get type: "summary", id: "syntax"
         # Watch query change to reload the search
         @scope.search = =>
+            # Extract valid object's name
+            # (we received an RDF formated object, with a tripplet)
+            if not @scope.query.object.name? and @scope.query.object.subject?
+                # Use the subject as name
+                @scope.query.object.name = @scope.query.object.subject.name
             @location.search 'q', angular.toJson(@scope.query)
         # Custom filter to display only subject related relationship
         @scope.currentSubject = (rel)=> rel.subject? and rel.subject == @scope.query.subject.name

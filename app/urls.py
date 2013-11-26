@@ -1,6 +1,6 @@
-from django.conf.urls    import patterns, include, url
-from django.contrib      import admin
-from app.detective.utils import get_apps
+from app.detective.utils  import get_apps
+from django.conf.urls     import patterns, include, url
+from django.contrib       import admin
 
 admin.autodiscover()
 apps = "|".join( get_apps() )
@@ -28,3 +28,5 @@ urlpatterns = patterns('',
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial', name='partial'),
 )
 
+# Handle 404 with the homepage
+handler404 = "app.detective.views.not_found"

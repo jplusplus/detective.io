@@ -388,7 +388,8 @@ class IndividualResource(ModelResource):
         #self.is_authenticated(request)
         self.throttle_check(request)
         self.is_authenticated(request)
-
+        bundle = self.build_bundle(request=request)
+        self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
         model = self.get_model()
         try:
             node = model.objects.select_related(depth=1).get(id=kwargs["pk"])

@@ -11,7 +11,7 @@ from django.http                        import Http404
 from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
-from tastypie.authentication            import SessionAuthentication, BasicAuthentication, MultiAuthentication
+from tastypie.authentication            import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization             import Authorization
 from tastypie.constants                 import ALL
 from tastypie.exceptions                import Unauthorized
@@ -53,7 +53,7 @@ class IndividualMeta:
     detail_allowed_methods = ['get', 'post', 'delete', 'put', 'patch']
     always_return_data     = True
     authorization          = IndividualAuthorization()
-    authentication         = MultiAuthentication(BasicAuthentication(), SessionAuthentication())
+    authentication         = MultiAuthentication(Authentication(), BasicAuthentication(), SessionAuthentication())
     filtering              = {'name': ALL}
     ordering               = {'name': ALL}
     serializer             = Serializer(formats=['json', 'jsonp', 'xml', 'yaml'])
@@ -102,7 +102,7 @@ class IndividualResource(ModelResource):
         return self.get_model()._meta.fields
 
     def get_model_field(self, name):
-        target = None 
+        target = None
         fields = self.get_model_fields()
         for field in fields:
             if field.name == name:
@@ -430,7 +430,7 @@ class IndividualResource(ModelResource):
                 else:
                     field_prop = self.get_model_field(field)._property
                     if isinstance(field_prop, DateProperty):
-                        # It's a date and therefor `value` should be converted as it 
+                        # It's a date and therefor `value` should be converted as it
                         value  = datetime.strptime(value, RFC_DATETIME_FORMAT)
                     # Set the new value
                     setattr(node, field, value)

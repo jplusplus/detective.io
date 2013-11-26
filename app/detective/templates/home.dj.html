@@ -15,6 +15,7 @@
     <script type="text/javascript" src="{% static 'unstable-angular-complete/angular-resource.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'unstable-angular-complete/angular-sanitize.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'angular-ui-bootstrap-bower/ui-bootstrap-tpls.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'angular-elastic/elastic.js' %}"></script>
     <script type="text/javascript" src="{% static 'chroma-js/chroma.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'kartograph.js/kartograph-0.8.2.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'raphael/raphael-min.js' %}"></script>
@@ -27,6 +28,7 @@
     {% compress js %}
         <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/BreadcrumbCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContactUsCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContributeCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ExploreCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/HeaderCtrl.coffee' %}"></script>
@@ -79,8 +81,9 @@
                     </li>
                 </ul>
                 <ul class="list-inline">
-                    <li><a href="/page/about">About</a></li>
+                    <li><a ng-href="/page/about">About</a></li>
                     <li><a href="mailto:contact@detective.io"> Contact</a></li>
+                    <li class=""><a ng-href="/contact-us">Get a quote!</a></li>
                     <li class="last"><a href="https://github.com/jplusplus/detective.io" target="_blank">Github</a></li>
                     <li class="last hidden"><a>Facebook</a></li>
                 </ul>

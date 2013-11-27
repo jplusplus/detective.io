@@ -396,7 +396,8 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual(resp.status_code in [302, 404], True)
 
     def test_cypher_detail(self):
-        self.assertHttpNotFound(self.api_client.get('/api/common/v1/cypher/111/', format='json', authentication=self.get_credentials()))
+        resp = self.api_client.get('/api/common/v1/cypher/111/', format='json', authentication=self.get_credentials())
+        self.assertEqual(resp.status_code in [302, 404], True)
 
     def test_cypher_unauthenticated(self):
         self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json'))
@@ -417,7 +418,8 @@ class ApiTestCase(ResourceTestCase):
         self.assertValidJSONResponse(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_credentials()))
 
     def test_summary_list(self):
-        self.assertHttpNotFound(self.api_client.get('/api/common/v1/summary/', format='json'))
+        resp = self.api_client.get('/api/common/v1/summary/', format='json')
+        self.assertEqual(resp.status_code in [302, 404], True)
 
     def test_summary_mine_success(self):
         resp = self.api_client.get('/api/common/v1/summary/mine/', authentication=self.get_credentials(), format='json')

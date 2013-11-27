@@ -26,7 +26,6 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
     sdo.hasAddPermission = (scope)->
         sdo.hasPermission scope, 'add'
 
-
     # Set user's values and returns it
     sdo.set(
         # Create basic user using cookies

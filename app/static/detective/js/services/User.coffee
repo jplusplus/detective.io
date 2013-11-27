@@ -32,7 +32,7 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
             is_logged   : $cookies.user__is_logged 
             is_staff    : $cookies.user__is_staff 
             username    : $cookies.user__username or ''
-            permissions : $cookies.user__permissions or []
+            permissions : $cookies.user__permissions.replace(/["]/g, '').split(' ') or []
         # set default values
         else
             is_logged   : false 
@@ -40,5 +40,4 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
             username    : ''
             permissions : []
     )
-
 ])

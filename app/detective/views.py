@@ -28,7 +28,7 @@ def home(request):
 
 
 def partial(request, partial_name=None):
-    template_name = 'partials/' + partial_name + '.dj.html';
+    template_name = 'partials/' + partial_name + '.dj.html'
     try:
         return render_to_response(template_name)
     except TemplateDoesNotExist:

@@ -3,7 +3,7 @@
 from app.detective.apps.common.message import SaltMixin
 from app.detective.apps.common.models  import Country
 from app.detective.apps.energy.models  import Organization, EnergyProject, Person
-from datetime                          import datetime 
+from datetime                          import datetime
 from django.contrib.auth.models        import User, Group
 from django.core                       import signing
 from tastypie.utils                    import timezone
@@ -12,8 +12,6 @@ from registration.models               import RegistrationProfile
 from tastypie.test                     import ResourceTestCase, TestApiClient
 import json
 import urllib
-import collections
-
 
 def find(function, iterable):
     for el in iterable:
@@ -185,7 +183,7 @@ class ApiTestCase(ResourceTestCase):
         return self.login(self.lambda_username, self.lambda_password)
 
     def signup_user(self, user_dict):
-        """ Utility method to signup through API """ 
+        """ Utility method to signup through API """
         return self.api_client.post('/api/common/v1/user/signup/', format='json', data=user_dict)
 
     def patch_individual(self, scope=None, model_name=None, model_id=None,
@@ -356,7 +354,7 @@ class ApiTestCase(ResourceTestCase):
 
     def test_reset_password_confirm_succes(self):
         """
-        Test to successfuly reset a password with a new one. 
+        Test to successfuly reset a password with a new one.
         Expected:
             HTTP 200 - OK
         """
@@ -364,8 +362,8 @@ class ApiTestCase(ResourceTestCase):
         password = "testtest"
         auth = dict(password=password, token=token)
         resp = self.api_client.post(
-                '/api/common/v1/user/reset_password_confirm/', 
-                format='json', 
+                '/api/common/v1/user/reset_password_confirm/',
+                format='json',
                 data=auth
             )
         self.assertValidJSON(resp.content)
@@ -377,14 +375,14 @@ class ApiTestCase(ResourceTestCase):
 
     def test_reset_password_confirm_no_data(self):
         """
-        Test on reset_password_confirm API endpoint without any data. 
-        Expected response: 
-            HTTP 400 (BadRequest). 
-        Explanation: 
-            Every request on /reset_password_confirm/ must have a JSON data payload. 
-            { 
+        Test on reset_password_confirm API endpoint without any data.
+        Expected response:
+            HTTP 400 (BadRequest).
+        Explanation:
+            Every request on /reset_password_confirm/ must have a JSON data payload.
+            {
                 password: ... // the password to reset"
-                token:    ... // the reset password token (received by emai) 
+                token:    ... // the reset password token (received by emai)
             }
         """
         resp = self.api_client.post('/api/common/v1/user/reset_password_confirm/', format='json')
@@ -394,16 +392,16 @@ class ApiTestCase(ResourceTestCase):
     def test_reset_password_confirm_empty_data(self):
         """
         Test on reset_password_confirm API endpoint with empty data:
-        { 
+        {
             password: ""
             token: ""
         }
         Expected result:
             HTTP 400 (BadRequest)
         Explanation:
-            A reset_password_confirm request must have a password and should be 
+            A reset_password_confirm request must have a password and should be
             authenticated with a token.
-        """ 
+        """
         auth = dict(password='', token='')
         resp = self.api_client.post('/api/common/v1/user/reset_password_confirm/', format='json', data=auth)
         self.assertHttpBadRequest(resp)
@@ -419,19 +417,16 @@ class ApiTestCase(ResourceTestCase):
             HTTP 403 (Forbidden)
         Explanation:
             A reset_password_confirm request should be authenticated with a valid
-            token. 
-        """ 
+            token.
+        """
         fake_token = 'f4k:t0k3N'
         auth = dict(password='newpassword', token=fake_token)
         resp = self.api_client.post(
-                '/api/common/v1/user/reset_password_confirm/', 
-                format='json', 
+                '/api/common/v1/user/reset_password_confirm/',
+                format='json',
                 data=auth
             )
         self.assertHttpForbidden(resp)
-
-    def test_get_list_unauthorzied(self):
-        self.assertHttpUnauthorized(self.api_client.get('/api/energy/v1/energyproject/', format='json'))
 
     def test_get_list_json(self):
         resp = self.api_client.get('/api/energy/v1/energyproject/?limit=20', format='json', authentication=self.get_super_credentials())
@@ -614,7 +609,7 @@ class ApiTestCase(ResourceTestCase):
         Test a patch request on an invidividual's date attribute.
         Request: /api/energy/v1/organization/
         Expected: HTTP 200 (OK)
-        """  
+        """
         # date are subject to special process with patch method.
         new_date  = datetime(2011, 4, 1, 0, 0, 0, 0)
         data = {

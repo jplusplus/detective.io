@@ -1,11 +1,11 @@
 class IndividualListCtrl
-    # Injects dependancies    
+    # Injects dependancies
     @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$location',  'Page']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @location, @Page)->   
+    constructor: (@scope, @routeParams, @Individual, @Summary, @location, @Page)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
-        # ──────────────────────────────────────────────────────────────────────  
+        # ──────────────────────────────────────────────────────────────────────
         @scope.hasPreviousPage = @hasPreviousPage
         @scope.hasNextPage     = @hasNextPage
         @scope.previousPage    = @previousPage
@@ -16,75 +16,73 @@ class IndividualListCtrl
         @scope.isLoading       = @isLoading
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
-        # ──────────────────────────────────────────────────────────────────────  
+        # ──────────────────────────────────────────────────────────────────────
         # Read route params
         @scope.scope              = @routeParams.scope
         @scope.type               = @routeParams.type or ""
         @scope.page               = @routeParams.page or 1
         @scope.limit              = 20
         @scope.individuals        = {}
-        @scope.selectedIndividual = {}             
+        @scope.selectedIndividual = {}
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
-        # ──────────────────────────────────────────────────────────────────────  
+        # ──────────────────────────────────────────────────────────────────────
         @scope.$watch "selectedIndividual", @selectIndividual, true
         @scope.$watch "page", =>
-            # Get parameters from context method (could be overloaded)   
+            # Get parameters from context method (could be overloaded)
             params = @getParams()
             # Only if params are valid
             if params
                 # Global loading mode
-                @Page.loading true        
+                @Page.loading true
                 # Get individual from database
-                @scope.individuals = @Individual.get(params, => 
+                @scope.individuals = @Individual.get params, =>
                     # Turn off loading mode
-                    @Page.loading false        
-                # Not found
-                , => @location.path "/404")
+                    @Page.loading false
         # Update page value
         @scope.$on "$routeUpdate", => @scope.page = @routeParams.page or 1
         # ──────────────────────────────────────────────────────────────────────
         # Page setup
-        # ──────────────────────────────────────────────────────────────────────  
+        # ──────────────────────────────────────────────────────────────────────
         @getVerbose()
 
     selectIndividual: (val, old)=>
         # Single entity selected
         if val.id?
-            @location.path "/#{@scope.scope}/#{@scope.type.toLowerCase()}/#{val.id}"                
+            @location.path "/#{@scope.scope}/#{@scope.type.toLowerCase()}/#{val.id}"
 
     # Verbose informations
     # (loaded contexualy)
-    getVerbose: =>        
+    getVerbose: =>
         # Get meta information for this type
-        @Summary.get id: "forms", (data)=>         
+        @Summary.get id: "forms", (data)=>
             # Avoid set the wrong title
             # (when the controller is destroyed)
             unless @scope.$$destroyed
                 @scope.meta = meta = data[@scope.type.toLowerCase()]
-                if meta? 
+                if meta?
                     # Redirect "unlistable" resource
                     return @location.path "/#{@scope.scope}" unless meta.rules.is_searchable
                     @scope.verbose_name        = meta.verbose_name
-                    @scope.verbose_name_plural = meta.verbose_name_plural        
+                    @scope.verbose_name_plural = meta.verbose_name_plural
                     # Set page's title
-                    @Page.title meta.verbose_name_plural            
+                    @Page.title meta.verbose_name_plural
                 # Unkown type
                 else @location.path "/404"
 
     # List parameters
-    getParams: =>        
+    getParams: =>
         type    : @scope.type
         scope   : @scope.scope
         limit   : @scope.limit
-        offset  : (@scope.page-1)*@scope.limit  
+        offset  : (@scope.page-1)*@scope.limit
         order_by: "name"
 
-    singleUrl: (individual)=> 
+    singleUrl: (individual)=>
         type = (@scope.type or individual.model).toLowerCase()
         "/#{@scope.scope}/#{type}/#{individual.id}"
     # Pages list
-    pages: => 
+    pages: =>
         # No page yet
         unless @scope.individuals.meta? then return [1]
         # Use the meta info to determine the page number
@@ -104,5 +102,5 @@ class IndividualListCtrl
     isLoading: => not @scope.individuals.meta?
 
 
-    
+
 angular.module('detective').controller 'individualListCtrl', IndividualListCtrl

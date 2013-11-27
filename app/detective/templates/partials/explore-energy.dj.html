@@ -4,16 +4,17 @@
 
 	<div class="banner banner-big" parallax=".bg" speed="0.9">
 		<img src="{% static 'detective/img/energy-heading.jpg' %}" class="bg" />
-		<div class="container fg top90">
-			<div class="row">
-				<div class="col-sm-6">
-					<h2>Innovative energy projects in developing countries</h2>
-					<p class="lead">A comprehensive database of every person and every organization linked to innovative energy projects.</p>
-					<p class="top40">
-						<a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission('energy')" ng-href="/energy/contribute">Contribute</a>
-						<a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">Start to explore</a>
-					</p>
-				</div>
+		<div class="fg top90 container">
+			<div class="intro">
+				<span class="logo">
+					<img src="{% static 'detective/img/logo-energy.png' %}" />
+				</span>
+				<h2>Innovative energy projects in developing countries</h2>
+				<p class="lead">A comprehensive database of every person and every organization linked to innovative energy projects.</p>
+				<p class="top40">
+					<a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission('energy')" ng-href="/energy/contribute">Contribute</a>
+					<a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">Start to explore</a>
+				</p>
 			</div>
 		</div>
 	</div>
@@ -23,7 +24,7 @@
 			<a scroll-to="600" ng-if="scrollToExplore == true" reset="scrollToExplore"></a>
 			<div class="top50 bottom40">
 				<div class="row">
-					<form class="col-sm-8 col-sm-push-2" role="search">
+					<form class="col-md-8 col-md-push-2" role="search">
 						<div class="input-group">
 	  						<span class="input-group-addon"><i class="fa fa-search"></i></span>
 							<input type="search"
@@ -39,7 +40,7 @@
 								   	id="input-search" />
 					    </div>
 					</form>
-					<div class="col-sm-8 col-sm-push-2 lead top20">
+					<div class="col-md-8 col-md-push-2 lead top20">
 						Navigate through
 						<a ng-href="/energy/energyproject"><strong>[[getTypeCount("EnergyProject")]]</strong> projects</a>,
 						<a ng-href="/energy/person"><strong>[[getTypeCount("Person")]]</strong> persons</a> and
@@ -53,13 +54,13 @@
 
 	<div class="container">
 		<div class="row">
-			<div class="col-sm-4">
+			<div class="col-md-4">
 				<h3>About the project</h3>
 				<p>This comprehensive knowledge base draws up an inventory of innovative energy projects in developing countries. It rigorously lists <a href="energy/energyproject/">projects</a>, their <a href="energy/organization/">owners</a> and <a href="energy/person/">key persons</a> and the relationships that link them. Journalists, investors and development professionals now have access to a wide range of sourced and structured data. It will enable them to make better informed decision in a field that dramatically lacks scrutiny. </p>
-				<p>The project was funded by a grant by the European Journalism Center in cooperation with the Bill &amp; Melinda Gates Foundation.</p>
+				<p>The project was funded by a grant by the European Journalism Center in cooperation with the Bill &amp; Melinda Gates Foundation. It is done in partnership with <a href="http://liberation.fr/">Libération</a>, <a href="http://localenergynetwork.org/">Local Energy Network</a> and <a href="http://www.svd.se/">Svenska Dagbladet</a>.</p>
 			</div>
 
-			<div class="col-sm-8 select-a-country">
+			<div class="col-md-8 select-a-country">
 				<div country-map model="selectedCountry" values="countries" class="top60" />
 			</div>
 		</div>

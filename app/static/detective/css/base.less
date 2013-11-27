@@ -30,6 +30,17 @@ body {
 	    }
     }
 
+    label.radio {
+    	font-weight:normal;
+    }
+
+    .required label, label.required {
+    	&:after {
+    		content:"*";
+    		color:red;
+    	}
+    }
+
 	.bg-primary {
 		background:@brand-primary;
 		color:contrast(@brand-primary);
@@ -58,6 +69,9 @@ body {
 	.bg-light {
 		background:contrast(@header-bg);
 		color:@header-bg;
+		a {
+			color:mix(contrast(@brand-secondary), @header-bg);
+		}
 	}
 
 
@@ -141,16 +155,11 @@ header {
 	@open-speed: 0.4s;
 	position:relative;
 	z-index:@zindex-header;
-	padding-top:20px;
+	padding:20px 0;
 	background:@header-bg;
 	overflow:hidden;
 	.box-shadow(0 3px 0 fade(#000, 10));
 	.transition(@open-speed);
-
-	&.no-breadcrumb {
-		background:@body-bg;
-		.box-shadow(0 3px 0 fade(#000, 0));
-	}
 
 	.form-login {
 		.opacity(0.4);
@@ -171,7 +180,7 @@ header {
 	}
 
 	h1 {
-		background: url("@{staticPath}img/hat.png") no-repeat 0 0;
+		background: url("@{staticPath}img/white-hat.png") no-repeat 0 0;
 		padding-left:80px;
 		margin:0 25px;
 		text-shadow:0 3px 0 fade(#000, 10);
@@ -603,7 +612,6 @@ header {
 	.boxes {
 
 		@box-height:240px;
-		@box-width:380px;
   		.make-row();
   		position:relative;
   		z-index:5;
@@ -615,16 +623,14 @@ header {
 		.box {
 			overflow: hidden;
 			position:relative;
-			float:left;
 			display:block;
-			margin-right:30px;
-			margin-top:10px;
-			margin-bottom:20px;
+			margin-right:10px;
+			margin-top:20px;
+			margin-bottom:30px;
 			text-align:left;
 			border:1px solid darken(#BCB5A6, 10%);
 			border-bottom-width:3px;
 			height:@box-height;
-			width:@box-width;
 			background:#BCB5A6;
 			color:@text-color;
 
@@ -637,9 +643,14 @@ header {
 				}
 			}
 
-			h3 a {
-				color:inherit;
-				text-decoration: none;
+
+			h3 {
+				margin-top:0;
+
+				a {
+					color:inherit;
+					text-decoration: none;
+				}
 			}
 
 			.bg {
@@ -674,6 +685,13 @@ header {
 		}
 	}
 
+	.features .illustration {
+		img {
+			margin:20px 10px;
+			max-width: 100%;
+		}
+	}
+
 }
 
 #energy {
@@ -682,6 +700,23 @@ header {
 		.opacity(0.7);
 	}
 
+	.intro {
+		position:relative;
+		max-width: 600px;
+		padding-left:120px;
+
+		.logo {
+			position:absolute;
+			top:0;
+			left:0;
+			height:123px;
+			width:100px;
+			display:block;
+			img {
+				max-width:100%;
+			}
+		}
+	}
 
 	.select-a-country {
 		padding-bottom:30px;
@@ -715,6 +750,8 @@ footer {
 		ul, li {
 			margin:0;
 			padding:0;
+			display:block;
+			float:left;
 
 			a {
 				text-transform: uppercase;
@@ -726,6 +763,12 @@ footer {
 				line-height:70px;
 				border-left:1px @body-bg solid;
 				color:mix(@link-color, @bg);
+				.transition(0.7s);
+
+				&:hover {
+					background:lighten(@bg, 5);
+				}
+
 			}
 
 			.last a {

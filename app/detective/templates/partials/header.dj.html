@@ -1,36 +1,7 @@
 <header ng-class="{ 'no-breadcrumb': location.path() == '/' }">
 
 	<div ng-controller="UserCtrl">
-		<form class="pull-right form-login form-inline"
-			  ng-hide="user.is_logged"
-			  ng-class="{loading:loading}"
-			  ng-submit="login()">
-
-  			<fieldset ng-disabled="loading">
-
-				<div class="form-group">
-					<input required type="text" class="form-control" ng-model="username" placeholder="Username" />
-					<input required type="password" class="form-control" ng-model="password" placeholder="Password" />
-					<button class="btn btn-primary">Sign in</button>
-				</div>
-
-				<div class="clearfix tl top05 bottom05 login-controls">
-					<div class="login-control pull-right text-right">
-			    		<label><a href="{% url 'reset_password' %}"> Password forgot?</a></label>
-			    	</div>
-					<div class="login-control" class="checkbox">
-				        <label>
-				        	<input type="checkbox" ng-model="remember_me"> Remember me
-				        </label>
-				    </div>
-		    	</div>
-		    	<div class="clearfix bottom10" ng-if="error">
-    		    	<span class="label label-danger top05">[[error]]</span>
-    		    </div>
-			</fieldset>
-		</form>
-
-		<div ng-show="user.is_logged" class="pull-right top10 right20 bottom30">
+		<div ng-show="user.is_logged" class="pull-right top10 right20">
 			Welcome, [[user.username]]!
 			<a ng-click="logout()" href="#">Sign out</a>
 		</div>

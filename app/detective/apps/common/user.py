@@ -191,7 +191,6 @@ class UserResource(ModelResource):
     def permissions(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
         self.is_authenticated(request)
-        print "user: %s" % request.user
         if request.user.is_authenticated():
             return self.create_response(request, {
                 'permissions': list(request.user.get_all_permissions())

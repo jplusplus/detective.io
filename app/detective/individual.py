@@ -8,18 +8,22 @@ from django.core.exceptions             import ObjectDoesNotExist
 from django.core.paginator              import Paginator, InvalidPage
 from django.db.models.query             import QuerySet
 from django.http                        import Http404
+from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
-from tastypie.authentication            import SessionAuthentication, BasicAuthentication, MultiAuthentication
+from tastypie.authentication            import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization             import Authorization
 from tastypie.constants                 import ALL
 from tastypie.exceptions                import Unauthorized
 from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
+from datetime                           import datetime
 import json
 import re
 
+# inspired from django.utils.formats.ISO_FORMATS['DATE_INPUT_FORMATS'][1]
+RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
     def read_detail(self, object_list, bundle):
@@ -49,7 +53,7 @@ class IndividualMeta:
     detail_allowed_methods = ['get', 'post', 'delete', 'put', 'patch']
     always_return_data     = True
     authorization          = IndividualAuthorization()
-    authentication         = MultiAuthentication(BasicAuthentication(), SessionAuthentication())
+    authentication         = MultiAuthentication(Authentication(), BasicAuthentication(), SessionAuthentication())
     filtering              = {'name': ALL}
     ordering               = {'name': ALL}
     serializer             = Serializer(formats=['json', 'jsonp', 'xml', 'yaml'])
@@ -96,6 +100,14 @@ class IndividualResource(ModelResource):
     def get_model_fields(self):
         # Find fields of the queryset's model
         return self.get_model()._meta.fields
+
+    def get_model_field(self, name):
+        target = None
+        fields = self.get_model_fields()
+        for field in fields:
+            if field.name == name:
+                target = field
+        return target
 
     def need_to_many_field(self, field):
         # Limit the definition of the new fields
@@ -169,7 +181,6 @@ class IndividualResource(ModelResource):
                 bundle.data[key] = rules[key].query(bundle.obj.id)
 
         return bundle
-
 
     def dehydrate(self, bundle):
         # Show additional field following the model's rules
@@ -376,7 +387,9 @@ class IndividualResource(ModelResource):
         self.method_check(request, allowed=['post'])
         #self.is_authenticated(request)
         self.throttle_check(request)
-
+        self.is_authenticated(request)
+        bundle = self.build_bundle(request=request)
+        self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
         model = self.get_model()
         try:
             node = model.objects.select_related(depth=1).get(id=kwargs["pk"])
@@ -416,6 +429,10 @@ class IndividualResource(ModelResource):
                                 continue
                 # It's a literal value
                 else:
+                    field_prop = self.get_model_field(field)._property
+                    if isinstance(field_prop, DateProperty):
+                        # It's a date and therefor `value` should be converted as it
+                        value  = datetime.strptime(value, RFC_DATETIME_FORMAT)
                     # Set the new value
                     setattr(node, field, value)
                 # Continue to not deleted the field
@@ -424,6 +441,7 @@ class IndividualResource(ModelResource):
             del data[field]
 
         if len(data) > 0:
+            val = (getattr(node, field), field)
             # Convert author to set to avoid duplicate
             node._author = set(node._author)
             node._author.add(request.user.id)

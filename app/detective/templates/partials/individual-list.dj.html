@@ -1,15 +1,15 @@
 <div class="container" id="individual-list">
 
-	<form class="form-inline pull-right left20 top20" role="search">	
-		<input  type="search" 
+	<form class="form-inline pull-right left20 top20" role="search" ng-if="!query">
+		<input  type="search"
 			    placeholder="Search..."
 			 	tt-typeahead
 				tt-scope="scope"
 				tt-individual="type"
 				tt-model="selectedIndividual"
 				limit="10"
-			   	class="form-control" 
-			   	id="input-search" />		
+			   	class="form-control"
+			   	id="input-search" />
     </form>
 
 	<h2 ng-if="individuals.meta.total_count <= 1">
@@ -28,16 +28,16 @@
 
 	<div ng-class="{'row': query}">
 
-		<form class="well query top10 col-md-3" ng-if="query" ng-submit="search()">			
+		<form class="well query top10 col-md-3" ng-if="query" ng-submit="search()">
 			<select class="form-control bottom10"
-					 ng-options="m.name as m.label for (key, m) in syntax.subject.model" 
+					 ng-options="m.name as m.label for (key, m) in syntax.subject.model"
 					 ng-model="query.subject.name">
 			</select>
 			<select class="form-control bottom10"
-					 ng-options="m.name as m.label for (key, m) in syntax.predicate.relationship | filter:currentSubject" 
+					 ng-options="m.name as m.label for (key, m) in syntax.predicate.relationship | filter:currentSubject"
 					 ng-model="query.predicate.name">
 			</select>
-			<input class="form-control" 			
+			<input class="form-control"
 				 	tt-typeahead
 					tt-individual="'summary'"
 					tt-model="query.object" />
@@ -47,10 +47,10 @@
 		</form>
 
 		<ul class="list-unstyled top10" ng-class="{'col-md-9': query}">
-			<li ng-repeat="individual in individuals.objects">			
+			<li ng-repeat="individual in individuals.objects">
 				<div class="panel individual">
 					<div class="thumb">
-						<img ng-src="[[individual.image]]" ng-if="individual.image" />					
+						<img ng-src="[[individual.image]]" ng-if="individual.image" />
 					</div>
 					<div class="panel-heading">
 						<div class="pull-right top10">
@@ -67,7 +67,7 @@
 		</ul>
 	</div>
 
-	<div class="tr" ng-if="hasPreviousPage() || hasNextPage()">	
+	<div class="tr" ng-if="hasPreviousPage() || hasNextPage()">
 		<ul class="pagination top0">
 			<li ng-class="{disabled: !hasPreviousPage()}">
 				<a ng-click="previousPage()">&laquo;</a>
@@ -80,7 +80,7 @@
 			<li ng-class="{disabled: !hasNextPage()}">
 				<a ng-click="nextPage()">&raquo;</a>
 			</li>
-		</ul>	
+		</ul>
 	</div>
 
 </div>

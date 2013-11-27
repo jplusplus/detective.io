@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective.apps.common.models import Country
-from app.detective.apps.energy.models import Organization, EnergyProject, Person
-from django.contrib.auth.models       import User
-from django.core.exceptions           import ObjectDoesNotExist
-from tastypie.test                    import ResourceTestCase, TestApiClient
+from app.detective.apps.common.message import SaltMixin
+from app.detective.apps.common.models  import Country
+from app.detective.apps.energy.models  import Organization, EnergyProject, Person
+from datetime                          import datetime
+from django.contrib.auth.models        import User
+from django.core                       import signing
+from tastypie.utils                    import timezone
+from django.core.exceptions            import ObjectDoesNotExist
+from registration.models               import RegistrationProfile
+from tastypie.test                     import ResourceTestCase, TestApiClient
 import json
 import urllib
-
 
 def find(function, iterable):
     for el in iterable:
@@ -24,26 +28,34 @@ class ApiTestCase(ResourceTestCase):
         # Look for the test user
         self.username = u'tester'
         self.password = u'tester'
+        self.email    = u'tester@detective.io'
+        self.salt     = SaltMixin.salt
         try:
             self.user = User.objects.get(username=self.username)
-            jpp       = Organization.objects.get(name=u"Journalism++")
-            jg        = Organization.objects.get(name=u"Journalism Grant")
-            fra       = Country.objects.get(name=u"France")
-            self.pr = pr = Person.objects.get(name=u"Pierre Roméra")
-            self.pb = pb = Person.objects.get(name=u"Pierre Bellon")
+            self.jpp  = jpp = Organization.objects.get(name=u"Journalism++")
+            self.jg   = jg  = Organization.objects.get(name=u"Journalism Grant")
+            self.fra  = fra = Country.objects.get(name=u"France")
+            self.pr   = pr  = Person.objects.get(name=u"Pierre Roméra")
+            self.pb   = pb  = Person.objects.get(name=u"Pierre Bellon")
 
         except ObjectDoesNotExist:
             # Create the new user
-            self.user = User.objects.create_user(self.username, 'tester@detective.io', self.password)
+            self.user = User.objects.create_user(self.username, self.email, self.password)
             self.user.is_staff = True
             self.user.is_superuser = True
             self.user.save()
             # Create related objects
-            jpp = Organization(name=u"Journalism++")
+            self.jpp = jpp = Organization(name=u"Journalism++")
+            jpp._author = [self.user.pk]
+            jpp.founded = datetime(2011, 4, 3)
+            jpp.website_url = 'http://jplusplus.com'
             jpp.save()
-            jg  = Organization(name=u"Journalism Grant")
+
+            self.jg = jg  = Organization(name=u"Journalism Grant")
+            jg._author = [self.user.pk]
             jg.save()
-            fra = Country(name=u"France", isoa3=u"FRA")
+
+            self.fra = fra = Country(name=u"France", isoa3=u"FRA")
             fra.save()
 
             self.pr = pr = Person(name=u"Pierre Roméra")
@@ -89,8 +101,85 @@ class ApiTestCase(ResourceTestCase):
             }
         }
 
+    def tearDown(self):
+        if self.user:
+            self.user.delete()
+        if self.jpp:
+            self.jpp.delete()
+        if self.jg:
+            self.jg.delete()
+        if self.fra:
+            self.fra.delete()
+        if self.pr:
+            self.pr.delete()
+        if self.pb:
+            self.pb.delete()
+
+    # Utility functions (Auth, operation etc.)
     def get_credentials(self):
         return self.api_client.client.login(username=self.username, password=self.password)
+
+    def signup_user(self, user_dict):
+        """ Utility method to signup through API """
+        return self.api_client.post('/api/common/v1/user/signup/', format='json', data=user_dict)
+
+    def patch_individual(self, scope=None, model_name=None, model_id=None,
+                         patch_data=None, auth=None, skipAuth=False):
+        if not skipAuth and not auth:
+            auth = self.get_credentials()
+        url = '/api/%s/v1/%s/%d/patch/' % (scope, model_name, model_id)
+        return self.api_client.post(url, format='json', data=patch_data, authentication=auth)
+
+    # All test functions
+    def test_user_signup_succeed(self):
+        """
+        Test with proper data to signup user
+        Expected: HTTT 201 (Created)
+        """
+        user_dict = dict(username=u"newuser", password=u"newuser", email=u"newuser@detective.io")
+        resp = self.signup_user(user_dict)
+        self.assertHttpCreated(resp)
+
+    def test_user_signup_empty_data(self):
+        """
+        Test with empty data to signup user
+        Expected: HTTP 400 (BadRequest)
+        """
+        user_dict = dict(username=u"", password=u"", email=u"")
+        resp = self.signup_user(user_dict)
+        self.assertHttpBadRequest(resp)
+
+    def test_user_signup_no_data(self):
+        resp = self.api_client.post('/api/common/v1/user/signup/', format='json')
+        self.assertHttpBadRequest(resp)
+
+    def test_user_signup_existing_user(self):
+        user_dict = dict(username=self.username, password=self.password, email=self.email)
+        resp = self.signup_user(user_dict)
+        self.assertHttpForbidden(resp)
+
+    def test_user_activate_succeed(self):
+        user_dict = dict(username='myuser', password='mypassword', email='myuser@mywebsite.com')
+        self.assertHttpCreated(self.signup_user(user_dict))
+        innactive_user = User.objects.get(email=user_dict.get('email'))
+        activation_profile = RegistrationProfile.objects.get(user=innactive_user)
+        activation_key = activation_profile.activation_key
+        resp_activate = self.api_client.get('/api/common/v1/user/activate/?token=%s' % activation_key)
+        self.assertHttpOK(resp_activate)
+        user = User.objects.get(email=user_dict.get('email'))
+        self.assertTrue(user.is_active)
+
+    def test_user_activate_fake_token(self):
+        resp = self.api_client.get('/api/common/v1/user/activate/?token=FAKE')
+        self.assertHttpForbidden(resp)
+
+    def test_user_activate_no_token(self):
+        resp = self.api_client.get('/api/common/v1/user/activate/')
+        self.assertHttpBadRequest(resp)
+
+    def test_user_activate_empty_token(self):
+        resp = self.api_client.get('/api/common/v1/user/activate/?token')
+        self.assertHttpBadRequest(resp)
 
     def test_user_login_succeed(self):
         auth = dict(username=u"tester", password=u"tester")
@@ -144,8 +233,102 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)
         self.assertEqual(data["is_logged"], True)
 
-    def test_get_list_unauthorzied(self):
-        self.assertHttpUnauthorized(self.api_client.get('/api/energy/v1/energyproject/', format='json'))
+    def test_reset_password_success(self):
+        email = dict(email="tester@detective.io")
+        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=email)
+        self.assertValidJSON(resp.content)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        self.assertTrue(data['success'])
+
+    def test_reset_password_wrong_email(self):
+        email = dict(email="wrong_email@detective.io")
+        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=email)
+        self.assertHttpNotFound(resp)
+
+    def test_reset_password_no_data(self):
+        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json')
+        self.assertHttpBadRequest(resp)
+
+    def test_reset_password_empty_email(self):
+        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=dict(email=''))
+        self.assertHttpBadRequest(resp)
+
+    def test_reset_password_confirm_succes(self):
+        """
+        Test to successfuly reset a password with a new one.
+        Expected:
+            HTTP 200 - OK
+        """
+        token = signing.dumps(self.user.pk, salt=self.salt)
+        password = "testtest"
+        auth = dict(password=password, token=token)
+        resp = self.api_client.post(
+                '/api/common/v1/user/reset_password_confirm/',
+                format='json',
+                data=auth
+            )
+        self.assertValidJSON(resp.content)
+        data = json.loads(resp.content)
+        self.assertTrue(data['success'])
+        # we query users to get the latest user object (updated with password)
+        user = User.objects.get(email=self.user.email)
+        self.assertTrue(user.check_password(password))
+
+    def test_reset_password_confirm_no_data(self):
+        """
+        Test on reset_password_confirm API endpoint without any data.
+        Expected response:
+            HTTP 400 (BadRequest).
+        Explanation:
+            Every request on /reset_password_confirm/ must have a JSON data payload.
+            {
+                password: ... // the password to reset"
+                token:    ... // the reset password token (received by emai)
+            }
+        """
+        resp = self.api_client.post('/api/common/v1/user/reset_password_confirm/', format='json')
+        self.assertHttpBadRequest(resp)
+        self.assertIsNotNone(resp.content)
+
+    def test_reset_password_confirm_empty_data(self):
+        """
+        Test on reset_password_confirm API endpoint with empty data:
+        {
+            password: ""
+            token: ""
+        }
+        Expected result:
+            HTTP 400 (BadRequest)
+        Explanation:
+            A reset_password_confirm request must have a password and should be
+            authenticated with a token.
+        """
+        auth = dict(password='', token='')
+        resp = self.api_client.post('/api/common/v1/user/reset_password_confirm/', format='json', data=auth)
+        self.assertHttpBadRequest(resp)
+
+    def test_reset_password_confirm_fake_token(self):
+        """
+        Test on reset_password_confirm API endpoint with empty data:
+        {
+            password: ""
+            token: ""
+        }
+        Expected result:
+            HTTP 403 (Forbidden)
+        Explanation:
+            A reset_password_confirm request should be authenticated with a valid
+            token.
+        """
+        fake_token = 'f4k:t0k3N'
+        auth = dict(password='newpassword', token=fake_token)
+        resp = self.api_client.post(
+                '/api/common/v1/user/reset_password_confirm/',
+                format='json',
+                data=auth
+            )
+        self.assertHttpForbidden(resp)
 
     def test_get_list_json(self):
         resp = self.api_client.get('/api/energy/v1/energyproject/?limit=20', format='json', authentication=self.get_credentials())
@@ -236,6 +419,19 @@ class ApiTestCase(ResourceTestCase):
     def test_summary_list(self):
         self.assertHttpNotFound(self.api_client.get('/api/common/v1/summary/', format='json'))
 
+    def test_summary_mine_success(self):
+        resp = self.api_client.get('/api/common/v1/summary/mine/', authentication=self.get_credentials(), format='json')
+        self.assertValidJSONResponse(resp)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        objects = data['objects']
+        jpp_t = find(lambda x: x['label'] == self.jpp.name, objects)
+        jg_t  = find(lambda x: x['label'] == self.jg.name,  objects)
+        self.assertIsNotNone(jpp_t)
+        self.assertIsNotNone(jg_t)
+
+    def test_summary_mine_unauthenticated(self):
+        self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/summary/mine/', format='json'))
 
     def test_countries_summary(self):
         resp = self.api_client.get('/api/common/v1/summary/countries/', format='json', authentication=self.get_credentials())
@@ -273,8 +469,6 @@ class ApiTestCase(ResourceTestCase):
 
     def test_summary_human_search(self):
         query = "Person activity in Journalism"
-        expected = "Person that has activity in Journalism++"
-        expected2 = "Person that had activity previous in Journalism++"
         resp = self.api_client.get('/api/common/v1/summary/human/?q=%s' % query, format='json', authentication=self.get_credentials())
         self.assertValidJSONResponse(resp)
         data = json.loads(resp.content)
@@ -294,3 +488,74 @@ class ApiTestCase(ResourceTestCase):
         self.assertIsNotNone(pr_t)
         self.assertIsNotNone(pb_t)
 
+    def test_patch_individual_date(self):
+        """
+        Test a patch request on an invidividual's date attribute.
+        Request: /api/energy/v1/organization/
+        Expected: HTTP 200 (OK)
+        """
+        # date are subject to special process with patch method.
+        new_date  = datetime(2011, 4, 1, 0, 0, 0, 0)
+        data = {
+            'founded': new_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpOK(resp)
+        self.assertValidJSONResponse(resp)
+        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        self.assertEqual(timezone.make_naive(updated_jpp.founded), new_date)
+
+
+
+    def test_patch_individual_website(self):
+
+        jpp_url  = 'http://jplusplus.org'
+        data = {
+            'website_url': jpp_url,
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpOK(resp)
+        self.assertValidJSONResponse(resp)
+        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        self.assertEqual(updated_jpp.website_url, jpp_url)
+
+    def test_patch_individual_unauthorized(self):
+        jpp_url  = 'http://jplusplus.org'
+        data = {
+            'website_url': jpp_url,
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data,
+            'skipAuth'   : True,
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpUnauthorized(resp)
+
+    def test_patch_individual_not_found(self):
+        jpp_url  = 'http://jplusplus.org'
+        data = {
+            'website_url': jpp_url,
+        }
+        args = {
+            'scope'      : 'energy',
+            'model_id'   : 1337,
+            'model_name' : 'organization',
+            'patch_data' : data,
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpNotFound(resp)

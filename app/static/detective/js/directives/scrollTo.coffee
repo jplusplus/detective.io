@@ -1,4 +1,9 @@
 angular.module('detective').directive "scrollTo", ->
     (scope, element, attrs) ->
-        scope.$watch "$last", () ->
-            $(window).scrollTo(element, attrs.scrollTo or 0)
+        scroll = ()->
+            $(window).scrollTo element, attrs.scrollTo or 0, ->
+                if attrs.reset?
+                    # Reset a given variable
+                    scope.$parent[attrs.reset] = false
+                    scope.$parent.$apply()
+        scope.$watch "$last", scroll

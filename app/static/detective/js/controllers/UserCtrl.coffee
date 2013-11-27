@@ -18,6 +18,8 @@ class UserCtrl
         @scope.login   = @login
         @scope.logout  = @logout
         @scope.signup  = @signup
+        @scope.resetPassword = @resetPassword
+        @scope.resetPasswordConfirm = @resetPasswordConfirm
         # Set page title with no title-case
         switch @location.path()
             when "/signup"
@@ -27,8 +29,10 @@ class UserCtrl
             when "/account/activate"
                 @Page.title "Activate your account", false
                 @readToken()
-
-
+            when "/account/reset-password"
+                @Page.title "Reset password", false     
+            when "/account/reset-password-confirm"
+                @Page.title "Enter a new password", false
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
@@ -92,17 +96,74 @@ class UserCtrl
         # Turn on loading mode
         @scope.loading = true
         # succefull login
-        @http(config).then (response) =>
-            # Turn off loading mode
-            @scope.loading = false
-            # Interpret the respose
-            if response.data?
+        @http(config)
+            .success (response) =>
+                # Turn off loading mode
+                @scope.loading = false
                 @scope.signupSucceed = true
-                # Delete error
+                    # Delete error
                 delete @scope.error
-            else
+            .error (message)=>
+                # Turn off loading mode
+                @scope.loading = false
+                @scope.signupSucceed = false
                 # Record the error
-                @scope.error = response.data.error_message if response.data.error_message?
+                @scope.error = message if message?
+
+    resetPassword: =>
+        config = 
+            method: "POST"
+            url: "/api/common/v1/user/reset_password/"
+            data:
+                email: @scope.email
+            headers:
+                "Content-Type": "application/json"
+        # Turn on loading mode
+        @scope.loading = true
+        @http(config)
+            .success (response)=>
+                # Turn off loading mode
+                @scope.loading = false
+                @scope.resetEmailSent = true
+                delete @scope.error
+            .error (message)=>
+                @scope.resetEmailSent = false
+                @scope.loading = false
+                if message?
+                    @scope.error = message
+                else
+                    @unknownError()
+
+
+    resetPasswordConfirm: =>
+        token = @location.search()['token']
+        if !token?
+            @scope.invalidURL = true
+            @scope.error = "Invalid URL, please use the link contained in your password reset email."
+        else
+            @scope.invalidURL = false
+            delete @scope.error 
+            config =
+                method: "POST"
+                url: "/api/common/v1/user/reset_password_confirm/"
+                data: 
+                    password: @scope.newPassword
+                    token: token
+                headers:
+                    "Content-Type": "application/json"
+
+            # Turn on loading mode
+            @scope.loading = true
+            @http(config)
+                .success (response)=>
+                    # Turn off loading mode
+                    @scope.loading = false
+                    delete @scope.error
+                    @scope.resetPasswordSucceed = true 
+                .error (response, error)=>
+                    @scope.resetPasswordSucceed = false 
+                    @scope.error = response.data.error_message if response.data.error_message?
+
 
     logout: =>
         config =
@@ -133,8 +194,15 @@ class UserCtrl
             params:
                 token: @routeParams.token
         # Submits the token for activation
-        @http(config).then (response) =>
-            @Page.loading false
-            @scope.state = response.data? and response.data.success
+        @http(config)
+            .success (response) =>
+                @Page.loading false
+                @scope.state = true
+            .error (message)=>
+                @Page.loading false
+                @scope.state = false 
+
+    unknownError: ()=>
+        @scope.error = "An unexpected error happened, sorry for that."
 
 angular.module('detective').controller 'userCtrl', UserCtrl

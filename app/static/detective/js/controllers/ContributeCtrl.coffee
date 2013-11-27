@@ -162,6 +162,10 @@ class ContributeCtrl
                 @updating = _.omit(@updating, _.keys(data))
                 # Prevent communications between forms
                 @updating = angular.copy @updating
+            , (error)=>
+                if error.status == 404
+                    @isClosed   = true
+                    @isRemoved  = true
 
         # Returns individual's scope
         getScope: => @meta.scope or @scope.routeParams.scope
@@ -201,10 +205,18 @@ class ContributeCtrl
             params = type: @type, id: id, scope: @getScope()
             # Load the given individual
             @fields = @Individual.get params, (master)=>
-                # Disable loading state
-                @loading = false
-                # Record the database version of the individual
-                @master  = angular.copy master
+                    # Disable loading state
+                    @loading = false
+                    # Record the database version of the individual
+                    @master  = angular.copy master
+                , (error)=>
+                    @loading = false
+                    # handle 404 response for entity loading
+                    if error.status == 404
+                        @isClosed  = true
+                        @isRemoved = false
+                        @isNotFound = true 
+
 
         # True if the given field is visible
         isVisible: (field)=>

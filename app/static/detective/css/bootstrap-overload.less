@@ -42,9 +42,9 @@
 @import "../../components/bootstrap/less/responsive-utilities.less";
 
 .form-control, .form-control:focus {
-	.box-shadow(none);	
+	.box-shadow(none);
 	border-width:0;
-	outline:1px solid fade(#000, 10); 
+	outline:1px solid fade(#000, 10);
 	&.disabled {
 		background-color:@input-bg-disabled;
 	}
@@ -73,12 +73,12 @@
 }
 
 html body .panel {
-	color:@gray-darker;	
+	color:@gray-darker;
 	.border-radius(2px);
 	.box-shadow( 0 -2px 0 fade(#000, 20) inset);
 	border-bottom:0;
 
-	.panel-heading {		
+	.panel-heading {
 		margin-top:0;
 		background:fade(#fff, 5);
 		border-bottom:1px solid fade(#fff, 20);
@@ -106,15 +106,15 @@ html body .panel {
 	.active, & {
 		color:gray;
 	}
-	
+
 	li {
-		text-transform: uppercase;	
+		text-transform: uppercase;
 
 		a {
 			font-weight:bold;
 			text-decoration: none;
 		}
-	}	
+	}
 }
 
 .pagination {
@@ -134,7 +134,7 @@ html body .panel {
 	}
 }
 
-// Patch for bootstrap calendar icons 
+// Patch for bootstrap calendar icons
 // (using FontAwesome)
 .icon-chevron-left, .icon-chevron-right:before {
   display: inline-block;
@@ -145,10 +145,14 @@ html body .panel {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
- 
+
 .icon-chevron-left:before {
 	content:"\f053";
 }
 .icon-chevron-right:before {
 	content:"\f054";
+}
+
+.btn-stroke {
+  .button-variant(white, fade(white, 0), white);
 }

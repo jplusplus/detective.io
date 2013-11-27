@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
-from .models                import Country
-from .forms                 import register_model_rules
-from app.detective.neomatch import Neomatch
-from app.detective.utils    import get_model_node_id, get_model_fields, get_registered_models, get_model_scope
-from difflib                import SequenceMatcher
-from django.core.paginator  import Paginator, InvalidPage
-from django.http            import Http404, HttpResponse
-from neo4django.db          import connection
-from tastypie.exceptions    import ImmediateHttpResponse
-from tastypie.resources     import Resource
-from tastypie.serializers   import Serializer
+from .models                 import Country
+from .forms                  import register_model_rules
+from app.detective.neomatch  import Neomatch
+from app.detective.utils     import get_model_node_id, get_model_fields, get_registered_models, get_model_scope
+from difflib                 import SequenceMatcher
+from django.core.paginator   import Paginator, InvalidPage
+from django.http             import Http404, HttpResponse
+from neo4django.db           import connection
+from tastypie                import http
+from tastypie.authentication import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
+from tastypie.authorization  import ReadOnlyAuthorization
+from tastypie.exceptions     import ImmediateHttpResponse
+from tastypie.resources      import Resource
+from tastypie.serializers    import Serializer
 import json
 import re
+
+from .errors import *
 
 class SummaryResource(Resource):
     # Local serializer
@@ -31,17 +36,23 @@ class SummaryResource(Resource):
         # Check for an optional method to do further dehydration.
         method = getattr(self, "summary_%s" % kwargs["pk"], None)
         if method:
-            content = method(kwargs["bundle"])
+            try:
+                content = method(kwargs["bundle"])
+                # Serialize content in json
+                # @TODO implement a better format support
+                content  = self.serializer(content, "application/json")
+                # Create an HTTP response
+                response = HttpResponse(content=content, content_type="application/json")
+            except ForbiddenError as e:
+                response = http.HttpForbidden(e)
+            except UnauthorizedError as e: 
+                response = http.HttpUnauthorized(e)
         else:
             # Stop here, unkown summary type
             raise Http404("Sorry, not implemented yet!")
-        # Serialize content in json
-        # @TODO implement a better format support
-        content  = self.serializer(content, "application/json")
-        # Create an HTTP response
-        response = HttpResponse(content=content, content_type="application/json")
         # We force tastypie to render the response directly
         raise ImmediateHttpResponse(response=response)
+     
 
     def summary_countries(self, bundle):
         model_id = get_model_node_id(Country)
@@ -128,6 +139,8 @@ class SummaryResource(Resource):
         request = bundle.request
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
+        if not request.user.id:
+            raise UnauthorizedError('This method require authentication')
 
         query = """
             START root=node(*)

@@ -1,31 +1,7 @@
-<header>
-	
+<header ng-class="{ 'no-breadcrumb': location.path() == '/' }">
+
 	<div ng-controller="UserCtrl">
-		<form class="pull-right form-login form-inline" 
-			  ng-hide="user.is_logged" 
-			  ng-class="{loading:loading}" 
-			  ng-submit="login()">		
-
-  			<fieldset ng-disabled="loading">
-
-				<div class="form-group">
-					<input required type="text" class="form-control" ng-model="username" placeholder="Username" />
-					<input required type="password" class="form-control" ng-model="password" placeholder="Password" />
-					<button class="btn btn-primary">Sign in</button>	
-				</div>
-
-				<div class="clearfix tr top05 bottom10">
-    		    	<span class="label label-danger pull-left top05" ng-if="error">[[error]]</span>	
-					<div class="checkbox">
-				        <label>
-				          <input type="checkbox" ng-model="remember_me"> Remember me
-				        </label>
-				    </div>
-			    </div>
-			</fieldset>
-		</form>
-
-		<div ng-show="user.is_logged" class="pull-right top10 right20 bottom30">
+		<div ng-show="user.is_logged" class="pull-right top10 right20">
 			Welcome, [[user.username]]!
 			<a ng-click="logout()" href="#">Sign out</a>
 		</div>
@@ -37,22 +13,6 @@
 		</a>
 	</h1>
 
-
-	<nav class="top10 clearfix hidden">
-		<ul class="list-inline">
-			<li>
-				<a href="" class="contribute-color">
-					Contribute				
-				</a>
-			</li>
-			<li>
-				<a href="" class="explore-color">
-					Explore					
-				</a>
-			</li>
-		</ul>
-	</nav>
-	
 </header>
 
 <ul class="breadcrumb" ng-controller="BreadcrumbCtrl" ng-hide="isHome()">
@@ -65,7 +25,7 @@
 		<a ng-if="p.path && !$last" ng-href="[[p.path]]">
 			[[p.name]]
 		</a>
-		<span ng-if="!p.path || $last">						
+		<span ng-if="!p.path || $last">
 			[[Page.title()]]
 		</span>
 	</li>

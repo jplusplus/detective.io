@@ -2,8 +2,6 @@ import os
 from settings import *
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-AUTHENTICATION_BACKENDS = ('neo4django.graph_auth.backends.NodeModelBackend',)
-
 NEO4J_DATABASES = {
     'default' : {
         'HOST':'localhost',
@@ -48,7 +46,9 @@ INSTALLED_APPS = (
     'compressor',
     'tastypie',
     'registration',
+    'password_reset',
     'app.detective',
+    'app.detective.permissions',
     'app.detective.apps.common',
     'app.detective.apps.energy'
 )

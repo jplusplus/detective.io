@@ -181,6 +181,7 @@ INSTALLED_APPS = (
     "djrill",
     # Internal
     'app.detective',
+    'app.detective.permissions',
     'app.detective.apps.common',
     'app.detective.apps.energy',
     'password_reset',

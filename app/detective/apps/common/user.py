@@ -49,11 +49,12 @@ class UserResource(ModelResource):
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
         return [
-            url(r"^(?P<resource_name>%s)/login%s$"  % params, self.wrap_view('login'), name="api_login"),
-            url(r'^(?P<resource_name>%s)/logout%s$' % params, self.wrap_view('logout'), name='api_logout'),
-            url(r'^(?P<resource_name>%s)/status%s$' % params, self.wrap_view('status'), name='api_status'),
-            url(r'^(?P<resource_name>%s)/signup%s$' % params, self.wrap_view('signup'), name='api_signup'),
-            url(r'^(?P<resource_name>%s)/activate%s$' % params, self.wrap_view('activate'), name='api_activate'),
+            url(r"^(?P<resource_name>%s)/login%s$"                  % params, self.wrap_view('login'),                  name="api_login"),
+            url(r'^(?P<resource_name>%s)/logout%s$'                 % params, self.wrap_view('logout'),                 name='api_logout'),
+            url(r'^(?P<resource_name>%s)/status%s$'                 % params, self.wrap_view('status'),                 name='api_status'),
+            url(r'^(?P<resource_name>%s)/permissions%s$'            % params, self.wrap_view('permissions'),            name='api_user_permissions'),
+            url(r'^(?P<resource_name>%s)/signup%s$'                 % params, self.wrap_view('signup'),                 name='api_signup'),
+            url(r'^(?P<resource_name>%s)/activate%s$'               % params, self.wrap_view('activate'),               name='api_activate'),
             url(r'^(?P<resource_name>%s)/reset_password%s$'         % params, self.wrap_view('reset_password'),         name='api_reset_password'),
             url(r'^(?P<resource_name>%s)/reset_password_confirm%s$' % params, self.wrap_view('reset_password_confirm'), name='api_reset_password_confirm'),
         ]
@@ -185,6 +186,18 @@ class UserResource(ModelResource):
             return self.create_response(request, { 'is_logged': True,  'username': request.user.username })
         else:
             return self.create_response(request, { 'is_logged': False, 'username': '' })
+
+
+    def permissions(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        print "user: %s" % request.user
+        if request.user.is_authenticated():
+            return self.create_response(request, {
+                'permissions': list(request.user.get_all_permissions())
+            })
+        else:
+            return http.HttpUnauthorized('You need to be logged to list your permissions')
 
     def reset_password(self, request, **kwargs):
         """

@@ -167,9 +167,8 @@ class ApiTestCase(ResourceTestCase):
         self.cleanModel(self.fra)  # country
         self.cleanModel(self.pr)   # people 
         self.cleanModel(self.pb)   # people
-    
 
-      # Utility functions (Auth, operation etc.)
+    # Utility functions (Auth, operation etc.)
     def login(self, username, password):
         return self.api_client.client.login(username=username, password=password)
         
@@ -192,6 +191,12 @@ class ApiTestCase(ResourceTestCase):
             auth = self.get_super_credentials()
         url = '/api/%s/v1/%s/%d/patch/' % (scope, model_name, model_id)
         return self.api_client.post(url, format='json', data=patch_data, authentication=auth)
+
+    def check_permissions(self, permissions=None, user=None):
+        user_permissions = list(user.get_all_permissions())
+        self.assertEqual(len(user_permissions), len(permissions))
+        for perm in user_permissions:
+            self.assertTrue(perm in permissions)
 
     # All test functions
     def test_user_signup_succeed(self):
@@ -249,16 +254,8 @@ class ApiTestCase(ResourceTestCase):
         resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         data = json.loads(resp.content)
-        permissions = data.get("permissions")
         self.assertTrue(data["success"])
-        self.assertIsNotNone(permissions)
-        # check if permissions is an array (not a string)
-        self.assertEqual(len(permissions), 3)
-        # all permission for energy contribution 
-        self.assertTrue('energy.contribute_add'    in permissions)
-        self.assertTrue('energy.contribute_delete' in permissions)
-        self.assertTrue('energy.contribute_change' in permissions)
-
+        self.check_permissions(permissions=data.get("permissions"), user=self.contrib_user)
         
     def test_user_login_succeed(self):
         auth = dict(username=self.super_username, password=self.super_password)
@@ -294,6 +291,19 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)
         self.assertEqual(data["success"], False)
 
+    def test_user_permissions_is_logged(self):
+        auth = dict(username=self.contrib_username, password=self.contrib_password)
+        self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.get('/api/common/v1/user/permissions/', format='json')
+        self.assertValidJSON(resp.content)
+        data = json.loads(resp.content)
+        self.check_permissions(permissions=data.get("permissions"), user=self.contrib_user)
+
+    def test_user_permissions_isnt_logged(self):
+        resp = self.api_client.get('/api/common/v1/user/permissions/', format='json')
+        self.assertHttpUnauthorized(resp)
+
+
     def test_user_status_isnt_logged(self):
         resp = self.api_client.get('/api/common/v1/user/status/', format='json')
         self.assertValidJSON(resp.content)
@@ -314,7 +324,6 @@ class ApiTestCase(ResourceTestCase):
         # Parse data to check the number of result
         data = json.loads(resp.content)
         self.assertEqual(data["is_logged"], True)
-
 
     def test_contrib_user_status_is_logged(self):
         # Log in

@@ -81,6 +81,8 @@ detective = angular
                     })
                     .when('/:scope', {
                         controller: ExploreCtrl
+                        # Resolve the Summary service before load this page
+                        resolve: data: (Summary)-> Summary.get(id: "forms")
                         # Allow a dynamic loading by setting the templateUrl within controller
                         template: "<div ng-include src='templateUrl'></div>"
                     })

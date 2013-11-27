@@ -12,6 +12,7 @@ Thumbs.db
 *.log
 *.pot
 *.pyc
+*.orig
 
 fabfile.py
 # Users media

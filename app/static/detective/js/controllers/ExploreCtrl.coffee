@@ -11,6 +11,9 @@ class ExploreCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Current individual scope
         @scope.scope           = @routeParams.scope
+        # Temporary static app control
+        # @TODO get applications list from server
+        @location.path "/404" if @scope.scope isnt "energy" and @scope.scope isnt "common"
         # Build template url
         @scope.templateUrl     = "/partial/explore-#{@scope.scope}.html"
         # Countries info

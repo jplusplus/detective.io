@@ -8,14 +8,15 @@ Packages required:
 from settings import *
 from urlparse import urlparse
 import os
-import dj_database_url  
+import dj_database_url
 
+ALLOWED_HOSTS = [".detective.io"]
 
 DATABASES = {
     'default' : dj_database_url.config()
 }
 
-# Parse url given into environment variable 
+# Parse url given into environment variable
 NEO4J_URL  = urlparse( os.getenv('NEO4J_URL') )
 NEO4J_OPTIONS = {}
 
@@ -23,7 +24,7 @@ NEO4J_OPTIONS = {}
 if NEO4J_URL.username and NEO4J_URL.password:
     NEO4J_OPTIONS = {
         'username': NEO4J_URL.username,
-        'password': NEO4J_URL.password        
+        'password': NEO4J_URL.password
     }
 
 NEO4J_DATABASES = {
@@ -44,7 +45,7 @@ AWS_QUERYSTRING_AUTH       = False
 AWS_S3_FILE_OVERWRITE      = True
 
 # Enable debug for minfication
-DEBUG                      = os.getenv('DEBUG', False)
+DEBUG                      = bool(os.getenv('DEBUG', False))
 # Configure static files for S3
 STATIC_URL                 = os.getenv('STATIC_URL')
 STATIC_ROOT                = here('staticfiles')

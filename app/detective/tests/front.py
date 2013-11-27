@@ -23,7 +23,7 @@ class FrontTestCase(unittest.TestCase):
         # Issue a GET request.
         response = self.client.get('/partial/unkown.html')
         # Check that the response is 200 OK.
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code in [302, 404], True)
 
     def test_login(self):
         from django.contrib.auth.models import User

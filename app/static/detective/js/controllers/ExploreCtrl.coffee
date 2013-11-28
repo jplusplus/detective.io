@@ -1,25 +1,31 @@
 class ExploreCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Summary', '$location', '$timeout', '$filter', 'Page']
+    @$inject: ['$scope', '$routeParams', 'Summary', 'Individual', '$location', '$timeout', '$filter', 'Page']
 
-    constructor: (@scope, @routeParams, @Summary, @location, @timeout, @filter, @Page)->
+    constructor: (@scope, @routeParams, @Summary, @Individual, @location, @timeout, @filter, @Page)->
         @scope.getTypeCount = @getTypeCount
         # Set page's title
         @Page.title @routeParams.scope
+        @Page.loading yes
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Current individual scope
-        @scope.scope           = @routeParams.scope
-        # Temporary static app control
-        # @TODO get applications list from server
-        @location.path "/404" if @scope.scope isnt "energy" and @scope.scope isnt "common"
-        # Build template url
-        @scope.templateUrl     = "/partial/explore-#{@scope.scope}.html"
-        # Countries info
-        @scope.countries       = @Summary.get id:"countries"
-        # Types info
-        @scope.types           = @Summary.get id:"types"
+        @scope.scope = @routeParams.scope
+        # Topic control
+        @Individual.get type: "topic", (data)=>
+            # Disable loading mode
+            @Page.loading no
+            # Find the right topic
+            topic = _.findWhere data.objects, module: @scope.scope
+            # Stop if it's an unkown topic
+            return @location.path "/404" unless topic
+            # Build template url
+            @scope.templateUrl = "/partial/explore-#{@scope.scope}.html"
+            # Countries info
+            @scope.countries   = @Summary.get id:"countries"
+            # Types info
+            @scope.types       = @Summary.get id:"types"
         # Country where the user click
         @scope.selectedCountry = {}
         @scope.selectedIndividual = {}

@@ -1,5 +1,4 @@
 from .utils                   import get_apps
-from django.core.urlresolvers import reverse
 from django.db                import models
 
 class QuoteRequest(models.Model):
@@ -45,7 +44,7 @@ class Topic(models.Model):
         return self.title
 
     def get_absolute_path(self):
-        return reverse('explore', args=[self.slug])
+        return "/%s/" % self.slug
 
     def link(self):
         path = self.get_absolute_path()

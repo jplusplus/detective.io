@@ -14,7 +14,8 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
         return sdo
     
     sdo.hasPermission = (scope, operation)->
-        sdo.is_staff or _.contains(sdo.permissions,"#{scope}.contribute_#{operation}")
+        permission_name = "#{scope}.contribute_#{operation}"
+        sdo.is_staff is true or _.contains(sdo.permissions,permission_name)
 
     sdo.hasDeletePermission = (scope)->
         sdo.hasPermission scope, 'delete'
@@ -24,7 +25,7 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
 
     sdo.hasAddPermission = (scope)->
         sdo.hasPermission scope, 'add'
-
+        
     # Set user's values and returns it
     sdo.set(
         # Create basic user using cookies

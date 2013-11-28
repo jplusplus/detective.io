@@ -2,14 +2,12 @@
 from .models                 import Country
 from .forms                  import register_model_rules
 from app.detective.neomatch  import Neomatch
-from app.detective.utils     import get_model_node_id, get_model_fields, get_registered_models, get_model_scope, get_apps
+from app.detective.utils     import get_model_node_id, get_model_fields, get_registered_models, get_model_scope
 from difflib                 import SequenceMatcher
 from django.core.paginator   import Paginator, InvalidPage
 from django.http             import Http404, HttpResponse
 from neo4django.db           import connection
 from tastypie                import http
-from tastypie.authentication import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
-from tastypie.authorization  import ReadOnlyAuthorization
 from tastypie.exceptions     import ImmediateHttpResponse
 from tastypie.resources      import Resource
 from tastypie.serializers    import Serializer
@@ -52,25 +50,6 @@ class SummaryResource(Resource):
             raise Http404("Sorry, not implemented yet!")
         # We force tastypie to render the response directly
         raise ImmediateHttpResponse(response=response)
-
-    def summary_apps(self, bundle):
-        # Apps object displayed
-        apps = {}
-        # Apps names
-        apps_names = get_apps()
-        # Get all registered models
-        apps_models = get_registered_models()
-        # Filter model to the one under app.detective.apps
-        apps_models = [ m for m in apps_models if m.__module__.startswith("app.detective.apps") ]
-        for name in apps_names:
-            apps[name] = {
-                'slug': name.replace("_", "-"),
-                # Extract names of app's models
-                'models': [m.__name__ for m in apps_models if m.__module__.startswith("app.detective.apps.%s." % name) ],
-                # We don't manage private app yet
-                'public': True
-            }
-        return apps
 
 
     def summary_countries(self, bundle):

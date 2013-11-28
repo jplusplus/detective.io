@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from .models                  import *
-from app.detective.models     import QuoteRequest
+from app.detective.models     import QuoteRequest, Topic
 from app.detective.individual import IndividualResource, IndividualMeta
+from app.detective.utils      import get_registered_models
 from tastypie.authorization   import ReadOnlyAuthorization
 from tastypie.resources       import ModelResource
 from tastypie.exceptions      import Unauthorized
@@ -25,6 +26,24 @@ class QuoteRequestResource(ModelResource):
     class Meta:
         authorization = QuoteRequestAuthorization()
         queryset      = QuoteRequest.objects.all()
+
+class TopicResource(ModelResource):
+    class Meta:
+        queryset = Topic.objects.all()
+
+    def dehydrate(self, bundle):
+        # Get all registered models
+        models = get_registered_models()
+        in_topic = lambda m: m.__module__.startswith("app.detective.apps.%s." % bundle.obj.module)
+        # Filter model to the one under app.detective.apps
+        bundle.data["models"] = [ m.__name__ for m in models if in_topic(m) ]
+        return bundle
+
+    def get_object_list(self, request):
+        is_staff    = request.user and request.user.is_staff
+        object_list = super(TopicResource, self).get_object_list(request)
+        # Return only public topics for non-staff user
+        return object_list if is_staff else object_list.filter(public=True)
 
 class CountryResource(IndividualResource):
     class Meta(IndividualMeta):

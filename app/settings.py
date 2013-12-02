@@ -164,8 +164,6 @@ DEBUG_TOOLBAR_CONFIG = {
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
 INSTALLED_APPS = (
-    #'neo4django.admin',
-    #'neo4django.graph_auth',
     'neo4django.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -181,13 +179,16 @@ INSTALLED_APPS = (
     'tastypie',
     # Email backend
     "djrill",
+    'password_reset',
     # Internal
     'app.detective',
     'app.detective.permissions',
-    'app.detective.apps.common',
-    'app.detective.apps.energy',
-    'password_reset',
 )
+
+# Add customs app to INSTALLED_APPS
+from app.detective.utils import get_apps_modules
+INSTALLED_APPS = INSTALLED_APPS + get_apps_modules()
+
 
 MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")
 EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"

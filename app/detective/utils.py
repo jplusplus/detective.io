@@ -8,7 +8,6 @@ from random                    import randint
 from os                        import listdir
 from os.path                   import isdir, join
 import re
-import app.settings as settings
 
 
 def import_class(path):
@@ -17,22 +16,28 @@ def import_class(path):
     mod        = ".".join(components[0:-1])
     return getattr(__import__(mod, fromlist=klass), klass[0], None)
 
-def get_apps():    
-    # Load apps' names 
+def get_apps():
+    # Load apps' names
     appsdir = "./app/detective/apps"
-    return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]    
+    return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
+
+def get_apps_modules():
+    # Import the whole apps directory automaticly
+    CUSTOM_APPS = tuple( "app.detective.apps.%s" % a for a in get_apps() )
+    return CUSTOM_APPS
 
 def get_registered_models():
+    import app.settings as settings
     mdls = []
     for app in settings.INSTALLED_APPS:
         models_name = app + ".models"
         try:
-            models_module = __import__(models_name, fromlist=["models"])            
+            models_module = __import__(models_name, fromlist=["models"])
             attributes = dir(models_module)
             for attr in attributes:
                 try:
                     attrib = models_module.__getattribute__(attr)
-                    if issubclass(attrib, models.Model) and attrib.__module__== models_name:                           
+                    if issubclass(attrib, models.Model) and attrib.__module__== models_name:
                         mdls.append(attrib)
                 except TypeError:
                     pass
@@ -43,7 +48,7 @@ def get_registered_models():
 def get_model_fields(model):
     fields      = []
     modelsRules = register_model_rules().model(model)
-    if hasattr(model, "_meta"):          
+    if hasattr(model, "_meta"):
         # Create field object
         for fieldRules in modelsRules.fields():
             try:
@@ -52,7 +57,7 @@ def get_model_fields(model):
                 # This is rule field. Ignore it!
                 continue
             # Ignores field terminating by + or begining by _
-            if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):             
+            if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):
                 # Find related model for relation
                 if hasattr(f, "target_model"):
                     # We received a model as a string
@@ -63,12 +68,12 @@ def get_model_fields(model):
                         module       = __import__( ".".join(module_path[0:-1]), fromlist=["class"])
                         # Import the target_model from the models module
                         target_model = getattr(module, module_path[-1], {__name__: None})
-                    else:                        
-                        target_model  = f.target_model                     
+                    else:
+                        target_model  = f.target_model
                     related_model = target_model.__name__
                 else:
-                    related_model = None     
-                
+                    related_model = None
+
                 field = {
                     'name'         : f.name,
                     'type'         : f.get_internal_type(),
@@ -77,14 +82,14 @@ def get_model_fields(model):
                     'related_model': related_model,
                     'rules'        : fieldRules.all()
                 }
-                
+
                 fields.append(field)
 
     return fields
 
 def get_model_nodes():
     # Return buffer values
-    if hasattr(get_model_nodes, "buffer"): 
+    if hasattr(get_model_nodes, "buffer"):
         results = get_model_nodes.buffer
         # Refresh the buffer ~ 1/10 calls
         if randint(0,10) == 10: del get_model_nodes.buffer
@@ -96,9 +101,9 @@ def get_model_nodes():
         RETURN t.name as name, ID(t) as id
     """
     # Bufferize the result
-    get_model_nodes.buffer = connection.cypher(query).to_dicts()    
+    get_model_nodes.buffer = connection.cypher(query).to_dicts()
     return get_model_nodes.buffer
-    
+
 
 def get_model_node_id(model):
     # All node from neo4j that are have ascending <<TYPE>> relationship
@@ -132,16 +137,16 @@ def to_class_name(value=""):
 
 def to_camelcase(value=""):
 
-    def camelcase(): 
+    def camelcase():
         yield str.lower
         while True:
-            yield str.capitalize            
+            yield str.capitalize
 
     value =  re.sub(r'([a-z])([A-Z])', r'\1_\2', value)
     c = camelcase()
     return "".join(c.next()(x) if x else '_' for x in value.split("_"))
 
-def to_underscores(value=""):    
+def to_underscores(value=""):
     # Lowercase of the first letter
     value = list(value)
     if len(value) > 0:

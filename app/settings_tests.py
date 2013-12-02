@@ -49,9 +49,11 @@ INSTALLED_APPS = (
     'password_reset',
     'app.detective',
     'app.detective.permissions',
-    'app.detective.apps.common',
-    'app.detective.apps.energy'
 )
+
+# Add customs app to INSTALLED_APPS
+from app.detective.utils import get_apps_modules
+INSTALLED_APPS = INSTALLED_APPS + get_apps_modules()
 
 SECRET_KEY="<SET A SECRET KEY HERE>"
 

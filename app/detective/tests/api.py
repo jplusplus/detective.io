@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective.apps.common.message import SaltMixin
-from app.detective.apps.common.models  import Country
-from app.detective.apps.energy.models  import Organization, EnergyProject, Person
-from datetime                          import datetime
-from django.contrib.auth.models        import User, Group
-from django.core                       import signing
-from tastypie.utils                    import timezone
-from django.core.exceptions            import ObjectDoesNotExist
-from registration.models               import RegistrationProfile
-from tastypie.test                     import ResourceTestCase, TestApiClient
+from app.detective.topics.common.message import SaltMixin
+from app.detective.topics.common.models  import Country
+from app.detective.topics.energy.models  import Organization, EnergyProject, Person
+from datetime                            import datetime
+from django.contrib.auth.models          import User, Group
+from django.core                         import signing
+from tastypie.utils                      import timezone
+from django.core.exceptions              import ObjectDoesNotExist
+from registration.models                 import RegistrationProfile
+from tastypie.test                       import ResourceTestCase, TestApiClient
 import json
 import urllib
 
@@ -41,39 +41,39 @@ class ApiTestCase(ResourceTestCase):
 
         contributors = Group.objects.get(name='energy_contributor')
 
-        # Look for the test users 
+        # Look for the test users
         try:
             # get users (superuser, contributor & lambda user)
             super_user   = User.objects.get(username=self.super_username)
             contrib_user = User.objects.get(username=self.contrib_username)
             lambda_user  = User.objects.get(username=self.lambda_username)
-            
+
             # fixtures & test data
             self.jpp  = Organization.objects.filter(name=u"Journalism++")[0]
             self.jg   = Organization.objects.filter(name=u"Journalism Grant")[0]
             self.fra  = Country.objects.get(name=u"France")
             self.pr   = Person.objects.get(name=u"Pierre Roméra")
             self.pb   = Person.objects.get(name=u"Pierre Bellon")
-            
+
         except ObjectDoesNotExist:
-            # Create the new user users 
+            # Create the new user users
             super_user = User.objects.create(
-                username=self.super_username, 
-                email=self.super_email, 
+                username=self.super_username,
+                email=self.super_email,
             )
             super_user.set_password(self.super_password)
             super_user.save()
 
             contrib_user = User.objects.create(
-                username=self.contrib_username, 
-                email=self.contrib_email, 
+                username=self.contrib_username,
+                email=self.contrib_email,
             )
             contrib_user.set_password(self.contrib_password)
             contrib_user.save()
 
             lambda_user = User.objects.create(
-                username=self.lambda_username, 
-                email=self.lambda_email, 
+                username=self.lambda_username,
+                email=self.lambda_email,
             )
             lambda_user.set_password(self.lambda_password)
             lambda_user.save()
@@ -93,16 +93,16 @@ class ApiTestCase(ResourceTestCase):
         super_user.is_staff = True
         super_user.is_superuser = True
         super_user.save()
-        
+
         contrib_user.is_active = True
         contrib_user.groups.add(contributors)
         contrib_user.save()
-    
+
         self.jpp._author = [super_user.pk]
         self.jpp.founded = datetime(2011, 4, 3)
         self.jpp.website_url = 'http://jplusplus.com'
         self.jpp.save()
-        
+
         self.jg._author = [super_user.pk]
         self.jg.save()
 
@@ -114,9 +114,9 @@ class ApiTestCase(ResourceTestCase):
         self.pb.activity_in_organization.add(self.jpp)
         self.pb.save()
 
-        self.super_user = super_user 
-        self.contrib_user = contrib_user 
-        self.lambda_user = lambda_user 
+        self.super_user = super_user
+        self.contrib_user = contrib_user
+        self.lambda_user = lambda_user
 
         self.post_data_simple = {
             "name": "Lorem ispum TEST",
@@ -157,21 +157,21 @@ class ApiTestCase(ResourceTestCase):
 
     def tearDown(self):
         # Clean & delete generated data
-        # users 
+        # users
         self.cleanModel(self.super_user)
         self.cleanModel(self.contrib_user)
         self.cleanModel(self.lambda_user)
-        # individuals 
+        # individuals
         self.cleanModel(self.jpp)  # organization
         self.cleanModel(self.jg)   # organization
         self.cleanModel(self.fra)  # country
-        self.cleanModel(self.pr)   # people 
+        self.cleanModel(self.pr)   # people
         self.cleanModel(self.pb)   # people
 
     # Utility functions (Auth, operation etc.)
     def login(self, username, password):
         return self.api_client.client.login(username=username, password=password)
-        
+
     def get_super_credentials(self):
         return self.login(self.super_username, self.super_password)
 
@@ -256,7 +256,7 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)
         self.assertTrue(data["success"])
         self.check_permissions(permissions=data.get("permissions"), user=self.contrib_user)
-        
+
     def test_user_login_succeed(self):
         auth = dict(username=self.super_username, password=self.super_password)
         resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
@@ -379,7 +379,7 @@ class ApiTestCase(ResourceTestCase):
         data = json.loads(resp.content)
         self.assertTrue(data['success'])
         # we query users to get the latest user object (updated with password)
-        user = User.objects.get(email=self.super_user.email) 
+        user = User.objects.get(email=self.super_user.email)
         self.assertTrue(user.check_password(password))
 
     def test_reset_password_confirm_no_data(self):

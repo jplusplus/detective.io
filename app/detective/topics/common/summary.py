@@ -100,7 +100,7 @@ class SummaryResource(Resource):
         for model in get_registered_models():
             # Do this ressource has a model?
             # Do this ressource is a part of apps?
-            if model != None and model.__module__.startswith("app.detective.apps"):
+            if model != None and model.__module__.startswith("app.detective.topics"):
                 name                = model.__name__.lower()
                 rules               = rulesManager.model(model).all()
                 fields              = get_model_fields(model)
@@ -334,7 +334,7 @@ class SummaryResource(Resource):
     def get_models_output(self):
         # Select only some atribute
         output = lambda m: {'name': get_model_scope(m) + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
-        return [ output(m) for m in get_registered_models() if m.__module__.startswith("app.detective.apps") ]
+        return [ output(m) for m in get_registered_models() if m.__module__.startswith("app.detective.topics") ]
 
 
     def ngrams(self, input):

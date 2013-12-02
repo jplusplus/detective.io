@@ -13,7 +13,7 @@ api.register(SummaryResource())
 api.register(CypherResource())
 api.register(UserResource())
 
-urlpatterns = patterns('app.detective.apps.common',
+urlpatterns = patterns('app.detective.topics.common',
     url(r'', include(api.urls)),
 )
 

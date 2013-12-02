@@ -1,12 +1,12 @@
-from app.detective.apps.common.models import Country
-from app.detective.apps.energy.models import *
+from app.detective.topics.common.models import Country
+from app.detective.topics.energy.models import *
 from app.detective.modelrules         import ModelRules
 from app.detective.neomatch           import Neomatch
 from app.detective.models             import *
 
 def register_model_rules():
     # ModelRules is a singleton that record every model rules
-    rules = ModelRules()   
+    rules = ModelRules()
     # Records "invisible" fields
     rules.model(FundraisingRound).field("personal_payer").add(is_visible=False)
     rules.model(Organization).field("adviser").add(is_visible=False)
@@ -78,7 +78,7 @@ def register_model_rules():
             (root)-[:`energy_product_has_distribution+`]-()-[:`distribution_has_activity_in_country+`]-({select})
         """
     ))
-    
+
     rules.model(Organization).add(energyproject_set=Neomatch(
         title="Energy projects this organization owns",
         target_model=EnergyProject,
@@ -86,21 +86,21 @@ def register_model_rules():
             (root)-[:`energy_project_has_owner+`]-({select})
         """
     ))
-    
+
     rules.model(EnergyProduct).add(energyproduct_set=Neomatch(
         title="Energy project this product belongs to",
         target_model=EnergyProject,
         match="""
             (root)-[:`energy_project_has_product+`]-({select})
         """
-    ))   
+    ))
 
-    rules.model(Price).add(transform='{currency} {units}')               
-    rules.model(FundraisingRound).add(transform='{currency} {units}')       
+    rules.model(Price).add(transform='{currency} {units}')
+    rules.model(FundraisingRound).add(transform='{currency} {units}')
 
     def to_twitter_profile_url(data, field=None):
         th = data["twitter_handle"]
-        if not th: 
+        if not th:
             return th
         elif th.startswith("http://") or th.startswith("https://"):
             return th
@@ -109,8 +109,8 @@ def register_model_rules():
         else:
             return "http://twitter.com/%s" % th
 
-    rules.model(Organization).field("twitter_handle").add(transform=to_twitter_profile_url)               
-    rules.model(Person).field("twitter_handle").add(transform=to_twitter_profile_url)               
-    rules.model(EnergyProject).field("twitter_handle").add(transform=to_twitter_profile_url)               
+    rules.model(Organization).field("twitter_handle").add(transform=to_twitter_profile_url)
+    rules.model(Person).field("twitter_handle").add(transform=to_twitter_profile_url)
+    rules.model(EnergyProject).field("twitter_handle").add(transform=to_twitter_profile_url)
 
     return rules

@@ -1,4 +1,4 @@
-from app.detective.apps.common.models import Country
+from app.detective.topics.common.models import Country
 from django.core.management           import call_command
 from django.core.management.base      import CommandError
 from django.test                      import TestCase
@@ -17,7 +17,7 @@ class CommandsTestCase(TestCase):
             self.toto.set_password('tttooo')
             self.toto.save()
 
-    def tearDown(self): 
+    def tearDown(self):
         if self.toto:
             self.toto.delete()
 

@@ -12,14 +12,14 @@ def import_class(path):
     mod        = ".".join(components[0:-1])
     return getattr(__import__(mod, fromlist=klass), klass[0], None)
 
-def get_apps():
-    # Load apps' names
-    appsdir = "./app/detective/apps"
+def get_topics():
+    # Load topics' names
+    appsdir = "./app/detective/topics"
     return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
 
-def get_apps_modules():
-    # Import the whole apps directory automaticly
-    CUSTOM_APPS = tuple( "app.detective.apps.%s" % a for a in get_apps() )
+def get_topics_modules():
+    # Import the whole topics directory automaticly
+    CUSTOM_APPS = tuple( "app.detective.topics.%s" % a for a in get_topics() )
     return CUSTOM_APPS
 
 def get_registered_models():

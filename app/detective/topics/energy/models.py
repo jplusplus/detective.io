@@ -2,7 +2,7 @@
 # The ontology can be found in its entirety at http://www.semanticweb.org/nkb/ontologies/2013/6/impact-investment#
 from neo4django.db import models
 from neo4django.graph_auth.models import User
-from app.detective.apps.common.models import Country
+from app.detective.topics.common.models import Country
 
 
 class Amount(models.NodeModel):

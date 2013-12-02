@@ -1,4 +1,4 @@
-from app.detective.apps.common.models import Country
+from app.detective.topics.common.models import Country
 from app.detective.modelrules         import ModelRules
 
 def register_model_rules():
@@ -11,7 +11,7 @@ def register_model_rules():
     # Get all registered models
     models = get_registered_models()
     # Them filter the list to the detective's apps
-    models = [m for m in models if m.__module__.startswith("app.detective.apps")]    
+    models = [m for m in models if m.__module__.startswith("app.detective.topics")]
     # Set "is_searchable" to true on every model with a name
     for model in models:
         # If the current model has a name
@@ -27,16 +27,16 @@ def register_model_rules():
     # Check now that each "Relationship"
     # match with a searchable model
     for model in models:
-        for field in model._meta.fields:  
+        for field in model._meta.fields:
             # Find related model for relation
-            if hasattr(field, "target_model"):                       
-                target_model  = field.target_model         
+            if hasattr(field, "target_model"):
+                target_model  = field.target_model
                 # Load class path
                 if type(target_model) is str: target_model = import_class(target_model)
                 # It's a searchable field !
                 modelRules = rules.model(target_model).all()
                 # Set it into the rules
                 rules.model(model).field(field.name).add(is_searchable=modelRules["is_searchable"])
-                rules.model(model).field(field.name).add(is_editable=modelRules["is_editable"])                            
+                rules.model(model).field(field.name).add(is_editable=modelRules["is_editable"])
 
     return rules

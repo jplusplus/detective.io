@@ -21,7 +21,7 @@ class ContributeCtrl
         @scope.removeIndividual    = @removeIndividual
         @scope.removeRelated       = @removeRelated
         @scope.replaceIndividual   = @replaceIndividual
-        @scope.scopeResources      = @scopeResources
+        @scope.topicResources      = @topicResources
         @scope.scrollTo            = @scrollTo
         @scope.setNewIndividual    = @setNewIndividual
         @scope.showKickStart       = @showKickStart
@@ -44,7 +44,7 @@ class ContributeCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @scope.scope = @routeParams.scope
+        @scope.topic = @routeParams.topic
         # By default, hide the kick-start form
         showKickStart = false
         # Shortcuts for child classes
@@ -146,12 +146,12 @@ class ContributeCtrl
 
         # Generates the permalink to this individual
         permalink: =>
-            return false unless @fields.id? and @meta.scope
-            return "/#{@meta.scope}/#{@type}/#{@fields.id}"
+            return false unless @fields.id? and @meta.topic
+            return "/#{@meta.topic}/#{@type}/#{@fields.id}"
 
         # Event when fields changed
         update: (data)=>
-            params = type: @type, scope: @getScope(), id: @fields.id
+            params = type: @type, topic: @getTopic(), id: @fields.id
             # Notice that the field is loading
             @updating = _.extend @updating, data
             # Patch the current individual
@@ -167,8 +167,8 @@ class ContributeCtrl
                     @isClosed   = true
                     @isRemoved  = true
 
-        # Returns individual's scope
-        getScope: => @meta.scope or @scope.routeParams.scope
+        # Returns individual's topic
+        getTopic: => @meta.topic or @scope.routeParams.topic
 
         # Save the current individual form
         save: =>
@@ -176,7 +176,7 @@ class ContributeCtrl
             unless @loading
                 # Loading mode on
                 @loading = true
-                params   = type: @type, scope: @getScope()
+                params   = type: @type, topic: @getTopic()
                 # Save the individual and
                 # take care to specify the type
                 @fields.$save(params, (master)=>
@@ -202,7 +202,7 @@ class ContributeCtrl
             @loading    = true
             @related_to = related_to
             # Params to retreive the individual
-            params = type: @type, id: id, scope: @getScope()
+            params = type: @type, id: id, topic: @getTopic()
             # Load the given individual
             @fields = @Individual.get params, (master)=>
                     # Disable loading state
@@ -215,7 +215,7 @@ class ContributeCtrl
                     if error.status == 404
                         @isClosed  = true
                         @isRemoved = false
-                        @isNotFound = true 
+                        @isNotFound = true
 
 
         # True if the given field is visible
@@ -268,9 +268,9 @@ class ContributeCtrl
         # Return the index of the new individual
         return index
 
-    # Get resources list filtered by the current scope
-    scopeResources: =>
-        resources = _.where @scope.resources, { scope: @scope.scope }
+    # Get resources list filtered by the current topic
+    topicResources: =>
+        resources = _.where @scope.resources, { topic: @scope.topic }
         # Add generic resources
         for r in ["organization", "person"]
             hasResource = !! _.findWhere resources, name: r
@@ -302,7 +302,7 @@ class ContributeCtrl
                     type:  @scope.new.type
                     id:    "search"
                     q:     @scope.new.fields.name
-                    scope: @scope.new.meta.scope
+                    topic: @scope.new.meta.topic
                 # Look for individual with the same name
                 @Individual.query params, (d)=>
                     # Remove the one we just created
@@ -330,7 +330,7 @@ class ContributeCtrl
         toDelete =
             type : individual.type
             id   : individual.fields.id
-            scope: scope
+            topic: scope
         # Remove the node we're about to replace
         # (no feedback)
         @Individual.delete(toDelete)
@@ -338,7 +338,7 @@ class ContributeCtrl
         params =
             type : individual.type
             id   : id
-            scope: scope
+            topic: scope
         # Then load the individual
         individual.fields = @Individual.get params, (master)->
             # Disable loading state

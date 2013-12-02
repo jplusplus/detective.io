@@ -1,10 +1,10 @@
 from app.detective.topics.common.models import Country
-from django.core.management           import call_command
-from django.core.management.base      import CommandError
-from django.test                      import TestCase
-from neo4django.graph_auth.models     import User as GraphUser
-from django.contrib.auth.models       import User
-from StringIO                         import StringIO
+from django.core.management             import call_command
+from django.core.management.base        import CommandError
+from django.test                        import TestCase
+from neo4django.graph_auth.models       import User as GraphUser
+from django.contrib.auth.models         import User
+from StringIO                           import StringIO
 import sys
 
 class CommandsTestCase(TestCase):
@@ -49,7 +49,7 @@ class CommandsTestCase(TestCase):
         output = StringIO()
         sys.stdout = output
         # Import countries
-        args = "./app/detective/apps/common/fixtures/countries.json"
+        args = "./app/detective/topics/common/fixtures/countries.json"
         call_command('loadnodes', args)
         # Does France exists?
         self.assertGreater(len( Country.objects.filter(isoa3="FRA") ), 0)

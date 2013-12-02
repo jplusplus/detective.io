@@ -1,9 +1,9 @@
 angular.module('detectiveServices').factory("Search", [ '$resource', '$http', ($resource, $http)->
-    $resource '/api/:scope/v1/:type/search/#', {}, {
+    $resource '/api/:topic/v1/:type/search/#', {}, {
         query: {
-            method : 'GET', 
+            method : 'GET',
             isArray: true,
-            transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->                    
+            transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
                 data.objects
             ])
         }

@@ -1,12 +1,8 @@
-from app.detective.forms       import register_model_rules
-from django.conf.urls.defaults import *
-from django.db                 import models
-from django.db.models.fields   import FieldDoesNotExist
-from django.forms.forms        import pretty_name
-from neo4django.db             import connection
-from random                    import randint
-from os                        import listdir
-from os.path                   import isdir, join
+from app.detective.forms import register_model_rules
+from django.forms.forms  import pretty_name
+from random              import randint
+from os                  import listdir
+from os.path             import isdir, join
 import re
 
 
@@ -27,6 +23,7 @@ def get_apps_modules():
     return CUSTOM_APPS
 
 def get_registered_models():
+    from django.db import models
     import app.settings as settings
     mdls = []
     for app in settings.INSTALLED_APPS:
@@ -46,6 +43,7 @@ def get_registered_models():
     return mdls
 
 def get_model_fields(model):
+    from django.db.models.fields import FieldDoesNotExist
     fields      = []
     modelsRules = register_model_rules().model(model)
     if hasattr(model, "_meta"):
@@ -88,6 +86,7 @@ def get_model_fields(model):
     return fields
 
 def get_model_nodes():
+    from neo4django.db import connection
     # Return buffer values
     if hasattr(get_model_nodes, "buffer"):
         results = get_model_nodes.buffer

@@ -33,6 +33,11 @@ DATABASES = {
 
 DATABASE_ROUTERS = ['neo4django.utils.Neo4djangoIntegrationRouter']
 
+DEBUG = False
+
+NEO4DJANGO_PROFILE_REQUESTS = False
+NEO4DJANGO_DEBUG_GREMLIN = False
+
 USE_TZ = True
 
 INSTALLED_APPS = (
@@ -52,12 +57,4 @@ INSTALLED_APPS = (
 )
 
 # Add customs app to INSTALLED_APPS
-from app.detective.utils import get_apps_modules
 INSTALLED_APPS = INSTALLED_APPS + get_apps_modules()
-
-SECRET_KEY="<SET A SECRET KEY HERE>"
-
-DEBUG = False
-
-NEO4DJANGO_PROFILE_REQUESTS = False
-NEO4DJANGO_DEBUG_GREMLIN = False

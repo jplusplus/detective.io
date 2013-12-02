@@ -18,7 +18,7 @@ class IndividualListCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Read route params
-        @scope.scope              = @routeParams.scope
+        @scope.topic              = @routeParams.topic
         @scope.type               = @routeParams.type or ""
         @scope.page               = @routeParams.page or 1
         @scope.limit              = 20
@@ -49,7 +49,7 @@ class IndividualListCtrl
     selectIndividual: (val, old)=>
         # Single entity selected
         if val.id?
-            @location.path "/#{@scope.scope}/#{@scope.type.toLowerCase()}/#{val.id}"
+            @location.path "/#{@scope.topic}/#{@scope.type.toLowerCase()}/#{val.id}"
 
     # Verbose informations
     # (loaded contexualy)
@@ -62,7 +62,7 @@ class IndividualListCtrl
                 @scope.meta = meta = data[@scope.type.toLowerCase()]
                 if meta?
                     # Redirect "unlistable" resource
-                    return @location.path "/#{@scope.scope}" unless meta.rules.is_searchable
+                    return @location.path "/#{@scope.topic}" unless meta.rules.is_searchable
                     @scope.verbose_name        = meta.verbose_name
                     @scope.verbose_name_plural = meta.verbose_name_plural
                     # Set page's title
@@ -73,14 +73,14 @@ class IndividualListCtrl
     # List parameters
     getParams: =>
         type    : @scope.type
-        scope   : @scope.scope
+        topic   : @scope.topic
         limit   : @scope.limit
         offset  : (@scope.page-1)*@scope.limit
         order_by: "name"
 
     singleUrl: (individual)=>
         type = (@scope.type or individual.model).toLowerCase()
-        "/#{@scope.scope}/#{type}/#{individual.id}"
+        "/#{@scope.topic}/#{type}/#{individual.id}"
     # Pages list
     pages: =>
         # No page yet

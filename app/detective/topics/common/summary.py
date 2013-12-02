@@ -2,7 +2,7 @@
 from .models                 import Country
 from .forms                  import register_model_rules
 from app.detective.neomatch  import Neomatch
-from app.detective.utils     import get_model_node_id, get_model_fields, get_registered_models, get_model_scope
+from app.detective.utils     import get_model_node_id, get_model_fields, get_registered_models, get_model_topic
 from difflib                 import SequenceMatcher
 from django.core.paginator   import Paginator, InvalidPage
 from django.http             import Http404, HttpResponse
@@ -106,8 +106,8 @@ class SummaryResource(Resource):
                 fields              = get_model_fields(model)
                 verbose_name        = getattr(model._meta, "verbose_name", name).title()
                 verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()
-                # Extract the model parent to find its scope
-                scope               = model.__module__.split(".")[-2]
+                # Extract the model parent to find its topic
+                topic               = model.__module__.split(".")[-2]
 
                 for key in rules:
                     # Filter rules to keep only Neomatch
@@ -122,7 +122,7 @@ class SummaryResource(Resource):
 
                 available_resources[name] = {
                     'description'         : getattr(model, "_description", None),
-                    'scope'               : getattr(model, "_scope", scope),
+                    'topic'               : getattr(model, "_topic", topic),
                     'model'               : getattr(model, "__name_", ""),
                     'verbose_name'        : verbose_name,
                     'verbose_name_plural' : verbose_name_plural,
@@ -333,7 +333,7 @@ class SummaryResource(Resource):
 
     def get_models_output(self):
         # Select only some atribute
-        output = lambda m: {'name': get_model_scope(m) + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
+        output = lambda m: {'name': get_model_topic(m) + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
         return [ output(m) for m in get_registered_models() if m.__module__.startswith("app.detective.topics") ]
 
 

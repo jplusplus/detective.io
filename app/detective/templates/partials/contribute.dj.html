@@ -3,7 +3,7 @@
 		<div class="container">
 			<h2>Add a new individual to the database</h2>
 
-			<div ng-repeat="resource in scopeResources() track by $index" ng-show="resource.description">
+			<div ng-repeat="resource in topicResources() track by $index" ng-show="resource.description">
 				<div class="row top30">
 					<div class="col-sm-3">
 						<label class="btn btn-block btn-default btn-large">
@@ -170,7 +170,7 @@
 									placeholder="Search..."
 									tt-typeahead
 									tt-individual="field.related_model"
-									tt-scope="modelScope(field.related_model)"
+									tt-topic="modelTopic(field.related_model)"
 									tt-model="individual.fields[field.name][$index]"
 									ng-disabled="individual.loading"
 									ng-if="relatedState(f) == 'input'" />

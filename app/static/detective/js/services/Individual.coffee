@@ -1,5 +1,5 @@
 angular.module('detectiveServices').factory("Individual", [ '$resource', '$http', ($resource, $http)->
-    $resource '/api/:topic/v1/:type/:id/', { scope: "common" }, {
+    $resource '/api/:topic/v1/:type/:id/', { topic: "common" }, {
         query: {
             method : 'GET',
             isArray: true,
@@ -12,7 +12,7 @@ angular.module('detectiveServices').factory("Individual", [ '$resource', '$http'
             method : 'POST',
             isArray: false,
             paramDefaults: {
-                scope: "common"
+                topic: "common"
             }
         },
         delete: {
@@ -24,7 +24,7 @@ angular.module('detectiveServices').factory("Individual", [ '$resource', '$http'
             method : 'POST',
             isArray: false,
             paramDefaults: {
-                scope: "common"
+                topic: "common"
             }
         }
     }

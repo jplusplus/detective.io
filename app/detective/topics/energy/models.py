@@ -6,7 +6,7 @@ from app.detective.topics.common.models import Country
 
 
 class Amount(models.NodeModel):
-	_scope = u'energy'
+	_topic = u'energy'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
 	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
@@ -18,7 +18,7 @@ class Amount(models.NodeModel):
 		pass
 
 class FundraisingRound(models.NodeModel):
-	_scope = u'energy'
+	_topic = u'energy'
 	_parent = u'Amount'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
@@ -35,7 +35,7 @@ class FundraisingRound(models.NodeModel):
 		pass
 
 class Person(models.NodeModel):
-	_scope = u'energy'
+	_topic = u'energy'
 	_description = u'A Person represents a physical man or woman that is involved in an Organization, a Project or a Commentary.'
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
 	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
@@ -58,7 +58,7 @@ class Person(models.NodeModel):
 		return self.name or u"Unkown"
 
 class Revenue(models.NodeModel):
-	_scope = u'energy'
+	_topic = u'energy'
 	_parent = u'Amount'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
@@ -72,7 +72,7 @@ class Revenue(models.NodeModel):
 		pass
 
 class Commentary(models.NodeModel):
-	_scope = u'energy'
+	_topic = u'energy'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
 	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
@@ -85,7 +85,7 @@ class Commentary(models.NodeModel):
 		pass
 
 class Organization(models.NodeModel):
-	_scope = u'energy'
+	_topic = u'energy'
 	_description = u'An Organization represents a social entity that implements, funds, takes part in or helps a Project. It can be an NGO, a university, a governement organization, a for-profit company or an international organization.'
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
 	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
@@ -118,7 +118,7 @@ class Organization(models.NodeModel):
 
 
 class Distribution(models.NodeModel):
-	_scope = u'energy'
+	_topic = u'energy'
 	_parent = u'Amount'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
@@ -133,7 +133,7 @@ class Distribution(models.NodeModel):
 		pass
 
 class Price(models.NodeModel):
-	_scope = u'energy'
+	_topic = u'energy'
 	_parent = u'Amount'
 	_description = u''
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
@@ -148,7 +148,7 @@ class Price(models.NodeModel):
 
 
 class EnergyProduct(models.NodeModel):
-	_scope = u'energy'
+	_topic = u'energy'
 	_description = u'An energy Product represents the concrete emanation of an energy Project. It can be a mass-produced device or a power plant.'
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
 	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')
@@ -170,7 +170,7 @@ class EnergyProduct(models.NodeModel):
 
 
 class EnergyProject(models.NodeModel):
-	_scope = u'energy'
+	_topic = u'energy'
 	_description = u'An energy Project represents an endeavor to reach a particular aim (e.g. improve access to electricity, produce electricity in a certain way, improve energy efficiency, etc.). A project is the child of an Organization and takes its concrete form most often through Products.'
 	_status = models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
 	_author = models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author')

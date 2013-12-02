@@ -27,7 +27,7 @@ class ContributeCtrl
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
-        @scope.modelScope          = (m)=> if @scope.resources? then @scope.resources[m.toLowerCase()].scope
+        @scope.modelTopic          = (m)=> if @scope.resources? then @scope.resources[m.toLowerCase()].topic
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
@@ -325,12 +325,12 @@ class ContributeCtrl
         individual = @scope.individuals[index]
         individual.loading  = true
         individual.similars = []
-        scope = @scope.resources[individual.type].scope
+        topic = @scope.resources[individual.type].topic
         # Parameters of the individual to delete
         toDelete =
             type : individual.type
             id   : individual.fields.id
-            topic: scope
+            topic: topic
         # Remove the node we're about to replace
         # (no feedback)
         @Individual.delete(toDelete)
@@ -338,7 +338,7 @@ class ContributeCtrl
         params =
             type : individual.type
             id   : id
-            topic: scope
+            topic: topic
         # Then load the individual
         individual.fields = @Individual.get params, (master)->
             # Disable loading state

@@ -62,7 +62,7 @@ COMPRESS_URL               = STATIC_URL
 COMPRESS_STORAGE           = STATICFILES_STORAGE
 # Activate CSS minifier
 COMPRESS_CSS_FILTERS       = (
-    "compressor.filters.css_default.CssAbsoluteFilter",
+    "app.detective.compress_filter.CustomCssAbsoluteFilter",
     "compressor.filters.cssmin.CSSMinFilter",
     "compressor.filters.template.TemplateFilter",
 )

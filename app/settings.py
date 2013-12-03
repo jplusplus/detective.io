@@ -136,7 +136,7 @@ TEMPLATE_DIRS = (
 # JS/CSS COMPRESSOR SETTINGS
 COMPRESS_PRECOMPILERS = (
     ('text/coffeescript', 'coffee --compile --stdio --bare'),
-    ('text/less', 'lessc --include-path="%s" {infile} {outfile}' % STATIC_ROOT ),
+    ('text/less', 'lessc --include-path="%s" {infile} {outfile}' % here('static') ),
 )
 
 # Activate CSS minifier

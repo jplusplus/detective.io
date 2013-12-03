@@ -76,11 +76,6 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
 }
 
-# JS/CSS COMPRESSOR SETTINGS
-COMPRESS_PRECOMPILERS = (
-    ('text/coffeescript', 'coffee --compile --stdio --bare'),
-    ('text/less', 'lessc --include-path="%s" {infile} {outfile}' % STATIC_ROOT ),
-)
 
 # Activate the cache, for true
 CACHES = {

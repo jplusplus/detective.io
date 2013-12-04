@@ -34,8 +34,8 @@ class TopicResource(ModelResource):
     def dehydrate(self, bundle):
         # Get all registered models
         models = get_registered_models()
-        in_topic = lambda m: m.__module__.startswith("app.detective.apps.%s." % bundle.obj.module)
-        # Filter model to the one under app.detective.apps
+        in_topic = lambda m: m.__module__.startswith("app.detective.topics.%s." % bundle.obj.module)
+        # Filter model to the one under app.detective.topics
         bundle.data["models"] = [ m.__name__ for m in models if in_topic(m) ]
         return bundle
 

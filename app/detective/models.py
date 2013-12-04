@@ -1,5 +1,5 @@
-from .utils                   import get_apps
-from django.db                import models
+from .utils    import get_topics
+from django.db import models
 
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (
@@ -33,12 +33,12 @@ class QuoteRequest(models.Model):
         return "%s - %s" % (self.name, self.email,)
 
 class Topic(models.Model):
-    MODULES     = tuple( (app, app,) for app in get_apps() )
+    MODULES     = tuple( (topic, topic,) for topic in get_topics() )
     title       = models.CharField(max_length=250, help_text="Title of your topic.")
     module      = models.CharField(max_length=250, choices=MODULES, unique=True, help_text="Module to use to create your topic.")
     slug        = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
     description = models.TextField(null=True, blank=True, help_text="A short description of what your topic.")
-    public      = models.BooleanField(help_text="Is your app public?", default=True)
+    public      = models.BooleanField(help_text="Is your topic public?", default=True)
 
     def __unicode__(self):
         return self.title

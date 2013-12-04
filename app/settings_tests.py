@@ -57,4 +57,4 @@ INSTALLED_APPS = (
 )
 
 # Add customs app to INSTALLED_APPS
-INSTALLED_APPS = INSTALLED_APPS + get_apps_modules()
+INSTALLED_APPS = INSTALLED_APPS + get_topics_modules()

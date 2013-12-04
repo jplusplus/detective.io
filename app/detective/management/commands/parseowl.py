@@ -265,7 +265,7 @@ class Command(BaseCommand):
 
 
             if m["scope"] != '' and m["scope"] != None:
-                modelsContents.append("\t_scope = u'%s'" % m["scope"])
+                modelsContents.append("\t_topic = u'%s'" % m["scope"])
 
             if m["help_text"] != None:
                 modelsContents.append("\t_description = u'%s'" % m["help_text"])

@@ -3,22 +3,22 @@ import importlib
 
 def register_model_rules():
     # Singleton
-    if hasattr(register_model_rules, "rules"): return register_model_rules.rules        
+    if hasattr(register_model_rules, "rules"): return register_model_rules.rules
     # Avoid bi-directional dependancy
-    from app.detective.utils import get_apps
+    from app.detective.utils import get_topics
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # Each app can defined a forms.py file that describe the model rules
-    apps = get_apps()
+    apps = get_topics()
     for app in apps:
         # Does this app contain a forms.py file?
-        path = "app.detective.apps.%s.forms" % app
+        path = "app.detective.topics.%s.forms" % app
         try:
-            mod  = importlib.import_module(path)              
+            mod  = importlib.import_module(path)
         except ImportError:
             # Ignore import error
             continue
-        func = getattr(mod, "register_model_rules", None)        
+        func = getattr(mod, "register_model_rules", None)
         # Simply call the function to register app's rules
         if func: rules = func()
     # Register the rules

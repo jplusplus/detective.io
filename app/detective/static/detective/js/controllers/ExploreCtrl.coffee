@@ -5,23 +5,23 @@ class ExploreCtrl
     constructor: (@scope, @routeParams, @Summary, @Individual, @location, @timeout, @filter, @Page)->
         @scope.getTypeCount = @getTypeCount
         # Set page's title
-        @Page.title @routeParams.scope
+        @Page.title @routeParams.topic
         @Page.loading yes
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Current individual scope
-        @scope.scope = @routeParams.scope
+        @scope.topic = @routeParams.topic
         # Topic control
         @Individual.get type: "topic", (data)=>
             # Disable loading mode
             @Page.loading no
             # Find the right topic
-            topic = _.findWhere data.objects, module: @scope.scope
+            topic = _.findWhere data.objects, module: @scope.topic
             # Stop if it's an unkown topic
             return @location.path "/404" unless topic
             # Build template url
-            @scope.templateUrl = "/partial/explore-#{@scope.scope}.html"
+            @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
             # Countries info
             @scope.countries   = @Summary.get id:"countries"
             # Types info

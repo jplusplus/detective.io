@@ -14,6 +14,6 @@ api.register(RevenueResource())
 api.register(EnergyProductResource())
 api.register(EnergyProjectResource())
 
-urlpatterns = patterns('app.detective.apps.energy',
-    url(r'', include(api.urls)),    
+urlpatterns = patterns('app.detective.topics.energy',
+    url(r'', include(api.urls)),
 )

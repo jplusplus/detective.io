@@ -72,7 +72,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = here('static')
+STATIC_ROOT = here('staticfiles')
 
 LOGIN_URL = "/admin"
 # URL prefix for static files.
@@ -82,7 +82,7 @@ STATIC_URL = '/static/'
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Bower components
-    here('static/components'),
+    here('static'),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -136,12 +136,12 @@ TEMPLATE_DIRS = (
 # JS/CSS COMPRESSOR SETTINGS
 COMPRESS_PRECOMPILERS = (
     ('text/coffeescript', 'coffee --compile --stdio --bare'),
-    ('text/less', 'lessc {infile} {outfile}'),
+    ('text/less', 'lessc --include-path="%s" {infile} {outfile}' % here('static') ),
 )
 
 # Activate CSS minifier
 COMPRESS_CSS_FILTERS = (
-    "compressor.filters.css_default.CssAbsoluteFilter",
+    "app.detective.compress_filter.CustomCssAbsoluteFilter",
     "compressor.filters.template.TemplateFilter",
 )
 
@@ -153,7 +153,7 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
 }
 
-COMPRESS_ENABLED = True
+COMPRESS_ENABLED = False
 
 #INTERNAL_IPS = ('127.0.0.1',)
 
@@ -186,8 +186,8 @@ INSTALLED_APPS = (
 )
 
 # Add customs app to INSTALLED_APPS
-from app.detective.utils import get_apps_modules
-INSTALLED_APPS = INSTALLED_APPS + get_apps_modules()
+from app.detective.utils import get_topics_modules
+INSTALLED_APPS = INSTALLED_APPS + get_topics_modules()
 
 
 MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")

@@ -1,0 +1,38 @@
+[
+{
+    "pk": 1,
+    "model": "detective.topic",
+    "fields": {
+        "description": "A comprehensive database of every person and every organization linked to innovative energy projects.",
+        "title": "Innovative energy projects in developing countries ",
+        "module": "energy",
+        "slug": "energy",
+        "ontology": "",
+        "public": true
+    }
+},
+{
+    "pk": 2,
+    "model": "detective.topic",
+    "fields": {
+        "description": "",
+        "title": "Microfinance in the DRC",
+        "module": "microfinance_in_the_drc",
+        "slug": "microfinance-drc",
+        "ontology": "",
+        "public": true
+    }
+},
+{
+    "pk": 3,
+    "model": "detective.topic",
+    "fields": {
+        "description": "All default resources.",
+        "title": "Common",
+        "module": "common",
+        "slug": "common",
+        "ontology": "",
+        "public": true
+    }
+},
+]

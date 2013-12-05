@@ -1,5 +1,5 @@
-from app.detective             import owl
-from app.detective             import utils
+from app.detective             import owl, utils
+from app.detective.models      import Topic
 from app.detective.modelrules  import ModelRules
 from django.conf.urls          import url, include, patterns
 from tastypie.api              import Api
@@ -42,7 +42,7 @@ def import_or_create(path):
         module = importlib.import_module(path)
     # File dosen't exist, we create it virtually!
     except ImportError:
-        module = types.ModuleType(path)
+        module = types.ModuleType(str(path))
         # Register the virtual module
         sys.modules[path] = module
     return module
@@ -53,19 +53,33 @@ def topic_models(path, with_api=True):
         a topic package for an ontology file. This will also
         create all api resources and endpoints.
     """
-    topic_name  = path.split(".")[-1]
+    topic_name   = path.split(".")[-1]
+    # Ensure that the topic's model exist
+    import_or_create(path)
+    try:
+        topic_obj = Topic.objects.get(module=topic_name)
+    except Topic.DoesNotExist:
+        # Fails silently
+        return []
     # Add '.models to the path if needed
     models_path = path if path.endswith(".models") else '%s.models' % path
     urls_path   = "%s.urls" % path
     # Import or create virtually the models.py file
     models_module = import_or_create(models_path)
-    directory     = os.path.dirname(os.path.realpath( models_module.__file__ ))
-    # Path to the ontology file
-    ontology = "%s/ontology.owl" % directory
-    # Generates all model using the ontology file
-    models = owl.parse(ontology, path)
-    # Makes every model available through this module
-    for m in models: setattr(models_module, m, models[m])
+    if topic_obj.ontology is None:
+        directory     = os.path.dirname(os.path.realpath( models_module.__file__ ))
+        # Path to the ontology file
+        ontology = "%s/ontology.owl" % directory
+    else:
+        # Use the provided file
+        ontology = topic_obj.ontology
+    try:
+        # Generates all model using the ontology file
+        models = owl.parse(ontology, path)
+        # Makes every model available through this module
+        for m in models: setattr(models_module, m, models[m])
+    except TypeError:
+        models = []
     # No API creation request!
     if not with_api: return models
     # Generates the API endpoints

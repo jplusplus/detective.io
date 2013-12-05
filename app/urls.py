@@ -5,7 +5,12 @@ from django.contrib       import admin
 admin.autodiscover()
 topics = "|".join( get_topics() )
 
-urlpatterns = patterns('',
+urlpatterns = patterns('api',
+    url(r'^api/common/',                       include('app.detective.topics.common.urls')),
+    url(r'^api/energy/',                       include('app.detective.topics.energy.urls')),
+)
+
+urlpatterns += patterns('',
     url(r'^$',                                'app.detective.views.home', name='home'),
     url(r'^404/$',                            'app.detective.views.home', name='404'),
     url(r'^admin/',                            include(admin.site.urls)),
@@ -23,8 +28,6 @@ urlpatterns = patterns('',
     url(r'^%s/\w+/$' % topics,                'app.detective.views.home', name='list'),
     url(r'^%s/\w+/\d+/$' % topics,            'app.detective.views.home', name='single'),
     url(r'^%s/contribute/$' % topics,         'app.detective.views.home', name='contribute'),
-    url(r'^api/common/',                       include('app.detective.topics.common.urls')),
-    url(r'^api/energy/',                       include('app.detective.topics.energy.urls')),
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial', name='partial'),
 )
 

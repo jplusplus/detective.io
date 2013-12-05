@@ -157,10 +157,6 @@ COMPRESS_ENABLED = False
 
 #INTERNAL_IPS = ('127.0.0.1',)
 
-DEBUG_TOOLBAR_CONFIG = {
-    "INTERCEPT_REDIRECTS": False
-}
-
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
 INSTALLED_APPS = (
@@ -203,8 +199,7 @@ CACHES = {
     }
 }
 
-
-
+TASTYPIE_ALLOW_MISSING_SLASH = True
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

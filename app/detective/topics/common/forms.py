@@ -1,7 +1,7 @@
 from app.detective.topics.common.models import Country
 from app.detective.modelrules         import ModelRules
 
-def register_model_rules():
+def topics_rules():
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # Disable editing on some model

@@ -59,6 +59,7 @@ def get_class_specials(element):
     return props
 
 def parse(ontology, module=''):
+    app_label= module.split(".")[-1]
     # Open the ontology file
     tree = ET.parse(ontology)
     root = tree.getroot()
@@ -124,5 +125,5 @@ def parse(ontology, module=''):
             # Record the field
             class_fields[field_name] = getattr(models, field_type)(**field_opts)
         # Record the class with this fields
-        classes[class_name] = create_node_model(class_name, class_fields, options=class_options, module=module)
+        classes[class_name] = create_node_model(class_name, class_fields, app_label=app_label, options=class_options, module=module)
     return classes

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective.forms                import register_model_rules
+from app.detective                      import register
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class
 from django.conf.urls                   import url
@@ -28,7 +28,7 @@ RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 class IndividualAuthorization(Authorization):
 
     def check_contribution_permission(self, object_list, bundle, operation):
-        authorized = False 
+        authorized = False
         user = bundle.request.user
         if user:
             perm_name  = "%s.contribute_%s" % (object_list._app_label, operation)
@@ -57,7 +57,7 @@ class IndividualAuthorization(Authorization):
         return False
         # if not self.check_contribution_permission(object_list, bundle, 'delete'):
         #     raise Unauthorized("Sorry, only staff or contributors can delete resource.")
-        # return True 
+        # return True
 
 class IndividualMeta:
     list_allowed_methods   = ['get', 'post', 'put']
@@ -183,7 +183,7 @@ class IndividualResource(ModelResource):
 
     def alter_detail_data_to_serialize(self, request, bundle):
         # Show additional field following the model's rules
-        rules = register_model_rules().model(self.get_model()).all()
+        rules = register.topics_rules().model(self.get_model()).all()
         # All additional relationships
         for key in rules:
             # Filter rules to keep only Neomatch
@@ -194,7 +194,7 @@ class IndividualResource(ModelResource):
 
     def dehydrate(self, bundle):
         # Show additional field following the model's rules
-        rules = register_model_rules().model( self.get_model() )
+        rules = register.topics_rules().model( self.get_model() )
         # Get the output transformation for this model
         transform = rules.get("transform")
         # This is just a string

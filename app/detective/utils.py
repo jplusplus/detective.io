@@ -1,9 +1,8 @@
-from app.detective.forms import register_model_rules
-from django.forms.forms  import pretty_name
-from random              import randint
-from os                  import listdir
-from os.path             import isdir, join
-from neo4django.db       import models
+from django.forms.forms       import pretty_name
+from random                   import randint
+from os                       import listdir
+from os.path                  import isdir, join
+from neo4django.db            import models
 import re
 
 
@@ -14,28 +13,32 @@ def create_node_model(name, fields=None, app_label='', module='', options=None, 
     class Meta:
         # Using type('Meta', ...) gives a dictproxy error during model creation
         pass
-
     if app_label:
         # app_label must be set using the Meta inner class
         setattr(Meta, 'app_label', app_label)
-
     # Update Meta with any options that were provided
     if options is not None:
         for key, value in options.iteritems():
             setattr(Meta, key, value)
-
     # Set up a dictionary to simulate declarations within a class
     attrs = {'__module__': module, 'Meta': Meta}
-
     # Add in any fields that were provided
     if fields:
         attrs.update(fields)
-
     # Create the class, which automatically triggers ModelBase processing
-    model = type(name, (base_class,), attrs)
+    return type(name, (base_class,), attrs)
 
-    return model
-
+def create_model_resource(model):
+    """
+        Create specified model's api resource
+    """
+    from app.detective.individual import IndividualResource, IndividualMeta
+    class Meta(IndividualMeta):
+        queryset = model.objects.all().select_related(depth=1)
+     # Set up a dictionary to simulate declarations within a class
+    attrs = {'Meta': Meta}
+    name  = "%sResource" % model.__name__
+    return type(name, (IndividualResource,), attrs)
 
 def import_class(path):
     components = path.split('.')
@@ -74,9 +77,10 @@ def get_registered_models():
     return mdls
 
 def get_model_fields(model):
+    from app.detective           import register
     from django.db.models.fields import FieldDoesNotExist
     fields      = []
-    modelsRules = register_model_rules().model(model)
+    modelsRules = register.topics_rules().model(model)
     if hasattr(model, "_meta"):
         # Create field object
         for fieldRules in modelsRules.fields():

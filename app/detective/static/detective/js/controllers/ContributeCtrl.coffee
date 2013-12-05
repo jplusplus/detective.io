@@ -51,7 +51,7 @@ class ContributeCtrl
         @scope.Individual  = @Individual
         @scope.routeParams = @routeParams
         # Get the list of available resources
-        @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
+        @scope.resources = @Summary.get {id: "forms", topic: @scope.topic }, => @Page.loading(false)
         # Prepare future individual
         @initNewIndividual()
         # Individual list

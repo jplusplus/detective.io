@@ -41,7 +41,7 @@ class IndividualSingleCtrl
         # Not found
         , => @location.path "/404"
         # Get meta information for this type
-        @Summary.get id: "forms", (data)=>
+        @Summary.get { id: "forms", topic: @scope.topic}, (data)=>
             @scope.resource = data
             @scope.meta     = data[@scope.type.toLowerCase()]
 

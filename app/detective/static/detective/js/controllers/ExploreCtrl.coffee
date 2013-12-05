@@ -23,9 +23,9 @@ class ExploreCtrl
             # Build template url
             @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
             # Countries info
-            @scope.countries   = @Summary.get id:"countries"
+            @scope.countries   = @Summary.get id:"countries", topic: @scope.topic
             # Types info
-            @scope.types       = @Summary.get id:"types"
+            @scope.types       = @Summary.get id:"types", topic: @scope.topic
         # Country where the user click
         @scope.selectedCountry = {}
         @scope.selectedIndividual = {}

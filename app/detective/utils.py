@@ -2,16 +2,16 @@ from django.forms.forms       import pretty_name
 from random                   import randint
 from os                       import listdir
 from os.path                  import isdir, join
-from neo4django.db            import models
 import importlib
 import inspect
 import re
 
 
-def create_node_model(name, fields=None, app_label='', module='', options=None, base_class=models.NodeModel):
+def create_node_model(name, fields=None, app_label='', module='', options=None):
     """
     Create specified model
     """
+    from neo4django.db import models
     class Meta:
         # Using type('Meta', ...) gives a dictproxy error during model creation
         pass
@@ -28,7 +28,7 @@ def create_node_model(name, fields=None, app_label='', module='', options=None, 
     if fields:
         attrs.update(fields)
     # Create the class, which automatically triggers ModelBase processing
-    return type(name, (base_class,), attrs)
+    return type(name, (models.NodeModel,), attrs)
 
 def create_model_resource(model):
     """

@@ -1,5 +1,5 @@
-from .utils    import get_topics
-from django.db import models
+from .utils                 import get_topics
+from django.db              import models
 from django.core.exceptions import ValidationError
 import importlib
 import os
@@ -50,8 +50,13 @@ class Topic(models.Model):
     def clean(self):
         if self.ontology == "" and not self.has_default_ontology():
             raise ValidationError( 'An ontology file is required with this module.',  code='invalid')
-        # this can, of course, be made more generic
         models.Model.clean(self)
+
+
+    def save(self):
+        from app.detective.register import init_topics
+        models.Model.save(self)
+        init_topics()
 
     def has_default_ontology(self):
         module = importlib.import_module("app.detective.topics.%s" % self.module)

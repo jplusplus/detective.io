@@ -1,9 +1,7 @@
-from app.detective.utils  import get_topics
 from django.conf.urls     import patterns, include, url
 from django.contrib       import admin
 
 admin.autodiscover()
-topics = "|".join( get_topics() )
 
 urlpatterns = patterns('api',
     url(r'^api/common/',                       include('app.detective.topics.common.urls')),
@@ -24,10 +22,10 @@ urlpatterns += patterns('',
     url(r'^search/$',                         'app.detective.views.home', name='search'),
     url(r'^signup/$',                         'app.detective.views.home', name='signup'),
     url(r'^contact-us/$',                     'app.detective.views.home', name='contact-us'),
-    url(r'^%s/$' % topics,                    'app.detective.views.home', name='explore'),
-    url(r'^%s/\w+/$' % topics,                'app.detective.views.home', name='list'),
-    url(r'^%s/\w+/\d+/$' % topics,            'app.detective.views.home', name='single'),
-    url(r'^%s/contribute/$' % topics,         'app.detective.views.home', name='contribute'),
+    url(r'^\w+/$',                            'app.detective.views.home', name='explore'),
+    url(r'^\w+/\w+/$',                        'app.detective.views.home', name='list'),
+    url(r'^\w+/\w+/\d+/$',                    'app.detective.views.home', name='single'),
+    url(r'^\w+/contribute/$',                 'app.detective.views.home', name='contribute'),
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial', name='partial'),
 )
 

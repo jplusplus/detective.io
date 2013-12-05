@@ -270,12 +270,10 @@ class ContributeCtrl
 
     # Get resources list filtered by the current topic
     topicResources: =>
-        resources = _.where @scope.resources, { topic: @scope.topic }
-        # Add generic resources
-        for r in ["organization", "person"]
-            hasResource = !! _.findWhere resources, name: r
-            if @scope.resources[r]? and not hasResource
-                resources.push( @scope.resources[r] )
+        return [] unless @scope.resources.$resolved
+        # Only show resources with a name
+        resources = _.filter @scope.resources, (r)->
+            r.rules? and r.rules.is_searchable and r.rules.is_editable
         return resources
 
     # True if the given type is allowed

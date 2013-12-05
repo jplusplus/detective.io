@@ -2,6 +2,7 @@ from app.detective             import owl, utils
 from app.detective.models      import Topic
 from app.detective.modelrules  import ModelRules
 from django.conf.urls          import url, include, patterns
+from django.db                 import DatabaseError
 from tastypie.api              import Api
 import importlib
 import os
@@ -111,3 +112,13 @@ def topic_models(path, with_api=True):
         url(r'^api/%s/' % topic_name, include(urls_path)),
     ) + urls.urlpatterns
     return models
+
+def init_topics():
+    try:
+        # Create all the application using database information
+        for topic in Topic.objects.exclude(module="common"):
+            topic_models("app.detective.topics.%s" % topic.module)
+    except DatabaseError:
+        # Database may not be ready yet (syncdb running),
+        # we juste pass silently
+        pass

@@ -3,6 +3,8 @@ from random                   import randint
 from os                       import listdir
 from os.path                  import isdir, join
 from neo4django.db            import models
+import importlib
+import inspect
 import re
 
 
@@ -55,6 +57,22 @@ def get_topics_modules():
     # Import the whole topics directory automaticly
     CUSTOM_APPS = tuple( "app.detective.topics.%s" % a for a in get_topics() )
     return CUSTOM_APPS
+
+def get_topic_models(topic):
+    from django.db.models import Model
+    # Models to collect
+    models        = []
+    models_path   = "app.detective.topics.%s.models" % topic
+    try:
+        models_module = importlib.import_module(models_path)
+        for i in dir(models_module):
+            cls = getattr(models_module, i)
+            # Collect every Django's model subclass
+            if inspect.isclass(cls) and issubclass(cls, Model): models.append(cls)
+    except ImportError:
+        # Fail silently if the topic doesn't exist
+        pass
+    return models
 
 def get_registered_models():
     from django.db import models

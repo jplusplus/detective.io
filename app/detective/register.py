@@ -54,6 +54,8 @@ def topic_models(path, with_api=True):
     ontology = "%s/ontology.owl" % directory
     # Generates all model using the ontology file
     models = owl.parse(ontology, path)
+    # Makes every model available through this module
+    for m in models: setattr(models_module, m, models[m])
     # API creation request!
     if with_api:
         # Generates the API endpoints

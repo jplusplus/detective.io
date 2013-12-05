@@ -83,10 +83,10 @@ def parse(ontology, module=''):
             "_status": models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
         }
         # Pick some options (Meta class)
-        class_options = {
-            "verbose_name"       : class_specials["verbose_name"],
-            "verbose_name_plural": class_specials["verbose_name_plural"]
-        }
+        class_options = {}
+        for f in ["verbose_name", "verbose_name_plural"]:
+            if class_specials[f] is not None:
+                class_options[f] = class_specials[f]
         # List all fields
         for field in clss.findall("rdfs:subClassOf//owl:Restriction", namespaces=NAMESPACES):
             # All field's options

@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from .models                 import Country
 from .forms                  import topics_rules
+from app.detective.models    import Topic
 from app.detective.neomatch  import Neomatch
-from app.detective.utils     import get_model_node_id, get_model_fields, get_registered_models, get_model_topic
+from app.detective.utils     import get_model_node_id, get_model_fields, get_registered_models, get_model_topic, get_topic_models
 from difflib                 import SequenceMatcher
 from django.core.paginator   import Paginator, InvalidPage
 from django.http             import Http404, HttpResponse
 from neo4django.db           import connection
 from tastypie                import http
-from tastypie.exceptions     import ImmediateHttpResponse
+from tastypie.exceptions     import ImmediateHttpResponse, BadRequest
 from tastypie.resources      import Resource
 from tastypie.serializers    import Serializer
 import json
@@ -74,13 +75,19 @@ class SummaryResource(Resource):
         return obj
 
     def summary_types(self, bundle):
+        slug =  bundle.request.GET.get('topic', False)
+        if not slug: raise BadRequest("Missing 'topic' parameter.")
+        try:
+            topic = Topic.objects.get(slug=slug)
+        except Topic.DoesNotExist: raise Http404()
         # Query to aggreagte relationships count by country
         query = """
             START n=node(*)
             MATCH (c)<-[r:`<<INSTANCE>>`]-(n)
             WHERE HAS(n.model_name)
+            AND n.app_label = '%s'
             RETURN ID(n) as id, n.model_name as name, count(c) as count
-        """
+        """ % topic.module
         # Get the data and convert it to dictionnary
         types = connection.cypher(query).to_dicts()
         obj   = {}
@@ -93,43 +100,43 @@ class SummaryResource(Resource):
 
     def summary_forms(self, bundle):
         available_resources = {}
+        slug =  bundle.request.GET.get('topic', False)
+        if not slug: raise BadRequest("Missing 'topic' parameter.")
+        try:
+            topic = Topic.objects.get(slug=slug)
+        except Topic.DoesNotExist: raise Http404()
         # Get the model's rules manager
         rulesManager = topics_rules()
         # Fetch every registered model
         # to print out its rules
-        for model in get_registered_models():
-            # Do this ressource has a model?
-            # Do this ressource is a part of apps?
-            if model != None and model.__module__.startswith("app.detective.topics"):
-                name                = model.__name__.lower()
-                rules               = rulesManager.model(model).all()
-                fields              = get_model_fields(model)
-                verbose_name        = getattr(model._meta, "verbose_name", name).title()
-                verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()
-                # Extract the model parent to find its topic
-                topic               = model.__module__.split(".")[-2]
+        for model in get_topic_models(topic.module):
+            name                = model.__name__.lower()
+            rules               = rulesManager.model(model).all()
+            fields              = get_model_fields(model)
+            verbose_name        = getattr(model._meta, "verbose_name", name).title()
+            verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()
 
-                for key in rules:
-                    # Filter rules to keep only Neomatch
-                    if isinstance(rules[key], Neomatch):
-                        fields.append({
-                            "name"         : key,
-                            "type"         : "ExtendedRelationship",
-                            "verbose_name" : rules[key].title,
-                            "rules"        : {},
-                            "related_model": rules[key].target_model.__name__
-                        })
+            for key in rules:
+                # Filter rules to keep only Neomatch
+                if isinstance(rules[key], Neomatch):
+                    fields.append({
+                        "name"         : key,
+                        "type"         : "ExtendedRelationship",
+                        "verbose_name" : rules[key].title,
+                        "rules"        : {},
+                        "related_model": rules[key].target_model.__name__
+                    })
 
-                available_resources[name] = {
-                    'description'         : getattr(model, "_description", None),
-                    'topic'               : getattr(model, "_topic", topic),
-                    'model'               : getattr(model, "__name_", ""),
-                    'verbose_name'        : verbose_name,
-                    'verbose_name_plural' : verbose_name_plural,
-                    'name'                : name,
-                    'fields'              : fields,
-                    'rules'               : rules
-                }
+            available_resources[name] = {
+                'description'         : getattr(model, "_description", None),
+                'topic'               : getattr(model, "_topic", topic.module),
+                'model'               : getattr(model, "__name_", ""),
+                'verbose_name'        : verbose_name,
+                'verbose_name_plural' : verbose_name_plural,
+                'name'                : name,
+                'fields'              : fields,
+                'rules'               : rules
+            }
 
         return available_resources
 

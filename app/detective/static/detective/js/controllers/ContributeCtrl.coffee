@@ -146,8 +146,8 @@ class ContributeCtrl
 
         # Generates the permalink to this individual
         permalink: =>
-            return false unless @fields.id? and @meta.topic
-            return "/#{@meta.topic}/#{@type}/#{@fields.id}"
+            return false unless @fields.id? and @scope.topic
+            return "/#{@scope.topic}/#{@type}/#{@fields.id}"
 
         # Event when fields changed
         update: (data)=>
@@ -168,7 +168,7 @@ class ContributeCtrl
                     @isRemoved  = true
 
         # Returns individual's topic
-        getTopic: => @meta.topic or @scope.routeParams.topic
+        getTopic: => @scope.topic or @scope.routeParams.topic
 
         # Save the current individual form
         save: =>
@@ -300,7 +300,7 @@ class ContributeCtrl
                     type:  @scope.new.type
                     id:    "search"
                     q:     @scope.new.fields.name
-                    topic: @scope.new.meta.topic
+                    topic: @scope.topic
                 # Look for individual with the same name
                 @Individual.query params, (d)=>
                     # Remove the one we just created
@@ -323,12 +323,11 @@ class ContributeCtrl
         individual = @scope.individuals[index]
         individual.loading  = true
         individual.similars = []
-        topic = @scope.resources[individual.type].topic
         # Parameters of the individual to delete
         toDelete =
             type : individual.type
             id   : individual.fields.id
-            topic: topic
+            topic: @scope.topic
         # Remove the node we're about to replace
         # (no feedback)
         @Individual.delete(toDelete)
@@ -336,7 +335,7 @@ class ContributeCtrl
         params =
             type : individual.type
             id   : id
-            topic: topic
+            topic: @scope.topic
         # Then load the individual
         individual.fields = @Individual.get params, (master)->
             # Disable loading state

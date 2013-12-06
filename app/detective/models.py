@@ -47,6 +47,9 @@ class Topic(models.Model):
     def __unicode__(self):
         return self.title
 
+    def app_label(self):
+        return "topic%s" % self.id
+
     def clean(self):
         if self.ontology == "" and not self.has_default_ontology():
             raise ValidationError( 'An ontology file is required with this module.',  code='invalid')

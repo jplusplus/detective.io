@@ -80,7 +80,7 @@ class SummaryResource(Resource):
         try:
             topic = Topic.objects.get(slug=slug)
             # Exception for common and energy app
-            app_label = slug if slug in ["common", "energy"] else ('api-%s' % topic.id)
+            app_label = slug if slug in ["common", "energy"] else topic.app_label()
         except Topic.DoesNotExist: raise Http404()
         # Query to aggreagte relationships count by country
         query = """

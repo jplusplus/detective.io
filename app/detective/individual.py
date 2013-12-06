@@ -402,7 +402,7 @@ class IndividualResource(ModelResource):
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
         model = self.get_model()
         try:
-            node = model.objects.select_related(depth=1).get(id=kwargs["pk"])
+            node = model.objects.get(id=kwargs["pk"])
         except ObjectDoesNotExist:
             raise Http404("Sorry, unkown node.")
 

@@ -59,11 +59,10 @@ def topic_models(path, with_api=True):
     import_or_create(path)
     try:
         topic_obj = Topic.objects.get(module=topic_name)
+        app_label = topic_obj.app_label()
     except Topic.DoesNotExist:
         # Fails silently
         return []
-    # App name to use to retreive urlconfs and resourses
-    app_name ='api-%s'% topic_obj.id
     # Add '.models to the path if needed
     models_path = path if path.endswith(".models") else '%s.models' % path
     urls_path   = "%s.urls" % path
@@ -79,7 +78,7 @@ def topic_models(path, with_api=True):
     try:
         # Generates all model using the ontology file.
         # Also overides the default app label to allow data persistance
-        models = owl.parse(ontology, path, app_label=app_name)
+        models = owl.parse(ontology, path, app_label=app_label)
         # Makes every model available through this module
         for m in models: setattr(models_module, m, models[m])
     except TypeError:
@@ -90,8 +89,7 @@ def topic_models(path, with_api=True):
     api = Api(api_name='v1')
     # Creates a resource for each model
     for name in models:
-        model =  models[name]
-        Resource = utils.create_model_resource(model)
+        Resource = utils.create_model_resource(models[name])
         # Register the virtual resource to by importa
         resource_path = "%s.resource.%sResource" % (path, name)
         sys.modules[resource_path] = Resource
@@ -111,10 +109,10 @@ def topic_models(path, with_api=True):
     # we need to connect its url patterns to global one
     urls = importlib.import_module("app.urls")
     # Add api url pattern with the highest priority
-    urls.urlpatterns = patterns(app_name,
-        url(r'^api/%s/' % topic_obj.slug, include(urls_path, app_name=app_name)),
+    urls.urlpatterns = patterns(app_label,
+        url(r'^api/%s/' % topic_obj.slug, include(urls_path, app_name=app_label)),
     # Merge with a filtered version of the urlpattern to avoid duplicates
-    ) + [u for u in urls.urlpatterns if getattr(u, "app_name", None) != app_name ]
+    ) + [u for u in urls.urlpatterns if getattr(u, "app_name", None) != app_label ]
 
     return models
 

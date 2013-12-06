@@ -79,6 +79,8 @@ class SummaryResource(Resource):
         if not slug: raise BadRequest("Missing 'topic' parameter.")
         try:
             topic = Topic.objects.get(slug=slug)
+            # Exception for common and energy app
+            app_label = slug if slug in ["common", "energy"] else ('api-%s' % topic.id)
         except Topic.DoesNotExist: raise Http404()
         # Query to aggreagte relationships count by country
         query = """
@@ -87,7 +89,7 @@ class SummaryResource(Resource):
             WHERE HAS(n.model_name)
             AND n.app_label = '%s'
             RETURN ID(n) as id, n.model_name as name, count(c) as count
-        """ % topic.module
+        """ % app_label
         # Get the data and convert it to dictionnary
         types = connection.cypher(query).to_dicts()
         obj   = {}

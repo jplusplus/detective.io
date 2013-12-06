@@ -4,7 +4,9 @@ from django.contrib       import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    # Energy and Common are the 2 first topics and are threat with attentions
     url(r'^api/common/',                       include('app.detective.topics.common.urls', app_name='common')),
+    url(r'^api/energy/',                       include('app.detective.topics.energy.urls', app_name='energy')),
     url(r'^$',                                'app.detective.views.home', name='home'),
     url(r'^404/$',                            'app.detective.views.home', name='404'),
     url(r'^admin/',                            include(admin.site.urls)),
@@ -18,9 +20,9 @@ urlpatterns = patterns('',
     url(r'^search/$',                         'app.detective.views.home', name='search'),
     url(r'^signup/$',                         'app.detective.views.home', name='signup'),
     url(r'^contact-us/$',                     'app.detective.views.home', name='contact-us'),
-    url(r'^\w+/$',                            'app.detective.views.home', name='explore'),
-    url(r'^\w+/\w+/$',                        'app.detective.views.home', name='list'),
-    url(r'^\w+/\w+/\d+/$',                    'app.detective.views.home', name='single'),
+    url(r'^[a-zA-Z0-9_\-/]+/$',               'app.detective.views.home', name='explore'),
+    url(r'^[a-zA-Z0-9_\-/]+/\w+/$',           'app.detective.views.home', name='list'),
+    url(r'^[a-zA-Z0-9_\-/]+/\w+/\d+/$',       'app.detective.views.home', name='single'),
     url(r'^\w+/contribute/$',                 'app.detective.views.home', name='contribute'),
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial', name='partial'),
 )

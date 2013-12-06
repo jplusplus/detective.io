@@ -62,6 +62,8 @@ def topic_models(path, with_api=True):
     except Topic.DoesNotExist:
         # Fails silently
         return []
+    # App name to use to retreive urlconfs and resourses
+    app_name ='api-%s'% topic_obj.id
     # Add '.models to the path if needed
     models_path = path if path.endswith(".models") else '%s.models' % path
     urls_path   = "%s.urls" % path
@@ -75,8 +77,9 @@ def topic_models(path, with_api=True):
         # Use the provided file
         ontology = topic_obj.ontology
     try:
-        # Generates all model using the ontology file
-        models = owl.parse(ontology, path)
+        # Generates all model using the ontology file.
+        # Also overides the default app label to allow data persistance
+        models = owl.parse(ontology, path, app_label=app_name)
         # Makes every model available through this module
         for m in models: setattr(models_module, m, models[m])
     except TypeError:
@@ -107,10 +110,9 @@ def topic_models(path, with_api=True):
     # API is now up and running,
     # we need to connect its url patterns to global one
     urls = importlib.import_module("app.urls")
-    app_name ='api-%s'% topic_obj.id
     # Add api url pattern with the highest priority
     urls.urlpatterns = patterns(app_name,
-        url(r'^api/%s/' % topic_name, include(urls_path, app_name=app_name)),
+        url(r'^api/%s/' % topic_obj.slug, include(urls_path, app_name=app_name)),
     # Merge with a filtered version of the urlpattern to avoid duplicates
     ) + [u for u in urls.urlpatterns if getattr(u, "app_name", None) != app_name ]
 
@@ -119,8 +121,9 @@ def topic_models(path, with_api=True):
 def init_topics():
     try:
         # Create all the application using database information
-        for topic in Topic.objects.exclude(module="common"):
-            topic_models("app.detective.topics.%s" % topic.module)
+        for topic in Topic.objects.all():
+            if topic.module not in ["common", "energy"]:
+                topic_models("app.detective.topics.%s" % topic.module)
     except DatabaseError:
         # Database may not be ready yet (syncdb running),
         # we juste pass silently

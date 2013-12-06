@@ -58,8 +58,8 @@ def get_class_specials(element):
     # Return an empty dict by default
     return props
 
-def parse(ontology, module=''):
-    app_label= module.split(".")[-1]
+def parse(ontology, module='', app_label=None):
+    app_label = app_label if app_label is not None else module.split(".")[-1]
     # Open the ontology file
     tree = ET.parse(ontology)
     root = tree.getroot()

@@ -107,10 +107,13 @@ def topic_models(path, with_api=True):
     # API is now up and running,
     # we need to connect its url patterns to global one
     urls = importlib.import_module("app.urls")
+    app_name ='api-%s'% topic_obj.id
     # Add api url pattern with the highest priority
-    urls.urlpatterns = patterns('api',
-        url(r'^api/%s/' % topic_name, include(urls_path)),
-    ) + urls.urlpatterns
+    urls.urlpatterns = patterns(app_name,
+        url(r'^api/%s/' % topic_name, include(urls_path, app_name=app_name)),
+    # Merge with a filtered version of the urlpattern to avoid duplicates
+    ) + [u for u in urls.urlpatterns if getattr(u, "app_name", None) != app_name ]
+
     return models
 
 def init_topics():

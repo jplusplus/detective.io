@@ -3,12 +3,8 @@ from django.contrib       import admin
 
 admin.autodiscover()
 
-urlpatterns = patterns('api',
-    url(r'^api/common/',                       include('app.detective.topics.common.urls')),
-    url(r'^api/energy/',                       include('app.detective.topics.energy.urls')),
-)
-
-urlpatterns += patterns('',
+urlpatterns = patterns('',
+    url(r'^api/common/',                       include('app.detective.topics.common.urls', app_name='common')),
     url(r'^$',                                'app.detective.views.home', name='home'),
     url(r'^404/$',                            'app.detective.views.home', name='404'),
     url(r'^admin/',                            include(admin.site.urls)),
@@ -28,6 +24,7 @@ urlpatterns += patterns('',
     url(r'^\w+/contribute/$',                 'app.detective.views.home', name='contribute'),
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial', name='partial'),
 )
+
 
 # Handle 404 with the homepage
 handler404 = "app.detective.views.not_found"

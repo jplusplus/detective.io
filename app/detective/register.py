@@ -125,4 +125,6 @@ def init_topics():
     except DatabaseError:
         # Database may not be ready yet (syncdb running),
         # we juste pass silently
+        from django.db import transaction
+        transaction.rollback()
         pass

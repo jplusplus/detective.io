@@ -26,6 +26,8 @@ class ExploreCtrl
             @scope.countries   = @Summary.get id:"countries", topic: @scope.topic
             # Types info
             @scope.types       = @Summary.get id:"types", topic: @scope.topic
+            # Types info
+            @scope.forms       = @Summary.get id:"forms", topic: @scope.topic
         # Country where the user click
         @scope.selectedCountry = {}
         @scope.selectedIndividual = {}
@@ -58,6 +60,7 @@ class ExploreCtrl
     getTypeCount: ()=>
         tt = 0
         for type in arguments
+            console.log type
             t   = @scope.types[type]
             tt += if t? and t.count? then t.count else 0
         tt

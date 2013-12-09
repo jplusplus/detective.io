@@ -3,7 +3,6 @@
 <div id="energy">
 
     <div class="banner banner-big" parallax=".bg" speed="0.9">
-        <img src="{% static 'detective/img/energy-heading.jpg' %}" class="bg" />
         <div class="fg top90 container">
             <div class="intro">
                 <h2>[[meta.title]]</h2>
@@ -43,10 +42,15 @@
                     </form>
                     <div class="col-md-8 col-md-push-2 lead top20">
                         Navigate through
-                        <a ng-href="/energy/energyproject"><strong>[[getTypeCount("EnergyProject")]]</strong> projects</a>,
-                        <a ng-href="/energy/person"><strong>[[getTypeCount("Person")]]</strong> persons</a> and
-                        <a ng-href="/energy/organization"><strong>[[getTypeCount("Organization")]]</strong> organizations</a>.
-
+                        <span ng-repeat="form in forms">
+                            <span ng-if="$last && !$first"> and </span>
+                            <span ng-if="!$last && !$first">, </span>
+                            <a ng-href="/[[topic]]/[[form.name]]">
+                                <strong>[[getTypeCount(form.name)]]</strong>
+                                [[form.verbose_name_plural]]
+                            </a>
+                            <span ng-if="$last">.</span>
+                        </span>
                     </div>
                 </div>
             </div>

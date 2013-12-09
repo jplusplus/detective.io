@@ -103,7 +103,7 @@ class SummaryResource(Resource):
         obj   = {}
         for t in types:
             # Use name as identifier
-            obj[ t["name"] ] = t
+            obj[ t["name"].lower() ] = t
             # name is now useless
             del t["name"]
         return obj

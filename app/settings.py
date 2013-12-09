@@ -82,7 +82,8 @@ STATIC_URL = '/static/'
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Bower components
-    here('static'),
+    ('components', here('static/components') ),
+    here("detective/static"),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -154,7 +155,6 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
 }
 
 COMPRESS_ENABLED = True
-
 #INTERNAL_IPS = ('127.0.0.1',)
 
 TASTYPIE_DEFAULT_FORMATS = ['json']

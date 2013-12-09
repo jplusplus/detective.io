@@ -13,13 +13,13 @@ class ExploreCtrl
         # Current individual scope
         @scope.topic = @routeParams.topic
         # Topic control
-        @Individual.get type: "topic", (data)=>
+        @Individual.get {type: "topic", slug: @scope.topic }, (data)=>
             # Disable loading mode
             @Page.loading no
-            # Find the right topic
-            topic = _.findWhere data.objects, module: @scope.topic
             # Stop if it's an unkown topic
-            return @location.path "/404" unless topic
+            return @location.path "/404" unless data.objects and data.objects.length
+            # Meta data about this topic
+            @scope.meta = data.objects[0]
             # Build template url
             @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
             # Countries info

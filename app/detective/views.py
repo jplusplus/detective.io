@@ -26,13 +26,20 @@ def home(request):
 
     return response
 
-
 def partial(request, partial_name=None):
     template_name = 'partials/' + partial_name + '.dj.html'
     try:
         return render_to_response(template_name)
     except TemplateDoesNotExist:
         raise Http404
+
+def partial_explore(request, topic=None):
+    template_name = 'partials/explore-' + topic + '.dj.html'
+    try:
+        return render_to_response(template_name)
+    except TemplateDoesNotExist:
+        return partial(request, partial_name='explore-common')
+
 
 def not_found(request):
     return redirect("/404/")

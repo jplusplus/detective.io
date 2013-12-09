@@ -54,16 +54,24 @@ class SummaryResource(Resource):
 
 
     def summary_countries(self, bundle):
+        slug =  bundle.request.GET.get('topic', False)
+        if not slug: raise BadRequest("Missing 'topic' parameter.")
+        try:
+            topic = Topic.objects.get(slug=slug)
+            # Exception for common and energy app
+            app_label = slug if slug in ["common", "energy"] else topic.app_label()
+        except Topic.DoesNotExist: raise Http404()
         model_id = get_model_node_id(Country)
         # The Country isn't set yet in neo4j
         if model_id == None: raise Http404()
         # Query to aggreagte relationships count by country
         query = """
             START n=node(%d)
-            MATCH (i)<-[*0..1]->(country)<-[r:`<<INSTANCE>>`]-(n)
+            MATCH (m)-[:`<<INSTANCE>>`]->(i)<-[*0..1]->(country)<-[r:`<<INSTANCE>>`]-(n)
             WHERE HAS(country.isoa3)
+            AND m.app_label = '%s'
             RETURN country.isoa3 as isoa3, ID(country) as id, count(i)-1 as count
-        """ % int(model_id)
+        """ % ( int(model_id), app_label, )
         # Get the data and convert it to dictionnary
         countries = connection.cypher(query).to_dicts()
         obj       = {}

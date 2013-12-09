@@ -80,7 +80,7 @@ detective = angular
                     .when('/:topic', {
                         controller: ExploreCtrl
                         # Allow a dynamic loading by setting the templateUrl within controller
-                        template: "<div ng-include src='templateUrl'></div>"
+                        template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
                     })
                     .when('/:topic/:type', {
                         controller: IndividualListCtrl

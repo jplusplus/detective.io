@@ -1,4 +1,68 @@
-<div class="container" id="explore">
-	<h2>Welcome to <a href="/[[scope]]">detective.io/[[scope]]</a></h2>
-	<p class="lead">Detective.io tries to connect knowledge entities in order to leverage online investigation.</p>			
+{% load staticfiles %}
+
+<div id="energy">
+
+    <div class="banner banner-big" parallax=".bg" speed="0.9">
+        <img src="{% static 'detective/img/energy-heading.jpg' %}" class="bg" />
+        <div class="fg top90 container">
+            <div class="intro">
+                <h2>[[meta.title]]</h2>
+                <p class="lead" ng-if="meta.punchline">[[meta.punchline]]</p>
+                <p class="top40">
+                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(topic) || true" ng-href="/[[topic]]/contribute">
+                        Contribute
+                    </a>
+                    <a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">
+                        Start to explore
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-primary">
+        <div class="container">
+            <a scroll-to="600" ng-if="scrollToExplore == true" reset="scrollToExplore"></a>
+            <div class="top50 bottom40">
+                <div class="row">
+                    <form class="col-md-8 col-md-push-2" role="search">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                            <input type="search"
+                                    placeholder="Search linked individuals in our graph database..."
+                                    tt-typeahead
+                                    tt-individual="'summary'"
+                                    tt-model="selectedIndividual"
+                                    remote="/api/common/v1/summary/human/?q=%QUERY"
+                                    prefetch="/api/common/v1/summary/mine/"
+                                    value-key="label"
+                                    limit="10"
+                                    class="form-control"
+                                    id="input-search" />
+                        </div>
+                    </form>
+                    <div class="col-md-8 col-md-push-2 lead top20">
+                        Navigate through
+                        <a ng-href="/energy/energyproject"><strong>[[getTypeCount("EnergyProject")]]</strong> projects</a>,
+                        <a ng-href="/energy/person"><strong>[[getTypeCount("Person")]]</strong> persons</a> and
+                        <a ng-href="/energy/organization"><strong>[[getTypeCount("Organization")]]</strong> organizations</a>.
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="hr-primary" />
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h3>About the project</h3>
+                <div>[[meta.description]]</div>
+            </div>
+            <div class="col-md-8 select-a-country">
+                <div country-map model="selectedCountry" values="countries" class="top60" />
+            </div>
+        </div>
+    </div>
 </div>

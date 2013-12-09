@@ -1,5 +1,6 @@
 from django.conf.urls     import patterns, include, url
 from django.contrib       import admin
+from django.conf          import settings
 
 admin.autodiscover()
 
@@ -27,6 +28,11 @@ urlpatterns = patterns('',
     url(r'^partial/explore-(?P<topic>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial_explore', name='partial_explore'),
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$',  'app.detective.views.partial', name='partial'),
 )
+
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        (r'^public/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+    )
 
 
 # Handle 404 with the homepage

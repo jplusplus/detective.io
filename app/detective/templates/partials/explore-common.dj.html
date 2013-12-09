@@ -3,10 +3,11 @@
 <div id="energy">
 
     <div class="banner banner-big" parallax=".bg" speed="0.9">
+        <img ng-src="[[meta.background]]" class="bg" />
         <div class="fg top90 container">
             <div class="intro">
                 <h2>[[meta.title]]</h2>
-                <p class="lead" ng-if="meta.punchline">[[meta.punchline]]</p>
+                <p class="lead" ng-if="meta.description">[[meta.description]]</p>
                 <p class="top40">
                     <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(topic) || true" ng-href="/[[topic]]/contribute">
                         Contribute
@@ -62,7 +63,7 @@
         <div class="row">
             <div class="col-md-4">
                 <h3>About the project</h3>
-                <div>[[meta.description]]</div>
+                <div>[[meta.about]]</div>
             </div>
             <div class="col-md-8 select-a-country">
                 <div country-map model="selectedCountry" values="countries" class="top60" />

@@ -3,6 +3,7 @@ from .models                  import *
 from app.detective.models     import QuoteRequest, Topic
 from app.detective.individual import IndividualResource, IndividualMeta
 from app.detective.utils      import get_registered_models
+from django.conf              import settings
 from tastypie.authorization   import ReadOnlyAuthorization
 from tastypie.constants       import ALL
 from tastypie.exceptions      import Unauthorized

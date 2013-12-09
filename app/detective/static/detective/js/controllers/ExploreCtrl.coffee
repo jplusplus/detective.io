@@ -60,7 +60,6 @@ class ExploreCtrl
     getTypeCount: ()=>
         tt = 0
         for type in arguments
-            console.log type
             t   = @scope.types[type]
             tt += if t? and t.count? then t.count else 0
         tt

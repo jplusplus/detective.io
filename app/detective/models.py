@@ -40,9 +40,11 @@ class Topic(models.Model):
     title       = models.CharField(max_length=250, help_text="Title of your topic.")
     module      = models.SlugField(max_length=250, unique=True, help_text="Module to use to create your topic.")
     slug        = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
-    description = models.TextField(null=True, blank=True, help_text="A short description of what your topic.")
+    description = models.TextField(null=True, blank=True, help_text="A short description of what is your topic.")
+    about       = models.TextField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public      = models.BooleanField(help_text="Is your topic public?", default=True)
     ontology    = models.FileField(null=True, blank=True, upload_to="ontologies", help_text="Ontology file that descibes your field of study.")
+    background  = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
 
     def __unicode__(self):
         return self.title

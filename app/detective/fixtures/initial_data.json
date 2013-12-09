@@ -8,6 +8,8 @@
         "module": "common",
         "slug": "common",
         "ontology": "",
+        "about": "",
+        "background": "",
         "public": true
     }
 },
@@ -20,6 +22,8 @@
         "module": "energy",
         "slug": "energy",
         "ontology": "",
+        "about": "",
+        "background": "",
         "public": true
     }
 }

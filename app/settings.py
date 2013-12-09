@@ -17,9 +17,11 @@ DEFAULT_FROM_EMAIL = 'Detective.io <contact@detective.io>'
 
 MANAGERS = ADMINS
 
-import dj_database_url
 DATABASES = {
-    'default' : dj_database_url.config()
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'dev.db'
+    }
 }
 
 NEO4J_DATABASES = {

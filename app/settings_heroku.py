@@ -54,6 +54,7 @@ INSTALLED_APPS            += ('storages',)
 DEFAULT_FILE_STORAGE       = 'storages.backends.s3boto.S3BotoStorage'
 # Static storage
 STATICFILES_STORAGE        = DEFAULT_FILE_STORAGE
+ADMIN_MEDIA_PREFIX         = STATIC_URL + 'admin/'
 
 # JS/CSS compressor settings
 COMPRESS_ENABLED           = True

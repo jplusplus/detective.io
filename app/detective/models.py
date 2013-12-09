@@ -80,3 +80,11 @@ class Topic(models.Model):
         path = self.get_absolute_path()
         return '<a href="%s">%s</a>' % (path, path, )
     link.allow_tags = True
+
+
+class RelationshipSearch(models.Model):
+    # Every field are required
+    label   = models.CharField(max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
+    subject = models.CharField(max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    name    = models.CharField(max_length=250, help_text="Name of the relationship inside.")
+    topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")

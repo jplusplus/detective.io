@@ -563,7 +563,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/summary/mine/', format='json'))
 
     def test_countries_summary(self):
-        resp = self.api_client.get('/api/common/v1/summary/countries/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/common/v1/summary/countries/?topic=energy', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)

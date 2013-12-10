@@ -59,7 +59,7 @@ class SummaryResource(Resource):
         try:
             topic = Topic.objects.get(slug=slug)
             # Exception for common and energy app
-            app_label = slug if slug in ["common", "energy"] else topic.app_label()
+            app_label = topic.app_label()
         except Topic.DoesNotExist: raise Http404()
         model_id = get_model_node_id(Country)
         # The Country isn't set yet in neo4j
@@ -88,7 +88,7 @@ class SummaryResource(Resource):
         try:
             topic = Topic.objects.get(slug=slug)
             # Exception for common and energy app
-            app_label = slug if slug in ["common", "energy"] else topic.app_label()
+            app_label = topic.app_label()
         except Topic.DoesNotExist: raise Http404()
         # Query to aggreagte relationships count by country
         query = """

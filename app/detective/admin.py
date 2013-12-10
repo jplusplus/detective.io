@@ -7,13 +7,13 @@ class QuoteRequestAdmin(admin.ModelAdmin):
 
 admin.site.register(QuoteRequest, QuoteRequestAdmin)
 
-class RelationshipSearchInline(admin.StackedInline):
+class RelationshipSearchInline(admin.TabularInline):
     model = RelationshipSearch
+    extra = 1
 
 class TopicAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ("title", "link", "public", )
-
     inlines = ( RelationshipSearchInline, )
 
 admin.site.register(Topic, TopicAdmin)

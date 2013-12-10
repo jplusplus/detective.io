@@ -38,7 +38,7 @@ class QuoteRequest(models.Model):
 class Topic(models.Model):
     MODULES     = tuple( (topic, topic,) for topic in get_topics() )
     title       = models.CharField(max_length=250, help_text="Title of your topic.")
-    module      = models.SlugField(max_length=250, unique=True, help_text="Module to use to create your topic.")
+    module      = models.SlugField(choices=MODULES, blank=True, max_length=250, unique=True, help_text="Module to use to create your topic.")
     slug        = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
     description = models.TextField(null=True, blank=True, help_text="A short description of what is your topic.")
     about       = models.TextField(null=True, blank=True, help_text="A longer description of what is your topic.")
@@ -50,7 +50,10 @@ class Topic(models.Model):
         return self.title
 
     def app_label(self):
-        return "topic%s" % self.id
+        if self.slug in ["common", "energy"]:
+            return self.slug
+        else:
+            return "topic%s" % self.id
 
     def clean(self):
         if self.ontology == "" and not self.has_default_ontology():
@@ -59,8 +62,11 @@ class Topic(models.Model):
 
 
     def save(self):
-        from app.detective.register import init_topics
+        if not self.module:
+            # Auto populate module with the app_label()
+            self.module = self.app_label()
         models.Model.save(self)
+        from app.detective.register import init_topics
         init_topics()
 
     def has_default_ontology(self):
@@ -87,5 +93,5 @@ class RelationshipSearch(models.Model):
     subject = models.CharField(editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
     # Every field are required
     label   = models.CharField(max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
-    name    = models.CharField(max_length=250, help_text="Name of the relationship inside.")
+    name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
     topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")

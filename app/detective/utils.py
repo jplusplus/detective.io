@@ -48,10 +48,14 @@ def import_class(path):
     mod        = ".".join(components[0:-1])
     return getattr(__import__(mod, fromlist=klass), klass[0], None)
 
-def get_topics():
-    # Load topics' names
-    appsdir = "./app/detective/topics"
-    return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
+def get_topics(offline=True):
+    if offline:
+        # Load topics' names
+        appsdir = "./app/detective/topics"
+        return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
+    else:
+        from app.detective.models import Topic
+        return [t.module for t in Topic.objects.all()]
 
 def get_topics_modules():
     # Import the whole topics directory automaticly

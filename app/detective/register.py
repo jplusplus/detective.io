@@ -21,20 +21,56 @@ def topics_rules():
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # Each app can defined a forms.py file that describe the model rules
-    apps = get_topics()
-    for app in apps:
+    topcis = get_topics(offline=False)
+    for topic in topcis:
+        # Add default rules
+        default_rules(topic)
         # Does this app contain a forms.py file?
-        path = "app.detective.topics.%s.forms" % app
+        path = "app.detective.topics.%s.forms" % topic
         try:
             mod  = importlib.import_module(path)
         except ImportError:
-            # Ignore import error
+            # Ignore absent forms.py
             continue
         func = getattr(mod, "topics_rules", None)
         # Simply call the function to register app's rules
         if func: rules = func()
     # Register the rules
     topics_rules.rules = rules
+    return rules
+
+def default_rules(topic):
+    # ModelRules is a singleton that record every model rules
+    rules = ModelRules()
+    # We cant import this early to avoid bi-directional dependancies
+    from app.detective.utils import get_topic_models, import_class
+    # Get all registered models
+    models = get_topic_models(topic)
+    # Set "is_searchable" to true on every model with a name
+    for model in models:
+        # If the current model has a name
+        if "name" in rules.model(model).field_names:
+            field_names = rules.model(model).field_names
+            # Count the fields len
+            fields_len = len(field_names)
+            # Put the highest priority to that name
+            rules.model(model).field('name').add(priority=fields_len)
+        # This model isn't searchable
+        else: rules.model(model).add(is_searchable=False)
+    # Check now that each "Relationship"
+    # match with a searchable model
+    for model in models:
+        for field in model._meta.fields:
+            # Find related model for relation
+            if hasattr(field, "target_model"):
+                target_model  = field.target_model
+                # Load class path
+                if type(target_model) is str: target_model = import_class(target_model)
+                # It's a searchable field !
+                modelRules = rules.model(target_model).all()
+                # Set it into the rules
+                rules.model(model).field(field.name).add(is_searchable=modelRules["is_searchable"])
+                rules.model(model).field(field.name).add(is_editable=modelRules["is_editable"])
     return rules
 
 def import_or_create(path):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .models                 import Country
-from .forms                  import topics_rules
+from app.detective.register  import topics_rules
 from app.detective.models    import Topic
 from app.detective.neomatch  import Neomatch
 from app.detective.utils     import get_model_node_id, get_model_fields, get_registered_models, get_model_topic, get_topic_models

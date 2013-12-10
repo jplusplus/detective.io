@@ -145,11 +145,14 @@ def topic_models(path, with_api=True):
     # we need to connect its url patterns to global one
     urls = importlib.import_module("app.urls")
     # Add api url pattern with the highest priority
-    urls.urlpatterns = patterns(app_label,
+    new_patterns = patterns(app_label,
         url(r'^api/%s/' % topic_obj.slug, include(urls_path, app_name=app_label)),
-    # Merge with a filtered version of the urlpattern to avoid duplicates
-    ) + [u for u in urls.urlpatterns if getattr(u, "app_name", None) != app_label ]
-
+    )
+    if hasattr(urls, "urlpatterns"):
+        # Merge with a filtered version of the urlpattern to avoid duplicates
+        new_patterns += [u for u in urls.urlpatterns if getattr(u, "app_name", None) != app_label ]
+    # Then update url pattern
+    urls.urlpatterns = new_patterns
     return models
 
 def init_topics():

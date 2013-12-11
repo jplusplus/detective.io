@@ -132,9 +132,7 @@ def topic_models(path, with_api=True):
         # And register it into the API instance
         api.register(Resource())
     # Create url patterns
-    urlpatterns = patterns(path,
-        url(r'', include(api.urls)),
-    )
+    urlpatterns = patterns(path, url(r'', include(api.urls)), )
     # Import or create virtually the url path
     urls_modules = import_or_create(urls_path)
     # Merge the two url patterns if needed
@@ -143,10 +141,10 @@ def topic_models(path, with_api=True):
     urls_modules.urlpatterns = urlpatterns
     # API is now up and running,
     # we need to connect its url patterns to global one
-    urls = importlib.import_module("app.urls")
+    urls = importlib.import_module("app.detective.urls")
     # Add api url pattern with the highest priority
     new_patterns = patterns(app_label,
-        url(r'^api/%s/' % topic_obj.slug, include(urls_path, app_name=app_label)),
+        url(r'^%s/' % topic_obj.slug, include(urls_path, app_name=app_label)),
     )
     if hasattr(urls, "urlpatterns"):
         # Merge with a filtered version of the urlpattern to avoid duplicates

@@ -43,12 +43,13 @@
                     </form>
                     <div class="col-md-8 col-md-push-2 lead top20">
                         Navigate through
-                        <span ng-repeat="form in forms">
+                        <span ng-repeat="form in forms | filter:form.rules.is_searchable">
                             <span ng-if="$last && !$first"> and </span>
                             <span ng-if="!$last && !$first">, </span>
-                            <a ng-href="/[[topic]]/[[form.name]]">
-                                <strong>[[getTypeCount(form.name)]]</strong>
-                                [[form.verbose_name_plural]]
+                            <a ng-href="/[[topic]]/[[form.name]]" ng-init="count = getTypeCount(form.name)">
+                                <strong>[[count]]</strong>
+                                <span ng-if="count <= 1">[[form.verbose_name|lowercase]]</span>
+                                <span ng-if="count > 1">[[form.verbose_name_plural|lowercase]]</span>
                             </a>
                             <span ng-if="$last">.</span>
                         </span>

@@ -1,8 +1,10 @@
 from .utils                 import get_topics
-from django.db              import models
 from django.core.exceptions import ValidationError
+from django.db              import models
 import importlib
 import os
+import random
+import string
 
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (
@@ -38,7 +40,8 @@ class QuoteRequest(models.Model):
 class Topic(models.Model):
     MODULES     = tuple( (topic, topic,) for topic in get_topics() )
     title       = models.CharField(max_length=250, help_text="Title of your topic.")
-    module      = models.SlugField(choices=MODULES, blank=True, max_length=250, unique=True, help_text="Module to use to create your topic.")
+    # Value will be set for this field if it's blank
+    module      = models.SlugField(choices=MODULES, blank=True, max_length=250, help_text="Module to use to create your topic.")
     slug        = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
     description = models.TextField(null=True, blank=True, help_text="A short description of what is your topic.")
     about       = models.TextField(null=True, blank=True, help_text="A longer description of what is your topic.")
@@ -52,8 +55,27 @@ class Topic(models.Model):
     def app_label(self):
         if self.slug in ["common", "energy"]:
             return self.slug
-        else:
-            return "topic%s" % self.id
+        elif not self.module:
+            # Already saved topic
+            if self.id:
+                # Restore the previous module value
+                self.module = Topic.objects.get(id=self.id).module
+                # Call this function again.
+                # Continue if module is still empty
+                if self.module: return self.app_label()
+            while True:
+                token = Topic.get_module_token()
+                # Break the loop only if the token doesn't exist
+                if not Topic.objects.filter(module=token).exists(): break
+            # Save the new token
+            self.module = token
+            # Save a first time if no idea given
+            models.Model.save(self)
+        return self.module
+
+    @staticmethod
+    def get_module_token(size=10, chars=string.ascii_uppercase + string.digits):
+        return "topic%s" % ''.join(random.choice(chars) for x in range(size))
 
     def clean(self):
         if self.ontology == "" and not self.has_default_ontology():
@@ -62,9 +84,8 @@ class Topic(models.Model):
 
 
     def save(self):
-        if not self.module:
-            # Auto populate module with the app_label()
-            self.module = self.app_label()
+        # Ensure that the module field is populated with app_label()
+        self.module = self.app_label()
         models.Model.save(self)
         from app.detective.register import init_topics
         init_topics()

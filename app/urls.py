@@ -5,9 +5,7 @@ from django.conf          import settings
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Energy and Common are the 2 first topics and are threat with attentions
-    url(r'^api/common/',                       include('app.detective.topics.common.urls', app_name='common')),
-    url(r'^api/energy/',                       include('app.detective.topics.energy.urls', app_name='energy')),
+    url(r'^api/',                             include('app.detective.urls')),
     url(r'^$',                                'app.detective.views.home', name='home'),
     url(r'^404/$',                            'app.detective.views.home', name='404'),
     url(r'^admin/',                            include(admin.site.urls)),

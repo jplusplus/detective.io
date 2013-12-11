@@ -30,11 +30,13 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     # Create the class, which automatically triggers ModelBase processing
     return type(name, (models.NodeModel,), attrs)
 
-def create_model_resource(model):
+def create_model_resource(model, Resource=None, Meta=None):
     """
         Create specified model's api resource
     """
     from app.detective.individual import IndividualResource, IndividualMeta
+    if Resource is None: Resource = IndividualResource
+    if Meta is None: Meta = IndividualMeta
     class Meta(IndividualMeta):
         queryset = model.objects.all().select_related(depth=1)
      # Set up a dictionary to simulate declarations within a class

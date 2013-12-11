@@ -94,8 +94,8 @@ def topic_models(path, with_api=True):
     # Ensure that the topic's model exist
     import_or_create(path)
     try:
-        topic_obj = Topic.objects.get(module=topic_name)
-        app_label = topic_obj.app_label()
+        topic = Topic.objects.get(module=topic_name)
+        app_label = topic.app_label()
     except Topic.DoesNotExist:
         # Fails silently
         return []
@@ -104,13 +104,13 @@ def topic_models(path, with_api=True):
     urls_path   = "%s.urls" % path
     # Import or create virtually the models.py file
     models_module = import_or_create(models_path)
-    if topic_obj.ontology is None:
+    if topic.ontology is None:
         directory     = os.path.dirname(os.path.realpath( models_module.__file__ ))
         # Path to the ontology file
         ontology = "%s/ontology.owl" % directory
     else:
         # Use the provided file
-        ontology = topic_obj.ontology
+        ontology = topic.ontology
     try:
         # Generates all model using the ontology file.
         # Also overides the default app label to allow data persistance
@@ -131,6 +131,20 @@ def topic_models(path, with_api=True):
         sys.modules[resource_path] = Resource
         # And register it into the API instance
         api.register(Resource())
+    # Every app have to instance a SummaryResource class
+    summary_path   = "%s.summary" % path
+    summary_module = import_or_create(summary_path)
+    # Take the existing summary resource
+    if hasattr(summary_module, 'SummaryResource'):
+        SummaryResource = summary_module.SummaryResource
+    # We create one if it doesn't exist
+    else:
+        summary_common  = import_or_create("app.detective.topics.common.summary")
+        BaseResource    = summary_common.SummaryResource
+        attrs           = dict(meta=summary_common.SummaryResource.Meta)
+        SummaryResource = type('SummaryResource', (BaseResource,), attrs)
+    # Register the summary resource
+    api.register(SummaryResource())
     # Create url patterns
     urlpatterns = patterns(path, url(r'', include(api.urls)), )
     # Import or create virtually the url path
@@ -144,11 +158,11 @@ def topic_models(path, with_api=True):
     urls = importlib.import_module("app.detective.urls")
     # Add api url pattern with the highest priority
     new_patterns = patterns(app_label,
-        url(r'^%s/' % topic_obj.slug, include(urls_path, app_name=app_label)),
+        url(r'^%s/' % topic.slug, include(urls_path, app_name=topic.slug)),
     )
     if hasattr(urls, "urlpatterns"):
         # Merge with a filtered version of the urlpattern to avoid duplicates
-        new_patterns += [u for u in urls.urlpatterns if getattr(u, "app_name", None) != app_label ]
+        new_patterns += [u for u in urls.urlpatterns if getattr(u, "app_name", None) != topic.slug ]
     # Then update url pattern
     urls.urlpatterns = new_patterns
     return models

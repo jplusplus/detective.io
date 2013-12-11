@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-from .models                 import Country
-from app.detective.register  import topics_rules
-from app.detective.models    import Topic
-from app.detective.neomatch  import Neomatch
-from app.detective.utils     import get_model_node_id, get_model_fields, get_registered_models, get_model_topic, get_topic_models
-from difflib                 import SequenceMatcher
-from django.core.paginator   import Paginator, InvalidPage
-from django.http             import Http404, HttpResponse
-from neo4django.db           import connection
-from tastypie                import http
-from tastypie.exceptions     import ImmediateHttpResponse, BadRequest
-from tastypie.resources      import Resource
-from tastypie.serializers    import Serializer
+from .models                  import Country
+from app.detective.models     import Topic
+from app.detective.neomatch   import Neomatch
+from app.detective.register   import topics_rules
+from app.detective.utils      import get_model_node_id, get_model_fields, get_registered_models, get_model_topic, get_topic_models
+from difflib                  import SequenceMatcher
+from django.core.paginator    import Paginator, InvalidPage
+from django.core.urlresolvers import resolve
+from django.http              import Http404, HttpResponse
+from neo4django.db            import connection
+from tastypie                 import http
+from tastypie.exceptions      import ImmediateHttpResponse
+from tastypie.resources       import Resource
+from tastypie.serializers     import Serializer
 import json
 import re
 
@@ -36,7 +37,8 @@ class SummaryResource(Resource):
         method = getattr(self, "summary_%s" % kwargs["pk"], None)
         if method:
             try:
-                content = method(kwargs["bundle"])
+                self.throttle_check(kwargs["bundle"].request)
+                content = method(kwargs["bundle"], kwargs["bundle"].request)
                 # Serialize content in json
                 # @TODO implement a better format support
                 content  = self.serializer(content, "application/json")
@@ -53,14 +55,15 @@ class SummaryResource(Resource):
         raise ImmediateHttpResponse(response=response)
 
 
-    def summary_countries(self, bundle):
-        slug =  bundle.request.GET.get('topic', False)
-        if not slug: raise BadRequest("Missing 'topic' parameter.")
+    def get_topic_or_404(self, request):
         try:
-            topic = Topic.objects.get(slug=slug)
-            # Exception for common and energy app
-            app_label = topic.app_label()
-        except Topic.DoesNotExist: raise Http404()
+            return Topic.objects.get(slug=resolve(request.path).app_name)
+        except Topic.DoesNotExist:
+            raise Http404()
+
+    def summary_countries(self, bundle, request):
+        topic = self.get_topic_or_404(request)
+        app_label = topic.app_label()
         model_id = get_model_node_id(Country)
         # The Country isn't set yet in neo4j
         if model_id == None: raise Http404()
@@ -82,14 +85,9 @@ class SummaryResource(Resource):
             del country["isoa3"]
         return obj
 
-    def summary_types(self, bundle):
-        slug =  bundle.request.GET.get('topic', False)
-        if not slug: raise BadRequest("Missing 'topic' parameter.")
-        try:
-            topic = Topic.objects.get(slug=slug)
-            # Exception for common and energy app
-            app_label = topic.app_label()
-        except Topic.DoesNotExist: raise Http404()
+    def summary_types(self, bundle, request):
+        topic = self.get_topic_or_404(request)
+        app_label = topic.app_label()
         # Query to aggreagte relationships count by country
         query = """
             START n=node(*)
@@ -108,13 +106,9 @@ class SummaryResource(Resource):
             del t["name"]
         return obj
 
-    def summary_forms(self, bundle):
+    def summary_forms(self, bundle, request):
+        topic = self.get_topic_or_404(request)
         available_resources = {}
-        slug =  bundle.request.GET.get('topic', False)
-        if not slug: raise BadRequest("Missing 'topic' parameter.")
-        try:
-            topic = Topic.objects.get(slug=slug)
-        except Topic.DoesNotExist: raise Http404()
         # Get the model's rules manager
         rulesManager = topics_rules()
         # Fetch every registered model
@@ -150,10 +144,10 @@ class SummaryResource(Resource):
 
         return available_resources
 
-    def summary_mine(self, bundle):
-        request = bundle.request
+    def summary_mine(self, bundle, request):
+        topic = self.get_topic_or_404(request)
+        app_label = topic.app_label()
         self.method_check(request, allowed=['get'])
-        self.throttle_check(request)
         if not request.user.id:
             raise UnauthorizedError('This method require authentication')
 
@@ -164,8 +158,9 @@ class SummaryResource(Resource):
             AND HAS(root._author)
             AND HAS(type.model_name)
             AND %s IN root._author
+            AND type.app_label = '%s'
             RETURN DISTINCT ID(root) as id, root.name as name, type.name as model
-        """ % int(request.user.id)
+        """ % ( int(request.user.id), app_label )
 
         matches      = connection.cypher(query).to_dicts()
         count        = len(matches)
@@ -206,10 +201,8 @@ class SummaryResource(Resource):
         return object_list
 
 
-    def summary_search(self, bundle):
-        request = bundle.request
+    def summary_search(self, bundle, request):
         self.method_check(request, allowed=['get'])
-        self.throttle_check(request)
 
         if not "q" in request.GET: raise Exception("Missing 'q' parameter")
 
@@ -242,10 +235,8 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
-    def summary_rdf_search(self, bundle):
-        request = bundle.request
+    def summary_rdf_search(self, bundle, request):
         self.method_check(request, allowed=['get'])
-        self.throttle_check(request)
 
         limit     = int(request.GET.get('limit', 20))
         query     = json.loads(request.GET.get('q', 'null'))
@@ -278,10 +269,8 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
-    def summary_human(self, bundle):
-        request = bundle.request
+    def summary_human(self, bundle, request):
         self.method_check(request, allowed=['get'])
-        self.throttle_check(request)
 
         if not "q" in request.GET:
             raise Exception("Missing 'q' parameter")
@@ -319,7 +308,7 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
-    def summary_syntax(self, bundle): return self.get_syntax()
+    def summary_syntax(self, bundle, request): return self.get_syntax()
 
     def search(self, query):
         match = str(query).lower()

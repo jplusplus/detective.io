@@ -27,10 +27,11 @@ class ExploreCtrl
             # Types info
             @scope.types       = @Summary.get id:"types", topic: @scope.topic
             # Types info
-            @scope.forms       = @Summary.get id:"forms", topic: @scope.topic
+            @Summary.get { id:"forms", topic: @scope.topic }, (d)=> @scope.forms = _.values(d)
         # Country where the user click
         @scope.selectedCountry = {}
         @scope.selectedIndividual = {}
+        @scope.isSearchable = (f)-> f.rules? && f.rules.is_searchable
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────

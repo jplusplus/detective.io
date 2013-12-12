@@ -3,6 +3,7 @@ from django.conf.urls import patterns, include, url
 from tastypie.api     import Api
 
 api = Api(api_name='v1')
+api.register(SummaryResource())
 api.register(AmountResource())
 api.register(CommentaryResource())
 api.register(DistributionResource())

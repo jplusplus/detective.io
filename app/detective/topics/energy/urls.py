@@ -1,8 +1,8 @@
 from .resources       import *
 from django.conf.urls import patterns, include, url
-from tastypie.api     import Api
+from tastypie.api     import NamespacedApi
 
-api = Api(api_name='v1')
+api = NamespacedApi(api_name='v1')
 api.register(SummaryResource())
 api.register(AmountResource())
 api.register(CommentaryResource())
@@ -16,5 +16,5 @@ api.register(EnergyProductResource())
 api.register(EnergyProjectResource())
 
 urlpatterns = patterns('app.detective.topics.energy',
-    url(r'', include(api.urls)),
+    url(r'', include(api.urls, namespace='energy')),
 )

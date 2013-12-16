@@ -49,7 +49,9 @@ class IndividualSingleCtrl
     hasRels: ()=>
         if @scope.meta? and @scope.individual?
             _.some @scope.meta.fields, (field)=>
-                @scope.isRelationship(field)  and @scope.individual[field.name].length
+                @scope.isRelationship(field) and
+                @scope.individual[field.name]? and
+                @scope.individual[field.name].length
 
     scrollTo: (id)=>
         @location.hash(id)

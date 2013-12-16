@@ -3,7 +3,7 @@ from app.detective.models      import Topic
 from app.detective.modelrules  import ModelRules
 from django.conf.urls          import url, include, patterns
 from django.db                 import DatabaseError
-from tastypie.api              import Api
+from tastypie.api              import NamespacedApi
 import importlib
 import os
 import sys
@@ -79,7 +79,12 @@ def import_or_create(path):
         module = importlib.import_module(path)
     # File dosen't exist, we create it virtually!
     except ImportError:
-        module = types.ModuleType(str(path))
+        path_parts = path.split(".")
+        module     = types.ModuleType(str(path))
+        # Get the parent module
+        parent      = import_or_create( ".".join( path_parts[0:-1]) )
+        # Register this module as attribute of its parent
+        setattr( parent, path_parts[-1], module)
         # Register the virtual module
         sys.modules[path] = module
     return module
@@ -122,12 +127,19 @@ def topic_models(path, with_api=True):
     # No API creation request!
     if not with_api: return models
     # Generates the API endpoints
-    api = Api(api_name='v1')
+    api = NamespacedApi(api_name='v1', urlconf_namespace=app_label)
+    # Create resources root if needed
+    resources = import_or_create("%s.resources" % path)
     # Creates a resource for each model
     for name in models:
         Resource = utils.create_model_resource(models[name])
+        resource_name = "%sResource" % name
         # Register the virtual resource to by importa
-        resource_path = "%s.resource.%sResource" % (path, name)
+        resource_path = "%s.resources.%s" % (path, resource_name)
+        # This resource is now available everywhere:
+        #  * as an attribute of `resources`
+        #  * as a module
+        setattr(resources, resource_name, Resource)
         sys.modules[resource_path] = Resource
         # And register it into the API instance
         api.register(Resource())
@@ -158,11 +170,11 @@ def topic_models(path, with_api=True):
     urls = importlib.import_module("app.detective.urls")
     # Add api url pattern with the highest priority
     new_patterns = patterns(app_label,
-        url(r'^%s/' % topic.slug, include(urls_path, app_name=topic.slug)),
+        url(r'^%s/' % topic.slug, include(urls_path, namespace=topic.slug)),
     )
     if hasattr(urls, "urlpatterns"):
         # Merge with a filtered version of the urlpattern to avoid duplicates
-        new_patterns += [u for u in urls.urlpatterns if getattr(u, "app_name", None) != topic.slug ]
+        new_patterns += [u for u in urls.urlpatterns if getattr(u, "namespace", None) != topic.slug ]
     # Then update url pattern
     urls.urlpatterns = new_patterns
     return models

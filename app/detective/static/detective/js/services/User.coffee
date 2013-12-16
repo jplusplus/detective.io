@@ -15,7 +15,7 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
 
     sdo.hasPermission = (topic, operation)->
         permission_name = "#{topic}.contribute_#{operation}"
-        sdo.is_staff is true or _.contains(sdo.permissions,permission_name)
+        sdo.is_staff or _.contains(sdo.permissions,permission_name)
 
     sdo.hasDeletePermission = (topic)->
         sdo.hasPermission topic, 'delete'
@@ -30,8 +30,8 @@ angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$time
     sdo.set(
         # Create basic user using cookies
         if $cookies.user__is_logged
-            is_logged   : $cookies.user__is_logged
-            is_staff    : $cookies.user__is_staff
+            is_logged   : !! $cookies.user__is_logged
+            is_staff    : !! $cookies.user__is_staff
             username    : $cookies.user__username or ''
             permissions : $cookies.user__permissions.replace(/["]/g, '').split(' ') or []
         # set default values

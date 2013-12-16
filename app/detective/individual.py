@@ -6,6 +6,7 @@ from app.detective.utils                import import_class
 from django.conf.urls                   import url
 from django.core.exceptions             import ObjectDoesNotExist
 from django.core.paginator              import Paginator, InvalidPage
+from django.core.urlresolvers           import reverse
 from django.db.models.query             import QuerySet
 from django.http                        import Http404
 from neo4django.db.models.properties    import DateProperty
@@ -134,7 +135,10 @@ class IndividualResource(ModelResource):
 
     # TODO: Find another way!
     def dummy_class_to_ressource(self, klass):
-        module = klass.__module__.split(".")[0:-1]
+        module = klass.__module__.split(".")
+        # Remove last path part if need
+        if module[-1] == 'models': module = module[0:-1]
+        # Build the resource path
         module = ".".join(module + ["resources", klass.__name__ + "Resource"])
         try:
             # Try to import the class
@@ -162,6 +166,13 @@ class IndividualResource(ModelResource):
                 f = self.get_to_many_field(field, full=bool(full))
                 # Get the full relationship
                 if f: self.fields[field.name] = f
+
+    def _build_reverse_url(self, name, args=None, kwargs=None):
+        # This ModelResource respects Django namespaces.
+        # @see tastypie.resources.NamespacedModelResource
+        # @see tastypie.api.NamespacedApi
+        namespaced = "%s:%s" % (self._meta.urlconf_namespace, name)
+        return reverse(namespaced, args=args, kwargs=kwargs)
 
     def use_in(self, bundle=None):
         # Use in post/put
@@ -405,7 +416,6 @@ class IndividualResource(ModelResource):
             node = model.objects.get(id=kwargs["pk"])
         except ObjectDoesNotExist:
             raise Http404("Sorry, unkown node.")
-
         # Parse only body string
         body = json.loads(request.body) if type(request.body) is str else request.body
         # Copy data to allow dictionary resizing

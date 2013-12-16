@@ -30,7 +30,7 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     # Create the class, which automatically triggers ModelBase processing
     return type(name, (models.NodeModel,), attrs)
 
-def create_model_resource(model, Resource=None, Meta=None):
+def create_model_resource(model, path=None, Resource=None, Meta=None):
     """
         Create specified model's api resource
     """
@@ -42,7 +42,10 @@ def create_model_resource(model, Resource=None, Meta=None):
      # Set up a dictionary to simulate declarations within a class
     attrs = {'Meta': Meta}
     name  = "%sResource" % model.__name__
-    return type(name, (IndividualResource,), attrs)
+    mr = type(name, (IndividualResource,), attrs)
+    # Overide the default module
+    if path is not None: mr.__module__ = path
+    return mr
 
 def import_class(path):
     components = path.split('.')

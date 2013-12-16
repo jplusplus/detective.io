@@ -57,7 +57,7 @@ class SummaryResource(Resource):
 
     def get_topic_or_404(self, request):
         try:
-            return Topic.objects.get(slug=resolve(request.path).app_name)
+            return Topic.objects.get(slug=resolve(request.path).namespace)
         except Topic.DoesNotExist:
             raise Http404()
 
@@ -133,7 +133,7 @@ class SummaryResource(Resource):
 
             available_resources[name] = {
                 'description'         : getattr(model, "_description", None),
-                'topic'               : getattr(model, "_topic", topic.module),
+                'topic'               : getattr(model, "_topic", topic.slug) or topic.slug,
                 'model'               : getattr(model, "__name_", ""),
                 'verbose_name'        : verbose_name,
                 'verbose_name_plural' : verbose_name_plural,

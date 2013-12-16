@@ -57,7 +57,7 @@ class SummaryResource(Resource):
 
     def get_topic_or_404(self, request):
         try:
-            return Topic.objects.get(slug=resolve(request.path).namespace)
+            return Topic.objects.get(module=resolve(request.path).namespace)
         except Topic.DoesNotExist:
             raise Http404()
 

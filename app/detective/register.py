@@ -170,7 +170,7 @@ def topic_models(path, with_api=True):
     urls = importlib.import_module("app.detective.urls")
     # Add api url pattern with the highest priority
     new_patterns = patterns(app_label,
-        url(r'^%s/' % topic.slug, include(urls_path, namespace=topic.slug)),
+        url(r'^%s/' % topic.slug, include(urls_path, namespace=app_label)),
     )
     if hasattr(urls, "urlpatterns"):
         # Merge with a filtered version of the urlpattern to avoid duplicates

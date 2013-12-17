@@ -1,8 +1,17 @@
-from django.conf.urls     import patterns, include, url
-from django.contrib       import admin
-from django.conf          import settings
+from app.middleware.virtualapi import VirtualApi
+from django.conf               import settings
+from django.conf.urls          import patterns, include, url
+from django.contrib            import admin
+from urlmiddleware.conf        import middleware, mpatterns
 
 admin.autodiscover()
+
+# This will catch the api calls with a virtual api middleware.
+# If needed, this middleware will create the API endpoints and resources
+# that match to the given slug.
+middlewarepatterns = mpatterns('',
+    middleware(r'^api/([a-zA-Z0-9_\-]+)/', VirtualApi),
+)
 
 urlpatterns = patterns('',
     url(r'^api/',                             include('app.detective.urls')),
@@ -31,7 +40,6 @@ if settings.DEBUG:
     urlpatterns += patterns('',
         (r'^public/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
     )
-
 
 # Handle 404 with the homepage
 handler404 = "app.detective.views.not_found"

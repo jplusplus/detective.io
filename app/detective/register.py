@@ -73,7 +73,7 @@ def default_rules(topic):
                 rules.model(model).field(field.name).add(is_editable=modelRules["is_editable"])
     return rules
 
-def import_or_create(path):
+def import_or_create(path, register=True):
     try:
         # Import the models.py file
         module = importlib.import_module(path)
@@ -81,12 +81,14 @@ def import_or_create(path):
     except ImportError:
         path_parts = path.split(".")
         module     = types.ModuleType(str(path))
-        # Get the parent module
-        parent      = import_or_create( ".".join( path_parts[0:-1]) )
-        # Register this module as attribute of its parent
-        setattr( parent, path_parts[-1], module)
-        # Register the virtual module
-        sys.modules[path] = module
+        # Register the new module in the global scope
+        if register:
+            # Get the parent module
+            parent      = import_or_create( ".".join( path_parts[0:-1]) )
+            # Register this module as attribute of its parent
+            setattr( parent, path_parts[-1], module)
+            # Register the virtual module
+            sys.modules[path] = module
     return module
 
 def topic_models(path, with_api=True):
@@ -95,15 +97,11 @@ def topic_models(path, with_api=True):
         a topic package for an ontology file. This will also
         create all api resources and endpoints.
     """
+    topic_module = import_or_create(path)
     topic_name   = path.split(".")[-1]
     # Ensure that the topic's model exist
-    import_or_create(path)
-    try:
-        topic = Topic.objects.get(module=topic_name)
-        app_label = topic.app_label()
-    except Topic.DoesNotExist:
-        # Fails silently
-        return []
+    topic = Topic.objects.get(module=topic_name)
+    app_label = topic.app_label()
     # Add '.models to the path if needed
     models_path = path if path.endswith(".models") else '%s.models' % path
     urls_path   = "%s.urls" % path
@@ -125,7 +123,7 @@ def topic_models(path, with_api=True):
     except TypeError:
         models = []
     # No API creation request!
-    if not with_api: return models
+    if not with_api: return topic_module
     # Generates the API endpoints
     api = NamespacedApi(api_name='v1', urlconf_namespace=app_label)
     # Create resources root if needed
@@ -169,7 +167,7 @@ def topic_models(path, with_api=True):
     # we need to connect its url patterns to global one
     urls = importlib.import_module("app.detective.urls")
     # Add api url pattern with the highest priority
-    new_patterns = patterns(app_label,
+    new_patterns = patterns('',
         url(r'^%s/' % topic.slug, include(urls_path, namespace=app_label)),
     )
     if hasattr(urls, "urlpatterns"):
@@ -177,18 +175,4 @@ def topic_models(path, with_api=True):
         new_patterns += [u for u in urls.urlpatterns if getattr(u, "namespace", None) != topic.slug ]
     # Then update url pattern
     urls.urlpatterns = new_patterns
-    return models
-
-def init_topics():
-    try:
-        # Create all the application using database information
-        for topic in Topic.objects.all():
-            if topic.module not in ["common", "energy"]:
-                topic_models("app.detective.topics.%s" % topic.module)
-    except DatabaseError:
-        # Database may not be ready yet (syncdb running),
-        # we juste pass silently
-        from django.db import transaction
-        # Checks that we're in transaction-managed system
-        if transaction.is_managed(): transaction.rollback()
-        pass
+    return topic_module

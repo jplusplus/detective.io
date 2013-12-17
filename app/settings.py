@@ -117,6 +117,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'app.middleware.crossdomainxhr.XsSharing',
+    # add urlmiddleware after all other middleware.
+    'urlmiddleware.URLMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )

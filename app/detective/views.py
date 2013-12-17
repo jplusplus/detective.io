@@ -40,6 +40,5 @@ def partial_explore(request, topic=None):
     except TemplateDoesNotExist:
         return partial(request, partial_name='explore-common')
 
-
 def not_found(request):
     return redirect("/404/")

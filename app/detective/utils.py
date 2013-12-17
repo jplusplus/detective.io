@@ -6,7 +6,6 @@ import importlib
 import inspect
 import re
 
-
 def create_node_model(name, fields=None, app_label='', module='', options=None):
     """
     Create specified model

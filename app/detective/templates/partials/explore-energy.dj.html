@@ -27,10 +27,12 @@
 					<form class="col-md-8 col-md-push-2" role="search">
 						<div class="input-group">
 	  						<span class="input-group-addon"><i class="fa fa-search"></i></span>
+	  						YO [[topic]]
 							<input type="search"
 								    placeholder="Search linked individuals in our graph database..."
 								 	tt-typeahead
 									tt-individual="'summary'"
+									tt-topic="'energy'"
 									tt-model="selectedIndividual"
 									remote="/api/energy/v1/summary/human/?q=%QUERY"
 									prefetch="/api/energy/v1/summary/mine/"

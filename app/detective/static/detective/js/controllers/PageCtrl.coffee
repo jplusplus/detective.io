@@ -7,6 +7,7 @@ class PageCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Build template url
-        @scope.templateUrl  = "/partial/page-#{@routeParams.slug}.html"
+        if @routeParams.slug?
+            @scope.templateUrl  = "/partial/page-#{@routeParams.slug}.html"
 
 angular.module('detective').controller 'pageCtrl', PageCtrl

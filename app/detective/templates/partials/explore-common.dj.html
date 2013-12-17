@@ -32,6 +32,7 @@
                                     placeholder="Search linked individuals in our graph database..."
                                     tt-typeahead
                                     tt-individual="'summary'"
+                                    tt-topic="topic"
                                     tt-model="selectedIndividual"
                                     remote="/api/[[topic]]/v1/summary/human/?q=%QUERY"
                                     prefetch="/api/[[topic]]/v1/summary/mine/"

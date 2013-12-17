@@ -585,7 +585,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertValidJSONResponse(resp)
 
     def test_search_summary(self):
-        resp = self.api_client.get('/api/common/v1/summary/search/?q=Journalism', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/energy/v1/summary/search/?q=Journalism', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -593,12 +593,12 @@ class ApiTestCase(ResourceTestCase):
         self.assertGreater( len(data.items()), 1 )
 
     def test_search_summary_wrong_page(self):
-        resp = self.api_client.get('/api/common/v1/summary/search/?q=Journalism&page=-1', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/energy/v1/summary/search/?q=Journalism&page=-1', format='json', authentication=self.get_super_credentials())
         self.assertEqual(resp.status_code in [302, 404], True)
 
     def test_summary_human_search(self):
         query = "Person activity in Journalism"
-        resp = self.api_client.get('/api/common/v1/summary/human/?q=%s' % query, format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/energy/v1/summary/human/?q=%s' % query, format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         data = json.loads(resp.content)
         self.assertGreater(len(data['objects']), 1)
@@ -607,7 +607,7 @@ class ApiTestCase(ResourceTestCase):
         # RDF object for persons that have activity in J++, we need to urlencode
         # the JSON string to avoid '+' loss
         rdf_str = urllib.quote(json.dumps(self.rdf_jpp))
-        url = '/api/common/v1/summary/rdf_search/?limit=20&offset=0&q=%s' % rdf_str
+        url = '/api/energy/v1/summary/rdf_search/?limit=20&offset=0&q=%s' % rdf_str
         resp = self.api_client.get(url, format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         data = json.loads(resp.content)

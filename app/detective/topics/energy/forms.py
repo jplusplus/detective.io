@@ -1,4 +1,3 @@
-from app.detective.topics.common.models import Country
 from app.detective.topics.energy.models import *
 from app.detective.modelrules           import ModelRules
 from app.detective.neomatch             import Neomatch
@@ -7,6 +6,8 @@ from app.detective.models               import *
 def topics_rules():
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
+    # Disable editing on some model
+    rules.model(Country).add(is_editable=False)
     # Records "invisible" fields
     rules.model(FundraisingRound).field("personal_payer").add(is_visible=False)
     rules.model(Organization).field("adviser").add(is_visible=False)

@@ -164,6 +164,10 @@ class SummaryResource(SummaryResource):
         }
 
 
+class CountryResource(IndividualResource):
+    class Meta(IndividualMeta):
+        queryset = Country.objects.all().select_related(depth=1)
+
 class AmountResource(IndividualResource):
     class Meta(IndividualMeta):
         queryset = Amount.objects.all().select_related(depth=1)

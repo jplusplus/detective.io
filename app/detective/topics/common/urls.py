@@ -6,7 +6,6 @@ from django.conf.urls import patterns, include, url
 from tastypie.api     import NamespacedApi
 
 api = NamespacedApi(api_name='v1', urlconf_namespace='common')
-api.register(CountryResource())
 api.register(QuoteRequestResource())
 api.register(TopicResource())
 api.register(SummaryResource())

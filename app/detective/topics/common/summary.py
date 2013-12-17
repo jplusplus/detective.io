@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from .models                  import Country
 from app.detective.models     import Topic
 from app.detective.neomatch   import Neomatch
 from app.detective.register   import topics_rules
-from app.detective.utils      import get_model_node_id, get_model_fields, get_model_topic, get_topic_models
+from app.detective.utils      import get_model_fields, get_topic_models
 from difflib                  import SequenceMatcher
 from django.core.paginator    import Paginator, InvalidPage
 from django.core.urlresolvers import resolve
@@ -68,17 +67,17 @@ class SummaryResource(Resource):
 
     def summary_countries(self, bundle, request):
         app_label = self.topic.app_label()
-        model_id = get_model_node_id(Country)
-        # The Country isn't set yet in neo4j
-        if model_id == None: raise Http404()
         # Query to aggreagte relationships count by country
         query = """
-            START n=node(%d)
+            START n=node(*)
             MATCH (m)-[:`<<INSTANCE>>`]->(i)<-[*0..1]->(country)<-[r:`<<INSTANCE>>`]-(n)
             WHERE HAS(country.isoa3)
-            AND m.app_label = '%s'
+            AND HAS(n.model_name)
+            AND n.model_name = 'Country'
+            AND n.app_label = '%s'
+            AND HAS(country.isoa3)
             RETURN country.isoa3 as isoa3, ID(country) as id, count(i)-1 as count
-        """ % ( int(model_id), app_label, )
+        """ % app_label
         # Get the data and convert it to dictionnary
         countries = connection.cypher(query).to_dicts()
         obj       = {}

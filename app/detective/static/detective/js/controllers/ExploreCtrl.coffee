@@ -42,7 +42,7 @@ class ExploreCtrl
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
     selectCountry: (val, old)=>
-        @location.path "/common/country/#{val.id}" if val.id?
+        @location.path "/#{@scope.topic}/country/#{val.id}" if val.id?
 
     selectIndividual: (val, old)=>
         # Single entity selected

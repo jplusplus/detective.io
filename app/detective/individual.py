@@ -178,8 +178,8 @@ class IndividualResource(ModelResource):
         # Use in post/put
         if bundle.request.method in ['POST', 'PUT']:
             return bundle.request.path == self.get_resource_uri()
+        # Use in detail
         else:
-            # Use in detail
             return self.get_resource_uri(bundle) == bundle.request.path
 
     def get_detail(self, request, **kwargs):

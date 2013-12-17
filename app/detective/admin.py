@@ -1,5 +1,5 @@
 from django.contrib import admin
-from app.detective.models import QuoteRequest, Topic
+from app.detective.models import QuoteRequest, Topic, RelationshipSearch
 
 class QuoteRequestAdmin(admin.ModelAdmin):
     list_filter = ("employer", "records", "users", "public", )
@@ -7,7 +7,13 @@ class QuoteRequestAdmin(admin.ModelAdmin):
 
 admin.site.register(QuoteRequest, QuoteRequestAdmin)
 
+class RelationshipSearchInline(admin.TabularInline):
+    model = RelationshipSearch
+    extra = 1
+
 class TopicAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ("title", "link", "public", )
+    inlines = ( RelationshipSearchInline, )
+
 admin.site.register(Topic, TopicAdmin)

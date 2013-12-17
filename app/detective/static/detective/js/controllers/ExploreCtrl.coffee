@@ -13,22 +13,25 @@ class ExploreCtrl
         # Current individual scope
         @scope.topic = @routeParams.topic
         # Topic control
-        @Individual.get type: "topic", (data)=>
+        @Individual.get {type: "topic", slug: @scope.topic }, (data)=>
             # Disable loading mode
             @Page.loading no
-            # Find the right topic
-            topic = _.findWhere data.objects, module: @scope.topic
             # Stop if it's an unkown topic
-            return @location.path "/404" unless topic
+            return @location.path "/404" unless data.objects and data.objects.length
+            # Meta data about this topic
+            @scope.meta = data.objects[0]
             # Build template url
             @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
             # Countries info
-            @scope.countries   = @Summary.get id:"countries"
+            @scope.countries   = @Summary.get id:"countries", topic: @scope.topic
             # Types info
-            @scope.types       = @Summary.get id:"types"
+            @scope.types       = @Summary.get id:"types", topic: @scope.topic
+            # Types info
+            @Summary.get { id:"forms", topic: @scope.topic }, (d)=> @scope.forms = _.values(d)
         # Country where the user click
         @scope.selectedCountry = {}
         @scope.selectedIndividual = {}
+        @scope.isSearchable = (f)-> f.rules? && f.rules.is_searchable
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────

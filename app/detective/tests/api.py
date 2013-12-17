@@ -551,7 +551,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual(resp.status_code in [302, 404], True)
 
     def test_summary_mine_success(self):
-        resp = self.api_client.get('/api/common/v1/summary/mine/', authentication=self.get_super_credentials(), format='json')
+        resp = self.api_client.get('/api/energy/v1/summary/mine/', authentication=self.get_super_credentials(), format='json')
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -563,7 +563,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/summary/mine/', format='json'))
 
     def test_countries_summary(self):
-        resp = self.api_client.get('/api/common/v1/summary/countries/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/energy/v1/summary/countries/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -573,7 +573,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual("count" in data["FRA"], True)
 
     def test_forms_summary(self):
-        resp = self.api_client.get('/api/common/v1/summary/forms/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/energy/v1/summary/forms/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -581,7 +581,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual( 11, len(data.items()) )
 
     def test_types_summary(self):
-        resp = self.api_client.get('/api/common/v1/summary/types/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/energy/v1/summary/types/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
 
     def test_search_summary(self):

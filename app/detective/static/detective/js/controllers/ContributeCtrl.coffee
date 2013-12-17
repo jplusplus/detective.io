@@ -51,7 +51,7 @@ class ContributeCtrl
         @scope.Individual  = @Individual
         @scope.routeParams = @routeParams
         # Get the list of available resources
-        @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
+        @scope.resources = @Summary.get {id: "forms", topic: @scope.topic }, => @Page.loading(false)
         # Prepare future individual
         @initNewIndividual()
         # Individual list
@@ -146,8 +146,8 @@ class ContributeCtrl
 
         # Generates the permalink to this individual
         permalink: =>
-            return false unless @fields.id? and @meta.topic
-            return "/#{@meta.topic}/#{@type}/#{@fields.id}"
+            return false unless @fields.id? and @scope.topic
+            return "/#{@scope.topic}/#{@type}/#{@fields.id}"
 
         # Event when fields changed
         update: (data)=>
@@ -168,7 +168,7 @@ class ContributeCtrl
                     @isRemoved  = true
 
         # Returns individual's topic
-        getTopic: => @meta.topic or @scope.routeParams.topic
+        getTopic: => @scope.topic or @scope.routeParams.topic
 
         # Save the current individual form
         save: =>
@@ -270,12 +270,10 @@ class ContributeCtrl
 
     # Get resources list filtered by the current topic
     topicResources: =>
-        resources = _.where @scope.resources, { topic: @scope.topic }
-        # Add generic resources
-        for r in ["organization", "person"]
-            hasResource = !! _.findWhere resources, name: r
-            if @scope.resources[r]? and not hasResource
-                resources.push( @scope.resources[r] )
+        return [] unless @scope.resources.$resolved
+        # Only show resources with a name
+        resources = _.filter @scope.resources, (r)->
+            r.rules? and r.rules.is_searchable and r.rules.is_editable
         return resources
 
     # True if the given type is allowed
@@ -302,7 +300,7 @@ class ContributeCtrl
                     type:  @scope.new.type
                     id:    "search"
                     q:     @scope.new.fields.name
-                    topic: @scope.new.meta.topic
+                    topic: @scope.topic
                 # Look for individual with the same name
                 @Individual.query params, (d)=>
                     # Remove the one we just created
@@ -325,12 +323,11 @@ class ContributeCtrl
         individual = @scope.individuals[index]
         individual.loading  = true
         individual.similars = []
-        topic = @scope.resources[individual.type].topic
         # Parameters of the individual to delete
         toDelete =
             type : individual.type
             id   : individual.fields.id
-            topic: topic
+            topic: @scope.topic
         # Remove the node we're about to replace
         # (no feedback)
         @Individual.delete(toDelete)
@@ -338,7 +335,7 @@ class ContributeCtrl
         params =
             type : individual.type
             id   : id
-            topic: topic
+            topic: @scope.topic
         # Then load the individual
         individual.fields = @Individual.get params, (master)->
             # Disable loading state

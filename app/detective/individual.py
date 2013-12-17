@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective.forms                import register_model_rules
+from app.detective                      import register
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class
 from django.conf.urls                   import url
 from django.core.exceptions             import ObjectDoesNotExist
 from django.core.paginator              import Paginator, InvalidPage
+from django.core.urlresolvers           import reverse
 from django.db.models.query             import QuerySet
 from django.http                        import Http404
 from neo4django.db.models.properties    import DateProperty
@@ -28,7 +29,7 @@ RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 class IndividualAuthorization(Authorization):
 
     def check_contribution_permission(self, object_list, bundle, operation):
-        authorized = False 
+        authorized = False
         user = bundle.request.user
         if user:
             perm_name  = "%s.contribute_%s" % (object_list._app_label, operation)
@@ -57,7 +58,7 @@ class IndividualAuthorization(Authorization):
         return False
         # if not self.check_contribution_permission(object_list, bundle, 'delete'):
         #     raise Unauthorized("Sorry, only staff or contributors can delete resource.")
-        # return True 
+        # return True
 
 class IndividualMeta:
     list_allowed_methods   = ['get', 'post', 'put']
@@ -134,7 +135,10 @@ class IndividualResource(ModelResource):
 
     # TODO: Find another way!
     def dummy_class_to_ressource(self, klass):
-        module = klass.__module__.split(".")[0:-1]
+        module = klass.__module__.split(".")
+        # Remove last path part if need
+        if module[-1] == 'models': module = module[0:-1]
+        # Build the resource path
         module = ".".join(module + ["resources", klass.__name__ + "Resource"])
         try:
             # Try to import the class
@@ -163,12 +167,19 @@ class IndividualResource(ModelResource):
                 # Get the full relationship
                 if f: self.fields[field.name] = f
 
+    def _build_reverse_url(self, name, args=None, kwargs=None):
+        # This ModelResource respects Django namespaces.
+        # @see tastypie.resources.NamespacedModelResource
+        # @see tastypie.api.NamespacedApi
+        namespaced = "%s:%s" % (self._meta.urlconf_namespace, name)
+        return reverse(namespaced, args=args, kwargs=kwargs)
+
     def use_in(self, bundle=None):
         # Use in post/put
         if bundle.request.method in ['POST', 'PUT']:
             return bundle.request.path == self.get_resource_uri()
+        # Use in detail
         else:
-            # Use in detail
             return self.get_resource_uri(bundle) == bundle.request.path
 
     def get_detail(self, request, **kwargs):
@@ -183,7 +194,7 @@ class IndividualResource(ModelResource):
 
     def alter_detail_data_to_serialize(self, request, bundle):
         # Show additional field following the model's rules
-        rules = register_model_rules().model(self.get_model()).all()
+        rules = register.topics_rules().model(self.get_model()).all()
         # All additional relationships
         for key in rules:
             # Filter rules to keep only Neomatch
@@ -194,7 +205,7 @@ class IndividualResource(ModelResource):
 
     def dehydrate(self, bundle):
         # Show additional field following the model's rules
-        rules = register_model_rules().model( self.get_model() )
+        rules = register.topics_rules().model( self.get_model() )
         # Get the output transformation for this model
         transform = rules.get("transform")
         # This is just a string
@@ -402,10 +413,9 @@ class IndividualResource(ModelResource):
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
         model = self.get_model()
         try:
-            node = model.objects.select_related(depth=1).get(id=kwargs["pk"])
+            node = model.objects.get(id=kwargs["pk"])
         except ObjectDoesNotExist:
             raise Http404("Sorry, unkown node.")
-
         # Parse only body string
         body = json.loads(request.body) if type(request.body) is str else request.body
         # Copy data to allow dictionary resizing

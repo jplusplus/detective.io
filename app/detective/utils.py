@@ -1,10 +1,51 @@
-from app.detective.forms import register_model_rules
-from django.forms.forms  import pretty_name
-from random              import randint
-from os                  import listdir
-from os.path             import isdir, join
+from django.forms.forms       import pretty_name
+from random                   import randint
+from os                       import listdir
+from os.path                  import isdir, join
+import importlib
+import inspect
 import re
 
+
+def create_node_model(name, fields=None, app_label='', module='', options=None):
+    """
+    Create specified model
+    """
+    from neo4django.db import models
+    class Meta:
+        # Using type('Meta', ...) gives a dictproxy error during model creation
+        pass
+    if app_label:
+        # app_label must be set using the Meta inner class
+        setattr(Meta, 'app_label', app_label)
+    # Update Meta with any options that were provided
+    if options is not None:
+        for key, value in options.iteritems():
+            setattr(Meta, key, value)
+    # Set up a dictionary to simulate declarations within a class
+    attrs = {'__module__': module, 'Meta': Meta}
+    # Add in any fields that were provided
+    if fields:
+        attrs.update(fields)
+    # Create the class, which automatically triggers ModelBase processing
+    return type(name, (models.NodeModel,), attrs)
+
+def create_model_resource(model, path=None, Resource=None, Meta=None):
+    """
+        Create specified model's api resource
+    """
+    from app.detective.individual import IndividualResource, IndividualMeta
+    if Resource is None: Resource = IndividualResource
+    if Meta is None: Meta = IndividualMeta
+    class Meta(IndividualMeta):
+        queryset = model.objects.all().select_related(depth=1)
+     # Set up a dictionary to simulate declarations within a class
+    attrs = {'Meta': Meta}
+    name  = "%sResource" % model.__name__
+    mr = type(name, (IndividualResource,), attrs)
+    # Overide the default module
+    if path is not None: mr.__module__ = path
+    return mr
 
 def import_class(path):
     components = path.split('.')
@@ -12,15 +53,35 @@ def import_class(path):
     mod        = ".".join(components[0:-1])
     return getattr(__import__(mod, fromlist=klass), klass[0], None)
 
-def get_topics():
-    # Load topics' names
-    appsdir = "./app/detective/topics"
-    return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
+def get_topics(offline=True):
+    if offline:
+        # Load topics' names
+        appsdir = "./app/detective/topics"
+        return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
+    else:
+        from app.detective.models import Topic
+        return [t.module for t in Topic.objects.all()]
 
 def get_topics_modules():
     # Import the whole topics directory automaticly
     CUSTOM_APPS = tuple( "app.detective.topics.%s" % a for a in get_topics() )
     return CUSTOM_APPS
+
+def get_topic_models(topic):
+    from django.db.models import Model
+    # Models to collect
+    models        = []
+    models_path   = "app.detective.topics.%s.models" % topic
+    try:
+        models_module = importlib.import_module(models_path)
+        for i in dir(models_module):
+            cls = getattr(models_module, i)
+            # Collect every Django's model subclass
+            if inspect.isclass(cls) and issubclass(cls, Model): models.append(cls)
+    except ImportError:
+        # Fail silently if the topic doesn't exist
+        pass
+    return models
 
 def get_registered_models():
     from django.db import models
@@ -43,9 +104,10 @@ def get_registered_models():
     return mdls
 
 def get_model_fields(model):
+    from app.detective           import register
     from django.db.models.fields import FieldDoesNotExist
     fields      = []
-    modelsRules = register_model_rules().model(model)
+    modelsRules = register.topics_rules().model(model)
     if hasattr(model, "_meta"):
         # Create field object
         for fieldRules in modelsRules.fields():

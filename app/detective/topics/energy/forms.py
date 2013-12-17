@@ -1,10 +1,10 @@
 from app.detective.topics.common.models import Country
 from app.detective.topics.energy.models import *
-from app.detective.modelrules         import ModelRules
-from app.detective.neomatch           import Neomatch
-from app.detective.models             import *
+from app.detective.modelrules           import ModelRules
+from app.detective.neomatch             import Neomatch
+from app.detective.models               import *
 
-def register_model_rules():
+def topics_rules():
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # Records "invisible" fields

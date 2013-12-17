@@ -60,7 +60,7 @@ class Command(BaseCommand):
             "NegativeInteger" : "IntegerProperty",
             # Looking forward the neo4django float support!
             # See also: https://github.com/scholrly/neo4django/issues/197
-            "float" : "IntegerProperty",
+            "float" : "StringProperty",
             "integer" : "IntegerProperty",
             "dateTimeStamp" : "DateTimeProperty",
             "dateTime" : "DateTimeProperty",

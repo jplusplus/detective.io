@@ -66,7 +66,7 @@ MEDIA_ROOT = here('media')
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/public/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -82,7 +82,8 @@ STATIC_URL = '/static/'
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Bower components
-    here('static'),
+    ('components', here('static/components') ),
+    here("detective/static"),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -154,12 +155,7 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
 }
 
 COMPRESS_ENABLED = False
-
 #INTERNAL_IPS = ('127.0.0.1',)
-
-DEBUG_TOOLBAR_CONFIG = {
-    "INTERCEPT_REDIRECTS": False
-}
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
@@ -180,6 +176,8 @@ INSTALLED_APPS = (
     # Email backend
     "djrill",
     'password_reset',
+    # Manage migrations
+    'south',
     # Internal
     'app.detective',
     'app.detective.permissions',
@@ -202,9 +200,6 @@ CACHES = {
         'LOCATION': '/tmp/django_cache',
     }
 }
-
-
-
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

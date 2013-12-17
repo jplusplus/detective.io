@@ -41,7 +41,7 @@ class IndividualSingleCtrl
         # Not found
         , => @location.path "/404"
         # Get meta information for this type
-        @Summary.get id: "forms", (data)=>
+        @Summary.get { id: "forms", topic: @scope.topic}, (data)=>
             @scope.resource = data
             @scope.meta     = data[@scope.type.toLowerCase()]
 
@@ -49,7 +49,9 @@ class IndividualSingleCtrl
     hasRels: ()=>
         if @scope.meta? and @scope.individual?
             _.some @scope.meta.fields, (field)=>
-                @scope.isRelationship(field)  and @scope.individual[field.name].length
+                @scope.isRelationship(field) and
+                @scope.individual[field.name]? and
+                @scope.individual[field.name].length
 
     scrollTo: (id)=>
         @location.hash(id)

@@ -1,7 +1,7 @@
 angular.module('detectiveServices').factory("Summary", [ '$resource', '$http', ($resource, $http)->
-    $resource '/api/common/v1/summary/:id/', {}, {
+    $resource '/api/:topic/v1/summary/:id/', { topic: "common" }, {
         get: {
-            method : 'GET', 
+            method : 'GET',
             isArray: false,
             cache  : true
         }

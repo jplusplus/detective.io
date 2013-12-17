@@ -76,29 +76,21 @@ detective = angular
                         controller: ContributeCtrl
                         templateUrl: "/partial/contribute.html"
                         auth: true
-                        # Resolve the Summary service before load this page
-                        resolve: data: (Summary)-> Summary.get(id: "forms")
                     })
                     .when('/:topic', {
                         controller: ExploreCtrl
-                        # Resolve the Summary service before load this page
-                        resolve: data: (Summary)-> Summary.get(id: "forms")
                         # Allow a dynamic loading by setting the templateUrl within controller
-                        template: "<div ng-include src='templateUrl'></div>"
+                        template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
                     })
                     .when('/:topic/:type', {
                         controller: IndividualListCtrl
                         templateUrl: "/partial/individual-list.html"
                         reloadOnSearch: false
-                        # Resolve the Summary service before load this page
-                        resolve: data: (Summary)-> Summary.get(id: "forms")
                     })
                     .when('/:topic/:type/:id', {
                         controller: IndividualSingleCtrl
                         templateUrl: "/partial/individual-single.html"
                         reloadOnSearch: false
-                        # Resolve the Summary service before load this page
-                        resolve: data: (Summary)-> Summary.get(id: "forms")
                     })
                     .otherwise redirectTo: '/404'
         ]

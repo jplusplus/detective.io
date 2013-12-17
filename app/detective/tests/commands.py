@@ -49,7 +49,7 @@ class CommandsTestCase(TestCase):
         output = StringIO()
         sys.stdout = output
         # Import countries
-        args = "./app/detective/topics/common/fixtures/countries.json"
+        args = "./app/detective/topics/energy/fixtures/countries.json"
         call_command('loadnodes', args)
         # Does France exists?
         self.assertGreater(len( Country.objects.filter(isoa3="FRA") ), 0)
@@ -71,5 +71,5 @@ class CommandsTestCase(TestCase):
         output = StringIO()
         sys.stdout = output
         # Reindex countries
-        args = 'common.Country'
+        args = 'energy.Country'
         call_command('reindex', args)

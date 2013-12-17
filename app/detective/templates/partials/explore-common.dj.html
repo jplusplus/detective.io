@@ -33,8 +33,8 @@
                                     tt-typeahead
                                     tt-individual="'summary'"
                                     tt-model="selectedIndividual"
-                                    remote="/api/common/v1/summary/human/?q=%QUERY"
-                                    prefetch="/api/common/v1/summary/mine/"
+                                    remote="/api/[[topic]]/v1/summary/human/?q=%QUERY"
+                                    prefetch="/api/[[topic]]/v1/summary/mine/"
                                     value-key="label"
                                     limit="10"
                                     class="form-control"

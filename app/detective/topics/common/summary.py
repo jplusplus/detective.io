@@ -3,7 +3,7 @@ from .models                  import Country
 from app.detective.models     import Topic
 from app.detective.neomatch   import Neomatch
 from app.detective.register   import topics_rules
-from app.detective.utils      import get_model_node_id, get_model_fields, get_registered_models, get_model_topic, get_topic_models
+from app.detective.utils      import get_model_node_id, get_model_fields, get_model_topic, get_topic_models
 from difflib                  import SequenceMatcher
 from django.core.paginator    import Paginator, InvalidPage
 from django.core.urlresolvers import resolve
@@ -33,6 +33,8 @@ class SummaryResource(Resource):
 
     def obj_get(self, request=None, **kwargs):
         content = {}
+        # Get the current topic
+        self.topic = self.get_topic_or_404(request=request)
         # Check for an optional method to do further dehydration.
         method = getattr(self, "summary_%s" % kwargs["pk"], None)
         if method:
@@ -55,15 +57,17 @@ class SummaryResource(Resource):
         raise ImmediateHttpResponse(response=response)
 
 
-    def get_topic_or_404(self, request):
+    def get_topic_or_404(self, request=None):
         try:
-            return Topic.objects.get(module=resolve(request.path).namespace)
+            if request is not None:
+                return Topic.objects.get(module=resolve(request.path).namespace)
+            else:
+                return Topic.objects.get(module=self._meta.urlconf_namespace)
         except Topic.DoesNotExist:
             raise Http404()
 
     def summary_countries(self, bundle, request):
-        topic = self.get_topic_or_404(request)
-        app_label = topic.app_label()
+        app_label = self.topic.app_label()
         model_id = get_model_node_id(Country)
         # The Country isn't set yet in neo4j
         if model_id == None: raise Http404()
@@ -86,8 +90,7 @@ class SummaryResource(Resource):
         return obj
 
     def summary_types(self, bundle, request):
-        topic = self.get_topic_or_404(request)
-        app_label = topic.app_label()
+        app_label = self.topic.app_label()
         # Query to aggreagte relationships count by country
         query = """
             START n=node(*)
@@ -107,13 +110,12 @@ class SummaryResource(Resource):
         return obj
 
     def summary_forms(self, bundle, request):
-        topic = self.get_topic_or_404(request)
         available_resources = {}
         # Get the model's rules manager
         rulesManager = topics_rules()
         # Fetch every registered model
         # to print out its rules
-        for model in get_topic_models(topic.module):
+        for model in get_topic_models(self.topic.module):
             name                = model.__name__.lower()
             rules               = rulesManager.model(model).all()
             fields              = get_model_fields(model)
@@ -133,7 +135,7 @@ class SummaryResource(Resource):
 
             available_resources[name] = {
                 'description'         : getattr(model, "_description", None),
-                'topic'               : getattr(model, "_topic", topic.slug) or topic.slug,
+                'topic'               : getattr(model, "_topic", self.topic.slug) or self.topic.slug,
                 'model'               : getattr(model, "__name_", ""),
                 'verbose_name'        : verbose_name,
                 'verbose_name_plural' : verbose_name_plural,
@@ -145,8 +147,7 @@ class SummaryResource(Resource):
         return available_resources
 
     def summary_mine(self, bundle, request):
-        topic = self.get_topic_or_404(request)
-        app_label = topic.app_label()
+        app_label = self.topic.app_label()
         self.method_check(request, allowed=['get'])
         if not request.user.id:
             raise UnauthorizedError('This method require authentication')
@@ -308,7 +309,7 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
-    def summary_syntax(self, bundle, request): return self.get_syntax()
+    def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 
     def search(self, query):
         match = str(query).lower()
@@ -319,8 +320,9 @@ class SummaryResource(Resource):
             MATCH (root)<-[r:`<<INSTANCE>>`]-(type)
             WHERE HAS(root.name)
             AND LOWER(root.name) =~ '.*(%s).*'
-            RETURN ID(root) as id, root.name as name, type.name as model
-        """ % match
+            AND type.app_label = '%s'
+            RETURN ID(root) as id, root.name as name, type.model_name as model
+        """ % (match, self.topic.app_label() )
         return connection.cypher(query).to_dicts()
 
     def rdf_search(self, subject, predicate, obj):
@@ -332,15 +334,16 @@ class SummaryResource(Resource):
             AND HAS(st.name)
             AND type.name = "%s"
             AND st.name = "%s"
-            RETURN DISTINCT ID(root) as id, root.name as name, type.name as model
-        """ % ( predicate["name"], subject["name"], obj["name"], )
+            AND type.app_label = '%s'
+            RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+        """ % ( predicate["name"], subject["name"], obj["name"], self.topic.app_label() )
         return connection.cypher(query).to_dicts()
 
 
     def get_models_output(self):
         # Select only some atribute
-        output = lambda m: {'name': get_model_topic(m) + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
-        return [ output(m) for m in get_registered_models() if m.__module__.startswith("app.detective.topics") ]
+        output = lambda m: {'name': self.topic.slug + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
+        return [ output(m) for m in get_topic_models(self.topic.module) ]
 
 
     def ngrams(self, input):
@@ -487,159 +490,13 @@ class SummaryResource(Resource):
         # Remove duplicates proposition dicts
         return propositions
 
-    def get_syntax(self):
+    def get_syntax(self, bundle=None, request=None):
         return {
             'subject': {
                 'model':  self.get_models_output(),
                 'entity': None
             },
             'predicate': {
-                'relationship': [
-                    {
-                        "name": "fundraising_round_has_personal_payer+",
-                        "subject": "energy:FundraisingRound",
-                        "label": "was financed by"
-                    },
-                    {
-                        "name": "fundraising_round_has_payer+",
-                        "subject": "energy:FundraisingRound",
-                        "label": "was financed by"
-                    },
-                    {
-                        "name": "person_has_educated_in+",
-                        "subject": "energy:Person",
-                        "label": "was educated in"
-                    },
-                    {
-                        "name": "person_has_based_in+",
-                        "subject": "energy:Person",
-                        "label": "is based in"
-                    },
-                    {
-                        "name": "person_has_activity_in_organization+",
-                        "subject": "energy:Person",
-                        "label": "has activity in"
-                    },
-                    {
-                        "name": "person_has_previous_activity_in_organization+",
-                        "subject": "energy:Person",
-                        "label": "had previous activity in"
-                    },
-                    {
-                        "name": "energy_product_has_price+",
-                        "subject": "energy:EnergyProduct",
-                        "label": "is sold at"
-                    },
-                    {
-                        "name": "commentary_has_author+",
-                        "subject": "energy:Commentary",
-                        "label": "was written by"
-                    },
-                    {
-                        "name": "energy_product_has_distribution+",
-                        "subject": "energy:EnergyProduct",
-                        "label": "is distributed in"
-                    },
-                    {
-                        "name": "energy_product_has_operator+",
-                        "subject": "energy:EnergyProduct",
-                        "label": "is operated by"
-                    },
-                    {
-                        "name": "energy_product_has_price+",
-                        "subject": "energy:EnergyProduct",
-                        "label": "is sold at"
-                    },
-                    {
-                        "name": "organization_has_adviser+",
-                        "subject": "energy:Organization",
-                        "label": "is advised by"
-                    },
-                    {
-                        "name": "organization_has_key_person+",
-                        "subject": "energy:Organization",
-                        "label": "is staffed by"
-                    },
-                    {
-                        "name": "organization_has_partner+",
-                        "subject": "energy:Organization",
-                        "label": "has a partnership with"
-                    },
-                    {
-                        "name": "organization_has_fundraising_round+",
-                        "subject": "energy:Organization",
-                        "label": "was financed by"
-                    },
-                    {
-                        "name": "organization_has_monitoring_body+",
-                        "subject": "energy:Organization",
-                        "label": "is monitored by"
-                    },
-                    {
-                        "name": "organization_has_litigation_against+",
-                        "subject": "energy:Organization",
-                        "label": "has a litigation against"
-                    },
-                    {
-                        "name": "organization_has_revenue+",
-                        "subject": "energy:Organization",
-                        "label": "has revenue of"
-                    },
-                    {
-                        "name": "organization_has_board_member+",
-                        "subject": "energy:Organization",
-                        "label": "has board of directors with"
-                    },
-                    {
-                        "name": "energy_project_has_commentary+",
-                        "subject": "energy:EnergyProject",
-                        "label": "is analyzed by"
-                    },
-                    {
-                        "name": "energy_project_has_owner+",
-                        "subject": "energy:EnergyProject",
-                        "label": "is owned by"
-                    },
-                    {
-                        "name": "energy_project_has_partner+",
-                        "subject": "energy:EnergyProject",
-                        "label": "has a partnership with"
-                    },
-                    {
-                        "name": "energy_project_has_activity_in_country+",
-                        "subject": "energy:EnergyProject",
-                        "label": "has activity in"
-                    },
-                    {
-                        "name": "distribution_has_activity_in_country+",
-                        "subject": "energy:Distribution",
-                        "label": "has activity in"
-                    },
-                    {
-                        "name": "energy_project_has_product+",
-                        "subject": "energy:EnergyProject",
-                        "label": "has product of"
-                    },
-                    {
-                        "name": "energy_project_has_commentary+",
-                        "subject": "energy:EnergyProject",
-                        "label": "is analyzed by"
-                    },
-                    {
-                        "name": "energy_project_has_owner+",
-                        "subject": "energy:EnergyProject",
-                        "label": "is owned by"
-                    },
-                    {
-                        "name": "energy_project_has_partner+",
-                        "subject": "energy:EnergyProject",
-                        "label": "has partnership with"
-                    },
-                    {
-                        "name": "energy_project_has_activity_in_country+",
-                        "subject": "energy:EnergyProject",
-                        "label": "has activity in"
-                    }
-                ]
+                'relationship': []
             }
         }

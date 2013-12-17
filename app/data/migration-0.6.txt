@@ -1,0 +1,5 @@
+START root=node(*)
+WHERE HAS(root.app_label)
+AND root.name = 'common:Country'
+SET root.app_label = 'energy', root.name = 'energy:Country'
+RETURN root

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from app.detective.topics.common.message import SaltMixin
-from app.detective.topics.common.models  import Country
-from app.detective.topics.energy.models  import Organization, EnergyProject, Person
+from app.detective.topics.energy.models  import Organization, EnergyProject, Person, Country
 from datetime                            import datetime
 from django.contrib.auth.models          import User, Group
 from django.core                         import signing

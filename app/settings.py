@@ -9,6 +9,9 @@ TASTYPIE_FULL_DEBUG = DEBUG
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
+# Custom data directory
+DATA_ROOT = here('data')
+
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com')
 )

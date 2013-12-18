@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from app.detective.models                import Topic
 from app.detective.topics.common.message import SaltMixin
 from app.detective.topics.energy.models  import Organization, EnergyProject, Person, Country
 from datetime                            import datetime
+from django.conf                         import settings
 from django.contrib.auth.models          import User, Group
 from django.core                         import signing
-from tastypie.utils                      import timezone
 from django.core.exceptions              import ObjectDoesNotExist
 from registration.models                 import RegistrationProfile
 from tastypie.test                       import ResourceTestCase, TestApiClient
+from tastypie.utils                      import timezone
 import json
 import urllib
 
@@ -53,6 +55,8 @@ class ApiTestCase(ResourceTestCase):
             self.fra  = Country.objects.get(name=u"France")
             self.pr   = Person.objects.get(name=u"Pierre Roméra")
             self.pb   = Person.objects.get(name=u"Pierre Bellon")
+            self.common = Topic.objects.get(slug=u"common")
+            self.christmas = Topic.objects.get(slug=u"christmas")
 
         except ObjectDoesNotExist:
             # Create the new user users
@@ -88,6 +92,14 @@ class ApiTestCase(ResourceTestCase):
             self.pr.save()
             self.pb = Person(name=u"Pierre Bellon")
             self.pb.save()
+
+            ontology = settings.DATA_ROOT + "/ontology-v5.7.owl"
+            self.common = Topic(slug=u"common", module=u"common", title="Generic endpoint!")
+            self.common.save()
+
+            self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology)
+            self.christmas.save()
+
 
         super_user.is_staff = True
         super_user.is_superuser = True
@@ -150,7 +162,7 @@ class ApiTestCase(ResourceTestCase):
             }
         }
 
-    def cleanModel(self,model_instance):
+    def cleanModel(self, model_instance):
         if model_instance:
             model_instance.delete()
 
@@ -166,6 +178,8 @@ class ApiTestCase(ResourceTestCase):
         self.cleanModel(self.fra)  # country
         self.cleanModel(self.pr)   # people
         self.cleanModel(self.pb)   # people
+        # topics
+        self.cleanModel(self.christmas)
 
     # Utility functions (Auth, operation etc.)
     def login(self, username, password):
@@ -716,3 +730,22 @@ class ApiTestCase(ResourceTestCase):
         }
         resp = self.patch_individual(**args)
         self.assertEqual(resp.status_code in [302, 404], True)
+
+    def test_topic_endpoint_exists(self):
+        resp = self.api_client.get('/api/common/v1/topic/?slug=christmas', follow=True, format='json')
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        # 1 result
+        self.assertEqual( len( data["objects"] ), 1 )
+
+    def test_topic_api_exists(self):
+        resp = self.api_client.get('/api/christmas/v1/', format='json', authentication=self.get_super_credentials())
+        self.assertValidJSONResponse(resp)
+
+    def test_topic_has_person(self):
+        resp = self.api_client.get('/api/christmas/v1/person/schema/', format='json', authentication=self.get_super_credentials())
+        self.assertValidJSONResponse(resp)
+
+    def test_topic_has_summary_syntax(self):
+        resp = self.api_client.get('/api/christmas/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
+        self.assertValidJSONResponse(resp)

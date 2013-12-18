@@ -87,8 +87,6 @@ class Topic(models.Model):
         # Ensure that the module field is populated with app_label()
         self.module = self.app_label()
         models.Model.save(self)
-        from app.detective.register import init_topics
-        init_topics()
 
     def has_default_ontology(self):
         module = importlib.import_module("app.detective.topics.%s" % self.module)

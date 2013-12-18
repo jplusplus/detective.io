@@ -112,7 +112,7 @@ def topic_models(path, with_api=True):
         ontology = "%s/ontology.owl" % directory
     else:
         # Use the provided file
-        ontology = topic.ontology
+        ontology = topic.ontology.url
     try:
         # Generates all model using the ontology file.
         # Also overides the default app label to allow data persistance

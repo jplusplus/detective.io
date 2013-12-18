@@ -112,7 +112,7 @@ def topic_models(path, with_api=True):
         ontology = "%s/ontology.owl" % directory
     else:
         # Use the provided file
-        ontology = topic.ontology.url
+        ontology = topic.ontology
     try:
         # Generates all model using the ontology file.
         # Also overides the default app label to allow data persistance
@@ -167,7 +167,7 @@ def topic_models(path, with_api=True):
     urls = importlib.import_module("app.detective.urls")
     # Add api url pattern with the highest priority
     new_patterns = patterns('',
-        url(r'^%s/' % topic.slug, include(urls_path, namespace=app_label)),
+        url(r'^%s/' % topic.slug, include(urls_path, namespace=app_label) ),
     )
     if hasattr(urls, "urlpatterns"):
         # Merge with a filtered version of the urlpattern to avoid duplicates

@@ -96,6 +96,9 @@ class ApiTestCase(ResourceTestCase):
             ontology = settings.DATA_ROOT + "/ontology-v5.7.owl"
             self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology)
             self.christmas.save()
+            self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology)
+            self.thanksgiving.save()
+
 
 
         super_user.is_staff = True
@@ -177,6 +180,7 @@ class ApiTestCase(ResourceTestCase):
         self.cleanModel(self.pb)   # people
         # topics
         self.cleanModel(self.christmas)
+        self.cleanModel(self.thanksgiving)
 
     # Utility functions (Auth, operation etc.)
     def login(self, username, password):
@@ -740,7 +744,15 @@ class ApiTestCase(ResourceTestCase):
         self.assertValidJSONResponse(resp)
 
     def test_topic_has_person(self):
-        resp = self.api_client.get('/api/christmas/v1/person/schema/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/christmas/v1/', format='json', authentication=self.get_super_credentials())
+        self.assertValidJSONResponse(resp)
+
+    def test_topic_multiple_api(self):
+        # API 1
+        resp = self.api_client.get('/api/christmas/v1/', format='json')
+        self.assertValidJSONResponse(resp)
+        # API 2
+        resp = self.api_client.get('/api/thanksgiving/v1/', format='json')
         self.assertValidJSONResponse(resp)
 
     def test_topic_has_summary_syntax(self):

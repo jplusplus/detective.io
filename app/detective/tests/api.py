@@ -179,6 +179,7 @@ class ApiTestCase(ResourceTestCase):
         self.cleanModel(self.pr)   # people
         self.cleanModel(self.pb)   # people
         # topics
+        self.cleanModel(self.common)
         self.cleanModel(self.christmas)
 
     # Utility functions (Auth, operation etc.)

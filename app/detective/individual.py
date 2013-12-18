@@ -4,11 +4,11 @@ from app.detective                      import register
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class
 from django.conf.urls                   import url
-from django.core.exceptions             import ObjectDoesNotExist
+from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
 from django.db.models.query             import QuerySet
-from django.http                        import Http404
+from django.http                        import Http404, HttpResponseBadRequest
 from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
@@ -22,6 +22,8 @@ from tastypie.utils                     import trailing_slash
 from datetime                           import datetime
 import json
 import re
+import csv
+import tempfile
 
 # inspired from django.utils.formats.ISO_FORMATS['DATE_INPUT_FORMATS'][1]
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -326,6 +328,7 @@ class IndividualResource(ModelResource):
             url(r"^(?P<resource_name>%s)/search%s$" % params, self.wrap_view('get_search'), name="api_get_search"),
             url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
+            url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
         ]
 
 
@@ -469,3 +472,56 @@ class IndividualResource(ModelResource):
             # Save the node
             node.save()
         return self.create_response(request, data)
+
+    def bulk_upload(self, request, **kwargs):
+        self.method_check(request, allowed=['post'])
+        self.throttle_check(request)
+
+        # check the file has been uploaded
+        if not 'csv' in request.FILES:
+            return HttpResponseBadRequest("Missing parameter 'csv'")
+
+        # retrieve model and field names
+        model = self.get_model()
+        fields_names = [field.name for field in self.get_model_fields()]
+
+        # write all csv in a tempfile
+        temp_file = tempfile.TemporaryFile()
+        temp_file.write(request.FILES['csv'].read())
+        temp_file.seek(0)
+
+        # create a csv reader
+        csv_reader = csv.reader(temp_file, delimiter=';')
+        csv_cols = []
+
+        # check all fields in csv exists
+        for column in csv_reader.next():
+            # continue on empty columns
+            if column is '':
+                continue
+            if not column in fields_names:
+                return HttpResponseBadRequest("Unknown column '{0}'".format(column))
+            csv_cols.append(column)
+
+        # prepare returned JSON
+        ret = { 'saved' : 0, 'ids' : [] }
+
+        # iterate through csv lines
+        for row in csv_reader:
+            data = {}
+            for i in range(0, len(csv_cols)):
+                # do not use id defined in CSV
+                if csv_cols[i] == 'id':
+                    continue
+                data[csv_cols[i]] = str(row[i])
+
+            item = model(**data)
+            item.save()
+            ret['saved'] += 1
+            ret['ids'].append(item.id)
+
+        # Closing the tempfiles removes it
+        temp_file.close()
+
+        self.log_throttled_access(request)
+        return self.create_response(request, ret)

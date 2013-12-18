@@ -94,9 +94,6 @@ class ApiTestCase(ResourceTestCase):
             self.pb.save()
 
             ontology = settings.DATA_ROOT + "/ontology-v5.7.owl"
-            self.common = Topic(slug=u"common", module=u"common", title="Generic endpoint!")
-            self.common.save()
-
             self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology)
             self.christmas.save()
 
@@ -179,7 +176,6 @@ class ApiTestCase(ResourceTestCase):
         self.cleanModel(self.pr)   # people
         self.cleanModel(self.pb)   # people
         # topics
-        self.cleanModel(self.common)
         self.cleanModel(self.christmas)
 
     # Utility functions (Auth, operation etc.)

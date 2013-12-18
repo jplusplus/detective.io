@@ -2,7 +2,6 @@ from app.detective             import owl, utils
 from app.detective.models      import Topic
 from app.detective.modelrules  import ModelRules
 from django.conf.urls          import url, include, patterns
-from django.db                 import DatabaseError
 from tastypie.api              import NamespacedApi
 import importlib
 import os

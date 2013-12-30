@@ -6,7 +6,7 @@
 
 **1. Prerequisite**
 ```bash
-sudo apt-get install build-essential git-core python python-pip python-dev
+sudo apt-get install build-essential git-core python python-pip python-dev libmemcached-dev
 sudo pip install virtualenv
 ```
 

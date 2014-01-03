@@ -13,6 +13,7 @@ django-password-reset==0.5.1
 django-registration==1.0
 django-storages==1.1.8
 django-tastypie==0.10.0
+django-urlmiddleware==0.2.1
 Django==1.5.4
 djrill==0.7.0
 git+git://github.com/scholrly/neo4django.git#egg=neo4django

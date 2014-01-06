@@ -744,7 +744,7 @@ class ApiTestCase(ResourceTestCase):
         self.assertValidJSONResponse(resp)
 
     def test_topic_has_person(self):
-        resp = self.api_client.get('/api/christmas/v1/person/', format='json')
+        resp = self.api_client.get('/api/christmas/v1/', format='json')
         self.assertValidJSONResponse(resp)
 
     def test_topic_multiple_api(self):

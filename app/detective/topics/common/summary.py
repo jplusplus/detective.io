@@ -22,7 +22,7 @@ class SummaryResource(Resource):
     serializer = Serializer(formats=["json"]).serialize
 
     class Meta:
-        allowed_methods = ['get']
+        allowed_methods = ['get', 'post']
         resource_name   = 'summary'
         object_class    = object
 
@@ -55,6 +55,30 @@ class SummaryResource(Resource):
         # We force tastypie to render the response directly
         raise ImmediateHttpResponse(response=response)
 
+    # TODO : factorize obj_get and post_detail methods
+    def post_detail(self, request=None, **kwargs):
+        content = {}
+        # Get the current topic
+        self.topic = self.get_topic_or_404(request=request)
+        # Check for an optional method to do further dehydration.
+        method = getattr(self, "summary_%s" % kwargs["pk"], None)
+        if method:
+            try:
+                self.throttle_check(request)
+                content = method(request, **kwargs)
+                # Serialize content in json
+                # @TODO implement a better format support
+                content  = self.serializer(content, "application/json")
+                # Create an HTTP response
+                response = HttpResponse(content=content, content_type="application/json")
+            except ForbiddenError as e:
+                response = http.HttpForbidden(e)
+            except UnauthorizedError as e:
+                response = http.HttpUnauthorized(e)
+        else:
+            # Stop here, unkown summary type
+            raise Http404("Sorry, not implemented yet!")
+        raise ImmediateHttpResponse(response=response)
 
     def get_topic_or_404(self, request=None):
         try:
@@ -307,6 +331,17 @@ class SummaryResource(Resource):
 
         self.log_throttled_access(request)
         return object_list
+
+    def summary_bulk_upload(self, request, **kwargs):
+        # only allow POST requests
+        self.method_check(request, allowed=['post'])
+
+        # Check session
+        # if not request.user.id:
+        #     raise UnauthorizedError('This method require authentication')
+
+        self.log_throttled_access(request)
+        return { 'status' : 'OK' }
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 

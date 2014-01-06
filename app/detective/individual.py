@@ -504,7 +504,7 @@ class IndividualResource(ModelResource):
             csv_cols.append(column)
 
         # prepare returned JSON
-        ret = { 'saved' : 0, 'ids' : [] }
+        ret = { 'saved' : 0 , 'ids' : [] }
 
         # iterate through csv lines
         for row in csv_reader:
@@ -520,7 +520,7 @@ class IndividualResource(ModelResource):
             ret['saved'] += 1
             ret['ids'].append(item.id)
 
-        # Closing the tempfiles removes it
+        # Closing the tempfile removes it
         temp_file.close()
 
         self.log_throttled_access(request)

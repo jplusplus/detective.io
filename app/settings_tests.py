@@ -22,6 +22,7 @@ DEBUG = False
 
 INSTALLED_APPS = list(INSTALLED_APPS)
 
+# remove south an djrill to speed up the tests
 INSTALLED_APPS.remove('south')
 INSTALLED_APPS.remove('djrill')
 

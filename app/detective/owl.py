@@ -61,7 +61,7 @@ def get_class_specials(element):
 def parse(ontology, module='', app_label=None):
     app_label = app_label if app_label is not None else module.split(".")[-1]
     # Open the ontology file
-    tree = ET.parse(ontology)
+    tree = ET.parse( str(ontology) )
     root = tree.getroot()
     # Where record the new classes
     classes = dict()

@@ -740,11 +740,11 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual( len( data["objects"] ), 1 )
 
     def test_topic_api_exists(self):
-        resp = self.api_client.get('/api/christmas/v1/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/christmas/v1/', format='json')
         self.assertValidJSONResponse(resp)
 
     def test_topic_has_person(self):
-        resp = self.api_client.get('/api/christmas/v1/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/christmas/v1/person/', format='json')
         self.assertValidJSONResponse(resp)
 
     def test_topic_multiple_api(self):

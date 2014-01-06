@@ -62,10 +62,14 @@ def get_class_specials(element):
 def parse(ontology, module='', app_label=None):
     app_label = app_label if app_label is not None else module.split(".")[-1]
     # Deduce the path to the ontology
-    ontology_path = ontology.path if type(ontology) is FieldFile else str(ontology)
-    # Open the ontology file
-    tree = ET.parse(ontology_path)
-    root = tree.getroot()
+    if type(ontology) is FieldFile:
+        raw = ontology.read()
+        # Open the ontology file and returns the root
+        root = ET.fromstring(raw)
+    else:
+        tree = ET.parse(str(ontology))
+        # Get the root of the xml
+        root = tree.getroot()
     # Where record the new classes
     classes = dict()
     # List classes

@@ -184,6 +184,6 @@ def topic_models(path, with_api=True):
     # Then update url pattern
     urls.urlpatterns = new_patterns
     # At last, force the url resolver to reload (because we update it)
-    reload_urlconf()
     clear_url_caches()
+    reload_urlconf()
     return topic_module

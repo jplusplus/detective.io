@@ -192,7 +192,6 @@ INSTALLED_APPS = (
 from app.detective.utils import get_topics_modules
 INSTALLED_APPS = INSTALLED_APPS + get_topics_modules()
 
-
 MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")
 EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
 # One-week activation window

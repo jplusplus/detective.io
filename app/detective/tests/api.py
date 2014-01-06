@@ -8,6 +8,7 @@ from django.conf                         import settings
 from django.contrib.auth.models          import User, Group
 from django.core                         import signing
 from django.core.exceptions              import ObjectDoesNotExist
+from django.core.files                   import File
 from registration.models                 import RegistrationProfile
 from tastypie.test                       import ResourceTestCase, TestApiClient
 from tastypie.utils                      import timezone
@@ -93,7 +94,7 @@ class ApiTestCase(ResourceTestCase):
             self.pb = Person(name=u"Pierre Bellon")
             self.pb.save()
 
-            ontology = settings.DATA_ROOT + "/ontology-v5.7.owl"
+            ontology = File(open(settings.DATA_ROOT + "/ontology-v5.7.owl"))
             self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology)
             self.christmas.save()
             self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology)

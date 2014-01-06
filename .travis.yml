@@ -14,8 +14,6 @@ install:
   - pip install --use-mirrors -r test_requirements.txt
   - pip install --use-mirrors coveralls
   - python ./manage.py syncdb --pythonpath=. --noinput
-  - python ./manage.py migrate --pythonpath=. --noinput
-  - python ./manage.py datamigration detective load_myfixture --pythonpath=.
 env:
   - NEO4J_VERSION="1.9.1"
 matrix:

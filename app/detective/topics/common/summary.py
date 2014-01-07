@@ -337,11 +337,11 @@ class SummaryResource(Resource):
         # only allow POST requests
         self.method_check(request, allowed=['post'])
 
-        # Check session
+        # check session
         # if not request.user.id:
         #     raise UnauthorizedError('This method require authentication')
 
-        # Check the file(s) has been uploaded
+        # check the file(s) has been uploaded
         if not 'csv' in request.FILES:
             raise UnauthorizedError("Missing parameter 'csv'")
 
@@ -351,7 +351,7 @@ class SummaryResource(Resource):
         # retrieve all models in current topic
         all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.slug))
 
-        # Iterate over all files and dissociate entities .csv from relations .csv
+        # iterate over all files and dissociate entities .csv from relations .csv
         for file in request.FILES.getlist('csv'):
             # use .rstrip() to remove trailing \n
             file_header = file.readline().rstrip()
@@ -368,7 +368,7 @@ class SummaryResource(Resource):
 
         id_mapping = dict()
 
-        # First, iterate over entities
+        # first iterate over entities
         for entity, file in entities.items():
             tempfile = uploaded_to_tempfile(file)
             # create a csv reader
@@ -390,11 +390,32 @@ class SummaryResource(Resource):
                             data[columns[i]] = str(row[i])
                         else:
                             id = int(row[i])
-                    # instanciate a model, save it and map its new ID with the one defined
+                    # instanciate a model, save it and map it with the ID defined
                     # in the .csv
                     item = all_models[entity](**data)
                     item.save()
-                    id_mapping[id] = item.id
+                    id_mapping[id] = item
+            # closing a tempfile deletes it
+            tempfile.close()
+
+        # then iterate over relations
+        for file in relations:
+            tempfile = uploaded_to_tempfile(file)
+            # create a csv reader
+            csv_reader = csv.reader(tempfile, delimiter=';')
+            relation_name = csv_reader.next()[1]
+
+            # TODO : check that the relation actually exists between the two objects
+
+            for row in csv_reader:
+                id_from = int(row[0])
+                id_to = int(row[2])
+                if id_mapping[id_from] is not None and id_mapping[id_to] is not None:
+                    getattr(id_mapping[id_from], relation_name).add(id_mapping[id_to])
+                    # TODO : make another loop on id_mapping and call .save() an all instead
+                    # of the following line
+                    id_mapping[id_from].save()
+
             # closing a tempfile deletes it
             tempfile.close()
 

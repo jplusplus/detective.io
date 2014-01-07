@@ -32,6 +32,7 @@ class ArticleResource(ModelResource):
     class Meta:
         authorization = ReadOnlyAuthorization()
         queryset      = Article.objects.filter(public=True)
+        filtering     = {'slug': ALL, 'topic': ALL, 'public': ALL, 'title': ALL}
 
 class TopicResource(ModelResource):
     articles = fields.ToManyField(ArticleResource, full=True, use_in="detail", null=True, attribute=lambda bundle: Article.objects.filter(topic=bundle.obj, public=True))

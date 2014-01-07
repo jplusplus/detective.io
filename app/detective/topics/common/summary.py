@@ -340,6 +340,27 @@ class SummaryResource(Resource):
         # if not request.user.id:
         #     raise UnauthorizedError('This method require authentication')
 
+        # Check the file(s) has been uploaded
+        if not 'csv' in request.FILES:
+            raise UnauthorizedError("Missing parameter 'csv'")
+
+        entities = dict()
+        relations = []
+
+        # Iterate over all files and dissociate entities .csv from relations .csv
+        for file in request.FILES.getlist('csv'):
+            file_header = file.readline().rstrip()
+            print file_header
+            if len(re.findall('_id;?$', file_header)) is 0:
+                # extract the model name (match.group(1))
+                match = re.match('^(\w+)_id;', file_header)
+                entities[match.group(1)] = file
+            else:
+                relations.append(file)
+
+        print relations
+        print entities
+
         self.log_throttled_access(request)
         return { 'status' : 'OK' }
 

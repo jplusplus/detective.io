@@ -27,14 +27,14 @@ class BulkUploadCtrl
     send: =>
         form_data = new FormData($('form').get(0))
         $.ajax
-            url         : ""
+            url         : "/api/#{@scope.topic_selected.slug}/v1/summary/bulk_upload/"
             type        : "POST"
             xhr         : $.ajaxSettings.xhr
             data        : form_data
             cache       : false
             contentType : false
             processData : false
-        
+
     add_file_field: =>
         @scope.file_fields.push("file" + (@scope.file_fields.length + 1))
 

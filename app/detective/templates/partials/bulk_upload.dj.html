@@ -3,8 +3,6 @@
 
 {% block content %}
 
-<script type="text/javascript" src="{% static 'components/jquery/jquery.min.js' %}"></script>
-
 <style type="text/css">
 	.BulkUploadCtrl {
 		margin: 20px;
@@ -18,7 +16,7 @@
 	}
 	.BulkUploadCtrl .topics .topic.selected     {background-color: rgb(133, 111, 24);}
 	.BulkUploadCtrl input                       {display: block;}
-	.BulkUploadCtrl .bulk_upload_add_file_field {margin-top:20px;}
+	.BulkUploadCtrl input[type=file]  {margin:20px;}
 	.BulkUploadCtrl input[type=submit]          {margin-top:20px;}
 </style>
 
@@ -30,19 +28,20 @@
 			[[ topic.title ]]
 		</div>
 	</div>
-
-	<h2>Upload objects and relationship</h2>
-	<p>Notes:
-		<ul>
-			<li>Header for objects should respect this format : &lt;obj_name&gt;_id; &lt;field_name1&gt;; &lt;field_name2&gt; etc...</li>
-			<li>Header for relationship should respect this format : &lt;obj1_name&gt;_id;&lt;relation_type&gt;; &lt;obj2_name&gt;_id</li>
-		</ul>
-	</p>
-	<form action="" method="post" name="bulk_upload" enctype="multipart/form-data">
-		{% csrf_token %}
-		<input type="file" ng-repeat="field_name in file_fields" name="[[field_name]]" />
-		<a href="" class="bulk_upload_add_file_field" ng-click="add_file_field()">add a file</a>
-		<input type="submit" ng-click="send()" />
-	</form>
-
+	<div ng-if="topic_selected">
+		<h2>Upload objects and relationship</h2>
+		<p>Notes:
+			<ul>
+				<li>Header for objects should respect this format : &lt;obj_name&gt;_id; &lt;field_name1&gt;; &lt;field_name2&gt; etc...</li>
+				<li>Header for relationship should respect this format : &lt;obj1_name&gt;_id;&lt;relation_type&gt;; &lt;obj2_name&gt;_id</li>
+			</ul>
+		</p>
+		<form action="" method="post" name="bulk_upload" enctype="multipart/form-data">
+			{% csrf_token %}
+			<input type="file" ng-repeat="field_name in file_fields" name="[[field_name]]" />
+			<a href="" class="bulk_upload_add_file_field" ng-click="add_file_field()">add a file</a>
+			<input type="submit" ng-click="send()" />
+		</form>
+	</div>
+</div>
 {% endblock %}

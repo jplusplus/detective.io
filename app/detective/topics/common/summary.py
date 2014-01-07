@@ -2,7 +2,7 @@
 from app.detective.models     import Topic
 from app.detective.neomatch   import Neomatch
 from app.detective.register   import topics_rules
-from app.detective.utils      import get_model_fields, get_topic_models
+from app.detective.utils      import get_model_fields, get_topic_models, uploaded_to_tempfile
 from difflib                  import SequenceMatcher
 from django.core.paginator    import Paginator, InvalidPage
 from django.core.urlresolvers import resolve
@@ -14,6 +14,7 @@ from tastypie.resources       import Resource
 from tastypie.serializers     import Serializer
 import json
 import re
+import csv
 
 from .errors import *
 
@@ -359,7 +360,7 @@ class SummaryResource(Resource):
                 match = re.match('^(\w+)_id;', file_header)
                 if match.group(1) is not None:
                     model_name = match.group(1).capitalize()
-                    # check that this model octually exists in the currennt topic
+                    # check that this model actually exists in the current topic
                     if model_name in all_models.keys():
                         entities[model_name] = file
             else:
@@ -369,7 +370,19 @@ class SummaryResource(Resource):
 
         # First, iterate over entities
         for entity, file in entities.items():
-            print entity
+            tempfile = uploaded_to_tempfile(file)
+            # create a csv reader
+            csv_reader = csv.reader(tempfile, delimiter=';')
+            # must check that all columns map to an existing model field
+            field_names = [field['name'] for field in get_model_fields(all_models[entity])]
+            for column in csv_reader.next():
+                if column is not '' and not column in field_names:
+                    break
+            else:
+                # here, we know that all columns are valid
+                pass
+            # closing a tempfile deletes it
+            tempfile.close()
 
         self.log_throttled_access(request)
         return { 'status' : 'OK' }

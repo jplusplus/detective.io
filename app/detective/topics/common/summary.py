@@ -347,19 +347,29 @@ class SummaryResource(Resource):
         entities = dict()
         relations = []
 
+        # retrieve all models in current topic
+        all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.slug))
+
         # Iterate over all files and dissociate entities .csv from relations .csv
         for file in request.FILES.getlist('csv'):
+            # use .rstrip() to remove trailing \n
             file_header = file.readline().rstrip()
-            print file_header
             if len(re.findall('_id;?$', file_header)) is 0:
                 # extract the model name (match.group(1))
                 match = re.match('^(\w+)_id;', file_header)
-                entities[match.group(1)] = file
+                if match.group(1) is not None:
+                    model_name = match.group(1).capitalize()
+                    # check that this model octually exists in the currennt topic
+                    if model_name in all_models.keys():
+                        entities[model_name] = file
             else:
                 relations.append(file)
 
-        print relations
-        print entities
+        id_mapping = dict()
+
+        # First, iterate over entities
+        for entity, file in entities.items():
+            print entity
 
         self.log_throttled_access(request)
         return { 'status' : 'OK' }

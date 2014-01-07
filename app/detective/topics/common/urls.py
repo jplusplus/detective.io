@@ -11,6 +11,7 @@ api.register(TopicResource())
 api.register(SummaryResource())
 api.register(CypherResource())
 api.register(UserResource())
+api.register(ArticleResource())
 
 urlpatterns = patterns('common',
     url(r'', include(api.urls)),

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .models                  import *
-from app.detective.models     import QuoteRequest, Topic
+from app.detective.models     import QuoteRequest, Topic, Article
 from app.detective.utils      import get_registered_models
 from tastypie.authorization   import ReadOnlyAuthorization
 from tastypie.constants       import ALL
@@ -45,3 +45,10 @@ class TopicResource(ModelResource):
         object_list = super(TopicResource, self).get_object_list(request)
         # Return only public topics for non-staff user
         return object_list if is_staff else object_list.filter(public=True)
+
+
+class ArticleResource(ModelResource):
+    class Meta:
+        authorization = ReadOnlyAuthorization()
+        queryset      = Article.objects.filter(public=True)
+        filtering     = {'slug': ALL, 'topic': ALL, 'title': ALL}

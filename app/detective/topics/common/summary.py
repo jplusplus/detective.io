@@ -2,7 +2,7 @@
 from app.detective.models     import Topic
 from app.detective.neomatch   import Neomatch
 from app.detective.register   import topics_rules
-from app.detective.utils      import get_model_fields, get_topic_models
+from app.detective.utils      import get_model_fields, get_topic_models, uploaded_to_tempfile
 from difflib                  import SequenceMatcher
 from django.core.paginator    import Paginator, InvalidPage
 from django.core.urlresolvers import resolve
@@ -14,6 +14,7 @@ from tastypie.resources       import Resource
 from tastypie.serializers     import Serializer
 import json
 import re
+import csv
 
 from .errors import *
 
@@ -22,7 +23,7 @@ class SummaryResource(Resource):
     serializer = Serializer(formats=["json"]).serialize
 
     class Meta:
-        allowed_methods = ['get']
+        allowed_methods = ['get', 'post']
         resource_name   = 'summary'
         object_class    = object
 
@@ -55,6 +56,30 @@ class SummaryResource(Resource):
         # We force tastypie to render the response directly
         raise ImmediateHttpResponse(response=response)
 
+    # TODO : factorize obj_get and post_detail methods
+    def post_detail(self, request=None, **kwargs):
+        content = {}
+        # Get the current topic
+        self.topic = self.get_topic_or_404(request=request)
+        # Check for an optional method to do further dehydration.
+        method = getattr(self, "summary_%s" % kwargs["pk"], None)
+        if method:
+            try:
+                self.throttle_check(request)
+                content = method(request, **kwargs)
+                # Serialize content in json
+                # @TODO implement a better format support
+                content  = self.serializer(content, "application/json")
+                # Create an HTTP response
+                response = HttpResponse(content=content, content_type="application/json")
+            except ForbiddenError as e:
+                response = http.HttpForbidden(e)
+            except UnauthorizedError as e:
+                response = http.HttpUnauthorized(e)
+        else:
+            # Stop here, unkown summary type
+            raise Http404("Sorry, not implemented yet!")
+        raise ImmediateHttpResponse(response=response)
 
     def get_topic_or_404(self, request=None):
         try:
@@ -307,6 +332,60 @@ class SummaryResource(Resource):
 
         self.log_throttled_access(request)
         return object_list
+
+    def summary_bulk_upload(self, request, **kwargs):
+        # only allow POST requests
+        self.method_check(request, allowed=['post'])
+
+        # Check session
+        # if not request.user.id:
+        #     raise UnauthorizedError('This method require authentication')
+
+        # Check the file(s) has been uploaded
+        if not 'csv' in request.FILES:
+            raise UnauthorizedError("Missing parameter 'csv'")
+
+        entities = dict()
+        relations = []
+
+        # retrieve all models in current topic
+        all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.slug))
+
+        # Iterate over all files and dissociate entities .csv from relations .csv
+        for file in request.FILES.getlist('csv'):
+            # use .rstrip() to remove trailing \n
+            file_header = file.readline().rstrip()
+            if len(re.findall('_id;?$', file_header)) is 0:
+                # extract the model name (match.group(1))
+                match = re.match('^(\w+)_id;', file_header)
+                if match.group(1) is not None:
+                    model_name = match.group(1).capitalize()
+                    # check that this model actually exists in the current topic
+                    if model_name in all_models.keys():
+                        entities[model_name] = file
+            else:
+                relations.append(file)
+
+        id_mapping = dict()
+
+        # First, iterate over entities
+        for entity, file in entities.items():
+            tempfile = uploaded_to_tempfile(file)
+            # create a csv reader
+            csv_reader = csv.reader(tempfile, delimiter=';')
+            # must check that all columns map to an existing model field
+            field_names = [field['name'] for field in get_model_fields(all_models[entity])]
+            for column in csv_reader.next():
+                if column is not '' and not column in field_names:
+                    break
+            else:
+                # here, we know that all columns are valid
+                pass
+            # closing a tempfile deletes it
+            tempfile.close()
+
+        self.log_throttled_access(request)
+        return { 'status' : 'OK' }
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 

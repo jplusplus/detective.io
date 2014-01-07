@@ -5,6 +5,7 @@ from os.path                  import isdir, join
 import importlib
 import inspect
 import re
+import tempfile
 
 def create_node_model(name, fields=None, app_label='', module='', options=None):
     """
@@ -215,3 +216,17 @@ def to_underscores(value=""):
 
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', value)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+def uploaded_to_tempfile(uploaded_file):
+    # reset uploaded file's cusor
+    cursor_pos = uploaded_file.tell()
+    uploaded_file.seek(0)
+    # create a new tempfile
+    temporary = tempfile.TemporaryFile()
+    # write the uploaded content
+    temporary.write(uploaded_file.read())
+    # reset cusors
+    temporary.seek(0)
+    uploaded_file.seek(cursor_pos)
+
+    return temporary

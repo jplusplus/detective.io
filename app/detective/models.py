@@ -116,6 +116,27 @@ class Topic(models.Model):
     link.allow_tags = True
 
 
+class Article(models.Model):
+    topic   = models.ForeignKey(Topic, help_text="The topic this article is related to.")
+    title   = models.CharField(max_length=250, help_text="Title of your article.")
+    slug    = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
+    content = models.TextField(null=True, blank=True)
+    public  = models.BooleanField(default=False, help_text="Is your article public?")
+
+    def get_absolute_path(self):
+        return self.topic.get_absolute_path() + ( "p/%s/" % self.slug )
+
+    def __unicode__(self):
+        return self.title
+
+    def link(self):
+        path = self.get_absolute_path()
+        return '<a href="%s">%s</a>' % (path, path, )
+    link.allow_tags = True
+
+
+# @TODO finish this feature!
+# This model aims to describe a research alongside a relationship.
 class RelationshipSearch(models.Model):
     # This field is deduced from the relationship name
     subject = models.CharField(editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")

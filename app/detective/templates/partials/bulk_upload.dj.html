@@ -42,7 +42,7 @@
 		{% csrf_token %}
 		<input type="file" ng-repeat="field_name in file_fields" name="[[field_name]]" />
 		<a href="" class="bulk_upload_add_file_field" ng-click="add_file_field()">add a file</a>
-		<input type="submit" />
+		<input type="submit" ng-click="send()" />
 	</form>
 
 {% endblock %}

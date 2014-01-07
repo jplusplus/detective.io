@@ -81,6 +81,9 @@ class Topic(models.Model):
         from app.detective import topics
         return getattr(topics, self.module)
 
+    def get_models(self):
+        return getattr(self.get_module(), "models")
+
     def clean(self):
         if self.ontology == "" and not self.has_default_ontology():
             raise ValidationError( 'An ontology file is required with this module.',  code='invalid')
@@ -92,7 +95,7 @@ class Topic(models.Model):
         self.module = self.app_label()
         models.Model.save(self)
         # Then create the permissions related to the label module
-        create_permissions( self.get_module() )
+        create_permissions( self.get_models() )
 
     def has_default_ontology(self):
         module = self.get_module()

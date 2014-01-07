@@ -57,13 +57,14 @@ def _get_permission_args(app_label, operation):
         "name":  operation[1].format(app_name=app_label),
     }
 
-def create_permissions(app, created_models=None, verbosity=False, db=DEFAULT_DB_ALIAS, **kwargs):
+def create_permissions(app, app_label=None, created_models=None, verbosity=False, db=DEFAULT_DB_ALIAS, **kwargs):
     """
     Entry point for permission creation. Will be called after DB synchronisation
     for every installed app (see settings.INSTALLED_APPS)
     """
     app_name  = app.__name__
-    app_label = app_name.split('.')[-2]
+    if app_label is None:
+        app_label = app_name.split('.')[-2]
 
     # we check if the received signal come from a local installed application
     if app_name.startswith("app.detective.topics"):

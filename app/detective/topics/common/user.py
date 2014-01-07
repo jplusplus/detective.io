@@ -192,8 +192,11 @@ class UserResource(ModelResource):
         self.method_check(request, allowed=['get'])
         self.is_authenticated(request)
         if request.user.is_authenticated():
+            # Get the list of permission and sorts it alphabeticly
+            permissions = list(request.user.get_all_permissions())
+            permissions.sort()
             return self.create_response(request, {
-                'permissions': list(request.user.get_all_permissions())
+                'permissions': permissions
             })
         else:
             return http.HttpUnauthorized('You need to be logged to list your permissions')

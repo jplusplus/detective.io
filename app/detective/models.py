@@ -1,7 +1,7 @@
-from .utils                 import get_topics
-from django.core.exceptions import ValidationError
-from django.db              import models
-import importlib
+from .utils                    import get_topics
+from app.detective.permissions import create_permissions
+from django.core.exceptions    import ValidationError
+from django.db                 import models
 import os
 import random
 import string
@@ -77,6 +77,13 @@ class Topic(models.Model):
     def get_module_token(size=10, chars=string.ascii_uppercase + string.digits):
         return "topic%s" % ''.join(random.choice(chars) for x in range(size))
 
+    def get_module(self):
+        from app.detective import topics
+        return getattr(topics, self.module)
+
+    def get_models(self):
+        return getattr(self.get_module(), "models")
+
     def clean(self):
         if self.ontology == "" and not self.has_default_ontology():
             raise ValidationError( 'An ontology file is required with this module.',  code='invalid')
@@ -87,9 +94,11 @@ class Topic(models.Model):
         # Ensure that the module field is populated with app_label()
         self.module = self.app_label()
         models.Model.save(self)
+        # Then create the permissions related to the label module
+        create_permissions( self.get_models() )
 
     def has_default_ontology(self):
-        module = importlib.import_module("app.detective.topics.%s" % self.module)
+        module = self.get_module()
         # File if it's a virtual module
         if not hasattr(module, "__file__"): return False
         directory     = os.path.dirname(os.path.realpath( module.__file__ ))

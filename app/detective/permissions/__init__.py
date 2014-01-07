@@ -57,7 +57,7 @@ def _get_permission_args(app_label, operation):
         "name":  operation[1].format(app_name=app_label),
     }
 
-def create_permissions(app, created_models, verbosity, db=DEFAULT_DB_ALIAS, **kwargs):
+def create_permissions(app, created_models=None, verbosity=False, db=DEFAULT_DB_ALIAS, **kwargs):
     """
     Entry point for permission creation. Will be called after DB synchronisation
     for every installed app (see settings.INSTALLED_APPS)

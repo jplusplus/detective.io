@@ -1,7 +1,9 @@
 from app.detective             import owl, utils
-from app.detective.models      import Topic
 from app.detective.modelrules  import ModelRules
+from app.detective.models      import Topic
 from django.conf.urls          import url, include, patterns
+from django.conf               import settings
+from django.core.urlresolvers  import clear_url_caches
 from tastypie.api              import NamespacedApi
 import importlib
 import os
@@ -90,6 +92,13 @@ def import_or_create(path, register=True):
             sys.modules[path] = module
     return module
 
+
+def reload_urlconf(urlconf=None):
+    if urlconf is None:
+        urlconf = settings.ROOT_URLCONF
+    if urlconf in sys.modules:
+        reload(sys.modules[urlconf])
+
 def topic_models(path, with_api=True):
     """
         Auto-discover topic-related model by looking into
@@ -112,7 +121,7 @@ def topic_models(path, with_api=True):
         ontology = "%s/ontology.owl" % directory
     else:
         # Use the provided file
-        ontology = topic.ontology.url
+        ontology = topic.ontology
     try:
         # Generates all model using the ontology file.
         # Also overides the default app label to allow data persistance
@@ -155,7 +164,7 @@ def topic_models(path, with_api=True):
     # Register the summary resource
     api.register(SummaryResource())
     # Create url patterns
-    urlpatterns = patterns(path, url(r'', include(api.urls)), )
+    urlpatterns = patterns(path, url('', include(api.urls)), )
     # Import or create virtually the url path
     urls_modules = import_or_create(urls_path)
     # Merge the two url patterns if needed
@@ -166,12 +175,15 @@ def topic_models(path, with_api=True):
     # we need to connect its url patterns to global one
     urls = importlib.import_module("app.detective.urls")
     # Add api url pattern with the highest priority
-    new_patterns = patterns('',
-        url(r'^%s/' % topic.slug, include(urls_path, namespace=app_label)),
+    new_patterns = patterns(app_label,
+        url(r'^%s/' % topic.slug, include(urls_path, namespace=app_label) ),
     )
     if hasattr(urls, "urlpatterns"):
         # Merge with a filtered version of the urlpattern to avoid duplicates
         new_patterns += [u for u in urls.urlpatterns if getattr(u, "namespace", None) != topic.slug ]
     # Then update url pattern
     urls.urlpatterns = new_patterns
+    # At last, force the url resolver to reload (because we update it)
+    clear_url_caches()
+    reload_urlconf()
     return topic_module

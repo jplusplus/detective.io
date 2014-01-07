@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from app.detective.utils import to_class_name, to_underscores, create_node_model
-from lxml                import etree as ET
-from neo4django.db       import models
+from app.detective.utils           import to_class_name, to_underscores, create_node_model
+from django.db.models.fields.files import FieldFile
+from lxml                          import etree as ET
+from neo4django.db                 import models
 
 NAMESPACES = {
     'owl': 'http://www.w3.org/2002/07/owl#',
@@ -60,9 +61,15 @@ def get_class_specials(element):
 
 def parse(ontology, module='', app_label=None):
     app_label = app_label if app_label is not None else module.split(".")[-1]
-    # Open the ontology file
-    tree = ET.parse(ontology)
-    root = tree.getroot()
+    # Deduce the path to the ontology
+    if type(ontology) is FieldFile:
+        raw = ontology.read()
+        # Open the ontology file and returns the root
+        root = ET.fromstring(raw)
+    else:
+        tree = ET.parse(str(ontology))
+        # Get the root of the xml
+        root = tree.getroot()
     # Where record the new classes
     classes = dict()
     # List classes

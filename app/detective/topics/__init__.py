@@ -17,6 +17,6 @@ class Wrapper:
                 return topic_models(path)
             except Topic.DoesNotExist:
                 # Raise a basic attribute error
-                raise AttributeError("The topic '%s' doesn't exist." % name)
+                raise AttributeError("The attribute '%s' doesn't exist." % name)
 
 sys.modules[__name__] = Wrapper( sys.modules[__name__] )

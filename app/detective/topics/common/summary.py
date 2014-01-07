@@ -375,12 +375,26 @@ class SummaryResource(Resource):
             csv_reader = csv.reader(tempfile, delimiter=';')
             # must check that all columns map to an existing model field
             field_names = [field['name'] for field in get_model_fields(all_models[entity])]
+            columns = []
             for column in csv_reader.next():
-                if column is not '' and not column in field_names:
-                    break
+                if column is not '':
+                    if len(re.findall('_id$', column)) == 0 and not column in field_names:
+                        break
+                    columns.append(column)
             else:
                 # here, we know that all columns are valid
-                pass
+                for row in csv_reader:
+                    data = {}
+                    for i in range(0, len(columns)):
+                        if len(re.findall('_id$', columns[i])) == 0:
+                            data[columns[i]] = str(row[i])
+                        else:
+                            id = int(row[i])
+                    # instanciate a model, save it and map its new ID with the one defined
+                    # in the .csv
+                    item = all_models[entity](**data)
+                    item.save()
+                    id_mapping[id] = item.id
             # closing a tempfile deletes it
             tempfile.close()
 

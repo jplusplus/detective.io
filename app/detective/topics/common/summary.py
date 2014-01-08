@@ -345,7 +345,7 @@ class SummaryResource(Resource):
         relations = []
 
         # retrieve all models in current topic
-        all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.slug))
+        all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.module))
 
         # flattern the list of files
         files = [file for sublist in request.FILES.lists() for file in sublist[1]]

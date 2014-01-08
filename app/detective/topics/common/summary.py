@@ -412,12 +412,13 @@ class SummaryResource(Resource):
                 id_to = int(row[2])
                 if id_mapping[id_from] is not None and id_mapping[id_to] is not None:
                     getattr(id_mapping[id_from], relation_name).add(id_mapping[id_to])
-                    # TODO : make another loop on id_mapping and call .save() an all instead
-                    # of the following line
-                    id_mapping[id_from].save()
 
             # closing a tempfile deletes it
             tempfile.close()
+
+        # Save everything
+        for item in id_mapping.values():
+            item.save()
 
         self.log_throttled_access(request)
         return { 'status' : 'OK' }

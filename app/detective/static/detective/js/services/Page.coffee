@@ -1,7 +1,7 @@
-angular.module('detective').factory "Page", ->  
+angular.module('detective').factory "Page", ["ngProgressLite", (ngProgressLite)->
     # ──────────────────────────────────────────────────────────────────────────
     # Private attributes and methods
-    # ──────────────────────────────────────────────────────────────────────────  
+    # ──────────────────────────────────────────────────────────────────────────
     title   = "..."
     loading = false
     #
@@ -14,17 +14,19 @@ angular.module('detective').factory "Page", ->
             return match.toLowerCase()  if index > 0 and index + p1.length isnt title.length and p1.search(smallWords) > -1 and title.charAt(index - 2) isnt ":" and title.charAt(index - 1).search(/[^\s-]/) < 0
             return match  if p1.substr(1).search(/[A-Z]|\../) > -1
             match.charAt(0).toUpperCase() + match.substr(1)
-    # ──────────────────────────────────────────────────────────────────────────  
+    # ──────────────────────────────────────────────────────────────────────────
     # Public attributes and methods
-    # ──────────────────────────────────────────────────────────────────────────  
-    title: (newTitle, titleCase=true)->    
+    # ──────────────────────────────────────────────────────────────────────────
+    title: (newTitle, titleCase=true)->
         if newTitle?
             title = if titleCase then toTitleCase( "" + newTitle ) else newTitle
-        # Always return the title 
+        # Always return the title
         if loading then "Loading..." else title
     # Set a new loading state if newLoading is set. Return the loading value
     loading: (newLoading)->
         if newLoading?
             loading = newLoading
+            do ngProgressLite[if loading then "start" else "done"]
         # Always return the loading value
         loading
+]

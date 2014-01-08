@@ -338,8 +338,8 @@ class SummaryResource(Resource):
         self.method_check(request, allowed=['post'])
 
         # check session
-        # if not request.user.id:
-        #     raise UnauthorizedError('This method require authentication')
+        if not request.user.id:
+            raise UnauthorizedError('This method require authentication')
 
         entities = dict()
         relations = []

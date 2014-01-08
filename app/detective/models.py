@@ -95,7 +95,7 @@ class Topic(models.Model):
         self.module = self.app_label()
         models.Model.save(self)
         # Then create the permissions related to the label module
-        create_permissions( self.get_models() )
+        create_permissions( self.get_models(), app_label=self.slug )
 
     def has_default_ontology(self):
         module = self.get_module()

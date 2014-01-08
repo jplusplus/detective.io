@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from .models                  import *
-from app.detective.models     import QuoteRequest, Topic
+from app.detective.models     import QuoteRequest, Topic, Article
 from app.detective.utils      import get_registered_models
+from tastypie                 import fields
 from tastypie.authorization   import ReadOnlyAuthorization
-from tastypie.constants       import ALL
+from tastypie.constants       import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions      import Unauthorized
 from tastypie.resources       import ModelResource
 
@@ -28,6 +29,7 @@ class QuoteRequestResource(ModelResource):
         queryset      = QuoteRequest.objects.all()
 
 class TopicResource(ModelResource):
+
     class Meta:
         queryset = Topic.objects.all()
         filtering = {'slug': ALL, 'module': ALL, 'public': ALL, 'title': ALL}
@@ -45,3 +47,11 @@ class TopicResource(ModelResource):
         object_list = super(TopicResource, self).get_object_list(request)
         # Return only public topics for non-staff user
         return object_list if is_staff else object_list.filter(public=True)
+
+
+class ArticleResource(ModelResource):
+    topic = fields.ToOneField(TopicResource, 'topic', full=True)
+    class Meta:
+        authorization = ReadOnlyAuthorization()
+        queryset      = Article.objects.filter(public=True)
+        filtering     = {'slug': ALL, 'topic': ALL_WITH_RELATIONS, 'public': ALL, 'title': ALL}

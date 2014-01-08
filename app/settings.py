@@ -183,6 +183,8 @@ INSTALLED_APPS = (
     'password_reset',
     # Manage migrations
     'south',
+    # Rich text editor
+    'tinymce',
     # Internal
     'app.detective',
     'app.detective.permissions',

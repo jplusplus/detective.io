@@ -35,7 +35,9 @@ urlpatterns = patterns('',
     url(r'^\w+/contribute/$',                 'app.detective.views.home', name='contribute'),
     url(r'^partial/explore-(?P<topic>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial_explore', name='partial_explore'),
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$',  'app.detective.views.partial', name='partial'),
+    url(r'^tinymce/', include('tinymce.urls')),
 )
+
 
 if settings.DEBUG:
     urlpatterns += patterns('',

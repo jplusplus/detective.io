@@ -76,6 +76,11 @@ detective = angular
                     .when('/page',    redirectTo: '/')
                     .when('/account', redirectTo: '/')
                     .when('/common/contribute', redirectTo: '/')
+                    .when('/:topic/p/', redirectTo: '/:topic/')
+                    .when('/:topic/p/:slug',
+                        controller: ArticleCtrl
+                        templateUrl: "/partial/article.html"
+                    )
                     .when('/:topic/contribute', {
                         controller: ContributeCtrl
                         templateUrl: "/partial/contribute.html"

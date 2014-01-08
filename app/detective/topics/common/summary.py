@@ -347,6 +347,7 @@ class SummaryResource(Resource):
 
         entities = dict()
         relations = []
+        errors = []
 
         # retrieve all models in current topic
         all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.module))
@@ -366,6 +367,14 @@ class SummaryResource(Resource):
                     # check that this model actually exists in the current topic
                     if model_name in all_models.keys():
                         entities[model_name] = file
+                    else:
+                        errors.append(dict(ModelDoesntExist=dict(Model=model_name, File=file)))
+                        logger.error("the model '{model}' doesn't exist. Check the header of the {file} file."
+                            .format(model=model_name, file=file))
+                else:
+                    # TODO : error for 'no <model_name>_id column'
+                    # TODO : log error
+                    errors.append(dict())
             else:
                 relations.append(file)
 
@@ -382,6 +391,9 @@ class SummaryResource(Resource):
             for column in csv_reader.next():
                 if column is not '':
                     if len(re.findall('_id$', column)) == 0 and not column in field_names:
+                        errors.append(dict(AttributeDoesntExist=dict(Attribute=column, Model=entity)))
+                        logger.error("the attribute '{column}' doesn't exist for the model {entity}. Check the header of the {file} file."
+                            .format(attribute=relation_name, model=all_models[model_from], file=file))
                         break
                     columns.append(column)
             else:
@@ -393,10 +405,8 @@ class SummaryResource(Resource):
                             data[columns[i]] = str(row[i]).decode('utf-8')
                         else:
                             id = int(row[i])
-                    # instanciate a model, save it and map it with the ID defined
-                    # in the .csv
+                    # instanciate a model and map it with the ID defined in the .csv
                     item = all_models[entity].objects.create(**data)
-                    item.save()
                     id_mapping[id] = item
             # closing a tempfile deletes it
             tempfile.close()
@@ -422,6 +432,7 @@ class SummaryResource(Resource):
                         getattr(id_mapping[id_from], relation_name).add(id_mapping[id_to])
                         inserted_relations += 1
             except AttributeError:
+                errors.append(dict(AttributeDoesntExist=dict(Attribute=relation_name,Model=model_from)))
                 logger.error("the attribute '{attribute}' doesn't exist for the model {model}. Check the header of the {file} file."
                     .format(attribute=relation_name, model=all_models[model_from], file=file))
 
@@ -437,7 +448,8 @@ class SummaryResource(Resource):
             'inserted' : {
                 'objects' : len(id_mapping),
                 'links' : inserted_relations
-            }
+            },
+            'errors' : errors
         }
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)

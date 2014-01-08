@@ -398,6 +398,7 @@ class SummaryResource(Resource):
             # closing a tempfile deletes it
             tempfile.close()
 
+        inserted_relations = 0
         # then iterate over relations
         for file in relations:
             tempfile = uploaded_to_tempfile(file)
@@ -416,6 +417,7 @@ class SummaryResource(Resource):
                     id_to = int(row[2])
                     if id_mapping[id_from] is not None and id_mapping[id_to] is not None:
                         getattr(id_mapping[id_from], relation_name).add(id_mapping[id_to])
+                        inserted_relations += 1
             except AttributeError:
                 pass
 
@@ -427,7 +429,12 @@ class SummaryResource(Resource):
             item.save()
 
         self.log_throttled_access(request)
-        return { 'status' : 'OK' }
+        return {
+            'inserted' : {
+                'objects' : len(id_mapping),
+                'links' : inserted_relations
+            }
+        }
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 

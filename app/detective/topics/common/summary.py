@@ -341,18 +341,17 @@ class SummaryResource(Resource):
         # if not request.user.id:
         #     raise UnauthorizedError('This method require authentication')
 
-        # check the file(s) has been uploaded
-        if not 'csv' in request.FILES:
-            raise UnauthorizedError("Missing parameter 'csv'")
-
         entities = dict()
         relations = []
 
         # retrieve all models in current topic
         all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.slug))
 
+        # flattern the list of files
+        files = [file for sublist in request.FILES.lists() for file in sublist[1]]
+        # TODO: Check headers
         # iterate over all files and dissociate entities .csv from relations .csv
-        for file in request.FILES.getlist('csv'):
+        for file in files:
             # use .rstrip() to remove trailing \n
             file_header = file.readline().rstrip()
             if len(re.findall('_id;?$', file_header)) is 0:

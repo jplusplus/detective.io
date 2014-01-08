@@ -36,9 +36,12 @@ class BulkUploadCtrl
             processData : false
 
     add_file_field: =>
-        @scope.file_fields.push("file" + (@scope.file_fields.length + 1))
+        field_name = "file" + (@scope.file_fields.length + 1)
+        @scope.file_fields.push(field_name)
 
     select_topic: (topic) =>
         @scope.topic_selected = topic
 
 angular.module('detective').controller 'BulkUploadCtrl', BulkUploadCtrl
+
+# EOF

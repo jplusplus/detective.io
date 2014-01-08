@@ -1,11 +1,20 @@
-from app.detective.utils  import get_apps
-from django.conf.urls     import patterns, include, url
-from django.contrib       import admin
+from app.middleware.virtualapi import VirtualApi
+from django.conf               import settings
+from django.conf.urls          import patterns, include, url
+from django.contrib            import admin
+from urlmiddleware.conf        import middleware, mpatterns
 
 admin.autodiscover()
-apps = "|".join( get_apps() )
+
+# This will catch the api calls with a virtual api middleware.
+# If needed, this middleware will create the API endpoints and resources
+# that match to the given slug.
+middlewarepatterns = mpatterns('',
+    middleware(r'^api/([a-zA-Z0-9_\-]+)/', VirtualApi),
+)
 
 urlpatterns = patterns('',
+    url(r'^api/',                             include('app.detective.urls')),
     url(r'^$',                                'app.detective.views.home', name='home'),
     url(r'^404/$',                            'app.detective.views.home', name='404'),
     url(r'^admin/',                            include(admin.site.urls)),
@@ -19,14 +28,20 @@ urlpatterns = patterns('',
     url(r'^search/$',                         'app.detective.views.home', name='search'),
     url(r'^signup/$',                         'app.detective.views.home', name='signup'),
     url(r'^contact-us/$',                     'app.detective.views.home', name='contact-us'),
-    url(r'^%s/$' % apps,                      'app.detective.views.home', name='explore'),
-    url(r'^%s/\w+/$' % apps,                  'app.detective.views.home', name='list'),
-    url(r'^%s/\w+/\d+/$' % apps,              'app.detective.views.home', name='single'),
-    url(r'^%s/contribute/$' % apps,           'app.detective.views.home', name='contribute'),
-    url(r'^api/common/',                       include('app.detective.apps.common.urls')),
-    url(r'^api/energy/',                       include('app.detective.apps.energy.urls')),
-    url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial', name='partial'),
+    url(r'^[a-zA-Z0-9_\-/]+/$',               'app.detective.views.home', name='explore'),
+    url(r'^[a-zA-Z0-9_\-/]+/\w+/$',           'app.detective.views.home', name='list'),
+    url(r'^[a-zA-Z0-9_\-/]+/\w+/\d+/$',       'app.detective.views.home', name='single'),
+    url(r'^\w+/contribute/$',                 'app.detective.views.home', name='contribute'),
+    url(r'^partial/explore-(?P<topic>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial_explore', name='partial_explore'),
+    url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$',  'app.detective.views.partial', name='partial'),
+    url(r'^tinymce/', include('tinymce.urls')),
 )
+
+
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        (r'^public/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+    )
 
 # Handle 404 with the homepage
 handler404 = "app.detective.views.not_found"

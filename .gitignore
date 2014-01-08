@@ -31,3 +31,4 @@ app/static/components
 staticfiles
 lib
 node_modules
+catalog-v001.xml

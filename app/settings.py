@@ -9,6 +9,9 @@ TASTYPIE_FULL_DEBUG = DEBUG
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
+# Custom data directory
+DATA_ROOT = here('data')
+
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com')
 )
@@ -66,13 +69,13 @@ MEDIA_ROOT = here('media')
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/public/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = here('static')
+STATIC_ROOT = here('staticfiles')
 
 LOGIN_URL = "/admin"
 # URL prefix for static files.
@@ -82,7 +85,8 @@ STATIC_URL = '/static/'
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Bower components
-    here('static/components'),
+    ('components', here('static/components') ),
+    here("detective/static"),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -116,6 +120,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'app.middleware.crossdomainxhr.XsSharing',
+    # add urlmiddleware after all other middleware.
+    'urlmiddleware.URLMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -136,12 +142,12 @@ TEMPLATE_DIRS = (
 # JS/CSS COMPRESSOR SETTINGS
 COMPRESS_PRECOMPILERS = (
     ('text/coffeescript', 'coffee --compile --stdio --bare'),
-    ('text/less', 'lessc {infile} {outfile}'),
+    ('text/less', 'lessc --include-path="%s" {infile} {outfile}' % here('static') ),
 )
 
 # Activate CSS minifier
 COMPRESS_CSS_FILTERS = (
-    "compressor.filters.css_default.CssAbsoluteFilter",
+    "app.detective.compress_filter.CustomCssAbsoluteFilter",
     "compressor.filters.template.TemplateFilter",
 )
 
@@ -153,19 +159,12 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
 }
 
-COMPRESS_ENABLED = True
-
+COMPRESS_ENABLED = False
 #INTERNAL_IPS = ('127.0.0.1',)
-
-DEBUG_TOOLBAR_CONFIG = {
-    "INTERCEPT_REDIRECTS": False
-}
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
 INSTALLED_APPS = (
-    #'neo4django.admin',
-    #'neo4django.graph_auth',
     'neo4django.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -181,12 +180,19 @@ INSTALLED_APPS = (
     'tastypie',
     # Email backend
     "djrill",
+    'password_reset',
+    # Manage migrations
+    'south',
+    # Rich text editor
+    'tinymce',
     # Internal
     'app.detective',
-    'app.detective.apps.common',
-    'app.detective.apps.energy',
-    'password_reset',
+    'app.detective.permissions',
 )
+
+# Add customs app to INSTALLED_APPS
+from app.detective.utils import get_topics_modules
+INSTALLED_APPS = INSTALLED_APPS + get_topics_modules()
 
 MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")
 EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
@@ -200,9 +206,6 @@ CACHES = {
         'LOCATION': '/tmp/django_cache',
     }
 }
-
-
-
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

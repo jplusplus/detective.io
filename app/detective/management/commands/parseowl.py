@@ -60,7 +60,7 @@ class Command(BaseCommand):
             "NegativeInteger" : "IntegerProperty",
             # Looking forward the neo4django float support!
             # See also: https://github.com/scholrly/neo4django/issues/197
-            "float" : "IntegerProperty",
+            "float" : "StringProperty",
             "integer" : "IntegerProperty",
             "dateTimeStamp" : "DateTimeProperty",
             "dateTime" : "DateTimeProperty",
@@ -265,7 +265,7 @@ class Command(BaseCommand):
 
 
             if m["scope"] != '' and m["scope"] != None:
-                modelsContents.append("\t_scope = u'%s'" % m["scope"])
+                modelsContents.append("\t_topic = u'%s'" % m["scope"])
 
             if m["help_text"] != None:
                 modelsContents.append("\t_description = u'%s'" % m["help_text"])

@@ -1,0 +1,49 @@
+.csstransitions {
+    .slide-enter,
+    .slide-leave {
+        position:absolute;
+        left:0;
+        right:0;
+        .transition(0.6s all);
+    }
+
+    .slide-enter {
+        .transform( translate(0, -200px) );
+        .opacity(0);
+    }
+    .slide-enter.slide-enter-active {
+        .transform( translate(0, 0) );
+        .opacity(100);
+    }
+
+    .slide-leave {
+        .transform( translate(0, 0) );
+        .opacity(100);
+    }
+    .slide-leave.slide-leave-active {
+        .transform( translate(0, -200px) );
+        .opacity(0);
+    }
+
+
+    .fade-leave,
+    .fade-enter,
+    .fade-leave-active,
+    .fade-enter-active  {
+        .transition(5s);
+        position:absolute;
+        top:0;
+        left:0;
+        right:0;
+        z-index: @zindex-content+40;
+    }
+    .fade-enter,
+    .fade-leave-active  {
+        .opacity(0);
+    }
+
+    .fade-leave,
+    .fade-enter-active {
+        .opacity(100);
+    }
+}

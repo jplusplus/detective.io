@@ -1,30 +1,15 @@
+#!/usr/bin/env python
+# Encoding: utf-8
+
 import os
 from settings import *
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-AUTHENTICATION_BACKENDS = ('neo4django.graph_auth.backends.NodeModelBackend',)
-
-NEO4J_DATABASES = {
-    'default' : {
-        'HOST':'localhost',
-        'PORT':7474,
-        'ENDPOINT':'/db/data',
-        'OPTIONS':{
-            'CLEANDB_URI': '/cleandb/supersecretdebugkey!',
-        },
-    }
+NEO4J_DATABASES['default']['OPTIONS'] = {
+    'CLEANDB_URI': '/cleandb/supersecretdebugkey!',
 }
 
-NEO4J_TEST_DATABASES = {
-    'default' : {
-        'HOST':'localhost',
-        'PORT':7474,
-        'ENDPOINT':'/db/data',
-        'OPTIONS':{
-            'CLEANDB_URI': '/cleandb/supersecretdebugkey!',
-        }
-    }
-}
+NEO4J_TEST_DATABASES = NEO4J_DATABASES
 
 DATABASES = {
     'default': {
@@ -33,29 +18,15 @@ DATABASES = {
     }
 }
 
-DATABASE_ROUTERS = ['neo4django.utils.Neo4djangoIntegrationRouter']
-
-USE_TZ = True
-
-INSTALLED_APPS = (
-    'neo4django.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.admin',
-    'django.contrib.contenttypes',
-    'django.contrib.staticfiles',
-    'django.contrib.auth',
-    'compressor',
-    'tastypie',
-    'registration',
-    'app.detective',
-    'app.detective.apps.common',
-    'app.detective.apps.energy'
-)
-
-SECRET_KEY="<SET A SECRET KEY HERE>"
-
 DEBUG = False
+
+INSTALLED_APPS = list(INSTALLED_APPS)
+
+# remove south an djrill to speed up the tests
+INSTALLED_APPS.remove('south')
+INSTALLED_APPS.remove('djrill')
 
 NEO4DJANGO_PROFILE_REQUESTS = False
 NEO4DJANGO_DEBUG_GREMLIN = False
+
+# EOF

@@ -345,7 +345,7 @@ class SummaryResource(Resource):
         relations = []
 
         # retrieve all models in current topic
-        all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.slug))
+        all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.module))
 
         # flattern the list of files
         files = [file for sublist in request.FILES.lists() for file in sublist[1]]
@@ -386,12 +386,12 @@ class SummaryResource(Resource):
                     data = {}
                     for i in range(0, len(columns)):
                         if len(re.findall('_id$', columns[i])) == 0:
-                            data[columns[i]] = str(row[i])
+                            data[columns[i]] = str(row[i]).decode('utf-8')
                         else:
                             id = int(row[i])
                     # instanciate a model, save it and map it with the ID defined
                     # in the .csv
-                    item = all_models[entity](**data)
+                    item = all_models[entity].objects.create(**data)
                     item.save()
                     id_mapping[id] = item
             # closing a tempfile deletes it

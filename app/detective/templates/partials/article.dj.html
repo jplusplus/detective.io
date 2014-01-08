@@ -1,0 +1,11 @@
+<div class="container page">
+    <div class="row" ng-if="article">
+        <div class="col-sm-8">
+            <h2 ng-init="Page.title(article.title)">[[article.title]]</h2>
+            <details class="lead text-muted">
+                <i class="fa fa-calendar"></i> [[article.created_at|date:"longDate"]]
+            </details>
+            <article  ng-bind-html-unsafe="article.content"></article>
+        </div>
+    </div>
+</div>

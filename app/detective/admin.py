@@ -19,6 +19,6 @@ admin.site.register(Topic, TopicAdmin)
 
 class ArticleAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ("title", "link", "public", )
+    list_display = ("title", "link", "created_at", "public", )
 
 admin.site.register(Article, ArticleAdmin)

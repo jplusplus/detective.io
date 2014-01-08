@@ -2,6 +2,7 @@ from .utils                    import get_topics
 from app.detective.permissions import create_permissions
 from django.core.exceptions    import ValidationError
 from django.db                 import models
+from tinymce.models            import HTMLField
 import os
 import random
 import string
@@ -117,11 +118,12 @@ class Topic(models.Model):
 
 
 class Article(models.Model):
-    topic   = models.ForeignKey(Topic, help_text="The topic this article is related to.")
-    title   = models.CharField(max_length=250, help_text="Title of your article.")
-    slug    = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
-    content = models.TextField(null=True, blank=True)
-    public  = models.BooleanField(default=False, help_text="Is your article public?")
+    topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
+    title      = models.CharField(max_length=250, help_text="Title of your article.")
+    slug       = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
+    content    = HTMLField(null=True, blank=True)
+    public     = models.BooleanField(default=False, help_text="Is your article public?")
+    created_at = models.DateTimeField(auto_now_add=True, default=None, null=True)
 
     def get_absolute_path(self):
         return self.topic.get_absolute_path() + ( "p/%s/" % self.slug )

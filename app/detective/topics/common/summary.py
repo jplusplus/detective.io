@@ -386,12 +386,12 @@ class SummaryResource(Resource):
                     data = {}
                     for i in range(0, len(columns)):
                         if len(re.findall('_id$', columns[i])) == 0:
-                            data[columns[i]] = str(row[i])
+                            data[columns[i]] = str(row[i]).decode('utf-8')
                         else:
                             id = int(row[i])
                     # instanciate a model, save it and map it with the ID defined
                     # in the .csv
-                    item = all_models[entity](**data)
+                    item = all_models[entity].objects.create(**data)
                     item.save()
                     id_mapping[id] = item
             # closing a tempfile deletes it

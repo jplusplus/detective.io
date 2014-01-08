@@ -2,6 +2,7 @@ from .utils                    import get_topics
 from app.detective.permissions import create_permissions
 from django.core.exceptions    import ValidationError
 from django.db                 import models
+from tinymce.models            import HTMLField
 import os
 import random
 import string
@@ -41,10 +42,10 @@ class Topic(models.Model):
     MODULES     = tuple( (topic, topic,) for topic in get_topics() )
     title       = models.CharField(max_length=250, help_text="Title of your topic.")
     # Value will be set for this field if it's blank
-    module      = models.SlugField(choices=MODULES, blank=True, max_length=250, help_text="Module to use to create your topic.")
+    module      = models.SlugField(choices=MODULES, blank=True, max_length=250, help_text="Module to use to create your topic. Leave blank to create a virtual one.")
     slug        = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
-    description = models.TextField(null=True, blank=True, help_text="A short description of what is your topic.")
-    about       = models.TextField(null=True, blank=True, help_text="A longer description of what is your topic.")
+    description = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
+    about       = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public      = models.BooleanField(help_text="Is your topic public?", default=True)
     ontology    = models.FileField(null=True, blank=True, upload_to="ontologies", help_text="Ontology file that descibes your field of study.")
     background  = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
@@ -95,6 +96,7 @@ class Topic(models.Model):
         self.module = self.app_label()
         models.Model.save(self)
         # Then create the permissions related to the label module
+        # @TODO check that the slug changed or not to avoid permissions hijacking
         create_permissions( self.get_models(), app_label=self.slug )
 
     def has_default_ontology(self):
@@ -116,6 +118,28 @@ class Topic(models.Model):
     link.allow_tags = True
 
 
+class Article(models.Model):
+    topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
+    title      = models.CharField(max_length=250, help_text="Title of your article.")
+    slug       = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
+    content    = HTMLField(null=True, blank=True)
+    public     = models.BooleanField(default=False, help_text="Is your article public?")
+    created_at = models.DateTimeField(auto_now_add=True, default=None, null=True)
+
+    def get_absolute_path(self):
+        return self.topic.get_absolute_path() + ( "p/%s/" % self.slug )
+
+    def __unicode__(self):
+        return self.title
+
+    def link(self):
+        path = self.get_absolute_path()
+        return '<a href="%s">%s</a>' % (path, path, )
+    link.allow_tags = True
+
+
+# @TODO finish this feature!
+# This model aims to describe a research alongside a relationship.
 class RelationshipSearch(models.Model):
     # This field is deduced from the relationship name
     subject = models.CharField(editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")

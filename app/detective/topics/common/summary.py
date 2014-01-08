@@ -397,29 +397,43 @@ class SummaryResource(Resource):
             # closing a tempfile deletes it
             tempfile.close()
 
+        inserted_relations = 0
         # then iterate over relations
         for file in relations:
             tempfile = uploaded_to_tempfile(file)
             # create a csv reader
             csv_reader = csv.reader(tempfile, delimiter=';')
-            relation_name = csv_reader.next()[1]
+            csv_header = csv_reader.next()
+            relation_name = csv_header[1]
 
-            # TODO : check that the relation actually exists between the two objects
+            # check that the relation actually exists between the two objects
+            model_from = re.match('(\w+)_id', csv_header[0]).group(1).capitalize()
+            try:
+                getattr(all_models[model_from], relation_name)
 
-            for row in csv_reader:
-                id_from = int(row[0])
-                id_to = int(row[2])
-                if id_mapping[id_from] is not None and id_mapping[id_to] is not None:
-                    getattr(id_mapping[id_from], relation_name).add(id_mapping[id_to])
-                    # TODO : make another loop on id_mapping and call .save() an all instead
-                    # of the following line
-                    id_mapping[id_from].save()
+                for row in csv_reader:
+                    id_from = int(row[0])
+                    id_to = int(row[2])
+                    if id_mapping[id_from] is not None and id_mapping[id_to] is not None:
+                        getattr(id_mapping[id_from], relation_name).add(id_mapping[id_to])
+                        inserted_relations += 1
+            except AttributeError:
+                pass
 
             # closing a tempfile deletes it
             tempfile.close()
 
+        # Save everything
+        for item in id_mapping.values():
+            item.save()
+
         self.log_throttled_access(request)
-        return { 'status' : 'OK' }
+        return {
+            'inserted' : {
+                'objects' : len(id_mapping),
+                'links' : inserted_relations
+            }
+        }
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 

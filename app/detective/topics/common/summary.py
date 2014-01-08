@@ -15,8 +15,12 @@ from tastypie.serializers     import Serializer
 import json
 import re
 import csv
+import logging
 
 from .errors import *
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 class SummaryResource(Resource):
     # Local serializer
@@ -418,7 +422,8 @@ class SummaryResource(Resource):
                         getattr(id_mapping[id_from], relation_name).add(id_mapping[id_to])
                         inserted_relations += 1
             except AttributeError:
-                pass
+                logger.error("the attribute '{attribute}' doesn't exist for the model {model}. Check the header of the {file} file."
+                    .format(attribute=relation_name, model=all_models[model_from], file=file))
 
             # closing a tempfile deletes it
             tempfile.close()

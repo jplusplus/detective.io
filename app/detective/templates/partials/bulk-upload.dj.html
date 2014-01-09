@@ -16,7 +16,7 @@
 			</p>
 
 			<div ng-repeat="field_name in file_fields" class="bottom20">
-				<input type="file" ng-file-select="onFileSelect($files, field_name)" class="btn btn-default">
+				<input type="file" multiple ng-file-select="onFileSelect($files, field_name)" class="btn btn-default">
 			</div>
 
 			<button class="btn btn-default" ng-click="addFileField()">add a file</button>

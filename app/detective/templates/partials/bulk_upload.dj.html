@@ -37,7 +37,7 @@
 			</ul>
 		</p>
 		<form action="" method="post" name="bulk_upload" enctype="multipart/form-data">
-			<input type="file" ng-repeat="field_name in file_fields" name="[[field_name]]" class="btn btn-default" />
+			<input type="file" ng-repeat="field_name in file_fields" name="[[field_name]]" class="btn btn-default" multiple/>
 			<a href="" class="bulk_upload_add_file_field btn btn-default" ng-click="add_file_field()">add a file</a>
 			<input type="submit" ng-click="send()" class="btn btn-primary" />
 		</form>

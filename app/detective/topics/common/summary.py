@@ -401,13 +401,15 @@ class SummaryResource(Resource):
                 for row in csv_reader:
                     data = {}
                     for i in range(0, len(columns)):
-                        if len(re.findall('_id$', columns[i])) == 0:
-                            data[columns[i]] = str(row[i]).decode('utf-8')
-                        else:
+                        if columns[i].endswith("_id"):
+                            # save the given id for future matching
                             id = int(row[i])
+                        else:
+                            # save all the other attributes
+                            data[columns[i]] = str(row[i]).decode('utf-8')
                     # instanciate a model and map it with the ID defined in the .csv
                     item = all_models[entity].objects.create(**data)
-                    id_mapping[id] = item
+                    id_mapping[(entity, id)] = item
             # closing a tempfile deletes it
             tempfile.close()
 
@@ -416,20 +418,20 @@ class SummaryResource(Resource):
         for file in relations:
             tempfile = uploaded_to_tempfile(file)
             # create a csv reader
-            csv_reader = csv.reader(tempfile, delimiter=';')
-            csv_header = csv_reader.next()
+            csv_reader    = csv.reader(tempfile, delimiter=';')
+            csv_header    = csv_reader.next()
             relation_name = csv_header[1]
 
             # check that the relation actually exists between the two objects
             model_from = re.match('(\w+)_id', csv_header[0]).group(1).capitalize()
+            model_to   = re.match('(\w+)_id', csv_header[2]).group(1).capitalize()
             try:
                 getattr(all_models[model_from], relation_name)
-
                 for row in csv_reader:
                     id_from = int(row[0])
                     id_to = int(row[2])
-                    if id_mapping[id_from] is not None and id_mapping[id_to] is not None:
-                        getattr(id_mapping[id_from], relation_name).add(id_mapping[id_to])
+                    if id_mapping[(model_from, id_from)] is not None and id_mapping[(model_to, id_to)] is not None:
+                        getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
                         inserted_relations += 1
             except AttributeError:
                 errors.append(dict(AttributeDoesntExist=dict(Attribute=relation_name,Model=model_from)))
@@ -439,15 +441,18 @@ class SummaryResource(Resource):
             # closing a tempfile deletes it
             tempfile.close()
 
-        # Save everything
-        for item in id_mapping.values():
-            item.save()
+        # Save everything if all is ok
+        saved = 0
+        if not errors:
+            for item in id_mapping.values():
+                item.save()
+                saved += 1
 
         self.log_throttled_access(request)
         return {
             'inserted' : {
-                'objects' : len(id_mapping),
-                'links' : inserted_relations
+                'objects' : saved,
+                'links'   : saved > 0 and inserted_relations or saved
             },
             'errors' : errors
         }

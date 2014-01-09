@@ -18,7 +18,10 @@
         <base href="{% url 'home' %}" />
     </head>
     <body ng-cloak>
-        {% block content %}{% endblock %}
-        {% block extrajs %}{% endblock %}
+        {% load cache %}
+        {% cache 3600 fullpage %}
+            {% block content %}{% endblock %}
+            {% block extrajs %}{% endblock %}
+        {% endcache %}
     </body>
 </html>

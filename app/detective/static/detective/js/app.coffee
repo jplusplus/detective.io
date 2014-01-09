@@ -54,10 +54,6 @@ detective = angular
                         controller: UserCtrl
                         templateUrl: "/partial/signup.html"
                     })
-                     .when('/bulk_upload', {
-                        controller: BulkUploadCtrl
-                        templateUrl: "/partial/bulk_upload.html"
-                    })
                     .when('/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"
@@ -85,6 +81,10 @@ detective = angular
                         controller: ContributeCtrl
                         templateUrl: "/partial/contribute.html"
                         auth: true
+                    })
+                     .when('/:topic/contribute/upload', {
+                        controller: BulkUploadCtrl
+                        templateUrl: "/partial/bulk-upload.html"
                     })
                     .when('/:topic', {
                         controller: ExploreCtrl

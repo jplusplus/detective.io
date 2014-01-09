@@ -1,8 +1,8 @@
 class BulkUploadCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$http', '$routeParams', 'Page', 'Individual']
+    @$inject: ['$scope', '$http', '$routeParams', 'Page', 'Common']
 
-    constructor: (@scope, @http, @routeParams, @Page, @Individual)->
+    constructor: (@scope, @http, @routeParams, @Page, @Common)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -11,18 +11,8 @@ class BulkUploadCtrl
         @scope.select_topic   = @select_topic
         @scope.send           = @send
         @scope.file_fields    = ["file1"] # start with one file field
-
-        config =
-            method  : "GET"
-            url     : "/api/common/v1/topic/"
-            headers :
-                "Content-Type": "application/json"
-        @http(config)
-            .success (response) =>
-                @scope.topics = response.objects
-            .error (message)=>
-                # TODO
-                console.log message
+        # Get the first topic page
+        @scope.topics = @Common.query type: "topic"
 
     send: =>
         form_data = new FormData($('form').get(0))

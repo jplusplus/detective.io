@@ -1,36 +1,42 @@
 class BulkUploadCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$http', '$routeParams', 'Page', 'Common']
+    @$inject: ['$scope', '$http', '$routeParams', 'Page', 'Individual']
 
-    constructor: (@scope, @http, @routeParams, @Page, @Common)->
+    constructor: (@scope, @http, @routeParams, @Page, @Individual)->
+        @Page.title "Bulk Upload", no
+        # ──────────────────────────────────────────────────────────────────────
+        # Scope methods
+        # ──────────────────────────────────────────────────────────────────────
+        @scope.addFileField   = @addFileField
+        @scope.selectTopic    = @selectTopic
+        @scope.submit           = @submit
+        @scope.onFileSelect   = @onFileSelect
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @Page.title "Bulk Upload", no
-        @scope.add_file_field = @add_file_field
-        @scope.select_topic   = @select_topic
-        @scope.send           = @send
-        @scope.file_fields    = ["file1"] # start with one file field
-        # Get the first topic page
-        @scope.topics = @Common.query type: "topic"
+        # Get the current topic as default topic
+        @scope.topic_selected = @routeParams.topic
+        # start with one file field
+        @scope.file_fields    = ["file1"]
+        @scope.files          = {}
 
-    send: =>
-        form_data = new FormData($('form').get(0))
-        $.ajax
-            url         : "/api/#{@scope.topic_selected.slug}/v1/summary/bulk_upload/"
-            type        : "POST"
-            xhr         : $.ajaxSettings.xhr
-            data        : form_data
-            cache       : false
-            contentType : false
-            processData : false
+    # User submit the form
+    submit: =>
+        # Parameters of your request (to build the url)
+        params =
+            topic: @scope.topic_selected
+        # Send the data
+        @Individual.bulk params, @scope.files
 
-    add_file_field: =>
+    # User choose a file
+    onFileSelect: (files, field)=>
+        # Queue the file
+        @scope.files[field] = files
+
+    # User ask for a new file field
+    addFileField: =>
         field_name = "file" + (@scope.file_fields.length + 1)
         @scope.file_fields.push(field_name)
-
-    select_topic: (topic) =>
-        @scope.topic_selected = topic
 
 angular.module('detective').controller 'BulkUploadCtrl', BulkUploadCtrl
 

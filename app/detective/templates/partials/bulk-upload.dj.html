@@ -3,44 +3,25 @@
 
 {% block content %}
 
-<style type="text/css">
-	.BulkUploadCtrl {
-		margin: 20px;
-	}
-	.BulkUploadCtrl .topics .topic {
-		display      : inline-block;
-		margin       : 0px 10px 20px 0;
-		padding      : 5px;
-		border       : 1px solid white;
-		cursor       : pointer;
-	}
-	.BulkUploadCtrl .topics .topic.selected     {background-color: rgb(133, 111, 24);}
-	.BulkUploadCtrl input                       {display: block;}
-	.BulkUploadCtrl input[type=file]            {margin:20px;}
-	.BulkUploadCtrl input[type=submit]          {margin-top:20px;}
-</style>
+	<div class="margin20">
 
-<div class="BulkUploadCtrl" ng-controller="BulkUploadCtrl">
+		<form name="uploadForm" ng-submit="submit()">
 
-	<h2>Choose the relative topic</h2>
-	<div class="topics">
-		<div ng-repeat="topic in topics" class="topic" ng-class="{selected: topic_selected == topic}" ng-click="select_topic(topic)">
-			[[ topic.title ]]
-		</div>
-	</div>
-	<div ng-if="topic_selected">
-		<h2>Upload objects and relationship</h2>
-		<p>Notes:
-			<ul>
-				<li>Header for objects should respect this syntax : &lt;obj_name&gt;_id; &lt;field_name1&gt;; &lt;field_name2&gt; etc...</li>
-				<li>Header for relationship should respect this syntax : &lt;obj1_name&gt;_id;&lt;relation_type&gt;; &lt;obj2_name&gt;_id</li>
-			</ul>
-		</p>
-		<form action="" method="post" name="bulk_upload" enctype="multipart/form-data">
-			<input type="file" ng-repeat="field_name in file_fields" name="[[field_name]]" class="btn btn-default" />
-			<a href="" class="bulk_upload_add_file_field btn btn-default" ng-click="add_file_field()">add a file</a>
-			<input type="submit" ng-click="send()" class="btn btn-primary" />
+			<h2>Upload objects and relationship</h2>
+			<p>Notes:
+				<ul>
+					<li>Header for objects should respect this syntax : &lt;obj_name&gt;_id; &lt;field_name1&gt;; &lt;field_name2&gt; etc...</li>
+					<li>Header for relationship should respect this syntax : &lt;obj1_name&gt;_id;&lt;relation_type&gt;; &lt;obj2_name&gt;_id</li>
+				</ul>
+			</p>
+
+			<div ng-repeat="field_name in file_fields" class="bottom20">
+				<input type="file" ng-file-select="onFileSelect($files, field_name)" class="btn btn-default">
+			</div>
+
+			<button class="btn btn-default" ng-click="addFileField()">add a file</button>
+			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>
+
 	</div>
-</div>
 {% endblock %}

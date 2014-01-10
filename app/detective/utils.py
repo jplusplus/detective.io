@@ -230,3 +230,16 @@ def uploaded_to_tempfile(uploaded_file):
     uploaded_file.seek(cursor_pos)
 
     return temporary
+
+def open_csv(csv_file):
+    """ 
+    Return a csv reader for the reading the given file.
+    Deduce the format of the csv file.
+    """
+    import csv
+    dialect = csv.Sniffer().sniff(csv_file.read(1024))
+    csv_file.seek(0)
+    reader = csv.reader(csv_file, dialect)
+    return reader
+
+# EOF

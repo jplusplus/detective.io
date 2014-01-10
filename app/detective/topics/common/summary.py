@@ -2,7 +2,6 @@
 from app.detective.models     import Topic
 from app.detective.neomatch   import Neomatch
 from app.detective.register   import topics_rules
-from app.detective.utils      import get_model_fields, get_topic_models, uploaded_to_tempfile, open_csv, to_underscores, to_class_name
 from difflib                  import SequenceMatcher
 from django.core.paginator    import Paginator, InvalidPage
 from django.core.urlresolvers import resolve
@@ -12,6 +11,7 @@ from tastypie                 import http
 from tastypie.exceptions      import ImmediateHttpResponse
 from tastypie.resources       import Resource
 from tastypie.serializers     import Serializer
+import app.detective.utils    as utils
 import json
 import re
 import logging
@@ -142,10 +142,10 @@ class SummaryResource(Resource):
         rulesManager = topics_rules()
         # Fetch every registered model
         # to print out its rules
-        for model in get_topic_models(self.topic.module):
+        for model in utils.get_topic_models(self.topic.module):
             name                = model.__name__.lower()
             rules               = rulesManager.model(model).all()
-            fields              = get_model_fields(model)
+            fields              = utils.get_model_fields(model)
             verbose_name        = getattr(model._meta, "verbose_name", name).title()
             verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()
 
@@ -372,13 +372,13 @@ class SummaryResource(Resource):
 
         try:
             # retrieve all models in current topic
-            all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.module))
+            all_models = dict((model.__name__, model) for model in utils.get_topic_models(self.topic.module))
 
             # flattern the list of files
             files = [file for sublist in request.FILES.lists() for file in sublist[1]]
             # iterate over all files and dissociate entities .csv from relations .csv
             for file in files:
-                csv_reader = open_csv(file)
+                csv_reader = utils.open_csv(file)
                 header = csv_reader.next()
                 assert len(header) > 1, "header should have at least 2 columns"
                 assert header[0].endswith("_id"), "First column should begin with a header like <model_name>_id"
@@ -387,7 +387,7 @@ class SummaryResource(Resource):
                     relations.append(file)
                 else:
                     # this is an entities file
-                    model_name = to_class_name(header[0].replace("_id", ""))
+                    model_name = utils.to_class_name(header[0].replace("_id", ""))
                     if model_name in all_models.keys():
                         entities[model_name] = file
                     else:
@@ -395,14 +395,14 @@ class SummaryResource(Resource):
 
             # first iterate over entities
             for entity, file in entities.items():
-                tempfile   = uploaded_to_tempfile(file)
-                csv_reader = open_csv(tempfile)
+                tempfile   = utils.uploaded_to_tempfile(file)
+                csv_reader = utils.open_csv(tempfile)
                 header     = csv_reader.next()
                 # must check that all columns map to an existing model field
-                field_names = [field['name'] for field in get_model_fields(all_models[entity])]
+                field_names = [field['name'] for field in utils.get_model_fields(all_models[entity])]
                 columns = []
                 for column in header[1:]:
-                    column = to_underscores(column)
+                    column = utils.to_underscores(column)
                     if column is not '':
                         if not column in field_names:
                             raise ColumnUnknow(file=file.name, column=column, model=entity, attributes_available=field_names)
@@ -433,13 +433,13 @@ class SummaryResource(Resource):
             inserted_relations = 0
             # then iterate over relations
             for file in relations:
-                tempfile = uploaded_to_tempfile(file)
+                tempfile = utils.uploaded_to_tempfile(file)
                 # create a csv reader
-                csv_reader    = open_csv(tempfile)
+                csv_reader    = utils.open_csv(tempfile)
                 csv_header    = csv_reader.next()
-                relation_name = to_underscores(csv_header[1])
-                model_from    = to_class_name(csv_header[0].replace("_id", ""))
-                model_to      = to_class_name(csv_header[2].replace("_id", ""))
+                relation_name = utils.to_underscores(csv_header[1])
+                model_from    = utils.to_class_name(csv_header[0].replace("_id", ""))
+                model_to      = utils.to_class_name(csv_header[2].replace("_id", ""))
                 # check that the relation actually exists between the two objects
                 try:
                     getattr(all_models[model_from], relation_name)
@@ -449,7 +449,7 @@ class SummaryResource(Resource):
                         model_from       = model_from,
                         model_to         = model_to,
                         relation_name    = relation_name,
-                        fields_available = [field['name'] for field in get_model_fields(all_models[model_from])],
+                        fields_available = [field['name'] for field in utils.get_model_fields(all_models[model_from])],
                         error            = e)
                 for row in csv_reader:
                     id_from = row[0]
@@ -529,7 +529,7 @@ class SummaryResource(Resource):
     def get_models_output(self):
         # Select only some atribute
         output = lambda m: {'name': self.topic.slug + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
-        return [ output(m) for m in get_topic_models(self.topic.module) ]
+        return [ output(m) for m in utils.get_topic_models(self.topic.module) ]
 
 
     def ngrams(self, input):

@@ -2,7 +2,7 @@
 from app.detective.models     import Topic
 from app.detective.neomatch   import Neomatch
 from app.detective.register   import topics_rules
-from app.detective.utils      import get_model_fields, get_topic_models, uploaded_to_tempfile
+from app.detective.utils      import get_model_fields, get_topic_models, uploaded_to_tempfile, open_csv, to_underscores, to_class_name
 from difflib                  import SequenceMatcher
 from django.core.paginator    import Paginator, InvalidPage
 from django.core.urlresolvers import resolve
@@ -14,7 +14,6 @@ from tastypie.resources       import Resource
 from tastypie.serializers     import Serializer
 import json
 import re
-import csv
 import logging
 
 from .errors import *
@@ -338,6 +337,27 @@ class SummaryResource(Resource):
         return object_list
 
     def summary_bulk_upload(self, request, **kwargs):
+        # Define Exceptions
+        topic = self.topic
+        class Error (Exception):
+            """
+            Generic Custom Exception for this endpoint.
+            Include the topic.
+            """
+            def __init__(self, **kwargs):
+                """ set the topic and add all the parameters as attributes """
+                self.topic = topic
+                for key, value in kwargs.items():
+                    setattr(self, key, value)
+            def __str__(self):
+                return self.__dict__
+
+        class AttributeDoesntExist (Error): pass
+        class WrongCSVSyntax       (Error): pass
+        class ColumnUnknow         (Error): pass
+        class ModelDoesntExist     (Error): pass
+        class RelationDoesntExist  (Error): pass
+        class ValidationError      (Error): pass
         # only allow POST requests
         self.method_check(request, allowed=['post'])
 
@@ -345,117 +365,135 @@ class SummaryResource(Resource):
         if not request.user.id:
             raise UnauthorizedError('This method require authentication')
 
-        entities = dict()
-        relations = []
-        errors = []
+        entities   = {}
+        relations  = []
+        errors     = []
+        id_mapping = {}
 
-        # retrieve all models in current topic
-        all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.module))
+        try:
+            # retrieve all models in current topic
+            all_models = dict((model.__name__, model) for model in get_topic_models(self.topic.module))
 
-        # flattern the list of files
-        files = [file for sublist in request.FILES.lists() for file in sublist[1]]
-        # TODO: Check headers
-        # iterate over all files and dissociate entities .csv from relations .csv
-        for file in files:
-            # use .rstrip() to remove trailing \n
-            file_header = file.readline().rstrip()
-            if len(re.findall('_id;?$', file_header)) is 0:
-                # extract the model name (match.group(1))
-                match = re.match('^(\w+)_id;', file_header)
-                if match.group(1) is not None:
-                    model_name = match.group(1).capitalize()
-                    # check that this model actually exists in the current topic
+            # flattern the list of files
+            files = [file for sublist in request.FILES.lists() for file in sublist[1]]
+            # iterate over all files and dissociate entities .csv from relations .csv
+            for file in files:
+                csv_reader = open_csv(file)
+                header = csv_reader.next()
+                assert len(header) > 1, "header should have at least 2 columns"
+                assert header[0].endswith("_id"), "First column should begin with a header like <model_name>_id"
+                if len(header) >=3 and header[0].endswith("_id") and header[2].endswith("_id"):
+                    # this is a relationship file
+                    relations.append(file)
+                else:
+                    # this is an entities file
+                    model_name = to_class_name(header[0].replace("_id", ""))
                     if model_name in all_models.keys():
                         entities[model_name] = file
                     else:
-                        errors.append(dict(ModelDoesntExist=dict(Model=model_name, File=file)))
-                        logger.error("the model '{model}' doesn't exist. Check the header of the {file} file."
-                            .format(model=model_name, file=file))
+                        raise ModelDoesntExist(model=model_name, file=file)
+
+            # first iterate over entities
+            for entity, file in entities.items():
+                tempfile   = uploaded_to_tempfile(file)
+                csv_reader = open_csv(tempfile)
+                header     = csv_reader.next()
+                # must check that all columns map to an existing model field
+                field_names = [field['name'] for field in get_model_fields(all_models[entity])]
+                columns = []
+                for column in header[1:]:
+                    column = to_underscores(column)
+                    if column is not '':
+                        if not column in field_names:
+                            raise ColumnUnknow(file=file.name, column=column, model=entity, attributes_available=field_names)
+                            break
+                        columns.append(column)
                 else:
-                    # TODO : error for 'no <model_name>_id column'
-                    # TODO : log error
-                    errors.append(dict())
-            else:
-                relations.append(file)
+                    # here, we know that all columns are valid
+                    for row in csv_reader:
+                        data = {}
+                        id   = row[0]
+                        for i, column in enumerate(columns):
+                            data[column] = str(row[i+1]).decode('utf-8')
+                        # instanciate a model
+                        # NOTE: The following line is not working, it could raise a ValidationError for nothing. Don't know why.
+                        # Then we iterate over all the parameters and use setattr.
+                        # item = all_models[entity].objects.create(**data)
+                        item = all_models[entity].objects.create()
+                        for key, value in data.items():
+                            try:
+                                setattr(item, key, value)
+                            except Exception as e:
+                                raise ValidationError(data=data, model=entity, key=key, value=value, error=e)
+                        # map the object with the ID defined in the .csv
+                        id_mapping[(entity, id)] = item
+                # closing a tempfile deletes it
+                tempfile.close()
 
-        id_mapping = dict()
-
-        # first iterate over entities
-        for entity, file in entities.items():
-            tempfile = uploaded_to_tempfile(file)
-            # create a csv reader
-            csv_reader = csv.reader(tempfile, delimiter=';')
-            # must check that all columns map to an existing model field
-            field_names = [field['name'] for field in get_model_fields(all_models[entity])]
-            columns = []
-            for column in csv_reader.next():
-                if column is not '':
-                    if len(re.findall('_id$', column)) == 0 and not column in field_names:
-                        errors.append(dict(AttributeDoesntExist=dict(Attribute=column, Model=entity)))
-                        logger.error("the attribute '{column}' doesn't exist for the model {entity}. Check the header of the {file} file."
-                            .format(attribute=relation_name, model=all_models[model_from], file=file))
-                        break
-                    columns.append(column)
-            else:
-                # here, we know that all columns are valid
+            inserted_relations = 0
+            # then iterate over relations
+            for file in relations:
+                tempfile = uploaded_to_tempfile(file)
+                # create a csv reader
+                csv_reader    = open_csv(tempfile)
+                csv_header    = csv_reader.next()
+                relation_name = to_underscores(csv_header[1])
+                model_from    = to_class_name(csv_header[0].replace("_id", ""))
+                model_to      = to_class_name(csv_header[2].replace("_id", ""))
+                # check that the relation actually exists between the two objects
+                try:
+                    getattr(all_models[model_from], relation_name)
+                except Exception as e:
+                    raise RelationDoesntExist(
+                        file             = file.name,
+                        model_from       = model_from,
+                        model_to         = model_to,
+                        relation_name    = relation_name,
+                        fields_available = [field['name'] for field in get_model_fields(all_models[model_from])],
+                        error            = e)
                 for row in csv_reader:
-                    data = {}
-                    for i in range(0, len(columns)):
-                        if columns[i].endswith("_id"):
-                            # save the given id for future matching
-                            id = int(row[i])
-                        else:
-                            # save all the other attributes
-                            data[columns[i]] = str(row[i]).decode('utf-8')
-                    # instanciate a model and map it with the ID defined in the .csv
-                    item = all_models[entity].objects.create(**data)
-                    id_mapping[(entity, id)] = item
-            # closing a tempfile deletes it
-            tempfile.close()
+                    id_from = row[0]
+                    id_to   = row[2]
+                    if id_to and id_from:
+                        try:
+                            getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
+                            inserted_relations += 1
+                        except Exception as e:
+                            raise Error(
+                                file             = file.name,
+                                model_from       = model_from,
+                                id_from          = id_from,
+                                model_to         = model_to,
+                                id_to            = id_to,
+                                relation_name    = relation_name,
+                                error            = e)
+                    else:
+                        # A key is missing (id_from or id_to) but we don't want to stop the parsing.
+                        # Then we store the wrong line to return it to the user.
+                        errors.append(dict(WarningInformationIsMissing=dict(file=file.name, row=row, line=csv_reader.line_num)))
 
-        inserted_relations = 0
-        # then iterate over relations
-        for file in relations:
-            tempfile = uploaded_to_tempfile(file)
-            # create a csv reader
-            csv_reader    = csv.reader(tempfile, delimiter=';')
-            csv_header    = csv_reader.next()
-            relation_name = csv_header[1]
+                tempfile.close()
 
-            # check that the relation actually exists between the two objects
-            model_from = re.match('(\w+)_id', csv_header[0]).group(1).capitalize()
-            model_to   = re.match('(\w+)_id', csv_header[2]).group(1).capitalize()
-            try:
-                getattr(all_models[model_from], relation_name)
-                for row in csv_reader:
-                    id_from = int(row[0])
-                    id_to = int(row[2])
-                    if id_mapping[(model_from, id_from)] is not None and id_mapping[(model_to, id_to)] is not None:
-                        getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
-                        inserted_relations += 1
-            except AttributeError:
-                errors.append(dict(AttributeDoesntExist=dict(Attribute=relation_name,Model=model_from)))
-                logger.error("the attribute '{attribute}' doesn't exist for the model {model}. Check the header of the {file} file."
-                    .format(attribute=relation_name, model=all_models[model_from], file=file))
+            # Save everything if all is ok
+            saved = 0
+            if not errors:
+                for item in id_mapping.values():
+                    item.save()
 
-            # closing a tempfile deletes it
-            tempfile.close()
-
-        # Save everything if all is ok
-        saved = 0
-        if not errors:
-            for item in id_mapping.values():
-                item.save()
-                saved += 1
-
-        self.log_throttled_access(request)
-        return {
-            'inserted' : {
-                'objects' : saved,
-                'links'   : saved > 0 and inserted_relations or saved
-            },
-            'errors' : errors
-        }
+            self.log_throttled_access(request)
+            return {
+                'inserted' : {
+                    'objects' : saved,
+                    'links'   : saved > 0 and inserted_relations or saved
+                },
+                "errors" : errors
+            }
+        except Exception as e:
+            import traceback
+            logger.error(traceback.format_exc())
+            return {
+                "errors" : [{e.__class__.__name__ : e}]
+            }
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 

@@ -495,6 +495,7 @@ class SummaryResource(Resource):
                             errors.append(
                                 WarningKeyUnknown(
                                     file             = file.name,
+                                    line             = csv_reader.line_num,
                                     model_from       = model_from,
                                     id_from          = id_from,
                                     model_to         = model_to,
@@ -504,8 +505,10 @@ class SummaryResource(Resource):
                                 )
                             )
                         except Exception as e:
+                            # Error unknown, we break the process to alert the user
                             raise Error(
                                 file             = file.name,
+                                line             = csv_reader.line_num,
                                 model_from       = model_from,
                                 id_from          = id_from,
                                 model_to         = model_to,
@@ -536,13 +539,13 @@ class SummaryResource(Resource):
                     'objects' : saved,
                     'links'   : inserted_relations
                 },
-                "errors" : sorted([dict([(e.__class__.__name__, e)]) for e in errors])
+                "errors" : sorted([dict([(e.__class__.__name__, e.__dict__)]) for e in errors])
             }
         except Exception as e:
             import traceback
             logger.error(traceback.format_exc())
             return {
-                "errors" : [{e.__class__.__name__ : e}]
+                "errors" : [{e.__class__.__name__ : e.__dict__}]
             }
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)

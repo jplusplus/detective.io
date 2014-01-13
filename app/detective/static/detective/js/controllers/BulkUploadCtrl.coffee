@@ -22,14 +22,15 @@ class BulkUploadCtrl
 
     # User submit the form
     submit: =>
+        @scope.feedback = null
         # Parameters of your request (to build the url)
         params =
             topic: @scope.topic_selected
         # Send the data
-        @Individual.bulk params, @scope.files
+        @scope.feedback = @Individual.bulk params, @scope.files
 
     # User choose a file
-    onFileSelect: (files, field)=>
+    onFileSelect: (files, field) =>
         # Queue the file
         @scope.files[field] = files
 

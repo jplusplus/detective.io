@@ -23,5 +23,13 @@
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>
 
+		<div class="feedback">
+			<div class="error" ng-repeat="error in feedback.errors">
+				<div ng-repeat="(key, value) in error">
+					[[key]]: [[value]]
+				</div>
+			</div>
+		</div>
+
 	</div>
 {% endblock %}

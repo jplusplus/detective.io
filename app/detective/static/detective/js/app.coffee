@@ -82,6 +82,10 @@ detective = angular
                         templateUrl: "/partial/contribute.html"
                         auth: true
                     })
+                    .when('/:topic/contribute/upload', {
+                        controller: BulkUploadCtrl
+                        templateUrl: "/partial/bulk-upload.html"
+                    })
                     .when('/:topic', {
                         controller: ExploreCtrl
                         # Allow a dynamic loading by setting the templateUrl within controller

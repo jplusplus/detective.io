@@ -9,8 +9,11 @@ from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
 from django.db.models.query             import QuerySet
 from django.http                        import Http404, HttpResponseBadRequest
+from django.http                        import Http404
+from neo4django.db                      import connection
 from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
+from neo4django.rest_utils              import id_from_url
 from tastypie                           import fields
 from tastypie.authentication            import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization             import Authorization
@@ -329,6 +332,7 @@ class IndividualResource(ModelResource):
             url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
             url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/graph%s$" % params, self.wrap_view('get_graph'), name="api_get_graph"),
         ]
 
 
@@ -473,3 +477,34 @@ class IndividualResource(ModelResource):
             node.save()
         return self.create_response(request, data)
 
+    def get_graph(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+
+        nodes = []
+
+        query = """
+            START root=node({0})
+            MATCH (root)-[:`<<INSTANCE>>`]-(type)
+            RETURN root as x, type.model_name as type
+        """.format(kwargs['pk'])
+        network = connection.cypher(query).to_dicts()
+
+        network[0]['x']['data']['type'] = network[0]['type']
+        network[0]['x']['data']['type'] = network[0]['type']
+
+        query = """
+            START root=node({0})
+            MATCH (root)-[r]-(x)-[:`<<INSTANCE>>`]-(type)
+            WHERE type(r) <> '<<INSTANCE>>'
+            RETURN DISTINCT x, type.model_name as type
+        """.format(kwargs['pk'])
+        network[len(network):] = connection.cypher(query).to_dicts()
+
+        for x in network:
+            x['x']['data']['type'] = x['type']
+            x['x']['data']['id'] = id_from_url(x['x']['self'])
+            nodes.append(x['x']['data'])
+
+        self.log_throttled_access(request)
+        return self.create_response(request, nodes)

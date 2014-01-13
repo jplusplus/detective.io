@@ -1,5 +1,5 @@
 detective = angular
-    .module('detective', ["detectiveServices", "detectiveFilters", "ui.bootstrap", "monospaced.elastic", "angularFileUpload"])
+    .module('detective', ["detectiveServices", "detectiveFilters", "ui.bootstrap", "monospaced.elastic", "detectiveFilters", "ui.bootstrap", "monospaced.elastic", "angularFileUpload", "ngProgressLite"])
     .run(
         [
             '$rootScope',
@@ -81,10 +81,6 @@ detective = angular
                         controller: ContributeCtrl
                         templateUrl: "/partial/contribute.html"
                         auth: true
-                    })
-                     .when('/:topic/contribute/upload', {
-                        controller: BulkUploadCtrl
-                        templateUrl: "/partial/bulk-upload.html"
                     })
                     .when('/:topic', {
                         controller: ExploreCtrl

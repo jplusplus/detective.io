@@ -1,6 +1,6 @@
 {
   "name": "detective",
-  "version": "0.0.6",
+  "version": "1.1.0",
   "dependencies": {
     "angular-elastic": "2.2.0",
     "angular-ui-bootstrap-bower": "0.6.0",
@@ -14,7 +14,8 @@
     "underscore": "1.5.2",
     "unstable-angular-complete": "1.1.5",
     "kartograph.js": "git://github.com/kartograph/kartograph.js",
-    "jquery": "1.9.*",
-    "ng-file-upload": "~1.2.3"
+    "jquery": "1.9.1",
+    "ng-file-upload": "~1.2.3",
+    "ngprogress-lite": "~1.0.4"
   }
 }

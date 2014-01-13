@@ -11,6 +11,7 @@ from tastypie                 import http
 from tastypie.exceptions      import ImmediateHttpResponse
 from tastypie.resources       import Resource
 from tastypie.serializers     import Serializer
+
 import app.detective.utils    as utils
 import json
 import re
@@ -352,12 +353,15 @@ class SummaryResource(Resource):
             def __str__(self):
                 return self.__dict__
 
-        class AttributeDoesntExist (Error): pass
-        class WrongCSVSyntax       (Error): pass
-        class ColumnUnknow         (Error): pass
-        class ModelDoesntExist     (Error): pass
-        class RelationDoesntExist  (Error): pass
-        class ValidationError      (Error): pass
+        class WarningCastingValueFail     (Error): pass
+        class WarningValidationError      (Error): pass
+        class WarningKeyUnknown           (Error): pass
+        class WarningInformationIsMissing (Error): pass
+        class AttributeDoesntExist        (Error): pass
+        class WrongCSVSyntax              (Error): pass
+        class ColumnUnknow                (Error): pass
+        class ModelDoesntExist            (Error): pass
+        class RelationDoesntExist         (Error): pass
         # only allow POST requests
         self.method_check(request, allowed=['post'])
 
@@ -373,7 +377,6 @@ class SummaryResource(Resource):
         try:
             # retrieve all models in current topic
             all_models = dict((model.__name__, model) for model in utils.get_topic_models(self.topic.module))
-
             # flattern the list of files
             files = [file for sublist in request.FILES.lists() for file in sublist[1]]
             # iterate over all files and dissociate entities .csv from relations .csv
@@ -394,12 +397,17 @@ class SummaryResource(Resource):
                         raise ModelDoesntExist(model=model_name, file=file)
 
             # first iterate over entities
+            logger.debug("BulkUpload: creating entities")
             for entity, file in entities.items():
                 tempfile   = utils.uploaded_to_tempfile(file)
                 csv_reader = utils.open_csv(tempfile)
                 header     = csv_reader.next()
                 # must check that all columns map to an existing model field
-                field_names = [field['name'] for field in utils.get_model_fields(all_models[entity])]
+                fields      = utils.get_model_fields(all_models[entity])
+                fields_types = {}
+                for field in fields:
+                    fields_types[field['name']] = field['type']
+                field_names = [field['name'] for field in fields]
                 columns = []
                 for column in header[1:]:
                     column = utils.to_underscores(column)
@@ -407,31 +415,56 @@ class SummaryResource(Resource):
                         if not column in field_names:
                             raise ColumnUnknow(file=file.name, column=column, model=entity, attributes_available=field_names)
                             break
-                        columns.append(column)
+                        column_type = fields_types[column]
+                        columns.append((column, column_type))
                 else:
                     # here, we know that all columns are valid
                     for row in csv_reader:
                         data = {}
                         id   = row[0]
-                        for i, column in enumerate(columns):
-                            data[column] = str(row[i+1]).decode('utf-8')
-                        # instanciate a model
-                        # NOTE: The following line is not working, it could raise a ValidationError for nothing. Don't know why.
-                        # Then we iterate over all the parameters and use setattr.
-                        # item = all_models[entity].objects.create(**data)
-                        item = all_models[entity].objects.create()
-                        for key, value in data.items():
+                        for i, (column, column_type) in enumerate(columns):
+                            value = str(row[i+1]).decode('utf-8')
+                            # cast value if needed
+                            if value:
+                                try:
+                                    if "Integer" in column_type:
+                                        value = int(value)
+                                    # TODO: cast float
+                                except Exception as e:
+                                    errors.append(
+                                        WarningCastingValueFail(
+                                            column_name = column,
+                                            value       = value,
+                                            type        = column_type,
+                                            data        = data, model=entity,
+                                            file        = file.name,
+                                            line        = csv_reader.line_num,
+                                            error       = e
+                                        )
+                                    )
+                                    break
+                                data[column] = value
+                        else:
+                            # instanciate a model
                             try:
-                                setattr(item, key, value)
+                                item = all_models[entity].objects.create(**data)
                             except Exception as e:
-                                raise ValidationError(data=data, model=entity, key=key, value=value, error=e)
-                        # map the object with the ID defined in the .csv
-                        id_mapping[(entity, id)] = item
+                                errors.append(
+                                    WarningValidationError(
+                                        data  = data,
+                                        model = entity,
+                                        file  = file.name,
+                                        line  = csv_reader.line_num,
+                                        error = e)
+                                    )
+                            # map the object with the ID defined in the .csv
+                            id_mapping[(entity, id)] = item
                 # closing a tempfile deletes it
                 tempfile.close()
 
             inserted_relations = 0
             # then iterate over relations
+            logger.debug("BulkUpload: creating relations")
             for file in relations:
                 tempfile = utils.uploaded_to_tempfile(file)
                 # create a csv reader
@@ -458,6 +491,19 @@ class SummaryResource(Resource):
                         try:
                             getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
                             inserted_relations += 1
+                        except KeyError as e:
+                            errors.append(
+                                WarningKeyUnknown(
+                                    file             = file.name,
+                                    model_from       = model_from,
+                                    id_from          = id_from,
+                                    model_to         = model_to,
+                                    id_to            = id_to,
+                                    relation_name    = relation_name,
+                                    error            = e
+                                )
+                            )
+                            break
                         except Exception as e:
                             raise Error(
                                 file             = file.name,
@@ -470,15 +516,20 @@ class SummaryResource(Resource):
                     else:
                         # A key is missing (id_from or id_to) but we don't want to stop the parsing.
                         # Then we store the wrong line to return it to the user.
-                        errors.append(dict(WarningInformationIsMissing=dict(file=file.name, row=row, line=csv_reader.line_num)))
+                        errors.append(
+                            WarningInformationIsMissing(
+                                file=file.name, row=row, line=csv_reader.line_num, id_to=id_to, id_from=id_from
+                            )
+                        )
 
                 tempfile.close()
 
-            # Save everything if all is ok
+            # Save everything
             saved = 0
-            if not errors:
-                for item in id_mapping.values():
-                    item.save()
+            logger.debug("BulkUpload: saving %d objects" % (len(id_mapping)))
+            for item in id_mapping.values():
+                item.save()
+                saved += 1
 
             self.log_throttled_access(request)
             return {
@@ -486,7 +537,7 @@ class SummaryResource(Resource):
                     'objects' : saved,
                     'links'   : saved > 0 and inserted_relations or saved
                 },
-                "errors" : errors
+                "errors" : sorted([dict([(e.__class__.__name__, e)]) for e in errors])
             }
         except Exception as e:
             import traceback

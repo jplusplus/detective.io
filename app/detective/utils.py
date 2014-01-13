@@ -239,6 +239,7 @@ def open_csv(csv_file):
     import csv
     dialect = csv.Sniffer().sniff(csv_file.read(1024))
     csv_file.seek(0)
+    dialect.doublequote = True
     reader = csv.reader(csv_file, dialect)
     return reader
 

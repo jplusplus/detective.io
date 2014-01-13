@@ -1,4 +1,4 @@
-(angular.module 'detective').directive "graphviz", ['$filter', '$window' , '$routeParams', ($filter, $window, $routeParams) ->
+(angular.module 'detective').directive "graphviz", ['$filter', '$routeParams', ($filter, $routeParams) ->
     restrict: "AE"
     template : "<div></div>"
     replace : yes
@@ -36,14 +36,11 @@
             link = (((do ((svg.selectAll '.link').data bilinks).enter).append 'path')
                 .attr 'class', 'link')
 
-            node = (((((do ((svg.selectAll '.node').data scope.nodes).enter).append 'circle')
-                .attr 'class', 'node').attr 'r', 30)
+            node = (((((((do ((svg.selectAll '.node').data scope.nodes).enter).append 'a')
+                .attr 'xlink:href', (d) -> "/#{$routeParams.topic}/#{do d.type.toLowerCase}/#{d.id}")
+                .append 'circle').attr 'class', 'node').attr 'r', 30)
                 .style 'stroke', (d) -> ($filter "strToColor") d.type)
                 .style 'fill', (d) -> ($filter "strToColor") d.type
-
-            node.on 'click', (d) ->
-                path = "/#{$routeParams.topic}/#{do d.type.toLowerCase}/#{d.id}"
-                $window.location.href = path
 
             node.on 'mouseover', (d) ->
                 (svg.selectAll '.link').attr 'class', (link) ->

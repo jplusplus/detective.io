@@ -503,7 +503,6 @@ class SummaryResource(Resource):
                                     error            = e
                                 )
                             )
-                            break
                         except Exception as e:
                             raise Error(
                                 file             = file.name,
@@ -535,7 +534,7 @@ class SummaryResource(Resource):
             return {
                 'inserted' : {
                     'objects' : saved,
-                    'links'   : saved > 0 and inserted_relations or saved
+                    'links'   : inserted_relations
                 },
                 "errors" : sorted([dict([(e.__class__.__name__, e)]) for e in errors])
             }

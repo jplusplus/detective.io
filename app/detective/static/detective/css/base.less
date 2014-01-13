@@ -821,3 +821,25 @@ footer {
 		padding:10px;
 	}
 }
+
+/*
+** GraphViz
+*/
+
+svg {
+	.node {
+		stroke: @brand-secondary;
+		stroke-width: 3px;
+		cursor: pointer;
+
+		&:hover {
+			stroke-width: 5px;
+		}
+	}
+
+	.link {
+		fill: none;
+		stroke-width: 4px;
+		stroke: @brand-primary;
+	}
+}

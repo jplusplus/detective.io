@@ -33,6 +33,8 @@
             svg.attr 'width', 800
             svg.attr 'height', 600
 
+            tooltip = ((d3.select element[0]).append 'div').attr 'class', 'tooltip'
+
             link = (((do ((svg.selectAll '.link').data bilinks).enter).append 'path')
                 .attr 'class', 'link')
 
@@ -45,7 +47,13 @@
             node.on 'mouseover', (d) ->
                 (svg.selectAll '.link').attr 'class', (link) ->
                     if link[0].index is d.index or link[2].index is d.index then 'link hover' else 'link'
-            node.on 'mouseleave', (d) -> (svg.selectAll '.link.hover').attr 'class', 'link'
+                ((do tooltip.transition).duration 200).style 'opacity', .9
+                tooltip.html "#{d.type} ##{d.id} : #{d.name}"
+                tooltip.style 'left', "#{d3.event.layerX}px"
+                tooltip.style 'top', "#{d3.event.layerY}px"
+            node.on 'mouseleave', (d) ->
+                ((do tooltip.transition).duration 200).style 'opacity', 0
+                (svg.selectAll '.link.hover').attr 'class', 'link'
 
             #node.call graph.drag
 

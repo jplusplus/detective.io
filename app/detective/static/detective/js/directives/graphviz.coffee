@@ -40,13 +40,15 @@
                 .attr 'class', 'node').attr 'r', 30)
                 .style 'stroke', (d) -> ($filter "strToColor") d.type)
                 .style 'fill', (d) -> ($filter "strToColor") d.type
+
             node.on 'click', (d) ->
                 path = "/#{$routeParams.topic}/#{do d.type.toLowerCase}/#{d.id}"
                 $window.location.href = path
-            # node.on 'mouseover', (d) ->
-            #     (svg.selectAll '.link').attr 'class', (link) ->
-            #         if link[0].index is d.index or link[2].index is d.index then 'link hover' else 'link'
-            # node.on 'mouseleave', (d) -> (svg.selectAll '.link.hover').attr 'class', 'link'
+
+            node.on 'mouseover', (d) ->
+                (svg.selectAll '.link').attr 'class', (link) ->
+                    if link[0].index is d.index or link[2].index is d.index then 'link hover' else 'link'
+            node.on 'mouseleave', (d) -> (svg.selectAll '.link.hover').attr 'class', 'link'
 
             #node.call graph.drag
 

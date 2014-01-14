@@ -448,6 +448,8 @@ class SummaryResource(Resource):
                             # instanciate a model
                             try:
                                 item = all_models[entity].objects.create(**data)
+                                # map the object with the ID defined in the .csv
+                                id_mapping[(entity, id)] = item
                             except Exception as e:
                                 errors.append(
                                     WarningValidationError(
@@ -457,8 +459,6 @@ class SummaryResource(Resource):
                                         line  = csv_reader.line_num,
                                         error = e)
                                     )
-                            # map the object with the ID defined in the .csv
-                            id_mapping[(entity, id)] = item
                 # closing a tempfile deletes it
                 tempfile.close()
 

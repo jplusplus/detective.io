@@ -481,30 +481,64 @@ class IndividualResource(ModelResource):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
 
+        def reduce_result(data):
+            all_IDs = dict()
+
+            def reducer(hash, iterator):
+                tmp = hash
+                for item in iterator:
+                    tmp.setdefault(item, dict())
+                    tmp = tmp[item]
+                return hash
+
+            def jsonize(node):
+                if node.keys()[0] in all_IDs.keys():
+                    temp = dict(data=all_IDs[node.keys()[0]])
+                    if not node[node.keys()[0]].keys()[0] is None:
+                        temp['link'] = [jsonize({key:node[node.keys()[0]][key]}) for key in node[node.keys()[0]].keys()]
+                    return temp
+
+            arr = []
+            for row in data:
+                tmp_arr = []
+                for key in ['root','l1','l2']:
+                    if row[key]:
+                        id = id_from_url(row[key]['self'])
+                        if not id in all_IDs.keys():
+                            all_IDs[id] = None
+                        tmp_arr.append(id)
+                tmp_arr.append(None)
+                arr.append(tmp_arr)
+
+            query = """
+                START root = node({0})
+                MATCH (root)-[:`<<INSTANCE>>`]-(type)
+                RETURN root, type
+            """.format(','.join([str(key) for key in all_IDs.keys()]))
+            all_data = connection.cypher(query).to_dicts()
+            for row in all_data:
+                id = id_from_url(row['root']['self'])
+                row['root']['data']['type'] = row['type']['data']['model_name']
+                row['root']['data']['id'] = id
+                all_IDs[id] = row['root']['data']
+
+            return jsonize(reduce(reducer, arr, dict()))
+
         nodes = []
+        links = []
 
         query = """
             START root=node({0})
-            MATCH (root)-[:`<<INSTANCE>>`]-(type)
-            RETURN root as x, type.model_name as type
+            MATCH (root)-[r1?]-(l1)-[r2?]-(l2)-[r3?]-(leaf)
+            WHERE  type(r1) <> '<<INSTANCE>>' AND
+            type(r2) <> '<<INSTANCE>>' AND
+            type(r3) <> '<<INSTANCE>>'
+            RETURN root, l1, l2, COUNT(leaf) as others
         """.format(kwargs['pk'])
         network = connection.cypher(query).to_dicts()
+        all_IDs = dict
 
-        network[0]['x']['data']['type'] = network[0]['type']
-        network[0]['x']['data']['type'] = network[0]['type']
-
-        query = """
-            START root=node({0})
-            MATCH (root)-[r]-(x)-[:`<<INSTANCE>>`]-(type)
-            WHERE type(r) <> '<<INSTANCE>>'
-            RETURN DISTINCT x, type.model_name as type
-        """.format(kwargs['pk'])
-        network[len(network):] = connection.cypher(query).to_dicts()
-
-        for x in network:
-            x['x']['data']['type'] = x['type']
-            x['x']['data']['id'] = id_from_url(x['x']['self'])
-            nodes.append(x['x']['data'])
+        nodes = reduce_result(network)
 
         self.log_throttled_access(request)
         return self.create_response(request, nodes)

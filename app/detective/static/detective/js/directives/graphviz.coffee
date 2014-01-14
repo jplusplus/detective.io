@@ -8,16 +8,29 @@
     link: (scope, element, attr) ->
         scope.$watch 'nodes', ->
 
-            return if not scope.nodes.length
+            return if not scope.nodes.data?
 
             do element.empty
 
             graph = ((((((do d3.layout.force).size [800, 600]).linkDistance 120).gravity 0.05)
                 .charge -2000).friction 0.1).linkStrength 0.8
 
-            nodes = do scope.nodes.slice
-            links = ({source:0,target:i} for i in [1..nodes.length - 1])
+            the_nodes = []
+            id_mapping = {}
+            links = []
+            recurse = (node, root) ->
+                if not id_mapping[node.data.id]?
+                    the_nodes.push node.data
+                    id_mapping[node.data.id] = the_nodes.length - 1
+                if root?
+                    links.push {source:id_mapping[root],target:id_mapping[node.data.id]}
+                if node.link?
+                    node.link.reduce ((i, n) ->
+                        recurse n, node.data.id
+                    ), 0
+            recurse(scope.nodes)
 
+            nodes = do the_nodes.slice
             bilinks = []
             links.forEach (link) ->
                 source = nodes[link.source]
@@ -38,7 +51,7 @@
             link = (((do ((svg.selectAll '.link').data bilinks).enter).append 'path')
                 .attr 'class', 'link')
 
-            node = (((((((do ((svg.selectAll '.node').data scope.nodes).enter).append 'a')
+            node = (((((((do ((svg.selectAll '.node').data the_nodes).enter).append 'a')
                 .attr 'xlink:href', (d) -> "/#{$routeParams.topic}/#{do d.type.toLowerCase}/#{d.id}")
                 .append 'circle').attr 'class', 'node').attr 'r', 30)
                 .style 'stroke', (d) -> ($filter "strToColor") d.type)
@@ -55,7 +68,7 @@
                 ((do tooltip.transition).duration 200).style 'opacity', 0
                 (svg.selectAll '.link.hover').attr 'class', 'link'
 
-            #node.call graph.drag
+            node.call graph.drag
 
             graph.on 'tick', ->
                 link.attr 'd', (d) ->

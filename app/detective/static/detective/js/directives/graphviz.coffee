@@ -40,13 +40,22 @@
             defs = (svg.append 'svg:defs')
             for node in nodes
                 if node.image?
-                    pattern = (defs.append 'svg:pattern').attr 'id', "pattern#{node.id}"
-                    ((pattern.attr 'x', '0').attr 'y', '0').attr 'patternUnits', 'objectBoundingBox'
-                    (pattern.attr 'width', '1').attr 'height', '1'
-                    image = (pattern.append 'svg:image').attr 'xlink:href', node.image
-                    (image.attr 'x', 0).attr 'y', 0
+                    pattern = defs.append 'svg:pattern'
+                    pattern.attr
+                        id : "pattern#{node.id}"
+                        x : 0
+                        y : 0
+                        patternUnits : 'objectBoundingBox'
+                        width : 1
+                        height : 1
+                    image = pattern.append 'svg:image'
                     size = if parseInt(node.id) is parseInt($routeParams.id) then 80 else 60
-                    (image.attr 'width', size).attr 'height', size
+                    image.attr
+                        'xlink:href' : node.image
+                        x : 0
+                        y : 0
+                        width : size
+                        height : size
 
             # Create all links
             link = (((do ((svg.selectAll '.link').data links).enter).append 'svg:line')
@@ -70,8 +79,9 @@
                     if link.source.index is d.index or link.target.index is d.index then 'link hover' else 'link'
                 ((do tooltip.transition).duration 200).style 'opacity', .9
                 tooltip.html "#{d.type} ##{d.id} : #{d.name}"
-                tooltip.style 'left', "#{d3.event.layerX}px"
-                tooltip.style 'top', "#{d3.event.layerY}px"
+                tooltip.style
+                    left : "#{d3.event.layerX}px"
+                    top : "#{d3.event.layerY}px"
             node.on 'mouseleave', (d) ->
                 ((do tooltip.transition).duration 200).style 'opacity', 0
                 (svg.selectAll '.link.hover').attr 'class', 'link'
@@ -80,9 +90,14 @@
             node.call graph.drag
 
             graph.on 'tick', ->
-                (link.attr 'x1', (d) -> d.source.x).attr 'y1', (d) -> d.source.y
-                (link.attr 'x2', (d) -> d.target.x).attr 'y2', (d) -> d.target.y
-                (node.attr 'cx', (d) -> d.x).attr 'cy', (d) -> d.y
+                link.attr
+                    x1 : (d) -> d.source.x
+                    y1 : (d) -> d.source.y
+                    x2 : (d) -> d.target.x
+                    y2 : (d) -> d.target.y
+                node.attr
+                    cx : (d) -> d.x
+                    cy : (d) -> d.y
 
         graph = ((((((do d3.layout.force).size size).linkDistance 140).gravity 0.05)
             .charge -2000).friction 0.1)

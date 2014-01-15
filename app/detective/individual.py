@@ -481,6 +481,8 @@ class IndividualResource(ModelResource):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
 
+        depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
+
         def reduce_result(data):
             all_IDs = dict()
 
@@ -493,15 +495,17 @@ class IndividualResource(ModelResource):
 
             def jsonize(node):
                 if node.keys()[0] in all_IDs.keys():
-                    temp = dict(data=all_IDs[node.keys()[0]])
+                    data = all_IDs[node.keys()[0]]
+                    temp = dict(id=data['id'],data=data)
                     if not node[node.keys()[0]].keys()[0] is None:
-                        temp['link'] = [jsonize({key:node[node.keys()[0]][key]}) for key in node[node.keys()[0]].keys()]
+                        temp['children'] = [jsonize({key:node[node.keys()[0]][key]}) for key in node[node.keys()[0]].keys()]
                     return temp
 
             arr = []
             for row in data:
                 tmp_arr = []
-                for key in ['root','l1','l2']:
+                keys = ['root'] + ["l{0}".format(i+1) for i in range(0, depth)]
+                for key in keys:
                     if row[key]:
                         id = id_from_url(row[key]['self'])
                         if not id in all_IDs.keys():
@@ -524,17 +528,27 @@ class IndividualResource(ModelResource):
 
             return jsonize(reduce(reducer, arr, dict()))
 
+        def generate_query():
+            match = "(root)-"
+            where = ""
+            ret = "root"
+            i = -1
+            for i in range(0, depth):
+                match += "[r{0}?]-(l{0})-".format(i+1)
+                where += "type(r{0}) <> '<<INSTANCE>>' AND ".format(i+1)
+                ret += ", l{0}".format(i+1)
+            match += "[r{0}]-(leaf)".format(i+2)
+            where += "type(r{0}) <> '<<INSTANCE>>'".format(i+2)
+            ret += ", COUNT(leaf) as others"
+            return """START root=node({0})
+                      MATCH {1}
+                      WHERE {2}
+                      RETURN {3}""".format(kwargs['pk'], match, where, ret)
+
         nodes = []
         links = []
 
-        query = """
-            START root=node({0})
-            MATCH (root)-[r1?]-(l1)-[r2?]-(l2)-[r3?]-(leaf)
-            WHERE  type(r1) <> '<<INSTANCE>>' AND
-            type(r2) <> '<<INSTANCE>>' AND
-            type(r3) <> '<<INSTANCE>>'
-            RETURN root, l1, l2, COUNT(leaf) as others
-        """.format(kwargs['pk'])
+        query = generate_query()
         network = connection.cypher(query).to_dicts()
         all_IDs = dict
 

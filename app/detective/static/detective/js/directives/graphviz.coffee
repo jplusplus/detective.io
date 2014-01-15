@@ -1,4 +1,4 @@
-(angular.module 'detective').directive "graphviz", ['$filter', '$routeParams', ($filter, $routeParams) ->
+(angular.module 'detective').directive "graphviz", ['$filter', '$routeParams', '$location', ($filter, $routeParams, $location) ->
     restrict: "AE"
     template : "<div></div>"
     replace : yes
@@ -7,7 +7,11 @@
         topic : '='
     link: (scope, element, attr) ->
         size = [element[0].clientWidth, 600]
+        absUrl = do $location.absUrl
+
         update = (graph) ->
+            return if not scope.nodes.data?
+
             # Extract nodes and links from data
             id_mapping = {}
             nodes = []
@@ -26,23 +30,39 @@
 
             do ((graph.nodes nodes).links links).start
 
-            svg = (d3.select element[0]).append 'svg'
-            svg.attr 'width', size[0]
-            svg.attr 'height', size[1]
+            svg = ((d3.select element[0]).append 'svg').attr
+                width : size[0]
+                height : size[1]
 
             # Begin real D3 work
             tooltip = ((d3.select element[0]).append 'div').attr 'class', 'tooltip'
 
+            defs = (svg.append 'svg:defs')
+            for node in nodes
+                if node.image?
+                    pattern = (defs.append 'svg:pattern').attr 'id', "pattern#{node.id}"
+                    ((pattern.attr 'x', '0').attr 'y', '0').attr 'patternUnits', 'objectBoundingBox'
+                    (pattern.attr 'width', '1').attr 'height', '1'
+                    image = (pattern.append 'svg:image').attr 'xlink:href', node.image
+                    (image.attr 'x', 0).attr 'y', 0
+                    size = if parseInt(node.id) is parseInt($routeParams.id) then 80 else 60
+                    (image.attr 'width', size).attr 'height', size
+
             # Create all links
-            link = (((do ((svg.selectAll '.link').data links).enter).append 'line')
+            link = (((do ((svg.selectAll '.link').data links).enter).append 'svg:line')
                 .attr 'class', 'link')
 
             # Create all nodes
-            node = (((((((do ((svg.selectAll '.node').data nodes).enter).append 'a')
-                .attr 'xlink:href', (d) -> "/#{$routeParams.topic}/#{do d.type.toLowerCase}/#{d.id}")
-                .append 'circle').attr 'class', 'node').attr 'r', (d) ->
+            node = (do svg.selectAll('.node').data(nodes).enter).append('svg:a')
+                .attr('xlink:href', (d) -> "/#{$routeParams.topic}/#{do d.type.toLowerCase}/#{d.id}")
+                .append('svg:circle').attr('class', 'node').attr('r', (d) ->
                     if parseInt(d.id) is parseInt($routeParams.id) then 40 else 30)
-                .style 'stroke', (d) -> ($filter "strToColor") d.type)
+                .style({
+                    'fill' : (d) ->
+                        if d.image?
+                            return 'url(' + absUrl + '#pattern' + d.id + ')'
+                        return ''
+                    'stroke' : (d) -> ($filter "strToColor") d.type})
 
             # Nodes behavior on mouseover
             node.on 'mouseover', (d) ->
@@ -68,8 +88,6 @@
             .charge -2000).friction 0.1)
 
         scope.$watch 'nodes', ->
-
-            return if not scope.nodes.data?
-
             update graph
+
 ]

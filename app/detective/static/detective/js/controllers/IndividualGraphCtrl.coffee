@@ -16,11 +16,10 @@ class IndividualGraphCtrl
             id   : @scope.id
 
         @Individual.get params, (data) =>
-            @Page.title @filter("individualPreview")(data)
+            @Page.title (@filter "individualPreview") data
 
             ($http.get "/api/#{@scope.topic}/v1/#{@scope.type}/#{@scope.id}/graph").success (data) =>
                 @scope.graphnodes = data
-
                 Page.loading false
 
 angular.module('detective').controller 'individualGraphCtrl', IndividualGraphCtrl

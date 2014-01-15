@@ -13,8 +13,8 @@
             width : size[0]
             height : size[1]
 
-        graph = ((((((do d3.layout.force).size size).linkDistance 140).gravity 0.05)
-            .charge -2000).friction 0.1)
+        graph = ((((do d3.layout.force).size size).linkDistance 90).gravity 0.01)
+            .charge -180
 
         the_links = null
         the_nodes = null
@@ -28,6 +28,10 @@
             links = []
             recurse = (node, root) ->
                 if not id_mapping[node.id]?
+                    if not root?
+                        node.fixed = yes
+                        node.x = size[0] / 2
+                        node.y = size[1] / 2
                     nodes.push node
                     id_mapping[node.id] = nodes.length - 1
                 if root?
@@ -57,13 +61,13 @@
                         width : 1
                         height : 1
                     image = pattern.append 'svg:image'
-                    size = if parseInt(node.id) is parseInt($routeParams.id) then 80 else 60
+                    radius = if parseInt(node.id) is parseInt($routeParams.id) then 80 else 60
                     image.attr
                         'xlink:href' : node.data.image
                         x : 0
                         y : 0
-                        width : size
-                        height : size
+                        width : radius
+                        height : radius
 
             # Create all links
             the_links = (svg.selectAll '.link').data links

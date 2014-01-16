@@ -1,53 +1,48 @@
-{% extends "base.dj.html" %}
-{% load staticfiles %}
 
-{% block content %}
+<div id="contribute" class="margin20 panel panel-default">
 
-	<div id="contribute" class="margin20 panel panel-default">
+	<div class="individual-forms panel-body">
 
-		<div class="individual-forms panel-body">
+		<form name="uploadForm" ng-submit="submit()">
 
-			<form name="uploadForm" ng-submit="submit()">
+			<h2>Upload objects and relationship</h2>
+			<p>Notes:
+				<ul>
+					<li>Header for objects should respect this syntax : &lt;obj_name&gt;_id; &lt;field_name1&gt;; &lt;field_name2&gt; etc...</li>
+					<li>Header for relationship should respect this syntax : &lt;obj1_name&gt;_id;&lt;relation_type&gt;; &lt;obj2_name&gt;_id</li>
+				</ul>
+			</p>
 
-				<h2>Upload objects and relationship</h2>
-				<p>Notes:
-					<ul>
-						<li>Header for objects should respect this syntax : &lt;obj_name&gt;_id; &lt;field_name1&gt;; &lt;field_name2&gt; etc...</li>
-						<li>Header for relationship should respect this syntax : &lt;obj1_name&gt;_id;&lt;relation_type&gt;; &lt;obj2_name&gt;_id</li>
-					</ul>
-				</p>
+			<div ng-repeat="field_name in file_fields" class="bottom20">
+				<input type="file" multiple ng-file-select="onFileSelect($files, field_name)" class="btn btn-default">
+			</div>
 
-				<div ng-repeat="field_name in file_fields" class="bottom20">
-					<input type="file" multiple ng-file-select="onFileSelect($files, field_name)" class="btn btn-default">
-				</div>
-
-				<button class="btn btn-default" ng-click="addFileField()">add a file</button>
-				<button type="submit" class="btn btn-primary">Submit</button>
-			</form>
+			<button class="btn btn-default" ng-click="addFileField()">add a file</button>
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</form>
 
 
-			<div class="feedback" ng-if="feedback && feedback.$resolved">
-				<div class="status" ng-class="feedback.inserted.objects && feedback.inserted.objects > 0 ? 'saved' : 'failed'">
-					<div class="row form-footer">
-						<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
-							<span ng-if="feedback.inserted.objects && feedback.inserted.objects > 0">
-								<i class="fa fa-check right05"></i>
-								[[ feedback.inserted.objects ]] <span class="objects">objects</span> inserted with [[ feedback.inserted.links ]] <span class="relations">relations</span>.
-							</span>
-							<span ng-if="!(feedback.inserted.objects && feedback.inserted.objects > 0)">
-								<i class="fa fa-square-o"></i>
-								Nothing saved, check your files.
-							</span>
-						</div>
+		<div class="feedback" ng-if="feedback && feedback.$resolved">
+			<div class="status" ng-class="feedback.inserted.objects && feedback.inserted.objects > 0 ? 'saved' : 'failed'">
+				<div class="row form-footer">
+					<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+						<span ng-if="feedback.inserted.objects && feedback.inserted.objects > 0">
+							<i class="fa fa-check right05"></i>
+							[[ feedback.inserted.objects ]] <span class="objects">objects</span> inserted with [[ feedback.inserted.links ]] <span class="relations">relations</span>.
+						</span>
+						<span ng-if="!(feedback.inserted.objects && feedback.inserted.objects > 0)">
+							<i class="fa fa-square-o"></i>
+							Nothing saved, check your files.
+						</span>
 					</div>
 				</div>
-				<div class="error failed" ng-if="feedback.errors">
-					<div class="row form-footer">
-						<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
-					 		<div ng-repeat="error in feedback.errors">
-								<div ng-repeat="(key, value) in error">
-									[[key]]: [[value]]
-								</div>
+			</div>
+			<div class="error failed" ng-if="feedback.errors">
+				<div class="row form-footer">
+					<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+				 		<div ng-repeat="error in feedback.errors">
+							<div ng-repeat="(key, value) in error">
+								[[key]]: [[value]]
 							</div>
 						</div>
 					</div>
@@ -55,4 +50,4 @@
 			</div>
 		</div>
 	</div>
-{% endblock %}
+</div>

@@ -15,6 +15,7 @@
     "unstable-angular-complete": "1.1.5",
     "kartograph.js": "git://github.com/kartograph/kartograph.js",
     "jquery": "1.9.1",
+    "ng-file-upload": "~1.2.3",
     "ngprogress-lite": "~1.0.4"
   }
 }

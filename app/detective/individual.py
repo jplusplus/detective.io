@@ -4,11 +4,11 @@ from app.detective                      import register
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class
 from django.conf.urls                   import url
-from django.core.exceptions             import ObjectDoesNotExist
+from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
 from django.db.models.query             import QuerySet
-from django.http                        import Http404
+from django.http                        import Http404, HttpResponseBadRequest
 from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
@@ -22,6 +22,8 @@ from tastypie.utils                     import trailing_slash
 from datetime                           import datetime
 import json
 import re
+import csv
+import tempfile
 
 # inspired from django.utils.formats.ISO_FORMATS['DATE_INPUT_FORMATS'][1]
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -326,6 +328,7 @@ class IndividualResource(ModelResource):
             url(r"^(?P<resource_name>%s)/search%s$" % params, self.wrap_view('get_search'), name="api_get_search"),
             url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
+            url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
         ]
 
 
@@ -469,3 +472,4 @@ class IndividualResource(ModelResource):
             # Save the node
             node.save()
         return self.create_response(request, data)
+

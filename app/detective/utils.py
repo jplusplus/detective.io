@@ -237,8 +237,12 @@ def open_csv(csv_file):
     Deduce the format of the csv file.
     """
     import csv
-    dialect = csv.Sniffer().sniff(csv_file.read(1024))
-    csv_file.seek(0)
+    if hasattr(csv_file, 'read'):
+        sample = csv_file.read(1024)
+        csv_file.seek(0)
+    elif type(csv_file) in (tuple, list):
+        sample = "\n".join(csv_file[:5])
+    dialect = csv.Sniffer().sniff(sample)
     dialect.doublequote = True
     reader = csv.reader(csv_file, dialect)
     return reader

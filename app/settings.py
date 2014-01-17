@@ -216,7 +216,7 @@ RQ_SHOW_ADMIN_LINK = True
 RQ_CONFIG = {
     'URL'  : os.getenv('REDISTOGO_URL', 'redis://localhost:6379'),
     'DB'   : 0,
-    'ASYNC': False
+    'ASYNC': True
 }
 RQ_QUEUES = {
     'default': RQ_CONFIG,

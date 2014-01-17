@@ -3,6 +3,8 @@ from app.detective.permissions import create_permissions
 from django.core.exceptions    import ValidationError
 from django.db                 import models
 from tinymce.models            import HTMLField
+
+import inspect
 import os
 import random
 import string
@@ -82,14 +84,25 @@ class Topic(models.Model):
         from app.detective import topics
         return getattr(topics, self.module)
 
-    def get_models(self):
+    def get_models_module(self):
+        """ return the module topic_module.models """
         return getattr(self.get_module(), "models")
+
+    def get_models(self):
+        """ return a list of Model """
+        models_module = self.get_models_module()
+        models_list   = []
+        for i in dir(models_module):
+            klass = getattr(models_module, i)
+            # Collect every Django's model subclass
+            if inspect.isclass(klass) and issubclass(klass, models.Model):
+                models_list.append(klass)
+        return models_list
 
     def clean(self):
         if self.ontology == "" and not self.has_default_ontology():
             raise ValidationError( 'An ontology file is required with this module.',  code='invalid')
         models.Model.clean(self)
-
 
     def save(self):
         # Ensure that the module field is populated with app_label()
@@ -97,7 +110,8 @@ class Topic(models.Model):
         models.Model.save(self)
         # Then create the permissions related to the label module
         # @TODO check that the slug changed or not to avoid permissions hijacking
-        create_permissions( self.get_models(), app_label=self.slug )
+        # FIXME: don't understand why the app_module.models module is used here
+        create_permissions(self.get_models_module(), app_label=self.slug )
 
     def has_default_ontology(self):
         module = self.get_module()

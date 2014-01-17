@@ -352,12 +352,12 @@ class SummaryResource(Resource):
         # reads the files
         files = [(f.name, f.readlines()) for f in files]
         # enqueue the parsing job
-        django_rq.enqueue(process_parsing, self.topic, files)
+        job = django_rq.enqueue(process_parsing, self.topic, files)
         # return a quick response
         self.log_throttled_access(request)
         return {
             "status" : "pending",
-            "token" : "__TOKEN__"
+            "token" : job.get_id()
         }
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)

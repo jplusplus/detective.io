@@ -68,6 +68,8 @@ def get_topics_modules():
     return CUSTOM_APPS
 
 def get_topic_models(topic):
+    import warnings
+    warnings.warn("deprecated, you should use the get_models() method from the Topic model.", DeprecationWarning)
     from django.db.models import Model
     # Models to collect
     models        = []

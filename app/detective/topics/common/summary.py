@@ -589,8 +589,7 @@ def process_parsing(topic, files):
 
     try:
         # retrieve all models in current topic
-        print utils.get_topic_models(topic.module)
-        all_models = dict((model.__name__, model) for model in utils.get_topic_models(topic.module))
+        all_models = dict((model.__name__, model) for model in topic.get_models())
         # iterate over all files and dissociate entities .csv from relations .csv
         for file in files:
             if type(file) is tuple:

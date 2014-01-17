@@ -4,7 +4,7 @@ VIRTUALENV = venv/
 NEO4J_VERSION = 1.9.1
 
 run:
-	. $(VIRTUALENV)bin/activate ; export PYTHONPATH=`pwd`/app/:$(PYTHONPATH) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading
+	. $(VIRTUALENV)bin/activate ; export PYTHONPATH=`pwd`/app/:$(PYTHONPATH) ; python manage.py runserver --nothreading
 
 install:
 	virtualenv venv --no-site-packages --distribute --prompt=Detective.io

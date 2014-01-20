@@ -60,8 +60,14 @@
                         patternUnits : 'objectBoundingBox'
                         width : 1
                         height : 1
-                    image = pattern.append 'svg:image'
                     radius = if parseInt(node.id) is parseInt($routeParams.id) then 80 else 60
+                    (pattern.append 'svg:rect').attr
+                        x : 0
+                        y : 0
+                        width : radius
+                        height : radius
+                        fill : '#21201E'
+                    image = pattern.append 'svg:image'
                     image.attr
                         'xlink:href' : node.data.image
                         x : 0

@@ -365,19 +365,19 @@
 
 @state-warning-text:             #38320E;
 @state-warning-bg:               #F9E76D;
-@state-warning-border:           #F9E76D;
+@state-warning-border:           darken(@state-warning-bg, 10);
 
 @state-danger-text:              #992D2D;
 @state-danger-bg:                #f79494;
-@state-danger-border:            #f79494;
+@state-danger-border:            darken(@state-danger-bg, 10);
 
 @state-success-text:             #468847;
 @state-success-bg:               #dff0d8;
-@state-success-border:           #dff0d8;
+@state-success-border:           darken(@state-success-bg, 10);
 
 @state-info-text:                #3a87ad;
-@state-info-bg:                  #d9edf7;
-@state-info-border:              #d9edf7;
+@state-info-bg:                  #e5eeff;
+@state-info-border:              darken(@state-info-bg, 10);
 
 
 // Tooltips
@@ -440,7 +440,7 @@
 // Alerts
 // -------------------------
 @alert-padding:               15px;
-@alert-border-radius:         @border-radius-base;
+@alert-border-radius:         0;
 @alert-link-font-weight:      bold;
 
 @alert-success-bg:            @state-success-bg;

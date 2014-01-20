@@ -563,6 +563,11 @@ def process_parsing(topic, files):
     errors     = []
     id_mapping = {}
 
+    assert type(files) in (tuple, list)
+    assert len(files) > 0
+    assert type(tiles[0]) in (tuple, list)
+    assert len(tiles[0]) == 2
+
     # Define Exceptions
     class Error (Exception):
         """
@@ -617,7 +622,6 @@ def process_parsing(topic, files):
         # first iterate over entities
         logger.debug("BulkUpload: creating entities")
         for entity, (file_name, file) in entities.items():
-            # tempfile   = utils.uploaded_to_tempfile(file)
             csv_reader = utils.open_csv(file)
             header     = csv_reader.next()
             # must check that all columns map to an existing model field
@@ -738,8 +742,6 @@ def process_parsing(topic, files):
                             file=file_name, row=row, line=csv_reader.line_num, id_to=id_to, id_from=id_from
                         )
                     )
-
-            tempfile.close()
 
         # Save everything
         saved = 0

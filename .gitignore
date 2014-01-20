@@ -23,7 +23,6 @@ app/media/*
 
 # Virtualenv
 venv
-.env
 
 # Generated files
 app/static/CACHE

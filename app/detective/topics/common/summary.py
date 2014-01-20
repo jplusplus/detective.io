@@ -352,7 +352,8 @@ class SummaryResource(Resource):
         # reads the files
         files = [(f.name, f.readlines()) for f in files]
         # enqueue the parsing job
-        job = django_rq.enqueue(process_parsing, self.topic, files)
+        queue = django_rq.get_queue('high', default_timeout=3600)
+        job   = queue.enqueue(process_parsing, self.topic, files)
         # return a quick response
         self.log_throttled_access(request)
         return {
@@ -565,8 +566,8 @@ def process_parsing(topic, files):
 
     assert type(files) in (tuple, list)
     assert len(files) > 0
-    assert type(tiles[0]) in (tuple, list)
-    assert len(tiles[0]) == 2
+    assert type(files[0]) in (tuple, list)
+    assert len(files[0]) == 2
 
     # Define Exceptions
     class Error (Exception):

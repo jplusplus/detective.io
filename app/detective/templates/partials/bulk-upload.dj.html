@@ -10,7 +10,7 @@
 					<div>
 						<p>Please select a CSV file to upload:</p>
 						<div ng-repeat="field_name in file_fields" class="well">
-							<input type="file" multiple ng-file-select="onFileSelect($files, field_name)">
+							<input type="file" multiple ng-file-select="onFileSelect($files, field_name)" class="form-control">
 						</div>
 
 						<button type="submit" class="btn btn-primary pull-right">

@@ -214,7 +214,7 @@ CACHES = {
 # with other apps that modifies the default admin template.
 RQ_SHOW_ADMIN_LINK = True
 RQ_CONFIG = {
-    'URL'  : os.getenv('REDISTOGO_URL', 'redis://localhost:6379'),
+    'URL'  : os.getenv('REDISTOGO_URL', None) or os.getenv('REDISCLOUD_URL', None) or 'redis://localhost:6379',
     'DB'   : 0,
     'ASYNC': True
 }

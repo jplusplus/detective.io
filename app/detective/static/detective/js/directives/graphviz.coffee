@@ -77,7 +77,9 @@
 
             # Create all nodes
             the_nodes = (svg.selectAll '.node').data nodes
-            (do the_nodes.enter).append('svg:circle').attr('class', 'node').attr('r', (d) ->
+            (do the_nodes.enter).append('svg:a').attr('xlink:href', (d) ->
+                    "/#{$routeParams.topic}/#{do d.data.type.toLowerCase}/#{d.id}"
+                ).append('svg:circle').attr('class', 'node').attr('r', (d) ->
                     if parseInt(d.id) is parseInt($routeParams.id) then 40 else 30)
                 .style
                     'fill' : (d) ->
@@ -85,6 +87,7 @@
                             return 'url(' + absUrl + '#pattern' + d.id + ')'
                         return ''
                     'stroke' : (d) -> ($filter "strToColor") d.data.type
+            the_nodes = svg.selectAll '.node'
 
             # Nodes behavior on mouseover
             the_nodes.on 'mouseover', (d) ->
@@ -118,8 +121,3 @@
             update graph
 
 ]
-
-###
-.append('svg:a')
-                .attr('xlink:href', (d) -> "/#{$routeParams.topic}/#{do d.type.toLowerCase}/#{d.id}")
-###

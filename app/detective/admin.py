@@ -12,7 +12,7 @@ admin.site.register(QuoteRequest, QuoteRequestAdmin)
 
 class RelationshipSearchInline(admin.TabularInline):
     model = RelationshipSearch
-    extra = 1
+    extra = 0
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'name':

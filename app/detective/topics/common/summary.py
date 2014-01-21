@@ -581,7 +581,7 @@ class SummaryResource(Resource):
 
     def get_models_output(self):
         # Select only some atribute
-        output = lambda m: {'name': self.topic.slug + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
+        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
         return [ output(m) for m in utils.get_topic_models(self.topic.module) ]
 
     def get_relationship_search(self):
@@ -715,8 +715,8 @@ class SummaryResource(Resource):
                 for obj in objects:
                     pred_sub = predicate.get("subject", None)
                     # If the predicate has a subject
-                    # and this matches to the current one
-                    if pred_sub == None or pred_sub == subject.get("name", None):
+                    # and it matches to the current one
+                    if pred_sub != None and pred_sub == subject.get("name", None):
                         if type(obj) is dict:
                             obj_disp = obj["name"] or obj["label"]
                         else:

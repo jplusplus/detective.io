@@ -144,7 +144,7 @@ class Article(models.Model):
 # This model aims to describe a research alongside a relationship.
 class RelationshipSearch(models.Model):
     # This field is deduced from the relationship name
-    subject = models.CharField(null=True, blank=True, editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    subject = models.CharField(null=True, blank=True, editable=True, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
     # Every field are required
     label   = models.CharField(null=True, blank=True, max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
     # This field will be re-written by app.detective.admin
@@ -160,7 +160,7 @@ class RelationshipSearch(models.Model):
             # Retreive every relationship field for this model
             for field in utils.get_model_fields(model):
                 if field["rel_type"] == self.name:
-                    subject = model._meta.app_label + ":" + model.__name__
+                    subject = model.__name__
         return subject
 
     def clean(self):

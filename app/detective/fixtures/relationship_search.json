@@ -5,7 +5,7 @@
     "fields": {
         "topic": 2,
         "name": "fundraising_round_has_personal_payer+",
-        "subject": "energy:FundraisingRound",
+        "subject": "FundraisingRound",
         "label": "was financed by"
     }
 },
@@ -15,7 +15,7 @@
     "fields": {
         "topic": 2,
         "name": "fundraising_round_has_payer+",
-        "subject": "energy:FundraisingRound",
+        "subject": "FundraisingRound",
         "label": "was financed by"
     }
 },
@@ -25,7 +25,7 @@
     "fields": {
         "topic": 2,
         "name": "person_has_educated_in+",
-        "subject": "energy:Person",
+        "subject": "Person",
         "label": "was educated in"
     }
 },
@@ -35,7 +35,7 @@
     "fields": {
         "topic": 2,
         "name": "person_has_based_in+",
-        "subject": "energy:Person",
+        "subject": "Person",
         "label": "is based in"
     }
 },
@@ -45,7 +45,7 @@
     "fields": {
         "topic": 2,
         "name": "person_has_activity_in_organization+",
-        "subject": "energy:Person",
+        "subject": "Person",
         "label": "has activity in"
     }
 },
@@ -55,7 +55,7 @@
     "fields": {
         "topic": 2,
         "name": "person_has_previous_activity_in_organization+",
-        "subject": "energy:Person",
+        "subject": "Person",
         "label": "had previous activity in"
     }
 },
@@ -65,7 +65,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_product_has_price+",
-        "subject": "energy:EnergyProduct",
+        "subject": "EnergyProduct",
         "label": "is sold at"
     }
 },
@@ -75,7 +75,7 @@
     "fields": {
         "topic": 2,
         "name": "commentary_has_author+",
-        "subject": "energy:Commentary",
+        "subject": "Commentary",
         "label": "was written by"
     }
 },
@@ -85,7 +85,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_product_has_distribution+",
-        "subject": "energy:EnergyProduct",
+        "subject": "EnergyProduct",
         "label": "is distributed in"
     }
 },
@@ -95,7 +95,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_product_has_operator+",
-        "subject": "energy:EnergyProduct",
+        "subject": "EnergyProduct",
         "label": "is operated by"
     }
 },
@@ -105,7 +105,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_product_has_price+",
-        "subject": "energy:EnergyProduct",
+        "subject": "EnergyProduct",
         "label": "is sold at"
     }
 },
@@ -115,7 +115,7 @@
     "fields": {
         "topic": 2,
         "name": "organization_has_adviser+",
-        "subject": "energy:Organization",
+        "subject": "Organization",
         "label": "is advised by"
     }
 },
@@ -125,7 +125,7 @@
     "fields": {
         "topic": 2,
         "name": "organization_has_key_person+",
-        "subject": "energy:Organization",
+        "subject": "Organization",
         "label": "is staffed by"
     }
 },
@@ -135,7 +135,7 @@
     "fields": {
         "topic": 2,
         "name": "organization_has_partner+",
-        "subject": "energy:Organization",
+        "subject": "Organization",
         "label": "has a partnership with"
     }
 },
@@ -145,7 +145,7 @@
     "fields": {
         "topic": 2,
         "name": "organization_has_fundraising_round+",
-        "subject": "energy:Organization",
+        "subject": "Organization",
         "label": "was financed by"
     }
 },
@@ -155,7 +155,7 @@
     "fields": {
         "topic": 2,
         "name": "organization_has_monitoring_body+",
-        "subject": "energy:Organization",
+        "subject": "Organization",
         "label": "is monitored by"
     }
 },
@@ -165,7 +165,7 @@
     "fields": {
         "topic": 2,
         "name": "organization_has_litigation_against+",
-        "subject": "energy:Organization",
+        "subject": "Organization",
         "label": "has a litigation against"
     }
 },
@@ -175,7 +175,7 @@
     "fields": {
         "topic": 2,
         "name": "organization_has_revenue+",
-        "subject": "energy:Organization",
+        "subject": "Organization",
         "label": "has revenue of"
     }
 },
@@ -185,7 +185,7 @@
     "fields": {
         "topic": 2,
         "name": "organization_has_board_member+",
-        "subject": "energy:Organization",
+        "subject": "Organization",
         "label": "has board of directors with"
     }
 },
@@ -195,7 +195,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_project_has_commentary+",
-        "subject": "energy:EnergyProject",
+        "subject": "EnergyProject",
         "label": "is analyzed by"
     }
 },
@@ -205,7 +205,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_project_has_owner+",
-        "subject": "energy:EnergyProject",
+        "subject": "EnergyProject",
         "label": "is owned by"
     }
 },
@@ -215,7 +215,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_project_has_partner+",
-        "subject": "energy:EnergyProject",
+        "subject": "EnergyProject",
         "label": "has a partnership with"
     }
 },
@@ -225,7 +225,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_project_has_activity_in_country+",
-        "subject": "energy:EnergyProject",
+        "subject": "EnergyProject",
         "label": "has activity in"
     }
 },
@@ -235,7 +235,7 @@
     "fields": {
         "topic": 2,
         "name": "distribution_has_activity_in_country+",
-        "subject": "energy:Distribution",
+        "subject": "Distribution",
         "label": "has activity in"
     }
 },
@@ -245,7 +245,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_project_has_product+",
-        "subject": "energy:EnergyProject",
+        "subject": "EnergyProject",
         "label": "has product of"
     }
 },
@@ -255,7 +255,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_project_has_commentary+",
-        "subject": "energy:EnergyProject",
+        "subject": "EnergyProject",
         "label": "is analyzed by"
     }
 },
@@ -265,7 +265,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_project_has_owner+",
-        "subject": "energy:EnergyProject",
+        "subject": "EnergyProject",
         "label": "is owned by"
     }
 },
@@ -275,7 +275,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_project_has_partner+",
-        "subject": "energy:EnergyProject",
+        "subject": "EnergyProject",
         "label": "has partnership with"
     }
 },
@@ -285,7 +285,7 @@
     "fields": {
         "topic": 2,
         "name": "energy_project_has_activity_in_country+",
-        "subject": "energy:EnergyProject",
+        "subject": "EnergyProject",
         "label": "has activity in"
     }
 }

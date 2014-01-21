@@ -45,7 +45,6 @@ class BulkUploadCtrl
                         if data.result?
                             result = JSON.parse(data.result)
                             data.result = result
-                            console.log result 
                         @scope.job_status = data
                     # restart this function again
                     if not @scope.job_status? or @scope.job_status.status == "enqueued" or @scope.job_status.status == "started" 

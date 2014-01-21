@@ -147,5 +147,5 @@ class RelationshipSearch(models.Model):
     subject = models.CharField(editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
     # Every field are required
     label   = models.CharField(max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
-    name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
+    name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.", choices=((None, "Define an ontology and save first"),))
     topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")

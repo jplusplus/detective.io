@@ -68,12 +68,18 @@ def get_topics_modules():
     return CUSTOM_APPS
 
 def get_topic_models(topic):
-    from django.db.models import Model
-    # Models to collect
-    models        = []
-    models_path   = "app.detective.topics.%s.models" % topic
+    from django.db.models     import Model
+    from app.detective.models import Topic
+    models = []
     try:
-        models_module = importlib.import_module(models_path)
+        if type(topic) is str:
+            # Models to collect
+            models_path   = "app.detective.topics.%s.models" % topic
+            models_module = importlib.import_module(models_path)
+        elif isinstance(topic, Topic):
+            models_module = topic.get_models()
+        else:
+            return []
         for i in dir(models_module):
             cls = getattr(models_module, i)
             # Collect every Django's model subclass
@@ -137,6 +143,7 @@ def get_model_fields(model):
                 field = {
                     'name'         : f.name,
                     'type'         : f.get_internal_type(),
+                    'rel_type'     : getattr(f, "rel_type", ""),
                     'help_text'    : getattr(f, "help_text", ""),
                     'verbose_name' : getattr(f, "verbose_name", pretty_name(f.name)),
                     'related_model': related_model,
@@ -232,7 +239,7 @@ def uploaded_to_tempfile(uploaded_file):
     return temporary
 
 def open_csv(csv_file):
-    """ 
+    """
     Return a csv reader for the reading the given file.
     Deduce the format of the csv file.
     """

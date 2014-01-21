@@ -678,10 +678,13 @@ class SummaryResource(Resource):
         subjects      = []
         objects       = []
         propositions  = []
+        ending_tokens = ""
         # Picks candidates for subjects and predicates
-        for match in matches:
-            subjects   += match["models"]
-            predicates += match["relationships"] + match["literals"]
+        for idx, match in enumerate(matches):
+            subjects     += match["models"]
+            predicates   += match["relationships"] + match["literals"]
+            # True when the current token is the last of the series
+            is_last_token = idx == len(matches)-1
             # Objects are detected when they start and end by double quotes
             if  match["token"].startswith('"') and match["token"].endswith('"'):
                 # Remove the quote from the token
@@ -689,9 +692,18 @@ class SummaryResource(Resource):
                 # Store the token as an object
                 objects += self.search(token)[:5]
             # Or if the previous word is a preposition
-            elif is_preposition( previous_word(query, match["token"]) ):
-                # Store the token as an object
-                objects += self.search(match["token"])[:5]
+            elif is_preposition( previous_word(query, match["token"]) ) or is_last_token:
+                # Looks for entities into the database
+                entities = self.search(match["token"])[:5]
+                if len(entities):
+                    objects += entities
+                # Save every tokens until the last one
+                elif not is_last_token:
+                    ending_tokens = match["token"]
+                # We reach the end
+                else:
+                    objects.append( ending_tokens )
+
 
         # We find some subjects
         if len(subjects) and not len(predicates):
@@ -711,7 +723,7 @@ class SummaryResource(Resource):
                     pred_sub = predicate.get("subject", None)
                     # If the predicate has a subject
                     # and it matches to the current one
-                    if pred_sub != None and pred_sub == subject.get("name", None):
+                    if pred_sub != None:
                         if type(obj) is dict:
                             obj_disp = obj["name"] or obj["label"]
                         else:

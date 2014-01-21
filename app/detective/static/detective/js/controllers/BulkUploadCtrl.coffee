@@ -1,15 +1,15 @@
 class BulkUploadCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$http', '$routeParams', 'Page', 'Individual']
+    @$inject: ['$scope', '$http', '$routeParams', 'Page', 'Individual', '$timeout','Common']
 
-    constructor: (@scope, @http, @routeParams, @Page, @Individual)->
+    constructor: (@scope, @http, @routeParams, @Page, @Individual, @timeout, @Common)->
         @Page.title "Bulk Upload", no
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
         @scope.addFileField   = @addFileField
         @scope.selectTopic    = @selectTopic
-        @scope.submit           = @submit
+        @scope.submit         = @submit
         @scope.onFileSelect   = @onFileSelect
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
@@ -20,14 +20,42 @@ class BulkUploadCtrl
         @scope.file_fields    = ["file1"]
         @scope.files          = {}
 
+        # CONFIG
+        @delay = 3000
+
     # User submit the form
     submit: =>
-        @scope.feedback = null
+        @scope.feedback   = null
+        @scope.job_status = null
         # Parameters of your request (to build the url)
         params =
             topic: @scope.topic_selected
         # Send the data
         @scope.feedback = @Individual.bulk params, @scope.files
+        # set an interval to provide job status
+
+        @timeout( =>
+            if @scope.feedback and @scope.feedback.status == "enqueued" and @scope.feedback.token
+                params = { 
+                    type: "jobs"
+                    id  : @scope.feedback.token
+                }
+                cancel_refresh = @timeout(refresh_status = =>
+                    @Common.get params, (data) =>
+                        if data.result?
+                            result = JSON.parse(data.result)
+                            data.result = result
+                            console.log result 
+                        @scope.job_status = data
+                    # restart this function again
+                    if not @scope.job_status? or @scope.job_status.status == "enqueued" or @scope.job_status.status == "started" 
+                        @scope.feedback = null
+                        cancel_refresh = @timeout(refresh_status, @delay)
+                , @delay)
+                # cancel the timeout if the view is destroyed
+                @scope.$on '$destroy', =>
+                    @timeout.cancel(cancel_refresh)
+        , 1000) # first call
 
     # User choose a file
     onFileSelect: (files, field) =>

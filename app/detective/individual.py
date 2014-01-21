@@ -534,10 +534,10 @@ class IndividualResource(ModelResource):
             ret = "root"
             i = -1
             for i in range(0, depth):
-                match += "[r{0}?]-(l{0})-".format(i+1)
+                match += "[r{0}?]->(l{0})-".format(i+1)
                 where += "type(r{0}) <> '<<INSTANCE>>' AND ".format(i+1)
                 ret += ", l{0}".format(i+1)
-            match += "[r{0}?]-(leaf)".format(i+2)
+            match += "[r{0}?]->(leaf)".format(i+2)
             where += "type(r{0}) <> '<<INSTANCE>>'".format(i+2)
             ret += ", COUNT(leaf) as others"
             return """START root=node({0})

@@ -39,7 +39,7 @@ angular.module('detectiveServices').factory("Individual", [ '$resource', '$http'
             paramDefaults:
                 topic: "common"
         graph:
-            url:'/api/:topic/v1/:type/:id/graph/?depth=3'
+            url:'/api/:topic/v1/:type/:id/graph'
             method: 'GET'
             isArray: false
             paramDefaults:

@@ -46,7 +46,9 @@ class IndividualSingleCtrl
             @scope.resource = data
             @scope.meta     = data[@scope.type.toLowerCase()]
 
-        @Individual.graph params, (data) =>
+        graph_params = angular.copy params
+        graph_params.depth = 2
+        @Individual.graph graph_params, (data) =>
             @scope.graphnodes = data
 
 

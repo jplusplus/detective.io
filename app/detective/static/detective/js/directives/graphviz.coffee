@@ -95,7 +95,6 @@
                     class : 'link'
                     d : linkUpdate
                     'marker-end' : 'url(' + absUrl + '#marker-end)'
-                .on 'mouseover', () -> console.log 'now'
             # Remove old links
             do (do the_links.exit).remove
 

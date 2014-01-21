@@ -17,6 +17,16 @@
 
         the_links = null
         the_nodes = null
+        the_names = null
+
+        linkUpdate = (d) ->
+            dx = d.target.x - d.source.x
+            dy = d.target.y - d.source.y
+            dr = Math.sqrt (dx * dx + dy * dy)
+            "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y
+
+        nodeUpdate = (d) ->
+            "translate(" + d.x + "," + d.y + ")"
 
         update = =>
             return if not scope.nodes.data?
@@ -79,39 +89,43 @@
                 markerHeight : 6
                 orient : "auto").append 'path').attr 'd', "M0,-5L10,0L0,5"
 
+            # Create all new links
             the_links = (svg.selectAll '.link').data links, (d) -> d.source.data.id + '-' + d.target.data.id
             ((do the_links.enter).insert 'svg:path', 'circle').attr
-                class : 'link'
-                'marker-end' : 'url(' + absUrl + '#marker-end)'
-
+                    class : 'link'
+                    d : linkUpdate
+                    'marker-end' : 'url(' + absUrl + '#marker-end)'
+                .on 'mouseover', () -> console.log 'now'
+            # Remove old links
             do (do the_links.exit).remove
 
-            # Create all nodes
+            # Create all new nodes
             the_nodes = (svg.selectAll '.node').data nodes, (d) -> d.data.id
-            (do the_nodes.enter).append('svg:circle').attr('class', 'node').attr('r', (d) ->
-                    if parseInt(d.id) is parseInt($routeParams.id) then 6 else 6)
+            (do the_nodes.enter).insert('svg:circle', 'text').attr('class', 'node').attr
+                    r : 6
+                    d : nodeUpdate
                 .style
-                    'fill' : (d) ->
+                    fill : (d) ->
                         if d.data.image?
                             return 'url(' + absUrl + '#pattern' + d.id + ')'
                         return ($filter "strToColor") d.data.type
-                    'stroke' : (d) -> ($filter "strToColor") d.data.type
-                .each (d) -> console.log d
-
+                    stroke : (d) -> ($filter "strToColor") d.data.type
+                .call graph.drag
+            # Remove old nodes
             do (do the_nodes.exit).remove
 
-            # Make nodes draggables
-            the_nodes.call graph.drag
+            # Create all new names
+            the_names = (svg.selectAll '.name').data nodes, (d) -> d.data.id
+            (do the_names.enter).append('svg:text').attr
+                    d : nodeUpdate
+                    class : 'name'
+                .text (d) -> d.data.name
+            do (do the_names.exit).remove
 
         graph.on 'tick', =>
-            the_links.attr 'd', (d) ->
-                dx = d.target.x - d.source.x
-                dy = d.target.y - d.source.y
-                dr = Math.sqrt (dx * dx + dy * dy)
-                "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y
-
-            the_nodes.attr 'transform', (d) ->
-                "translate(" + d.x + "," + d.y + ")"
+            the_links.attr 'd', linkUpdate
+            the_nodes.attr 'transform', nodeUpdate
+            the_names.attr 'transform', nodeUpdate
 
         scope.$watch 'nodes', =>
             update graph

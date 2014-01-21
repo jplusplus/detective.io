@@ -1,5 +1,6 @@
 from app.detective        import utils
 from app.detective.models import QuoteRequest, Topic, RelationshipSearch, Article
+from django.conf               import settings
 from django.contrib       import admin
 from django.db.models     import CharField
 
@@ -10,9 +11,16 @@ class QuoteRequestAdmin(admin.ModelAdmin):
 
 admin.site.register(QuoteRequest, QuoteRequestAdmin)
 
+# Display relationship admin panel only on debug mode
+if settings.DEBUG:
+    class RelationshipSearchAdmin(admin.ModelAdmin):
+        list_display  = ("name", "label", "subject", "topic", "type",)
+    admin.site.register(RelationshipSearch, RelationshipSearchAdmin)
+
+
 class RelationshipSearchInline(admin.TabularInline):
-    model = RelationshipSearch
-    extra = 0
+    model  = RelationshipSearch
+    extra  = 0
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'name':
@@ -37,7 +45,7 @@ class RelationshipSearchInline(admin.TabularInline):
                 auto_created=db_field.auto_created,
                 db_index=db_field.db_index,
                 validators=db_field.validators,
-                # The ony field we do not copu
+                # The ony field we don't copy
                 choices=choices
             )
 
@@ -56,9 +64,10 @@ class RelationshipSearchInline(admin.TabularInline):
                 subset        = []
                 # Retreive every relationship field for this model
                 for field in utils.get_model_fields(model):
-                    if field["type"] == 'Relationship':
-                        rel_type = field["rel_type"]
-                        choice     = (rel_type, rel_type, )
+                    if field["type"] != 'AutoField':
+                        choice   = [ field["name"], field["verbose_name"].title(), ]
+                        # Add ... at the end ot the relationship field
+                        if field["type"] == 'Relationship': choice[1] += "..."
                         subset.append(choice)
                 # Add the choice subset only if it contains elements
                 if len(subset): kwargs["choices"].append( (model_name, subset,) )

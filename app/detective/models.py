@@ -144,25 +144,49 @@ class Article(models.Model):
 # This model aims to describe a research alongside a relationship.
 class RelationshipSearch(models.Model):
     # This field is deduced from the relationship name
-    subject = models.CharField(null=True, blank=True, editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    subject = models.CharField(null=True, blank=True, default='', editable=True, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
     # Every field are required
-    label   = models.CharField(null=True, blank=True, max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
+    label   = models.CharField(null=True, blank=True, default='', max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
     # This field will be re-written by app.detective.admin
     # to be allow dynamic setting of the choices attribute.
-    name    = models.CharField(null=True, blank=True, max_length=250, help_text="Name of the relationship inside the subject.")
+    name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
     topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
 
     def get_relationship_subject(self):
         subject = None
         # Retreive the subject that match with the instance's name
-        topic_models = utils.get_topic_models(self.topic)
-        for model in topic_models:
-            # Retreive every relationship field for this model
-            for field in utils.get_model_fields(model):
-                if field["rel_type"] == self.name:
-                    subject = model.__name__
+        field = self.field
+        # If it has a related_model, its subject is given by its relationship
+        if field["related_model"] is not None:
+            subject = field["related_model"]
+        # If any related_model is given, that means its subject is is parent model
+        else:
+            subject = field["model"]
+
         return subject
 
     def clean(self):
         self.subject = self.get_relationship_subject()
         models.Model.clean(self)
+
+    @property
+    def field(self):
+        field = None
+        if self.name:
+            topic_models = utils.get_topic_models(self.topic)
+            for model in topic_models:
+                # Retreive every relationship field for this model
+                for f in utils.get_model_fields(model):
+                    if f["name"] == self.name:
+                        field = f
+        return field
+
+    @property
+    def type(self):
+        field = self.field
+        if field is None:
+            return None
+        elif field["type"] == "Relationship":
+            return "relationship"
+        else:
+            return "literal"

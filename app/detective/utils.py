@@ -147,6 +147,7 @@ def get_model_fields(model):
                     'help_text'    : getattr(f, "help_text", ""),
                     'verbose_name' : getattr(f, "verbose_name", pretty_name(f.name)),
                     'related_model': related_model,
+                    'model'        : model.__name__,
                     'rules'        : fieldRules.all()
                 }
 

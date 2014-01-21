@@ -586,11 +586,20 @@ class SummaryResource(Resource):
         return [ output(m) for m in utils.get_topic_models(self.topic.module) ]
 
     def get_relationship_search(self):
-        return RelationshipSearch.objects.filter(topic=self.topic)
+        isRelationship = lambda t: t.type == "relationship"
+        return [ rs for rs in RelationshipSearch.objects.filter(topic=self.topic) if isRelationship(rs) ]
 
     def get_relationship_search_output(self):
         output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
         return [ output(rs) for rs in self.get_relationship_search() ]
+
+    def get_literal_search(self):
+        isLiteral = lambda t: t.type == "literal"
+        return [ rs for rs in RelationshipSearch.objects.filter(topic=self.topic) if isLiteral(rs) ]
+
+    def get_literal_search_output(self):
+        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
+        return [ output(rs) for rs in self.get_literal_search() ]
 
     def ngrams(self, input):
         input = input.split(' ')
@@ -616,13 +625,15 @@ class SummaryResource(Resource):
         # Group ngram by following string
         ngrams  = [' '.join(x) for x in self.ngrams(query) ]
         matches = []
-        models  = self.get_syntax()["subject"]["model"]
-        rels    = self.get_syntax()["predicate"]["relationship"]
+        models  = self.get_syntax().get("subject").get("model")
+        rels    = self.get_syntax().get("predicate").get("relationship")
+        lits    = self.get_syntax().get("predicate").get("literal")
         # Known models lookup for each ngram
         for token in ngrams:
             obj = {
                 'models'       : self.get_close_labels(token, models),
                 'relationships': self.get_close_labels(token, rels),
+                'literals'     : self.get_close_labels(token, lits),
                 'token'        : token
             }
             matches.append(obj)
@@ -670,7 +681,7 @@ class SummaryResource(Resource):
         # Picks candidates for subjects and predicates
         for match in matches:
             subjects   += match["models"]
-            predicates += match["relationships"]
+            predicates += match["relationships"] + match["literals"]
             # Objects are detected when they start and end by double quotes
             if  match["token"].startswith('"') and match["token"].endswith('"'):
                 # Remove the quote from the token
@@ -684,10 +695,11 @@ class SummaryResource(Resource):
 
         # We find some subjects
         if len(subjects) and not len(predicates):
-            rels = self.get_syntax().get("predicate").get("relationship")
+            terms  = self.get_syntax().get("predicate").get("relationship")
+            terms += self.get_syntax().get("predicate").get("literal")
             for subject in subjects:
-                # Gets all available relationship for these subjects
-                predicates += [ rel for rel in rels if rel["subject"] == subject["name"] ]
+                # Gets all available terms for these subjects
+                predicates += [ term for term in terms if term["subject"] == subject["name"] ]
 
         # Add a default and irrelevant object
         if not len(objects): objects = [""]
@@ -743,6 +755,7 @@ class SummaryResource(Resource):
                 'entity': None
             },
             'predicate': {
-                'relationship': self.get_relationship_search_output()
+                'relationship': self.get_relationship_search_output(),
+                'literal':      self.get_literal_search_output()
             }
         }

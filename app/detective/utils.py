@@ -72,12 +72,12 @@ def get_topic_models(topic):
     from app.detective.models import Topic
     models = []
     try:
-        if type(topic) is str:
+        if isinstance(topic, Topic):
+            models_module = topic.get_models()
+        elif hasattr(topic, '__str__'):
             # Models to collect
             models_path   = "app.detective.topics.%s.models" % topic
             models_module = importlib.import_module(models_path)
-        elif isinstance(topic, Topic):
-            models_module = topic.get_models()
         else:
             return []
         for i in dir(models_module):

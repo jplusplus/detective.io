@@ -571,11 +571,12 @@ class SummaryResource(Resource):
             MATCH (st)<-[:`%s`]-(root)<-[:`<<INSTANCE>>`]-(type)
             WHERE HAS(root.name)
             AND HAS(st.name)
-            AND type.name = "%s"
+            AND type.model_name = "%s"
             AND st.name = "%s"
             AND type.app_label = '%s'
             RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
         """ % ( predicate["name"], subject["name"], obj["name"], self.topic.app_label() )
+        print query
         return connection.cypher(query).to_dicts()
 
 

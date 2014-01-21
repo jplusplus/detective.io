@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from app.detective.models     import Topic
+from app.detective.models     import Topic, RelationshipSearch
 from app.detective.neomatch   import Neomatch
 from app.detective.register   import topics_rules
 from difflib                  import SequenceMatcher
@@ -584,6 +584,12 @@ class SummaryResource(Resource):
         output = lambda m: {'name': self.topic.slug + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
         return [ output(m) for m in utils.get_topic_models(self.topic.module) ]
 
+    def get_relationship_search(self):
+        return RelationshipSearch.objects.filter(topic=self.topic)
+
+    def get_relationship_search_output(self):
+        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
+        return [ output(rs) for rs in self.get_relationship_search() ]
 
     def ngrams(self, input):
         input = input.split(' ')
@@ -736,6 +742,6 @@ class SummaryResource(Resource):
                 'entity': None
             },
             'predicate': {
-                'relationship': []
+                'relationship': self.get_relationship_search_output()
             }
         }

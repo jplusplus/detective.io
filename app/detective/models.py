@@ -7,6 +7,12 @@ import os
 import random
 import string
 
+
+PUBLIC = (
+    (True, "Yes, public"),
+    (False, "No, just for a small group of users"),
+)
+
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (
         (0, "Less than 200"),
@@ -20,10 +26,6 @@ class QuoteRequest(models.Model):
         (5, "1-5"),
         (0, "More than 5"),
         (-1, "I don't know yet"),
-    )
-    PUBLIC = (
-        (True, "Yes, public"),
-        (False, "No, just for a small group of users"),
     )
     name     = models.CharField(max_length=100)
     employer = models.CharField(max_length=100)
@@ -46,7 +48,7 @@ class Topic(models.Model):
     slug        = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
     description = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
     about       = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
-    public      = models.BooleanField(help_text="Is your topic public?", default=True)
+    public      = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
     ontology    = models.FileField(null=True, blank=True, upload_to="ontologies", help_text="Ontology file that descibes your field of study.")
     background  = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
 

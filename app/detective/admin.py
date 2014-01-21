@@ -1,6 +1,6 @@
-from django.contrib       import admin
 from app.detective        import utils
 from app.detective.models import QuoteRequest, Topic, RelationshipSearch, Article
+from django.contrib       import admin
 
 class QuoteRequestAdmin(admin.ModelAdmin):
     save_on_top   = True
@@ -12,6 +12,15 @@ admin.site.register(QuoteRequest, QuoteRequestAdmin)
 class RelationshipSearchInline(admin.TabularInline):
     model = RelationshipSearch
     extra = 1
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'name':
+            # We add temporary choices for this field so
+            # it will be threaded as a selectbox
+            choices = ( (None, "Will be replaced"), )
+            # This is the way we update the choices attributes
+            db_field._choices = choices
+        return super(RelationshipSearchInline, self).formfield_for_dbfield(db_field, **kwargs)
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
         if db_field.name == 'name' and hasattr(request, "topic_id"):
@@ -50,7 +59,7 @@ class TopicAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         if hasattr(obj, "id"):
-            # Asave the topic id into the request to retreive it into inline form
+            # Save the topic id into the request to retreive it into inline form
             setattr(request, 'topic_id', obj.id)
             # Add inlice RelationshipSearch only for saved object
             self.inlines = (RelationshipSearchInline,)

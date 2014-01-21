@@ -140,12 +140,13 @@ class Article(models.Model):
     link.allow_tags = True
 
 
-# @TODO finish this feature!
 # This model aims to describe a research alongside a relationship.
 class RelationshipSearch(models.Model):
     # This field is deduced from the relationship name
     subject = models.CharField(editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
     # Every field are required
     label   = models.CharField(max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
-    name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.", choices=((None, "Define an ontology and save first"),))
+    # This field will be re-written by app.detective.admin
+    # to be allow dynamic setting of the choices attribute.
+    name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
     topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")

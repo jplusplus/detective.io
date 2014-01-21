@@ -352,13 +352,13 @@ class SummaryResource(Resource):
         # reads the files
         files = [(f.name, f.readlines()) for f in files]
         # enqueue the parsing job
-        queue = django_rq.get_queue('high', default_timeout=3600)
+        queue = django_rq.get_queue('default', default_timeout=7200)
         job   = queue.enqueue(process_parsing, self.topic, files)
         # return a quick response
         self.log_throttled_access(request)
         return {
-            "status" : "pending",
-            "token" : job.get_id()
+            "status" : "enqueued",
+            "token"  : job.get_id()
         }
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
@@ -577,7 +577,7 @@ def process_parsing(topic, files):
         """
         def __init__(self, **kwargs):
             """ set the topic and add all the parameters as attributes """
-            self.topic = topic
+            self.topic = topic.title
             for key, value in kwargs.items():
                 setattr(self, key, value)
         def __str__(self):
@@ -662,7 +662,7 @@ def process_parsing(topic, files):
                                         data        = data, model=entity,
                                         file        = file_name,
                                         line        = csv_reader.line_num,
-                                        error       = e
+                                        error       = str(e)
                                     )
                                 )
                                 break
@@ -680,8 +680,9 @@ def process_parsing(topic, files):
                                     model = entity,
                                     file  = file_name,
                                     line  = csv_reader.line_num,
-                                    error = e)
+                                    error = str(e)
                                 )
+                            )
 
         inserted_relations = 0
         # then iterate over relations
@@ -703,7 +704,7 @@ def process_parsing(topic, files):
                     model_to         = model_to,
                     relation_name    = relation_name,
                     fields_available = [field['name'] for field in utils.get_model_fields(all_models[model_from])],
-                    error            = e)
+                    error            = str(e))
             for row in csv_reader:
                 id_from = row[0]
                 id_to   = row[2]
@@ -721,7 +722,7 @@ def process_parsing(topic, files):
                                 model_to         = model_to,
                                 id_to            = id_to,
                                 relation_name    = relation_name,
-                                error            = e
+                                error            = str(e)
                             )
                         )
                     except Exception as e:
@@ -734,7 +735,7 @@ def process_parsing(topic, files):
                             model_to         = model_to,
                             id_to            = id_to,
                             relation_name    = relation_name,
-                            error            = e)
+                            error            = str(e))
                 else:
                     # A key is missing (id_from or id_to) but we don't want to stop the parsing.
                     # Then we store the wrong line to return it to the user.
@@ -756,11 +757,11 @@ def process_parsing(topic, files):
                 'objects' : saved,
                 'links'   : inserted_relations
             },
-            "errors" : sorted([dict([(e.__class__.__name__, e.__dict__)]) for e in errors])
+            "errors" : sorted([dict([(e.__class__.__name__, str(e.__dict__))]) for e in errors])
         }
     except Exception as e:
         import traceback
         logger.error(traceback.format_exc())
         return {
-            "errors" : [{e.__class__.__name__ : e.__dict__}]
+            "errors" : [{e.__class__.__name__ : str(e.__dict__)}]
         }

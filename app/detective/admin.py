@@ -13,7 +13,17 @@ class RelationshipSearchInline(admin.TabularInline):
 
 class TopicAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ("title", "link", "public", )
+    list_display        = ("title", "link", "public", )
+    inlines             = (RelationshipSearchInline,)
+    fieldsets = (
+        (None, {
+            'fields':  ( ('title', 'slug',), 'ontology', 'module',)
+        }),
+        ('Advanced options', {
+            'classes': ('collapse',),
+            'fields': ( 'description', 'about', 'background', 'public', )
+        }),
+    )
 
 admin.site.register(Topic, TopicAdmin)
 

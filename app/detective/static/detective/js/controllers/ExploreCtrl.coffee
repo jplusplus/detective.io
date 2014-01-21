@@ -54,7 +54,7 @@ class ExploreCtrl
             delete val.label
             # Create a JSON query to pass though the URL
             query = angular.toJson val
-            @location.path "/search/"
+            @location.path "/#{@scope.topic}/search/"
             @location.search "q", query
 
     getTypeCount: ()=>

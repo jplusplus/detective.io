@@ -681,26 +681,8 @@ class SummaryResource(Resource):
                 # Store the token as an object
                 objects += self.search(match["token"])[:5]
 
-        # No subject, no predicate, it might be a classic search
-        if not len(subjects) and not len(predicates):
-            results = self.search(query)
-            for result in results:
-                # Build the label
-                label = result.get("name", None)
-                propositions.append({
-                    'label': label,
-                    'subject': {
-                        "name": result.get("id", None),
-                        "label": label
-                    },
-                    'predicate': {
-                        "label": "is instance of",
-                        "name": "<<INSTANCE>>"
-                    },
-                    'object': result.get("model", None)
-                })
         # We find some subjects
-        elif len(subjects) and not len(predicates):
+        if len(subjects) and not len(predicates):
             rels = self.get_syntax().get("predicate").get("relationship")
             for subject in subjects:
                 # Gets all available relationship for these subjects
@@ -732,6 +714,24 @@ class SummaryResource(Resource):
                             'object'   : obj
                         })
 
+        # It might be a classic search
+        results = self.search(query)
+
+        for result in results:
+            # Build the label
+            label = result.get("name", None)
+            propositions.append({
+                'label': label,
+                'subject': {
+                    "name": result.get("id", None),
+                    "label": label
+                },
+                'predicate': {
+                    "label": "is instance of",
+                    "name": "<<INSTANCE>>"
+                },
+                'object': result.get("model", None)
+            })
         # Remove duplicates proposition dicts
         return propositions
 

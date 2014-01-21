@@ -54,10 +54,6 @@ detective = angular
                         controller: UserCtrl
                         templateUrl: "/partial/signup.html"
                     })
-                    .when('/search', {
-                        controller: IndividualSearchCtrl
-                        templateUrl: "/partial/individual-list.html"
-                    })
                     .when('/contact-us', {
                         controller: ContactUsCtrl
                         templateUrl: "/partial/contact-us.html"
@@ -73,6 +69,10 @@ detective = angular
                     .when('/account', redirectTo: '/')
                     .when('/common/contribute', redirectTo: '/')
                     .when('/:topic/p/', redirectTo: '/:topic/')
+                    .when('/:topic/search', {
+                        controller: IndividualSearchCtrl
+                        templateUrl: "/partial/individual-list.html"
+                    })
                     .when('/:topic/p/:slug',
                         controller: ArticleCtrl
                         templateUrl: "/partial/article.html"

@@ -6,15 +6,14 @@
         nodes : '='
         topic : '='
     link: (scope, element, attr) ->
-        size = [element[0].clientWidth, 600]
+        size = [element[0].clientWidth, 200]
         absUrl = do $location.absUrl
 
         svg = ((d3.select element[0]).append 'svg').attr
             width : size[0]
             height : size[1]
 
-        graph = ((((do d3.layout.force).size size).linkDistance 90).gravity 0.01)
-            .charge -180
+        graph = (((do d3.layout.force).size size).linkDistance 60).charge -300
 
         the_links = null
         the_nodes = null
@@ -44,12 +43,8 @@
 
             do ((graph.nodes nodes).links links).start
 
-            # Begin real D3 work
-            tooltip = ((d3.select element[0]).append 'div').attr 'class', 'tooltip'
-
-            do (svg.selectAll '*').remove
-
-            defs = (svg.append 'svg:defs')
+            do (svg.selectAll 'defs').remove
+            defs = svg.insert 'svg:defs', 'path'
             for node in nodes
                 if node.data.image?
                     pattern = defs.append 'svg:pattern'
@@ -60,7 +55,7 @@
                         patternUnits : 'objectBoundingBox'
                         width : 1
                         height : 1
-                    radius = if parseInt(node.id) is parseInt($routeParams.id) then 80 else 60
+                    radius = if parseInt(node.id) is parseInt($routeParams.id) then 12 else 12
                     (pattern.append 'svg:rect').attr
                         x : 0
                         y : 0
@@ -75,53 +70,48 @@
                         width : radius
                         height : radius
 
-            # Create all links
-            the_links = (svg.selectAll '.link').data links
-            ((do the_links.enter).append 'svg:line').attr
+            (((defs.append 'marker').attr
+                id : 'marker-end'
+                viewBox : "0 -5 10 10"
+                refX : 15
+                refY : -1.5
+                markerWidth : 6
+                markerHeight : 6
+                orient : "auto").append 'path').attr 'd', "M0,-5L10,0L0,5"
+
+            the_links = (svg.selectAll '.link').data links, (d) -> d.source.data.id + '-' + d.target.data.id
+            ((do the_links.enter).insert 'svg:path', 'circle').attr
                 class : 'link'
-                rel : (d) -> d.target.id + ' - ' + d.source.id
+                'marker-end' : 'url(' + absUrl + '#marker-end)'
+
+            do (do the_links.exit).remove
 
             # Create all nodes
-            the_nodes = (svg.selectAll '.node').data nodes
-            (do the_nodes.enter).append('svg:a').attr('xlink:href', (d) ->
-                    "/#{$routeParams.topic}/#{do d.data.type.toLowerCase}/#{d.id}"
-                ).append('svg:circle').attr('class', 'node').attr('r', (d) ->
-                    if parseInt(d.id) is parseInt($routeParams.id) then 40 else 30)
+            the_nodes = (svg.selectAll '.node').data nodes, (d) -> d.data.id
+            (do the_nodes.enter).append('svg:circle').attr('class', 'node').attr('r', (d) ->
+                    if parseInt(d.id) is parseInt($routeParams.id) then 6 else 6)
                 .style
                     'fill' : (d) ->
                         if d.data.image?
                             return 'url(' + absUrl + '#pattern' + d.id + ')'
-                        return ''
+                        return ($filter "strToColor") d.data.type
                     'stroke' : (d) -> ($filter "strToColor") d.data.type
-            the_nodes = svg.selectAll '.node'
+                .each (d) -> console.log d
 
-            # Nodes behavior on mouseover
-            the_nodes.on 'mouseover', (d) ->
-                # Highlight links
-                (svg.selectAll '.link').attr 'class', (link) ->
-                    if link.source.index is d.index or link.target.index is d.index then 'link hover' else 'link'
-                # Display tooltip
-                ((do tooltip.transition).duration 200).style 'opacity', .9
-                tooltip.html "#{d.data.type} ##{d.id} : #{d.data.name}"
-                tooltip.style
-                    left : "#{d3.event.layerX}px"
-                    top : "#{d3.event.layerY}px"
-            the_nodes.on 'mouseleave', (d) ->
-                ((do tooltip.transition).duration 200).style 'opacity', 0
-                (svg.selectAll '.link.hover').attr 'class', 'link'
+            do (do the_nodes.exit).remove
 
             # Make nodes draggables
             the_nodes.call graph.drag
 
         graph.on 'tick', =>
-            the_links.attr
-                x1 : (d) -> d.source.x
-                y1 : (d) -> d.source.y
-                x2 : (d) -> d.target.x
-                y2 : (d) -> d.target.y
-            the_nodes.attr
-                cx : (d) -> d.x
-                cy : (d) -> d.y
+            the_links.attr 'd', (d) ->
+                dx = d.target.x - d.source.x
+                dy = d.target.y - d.source.y
+                dr = Math.sqrt (dx * dx + dy * dy)
+                "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y
+
+            the_nodes.attr 'transform', (d) ->
+                "translate(" + d.x + "," + d.y + ")"
 
         scope.$watch 'nodes', =>
             update graph

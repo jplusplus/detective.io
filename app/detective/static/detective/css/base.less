@@ -837,23 +837,23 @@ footer {
 svg {
 	.node {
 		stroke: @brand-secondary;
-		stroke-width: 3px;
+		stroke-width: 1.5px;
 		cursor: pointer;
-		fill: @body-bg;
+		fill: lighten(@body-bg, 20%);
 
-		&:hover {
-			stroke-width: 5px;
-		}
+		// &:hover {
+		// 	stroke-width: 5px;
+		// }
 	}
 
 	.link {
 		fill: none;
-		stroke-width: 4px;
-		stroke: @brand-primary;
+		stroke-width: 1.5px;
+		stroke: lighten(@body-bg, 20%);
 
-		&.hover {
-			stroke-width: 5px;
-		}
+		// &.hover {
+		// 	stroke-width: 5px;
+		// }
 	}
 }
 

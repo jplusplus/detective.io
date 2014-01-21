@@ -1,6 +1,7 @@
 from app.detective        import utils
 from app.detective.models import QuoteRequest, Topic, RelationshipSearch, Article
 from django.contrib       import admin
+from django.db.models     import CharField
 
 class QuoteRequestAdmin(admin.ModelAdmin):
     save_on_top   = True
@@ -18,8 +19,28 @@ class RelationshipSearchInline(admin.TabularInline):
             # We add temporary choices for this field so
             # it will be threaded as a selectbox
             choices = ( (None, "Will be replaced"), )
-            # This is the way we update the choices attributes
-            db_field._choices = choices
+            db_field = CharField(
+                name=db_field.name,
+                verbose_name=db_field.verbose_name,
+                primary_key=db_field.primary_key,
+                max_length=db_field.max_length,
+                blank=db_field.blank,
+                rel=db_field.rel,
+                default=db_field.default,
+                editable=db_field.editable,
+                serialize=db_field.serialize,
+                unique_for_date=db_field.unique_for_date,
+                unique_for_year=db_field.unique_for_year,
+                help_text=db_field.help_text,
+                db_column=db_field.db_column,
+                db_tablespace=db_field.db_tablespace,
+                auto_created=db_field.auto_created,
+                db_index=db_field.db_index,
+                validators=db_field.validators,
+                # The ony field we do not copu
+                choices=choices
+            )
+
         return super(RelationshipSearchInline, self).formfield_for_dbfield(db_field, **kwargs)
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):

@@ -3,6 +3,7 @@ from app.detective.permissions import create_permissions
 from django.core.exceptions    import ValidationError
 from django.db                 import models
 from tinymce.models            import HTMLField
+from app.detective             import utils
 import os
 import random
 import string
@@ -82,7 +83,7 @@ class Topic(models.Model):
 
     def get_module(self):
         from app.detective import topics
-        return getattr(topics, self.module)
+        return getattr(topics, self.app_label())
 
     def get_models(self):
         return getattr(self.get_module(), "models")
@@ -143,10 +144,25 @@ class Article(models.Model):
 # This model aims to describe a research alongside a relationship.
 class RelationshipSearch(models.Model):
     # This field is deduced from the relationship name
-    subject = models.CharField(editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    subject = models.CharField(null=True, blank=True, editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
     # Every field are required
-    label   = models.CharField(max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
+    label   = models.CharField(null=True, blank=True, max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
     # This field will be re-written by app.detective.admin
     # to be allow dynamic setting of the choices attribute.
-    name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
+    name    = models.CharField(null=True, blank=True, max_length=250, help_text="Name of the relationship inside the subject.")
     topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
+
+    def get_relationship_subject(self):
+        subject = None
+        # Retreive the subject that match with the instance's name
+        topic_models = utils.get_topic_models(self.topic)
+        for model in topic_models:
+            # Retreive every relationship field for this model
+            for field in utils.get_model_fields(model):
+                if field["rel_type"] == self.name:
+                    subject = model._meta.app_label + ":" + model.__name__
+        return subject
+
+    def clean(self):
+        self.subject = self.get_relationship_subject()
+        models.Model.clean(self)

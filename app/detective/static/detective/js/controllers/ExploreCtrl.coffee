@@ -47,11 +47,7 @@ class ExploreCtrl
     selectIndividual: (val, old)=>
         # Single entity selected
         if val.predicate? and val.predicate.name is "<<INSTANCE>>"
-            vals = val.object.split(":")
-            if vals.length > 1
-                @location.path "/#{vals[0]}/#{vals[1].toLowerCase()}/#{val.subject.name}"
-            else
-                @location.path "/#{@scope.topic}/#{vals[0].toLowerCase()}/#{val.subject.name}"
+            @location.path "/#{@scope.topic}/#{val.object.toLowerCase()}/#{val.subject.name}"
         # Full RDF-formated research
         else if val.predicate? and val.object? and val.object != ""
             # Do not pass the label

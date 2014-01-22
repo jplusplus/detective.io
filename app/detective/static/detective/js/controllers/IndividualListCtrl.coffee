@@ -11,6 +11,7 @@ class IndividualListCtrl
         @scope.previousPage    = @previousPage
         @scope.nextPage        = @nextPage
         @scope.pages           = @pages
+        @scope.nearestPages    = @nearestPages
         @scope.goToPage        = @goToPage
         @scope.singleUrl       = @singleUrl
         @scope.isLoading       = @isLoading
@@ -88,6 +89,14 @@ class IndividualListCtrl
         # Use the meta info to determine the page number
         nb = @scope.individuals.meta.total_count/@scope.limit
         new Array Math.ceil(nb)
+    nearestPages: =>
+        pages = []
+        scope = 4
+        for i in _.range(parseInt(@scope.page) - scope, parseInt(@scope.page) + scope)
+            # remove first and last pages
+            pages.push(i) unless i <= 1 or i >= @pages().length
+        return pages
+
     # Go to the given page
     goToPage: (page)=> @location.search "page", 1*page
     # True if there is a previous page

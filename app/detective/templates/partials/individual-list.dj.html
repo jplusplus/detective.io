@@ -66,17 +66,31 @@
 			</li>
 		</ul>
 	</div>
-
 	<div class="tr" ng-if="hasPreviousPage() || hasNextPage()">
 		<ul class="pagination top0">
+
+			<!-- previous -->
 			<li ng-class="{disabled: !hasPreviousPage()}">
 				<a ng-click="previousPage()">&laquo;</a>
 			</li>
-			<li ng-repeat="p in pages() track by $index" ng-class="{active: $index+1 == page}">
-				<a ng-click="goToPage($index+1)">
-					[[$index+1]] <span class="sr-only">(current)</span>
-				</a>
+
+			<!-- first page -->
+			<li ng-class="{active: 1 == page}">
+				<a ng-click="goToPage(1)">1</a>
 			</li>
+
+			<!-- nearest pages -->
+			<li class="disabled" ng-if="nearestPages()[0] > 2"><a >...</a></li>
+			<li ng-repeat="p in nearestPages()" ng-class="{active: p == page}">
+				<a ng-click="goToPage(p)">[[p]] <span class="sr-only">(current)</span></a>
+			</li>
+			<li class="disabled" ng-if="nearestPages()[nearestPages().length - 1] + 1 < pages().length "><a >...</a></li>
+			<!-- last page -->
+			<li ng-if="pages().length > 1" ng-class="{active: pages().length == page}">
+				<a ng-click="goToPage(pages().length)">[[ pages().length ]]</a>
+			</li>
+
+			<!-- next -->
 			<li ng-class="{disabled: !hasNextPage()}">
 				<a ng-click="nextPage()">&raquo;</a>
 			</li>

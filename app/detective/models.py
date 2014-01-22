@@ -1,5 +1,5 @@
 from .utils                    import get_topics
-from app.detective.permissions import create_permissions
+from app.detective.permissions import create_permissions, remove_permissions
 from django.core.exceptions    import ValidationError
 from django.db                 import models
 from tinymce.models            import HTMLField
@@ -90,8 +90,7 @@ class Topic(models.Model):
             raise ValidationError( 'An ontology file is required with this module.',  code='invalid')
         models.Model.clean(self)
 
-
-    def save(self):
+    def save(self, *args, **kwargs):
         # Ensure that the module field is populated with app_label()
         self.module = self.app_label()
         models.Model.save(self)
@@ -147,3 +146,13 @@ class RelationshipSearch(models.Model):
     label   = models.CharField(max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
     name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
     topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
+
+# -----------------------------------------------------------------------------
+#
+#    SIGNALS
+#
+# -----------------------------------------------------------------------------
+from django.db.models import signals
+signals.post_delete.connect(remove_permissions, sender=Topic)
+
+# EOF

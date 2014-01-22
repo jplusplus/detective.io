@@ -23,6 +23,7 @@ from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
 from datetime                           import datetime
+from collections                        import defaultdict
 import json
 import re
 import csv
@@ -486,7 +487,11 @@ class IndividualResource(ModelResource):
         def reduce_result(rows):
             # Initialize structures
             all_nodes = dict()
-            all_links = dict()
+            # Use defaultdict() to create somewhat of an autovivificating list
+            # We want to build a structure of the form:
+            # { source_id : { relation_name : [ target_ids ] } }
+            # Must use a set() instead of list() to avoid checking duplicates but it screw up json.dumps()
+            all_links = defaultdict(lambda: defaultdict(list))
             IDs = set()
 
             for row in rows:
@@ -497,8 +502,6 @@ class IndividualResource(ModelResource):
                     if relation == '<<INSTANCE>>':
                         break
 
-                    all_links.setdefault(nodes[i], {})
-                    all_links[nodes[i]].setdefault(relation, [])
                     if not nodes[i + 1] in all_links[nodes[i]][relation]:
                         all_links[nodes[i]][relation].append(nodes[i + 1])
 

@@ -6,7 +6,8 @@
         data : '='
         topic : '='
     link: (scope, element, attr) ->
-        size = [element[0].clientWidth, 200]
+        size = [element[0].clientWidth, 250]
+        node_size = 6
         absUrl = do $location.absUrl
 
         svg = ((d3.select element[0]).append 'svg').attr
@@ -23,10 +24,10 @@
             dx = d.target.x - d.source.x
             dy = d.target.y - d.source.y
             dr = Math.sqrt (dx * dx + dy * dy)
-            "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y
+            "M#{d.source.x},#{d.source.y}A#{dr},#{dr} 0 0,1 #{d.target.x},#{d.target.y}"
 
         nodeUpdate = (d) ->
-            "translate(" + d.x + "," + d.y + ")"
+            "translate(#{d.x}, #{d.y})"
 
         createPattern = (d, defs) ->
             pattern = defs.append 'svg:pattern'
@@ -40,16 +41,16 @@
             (pattern.append 'svg:rect').attr
                 x : 0
                 y : 0
-                width : 12
-                height : 12
+                width : node_size * 2
+                height : node_size * 2
                 fill : '#21201E'
             image = pattern.append 'svg:image'
             image.attr
                 'xlink:href' : d.image
                 x : 0
                 y : 0
-                width : 12
-                height : 12
+                width : node_size * 2
+                height : node_size * 2
 
         update = =>
             return if not scope.data.nodes?
@@ -76,8 +77,8 @@
                 viewBox : "0 -5 10 10"
                 refX : 15
                 refY : -1.5
-                markerWidth : 6
-                markerHeight : 6
+                markerWidth : node_size
+                markerHeight : node_size
                 orient : "auto").append 'path').attr 'd', "M0,-5L10,0L0,5"
 
             # Create all new links
@@ -93,13 +94,13 @@
             # Create all new nodes
             the_nodes = (svg.selectAll '.node').data nodes, (d) -> d._id
             (do the_nodes.enter).insert('svg:circle', 'text').attr('class', 'node').attr
-                    r : 6
+                    r : node_size
                     d : nodeUpdate
                 .style
                     fill : (d) ->
                         if d.image?
                             return 'url(' + absUrl + '#pattern' + d._id + ')'
-                        return ($filter "strToColor") d._type
+                        ($filter "strToColor") d._type
                     stroke : (d) -> ($filter "strToColor") d._type
                 .call(graph.drag)
                 .each (d) ->
@@ -116,6 +117,10 @@
             do (do the_names.exit).remove
 
         graph.on 'tick', =>
+            the_nodes.each (d) ->
+                d.x = Math.max node_size, (Math.min size[0] - node_size, d.x)
+                d.y = Math.max node_size, (Math.min size[1] - node_size, d.y)
+                null
             the_links.attr 'd', linkUpdate
             the_nodes.attr 'transform', nodeUpdate
             the_names.attr 'transform', nodeUpdate

@@ -46,10 +46,11 @@ class BulkUploadCtrl
                             result = JSON.parse(data.result)
                             data.result = result
                         @scope.job_status = data
-                    # restart this function again
-                    if not @scope.job_status? or @scope.job_status.status == "enqueued" or @scope.job_status.status == "started" 
-                        @scope.feedback = null
-                        cancel_refresh = @timeout(refresh_status, @delay)
+                        # restart this function again
+                        if not @scope.job_status? or @scope.job_status.status == "queued" or @scope.job_status.status == "started"
+                            cancel_refresh = @timeout(refresh_status, @delay)
+                        else
+                            @scope.feedback = null
                 , @delay)
                 # cancel the timeout if the view is destroyed
                 @scope.$on '$destroy', =>

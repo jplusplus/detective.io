@@ -51,6 +51,7 @@
                 y : 0
                 width : node_size * 2
                 height : node_size * 2
+            null
 
         update = =>
             return if not scope.data.nodes?
@@ -59,13 +60,30 @@
             nodes = (node for id, node of scope.data.nodes)
             links = []
 
+            aggregation = 1
+
             _.map (_.pairs scope.data.links), ([source_id, relations]) ->
                 _.map (_.pairs relations), ([relation, targets]) ->
                     _.map targets, (target_id) ->
+                        target = if (typeof target_id) isnt typeof []
+                            scope.data.nodes[target_id]
+                        else
+                            if target_id.length is 1
+                                scope.data.nodes[target_id[0]]
+                            else
+                                nodes.push
+                                    _id : -(aggregation++)
+                                    _type : '_AGGREGATION_'
+                                    name : "#{target_id.length} entities"
+                                nodes[nodes.length - 1]
+
                         links.push
                             source : scope.data.nodes[source_id]
-                            target : scope.data.nodes[target_id]
+                            target : target
                             _type : relation
+                        null
+                    null
+                null
 
             do ((graph.nodes nodes).links links).start
 
@@ -105,6 +123,7 @@
                 .call(graph.drag)
                 .each (d) ->
                     (createPattern d, defs) if d.image?
+                    null
             # Remove old nodes
             do (do the_nodes.exit).remove
 
@@ -115,6 +134,7 @@
                     class : 'name'
                 .text (d) -> d.name
             do (do the_names.exit).remove
+            null
 
         graph.on 'tick', =>
             the_nodes.each (d) ->
@@ -124,8 +144,12 @@
             the_links.attr 'd', linkUpdate
             the_nodes.attr 'transform', nodeUpdate
             the_names.attr 'transform', nodeUpdate
+            null
 
         scope.$watch 'data', =>
             update graph
+            null
+
+        null
 
 ]

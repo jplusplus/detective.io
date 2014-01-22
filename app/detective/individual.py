@@ -483,6 +483,7 @@ class IndividualResource(ModelResource):
         self.throttle_check(request)
 
         depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
+        aggregation_threshold = 2
 
         def reduce_result(rows):
             # Initialize structures
@@ -503,11 +504,19 @@ class IndividualResource(ModelResource):
                         break
 
                     if not nodes[i + 1] in all_links[nodes[i]][relation]:
-                        all_links[nodes[i]][relation].append(nodes[i + 1])
+                        links_len = len(all_links[nodes[i]][relation])
+                        if links_len < aggregation_threshold:
+                            all_links[nodes[i]][relation].append(nodes[i + 1])
 
-                    # Push IDs if not already in
-                    for node in [nodes[i], nodes[i + 1]]:
-                        IDs.add(node)
+                            # Push IDs if not already in
+                            for node in [nodes[i], nodes[i + 1]]:
+                                IDs.add(node)
+                        else:
+                            if links_len == aggregation_threshold:
+                                all_links[nodes[i]][relation].append([nodes[i + 1]])
+                            else:
+                                if not nodes[i + 1] in all_links[nodes[i]][relation][-1]:
+                                    all_links[nodes[i]][relation][-1].append(nodes[i + 1])
 
                     i += 1
 

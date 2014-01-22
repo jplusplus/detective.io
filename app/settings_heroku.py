@@ -16,6 +16,11 @@ DATABASES = {
     'default' : dj_database_url.config()
 }
 
+# Turn on database level autocommit
+# Otherwise db can raise a "current transaction is aborted, 
+# commands ignored until end of transaction block"
+DATABASES['default']['OPTIONS'] = {'autocommit': True,}
+
 # Parse url given into environment variable
 NEO4J_URL  = urlparse( os.getenv('NEO4J_URL') )
 NEO4J_OPTIONS = {}

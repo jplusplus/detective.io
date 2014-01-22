@@ -3,7 +3,7 @@
 	<div class="container">
 
 		<h2>Upload objects and relationship</h2>
-		<form name="uploadForm" ng-submit="submit()">
+		<form name="uploadForm">
 			<div class="panel panel-default">
 				<div class="panel-body">
 					<div>
@@ -12,7 +12,7 @@
 							<input type="file" multiple ng-file-select="onFileSelect($files, field_name)" class="form-control">
 						</div>
 
-						<button type="submit" class="btn btn-primary pull-right">
+						<button class="btn btn-primary pull-right" ng-click="submit()">
 							<i class="fa fa-upload right10"></i>
 							Upload
 						</button>

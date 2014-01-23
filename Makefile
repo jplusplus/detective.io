@@ -1,15 +1,15 @@
 # Makefile -- Detective.io
 
-VIRTUALENV = venv/
 NEO4J_VERSION = 1.9.1
+ENV           = `pwd`/.env
 
 run:
-	. $(VIRTUALENV)bin/activate ; export PYTHONPATH=`pwd`/app/:$(PYTHONPATH) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading
+	. $(ENV) ; python manage.py runserver --nothreading
 
 install:
 	virtualenv venv --no-site-packages --distribute --prompt=Detective.io
 	# Install pip packages
-	. $(VIRTUALENV)bin/activate; pip install -r requirements.txt
+	. $(ENV) ; pip install -r requirements.txt
 	# Install npm packages
 	cat npm_requirements.txt | echo $1
 	# Install bower packages
@@ -26,6 +26,6 @@ startdb:
 
 test:
 	curl -X DELETE 'http://localhost:7474/cleandb/supersecretdebugkey!'
-	. $(VIRTUALENV)bin/activate; export PYTHONPATH=`pwd`/app/:$(PYTHONPATH) ; python manage.py test detective --settings=app.settings_tests
+	. $(ENV) ; python manage.py test detective --settings=app.settings_tests
 
 # EOF

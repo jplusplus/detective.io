@@ -90,8 +90,9 @@ def create_permissions(app, app_label=None, created_models=None, verbosity=False
     Entry point for permission creation. Will be called after DB synchronisation
     for every installed app (see settings.INSTALLED_APPS)
     """
-    app_name  = app.__name__
+    app_name = app.__name__
     if app_label is None:
+        # FIXME: why -2 ? 
         app_label = app_name.split('.')[-2]
 
     # we check if the received signal come from a local installed application

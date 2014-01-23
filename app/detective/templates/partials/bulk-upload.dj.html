@@ -1,10 +1,9 @@
-
 <div id="contribute">
 
 	<div class="container">
 
 		<h2>Upload objects and relationship</h2>
-		<form name="uploadForm" ng-submit="submit()">
+		<form name="uploadForm">
 			<div class="panel panel-default">
 				<div class="panel-body">
 					<div>
@@ -13,7 +12,7 @@
 							<input type="file" multiple ng-file-select="onFileSelect($files, field_name)" class="form-control">
 						</div>
 
-						<button type="submit" class="btn btn-primary pull-right">
+						<button class="btn btn-primary pull-right" ng-click="submit()">
 							<i class="fa fa-upload right10"></i>
 							Upload
 						</button>
@@ -24,6 +23,26 @@
 						</button>
 
 					</div>
+
+					<!-- Feedback -->
+					<div class="loader" ng-if="feedback">
+						<span>Loading ...</span>
+					</div>
+
+					<div class="alert alert-success" ng-if="job_status.result.inserted.objects && job_status.result.inserted.objects > 0">
+						<i class="fa fa-check right05"></i>
+							[[ job_status.result.inserted.objects ]] <span class="objects">objects</span> inserted with [[ job_status.result.inserted.links ]] <span class="relations">relations</span>.
+					</div>
+
+					<div class="alert alert-warning" ng-if="job_status.result.errors">there are some warning about this request:
+						<div ng-repeat="error in job_status.result.errors">
+							<div ng-repeat="(key, value) in error">
+								[[key]]: [[value]]
+							</div>
+						</div>
+					</div>
+					<div class="alert alert-danger" ng-if="job_status.status == 'failed'">The job failed</div>
+					<!-- /Feedback -->
 
 					<div class="top20">
 						<div class="alert alert-info">
@@ -58,34 +77,5 @@
 				</div>
 			</div>
 		</form>
-
-
-		<div class="feedback" ng-if="feedback && feedback.$resolved">
-			<div class="status" ng-class="feedback.inserted.objects && feedback.inserted.objects > 0 ? 'saved' : 'failed'">
-				<div class="row form-footer">
-					<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
-						<span ng-if="feedback.inserted.objects && feedback.inserted.objects > 0">
-							<i class="fa fa-check right05"></i>
-							[[ feedback.inserted.objects ]] <span class="objects">objects</span> inserted with [[ feedback.inserted.links ]] <span class="relations">relations</span>.
-						</span>
-						<span ng-if="!(feedback.inserted.objects && feedback.inserted.objects > 0)">
-							<i class="fa fa-square-o"></i>
-							Nothing saved, check your files.
-						</span>
-					</div>
-				</div>
-			</div>
-			<div class="error failed" ng-if="feedback.errors">
-				<div class="row form-footer">
-					<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
-				 		<div ng-repeat="error in feedback.errors">
-							<div ng-repeat="(key, value) in error">
-								[[key]]: [[value]]
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
 	</div>
 </div>

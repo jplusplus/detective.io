@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Django Heroku settings for barometre project.
+Django Heroku settings for Detective.io project.
 Packages required:
     * boto
     * django-storages
@@ -66,6 +66,8 @@ COMPRESS_ENABLED           = True
 COMPRESS_ROOT              = STATIC_ROOT
 COMPRESS_URL               = STATIC_URL
 COMPRESS_STORAGE           = STATICFILES_STORAGE
+COMPRESS_OFFLINE           = True
+
 # Activate CSS minifier
 COMPRESS_CSS_FILTERS       = (
     "app.detective.compress_filter.CustomCssAbsoluteFilter",
@@ -82,7 +84,6 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
 }
 
-
 # Activate the cache, for true
 CACHES = {
     'default': {
@@ -91,3 +92,4 @@ CACHES = {
     }
 }
 
+# EOF

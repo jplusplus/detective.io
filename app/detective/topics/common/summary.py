@@ -11,13 +11,13 @@ from tastypie                 import http
 from tastypie.exceptions      import ImmediateHttpResponse
 from tastypie.resources       import Resource
 from tastypie.serializers     import Serializer
-
+from django.utils.timezone    import utc
 import app.detective.utils    as utils
 import json
 import re
+import datetime
 import logging
 import django_rq
-
 from .errors import *
 
 # Get an instance of a logger
@@ -653,18 +653,19 @@ def process_parsing(topic, files):
                                 if "Integer" in column_type:
                                     value = int(value)
                                 # TODO: cast float
+                                if "Date" in column_type:
+                                    value = datetime.datetime(*map(int, re.split('[^\d]', value)[:-1])).replace(tzinfo=utc)
                             except Exception as e:
-                                errors.append(
-                                    WarningCastingValueFail(
-                                        column_name = column,
-                                        value       = value,
-                                        type        = column_type,
-                                        data        = data, model=entity,
-                                        file        = file_name,
-                                        line        = csv_reader.line_num,
-                                        error       = str(e)
-                                    )
+                                e = WarningCastingValueFail(
+                                    column_name = column,
+                                    value       = value,
+                                    type        = column_type,
+                                    data        = data, model=entity,
+                                    file        = file_name,
+                                    line        = csv_reader.line_num,
+                                    error       = str(e)
                                 )
+                                errors.append(e)
                                 break
                             data[column] = value
                     else:

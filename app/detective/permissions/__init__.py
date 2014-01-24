@@ -94,7 +94,6 @@ def create_permissions(app, app_label=None, created_models=None, verbosity=False
     if app_label is None:
         # FIXME: why -2 ? 
         app_label = app_name.split('.')[-2]
-
     # we check if the received signal come from a local installed application
     if app_name.startswith("app.detective.topics"):
         for op in OPERATIONS:
@@ -115,6 +114,7 @@ def remove_permissions(sender, instance, using, **kwargs):
 #
 # -----------------------------------------------------------------------------
 # will be trigger for each created app
+
 signals.post_syncdb.connect(create_permissions,
     dispatch_uid="app.detective.permissions.create_permissions")
 

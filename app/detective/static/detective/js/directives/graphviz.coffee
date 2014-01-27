@@ -43,7 +43,7 @@
                 y : 0
                 width : node_size * 2
                 height : node_size * 2
-                fill : '#21201E'
+                fill : '#999'
             image = pattern.append 'svg:image'
             image.attr
                 'xlink:href' : d.image
@@ -65,17 +65,15 @@
             _.map (_.pairs scope.data.links), ([source_id, relations]) ->
                 _.map (_.pairs relations), ([relation, targets]) ->
                     _.map targets, (target_id) ->
-                        target = if (typeof target_id) isnt typeof []
+                        # If we have an array, we must create a aggregation node
+                        target = if (typeof target_id) isnt (typeof [])
                             scope.data.nodes[target_id]
                         else
-                            if target_id.length is 1
-                                scope.data.nodes[target_id[0]]
-                            else
-                                nodes.push
-                                    _id : -(aggregation++)
-                                    _type : '_AGGREGATION_'
-                                    name : "#{target_id.length} entities"
-                                nodes[nodes.length - 1]
+                            nodes.push
+                                _id : -(aggregation++)
+                                _type : '_AGGREGATION_'
+                                name : "#{target_id.length} entities"
+                            nodes[nodes.length - 1]
 
                         links.push
                             source : scope.data.nodes[source_id]

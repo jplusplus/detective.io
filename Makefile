@@ -3,7 +3,7 @@
 NEO4J_VERSION = 1.9.1
 ENV           = `pwd`/.env
 
-run:
+run: clear
 	. $(ENV) ; python manage.py runserver --nothreading
 
 install:
@@ -17,6 +17,9 @@ install:
 	# Install neo4j locally
 	./install_local_neo4j.bash $$NEO4J_VERSION
 	make startdb
+
+clear:
+	rm **/*.pyc -f
 
 stopdb:
 	./lib/neo4j/bin/neo4j stop || true

@@ -107,11 +107,7 @@ class Topic(models.Model):
     def save(self, *args, **kwargs):
         # Ensure that the module field is populated with app_label()
         self.module = self.app_label()
-        models.Model.save(self)
-        # Then create the permissions related to the label module
-        # @TODO check that the slug changed or not to avoid permissions hijacking
-        # FIXME: don't understand why the app_module.models module is used here
-        create_permissions(self.get_models_module(), app_label=self.slug)
+        super(Topic, self).save(*args, **kwargs)
 
     def has_default_ontology(self):
         module = self.get_module()
@@ -168,6 +164,15 @@ class RelationshipSearch(models.Model):
 #
 # -----------------------------------------------------------------------------
 from django.db.models import signals
+
+def update_permissions(*args, **kwargs):
+    """ create the permissions related to the label module """
+    assert kwargs.get('instance')
+    # @TODO check that the slug changed or not to avoid permissions hijacking
+    if kwargs.get('created', False):
+        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').slug)
+
 signals.post_delete.connect(remove_permissions, sender=Topic)
+signals.post_save.connect(update_permissions, sender=Topic)
 
 # EOF

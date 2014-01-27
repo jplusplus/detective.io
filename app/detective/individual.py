@@ -9,8 +9,11 @@ from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
 from django.db.models.query             import QuerySet
 from django.http                        import Http404, HttpResponseBadRequest
+from django.http                        import Http404
+from neo4django.db                      import connection
 from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
+from neo4django.rest_utils              import id_from_url
 from tastypie                           import fields
 from tastypie.authentication            import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization             import Authorization
@@ -20,6 +23,7 @@ from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
 from datetime                           import datetime
+from collections                        import defaultdict
 import json
 import re
 import csv
@@ -329,6 +333,7 @@ class IndividualResource(ModelResource):
             url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
             url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/graph%s$" % params, self.wrap_view('get_graph'), name="api_get_graph"),
         ]
 
 
@@ -473,3 +478,74 @@ class IndividualResource(ModelResource):
             node.save()
         return self.create_response(request, data)
 
+    def get_graph(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+
+        depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
+        aggregation_threshold = 2
+
+        def reduce_result(rows):
+            # Initialize structures
+            all_nodes = dict()
+            # Use defaultdict() to create somewhat of an autovivificating list
+            # We want to build a structure of the form:
+            # { source_id : { relation_name : [ target_ids ] } }
+            # Must use a set() instead of list() to avoid checking duplicates but it screw up json.dumps()
+            all_links = defaultdict(lambda: defaultdict(list))
+            IDs = set()
+
+            for row in rows:
+                nodes = row['nodes']
+                i = 0
+                for relation in row['relations']:
+                    # If link is <<INSTANCE>>, then we're over
+                    if relation == '<<INSTANCE>>':
+                        break
+
+                    if not nodes[i + 1] in all_links[nodes[i]][relation]:
+                        links_len = len(all_links[nodes[i]][relation])
+                        if links_len < aggregation_threshold:
+                            all_links[nodes[i]][relation].append(nodes[i + 1])
+
+                            # Push IDs if not already in
+                            for node in [nodes[i], nodes[i + 1]]:
+                                IDs.add(node)
+                        else:
+                            if links_len == aggregation_threshold:
+                                all_links[nodes[i]][relation].append([nodes[i + 1]])
+                            else:
+                                if not nodes[i + 1] in all_links[nodes[i]][relation][-1]:
+                                    all_links[nodes[i]][relation][-1].append(nodes[i + 1])
+
+                    i += 1
+
+            # Finally get all entities from their IDs
+            query = """
+                START root = node({0})
+                MATCH (root)-[:`<<INSTANCE>>`]-(type)
+                RETURN ID(root) as ID, root, type
+            """.format(','.join([str(ID) for ID in IDs]))
+            rows = connection.cypher(query).to_dicts()
+            for row in rows:
+                # Twist some data in the entity
+                for key in row['root']['data'].keys():
+                    if key[0] == '_': del row['root']['data'][key]
+                row['root']['data']['_type'] = row['type']['data']['model_name']
+                row['root']['data']['_id'] = row['ID']
+
+                all_nodes[row['ID']] = row['root']['data']
+
+            return (all_nodes, all_links)
+
+        query = """
+            START root=node({0})
+            MATCH path = (root)-[*1..{1}]-(leaf)
+            RETURN extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|ID(n)) as nodes
+        """.format(kwargs['pk'], depth)
+        rows = connection.cypher(query).to_dicts()
+
+        (nodes, links) = reduce_result(rows)
+
+        self.log_throttled_access(request)
+        return self.create_response(request, {'nodes':nodes,'links':links})

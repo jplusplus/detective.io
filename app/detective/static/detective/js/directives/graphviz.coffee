@@ -83,7 +83,16 @@
                     null
                 null
 
-            do ((graph.nodes nodes).links links).start
+            notlinked = -1
+            while notlinked isnt 0
+                notlinked = 0
+                do ((graph.nodes nodes).links links).start
+
+                _.map nodes, (node, i) ->
+                    if node.weight is 0
+                        nodes.splice i, 1
+                        ++notlinked
+                do ((graph.nodes nodes).links links).start
 
             do (svg.selectAll 'defs').remove
             defs = svg.insert 'svg:defs', 'path'

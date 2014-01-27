@@ -1,4 +1,12 @@
-# took from http://stackoverflow.com/questions/13932774/how-can-i-use-django-permissions-without-defining-a-content-type-or-model/13952198#13952198
+#!/usr/bin/env python
+# Encoding: utf-8
+# -----------------------------------------------------------------------------
+# Project : Detective.io
+# -----------------------------------------------------------------------------
+# Creation : 22-Jan-2014
+# Last mod : 22-Jan-2014
+# -----------------------------------------------------------------------------
+# From http://stackoverflow.com/questions/13932774/how-can-i-use-django-permissions-without-defining-a-content-type-or-model/13952198#13952198
 from django.db import models
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -27,3 +35,5 @@ class AppPermission(Permission):
         if label:
             self._app_label = label
         return self._app_label
+
+# EOF

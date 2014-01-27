@@ -35,10 +35,14 @@
 		</div>
 	</div>
 
-	<div class="container tr top20" ng-hide="showKickStart || !individuals.length">
-		<a class="btn btn-default btn-large" ng-click="showKickStart = true">
+	<div class="container tr top20">
+		<a class="btn btn-default btn-large" ng-click="showKickStart = true"  ng-hide="showKickStart || !individuals.length">
 			<i class="fa fa-plus right10"></i>
 			Add a new individual
+		</a>
+		<a class="btn btn-default btn-large" ng-href="[[topic]]/contribute/upload">
+			<i class="fa fa-upload right10"></i>
+			Bulk upload
 		</a>
 	</div>
 

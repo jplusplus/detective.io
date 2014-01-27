@@ -185,6 +185,8 @@ INSTALLED_APPS = (
     'south',
     # Rich text editor
     'tinymce',
+    # Redis queue backend
+    "django_rq",
     # Internal
     'app.detective',
     'app.detective.permissions',
@@ -202,9 +204,23 @@ ACCOUNT_ACTIVATION_DAYS = 7
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/tmp/django_cache',
     }
+}
+
+# Redis Queues
+# RQ_SHOW_ADMIN_LINK will override the default admin template so it may interfere 
+# with other apps that modifies the default admin template.
+RQ_SHOW_ADMIN_LINK = True
+RQ_CONFIG = {
+    'URL'  : os.getenv('REDISTOGO_URL', None) or os.getenv('REDISCLOUD_URL', None) or 'redis://localhost:6379',
+    'DB'   : 0,
+    'ASYNC': True
+}
+RQ_QUEUES = {
+    'default': RQ_CONFIG,
+    'high'   : RQ_CONFIG,
+    'low'    : RQ_CONFIG
 }
 
 # A sample logging configuration. The only tangible logging
@@ -215,16 +231,34 @@ CACHES = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[%(levelname)s] %(asctime)s | %(filename)s:%(lineno)d | %(message)s'
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
+        },
+         'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
         }
     },
     'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'filters' : ['require_debug_true'],
+            'formatter': 'simple'
         }
     },
     'loggers': {
@@ -232,6 +266,11 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
+        },
+        'app.detective': {
+            'handlers': ['mail_admins', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     }
 }

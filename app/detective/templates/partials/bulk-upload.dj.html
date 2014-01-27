@@ -1,0 +1,81 @@
+<div id="contribute">
+
+	<div class="container">
+
+		<h2>Upload objects and relationship</h2>
+		<form name="uploadForm">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<div>
+						<p>Please select a CSV file to upload:</p>
+						<div ng-repeat="field_name in file_fields" class="well">
+							<input type="file" multiple ng-file-select="onFileSelect($files, field_name)" class="form-control">
+						</div>
+
+						<button class="btn btn-primary pull-right" ng-click="submit()">
+							<i class="fa fa-upload right10"></i>
+							Upload
+						</button>
+
+						<button class="btn btn-default" ng-click="addFileField()">
+							<i class="fa fa-plus right05"></i>
+							Add a file
+						</button>
+
+					</div>
+
+					<!-- Feedback -->
+					<div class="loader" ng-if="feedback">
+						<span>Loading ...</span>
+					</div>
+
+					<div class="alert alert-success" ng-if="job_status.result.inserted.objects && job_status.result.inserted.objects > 0">
+						<i class="fa fa-check right05"></i>
+							[[ job_status.result.inserted.objects ]] <span class="objects">objects</span> inserted with [[ job_status.result.inserted.links ]] <span class="relations">relations</span>.
+					</div>
+
+					<div class="alert alert-warning" ng-if="job_status.result.errors">there are some warning about this request:
+						<div ng-repeat="error in job_status.result.errors">
+							<div ng-repeat="(key, value) in error">
+								[[key]]: [[value]]
+							</div>
+						</div>
+					</div>
+					<div class="alert alert-danger" ng-if="job_status.status == 'failed'">The job failed</div>
+					<!-- /Feedback -->
+
+					<div class="top20">
+						<div class="alert alert-info">
+							<h4>File format</h4>
+							<p>
+								Entities file should respect this header structure:
+							</p>
+							<table class="table table-bordered tabl top10 panel panel-default">
+								<theader>
+									<tr>
+										<td>&lt;object_name&gt;_id</td>
+										<td>&lt;field_name1&gt;</td>
+										<td>&lt;field_name2&gt;</td>
+										<td>etc..</td>
+									</tr>
+								</theader>
+							</table>
+							<p>
+								Relationships file should respect this header structure:
+							</p>
+							<table class="table table-bordered tabl top10 bottom0 panel panel-default">
+								<theader>
+									<tr>
+										<td>&lt;object_1_name&gt;_id</td>
+										<td>&lt;relation_type&gt;</td>
+										<td>&lt;object_2_name&gt;</td>
+									</tr>
+								</theader>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>

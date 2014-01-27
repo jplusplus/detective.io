@@ -3,7 +3,7 @@
 @import-once './tools.less';
 @import-once './animations.less';
 @import-once './bootstrap-overload.less';
-@import  '//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css';
+@import '//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css';
 
 @zindex-context   : 10;
 @zindex-content   : @zindex-context+100;
@@ -14,7 +14,18 @@
 
 @header-bg:#2E2D2A;
 @brand-secondary: #BFB8A6;
+@brand-tertiary: #CB5B5E;
 
+.ngProgressLite .ngProgressLiteBar  {
+	z-index: @zindex-loading;
+	background: @brand-tertiary;
+	position:absolute;
+	top:124px;
+
+	.ngProgressLiteBarShadow {
+		.box-shadow(~"0 0 10px @{brand-tertiary}, 0 0 5px @{brand-tertiary}");
+	}
+}
 
 body {
     position:relative;
@@ -98,25 +109,9 @@ body {
 		}
 	}
 
-	.spinner {
-		position:relative;
-		min-height:100px;
-
-		&.static {
-			position:static;
-		}
-
-		&:after {
-			content:"";
-			display:block;
-			position:absolute;
-			top:0;
-			bottom:0;
-			left:0;
-			right:0;
-			min-height:40px;
-			background:url("@{staticPath}img/spinner.gif") no-repeat center 20px @body-bg;
-		}
+	.freeze {
+		visibility: hidden;
+		min-height:400px;
 	}
 
 
@@ -477,6 +472,12 @@ header {
 		 	color: @panel-success-text;
 			background: @panel-success-heading-bg;
 			border-color: darken(@panel-success-border, 5);
+		}
+
+		.failed .form-footer {
+		 	color: @panel-warning-text;
+			background: @panel-warning-heading-bg;
+			border-color: darken(@panel-warning-border, 5);
 		}
 	}
 

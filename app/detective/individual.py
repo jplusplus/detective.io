@@ -505,20 +505,27 @@ class IndividualResource(ModelResource):
 
                     if not nodes[i + 1] in all_links[nodes[i]][relation]:
                         links_len = len(all_links[nodes[i]][relation])
-                        if links_len < aggregation_threshold:
-                            all_links[nodes[i]][relation].append(nodes[i + 1])
+                        #if links_len < aggregation_threshold:
+                        all_links[nodes[i]][relation].append(nodes[i + 1])
 
-                            # Push IDs if not already in
-                            for node in [nodes[i], nodes[i + 1]]:
-                                IDs.add(node)
-                        else:
-                            if links_len == aggregation_threshold:
-                                all_links[nodes[i]][relation].append([nodes[i + 1]])
-                            else:
-                                if not nodes[i + 1] in all_links[nodes[i]][relation][-1]:
-                                    all_links[nodes[i]][relation][-1].append(nodes[i + 1])
+                        # Push IDs if not already in
+                        for node in [nodes[i], nodes[i + 1]]:
+                            IDs.add(node)
+                        # else:
+                        #     if links_len == aggregation_threshold:
+                        #         all_links[nodes[i]][relation].append([nodes[i + 1]])
+                        #     else:
+                        #         if not nodes[i + 1] in all_links[nodes[i]][relation][-1]:
+                        #             all_links[nodes[i]][relation][-1].append(nodes[i + 1])
 
                     i += 1
+
+            for node in all_links.keys():
+                for relation in all_links[node].keys():
+                    if len(all_links[node][relation]) > 1:
+                        tmp = all_links[node][relation][1:]
+                        all_links[node][relation] = all_links[node][relation][:1]
+                        all_links[node][relation].append(tmp)
 
             # Finally get all entities from their IDs
             query = """

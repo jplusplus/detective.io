@@ -106,10 +106,10 @@ class Topic(models.Model):
         module = self.get_module()
         # File if it's a virtual module
         if not hasattr(module, "__file__"): return False
-        directory     = os.path.dirname(os.path.realpath( module.__file__ ))
+        directory = os.path.dirname(os.path.realpath( module.__file__ ))
         # Path to the ontology file
-        ontology = "%s/ontology.owl" % directory
-        return os.path.exists(ontology)
+        ontology  = "%s/ontology.owl" % directory
+        return os.path.exists(ontology) or hasattr(self.get_module(), "models")
 
 
     def get_absolute_path(self):
@@ -144,7 +144,7 @@ class Article(models.Model):
 # This model aims to describe a research alongside a relationship.
 class RelationshipSearch(models.Model):
     # This field is deduced from the relationship name
-    subject = models.CharField(null=True, blank=True, default='', editable=True, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    subject = models.CharField(null=True, blank=True, default='', editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
     # Every field are required
     label   = models.CharField(null=True, blank=True, default='', max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
     # This field will be re-written by app.detective.admin

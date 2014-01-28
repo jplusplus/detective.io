@@ -652,8 +652,11 @@ class SummaryResource(Resource):
             seen = set()
             new_list = []
             for item in lst:
-                # Create a hash of the dictionary
-                obj = hash(frozenset(item.items()))
+                if type(item) is dict:
+                    # Create a hash of the dictionary
+                    obj = hash(frozenset(item.items()))
+                else:
+                    obj = hash(item)
                 if obj not in seen:
                     seen.add(obj)
                     new_list.append(item)
@@ -674,6 +677,10 @@ class SummaryResource(Resource):
             parts = sentence.split(base)
             return parts[0].strip().split(" ")[-1] if len(parts) else None
 
+        def is_object(query, token):
+            previous = previous_word(query, token)
+            return is_preposition(previous) or previous.isdigit() or token.isnumeric()
+
         predicates    = []
         subjects      = []
         objects       = []
@@ -684,7 +691,7 @@ class SummaryResource(Resource):
             subjects     += match["models"]
             predicates   += match["relationships"] + match["literals"]
             # True when the current token is the last of the series
-            is_last_token = idx == len(matches)-1
+            is_last_token = ending_tokens != "" and query.endswith(ending_tokens)
             # Objects are detected when they start and end by double quotes
             if  match["token"].startswith('"') and match["token"].endswith('"'):
                 # Remove the quote from the token
@@ -692,18 +699,14 @@ class SummaryResource(Resource):
                 # Store the token as an object
                 objects += self.search(token)[:5]
             # Or if the previous word is a preposition
-            elif is_preposition( previous_word(query, match["token"]) ) or is_last_token:
+            elif is_object(query, match["token"]) or is_last_token:
                 # Looks for entities into the database
                 entities = self.search(match["token"])[:5]
-                if len(entities):
-                    objects += entities
+                if len(entities): objects += entities
                 # Save every tokens until the last one
-                elif not is_last_token:
-                    ending_tokens = match["token"]
+                if not is_last_token: ending_tokens = match["token"]
                 # We reach the end
-                else:
-                    objects.append( ending_tokens )
-
+                else: objects.append( ending_tokens )
 
         # We find some subjects
         if len(subjects) and not len(predicates):
@@ -719,7 +722,7 @@ class SummaryResource(Resource):
         # Generate proposition using RDF's parts
         for subject in remove_duplicates(subjects):
             for predicate in remove_duplicates(predicates):
-                for obj in objects:
+                for obj in remove_duplicates(objects):
                     pred_sub = predicate.get("subject", None)
                     # If the predicate has a subject
                     # and it matches to the current one

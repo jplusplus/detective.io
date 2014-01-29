@@ -11,6 +11,7 @@ from tastypie                 import http
 from tastypie.exceptions      import ImmediateHttpResponse
 from tastypie.resources       import Resource
 from tastypie.serializers     import Serializer
+from psycopg2.extensions      import adapt
 
 import app.detective.utils    as utils
 import json
@@ -273,6 +274,8 @@ class SummaryResource(Resource):
         predicate = query.get("predicate", None)
         obj       = query.get("object", None)
         results   = self.rdf_search(subject, predicate, obj)
+        # Stop now in case of error
+        if "errors" in results: return results
         count     = len(results)
         paginator = Paginator(results, limit)
         try:
@@ -565,18 +568,54 @@ class SummaryResource(Resource):
         return connection.cypher(query).to_dicts()
 
     def rdf_search(self, subject, predicate, obj):
-        # Query to get every result
-        query = """
-            START st=node(*)
-            MATCH (st)<-[:`%s`]-(root)<-[:`<<INSTANCE>>`]-(type)
-            WHERE HAS(root.name)
-            AND HAS(st.name)
-            AND type.model_name = "%s"
-            AND st.name = "%s"
-            AND type.app_label = '%s'
-            RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
-        """ % ( predicate["name"], subject["name"], obj["name"], self.topic.app_label() )
-        print query
+        obj = obj["name"] if "name" in obj else obj
+        # retrieve all models in current topic
+        all_models = dict((model.__name__, model) for model in utils.get_topic_models(self.topic.module))
+        # If the received obj describe a literal value
+        if self.is_registered_literal(predicate["name"]):
+            # Get the field name into the database
+            field_name = predicate["name"]
+            # Build the request
+            query = """
+                START root=node(*)
+                MATCH (root)<-[:`<<INSTANCE>>`]-(type)
+                WHERE HAS(root.name)
+                AND HAS(root.{field})
+                AND root.{field} = {value}
+                AND type.model_name = {model}
+                AND type.app_label = {app}
+                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+            """.format(
+                field=field_name,
+                value=adapt(obj),
+                model=adapt(subject["name"]),
+                app=adapt(self.topic.app_label())
+            )
+        # If the received obj describe a literal value
+        elif self.is_registered_relationship(predicate["name"]):
+            fields       = utils.get_model_fields( all_models[subject["name"]] )
+            # Get the field name into the database
+            relationships = [ field for field in fields if field["name"] == predicate["name"] ]
+            relationship  = relationships[0]["rel_type"]
+            # Query to get every result
+            query = """
+                START st=node(*)
+                MATCH (st)<-[:`{relationship}`]-(root)<-[:`<<INSTANCE>>`]-(type)
+                WHERE HAS(root.name)
+                AND HAS(st.name)
+                AND st.name = {name}
+                AND type.model_name = {model}
+                AND type.app_label = {app}
+                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+            """.format(
+                relationship=relationship,
+                name=adapt(obj),
+                model=adapt(subject["name"]),
+                app=adapt(self.topic.app_label())
+            )
+        else:
+            return {'errors': 'Unkown predicate type'}
+
         return connection.cypher(query).to_dicts()
 
 
@@ -762,6 +801,16 @@ class SummaryResource(Resource):
             })
         # Remove duplicates proposition dicts
         return propositions
+
+    def is_registered_literal(self, name):
+        literals = self.get_syntax().get("predicate").get("literal")
+        matches  = [ literal for literal in literals if name == literal["name"] ]
+        return len(matches)
+
+    def is_registered_relationship(self, name):
+        literals = self.get_syntax().get("predicate").get("relationship")
+        matches  = [ literal for literal in literals if name == literal["name"] ]
+        return len(matches)
 
     def get_syntax(self, bundle=None, request=None):
         return {

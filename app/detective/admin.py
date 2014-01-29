@@ -93,6 +93,8 @@ class TopicAdmin(admin.ModelAdmin):
             setattr(request, 'topic_id', obj.id)
             # Add inlice SearchTerm only for saved object
             self.inlines = (SearchTermInline,)
+        else:
+            self.inlines = []
         return super(TopicAdmin, self).get_form(request, obj, **kwargs)
 
 

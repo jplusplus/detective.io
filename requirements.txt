@@ -1,5 +1,4 @@
 argparse==1.2.1
-BeautifulSoup==3.2.1
 boto==2.9.6
 decorator==3.4.0
 defusedxml==0.4.1

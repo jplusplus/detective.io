@@ -6,10 +6,13 @@ NEO4J_VERSION = 1.9.1
 run:
 	. $(VIRTUALENV)bin/activate ; export PYTHONPATH=`pwd`/app/:$(PYTHONPATH) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading
 
-install:
+virtualenv:
 	virtualenv venv --no-site-packages --distribute --prompt=Detective.io
 	# Install pip packages
 	. $(VIRTUALENV)bin/activate; pip install -r requirements.txt
+
+install:
+	make virtualenv
 	# Install npm packages
 	cat npm_requirements.txt | echo $1
 	# Install bower packages

@@ -159,6 +159,8 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
 }
 
+# Remove BeautifulSoup requirement
+COMPRESS_PARSER = 'compressor.parser.HtmlParser'*
 COMPRESS_ENABLED = False
 #INTERNAL_IPS = ('127.0.0.1',)
 

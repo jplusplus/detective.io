@@ -4,9 +4,8 @@ class IndividualSearchCtrl extends IndividualListCtrl
         return @location.url("/") unless @routeParams.q?
         # Parse the JSON query
         @scope.query  = angular.fromJson @routeParams.q
-        @scope.topic  = @routeParams.topic
         # Load the search syntax
-        @scope.syntax = @Individual.get type: "summary", id: "syntax", topic: @scope.topic
+        @scope.syntax = @Individual.get type: "summary", id: "syntax"
         # Watch query change to reload the search
         @scope.search = =>
             # Extract valid object's name
@@ -36,7 +35,6 @@ class IndividualSearchCtrl extends IndividualListCtrl
         limit : @scope.limit
         offset: @scope.limit * (@scope.page - 1)
         q     : @routeParams.q
-        topic : @scope.topic
         type  : "summary"
 
 # Register the controller

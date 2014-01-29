@@ -13,7 +13,7 @@ class ExploreCtrl
         # Current individual scope
         @scope.topic = @routeParams.topic
         # Topic control
-        @Individual.get {type: "topic", slug: @scope.topic }, (data)=>
+        @Individual.get {type: "topic", slug: @scope.topic, topic: "common" }, (data)=>
             # Disable loading mode
             @Page.loading no
             # Stop if it's an unkown topic

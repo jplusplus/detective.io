@@ -51,7 +51,7 @@ class ContributeCtrl
         @scope.Individual  = @Individual
         @scope.routeParams = @routeParams
         # Get the list of available resources
-        @scope.resources = @Summary.get {id: "forms", topic: @scope.topic }, => @Page.loading(false)
+        @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
         # Prepare future individual
         @initNewIndividual()
         # Individual list
@@ -299,8 +299,7 @@ class ContributeCtrl
                 params =
                     type:  @scope.new.type
                     id:    "search"
-                    q:     @scope.new.fields.name
-                    topic: @scope.topic
+                    q:     @scope.new.fields.names
                 # Look for individual with the same name
                 @Individual.query params, (d)=>
                     # Remove the one we just created
@@ -326,16 +325,14 @@ class ContributeCtrl
         # Parameters of the individual to delete
         toDelete =
             type : individual.type
-            id   : individual.fields.id
-            topic: @scope.topic
+            id   : individual.fields.ids
         # Remove the node we're about to replace
         # (no feedback)
         @Individual.delete(toDelete)
         # Build parameters to load the individual from database
         params =
             type : individual.type
-            id   : id
-            topic: @scope.topic
+            id   : ids
         # Then load the individual
         individual.fields = @Individual.get params, (master)->
             # Disable loading state

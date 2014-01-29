@@ -73,7 +73,6 @@ class IndividualListCtrl
     # List parameters
     getParams: =>
         type    : @scope.type
-        topic   : @scope.topic
         limit   : @scope.limit
         offset  : (@scope.page-1)*@scope.limit
         order_by: "name"

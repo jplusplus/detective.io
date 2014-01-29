@@ -37,12 +37,12 @@ class Migration(DataMigration):
             'records': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'users': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'})
         },
-        u'detective.relationshipsearch': {
-            'Meta': {'object_name': 'RelationshipSearch'},
+        u'detective.searchterm': {
+            'Meta': {'object_name': 'SearchTerm'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'label': ('django.db.models.fields.CharField', [], {'max_length': '250'}),
+            'label': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '250', 'null': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '250'}),
-            'subject': ('django.db.models.fields.CharField', [], {'max_length': '250'}),
+            'subject': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '250', 'null': 'True', 'blank': 'True'}),
             'topic': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['detective.Topic']"})
         },
         u'detective.topic': {
@@ -58,6 +58,7 @@ class Migration(DataMigration):
             'title': ('django.db.models.fields.CharField', [], {'max_length': '250'})
         }
     }
+
 
     complete_apps = ['detective']
     symmetrical = True

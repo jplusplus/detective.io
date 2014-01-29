@@ -1,10 +1,11 @@
+
 [
 {
     "pk": null,
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "price",
+        "name": "personal_payer",
         "subject": "FundraisingRound",
         "label": "was financed by"
     }
@@ -14,19 +15,9 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "key_person",
+        "name": "payer",
         "subject": "FundraisingRound",
         "label": "was financed by"
-    }
-},
-{
-    "pk": null,
-    "model": "detective.relationshipsearch",
-    "fields": {
-        "topic": 2,
-        "name": "based_in",
-        "subject": "Person",
-        "label": "was educated in"
     }
 },
 {
@@ -36,6 +27,16 @@
         "topic": 2,
         "name": "educated_in",
         "subject": "Person",
+        "label": "was educated in"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.relationshipsearch",
+    "fields": {
+        "topic": 2,
+        "name": "based_in",
+        "subject": "Person",
         "label": "is based in"
     }
 },
@@ -44,7 +45,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "activity_in_country",
+        "name": "activity_in_organization",
         "subject": "Person",
         "label": "has activity in"
     }
@@ -54,7 +55,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "distribution",
+        "name": "previous_activity_in_organization",
         "subject": "Person",
         "label": "had previous activity in"
     }
@@ -64,7 +65,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "activity_in_country",
+        "name": "price",
         "subject": "EnergyProduct",
         "label": "is sold at"
     }
@@ -74,7 +75,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "operator",
+        "name": "author",
         "subject": "Commentary",
         "label": "was written by"
     }
@@ -84,7 +85,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "activity_in_organization",
+        "name": "distribution",
         "subject": "EnergyProduct",
         "label": "is distributed in"
     }
@@ -94,7 +95,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "revenue",
+        "name": "operator",
         "subject": "EnergyProduct",
         "label": "is operated by"
     }
@@ -104,7 +105,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "activity_in_country",
+        "name": "price",
         "subject": "EnergyProduct",
         "label": "is sold at"
     }
@@ -114,7 +115,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "product",
+        "name": "adviser",
         "subject": "Organization",
         "label": "is advised by"
     }
@@ -124,7 +125,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "commentary",
+        "name": "key_person",
         "subject": "Organization",
         "label": "is staffed by"
     }
@@ -134,7 +135,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "monitoring_body",
+        "name": "partner",
         "subject": "Organization",
         "label": "has a partnership with"
     }
@@ -144,7 +145,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "adviser",
+        "name": "fundraising_round",
         "subject": "Organization",
         "label": "was financed by"
     }
@@ -154,7 +155,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "fundraising_round",
+        "name": "monitoring_body",
         "subject": "Organization",
         "label": "is monitored by"
     }
@@ -174,7 +175,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "owner",
+        "name": "revenue",
         "subject": "Organization",
         "label": "has revenue of"
     }
@@ -184,7 +185,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "partner",
+        "name": "board_member",
         "subject": "Organization",
         "label": "has board of directors with"
     }
@@ -194,7 +195,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "payer",
+        "name": "commentary",
         "subject": "EnergyProject",
         "label": "is analyzed by"
     }
@@ -204,7 +205,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "board_member",
+        "name": "owner",
         "subject": "EnergyProject",
         "label": "is owned by"
     }
@@ -224,7 +225,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "previous_activity_in_organization",
+        "name": "activity_in_country",
         "subject": "EnergyProject",
         "label": "has activity in"
     }
@@ -234,7 +235,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "personal_payer",
+        "name": "activity_in_country",
         "subject": "Distribution",
         "label": "has activity in"
     }
@@ -244,7 +245,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "author",
+        "name": "product",
         "subject": "EnergyProject",
         "label": "has product of"
     }
@@ -254,7 +255,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "payer",
+        "name": "commentary",
         "subject": "EnergyProject",
         "label": "is analyzed by"
     }
@@ -264,7 +265,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "board_member",
+        "name": "owner",
         "subject": "EnergyProject",
         "label": "is owned by"
     }
@@ -284,7 +285,7 @@
     "model": "detective.relationshipsearch",
     "fields": {
         "topic": 2,
-        "name": "previous_activity_in_organization",
+        "name": "activity_in_country",
         "subject": "EnergyProject",
         "label": "has activity in"
     }

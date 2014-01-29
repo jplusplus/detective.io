@@ -156,6 +156,7 @@ class RelationshipSearch(models.Model):
         subject = None
         # Retreive the subject that match with the instance's name
         field = self.field
+        # If any related_model is given, that means its subject is is parent model
         subject = field["model"]
         return subject
 

@@ -33,7 +33,7 @@
 					 ng-model="query.subject.name">
 			</select>
 			<select class="form-control bottom10"
-					 ng-options="m.name as m.label for (key, m) in syntax.predicate.relationship | filter:currentSubject"
+					 ng-options="p.name as p.label for p in syntax.predicates | filter:currentSubject"
 					 ng-model="query.predicate.name">
 			</select>
 			<input class="form-control"

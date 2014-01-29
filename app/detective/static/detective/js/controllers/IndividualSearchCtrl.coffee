@@ -5,7 +5,10 @@ class IndividualSearchCtrl extends IndividualListCtrl
         # Parse the JSON query
         @scope.query  = angular.fromJson @routeParams.q
         # Load the search syntax
-        @scope.syntax = @Individual.get type: "summary", id: "syntax"
+        @Individual.get {type: "summary", id: "syntax"}, (d)=>
+            @scope.syntax = d
+            # Merge the two predicates array
+            @scope.syntax.predicates = d.predicate.literal.concat( d.predicate.relationship )
         # Watch query change to reload the search
         @scope.search = =>
             # Extract valid object's name

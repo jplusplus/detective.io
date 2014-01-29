@@ -604,13 +604,11 @@ class SummaryResource(Resource):
                 WHERE HAS(root.name)
                 AND HAS(st.name)
                 AND st.name = {name}
-                AND type.model_name = {model}
                 AND type.app_label = {app}
                 RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
             """.format(
                 relationship=relationship,
                 name=adapt(obj),
-                model=adapt(subject["name"]),
                 app=adapt(self.topic.app_label())
             )
         else:

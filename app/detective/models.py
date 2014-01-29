@@ -152,7 +152,7 @@ class SearchTerm(models.Model):
     name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
     topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
 
-    def get_relationship_subject(self):
+    def find_subject(self):
         subject = None
         # Retreive the subject that match with the instance's name
         field = self.field
@@ -161,7 +161,7 @@ class SearchTerm(models.Model):
         return subject
 
     def clean(self):
-        self.subject = self.get_relationship_subject()
+        self.subject = self.find_subject()
         models.Model.clean(self)
 
     @property

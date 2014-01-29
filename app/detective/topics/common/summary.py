@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from app.detective.models     import Topic, RelationshipSearch
+from app.detective.models     import Topic, SearchTerm
 from app.detective.neomatch   import Neomatch
 from app.detective.register   import topics_rules
 from difflib                  import SequenceMatcher
@@ -624,7 +624,7 @@ class SummaryResource(Resource):
 
     def get_relationship_search(self):
         isRelationship = lambda t: t.type == "relationship"
-        return [ rs for rs in RelationshipSearch.objects.filter(topic=self.topic) if isRelationship(rs) ]
+        return [ rs for rs in SearchTerm.objects.filter(topic=self.topic) if isRelationship(rs) ]
 
     def get_relationship_search_output(self):
         output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
@@ -632,7 +632,7 @@ class SummaryResource(Resource):
 
     def get_literal_search(self):
         isLiteral = lambda t: t.type == "literal"
-        return [ rs for rs in RelationshipSearch.objects.filter(topic=self.topic) if isLiteral(rs) ]
+        return [ rs for rs in SearchTerm.objects.filter(topic=self.topic) if isLiteral(rs) ]
 
     def get_literal_search_output(self):
         output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}

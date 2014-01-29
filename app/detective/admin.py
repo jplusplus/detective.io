@@ -1,6 +1,6 @@
 from app.detective        import utils
-from app.detective.models import QuoteRequest, Topic, RelationshipSearch, Article
-from django.conf               import settings
+from app.detective.models import QuoteRequest, Topic, SearchTerm, Article
+from django.conf          import settings
 from django.contrib       import admin
 from django.db.models     import CharField
 
@@ -13,13 +13,13 @@ admin.site.register(QuoteRequest, QuoteRequestAdmin)
 
 # Display relationship admin panel only on debug mode
 if settings.DEBUG:
-    class RelationshipSearchAdmin(admin.ModelAdmin):
+    class SearchTermAdmin(admin.ModelAdmin):
         list_display  = ("name", "label", "subject", "topic", "type",)
-    admin.site.register(RelationshipSearch, RelationshipSearchAdmin)
+    admin.site.register(SearchTerm, SearchTermAdmin)
 
 
-class RelationshipSearchInline(admin.TabularInline):
-    model  = RelationshipSearch
+class SearchTermInline(admin.TabularInline):
+    model  = SearchTerm
     extra  = 0
 
     def formfield_for_dbfield(self, db_field, **kwargs):
@@ -49,7 +49,7 @@ class RelationshipSearchInline(admin.TabularInline):
                 choices=choices
             )
 
-        return super(RelationshipSearchInline, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(SearchTermInline, self).formfield_for_dbfield(db_field, **kwargs)
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
         if db_field.name == 'name' and hasattr(request, "topic_id"):
@@ -71,7 +71,7 @@ class RelationshipSearchInline(admin.TabularInline):
                         subset.append(choice)
                 # Add the choice subset only if it contains elements
                 if len(subset): kwargs["choices"].append( (model_name, subset,) )
-        return super(RelationshipSearchInline, self).formfield_for_choice_field(db_field, request,**kwargs)
+        return super(SearchTermInline, self).formfield_for_choice_field(db_field, request,**kwargs)
 
 class TopicAdmin(admin.ModelAdmin):
     save_on_top         = True
@@ -91,8 +91,8 @@ class TopicAdmin(admin.ModelAdmin):
         if hasattr(obj, "id"):
             # Save the topic id into the request to retreive it into inline form
             setattr(request, 'topic_id', obj.id)
-            # Add inlice RelationshipSearch only for saved object
-            self.inlines = (RelationshipSearchInline,)
+            # Add inlice SearchTerm only for saved object
+            self.inlines = (SearchTermInline,)
         return super(TopicAdmin, self).get_form(request, obj, **kwargs)
 
 

@@ -142,7 +142,7 @@ class Article(models.Model):
 
 
 # This model aims to describe a research alongside a relationship.
-class RelationshipSearch(models.Model):
+class SearchTerm(models.Model):
     # This field is deduced from the relationship name
     subject = models.CharField(null=True, blank=True, default='', editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
     # Every field are required

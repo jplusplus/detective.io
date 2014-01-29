@@ -1,5 +1,5 @@
 detective = angular
-    .module('detective', ["detectiveServices", "detectiveFilters", "ui.bootstrap", "monospaced.elastic", "detectiveFilters", "ui.bootstrap", "monospaced.elastic", "angularFileUpload", "ngProgressLite"])
+    .module('detective', ["detectiveServices", "detectiveFilters", "ui.bootstrap", "monospaced.elastic", "angularFileUpload", "ngProgressLite"])
     .run(
         [
             '$rootScope',

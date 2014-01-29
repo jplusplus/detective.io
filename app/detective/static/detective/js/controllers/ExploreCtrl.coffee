@@ -23,11 +23,11 @@ class ExploreCtrl
             # Build template url
             @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
             # Countries info
-            @scope.countries   = @Summary.get id:"countries", topic: @scope.topic
+            @Summary.get id:"countries", (d)=> @scope.countries = d
             # Types info
-            @scope.types       = @Summary.get id:"types", topic: @scope.topic
+            @Summary.get id:"types", (d)=> @scope.types = d
             # Types info
-            @Summary.get { id:"forms", topic: @scope.topic }, (d)=> @scope.forms = _.values(d)
+            @Summary.get id:"forms", (d)=> @scope.forms = _.values(d)
         # Country where the user click
         @scope.selectedCountry = {}
         @scope.selectedIndividual = {}

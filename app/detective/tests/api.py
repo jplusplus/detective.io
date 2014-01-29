@@ -154,7 +154,7 @@ class ApiTestCase(ResourceTestCase):
             },
             "predicate": {
                 "label": u"has activity in",
-                "name": u"activity_in_organization",
+                "name": u"activity_in",
                 "subject": u"Person"
             },
             "subject": {

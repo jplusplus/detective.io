@@ -185,6 +185,8 @@ INSTALLED_APPS = (
     'south',
     # Rich text editor
     'tinymce',
+    # Redis queue backend
+    "django_rq",
     # Internal
     'app.detective',
     'app.detective.permissions',
@@ -201,10 +203,24 @@ ACCOUNT_ACTIVATION_DAYS = 7
 
 CACHES = {
     'default': {
-        #'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         'LOCATION': '/tmp/django_cache',
     }
+}
+
+# Redis Queues
+# RQ_SHOW_ADMIN_LINK will override the default admin template so it may interfere 
+# with other apps that modifies the default admin template.
+RQ_SHOW_ADMIN_LINK = True
+RQ_CONFIG = {
+    'URL'  : os.getenv('REDISTOGO_URL', None) or os.getenv('REDISCLOUD_URL', None) or 'redis://localhost:6379',
+    'DB'   : 0,
+    'ASYNC': True
+}
+RQ_QUEUES = {
+    'default': RQ_CONFIG,
+    'high'   : RQ_CONFIG,
+    'low'    : RQ_CONFIG
 }
 
 # A sample logging configuration. The only tangible logging

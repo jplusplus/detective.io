@@ -14,7 +14,12 @@ framework.
 
 """
 import os
+import sys
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings")
+
+# update python path with lib/
+sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

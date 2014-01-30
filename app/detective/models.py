@@ -107,12 +107,7 @@ class Topic(models.Model):
     def save(self, *args, **kwargs):
         # Ensure that the module field is populated with app_label()
         self.module = self.app_label()
-        # Do not use the super save function to avoid the bug bellow
-        models.Model.save(self)
-        # Then create the permissions related to the label module
-        # @TODO check that the slug changed or not to avoid permissions hijacking
-        # We deactivate the permissions until we solved the save bug
-        # create_permissions( self.get_models(), app_label=self.slug )
+        super(Topic, self).save(*args, **kwargs)
 
     def has_default_ontology(self):
         module = self.get_module()
@@ -177,7 +172,9 @@ def update_permissions(*args, **kwargs):
     if kwargs.get('created', False):
         create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').slug)
 
-signals.post_delete.connect(remove_permissions, sender=Topic)
-signals.post_save.connect(update_permissions, sender=Topic)
+# Disable permissions creations to avoid a bug
+# @see https://github.com/jplusplus/detective.io/issues/145
+# signals.post_delete.connect(remove_permissions, sender=Topic)
+# signals.post_save.connect(update_permissions, sender=Topic)
 
 # EOF

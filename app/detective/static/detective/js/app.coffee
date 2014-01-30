@@ -101,6 +101,11 @@ detective = angular
                         templateUrl: "/partial/individual-single.html"
                         reloadOnSearch: false
                     })
+                    .when('/:topic/:type/:id/graph', {
+                        controller: IndividualGraphCtrl
+                        templateUrl: "/partial/individual-graph.html"
+                        reloadOnSearch: false
+                    })
                     .otherwise redirectTo: '/404'
         ]
     )

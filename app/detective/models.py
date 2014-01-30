@@ -97,7 +97,8 @@ class Topic(models.Model):
         models.Model.save(self)
         # Then create the permissions related to the label module
         # @TODO check that the slug changed or not to avoid permissions hijacking
-        create_permissions( self.get_models(), app_label=self.slug )
+        # We deactivate the permissions until we solved the save bug
+        # create_permissions( self.get_models(), app_label=self.slug )
 
     def has_default_ontology(self):
         module = self.get_module()

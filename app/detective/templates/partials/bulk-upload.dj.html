@@ -1,0 +1,91 @@
+
+<div id="contribute">
+
+	<div class="container">
+
+		<h2>Upload objects and relationship</h2>
+		<form name="uploadForm" ng-submit="submit()">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<div>
+						<p>Please select a CSV file to upload:</p>
+						<div ng-repeat="field_name in file_fields" class="well">
+							<input type="file" multiple ng-file-select="onFileSelect($files, field_name)" class="form-control">
+						</div>
+
+						<button type="submit" class="btn btn-primary pull-right">
+							<i class="fa fa-upload right10"></i>
+							Upload
+						</button>
+
+						<button class="btn btn-default" ng-click="addFileField()">
+							<i class="fa fa-plus right05"></i>
+							Add a file
+						</button>
+
+					</div>
+
+					<div class="top20">
+						<div class="alert alert-info">
+							<h4>File format</h4>
+							<p>
+								Entities file should respect this header structure:
+							</p>
+							<table class="table table-bordered tabl top10 panel panel-default">
+								<theader>
+									<tr>
+										<td>&lt;object_name&gt;_id</td>
+										<td>&lt;field_name1&gt;</td>
+										<td>&lt;field_name2&gt;</td>
+										<td>etc..</td>
+									</tr>
+								</theader>
+							</table>
+							<p>
+								Relationships file should respect this header structure:
+							</p>
+							<table class="table table-bordered tabl top10 bottom0 panel panel-default">
+								<theader>
+									<tr>
+										<td>&lt;object_1_name&gt;_id</td>
+										<td>&lt;relation_type&gt;</td>
+										<td>&lt;object_2_name&gt;</td>
+									</tr>
+								</theader>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+
+
+		<div class="feedback" ng-if="feedback && feedback.$resolved">
+			<div class="status" ng-class="feedback.inserted.objects && feedback.inserted.objects > 0 ? 'saved' : 'failed'">
+				<div class="row form-footer">
+					<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+						<span ng-if="feedback.inserted.objects && feedback.inserted.objects > 0">
+							<i class="fa fa-check right05"></i>
+							[[ feedback.inserted.objects ]] <span class="objects">objects</span> inserted with [[ feedback.inserted.links ]] <span class="relations">relations</span>.
+						</span>
+						<span ng-if="!(feedback.inserted.objects && feedback.inserted.objects > 0)">
+							<i class="fa fa-square-o"></i>
+							Nothing saved, check your files.
+						</span>
+					</div>
+				</div>
+			</div>
+			<div class="error failed" ng-if="feedback.errors">
+				<div class="row form-footer">
+					<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+				 		<div ng-repeat="error in feedback.errors">
+							<div ng-repeat="(key, value) in error">
+								[[key]]: [[value]]
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

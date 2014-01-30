@@ -1,19 +1,21 @@
 {
-	"name": "detective",
-	"version": "1.1.0",
-	"dependencies": {
-		"angular-elastic": "2.2.0",
-		"angular-ui-bootstrap-bower": "0.6.0",
-		"bootstrap": "3.0.0",
-		"chroma-js": "0.5.2",
-		"jquery.scrollTo": "1.4.6",
-		"js-md5": "1.0.3",
-		"modernizr": "2.6.2",
-		"raphael": "2.1.2",
-		"typeahead.js": "0.9.3",
-		"underscore": "1.5.2",
-		"unstable-angular-complete": "1.1.5",
-		"kartograph.js": "git://github.com/kartograph/kartograph.js",
-		"jquery": "1.9.1"
-    }
+  "name": "detective",
+  "version": "1.2.1",
+  "dependencies": {
+    "angular-elastic": "2.2.0",
+    "angular-ui-bootstrap-bower": "0.6.0",
+    "bootstrap": "3.0.0",
+    "chroma-js": "0.5.2",
+    "jquery.scrollTo": "1.4.6",
+    "js-md5": "1.0.3",
+    "modernizr": "2.6.2",
+    "raphael": "2.1.2",
+    "typeahead.js": "0.9.3",
+    "underscore": "1.5.2",
+    "unstable-angular-complete": "1.1.5",
+    "kartograph.js": "git://github.com/kartograph/kartograph.js",
+    "jquery": "1.9.1",
+    "ng-file-upload": "~1.2.3",
+    "ngprogress-lite": "~1.0.4"
+  }
 }

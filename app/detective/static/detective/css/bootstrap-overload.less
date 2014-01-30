@@ -41,6 +41,11 @@
 @import "components/bootstrap/less/utilities.less";
 @import "components/bootstrap/less/responsive-utilities.less";
 
+
+h4, h5, h6 {
+	font-family: inherit;
+}
+
 .form-control, .form-control:focus {
 	.box-shadow(none);
 	border-width:0;
@@ -68,8 +73,10 @@
 	}
 }
 
-.alert {
-	padding:15px;
+html .alert {
+	padding:15px 20px;
+	border-width:0px;
+	border-left-width:4px;
 }
 
 html body .panel {

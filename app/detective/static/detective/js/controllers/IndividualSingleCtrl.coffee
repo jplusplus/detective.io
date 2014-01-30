@@ -17,6 +17,7 @@ class IndividualSingleCtrl
         @scope.isAddr         = (f)=> f.name.toLowerCase().indexOf('address') > -1
         @scope.isImg          = (f)=> f.name is 'image'
         @scope.isMono         = (f)=> @scope.isAddr(f) or @scope.isImg(f)
+        @scope.graphnodes     = []
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -44,6 +45,11 @@ class IndividualSingleCtrl
         @Summary.get { id: "forms", topic: @scope.topic}, (data)=>
             @scope.resource = data
             @scope.meta     = data[@scope.type.toLowerCase()]
+
+        graph_params = angular.copy params
+        graph_params.depth = 2
+        @Individual.graph graph_params, (data) =>
+            @scope.graphnodes = data
 
 
     hasRels: ()=>

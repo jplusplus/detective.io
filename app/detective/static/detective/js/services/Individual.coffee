@@ -38,4 +38,11 @@ angular.module('detectiveServices').factory("Individual", [ '$resource', '$http'
             isArray: no
             paramDefaults:
                 topic: "common"
+        graph:
+            url:'/api/:topic/v1/:type/:id/graph'
+            method: 'GET'
+            isArray: false
+            paramDefaults:
+                topic: "common"
+                depth: "2"
 ])

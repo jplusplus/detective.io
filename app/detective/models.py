@@ -107,7 +107,8 @@ class Topic(models.Model):
     def save(self, *args, **kwargs):
         # Ensure that the module field is populated with app_label()
         self.module = self.app_label()
-        super(Topic, self).save(*args, **kwargs)
+        # Do not use the super save function to avoid the bug bellow
+        models.Model.save(self)
         # Then create the permissions related to the label module
         # @TODO check that the slug changed or not to avoid permissions hijacking
         # We deactivate the permissions until we solved the save bug

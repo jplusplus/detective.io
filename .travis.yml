@@ -9,11 +9,11 @@ before_install:
   - ./install_local_neo4j.bash $NEO4J_VERSION
   - ./lib/neo4j/bin/neo4j start || ( cat ./lib/neo4j/data/log/*.log && exit 1 )
   - curl http://localhost:$NEO4J_PORT/db/data/
-  - curl -X DELETE 'http://localhost:7474/cleandb/supersecretdebugkey!'
 install:
   - pip install --use-mirrors -r test_requirements.txt
   - pip install --use-mirrors coveralls
   - python ./manage.py syncdb --pythonpath=. --noinput
+  - python ./manage.py loaddata app/detective/fixtures/search_terms.json
 env:
   - NEO4J_VERSION="1.9.1"
 matrix:

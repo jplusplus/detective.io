@@ -159,6 +159,8 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
 }
 
+# Remove BeautifulSoup requirement
+COMPRESS_PARSER = 'compressor.parser.HtmlParser'
 COMPRESS_ENABLED = False
 #INTERNAL_IPS = ('127.0.0.1',)
 
@@ -204,12 +206,13 @@ ACCOUNT_ACTIVATION_DAYS = 7
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/tmp/django_cache',
     }
 }
 
 # Redis Queues
-# RQ_SHOW_ADMIN_LINK will override the default admin template so it may interfere 
+# RQ_SHOW_ADMIN_LINK will override the default admin template so it may interfere
 # with other apps that modifies the default admin template.
 RQ_SHOW_ADMIN_LINK = True
 RQ_CONFIG = {

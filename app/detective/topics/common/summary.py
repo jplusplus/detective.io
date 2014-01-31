@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from app.detective.models     import Topic
+from app.detective.models     import Topic, SearchTerm
 from app.detective.neomatch   import Neomatch
 from app.detective.register   import topics_rules
 from difflib                  import SequenceMatcher
@@ -12,6 +12,8 @@ from tastypie.exceptions      import ImmediateHttpResponse
 from tastypie.resources       import Resource
 from tastypie.serializers     import Serializer
 from django.utils.timezone    import utc
+from psycopg2.extensions      import adapt
+
 import app.detective.utils    as utils
 import json
 import re
@@ -274,6 +276,8 @@ class SummaryResource(Resource):
         predicate = query.get("predicate", None)
         obj       = query.get("object", None)
         results   = self.rdf_search(subject, predicate, obj)
+        # Stop now in case of error
+        if "errors" in results: return results
         count     = len(results)
         paginator = Paginator(results, limit)
         try:
@@ -339,7 +343,7 @@ class SummaryResource(Resource):
         return object_list
 
     def summary_bulk_upload(self, request, **kwargs):
-        
+
         # only allow POST requests
         self.method_check(request, allowed=['post'])
 
@@ -378,25 +382,75 @@ class SummaryResource(Resource):
         return connection.cypher(query).to_dicts()
 
     def rdf_search(self, subject, predicate, obj):
-        # Query to get every result
-        query = """
-            START st=node(*)
-            MATCH (st)<-[:`%s`]-(root)<-[:`<<INSTANCE>>`]-(type)
-            WHERE HAS(root.name)
-            AND HAS(st.name)
-            AND type.name = "%s"
-            AND st.name = "%s"
-            AND type.app_label = '%s'
-            RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
-        """ % ( predicate["name"], subject["name"], obj["name"], self.topic.app_label() )
+        obj = obj["name"] if "name" in obj else obj
+        # retrieve all models in current topic
+        all_models = dict((model.__name__, model) for model in utils.get_topic_models(self.topic.module))
+        # If the received obj describe a literal value
+        if self.is_registered_literal(predicate["name"]):
+            # Get the field name into the database
+            field_name = predicate["name"]
+            # Build the request
+            query = """
+                START root=node(*)
+                MATCH (root)<-[:`<<INSTANCE>>`]-(type)
+                WHERE HAS(root.name)
+                AND HAS(root.{field})
+                AND root.{field} = {value}
+                AND type.model_name = {model}
+                AND type.app_label = {app}
+                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+            """.format(
+                field=field_name,
+                value=adapt(obj),
+                model=adapt(subject["name"]),
+                app=adapt(self.topic.app_label())
+            )
+        # If the received obj describe a literal value
+        elif self.is_registered_relationship(predicate["name"]):
+            fields       = utils.get_model_fields( all_models[subject["name"]] )
+            # Get the field name into the database
+            relationships = [ field for field in fields if field["name"] == predicate["name"] ]
+            relationship  = relationships[0]["rel_type"]
+            # Query to get every result
+            query = """
+                START st=node(*)
+                MATCH (st)<-[:`{relationship}`]-(root)<-[:`<<INSTANCE>>`]-(type)
+                WHERE HAS(root.name)
+                AND HAS(st.name)
+                AND st.name = {name}
+                AND type.app_label = {app}
+                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+            """.format(
+                relationship=relationship,
+                name=adapt(obj),
+                app=adapt(self.topic.app_label())
+            )
+        else:
+            return {'errors': 'Unkown predicate type'}
+
         return connection.cypher(query).to_dicts()
 
 
     def get_models_output(self):
         # Select only some atribute
-        output = lambda m: {'name': self.topic.slug + ":" + m.__name__, 'label': m._meta.verbose_name.title()}
+        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
         return [ output(m) for m in utils.get_topic_models(self.topic.module) ]
 
+    def get_relationship_search(self):
+        isRelationship = lambda t: t.type == "relationship"
+        return [ rs for rs in SearchTerm.objects.filter(topic=self.topic) if isRelationship(rs) ]
+
+    def get_relationship_search_output(self):
+        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
+        return [ output(rs) for rs in self.get_relationship_search() ]
+
+    def get_literal_search(self):
+        isLiteral = lambda t: t.type == "literal"
+        return [ rs for rs in SearchTerm.objects.filter(topic=self.topic) if isLiteral(rs) ]
+
+    def get_literal_search_output(self):
+        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
+        return [ output(rs) for rs in self.get_literal_search() ]
 
     def ngrams(self, input):
         input = input.split(' ')
@@ -422,13 +476,15 @@ class SummaryResource(Resource):
         # Group ngram by following string
         ngrams  = [' '.join(x) for x in self.ngrams(query) ]
         matches = []
-        models  = self.get_syntax()["subject"]["model"]
-        rels    = self.get_syntax()["predicate"]["relationship"]
+        models  = self.get_syntax().get("subject").get("model")
+        rels    = self.get_syntax().get("predicate").get("relationship")
+        lits    = self.get_syntax().get("predicate").get("literal")
         # Known models lookup for each ngram
         for token in ngrams:
             obj = {
                 'models'       : self.get_close_labels(token, models),
                 'relationships': self.get_close_labels(token, rels),
+                'literals'     : self.get_close_labels(token, lits),
                 'token'        : token
             }
             matches.append(obj)
@@ -447,8 +503,11 @@ class SummaryResource(Resource):
             seen = set()
             new_list = []
             for item in lst:
-                # Create a hash of the dictionary
-                obj = hash(frozenset(item.items()))
+                if type(item) is dict:
+                    # Create a hash of the dictionary
+                    obj = hash(frozenset(item.items()))
+                else:
+                    obj = hash(item)
                 if obj not in seen:
                     seen.add(obj)
                     new_list.append(item)
@@ -469,49 +528,50 @@ class SummaryResource(Resource):
             parts = sentence.split(base)
             return parts[0].strip().split(" ")[-1] if len(parts) else None
 
-        predicates    = []
-        subjects      = []
-        objects       = []
-        propositions  = []
+        def is_object(query, token):
+            previous = previous_word(query, token)
+            return is_preposition(previous) or previous.isdigit() or token.isnumeric()
+
+        predicates      = []
+        subjects        = []
+        objects         = []
+        propositions    = []
+        ending_tokens   = ""
+        searched_tokens = set()
         # Picks candidates for subjects and predicates
-        for match in matches:
-            subjects   += match["models"]
-            predicates += match["relationships"]
+        for idx, match in enumerate(matches):
+            subjects     += match["models"]
+            predicates   += match["relationships"] + match["literals"]
+            token         = match["token"]
+            # True when the current token is the last of the series
+            is_last_token = query.endswith(token)
             # Objects are detected when they start and end by double quotes
-            if  match["token"].startswith('"') and match["token"].endswith('"'):
+            if  token.startswith('"') and token.endswith('"'):
                 # Remove the quote from the token
-                token = match["token"].replace('"', '')
+                token = token.replace('"', '')
                 # Store the token as an object
                 objects += self.search(token)[:5]
             # Or if the previous word is a preposition
-            elif is_preposition( previous_word(query, match["token"]) ):
-                # Store the token as an object
-                objects += self.search(match["token"])[:5]
+            elif is_object(query, token) or is_last_token:
+                if token not in searched_tokens and len(token) > 3:
+                    # Looks for entities into the database
+                    entities = self.search(token)[:5]
+                    # Do not search this token again
+                    searched_tokens.add(token)
+                    # We found some result
+                    if len(entities): objects += entities
+                # Save every tokens until the last one
+                if not is_last_token: ending_tokens = token
+                # We reach the end
+                else: objects.append( ending_tokens )
 
-        # No subject, no predicate, it might be a classic search
-        if not len(subjects) and not len(predicates):
-            results = self.search(query)
-            for result in results:
-                # Build the label
-                label = result.get("name", None)
-                propositions.append({
-                    'label': label,
-                    'subject': {
-                        "name": result.get("id", None),
-                        "label": label
-                    },
-                    'predicate': {
-                        "label": "is instance of",
-                        "name": "<<INSTANCE>>"
-                    },
-                    'object': result.get("model", None)
-                })
         # We find some subjects
-        elif len(subjects) and not len(predicates):
-            rels = self.get_syntax().get("predicate").get("relationship")
+        if len(subjects) and not len(predicates):
+            terms  = self.get_syntax().get("predicate").get("relationship")
+            terms += self.get_syntax().get("predicate").get("literal")
             for subject in subjects:
-                # Gets all available relationship for these subjects
-                predicates += [ rel for rel in rels if rel["subject"] == subject["name"] ]
+                # Gets all available terms for these subjects
+                predicates += [ term for term in terms if term["subject"] == subject["name"] ]
 
         # Add a default and irrelevant object
         if not len(objects): objects = [""]
@@ -519,11 +579,11 @@ class SummaryResource(Resource):
         # Generate proposition using RDF's parts
         for subject in remove_duplicates(subjects):
             for predicate in remove_duplicates(predicates):
-                for obj in objects:
+                for obj in remove_duplicates(objects):
                     pred_sub = predicate.get("subject", None)
                     # If the predicate has a subject
-                    # and this matches to the current one
-                    if pred_sub == None or pred_sub == subject.get("name", None):
+                    # and it matches to the current one
+                    if pred_sub != None:
                         if type(obj) is dict:
                             obj_disp = obj["name"] or obj["label"]
                         else:
@@ -539,8 +599,34 @@ class SummaryResource(Resource):
                             'object'   : obj
                         })
 
+        # It might be a classic search
+        for obj in [ obj for obj in objects if 'id' in obj ]:
+            # Build the label
+            label = obj.get("name", None)
+            propositions.append({
+                'label': label,
+                'subject': {
+                    "name": obj.get("id", None),
+                    "label": label
+                },
+                'predicate': {
+                    "label": "is instance of",
+                    "name": "<<INSTANCE>>"
+                },
+                'object': obj.get("model", None)
+            })
         # Remove duplicates proposition dicts
         return propositions
+
+    def is_registered_literal(self, name):
+        literals = self.get_syntax().get("predicate").get("literal")
+        matches  = [ literal for literal in literals if name == literal["name"] ]
+        return len(matches)
+
+    def is_registered_relationship(self, name):
+        literals = self.get_syntax().get("predicate").get("relationship")
+        matches  = [ literal for literal in literals if name == literal["name"] ]
+        return len(matches)
 
     def get_syntax(self, bundle=None, request=None):
         return {
@@ -549,7 +635,8 @@ class SummaryResource(Resource):
                 'entity': None
             },
             'predicate': {
-                'relationship': []
+                'relationship': self.get_relationship_search_output(),
+                'literal':      self.get_literal_search_output()
             }
         }
 

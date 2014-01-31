@@ -13,7 +13,7 @@ class ExploreCtrl
         # Current individual scope
         @scope.topic = @routeParams.topic
         # Topic control
-        @Individual.get {type: "topic", slug: @scope.topic }, (data)=>
+        @Individual.get {type: "topic", slug: @scope.topic, topic: "common" }, (data)=>
             # Disable loading mode
             @Page.loading no
             # Stop if it's an unkown topic
@@ -23,11 +23,11 @@ class ExploreCtrl
             # Build template url
             @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
             # Countries info
-            @scope.countries   = @Summary.get id:"countries", topic: @scope.topic
+            @Summary.get id:"countries", (d)=> @scope.countries = d
             # Types info
-            @scope.types       = @Summary.get id:"types", topic: @scope.topic
+            @Summary.get id:"types", (d)=> @scope.types = d
             # Types info
-            @Summary.get { id:"forms", topic: @scope.topic }, (d)=> @scope.forms = _.values(d)
+            @Summary.get id:"forms", (d)=> @scope.forms = _.values(d)
         # Country where the user click
         @scope.selectedCountry = {}
         @scope.selectedIndividual = {}
@@ -47,18 +47,14 @@ class ExploreCtrl
     selectIndividual: (val, old)=>
         # Single entity selected
         if val.predicate? and val.predicate.name is "<<INSTANCE>>"
-            vals = val.object.split(":")
-            if vals.length > 1
-                @location.path "/#{vals[0]}/#{vals[1].toLowerCase()}/#{val.subject.name}"
-            else
-                @location.path "/#{@scope.topic}/#{vals[0].toLowerCase()}/#{val.subject.name}"
+            @location.path "/#{@scope.topic}/#{val.object.toLowerCase()}/#{val.subject.name}"
         # Full RDF-formated research
         else if val.predicate? and val.object? and val.object != ""
             # Do not pass the label
             delete val.label
             # Create a JSON query to pass though the URL
             query = angular.toJson val
-            @location.path "/search/"
+            @location.path "/#{@scope.topic}/search/"
             @location.search "q", query
 
     getTypeCount: ()=>

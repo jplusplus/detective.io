@@ -5,13 +5,16 @@ class IndividualSearchCtrl extends IndividualListCtrl
         # Parse the JSON query
         @scope.query  = angular.fromJson @routeParams.q
         # Load the search syntax
-        @scope.syntax = @Individual.get type: "summary", id: "syntax"
+        @Individual.get {type: "summary", id: "syntax"}, (d)=>
+            @scope.syntax = d
+            # Merge the two predicates array
+            @scope.syntax.predicates = d.predicate.literal.concat( d.predicate.relationship )
         # Watch query change to reload the search
         @scope.search = =>
             # Extract valid object's name
             # (we received an RDF formated object, with a tripplet)
             if not @scope.query.object.name? and @scope.query.object.subject?
-                _.extend(@scope.query.object, 
+                _.extend(@scope.query.object,
                     name: @scope.query.object.label
                     model: @scope.query.object.object
                     id: @scope.query.object.subject.name
@@ -26,11 +29,6 @@ class IndividualSearchCtrl extends IndividualListCtrl
         @scope.verbose_name = "individual"
         @scope.verbose_name_plural = "individuals"
         @Page.title @scope.verbose_name_plural
-
-    singleUrl: (individual)=>
-        model = individual.model.split(':')
-        type  = model[1].toLowerCase()
-        "/#{model[0]}/#{type}/#{individual.id}"
 
     # Define search parameter using route's params
     getParams: =>

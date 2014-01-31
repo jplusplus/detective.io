@@ -1,13 +1,19 @@
 from .utils                    import get_topics
+from app.detective             import utils
 from app.detective.permissions import create_permissions, remove_permissions
 from django.core.exceptions    import ValidationError
 from django.db                 import models
 from tinymce.models            import HTMLField
-
 import inspect
 import os
 import random
 import string
+
+
+PUBLIC = (
+    (True, "Yes, public"),
+    (False, "No, just for a small group of users"),
+)
 
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (
@@ -22,10 +28,6 @@ class QuoteRequest(models.Model):
         (5, "1-5"),
         (0, "More than 5"),
         (-1, "I don't know yet"),
-    )
-    PUBLIC = (
-        (True, "Yes, public"),
-        (False, "No, just for a small group of users"),
     )
     name     = models.CharField(max_length=100)
     employer = models.CharField(max_length=100)
@@ -48,7 +50,7 @@ class Topic(models.Model):
     slug        = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
     description = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
     about       = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
-    public      = models.BooleanField(help_text="Is your topic public?", default=True)
+    public      = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
     ontology    = models.FileField(null=True, blank=True, upload_to="ontologies", help_text="Ontology file that descibes your field of study.")
     background  = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
 
@@ -82,7 +84,7 @@ class Topic(models.Model):
 
     def get_module(self):
         from app.detective import topics
-        return getattr(topics, self.module)
+        return getattr(topics, self.app_label())
 
     def get_models_module(self):
         """ return the module topic_module.models """
@@ -113,10 +115,10 @@ class Topic(models.Model):
         module = self.get_module()
         # File if it's a virtual module
         if not hasattr(module, "__file__"): return False
-        directory     = os.path.dirname(os.path.realpath( module.__file__ ))
+        directory = os.path.dirname(os.path.realpath( module.__file__ ))
         # Path to the ontology file
-        ontology = "%s/ontology.owl" % directory
-        return os.path.exists(ontology)
+        ontology  = "%s/ontology.owl" % directory
+        return os.path.exists(ontology) or hasattr(self.get_module(), "models")
 
 
     def get_absolute_path(self):
@@ -148,15 +150,50 @@ class Article(models.Model):
     link.allow_tags = True
 
 
-# @TODO finish this feature!
 # This model aims to describe a research alongside a relationship.
-class RelationshipSearch(models.Model):
+class SearchTerm(models.Model):
     # This field is deduced from the relationship name
-    subject = models.CharField(editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    subject = models.CharField(null=True, blank=True, default='', editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
     # Every field are required
-    label   = models.CharField(max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
+    label   = models.CharField(null=True, blank=True, default='', max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
+    # This field will be re-written by app.detective.admin
+    # to be allow dynamic setting of the choices attribute.
     name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
     topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
+
+    def find_subject(self):
+        subject = None
+        # Retreive the subject that match with the instance's name
+        field = self.field
+        # If any related_model is given, that means its subject is is parent model
+        subject = field["model"]
+        return subject
+
+    def clean(self):
+        self.subject = self.find_subject()
+        models.Model.clean(self)
+
+    @property
+    def field(self):
+        field = None
+        if self.name:
+            topic_models = utils.get_topic_models(self.topic)
+            for model in topic_models:
+                # Retreive every relationship field for this model
+                for f in utils.get_model_fields(model):
+                    if f["name"] == self.name:
+                        field = f
+        return field
+
+    @property
+    def type(self):
+        field = self.field
+        if field is None:
+            return None
+        elif field["type"] == "Relationship":
+            return "relationship"
+        else:
+            return "literal"
 
 # -----------------------------------------------------------------------------
 #

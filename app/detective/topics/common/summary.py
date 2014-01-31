@@ -718,30 +718,36 @@ class SummaryResource(Resource):
             previous = previous_word(query, token)
             return is_preposition(previous) or previous.isdigit() or token.isnumeric()
 
-        predicates    = []
-        subjects      = []
-        objects       = []
-        propositions  = []
-        ending_tokens = ""
+        predicates      = []
+        subjects        = []
+        objects         = []
+        propositions    = []
+        ending_tokens   = ""
+        searched_tokens = set()
         # Picks candidates for subjects and predicates
         for idx, match in enumerate(matches):
             subjects     += match["models"]
             predicates   += match["relationships"] + match["literals"]
+            token         = match["token"]
             # True when the current token is the last of the series
-            is_last_token = ending_tokens != "" and query.endswith(ending_tokens)
+            is_last_token = query.endswith(token)
             # Objects are detected when they start and end by double quotes
-            if  match["token"].startswith('"') and match["token"].endswith('"'):
+            if  token.startswith('"') and token.endswith('"'):
                 # Remove the quote from the token
-                token = match["token"].replace('"', '')
+                token = token.replace('"', '')
                 # Store the token as an object
                 objects += self.search(token)[:5]
             # Or if the previous word is a preposition
-            elif is_object(query, match["token"]) or is_last_token:
-                # Looks for entities into the database
-                entities = self.search(match["token"])[:5]
-                if len(entities): objects += entities
+            elif is_object(query, token) or is_last_token:
+                if token not in searched_tokens and len(token) > 3:
+                    # Looks for entities into the database
+                    entities = self.search(token)[:5]
+                    # Do not search this token again
+                    searched_tokens.add(token)
+                    # We found some result
+                    if len(entities): objects += entities
                 # Save every tokens until the last one
-                if not is_last_token: ending_tokens = match["token"]
+                if not is_last_token: ending_tokens = token
                 # We reach the end
                 else: objects.append( ending_tokens )
 
@@ -780,22 +786,20 @@ class SummaryResource(Resource):
                         })
 
         # It might be a classic search
-        results = self.search(query)
-
-        for result in results:
+        for obj in [ obj for obj in objects if 'id' in obj ]:
             # Build the label
-            label = result.get("name", None)
+            label = obj.get("name", None)
             propositions.append({
                 'label': label,
                 'subject': {
-                    "name": result.get("id", None),
+                    "name": obj.get("id", None),
                     "label": label
                 },
                 'predicate': {
                     "label": "is instance of",
                     "name": "<<INSTANCE>>"
                 },
-                'object': result.get("model", None)
+                'object': obj.get("model", None)
             })
         # Remove duplicates proposition dicts
         return propositions

@@ -14,7 +14,6 @@ install:
   - pip install --use-mirrors -r test_requirements.txt
   - pip install --use-mirrors coveralls
   - python ./manage.py syncdb --pythonpath=. --noinput
-  - python ./manage.py loaddata app/detective/fixtures/*.json
 env:
   - NEO4J_VERSION="1.9.1"
 matrix:

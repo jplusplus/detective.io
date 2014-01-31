@@ -23,6 +23,8 @@ def find(function, iterable):
 
 class ApiTestCase(ResourceTestCase):
 
+    fixtures = ['/detective/fixtures/search_terms.json',]
+
     def setUp(self):
         super(ApiTestCase, self).setUp()
         # Use custom api client

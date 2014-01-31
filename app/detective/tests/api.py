@@ -758,6 +758,11 @@ class ApiTestCase(ResourceTestCase):
         resp = self.api_client.get('/api/thanksgiving/v1/', format='json')
         self.assertValidJSONResponse(resp)
 
-    def test_topic_has_summary_syntax(self):
+    def test_topic_has_summary_syntax_from_ontology(self):
         resp = self.api_client.get('/api/christmas/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
+        self.assertValidJSONResponse(resp)
+
+    def test_topic_has_summary_syntax_from_file(self):
+        resp = self.api_client.get('/api/energy/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
+        print resp.content
         self.assertValidJSONResponse(resp)

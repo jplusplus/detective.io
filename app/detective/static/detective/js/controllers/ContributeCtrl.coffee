@@ -325,14 +325,14 @@ class ContributeCtrl
         # Parameters of the individual to delete
         toDelete =
             type : individual.type
-            id   : individual.fields.ids
+            id   : individual.fields.id
         # Remove the node we're about to replace
         # (no feedback)
         @Individual.delete(toDelete)
         # Build parameters to load the individual from database
         params =
             type : individual.type
-            id   : ids
+            id   : id
         # Then load the individual
         individual.fields = @Individual.get params, (master)->
             # Disable loading state

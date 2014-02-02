@@ -23,6 +23,8 @@ def find(function, iterable):
 
 class ApiTestCase(ResourceTestCase):
 
+    fixtures = ['app/detective/fixtures/search_terms.json',]
+
     def setUp(self):
         super(ApiTestCase, self).setUp()
         # Use custom api client
@@ -149,17 +151,17 @@ class ApiTestCase(ResourceTestCase):
             "label": u"Person that has activity in Journalism++",
             "object": {
                 "id": 283,
-                "model": u"common:Organization",
+                "model": u"Organization",
                 "name": u"Journalism++"
             },
             "predicate": {
                 "label": u"has activity in",
-                "name": u"person_has_activity_in_organization+",
-                "subject": u"energy:Person"
+                "name": u"activity_in_organization",
+                "subject": u"Person"
             },
             "subject": {
                 "label": u"Person",
-                "name": u"energy:Person"
+                "name": u"Person"
             }
         }
 
@@ -756,6 +758,11 @@ class ApiTestCase(ResourceTestCase):
         resp = self.api_client.get('/api/thanksgiving/v1/', format='json')
         self.assertValidJSONResponse(resp)
 
-    def test_topic_has_summary_syntax(self):
+    def test_topic_has_summary_syntax_from_ontology(self):
         resp = self.api_client.get('/api/christmas/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
+        self.assertValidJSONResponse(resp)
+
+    def test_topic_has_summary_syntax_from_file(self):
+        resp = self.api_client.get('/api/energy/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
+        print resp.content
         self.assertValidJSONResponse(resp)

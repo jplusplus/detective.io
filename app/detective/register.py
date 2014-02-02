@@ -1,10 +1,11 @@
-from app.detective             import owl, utils
-from app.detective.modelrules  import ModelRules
-from app.detective.models      import Topic
-from django.conf.urls          import url, include, patterns
-from django.conf               import settings
-from django.core.urlresolvers  import clear_url_caches
-from tastypie.api              import NamespacedApi
+from app.detective                       import owl, utils
+from app.detective.modelrules            import ModelRules
+from app.detective.models                import Topic
+from django.conf.urls                    import url, include, patterns
+from django.conf                         import settings
+from django.core.urlresolvers            import clear_url_caches
+from tastypie.api                        import NamespacedApi
+
 import importlib
 import os
 import sys
@@ -157,10 +158,9 @@ def topic_models(path, with_api=True):
         SummaryResource = summary_module.SummaryResource
     # We create one if it doesn't exist
     else:
-        summary_common  = import_or_create("app.detective.topics.common.summary")
-        BaseResource    = summary_common.SummaryResource
-        attrs           = dict(meta=summary_common.SummaryResource.Meta)
-        SummaryResource = type('SummaryResource', (BaseResource,), attrs)
+        from app.detective.topics.common.summary import SummaryResource as CommonSummaryResource
+        attrs           = dict(meta=CommonSummaryResource.Meta)
+        SummaryResource = type('SummaryResource', (CommonSummaryResource,), attrs)
     # Register the summary resource
     api.register(SummaryResource())
     # Create url patterns

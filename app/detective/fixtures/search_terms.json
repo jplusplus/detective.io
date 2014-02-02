@@ -1,0 +1,292 @@
+[
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "personal_payer",
+        "subject": "FundraisingRound",
+        "label": "was financed by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "payer",
+        "subject": "FundraisingRound",
+        "label": "was financed by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "educated_in",
+        "subject": "Person",
+        "label": "was educated in"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "based_in",
+        "subject": "Person",
+        "label": "is based in"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "activity_in_organization",
+        "subject": "Person",
+        "label": "has activity in"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "previous_activity_in_organization",
+        "subject": "Person",
+        "label": "had previous activity in"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "price",
+        "subject": "EnergyProduct",
+        "label": "is sold at"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "author",
+        "subject": "Commentary",
+        "label": "was written by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "distribution",
+        "subject": "EnergyProduct",
+        "label": "is distributed in"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "operator",
+        "subject": "EnergyProduct",
+        "label": "is operated by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "price",
+        "subject": "EnergyProduct",
+        "label": "is sold at"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "adviser",
+        "subject": "Organization",
+        "label": "is advised by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "key_person",
+        "subject": "Organization",
+        "label": "is staffed by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "partner",
+        "subject": "Organization",
+        "label": "has a partnership with"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "fundraising_round",
+        "subject": "Organization",
+        "label": "was financed by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "monitoring_body",
+        "subject": "Organization",
+        "label": "is monitored by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "litigation_against",
+        "subject": "Organization",
+        "label": "has a litigation against"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "revenue",
+        "subject": "Organization",
+        "label": "has revenue of"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "board_member",
+        "subject": "Organization",
+        "label": "has board of directors with"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "commentary",
+        "subject": "EnergyProject",
+        "label": "is analyzed by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "owner",
+        "subject": "EnergyProject",
+        "label": "is owned by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "partner",
+        "subject": "EnergyProject",
+        "label": "has a partnership with"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "activity_in_country",
+        "subject": "EnergyProject",
+        "label": "has activity in"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "activity_in_country",
+        "subject": "Distribution",
+        "label": "has activity in"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "product",
+        "subject": "EnergyProject",
+        "label": "has product of"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "commentary",
+        "subject": "EnergyProject",
+        "label": "is analyzed by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "owner",
+        "subject": "EnergyProject",
+        "label": "is owned by"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "partner",
+        "subject": "EnergyProject",
+        "label": "has partnership with"
+    }
+},
+{
+    "pk": null,
+    "model": "detective.searchterm",
+    "fields": {
+        "topic": 2,
+        "name": "activity_in_country",
+        "subject": "EnergyProject",
+        "label": "has activity in"
+    }
+}
+]

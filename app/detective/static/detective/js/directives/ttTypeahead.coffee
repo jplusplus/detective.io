@@ -1,4 +1,4 @@
-angular.module('detective').directive "ttTypeahead", ($parse)->
+angular.module('detective').directive "ttTypeahead", ($parse, $routeParams)->
     lastDataset = []
     # Use underscore's template
     # @TODO use $compile from angular
@@ -19,7 +19,7 @@ angular.module('detective').directive "ttTypeahead", ($parse)->
     link: (scope, element, attrs) ->
         # Select the individual to look for
         individual = (scope.individual() or "").toLowerCase()
-        itopic     = (scope.topic() or "common").toLowerCase()
+        itopic     = (scope.topic() or $routeParams.topic or "common").toLowerCase()
         # Set a default value
         element.val scope.model.name if scope.model?
         # Helper to save the search response

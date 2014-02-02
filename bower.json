@@ -1,6 +1,6 @@
 {
   "name": "detective",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "dependencies": {
     "angular-elastic": "2.2.0",
     "angular-ui-bootstrap-bower": "0.6.0",

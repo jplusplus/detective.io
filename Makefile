@@ -6,10 +6,13 @@ ENV           = `pwd`/.env
 run: clear
 	. $(ENV) ; python manage.py runserver --nothreading
 
-install:
+virtualenv:
 	virtualenv venv --no-site-packages --distribute --prompt=Detective.io
 	# Install pip packages
 	. $(ENV) ; pip install -r requirements.txt
+
+install:
+	make virtualenv
 	# Install npm packages
 	cat npm_requirements.txt | echo $1
 	# Install bower packages

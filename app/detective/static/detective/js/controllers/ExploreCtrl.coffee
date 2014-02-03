@@ -58,6 +58,7 @@ class ExploreCtrl
             @location.search "q", query
 
     getTypeCount: ()=>
+        return '∞' unless @scope.types?
         tt = 0
         for type in arguments
             t   = @scope.types[type]

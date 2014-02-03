@@ -54,6 +54,13 @@
                 height : _node_size * 2
             null
 
+        deleteNode = (d) ->
+            if d._id > 0
+                delete scope.data.nodes[d._id]
+            else
+                delete scope.data.links[d._parent]['_AGGREGATION_']
+            update graph
+
         update = =>
             return if not scope.data.nodes?
 
@@ -78,6 +85,7 @@
                             nodes.push
                                 _id : -(aggregation++)
                                 _type : '_AGGREGATION_'
+                                _parent : source_id
                                 name : "#{targets.length} entities"
                             links.push
                                 source : scope.data.nodes[source_id]
@@ -138,9 +146,7 @@
             # Remove old nodes
             do (do the_nodes.exit).remove
 
-            the_nodes.on 'dblclick', (d) =>
-                delete scope.data.nodes[d._id]
-                update graph
+            the_nodes.on 'dblclick', deleteNode
 
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id

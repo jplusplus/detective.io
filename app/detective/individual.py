@@ -507,17 +507,13 @@ class IndividualResource(ModelResource):
                         all_links[nodes[i]]['__count'] += 1
                         all_links[nodes[i]]['__relations'][relation].append(nodes[i + 1])
 
-                        # Push IDs if not already in (must do this later)
-                        for node in [nodes[i], nodes[i + 1]]:
-                            IDs.add(node)
-
                     i += 1
 
             # Sort and aggregate nodes when we're over the threshold
             for node in all_links.keys():
+                IDs.add(node)
                 shortcut = all_links[node]['__relations']
                 if all_links[node]['__count'] >= aggregation_threshold:
-                    # all_links[node]['__relations']['_AGGREGATION_']
                     sorted_relations = sorted([(len(shortcut[rel]), rel) for rel in shortcut],
                                               key=lambda to_sort: to_sort[0])
                     shortcut = defaultdict(list)
@@ -525,13 +521,17 @@ class IndividualResource(ModelResource):
                     while i < aggregation_threshold:
                         for rel in sorted_relations:
                             try:
-                                shortcut[rel[1]].append(all_links[node]['__relations'][rel[1]].pop())
+                                node_id = all_links[node]['__relations'][rel[1]].pop()
+                                shortcut[rel[1]].append(node_id)
+                                IDs.add(node_id)
                                 i += 1
                             except IndexError:
                                 # Must except IndexError if we .pop() on an empty list
                                 pass
                             if i >= aggregation_threshold: break
                     shortcut['_AGGREGATION_'] = sum(all_links[node]['__relations'].values(), [])
+                else:
+                    IDs.update(sum(shortcut.values(), []))
                 all_links[node] = shortcut
 
             # Finally get all entities from their IDs

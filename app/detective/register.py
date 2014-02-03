@@ -10,6 +10,7 @@ import importlib
 import os
 import sys
 import types
+import imp
 
 def topics_rules():
     """
@@ -82,7 +83,8 @@ def import_or_create(path, register=True):
     # File dosen't exist, we create it virtually!
     except ImportError:
         path_parts = path.split(".")
-        module     = types.ModuleType(str(path))
+        module     = imp.new_module(path_parts[-1])
+        module.__package__ = path
         # Register the new module in the global scope
         if register:
             # Get the parent module
@@ -105,6 +107,13 @@ def topic_models(path, with_api=True):
         Auto-discover topic-related model by looking into
         a topic package for an ontology file. This will also
         create all api resources and endpoints.
+
+        This will create the following modules:
+            {path}
+            {path}.models
+            {path}.resources
+            {path}.summary
+            {path}.urls
     """
     topic_module = import_or_create(path)
     topic_name   = path.split(".")[-1]

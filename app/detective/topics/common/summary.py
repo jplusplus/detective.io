@@ -40,6 +40,8 @@ class SummaryResource(Resource):
 
     def obj_get(self, request=None, **kwargs):
         content = {}
+        # Refresh syntax cache at each request
+        if hasattr(self, "syntax"): delattr(self, "syntax")
         # Get the current topic
         self.topic = self.get_topic_or_404(request=request)
         # Check for an optional method to do further dehydration.
@@ -552,7 +554,7 @@ class SummaryResource(Resource):
                 # Store the token as an object
                 objects += self.search(token)[:5]
             # Or if the previous word is a preposition
-            elif is_object(query, token) or is_last_token:
+            elif is_object(query, token) and is_last_token:
                 if token not in searched_tokens and len(token) > 3:
                     # Looks for entities into the database
                     entities = self.search(token)[:5]
@@ -629,17 +631,18 @@ class SummaryResource(Resource):
         return len(matches)
 
     def get_syntax(self, bundle=None, request=None):
-        return {
-            'subject': {
-                'model':  self.get_models_output(),
-                'entity': None
-            },
-            'predicate': {
-                'relationship': self.get_relationship_search_output(),
-                'literal':      self.get_literal_search_output()
+        if not hasattr(self, "syntax"):
+            syntax = {
+                'subject': {
+                    'model':  self.get_models_output()
+                },
+                'predicate': {
+                    'relationship': self.get_relationship_search_output(),
+                    'literal':      self.get_literal_search_output()
+                }
             }
-        }
-
+            self.syntax = syntax
+        return self.syntax
 
 def process_parsing(topic, files):
     """

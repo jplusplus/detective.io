@@ -45,9 +45,9 @@ def default_rules(topic):
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # We cant import this early to avoid bi-directional dependancies
-    from app.detective.utils import get_topic_models, import_class
+    from app.detective.utils import import_class
     # Get all registered models
-    models = get_topic_models(topic)
+    models = Topic.objects.get(module=topic).get_models()
     # Set "is_searchable" to true on every model with a name
     for model in models:
         # If the current model has a name

@@ -177,7 +177,7 @@ class SearchTerm(models.Model):
     def field(self):
         field = None
         if self.name:
-            topic_models = utils.get_topic_models(self.topic)
+            topic_models = self.topic.get_models()
             for model in topic_models:
                 # Retreive every relationship field for this model
                 for f in utils.get_model_fields(model):

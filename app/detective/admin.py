@@ -58,7 +58,7 @@ class SearchTermInline(admin.TabularInline):
             # Get the current topic with the ID set into the parent form
             topic  = Topic.objects.get(id=request.topic_id)
             # Get the topic's models
-            models = utils.get_topic_models(topic)
+            models = topic.get_models()
             for model in models:
                 model_name    = getattr(model._meta, "verbose_name").title()
                 subset        = []

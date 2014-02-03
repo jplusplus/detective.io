@@ -84,7 +84,7 @@
 			<li ng-repeat="p in nearestPages()" ng-class="{active: p == page}">
 				<a ng-click="goToPage(p)">[[p]] <span class="sr-only">(current)</span></a>
 			</li>
-			<li class="disabled" ng-if="nearestPages()[nearestPages().length - 1] + 1 < pages().length "><a >...</a></li>
+			<li class="disabled" ng-if="nearestPages()[nearestPages().length - 1] && nearestPages()[nearestPages().length - 1] + 1 < pages().length "><a >...</a></li>
 			<!-- last page -->
 			<li ng-if="pages().length > 1" ng-class="{active: pages().length == page}">
 				<a ng-click="goToPage(pages().length)">[[ pages().length ]]</a>

@@ -119,7 +119,8 @@
             # Create all new nodes
             the_nodes = (svg.selectAll '.node').data nodes, (d) -> d._id
             (do the_nodes.enter).insert('svg:circle', 'text').attr('class', 'node').attr
-                    r : node_size
+                    r : (d) =>
+                        if d._id is parseInt $routeParams.id then node_size * 2 else node_size
                     d : nodeUpdate
                 .style
                     fill : (d) ->

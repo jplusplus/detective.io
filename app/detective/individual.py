@@ -483,7 +483,7 @@ class IndividualResource(ModelResource):
         self.throttle_check(request)
 
         depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
-        aggregation_threshold = 2
+        aggregation_threshold = 10
 
         def reduce_result(rows):
             # Initialize structures
@@ -492,7 +492,7 @@ class IndividualResource(ModelResource):
             # We want to build a structure of the form:
             # { source_id : { relation_name : [ target_ids ] } }
             # Must use a set() instead of list() to avoid checking duplicates but it screw up json.dumps()
-            all_links = defaultdict(lambda: defaultdict(list))
+            all_links = defaultdict(lambda: dict(__count=0, __relations=defaultdict(list)))
             IDs = set()
 
             for row in rows:
@@ -503,29 +503,36 @@ class IndividualResource(ModelResource):
                     if relation == '<<INSTANCE>>':
                         break
 
-                    if not nodes[i + 1] in all_links[nodes[i]][relation]:
-                        links_len = len(all_links[nodes[i]][relation])
-                        #if links_len < aggregation_threshold:
-                        all_links[nodes[i]][relation].append(nodes[i + 1])
+                    if not nodes[i + 1] in all_links[nodes[i]]['__relations'][relation]:
+                        all_links[nodes[i]]['__count'] += 1
+                        all_links[nodes[i]]['__relations'][relation].append(nodes[i + 1])
 
-                        # Push IDs if not already in
+                        # Push IDs if not already in (must do this later)
                         for node in [nodes[i], nodes[i + 1]]:
                             IDs.add(node)
-                        # else:
-                        #     if links_len == aggregation_threshold:
-                        #         all_links[nodes[i]][relation].append([nodes[i + 1]])
-                        #     else:
-                        #         if not nodes[i + 1] in all_links[nodes[i]][relation][-1]:
-                        #             all_links[nodes[i]][relation][-1].append(nodes[i + 1])
 
                     i += 1
 
+            # Sort and aggregate nodes when we're over the threshold
             for node in all_links.keys():
-                for relation in all_links[node].keys():
-                    if len(all_links[node][relation]) > 1:
-                        tmp = all_links[node][relation][1:]
-                        all_links[node][relation] = all_links[node][relation][:1]
-                        all_links[node][relation].append(tmp)
+                shortcut = all_links[node]['__relations']
+                if all_links[node]['__count'] >= aggregation_threshold:
+                    # all_links[node]['__relations']['_AGGREGATION_']
+                    sorted_relations = sorted([(len(shortcut[rel]), rel) for rel in shortcut],
+                                              key=lambda to_sort: to_sort[0])
+                    shortcut = defaultdict(list)
+                    i = 0
+                    while i < aggregation_threshold:
+                        for rel in sorted_relations:
+                            try:
+                                shortcut[rel[1]].append(all_links[node]['__relations'][rel[1]].pop())
+                                i += 1
+                            except IndexError:
+                                # Must except IndexError if we .pop() on an empty list
+                                pass
+                            if i >= aggregation_threshold: break
+                    shortcut['_AGGREGATION_'] = sum(all_links[node]['__relations'].values(), [])
+                all_links[node] = shortcut
 
             # Finally get all entities from their IDs
             query = """

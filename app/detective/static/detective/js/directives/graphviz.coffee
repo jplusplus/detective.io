@@ -64,22 +64,22 @@
 
             _.map (_.pairs scope.data.links), ([source_id, relations]) ->
                 _.map (_.pairs relations), ([relation, targets]) ->
-                    _.map targets, (target_id) ->
-                        # If we have an array, we must create a aggregation node
-                        target = if (typeof target_id) isnt (typeof [])
-                            scope.data.nodes[target_id]
-                        else
-                            nodes.push
-                                _id : -(aggregation++)
-                                _type : '_AGGREGATION_'
-                                name : "#{target_id.length} entities"
-                            nodes[nodes.length - 1]
-
+                    if relation isnt '_AGGREGATION_'
+                        _.map targets, (target_id) ->
+                            links.push
+                                source : scope.data.nodes[source_id]
+                                target : scope.data.nodes[target_id]
+                                _type : relation
+                            null
+                    else
+                        nodes.push
+                            _id : -(aggregation++)
+                            _type : '_AGGREGATION_'
+                            name : "#{targets.length} entities"
                         links.push
                             source : scope.data.nodes[source_id]
-                            target : target
+                            target : nodes[nodes.length - 1]
                             _type : relation
-                        null
                     null
                 null
 

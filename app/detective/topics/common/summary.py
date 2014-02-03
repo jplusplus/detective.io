@@ -191,7 +191,7 @@ class SummaryResource(Resource):
             AND HAS(type.model_name)
             AND %s IN root._author
             AND type.app_label = '%s'
-            RETURN DISTINCT ID(root) as id, root.name as name, type.name as model
+            RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
         """ % ( int(request.user.id), app_label )
 
         matches      = connection.cypher(query).to_dicts()

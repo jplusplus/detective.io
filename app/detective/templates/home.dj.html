@@ -13,8 +13,8 @@
 
     {% compress js %}
         <script type="text/javascript" src="{% static 'components/jquery/jquery.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/chroma-js/chroma.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/kartograph.js/kartograph-0.8.2.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'components/chroma-js/index.js' %}"></script>
+        <script type="text/javascript" src="{% static 'components/kartograph.js/index.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/raphael/raphael-min.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/jquery.scrollTo/jquery.scrollTo.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/js-md5/js/md5.min.js' %}"></script>
@@ -24,10 +24,10 @@
         <script type="text/javascript" src="{% static 'components/d3/d3.js' %}"></script>
     {% endcompress %}
 
-    <script type="text/javascript" src="{% static 'components/unstable-angular-complete/angular.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'components/unstable-angular-complete/angular-cookies.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'components/unstable-angular-complete/angular-resource.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'components/unstable-angular-complete/angular-sanitize.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular-all-unstable/angular.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular-all-unstable/angular-cookies.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular-all-unstable/angular-resource.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular-all-unstable/angular-sanitize.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-elastic/elastic.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/ng-file-upload/angular-file-upload.min.js' %}"></script>

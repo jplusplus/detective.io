@@ -146,7 +146,7 @@ class SummaryResource(Resource):
         rulesManager = topics_rules()
         # Fetch every registered model
         # to print out its rules
-        for model in utils.get_topic_models(self.topic.module):
+        for model in self.topic.get_models():
             name                = model.__name__.lower()
             rules               = rulesManager.model(model).all()
             fields              = utils.get_model_fields(model)
@@ -384,7 +384,7 @@ class SummaryResource(Resource):
     def rdf_search(self, subject, predicate, obj):
         obj = obj["name"] if "name" in obj else obj
         # retrieve all models in current topic
-        all_models = dict((model.__name__, model) for model in utils.get_topic_models(self.topic.module))
+        all_models = dict((model.__name__, model) for model in self.topic.get_models())
         # If the received obj describe a literal value
         if self.is_registered_literal(predicate["name"]):
             # Get the field name into the database
@@ -434,7 +434,7 @@ class SummaryResource(Resource):
     def get_models_output(self):
         # Select only some atribute
         output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
-        return [ output(m) for m in utils.get_topic_models(self.topic.module) ]
+        return [ output(m) for m in self.topic.get_models() ]
 
     def get_relationship_search(self):
         isRelationship = lambda t: t.type == "relationship"

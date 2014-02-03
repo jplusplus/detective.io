@@ -30,6 +30,7 @@
             "translate(#{d.x}, #{d.y})"
 
         createPattern = (d, defs) ->
+            _node_size = if d._id is parseInt $routeParams.id then node_size * 2 else node_size
             pattern = defs.append 'svg:pattern'
             pattern.attr
                 id : "pattern#{d._id}"
@@ -41,16 +42,16 @@
             (pattern.append 'svg:rect').attr
                 x : 0
                 y : 0
-                width : node_size * 2
-                height : node_size * 2
+                width : _node_size * 2
+                height : _node_size * 2
                 fill : '#999'
             image = pattern.append 'svg:image'
             image.attr
                 'xlink:href' : d.image
                 x : 0
                 y : 0
-                width : node_size * 2
-                height : node_size * 2
+                width : _node_size * 2
+                height : _node_size * 2
             null
 
         update = =>
@@ -66,20 +67,22 @@
                 _.map (_.pairs relations), ([relation, targets]) ->
                     if relation isnt '_AGGREGATION_'
                         _.map targets, (target_id) ->
-                            links.push
-                                source : scope.data.nodes[source_id]
-                                target : scope.data.nodes[target_id]
-                                _type : relation
+                            if scope.data.nodes[source_id]? and scope.data.nodes[target_id]?
+                                links.push
+                                    source : scope.data.nodes[source_id]
+                                    target : scope.data.nodes[target_id]
+                                    _type : relation
                             null
                     else
-                        nodes.push
-                            _id : -(aggregation++)
-                            _type : '_AGGREGATION_'
-                            name : "#{targets.length} entities"
-                        links.push
-                            source : scope.data.nodes[source_id]
-                            target : nodes[nodes.length - 1]
-                            _type : relation
+                        if scope.data.nodes[source_id]?
+                            nodes.push
+                                _id : -(aggregation++)
+                                _type : '_AGGREGATION_'
+                                name : "#{targets.length} entities"
+                            links.push
+                                source : scope.data.nodes[source_id]
+                                target : nodes[nodes.length - 1]
+                                _type : relation
                     null
                 null
 
@@ -134,6 +137,10 @@
                     null
             # Remove old nodes
             do (do the_nodes.exit).remove
+
+            the_nodes.on 'dblclick', (d) =>
+                delete scope.data.nodes[d._id]
+                update graph
 
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id

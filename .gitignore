@@ -31,3 +31,7 @@ staticfiles
 lib/neo4j*
 node_modules
 catalog-v001.xml
+.coverage
+
+# Configuration file
+.env_dev

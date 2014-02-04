@@ -1,11 +1,11 @@
-(angular.module 'detective').directive "graphviz", ['$filter', '$routeParams', '$location', 'Individual', ($filter, $routeParams, $location, Individual) ->
+(angular.module 'detective').directive "graphviz", ['$filter', '$routeParams', '$location', '$rootScope', 'Individual', ($filter, $routeParams, $location, $rootScope, Individual)->
     restrict: "AE"
     template : "<div></div>"
     replace : yes
     scope :
         data : '='
         topic : '='
-    link: (scope, element, attr) ->
+    link: (scope, element, attr)->
         size = [element[0].clientWidth, 250]
         node_size = 6
         absUrl = do $location.absUrl
@@ -19,6 +19,7 @@
         the_links = null
         the_nodes = null
         the_names = null
+
 
         linkUpdate = (d) ->
             dx = d.target.x - d.source.x
@@ -62,10 +63,11 @@
             update graph
 
         loadNode = (d) ->
-            params = { topic : scope.topic, type : do d._type.toLowerCase, id : String(d._id) , depth : 2 }
-            Individual.graph params, (data) =>
-                console.debug data
-            null
+            params =
+                type  : do d._type.toLowerCase
+                id    : d._id
+                depth : 2
+            Individual.graph params, (d)-> console.log(d)
 
         update = =>
             return if not scope.data.nodes?
@@ -153,7 +155,9 @@
             do (do the_nodes.exit).remove
 
             the_nodes.on 'dblclick', deleteNode
-            the_nodes.on 'click', loadNode
+            the_nodes.on 'click', (d)->
+                loadNode(d)
+                $rootScope.safeApply()
 
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id

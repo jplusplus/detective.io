@@ -73,19 +73,28 @@ HashMerge = (a, b) ->
                 height : _node_size * 2
             null
 
-        deleteNode = (d) ->
+        deleteNode = (d) =>
+            # Make a diference between click and dblclick
+            if d._timer?
+                clearTimeout d._timer
+                d._timer = undefined
+
             if d._id > 0
                 delete scope.data.nodes[d._id]
             else
                 delete scope.data.links[d._parent]['_AGGREGATION_']
-            update graph
+
+            do update
 
         loadNode = (d) ->
             params =
                 type  : do d._type.toLowerCase
                 id    : d._id
                 depth : 2
-            Individual.graph params, (d)-> console.log(d)
+            Individual.graph params, (d) ->
+                scope.data.nodes = HashMerge scope.data.nodes, d.nodes
+                scope.data.links = HashMerge scope.data.links, d.links
+                do update
 
         update = =>
             return if not scope.data.nodes?
@@ -173,9 +182,13 @@ HashMerge = (a, b) ->
             do (do the_nodes.exit).remove
 
             the_nodes.on 'dblclick', deleteNode
-            the_nodes.on 'click', (d)->
-                loadNode(d)
-                $rootScope.safeApply()
+            the_nodes.on 'click', (d) ->
+                if not d._timer?
+                    d._timer = setTimeout =>
+                        d._timer = undefined
+                        loadNode(d)
+                        $rootScope.safeApply()
+                    , 200
 
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id
@@ -197,7 +210,7 @@ HashMerge = (a, b) ->
             null
 
         scope.$watch 'data', =>
-            update graph
+            do update
             null
 
         null

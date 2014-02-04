@@ -1,3 +1,21 @@
+HashMerge = (a, b) ->
+    result = { }
+    for i of a
+        if (i of b) and a[i] isnt b[i]
+            if (a[i] instanceof Array) and (b[i] instanceof Array)
+                result[i] = a[i].concat b[i]
+            else if (a[i] instanceof Object) and (b[i] instanceof Object)
+                result[i] = HashMerge a[i], b[i]
+            else
+                result[i] = [a[i], b[i]]
+        else
+            result[i] = a[i]
+    for i of b
+        if i of result
+            continue
+        result[i] = b[i]
+    result
+
 (angular.module 'detective').directive "graphviz", ['$filter', '$routeParams', '$location', '$rootScope', 'Individual', ($filter, $routeParams, $location, $rootScope, Individual)->
     restrict: "AE"
     template : "<div></div>"

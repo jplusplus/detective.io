@@ -9,7 +9,6 @@ from tastypie.api                        import NamespacedApi
 import importlib
 import os
 import sys
-import types
 import imp
 
 def topics_rules():

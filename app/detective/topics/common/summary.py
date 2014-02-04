@@ -409,9 +409,11 @@ class SummaryResource(Resource):
             )
         # If the received obj describe a literal value
         elif self.is_registered_relationship(predicate["name"]):
-            fields       = utils.get_model_fields( all_models[subject["name"]] )
+            fields        = utils.get_model_fields( all_models[predicate["subject"]] )
             # Get the field name into the database
             relationships = [ field for field in fields if field["name"] == predicate["name"] ]
+            # We didn't find the predicate
+            if not len(relationships): return {'errors': 'Unkown predicate type'}
             relationship  = relationships[0]["rel_type"]
             # Query to get every result
             query = """

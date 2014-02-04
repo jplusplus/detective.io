@@ -105,7 +105,7 @@ class Topic(models.Model):
         return models_list
 
     def clean(self):
-        if self.ontology == "" or not self.has_default_ontology():
+        if self.ontology == "" and not self.has_default_ontology():
             raise ValidationError( 'An ontology file is required with this module.',  code='invalid')
         models.Model.clean(self)
 
@@ -120,7 +120,7 @@ class Topic(models.Model):
     def reload(self):
         from app.detective.register import topic_models
         # Register the topic's models again
-        topic_models(self.get_module().__package__)
+        topic_models(self.get_module().__name__)
 
     def has_default_ontology(self):
         try:

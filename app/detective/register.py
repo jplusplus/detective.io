@@ -83,7 +83,7 @@ def import_or_create(path, register=True):
     except ImportError:
         path_parts = path.split(".")
         module     = imp.new_module(path_parts[-1])
-        module.__package__ = path
+        module.__name__ = path
         # Register the new module in the global scope
         if register:
             # Get the parent module
@@ -138,6 +138,8 @@ def topic_models(path, with_api=True):
         # Makes every model available through this module
         for m in models: setattr(models_module, m, models[m])
     except TypeError:
+        models = []
+    except ValueError:
         models = []
     # No API creation request!
     if not with_api: return topic_module

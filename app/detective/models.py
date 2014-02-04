@@ -105,7 +105,7 @@ class Topic(models.Model):
         return models_list
 
     def clean(self):
-        if self.ontology == "" and not self.has_default_ontology():
+        if self.ontology == "" or not self.has_default_ontology():
             raise ValidationError( 'An ontology file is required with this module.',  code='invalid')
         models.Model.clean(self)
 
@@ -123,7 +123,9 @@ class Topic(models.Model):
         topic_models(self.get_module().__package__)
 
     def has_default_ontology(self):
-        module = self.get_module()
+        try:
+            module = self.get_module()
+        except ValueError: return False
         # File if it's a virtual module
         if not hasattr(module, "__file__"): return False
         directory = os.path.dirname(os.path.realpath( module.__file__ ))

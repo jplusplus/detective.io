@@ -1,4 +1,4 @@
-(angular.module 'detective').directive "graphviz", ['$filter', '$routeParams', '$location', ($filter, $routeParams, $location) ->
+(angular.module 'detective').directive "graphviz", ['$filter', '$routeParams', '$location', 'Individual', ($filter, $routeParams, $location, Individual) ->
     restrict: "AE"
     template : "<div></div>"
     replace : yes
@@ -60,6 +60,12 @@
             else
                 delete scope.data.links[d._parent]['_AGGREGATION_']
             update graph
+
+        loadNode = (d) ->
+            params = { topic : scope.topic, type : do d._type.toLowerCase, id : String(d._id) , depth : 2 }
+            Individual.graph params, (data) =>
+                console.debug data
+            null
 
         update = =>
             return if not scope.data.nodes?
@@ -147,6 +153,7 @@
             do (do the_nodes.exit).remove
 
             the_nodes.on 'dblclick', deleteNode
+            the_nodes.on 'click', loadNode
 
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id

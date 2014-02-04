@@ -16,15 +16,13 @@ def topics_rules():
         Auto-discover topic-related rules by looking into
         evry topics' directories for forms.py files.
     """
-    # Singleton
-    if hasattr(topics_rules, "rules"): return topics_rules.rules
     # Avoid bi-directional dependancy
     from app.detective.utils import get_topics
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # Each app can defined a forms.py file that describe the model rules
-    topcis = get_topics(offline=False)
-    for topic in topcis:
+    topics = get_topics(offline=False)
+    for topic in topics:
         # Add default rules
         default_rules(topic)
         # Does this app contain a forms.py file?
@@ -37,8 +35,6 @@ def topics_rules():
         func = getattr(mod, "topics_rules", None)
         # Simply call the function to register app's rules
         if func: rules = func()
-    # Register the rules
-    topics_rules.rules = rules
     return rules
 
 def default_rules(topic):

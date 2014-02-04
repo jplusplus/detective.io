@@ -129,7 +129,7 @@ def get_model_fields(model):
             # Ignores field terminating by + or begining by _
             if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):
                 # Find related model for relation
-                if hasattr(f, "target_model"):
+                if f.get_internal_type() == "relationship":
                     # We received a model as a string
                     if type(f.target_model) is str:
                         # Extract parts of the module path

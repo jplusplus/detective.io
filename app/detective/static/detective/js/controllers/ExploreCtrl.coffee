@@ -23,7 +23,7 @@ class ExploreCtrl
             # Build template url
             @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
             # Countries info
-            @Summary.get id:"countries", (d)=> @scope.countries = d
+            @scope.countries = @Summary.get id:"countries"
             # Types info
             @Summary.get id:"types", (d)=> @scope.types = d
             # Types info

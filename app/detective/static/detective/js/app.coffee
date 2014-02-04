@@ -8,9 +8,9 @@ detective = angular
             'Page',
             ($rootScope, $location, user, Page)->
                 # Location available within templates
-                $rootScope.location = $location;
-                $rootScope.user     = user
-                $rootScope.Page     = Page
+                $rootScope.location  = $location;
+                $rootScope.user      = user
+                $rootScope.Page      = Page
         ]
     )
     .config(

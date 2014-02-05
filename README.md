@@ -1,4 +1,4 @@
-[![Travis build](https://secure.travis-ci.org/jplusplus/detective.io.png?branch=master)](https://travis-ci.org/jplusplus/detective.io)
+[![Build Status](https://drone.io/github.com/jplusplus/detective.io/status.png)](https://drone.io/github.com/jplusplus/detective.io/latest)
 [![Coverage Status - master](https://coveralls.io/repos/jplusplus/detective.io/badge.png)](https://coveralls.io/r/jplusplus/detective.io)
 
 ## Installation

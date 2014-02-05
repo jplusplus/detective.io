@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class
+from app.detective.utils                import import_class, to_underscores
 from django.conf.urls                   import url
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
@@ -493,21 +493,42 @@ class IndividualResource(ModelResource):
             # { source_id : { relation_name : [ target_ids ] } }
             # Must use a set() instead of list() to avoid checking duplicates but it screw up json.dumps()
             all_links = defaultdict(lambda: dict(__count=0, __relations=defaultdict(list)))
-            IDs = set()
+            IDs = set(sum([row['nodes'] for row in rows], []))
+
+            # Get all entities from their IDs
+            query = """
+                START root = node({0})
+                MATCH (root)-[:`<<INSTANCE>>`]-(type)
+                WHERE type.app_label = '{1}'
+                RETURN ID(root) as ID, root, type
+            """.format(','.join([str(ID) for ID in IDs]), 'energy')
+            all_raw_nodes = connection.cypher(query).to_dicts()
+            for row in all_raw_nodes:
+                # Twist some data in the entity
+                for key in row['root']['data'].keys():
+                    if key[0] == '_': del row['root']['data'][key]
+                row['root']['data']['_type'] = row['type']['data']['model_name']
+                row['root']['data']['_id'] = row['ID']
+
+                all_nodes[row['ID']] = row['root']['data']
 
             for row in rows:
                 nodes = row['nodes']
                 i = 0
                 for relation in row['relations']:
-                    if not nodes[i + 1] in all_links[nodes[i]]['__relations'][relation]:
-                        all_links[nodes[i]]['__count'] += 1
-                        all_links[nodes[i]]['__relations'][relation].append(nodes[i + 1])
-
+                    try:
+                        if all_nodes[nodes[i]] is None or all_nodes[nodes[i + 1]] is None: continue
+                        (a, b) = (nodes[i], nodes[i + 1])
+                        if re.search('^'+to_underscores(all_nodes[nodes[i]]['_type']), relation) is None:
+                            (a, b) = (nodes[i + 1], nodes[i])
+                        if not b in all_links[a]['__relations'][relation]:
+                            all_links[a]['__count'] += 1
+                            all_links[a]['__relations'][relation].append(b)
+                    except KeyError: pass
                     i += 1
 
             # Sort and aggregate nodes when we're over the threshold
             for node in all_links.keys():
-                IDs.add(node)
                 shortcut = all_links[node]['__relations']
                 if all_links[node]['__count'] >= aggregation_threshold:
                     sorted_relations = sorted([(len(shortcut[rel]), rel) for rel in shortcut],
@@ -519,32 +540,13 @@ class IndividualResource(ModelResource):
                             try:
                                 node_id = all_links[node]['__relations'][rel[1]].pop()
                                 shortcut[rel[1]].append(node_id)
-                                IDs.add(node_id)
                                 i += 1
                             except IndexError:
                                 # Must except IndexError if we .pop() on an empty list
                                 pass
                             if i >= aggregation_threshold: break
                     shortcut['_AGGREGATION_'] = sum(all_links[node]['__relations'].values(), [])
-                else:
-                    IDs.update(sum(shortcut.values(), []))
                 all_links[node] = shortcut
-
-            # Finally get all entities from their IDs
-            query = """
-                START root = node({0})
-                MATCH (root)-[:`<<INSTANCE>>`]-(type)
-                RETURN ID(root) as ID, root, type
-            """.format(','.join([str(ID) for ID in IDs]))
-            rows = connection.cypher(query).to_dicts()
-            for row in rows:
-                # Twist some data in the entity
-                for key in row['root']['data'].keys():
-                    if key[0] == '_': del row['root']['data'][key]
-                row['root']['data']['_type'] = row['type']['data']['model_name']
-                row['root']['data']['_id'] = row['ID']
-
-                all_nodes[row['ID']] = row['root']['data']
 
             return (all_nodes, all_links)
 

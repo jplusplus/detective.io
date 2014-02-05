@@ -1,22 +1,22 @@
 {
   "name": "detective",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "dependencies": {
+    "angular-all-unstable": "1.1.5",
     "angular-elastic": "2.2.0",
     "angular-ui-bootstrap-bower": "0.6.0",
     "bootstrap": "3.0.0",
     "chroma-js": "https://raw.github.com/gka/chroma.js/7b06f8df0e95450fa6ed9266c3cc3efbf3e53fc9/chroma.min.js",
+    "d3": "~3.4.0",
+    "jquery": "1.9.1",
     "jquery.scrollTo": "1.4.6",
     "js-md5": "1.0.3",
-    "modernizr": "2.6.2",
-    "raphael": "2.1.2",
-    "typeahead.js": "0.9.3",
-    "underscore": "1.5.2",
-    "angular-all-unstable": "1.1.5",
     "kartograph.js": "https://raw.github.com/kartograph/kartograph.js/3d89db48d9e1ea020972e8fb9566bea1dc8aa495/kartograph-0.8.2.min.js",
-    "jquery": "1.9.1",
+    "modernizr": "2.6.2",
     "ng-file-upload": "~1.2.3",
     "ngprogress-lite": "~1.0.4",
-    "d3": "~3.4.0"
+    "raphael": "2.1.2",
+    "typeahead.js": "0.9.3",
+    "underscore": "1.5.2"
   }
 }

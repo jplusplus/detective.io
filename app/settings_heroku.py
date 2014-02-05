@@ -17,7 +17,7 @@ DATABASES = {
 }
 
 # Turn on database level autocommit
-# Otherwise db can raise a "current transaction is aborted, 
+# Otherwise db can raise a "current transaction is aborted,
 # commands ignored until end of transaction block"
 DATABASES['default']['OPTIONS'] = {'autocommit': True,}
 
@@ -47,7 +47,7 @@ AWS_ACCESS_KEY_ID          = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY      = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME    = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_QUERYSTRING_AUTH       = False
-AWS_S3_FILE_OVERWRITE      = True
+AWS_S3_FILE_OVERWRITE      = False
 
 # Enable debug for minfication
 DEBUG                      = bool(os.getenv('DEBUG', False))

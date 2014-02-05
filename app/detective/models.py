@@ -4,10 +4,13 @@ from app.detective.permissions import create_permissions, remove_permissions
 from django.core.exceptions    import ValidationError
 from django.db                 import models
 from tinymce.models            import HTMLField
+
+import importlib
 import inspect
 import os
 import random
 import string
+import sys
 
 
 PUBLIC = (
@@ -109,10 +112,20 @@ class Topic(models.Model):
     def save(self, *args, **kwargs):
         # Ensure that the module field is populated with app_label()
         self.module = self.app_label()
+        # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
+        # Refresh the API
+        self.reload()
+
+    def reload(self):
+        from app.detective.register import topic_models
+        # Register the topic's models again
+        topic_models(self.get_module().__name__)
 
     def has_default_ontology(self):
-        module = self.get_module()
+        try:
+            module = self.get_module()
+        except ValueError: return False
         # File if it's a virtual module
         if not hasattr(module, "__file__"): return False
         directory = os.path.dirname(os.path.realpath( module.__file__ ))

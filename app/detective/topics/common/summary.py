@@ -40,6 +40,8 @@ class SummaryResource(Resource):
 
     def obj_get(self, request=None, **kwargs):
         content = {}
+        # Refresh syntax cache at each request
+        if hasattr(self, "syntax"): delattr(self, "syntax")
         # Get the current topic
         self.topic = self.get_topic_or_404(request=request)
         # Check for an optional method to do further dehydration.
@@ -191,7 +193,7 @@ class SummaryResource(Resource):
             AND HAS(type.model_name)
             AND %s IN root._author
             AND type.app_label = '%s'
-            RETURN DISTINCT ID(root) as id, root.name as name, type.name as model
+            RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
         """ % ( int(request.user.id), app_label )
 
         matches      = connection.cypher(query).to_dicts()
@@ -407,9 +409,11 @@ class SummaryResource(Resource):
             )
         # If the received obj describe a literal value
         elif self.is_registered_relationship(predicate["name"]):
-            fields       = utils.get_model_fields( all_models[subject["name"]] )
+            fields        = utils.get_model_fields( all_models[predicate["subject"]] )
             # Get the field name into the database
             relationships = [ field for field in fields if field["name"] == predicate["name"] ]
+            # We didn't find the predicate
+            if not len(relationships): return {'errors': 'Unkown predicate type'}
             relationship  = relationships[0]["rel_type"]
             # Query to get every result
             query = """
@@ -552,7 +556,7 @@ class SummaryResource(Resource):
                 # Store the token as an object
                 objects += self.search(token)[:5]
             # Or if the previous word is a preposition
-            elif is_object(query, token) or is_last_token:
+            elif is_object(query, token) and is_last_token:
                 if token not in searched_tokens and len(token) > 3:
                     # Looks for entities into the database
                     entities = self.search(token)[:5]
@@ -629,17 +633,18 @@ class SummaryResource(Resource):
         return len(matches)
 
     def get_syntax(self, bundle=None, request=None):
-        return {
-            'subject': {
-                'model':  self.get_models_output(),
-                'entity': None
-            },
-            'predicate': {
-                'relationship': self.get_relationship_search_output(),
-                'literal':      self.get_literal_search_output()
+        if not hasattr(self, "syntax"):
+            syntax = {
+                'subject': {
+                    'model':  self.get_models_output()
+                },
+                'predicate': {
+                    'relationship': self.get_relationship_search_output(),
+                    'literal':      self.get_literal_search_output()
+                }
             }
-        }
-
+            self.syntax = syntax
+        return self.syntax
 
 def process_parsing(topic, files):
     """

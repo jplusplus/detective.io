@@ -39,8 +39,10 @@ def attr(obj, name, default=None):
 def get_field_specials(root, field_name):
     specials = ["verbose_name", "help_text"]
     props = {}
+    tags  = root.findall("owl:ObjectProperty",   namespaces=NAMESPACES)
+    tags += root.findall("owl:DatatypeProperty", namespaces=NAMESPACES)
     # List all special propertie
-    for prop in root.findall("owl:ObjectProperty", namespaces=NAMESPACES):
+    for prop in tags:
         if attr(prop, "rdf:about", "") == field_name:
             # Get the first element txt or the default value
             first = lambda a, d=None: a[0].text if len(a) else d

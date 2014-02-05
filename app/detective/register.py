@@ -9,22 +9,20 @@ from tastypie.api                        import NamespacedApi
 import importlib
 import os
 import sys
-import types
+import imp
 
 def topics_rules():
     """
         Auto-discover topic-related rules by looking into
         evry topics' directories for forms.py files.
     """
-    # Singleton
-    if hasattr(topics_rules, "rules"): return topics_rules.rules
     # Avoid bi-directional dependancy
     from app.detective.utils import get_topics
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # Each app can defined a forms.py file that describe the model rules
-    topcis = get_topics(offline=False)
-    for topic in topcis:
+    topics = get_topics(offline=False)
+    for topic in topics:
         # Add default rules
         default_rules(topic)
         # Does this app contain a forms.py file?
@@ -37,8 +35,6 @@ def topics_rules():
         func = getattr(mod, "topics_rules", None)
         # Simply call the function to register app's rules
         if func: rules = func()
-    # Register the rules
-    topics_rules.rules = rules
     return rules
 
 def default_rules(topic):
@@ -82,7 +78,8 @@ def import_or_create(path, register=True):
     # File dosen't exist, we create it virtually!
     except ImportError:
         path_parts = path.split(".")
-        module     = types.ModuleType(str(path))
+        module     = imp.new_module(path_parts[-1])
+        module.__name__ = path
         # Register the new module in the global scope
         if register:
             # Get the parent module
@@ -105,6 +102,13 @@ def topic_models(path, with_api=True):
         Auto-discover topic-related model by looking into
         a topic package for an ontology file. This will also
         create all api resources and endpoints.
+
+        This will create the following modules:
+            {path}
+            {path}.models
+            {path}.resources
+            {path}.summary
+            {path}.urls
     """
     topic_module = import_or_create(path)
     topic_name   = path.split(".")[-1]
@@ -130,6 +134,8 @@ def topic_models(path, with_api=True):
         # Makes every model available through this module
         for m in models: setattr(models_module, m, models[m])
     except TypeError:
+        models = []
+    except ValueError:
         models = []
     # No API creation request!
     if not with_api: return topic_module

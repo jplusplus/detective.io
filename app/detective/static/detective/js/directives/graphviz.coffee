@@ -11,8 +11,7 @@ HashMerge = (a, b) ->
         else
             result[i] = a[i]
     for i of b
-        if i of result
-            continue
+        continue if i of result
         result[i] = b[i]
     result
 

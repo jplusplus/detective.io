@@ -499,10 +499,6 @@ class IndividualResource(ModelResource):
                 nodes = row['nodes']
                 i = 0
                 for relation in row['relations']:
-                    # If link is <<INSTANCE>>, then we're over
-                    if relation == '<<INSTANCE>>':
-                        break
-
                     if not nodes[i + 1] in all_links[nodes[i]]['__relations'][relation]:
                         all_links[nodes[i]]['__count'] += 1
                         all_links[nodes[i]]['__relations'][relation].append(nodes[i + 1])
@@ -555,7 +551,9 @@ class IndividualResource(ModelResource):
         query = """
             START root=node({0})
             MATCH path = (root)-[*1..{1}]-(leaf)
-            RETURN extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|ID(n)) as nodes
+            WITH extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|ID(n)) as nodes
+            WHERE ALL(rel  in relations WHERE rel <> "<<INSTANCE>>")
+            RETURN relations, nodes
         """.format(kwargs['pk'], depth)
         rows = connection.cypher(query).to_dicts()
 
@@ -563,3 +561,12 @@ class IndividualResource(ModelResource):
 
         self.log_throttled_access(request)
         return self.create_response(request, {'nodes':nodes,'links':links})
+
+'''
+START root=node(273)
+MATCH path = (root)-[*1..2]-(leaf)
+WITH extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|n) as nodes
+WHERE ALL(rel  in relations WHERE rel <> "<<INSTANCE>>")
+AND   ALL(node in nodes     WHERE (node)<-[:`<<INSTANCE>>`]-({ app_label : 'energy' }))
+RETURN nodes, relations
+'''

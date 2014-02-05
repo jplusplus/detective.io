@@ -26,8 +26,8 @@ OPERATIONS = (
 )
 
 GROUPS = (dict(
-    name        = '{app_name}_contributor', 
-    description = 'Contributors of an application, can create', 
+    name        = '{app_name}_contributor',
+    description = 'Contributors of an application, can create',
     permissions = ('change', 'add', 'delete')),
 )
 
@@ -91,8 +91,9 @@ def create_permissions(app, app_label=None, created_models=None, verbosity=False
     for every installed app (see settings.INSTALLED_APPS)
     """
     app_name = app.__name__
+
     if app_label is None:
-        # FIXME: why -2 ? 
+        # FIXME: why -2 ?
         app_label = app_name.split('.')[-2]
     # we check if the received signal come from a local installed application
     if app_name.startswith("app.detective.topics"):

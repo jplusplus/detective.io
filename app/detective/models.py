@@ -5,13 +5,10 @@ from django.core.exceptions    import ValidationError
 from django.db                 import models
 from tinymce.models            import HTMLField
 
-import importlib
 import inspect
 import os
 import random
 import string
-import sys
-
 
 PUBLIC = (
     (True, "Yes, public"),
@@ -220,11 +217,8 @@ def update_permissions(*args, **kwargs):
     assert kwargs.get('instance')
     # @TODO check that the slug changed or not to avoid permissions hijacking
     if kwargs.get('created', False):
-        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').slug)
+        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').module)
 
-# Disable permissions creations to avoid a bug
-# @see https://github.com/jplusplus/detective.io/issues/145
-# signals.post_delete.connect(remove_permissions, sender=Topic)
-# signals.post_save.connect(update_permissions, sender=Topic)
-
+signals.post_delete.connect(remove_permissions, sender=Topic)
+signals.post_save.connect(update_permissions, sender=Topic)
 # EOF

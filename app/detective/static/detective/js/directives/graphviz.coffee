@@ -86,14 +86,26 @@ HashMerge = (a, b) ->
             do update
 
         loadNode = (d) ->
-            params =
-                type  : do d._type.toLowerCase
-                id    : d._id
-                depth : 2
-            Individual.graph params, (d) ->
-                scope.data.nodes = HashMerge scope.data.nodes, d.nodes
-                scope.data.links = HashMerge scope.data.links, d.links
+            if d._id is -1
+                # If it's an aggregation we need to shift 10 elements from it
+                scope.data.links[d._parent]['test'] = scope.data.links[d._parent]['test'] or []
+                for i in [0..9]
+                    tmp_node = scope.data.links[d._parent]['_AGGREGATION_'].shift()
+                    console.debug tmp_node
+                    if not tmp_node?
+                        break
+                    scope.data.links[d._parent]['test'].push tmp_node
+                delete scope.data.links[d._parent]['_AGGREGATION_'] if scope.data.links[d._parent]['_AGGREGATION_'].length is 0
                 do update
+            else
+                params =
+                    type  : do d._type.toLowerCase
+                    id    : d._id
+                    depth : 2
+                Individual.graph params, (d) ->
+                    scope.data.nodes = HashMerge scope.data.nodes, d.nodes
+                    scope.data.links = HashMerge scope.data.links, d.links
+                    do update
 
         update = =>
             return if not scope.data.nodes?

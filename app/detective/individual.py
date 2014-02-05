@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores
+from app.detective.utils                import import_class, to_underscores, get_model_topic
 from django.conf.urls                   import url
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
@@ -501,7 +501,7 @@ class IndividualResource(ModelResource):
                 MATCH (root)-[:`<<INSTANCE>>`]-(type)
                 WHERE type.app_label = '{1}'
                 RETURN ID(root) as ID, root, type
-            """.format(','.join([str(ID) for ID in IDs]), 'energy')
+            """.format(','.join([str(ID) for ID in IDs]), get_model_topic(self.get_model()))
             all_raw_nodes = connection.cypher(query).to_dicts()
             for row in all_raw_nodes:
                 # Twist some data in the entity

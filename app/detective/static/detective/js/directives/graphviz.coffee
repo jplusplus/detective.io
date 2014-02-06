@@ -23,7 +23,7 @@ HashMerge = (a, b) ->
         data : '='
         topic : '='
     link: (scope, element, attr)->
-        size = [element[0].clientWidth, 250]
+        size = [ element.width(), element.width()*0.8 ]
         node_size = 6
         absUrl = do $location.absUrl
 

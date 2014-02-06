@@ -3,6 +3,7 @@
 from app.detective                      import register
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class
+from app.detective.topics.common.models import FieldSource
 from django.conf.urls                   import url
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
@@ -76,7 +77,24 @@ class IndividualMeta:
     ordering               = {'name': ALL}
     serializer             = Serializer(formats=['json', 'jsonp', 'xml', 'yaml'])
 
+class FieldSourceResource(ModelResource):
+    class Meta:
+        queryset = FieldSource.objects.all()
+        resource_name = 'auth/user'
+        excludes = ['individual', 'id']
+
+    def dehydrate(self, bundle):
+        del bundle.data["resource_uri"]
+        return bundle
+
 class IndividualResource(ModelResource):
+
+    field_sources = fields.ToManyField(
+        FieldSourceResource,
+        attribute=lambda bundle: FieldSource.objects.filter(individual=bundle.obj.id),
+        full=True,
+        null=True
+    )
 
     def __init__(self, api_name=None):
         super(IndividualResource, self).__init__(api_name)

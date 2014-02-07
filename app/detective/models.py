@@ -117,7 +117,7 @@ class Topic(models.Model):
     def reload(self):
         from app.detective.register import topic_models
         # Register the topic's models again
-        topic_models(self.get_module().__name__)
+        topic_models(self.get_module().__name__, force=True)
 
     def has_default_ontology(self):
         try:

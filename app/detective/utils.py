@@ -2,7 +2,6 @@ from django.forms.forms       import pretty_name
 from random                   import randint
 from os                       import listdir
 from os.path                  import isdir, join
-from django.db.models.loading import AppCache
 import importlib
 import inspect
 import re
@@ -12,8 +11,8 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     """
     Create specified model
     """
-    from neo4django.db import models
-
+    from neo4django.db            import models
+    from django.db.models.loading import AppCache
     # Django use a cache by model
     cache = AppCache()
     # If we already create a model for this app

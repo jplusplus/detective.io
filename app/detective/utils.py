@@ -130,8 +130,9 @@ def get_model_fields(model):
     for f in model._meta.fields:
         # Ignores field terminating by + or begining by _
         if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):
+            print model.__name__, f.name, f.get_internal_type()
             # Find related model for relation
-            if f.get_internal_type() == "relationship":
+            if f.get_internal_type().lower() == "relationship":
                 # We received a model as a string
                 if type(f.target_model) is str:
                     # Extract parts of the module path

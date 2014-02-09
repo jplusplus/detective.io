@@ -2,7 +2,7 @@
 	<div class="row">
 
 		<div class="col-md-4 col-md-push-8">
-			<div class="well padding10 text-right">
+			<div class="panel panel-primary panel-bg padding10 text-right">
 				<span class="btn-group pull-left">
 					<a class="btn btn-default"
 					   ng-if="user.hasChangePermission(topic)"
@@ -37,7 +37,7 @@
 
 			<div ng-show="hasRels()">
 				<h3>Jump to...</h3>
-				<div class="well padding10">
+				<div class="panel panel-primary panel-bg padding10">
 					<ul class="nav nav-pills nav-stacked">
 					 	<li ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)">
 					 		<a ng-click="scrollTo('rels-' + field.name)">
@@ -50,7 +50,7 @@
 		</div>
 
 		<div class="col-md-8 col-md-pull-4">
-			<div class="panel">
+			<div class="panel panel-default">
 
 				<div class="panel-heading">
 					<div class="pull-left">

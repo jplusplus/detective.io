@@ -1,32 +1,39 @@
 <header ng-class="{ 'no-breadcrumb': location.path() == '/' }">
 
 	<div ng-controller="UserCtrl">
-		<div ng-show="user.is_logged" class="pull-right top10 right20">
+		<div ng-show="user.is_logged" class="pull-right right20 user-state">
 			Welcome, [[user.username]]!
 			<a ng-click="logout()" href="#">Sign out</a>
 		</div>
 	</div>
 
-	<h1>
+	<h1 class="pull-left">
 		<a href="#/">
 			Detective<i>.io</i>
 		</a>
 	</h1>
 
-</header>
 
-<ul class="breadcrumb" ng-controller="BreadcrumbCtrl" ng-hide="isHome()">
-	<li>
-		<a class='fa fa-home' ng-href="/">
-			<span class="sr-only">Home</span>
-		</a>
-	</li>
-	<li ng-repeat="p in breadcrumbs" ng-class="{active: $last}" ng-show="p.path != '/'">
-		<a ng-if="p.path && !$last" ng-href="[[p.path]]">
-			[[p.name]]
-		</a>
-		<span ng-if="!p.path || $last">
-			[[Page.title()]]
-		</span>
-	</li>
-</ul>
+    <form class="topic-search" role="search">
+        <div class="input-group">
+        	<span class="input-group-btn">
+	        	<select class="btn btn-default">
+	        		<option>Energy</option>
+	        	</select>
+	        </span>
+            <input type="search"
+                    placeholder="Search linked individuals in our graph database..."
+                    tt-typeahead
+                    tt-individual="'summary'"
+                    tt-topic="'energy'"
+                    tt-model="selectedIndividual"
+                    remote="/api/energy/v1/summary/human/?q=%QUERY"
+                    prefetch="/api/energy/v1/summary/mine/"
+                    value-key="label"
+                    limit="10"
+                    class="form-control"
+                    id="input-search" />
+        </div>
+    </form>
+
+</header>

@@ -101,28 +101,32 @@ html body .panel {
 			color:mix(#fff, @link-color);
 		}
 	}
-}
 
-.breadcrumb {
-	@bg: mix(#2E2D2A, @body-bg);
-	background:@bg;
-	margin:0;
-	.box-shadow( 0 1px 2px 0 fade(darken(@bg, 5), 60) );
-	.border-radius(0);
+	&.panel-bg {
 
-	.active, & {
-		color:gray;
-	}
-
-	li {
-		text-transform: uppercase;
-
-		a {
-			font-weight:bold;
-			text-decoration: none;
+		&.panel-primary {
+			background:@brand-primary;
 		}
+
+		&.panel-danger {
+			background:@brand-danger;
+		}
+
+		&.panel-success {
+			background:@brand-success;
+		}
+
+		&.panel-warning {
+			background:@brand-warning;
+		}
+
+		&.panel-info {
+			background:@brand-info;
+		}
+
 	}
 }
+
 
 .pagination {
 	a {

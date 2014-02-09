@@ -1,4 +1,4 @@
-<header ng-class="{ 'no-breadcrumb': location.path() == '/' }">
+<header ng-class="{ 'is-home': location.path() == '/' }">
 
 	<div ng-controller="UserCtrl">
 		<div ng-show="user.is_logged" class="pull-right right20 user-state">
@@ -14,21 +14,21 @@
 	</h1>
 
 
-    <form class="topic-search" role="search">
-        <div class="input-group">
-        	<span class="input-group-btn">
-	        	<select class="btn btn-default">
-	        		<option>Energy</option>
-	        	</select>
-	        </span>
+    <form class="topic-search" role="search" ng-controller="SearchFormCtrl">
+
+        <div ng-if="topic">
+        	<select class="btn btn-default">
+        		<option value="energy" selected>Energy</option>
+        	</select>
+
             <input type="search"
                     placeholder="Search linked individuals in our graph database..."
                     tt-typeahead
                     tt-individual="'summary'"
-                    tt-topic="'energy'"
+                    tt-topic="'[[topic]]'"
                     tt-model="selectedIndividual"
-                    remote="/api/energy/v1/summary/human/?q=%QUERY"
-                    prefetch="/api/energy/v1/summary/mine/"
+                    remote="/api/[[topic]]/v1/summary/human/?q=%QUERY"
+                    prefetch="/api/[[topic]]/v1/summary/mine/"
                     value-key="label"
                     limit="10"
                     class="form-control"

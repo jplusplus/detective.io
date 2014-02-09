@@ -34,7 +34,7 @@
 // Links
 // -------------------------
 
-@link-color:            darken(@brand-primary, 15%);
+@link-color:            mix(@brand-primary, @text-color);
 @link-hover-color:      darken(@link-color, 30%);
 
 // Typography
@@ -45,7 +45,7 @@
 @font-family-monospace:   Monaco, Menlo, Consolas, "Courier New", monospace;
 @font-family-base:        @font-family-sans-serif;
 
-@font-size-base:          16px;
+@font-size-base:          15px;
 @font-size-large:         ceil(@font-size-base * 1.25); // ~18px
 @font-size-small:         ceil(@font-size-base * 0.85); // ~12px
 
@@ -67,8 +67,8 @@
 // -------------------------
 // Based on 14px font-size and 1.428 line-height (~20px to start)
 
-@padding-base-vertical:          8px;
-@padding-base-horizontal:        12px;
+@padding-base-vertical:          4px;
+@padding-base-horizontal:        6px;
 
 @padding-large-vertical:         14px;
 @padding-large-horizontal:       16px;

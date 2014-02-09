@@ -158,14 +158,9 @@ header {
 	height:@header-height;
 	background:@header-bg;
 
-	.box-shadow( 0 2px 4px 0 fade(#2E2D2A, 20%) );
+	.box-shadow( 0 2px 1px 1px fade(#2E2D2A, 10%) );
 	.transition(@open-speed);
 	.opacity(100);
-
-	&.no-breadcrumb {
-		.opacity(0);
-		.translate(0, -100px);
-	}
 
 
 	h1 {
@@ -201,22 +196,24 @@ header {
 
 	.topic-search {
 		border-left:#DDD solid 1px;
-		width:500px;
 		position:absolute;
 		top:0;
 		bottom:0;
-		padding-top:5px;
-		padding-left:5px;
+		padding-top:9px;
+		padding-left:9px;
 		left:250px;
+		right:200px;
 
-		.twitter-typeahead, .input-control, .input-group {
-			width:100%;
+		.twitter-typeahead, .input-control {
+			width:500px;
 			height: @header-height - 10px;
+			padding-top:0;
 		}
 
 		.btn {
-			height: @header-height - 10px;
-			margin-right:5px;
+			float:left;
+			height: @header-height - 17px;
+			margin-right:9px;
 		}
 
 		.form-control,  .tt-query {
@@ -226,6 +223,52 @@ header {
 
 }
 
+html body {
+
+	.twitter-typeahead {
+		.form-control();
+		padding:0;
+		border:0;
+		outline:0;
+
+		.tt-query, .tt-hint {
+			padding:8px 12px;
+			width:100%;
+			border:0;
+			background:transparent;
+			&[disabled] {
+				display:none;
+			}
+		}
+
+		.model {
+			font-size:90%;
+			color:fade(#000, 60);
+		}
+	}
+
+	.tt-hint {
+		color:@input-color-placeholder;
+	}
+
+	.tt-dropdown-menu {
+		width:100%;
+		color:#000;
+		.dropdown-menu();
+		.box-shadow(0 6px 12px 0 rgba(0, 0, 0, 0.176))
+	}
+
+	.tt-suggestion {
+
+		padding:3px 6px;
+
+		&.tt-is-under-cursor {
+			background-color: @link-color;
+			color:darken(@link-color, 60);
+		}
+	}
+
+}
 
 #content {
 	position:relative;
@@ -266,48 +309,6 @@ header {
 		margin-left:auto;
 		margin-right:auto;
 	}
-
-	.twitter-typeahead {
-		.form-control();
-		padding:0;
-
-		.tt-query, .tt-hint {
-			padding:8px 12px;
-			width:100%;
-			border:0;
-			background:transparent;
-			&[disabled] {
-				display:none;
-			}
-		}
-
-		.model {
-			font-size:90%;
-			color:fade(#000, 60);
-		}
-	}
-
-	.tt-hint {
-		color:@input-color-placeholder;
-	}
-
-	.tt-dropdown-menu {
-		width:100%;
-		color:#000;
-		.dropdown-menu();
-		.box-shadow(0 6px 12px 0 rgba(0, 0, 0, 0.176))
-	}
-
-	.tt-suggestion {
-
-		padding:3px 6px;
-
-		&.tt-is-under-cursor {
-			background-color: @link-color;
-			color:darken(@link-color, 60);
-		}
-	}
-
 	.triggered-events {
 		float: right;
 		width: 500px;
@@ -713,8 +714,13 @@ header {
 
 #energy {
 
-	.banner .bg {
-		.opacity(0.7);
+	.banner {
+		background:black;
+		color:white;
+
+		.bg {
+			.opacity(0.7);
+		}
 	}
 
 	.intro {
@@ -762,6 +768,7 @@ footer {
 
 	.links {
 		@bg:lighten(@body-bg, 5);
+		@color:contrast(@bg);
 		background:@bg;
 
 		ul, li {
@@ -779,11 +786,11 @@ footer {
 				height:70px;
 				line-height:70px;
 				border-left:1px @body-bg solid;
-				color:mix(@link-color, @bg);
+				color:mix(@link-color, @color);
 				.transition(0.7s);
 
 				&:hover {
-					background:lighten(@bg, 5);
+					background:mix( lighten(@link-color, 5), @bg);
 				}
 
 			}

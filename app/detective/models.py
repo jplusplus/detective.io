@@ -134,11 +134,18 @@ class Topic(models.Model):
 
 
     def get_absolute_path(self):
-        return "/%s/" % self.slug
+        if self.author is None:
+            return None
+        else:
+            return "/%s/%s/" % (self.author.username, self.slug,)
 
     def link(self):
         path = self.get_absolute_path()
-        return '<a href="%s">%s</a>' % (path, path, )
+        if path is None:
+            return ''
+        else:
+            return '<a href="%s">%s</a>' % (path, path, )
+
     link.allow_tags = True
 
 

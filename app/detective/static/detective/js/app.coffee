@@ -68,40 +68,40 @@ detective = angular
                     .when('/page',    redirectTo: '/')
                     .when('/account', redirectTo: '/')
                     .when('/common/contribute', redirectTo: '/')
-                    .when('/:topic/p/', redirectTo: '/:topic/')
-                    .when('/:topic/search', {
+                    .when('/:user/:topic/p/', redirectTo: '/:user/:topic/')
+                    .when('/:user/:topic/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"
                     })
-                    .when('/:topic/p/:slug',
+                    .when('/:user/:topic/p/:slug',
                         controller: ArticleCtrl
                         templateUrl: "/partial/article.html"
                     )
-                    .when('/:topic/contribute', {
+                    .when('/:user/:topic/contribute', {
                         controller: ContributeCtrl
                         templateUrl: "/partial/contribute.html"
                         auth: true
                     })
-                    .when('/:topic/contribute/upload', {
+                    .when('/:user/:topic/contribute/upload', {
                         controller: BulkUploadCtrl
                         templateUrl: "/partial/bulk-upload.html"
                     })
-                    .when('/:topic', {
+                    .when('/:user/:topic', {
                         controller: ExploreCtrl
                         # Allow a dynamic loading by setting the templateUrl within controller
                         template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
                     })
-                    .when('/:topic/:type', {
+                    .when('/:user/:topic/:type', {
                         controller: IndividualListCtrl
                         templateUrl: "/partial/individual-list.html"
                         reloadOnSearch: false
                     })
-                    .when('/:topic/:type/:id', {
+                    .when('/:user/:topic/:type/:id', {
                         controller: IndividualSingleCtrl
                         templateUrl: "/partial/individual-single.html"
                         reloadOnSearch: false
                     })
-                    .when('/:topic/:type/:id/graph', {
+                    .when('/:user/:topic/:type/:id/graph', {
                         controller: IndividualGraphCtrl
                         templateUrl: "/partial/individual-graph.html"
                         reloadOnSearch: false

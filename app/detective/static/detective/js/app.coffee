@@ -8,9 +8,9 @@ detective = angular
             'Page',
             ($rootScope, $location, user, Page)->
                 # Location available within templates
-                $rootScope.location = $location;
-                $rootScope.user     = user
-                $rootScope.Page     = Page
+                $rootScope.location  = $location;
+                $rootScope.user      = user
+                $rootScope.Page      = Page
         ]
     )
     .config(
@@ -67,44 +67,52 @@ detective = angular
                     .when('/common',  redirectTo: '/')
                     .when('/page',    redirectTo: '/')
                     .when('/account', redirectTo: '/')
-                    .when('/common/contribute', redirectTo: '/')
-                    .when('/:topic/p/', redirectTo: '/:topic/')
-                    .when('/:topic/search', {
+                    .when('/:username/common/contribute', redirectTo: '/')
+                    .when('/:username/:topic/p/', redirectTo: '/:username/:topic/')
+                    .when('/:username', {
+                        controller: ProfileCtrl
+                        templateUrl: "/partial/profile.html"
+                        resolve: UserCtrl.resolve
+                    })
+                    .when('/:username/:topic/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"
+                        resolve: UserTopicCtrl.resolve
                     })
-                    .when('/:topic/p/:slug',
+                    .when('/:username/:topic/p/:slug',
                         controller: ArticleCtrl
                         templateUrl: "/partial/article.html"
+                        resolve: UserTopicCtrl.resolve
                     )
-                    .when('/:topic/contribute', {
+                    .when('/:username/:topic/contribute', {
                         controller: ContributeCtrl
                         templateUrl: "/partial/contribute.html"
+                        resolve: UserTopicCtrl.resolve
                         auth: true
                     })
-                    .when('/:topic/contribute/upload', {
+                    .when('/:username/:topic/contribute/upload', {
                         controller: BulkUploadCtrl
                         templateUrl: "/partial/bulk-upload.html"
+                        resolve: UserTopicCtrl.resolve
+                        auth: true
                     })
-                    .when('/:topic', {
+                    .when('/:username/:topic', {
                         controller: ExploreCtrl
                         # Allow a dynamic loading by setting the templateUrl within controller
                         template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+                        resolve: UserTopicCtrl.resolve
                     })
-                    .when('/:topic/:type', {
+                    .when('/:username/:topic/:type', {
                         controller: IndividualListCtrl
                         templateUrl: "/partial/individual-list.html"
                         reloadOnSearch: false
+                        resolve: UserTopicCtrl.resolve
                     })
-                    .when('/:topic/:type/:id', {
+                    .when('/:username/:topic/:type/:id', {
                         controller: IndividualSingleCtrl
                         templateUrl: "/partial/individual-single.html"
                         reloadOnSearch: false
-                    })
-                    .when('/:topic/:type/:id/graph', {
-                        controller: IndividualGraphCtrl
-                        templateUrl: "/partial/individual-graph.html"
-                        reloadOnSearch: false
+                        resolve: UserTopicCtrl.resolve
                     })
                     .otherwise redirectTo: '/404'
         ]

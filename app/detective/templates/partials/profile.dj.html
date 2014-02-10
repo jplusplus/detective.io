@@ -1,0 +1,21 @@
+<div class="container">
+    <h2 class="container">[[user.username]]'s open topics</h2>
+    <div class="boxes">
+        <div class="col-sm-4" ng-repeat="topic in userTopics">
+            <div class="box">
+                <div class="fg">
+                    <h3>
+                        <a ng-href="[[topic.link]]">
+                            [[topic.title]]
+                        </a>
+                    </h3>
+                    <a ng-href="[[topic.link]]" class="label label-primary">
+                        Discover now
+                        <i class="fa fa-arrow-right left05"></i>
+                    </a>
+                </div>
+                <img ng-src="[[topic.background]]" width="100%" class="bg" />
+            </div>
+        </div>
+    </div>
+</div>

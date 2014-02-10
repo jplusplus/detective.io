@@ -9,7 +9,7 @@
                 <h2>[[meta.title]]</h2>
                 <p class="lead" ng-if="meta.description" ng-bind-html="meta.description"></p>
                 <p class="top40">
-                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(topic) || true" ng-href="/[[topic]]/contribute">
+                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(topic) || true" ng-href="/[[username]]/[[topic]]/contribute">
                         Contribute
                     </a>
                     <a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">
@@ -47,7 +47,7 @@
                         <span ng-repeat="form in filtered = ( forms | filter:isSearchable )">
                             <span ng-if="$last && !$first"> and </span>
                             <span ng-if="!$last && !$first">, </span>
-                            <a ng-href="/[[topic]]/[[form.name]]" ng-init="count = getTypeCount(form.name)">
+                            <a ng-href="/[[username]]/[[topic]]/[[form.name]]" ng-init="count = getTypeCount(form.name)">
                                 <strong>[[count]]</strong>
                                 <span ng-if="count <= 1">[[form.verbose_name|lowercase]]</span>
                                 <span ng-if="count > 1">[[form.verbose_name_plural|lowercase]]</span>

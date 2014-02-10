@@ -76,7 +76,7 @@ def import_or_create(path, register=True, force=False):
     try:
         # For the new module to be written
         if force:
-            del( sys.modules[path] )
+            if path in sys.modules: del( sys.modules[path] )
             raise ImportError
         # Import the models.py file
         module = importlib.import_module(path)

@@ -161,6 +161,11 @@ HashMerge = (a, b) ->
             do (svg.selectAll 'defs').remove
             defs = svg.insert 'svg:defs', 'path'
 
+            # Sort by weight (DESC) to know which node should should always display its name
+            nodes = _.sortBy nodes, (elem) -> -elem.weight
+            for i in [0..(Math.min nodes.length, 3)]
+                nodes[i]._displayName = yes
+
             (((defs.append 'marker').attr
                 id : 'marker-end'
                 viewBox : "0 -5 10 10"
@@ -213,7 +218,10 @@ HashMerge = (a, b) ->
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id
             (do the_names.enter).append('svg:text').attr
                     d : nodeUpdate
-                    class : 'name'
+                    class : (d) -> [
+                        'name'
+                        if not d._displayName then 'toggle-display' else ''
+                    ].join ' '
                 .text (d) -> d.name
             do (do the_names.exit).remove
             null

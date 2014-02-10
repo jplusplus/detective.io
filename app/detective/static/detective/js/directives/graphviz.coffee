@@ -105,6 +105,19 @@ HashMerge = (a, b) ->
                     scope.data.links = HashMerge scope.data.links, d.links
                     do update
 
+        cleanWeightZero = (nodes, links) =>
+            notlinked = -1
+            while notlinked isnt 0
+                notlinked = 0
+                do ((graph.nodes nodes).links links).start
+
+                _.map nodes, (node, i) ->
+                    if node.weight is 0
+                        nodes.splice i, 1
+                        ++notlinked
+
+                do ((graph.nodes nodes).links links).start
+
         update = =>
             return if not scope.data.nodes?
 
@@ -142,16 +155,7 @@ HashMerge = (a, b) ->
                             _type : '_AGGREGATION_'
                 null
 
-            notlinked = -1
-            while notlinked isnt 0
-                notlinked = 0
-                do ((graph.nodes nodes).links links).start
-
-                _.map nodes, (node, i) ->
-                    if node.weight is 0
-                        nodes.splice i, 1
-                        ++notlinked
-                do ((graph.nodes nodes).links links).start
+            cleanWeightZero nodes, links
 
             do (svg.selectAll 'defs').remove
             defs = svg.insert 'svg:defs', 'path'

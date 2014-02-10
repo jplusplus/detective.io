@@ -11,7 +11,15 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     """
     Create specified model
     """
-    from neo4django.db import models
+    from neo4django.db            import models
+    from django.db.models.loading import AppCache
+    # Django use a cache by model
+    cache = AppCache()
+    # If we already create a model for this app
+    if app_label in cache.app_models and name.lower() in cache.app_models[app_label]:
+        # We just delete it quietly
+        del cache.app_models[app_label][name.lower()]
+
     class Meta:
         # Using type('Meta', ...) gives a dictproxy error during model creation
         pass
@@ -25,10 +33,10 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     # Set up a dictionary to simulate declarations within a class
     attrs = {'__module__': module, 'Meta': Meta}
     # Add in any fields that were provided
-    if fields:
-        attrs.update(fields)
+    if fields: attrs.update(fields)
     # Create the class, which automatically triggers ModelBase processing
-    return type(name, (models.NodeModel,), attrs)
+    cls = type(name, (models.NodeModel,), attrs)
+    return cls
 
 def create_model_resource(model, path=None, Resource=None, Meta=None):
     """
@@ -116,46 +124,46 @@ def get_registered_models():
 def get_model_fields(model):
     from app.detective           import register
     from django.db.models.fields import FieldDoesNotExist
-    fields      = []
-    modelsRules = register.topics_rules().model(model)
-    if hasattr(model, "_meta"):
-        # Create field object
-        for fieldRules in modelsRules.fields():
-            try:
-                f = model._meta.get_field(fieldRules.name)
-            except FieldDoesNotExist:
-                # This is rule field. Ignore it!
-                continue
-            # Ignores field terminating by + or begining by _
-            if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):
-                # Find related model for relation
-                if hasattr(f, "target_model"):
-                    # We received a model as a string
-                    if type(f.target_model) is str:
-                        # Extract parts of the module path
-                        module_path  = f.target_model.split(".")
-                        # Import models as a module
-                        module       = __import__( ".".join(module_path[0:-1]), fromlist=["class"])
-                        # Import the target_model from the models module
-                        target_model = getattr(module, module_path[-1], {__name__: None})
-                    else:
-                        target_model  = f.target_model
-                    related_model = target_model.__name__
+    fields       = []
+    models_rules = register.topics_rules().model(model)
+    # Create field object
+    for f in model._meta.fields:
+        # Ignores field terminating by + or begining by _
+        if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):
+            # Find related model for relation
+            if f.get_internal_type() == "relationship":
+                # We received a model as a string
+                if type(f.target_model) is str:
+                    # Extract parts of the module path
+                    module_path  = f.target_model.split(".")
+                    # Import models as a module
+                    module       = __import__( ".".join(module_path[0:-1]), fromlist=["class"])
+                    # Import the target_model from the models module
+                    target_model = getattr(module, module_path[-1], {__name__: None})
                 else:
-                    related_model = None
+                    target_model  = f.target_model
+                related_model = target_model.__name__
+            else:
+                related_model = None
 
-                field = {
-                    'name'         : f.name,
-                    'type'         : f.get_internal_type(),
-                    'rel_type'     : getattr(f, "rel_type", ""),
-                    'help_text'    : getattr(f, "help_text", ""),
-                    'verbose_name' : getattr(f, "verbose_name", pretty_name(f.name)),
-                    'related_model': related_model,
-                    'model'        : model.__name__,
-                    'rules'        : fieldRules.all()
-                }
+            try:
+                # Get the rules related to this model
+                field_rules = models_rules.field(f.name).all()
+            except FieldDoesNotExist:
+                # No rules
+                field_rules = []
 
-                fields.append(field)
+            field = {
+                'name'         : f.name,
+                'type'         : f.get_internal_type(),
+                'rel_type'     : getattr(f, "rel_type", ""),
+                'help_text'    : getattr(f, "help_text", ""),
+                'verbose_name' : getattr(f, "verbose_name", pretty_name(f.name)),
+                'related_model': related_model,
+                'model'        : model.__name__,
+                'rules'        : field_rules
+            }
+            fields.append(field)
 
     return fields
 

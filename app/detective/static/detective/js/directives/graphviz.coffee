@@ -30,6 +30,7 @@ HashMerge = (a, b) ->
         svg = ((d3.select element[0]).append 'svg').attr
             width : size[0]
             height : size[1]
+        defs = svg.insert 'svg:defs', 'path'
 
         graph = (((do d3.layout.force).size size).linkDistance 60).charge -300
 
@@ -91,9 +92,7 @@ HashMerge = (a, b) ->
                 scope.data.links[d._parent]['test'] = scope.data.links[d._parent]['test'] or []
                 for i in [0..9]
                     tmp_node = scope.data.links[d._parent]['_AGGREGATION_'].shift()
-                    console.debug tmp_node
-                    if not tmp_node?
-                        break
+                    break if not tmp_node?
                     scope.data.links[d._parent]['test'].push tmp_node
                 delete scope.data.links[d._parent]['_AGGREGATION_'] if scope.data.links[d._parent]['_AGGREGATION_'].length is 0
                 do update
@@ -107,39 +106,7 @@ HashMerge = (a, b) ->
                     scope.data.links = HashMerge scope.data.links, d.links
                     do update
 
-        update = =>
-            return if not scope.data.nodes?
-
-            # Extract nodes and links from data
-            nodes = (node for id, node of scope.data.nodes)
-            links = []
-
-            aggregation = 1
-
-            _.map (_.pairs scope.data.links), ([source_id, relations]) ->
-                _.map (_.pairs relations), ([relation, targets]) ->
-                    if relation isnt '_AGGREGATION_'
-                        _.map targets, (target_id) ->
-                            if scope.data.nodes[source_id]? and scope.data.nodes[target_id]?
-                                links.push
-                                    source : scope.data.nodes[source_id]
-                                    target : scope.data.nodes[target_id]
-                                    _type : relation
-                            null
-                    else
-                        if scope.data.nodes[source_id]?
-                            nodes.push
-                                _id : -(aggregation++)
-                                _type : '_AGGREGATION_'
-                                _parent : source_id
-                                name : "#{targets.length} entities"
-                            links.push
-                                source : scope.data.nodes[source_id]
-                                target : nodes[nodes.length - 1]
-                                _type : relation
-                    null
-                null
-
+        cleanWeightZero = (nodes, links) =>
             notlinked = -1
             while notlinked isnt 0
                 notlinked = 0
@@ -149,10 +116,53 @@ HashMerge = (a, b) ->
                     if node.weight is 0
                         nodes.splice i, 1
                         ++notlinked
+
                 do ((graph.nodes nodes).links links).start
 
-            do (svg.selectAll 'defs').remove
-            defs = svg.insert 'svg:defs', 'path'
+        update = =>
+            # It's useless to process if we do not have any data
+            return if not scope.data.nodes?
+
+            # Extract nodes and links from data
+            nodes = (node for id, node of scope.data.nodes)
+            links = []
+
+            aggregation = 1
+
+            _.map (_.pairs scope.data.links), ([source_id, relations]) ->
+                if scope.data.nodes[source_id]?
+                    hasAggreg = "_AGGREGATION_" in _.keys relations
+                    aggreg = relations['_AGGREGATION_']
+                    _.map (_.pairs relations), ([relation, targets]) ->
+                        if relation isnt '_AGGREGATION_'
+                            _.map targets, (target_id) ->
+                                if scope.data.nodes[target_id]?
+                                    links.push
+                                        source : scope.data.nodes[source_id]
+                                        target : scope.data.nodes[target_id]
+                                        _type : relation
+                                    if hasAggreg and (i = _.indexOf aggreg, target_id) >= 0
+                                        aggreg.splice i, 1
+                                null
+                        null
+                    if hasAggreg and aggreg.length
+                        nodes.push
+                            _id : -(aggregation++)
+                            _type : '_AGGREGATION_'
+                            _parent : source_id
+                            name : "#{aggreg.length} entities"
+                        links.push
+                            source : scope.data.nodes[source_id]
+                            target : nodes[nodes.length - 1]
+                            _type : '_AGGREGATION_'
+                null
+
+            cleanWeightZero nodes, links
+
+            # Sort by weight (DESC) to know which node should should always display its name
+            nodes = _.sortBy nodes, (elem) -> -elem.weight
+            for i in [0..(Math.min nodes.length, 3)]
+                nodes[i]._displayName = yes
 
             (((defs.append 'marker').attr
                 id : 'marker-end'
@@ -170,6 +180,7 @@ HashMerge = (a, b) ->
                     class : 'link'
                     d : linkUpdate
                     'marker-end' : 'url(' + absUrl + '#marker-end)'
+                    stroke : (d) -> ($filter "strToColor") d._type
             # Remove old links
             do (do the_links.exit).remove
 
@@ -185,13 +196,13 @@ HashMerge = (a, b) ->
                             return 'url(' + absUrl + '#pattern' + d._id + ')'
                         ($filter "strToColor") d._type
                     stroke : (d) -> ($filter "strToColor") d._type
-                .call(graph.drag)
                 .each (d) ->
                     (createPattern d, defs) if d.image?
                     null
             # Remove old nodes
             do (do the_nodes.exit).remove
 
+            # Define action handlers
             the_nodes.on 'dblclick', deleteNode
             the_nodes.on 'click', (d) ->
                 if not d._timer?
@@ -205,7 +216,10 @@ HashMerge = (a, b) ->
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id
             (do the_names.enter).append('svg:text').attr
                     d : nodeUpdate
-                    class : 'name'
+                    class : (d) -> [
+                        'name'
+                        if not d._displayName then 'toggle-display' else ''
+                    ].join ' '
                 .text (d) -> d.name
             do (do the_names.exit).remove
             null

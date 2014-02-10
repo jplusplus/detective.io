@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import DataMigration
-from django.db import models
+from south.v2    import DataMigration
+import json
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        from django.core.management import call_command
-        call_command("loaddata", "app/detective/fixtures/search_terms.json")
+        json_data=open("app/detective/fixtures/search_terms.json")
+        search_terms = json.load(json_data)
+        for st in search_terms:
+            st["fields"]["topic"] = orm["detective.topic"].objects.get(id=st["fields"]["topic"])
+            obj = orm["detective.searchterm"](**st["fields"])
+            obj.save()
+        json_data.close()
 
     def backwards(self, orm):
         "Write your backwards methods here."
 
+    no_dry_run = True
     models = {
         u'detective.article': {
             'Meta': {'object_name': 'Article'},

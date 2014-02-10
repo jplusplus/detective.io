@@ -42,7 +42,7 @@
                                     id="input-search" />
                         </div>
                     </form>
-                    <div class="col-md-8 col-md-push-2 lead top20">
+                    <div class="col-md-8 col-md-push-2 lead top20" ng-if="types">
                         Navigate through
                         <span ng-repeat="form in filtered = ( forms | filter:isSearchable )">
                             <span ng-if="$last && !$first"> and </span>

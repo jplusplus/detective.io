@@ -4,11 +4,11 @@ from app.detective.permissions import create_permissions, remove_permissions
 from django.core.exceptions    import ValidationError
 from django.db                 import models
 from tinymce.models            import HTMLField
+
 import inspect
 import os
 import random
 import string
-
 
 PUBLIC = (
     (True, "Yes, public"),
@@ -109,10 +109,20 @@ class Topic(models.Model):
     def save(self, *args, **kwargs):
         # Ensure that the module field is populated with app_label()
         self.module = self.app_label()
+        # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
+        # Refresh the API
+        self.reload()
+
+    def reload(self):
+        from app.detective.register import topic_models
+        # Register the topic's models again
+        topic_models(self.get_module().__name__, force=True)
 
     def has_default_ontology(self):
-        module = self.get_module()
+        try:
+            module = self.get_module()
+        except ValueError: return False
         # File if it's a virtual module
         if not hasattr(module, "__file__"): return False
         directory = os.path.dirname(os.path.realpath( module.__file__ ))
@@ -153,13 +163,15 @@ class Article(models.Model):
 # This model aims to describe a research alongside a relationship.
 class SearchTerm(models.Model):
     # This field is deduced from the relationship name
-    subject = models.CharField(null=True, blank=True, default='', editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    subject    = models.CharField(null=True, blank=True, default='', editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    # This field is set automaticly too according the choosen name
+    is_literal = models.BooleanField(editable=False, default=False)
     # Every field are required
-    label   = models.CharField(null=True, blank=True, default='', max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
+    label      = models.CharField(null=True, blank=True, default='', max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
     # This field will be re-written by app.detective.admin
     # to be allow dynamic setting of the choices attribute.
-    name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
-    topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
+    name       = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
+    topic      = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
 
     def find_subject(self):
         subject = None
@@ -170,7 +182,8 @@ class SearchTerm(models.Model):
         return subject
 
     def clean(self):
-        self.subject = self.find_subject()
+        self.subject    = self.find_subject()
+        self.is_literal = self.type == "literal"
         models.Model.clean(self)
 
     @property
@@ -207,11 +220,8 @@ def update_permissions(*args, **kwargs):
     assert kwargs.get('instance')
     # @TODO check that the slug changed or not to avoid permissions hijacking
     if kwargs.get('created', False):
-        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').slug)
+        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').module)
 
-# Disable permissions creations to avoid a bug
-# @see https://github.com/jplusplus/detective.io/issues/145
-# signals.post_delete.connect(remove_permissions, sender=Topic)
-# signals.post_save.connect(update_permissions, sender=Topic)
-
+signals.post_delete.connect(remove_permissions, sender=Topic)
+signals.post_save.connect(update_permissions, sender=Topic)
 # EOF

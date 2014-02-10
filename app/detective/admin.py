@@ -14,7 +14,7 @@ admin.site.register(QuoteRequest, QuoteRequestAdmin)
 # Display relationship admin panel only on debug mode
 if settings.DEBUG:
     class SearchTermAdmin(admin.ModelAdmin):
-        list_display  = ("name", "label", "subject", "topic", "type",)
+        list_display  = ("name", "label", "subject", "topic", "is_literal",)
     admin.site.register(SearchTerm, SearchTermAdmin)
 
 

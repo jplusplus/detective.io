@@ -79,7 +79,7 @@ class TopicAdmin(admin.ModelAdmin):
     list_display        = ("title", "link", "public", )
     fieldsets = (
         (None, {
-            'fields':  ( ('title', 'slug',), 'ontology', 'module', 'public')
+            'fields':  ( ('title', 'slug',), 'ontology', 'module', ('public', 'author'))
         }),
         ('Advanced options', {
             'classes': ('collapse',),

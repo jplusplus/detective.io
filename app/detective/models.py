@@ -1,9 +1,10 @@
-from .utils                    import get_topics
-from app.detective             import utils
-from app.detective.permissions import create_permissions, remove_permissions
-from django.core.exceptions    import ValidationError
-from django.db                 import models
-from tinymce.models            import HTMLField
+from .utils                     import get_topics
+from app.detective              import utils
+from app.detective.permissions  import create_permissions, remove_permissions
+from django.core.exceptions     import ValidationError
+from django.db                  import models
+from django.contrib.auth.models import User
+from tinymce.models             import HTMLField
 
 import inspect
 import os
@@ -53,6 +54,7 @@ class Topic(models.Model):
     public      = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
     ontology    = models.FileField(null=True, blank=True, upload_to="ontologies", help_text="Ontology file that descibes your field of study.")
     background  = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
+    author      = models.ForeignKey(User, help_text="Author of this topic.", null=True)
 
     def __unicode__(self):
         return self.title

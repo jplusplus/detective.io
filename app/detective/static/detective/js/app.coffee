@@ -8,9 +8,9 @@ detective = angular
             'Page',
             ($rootScope, $location, user, Page)->
                 # Location available within templates
-                $rootScope.location = $location;
-                $rootScope.user     = user
-                $rootScope.Page     = Page
+                $rootScope.location  = $location;
+                $rootScope.user      = user
+                $rootScope.Page      = Page
         ]
     )
     .config(
@@ -99,11 +99,6 @@ detective = angular
                     .when('/:topic/:type/:id', {
                         controller: IndividualSingleCtrl
                         templateUrl: "/partial/individual-single.html"
-                        reloadOnSearch: false
-                    })
-                    .when('/:topic/:type/:id/graph', {
-                        controller: IndividualGraphCtrl
-                        templateUrl: "/partial/individual-graph.html"
                         reloadOnSearch: false
                     })
                     .otherwise redirectTo: '/404'

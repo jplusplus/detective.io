@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class
+from app.detective.utils                import import_class, to_underscores, get_model_topic
 from django.conf.urls                   import url
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
@@ -483,7 +483,7 @@ class IndividualResource(ModelResource):
         self.throttle_check(request)
 
         depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
-        aggregation_threshold = 2
+        aggregation_threshold = 10
 
         def reduce_result(rows):
             # Initialize structures
@@ -492,42 +492,18 @@ class IndividualResource(ModelResource):
             # We want to build a structure of the form:
             # { source_id : { relation_name : [ target_ids ] } }
             # Must use a set() instead of list() to avoid checking duplicates but it screw up json.dumps()
-            all_links = defaultdict(lambda: defaultdict(list))
-            IDs = set()
+            all_links = defaultdict(lambda: dict(__count=0, __relations=defaultdict(list)))
+            IDs = set(sum([row['nodes'] for row in rows], []))
 
-            for row in rows:
-                nodes = row['nodes']
-                i = 0
-                for relation in row['relations']:
-                    # If link is <<INSTANCE>>, then we're over
-                    if relation == '<<INSTANCE>>':
-                        break
-
-                    if not nodes[i + 1] in all_links[nodes[i]][relation]:
-                        links_len = len(all_links[nodes[i]][relation])
-                        if links_len < aggregation_threshold:
-                            all_links[nodes[i]][relation].append(nodes[i + 1])
-
-                            # Push IDs if not already in
-                            for node in [nodes[i], nodes[i + 1]]:
-                                IDs.add(node)
-                        else:
-                            if links_len == aggregation_threshold:
-                                all_links[nodes[i]][relation].append([nodes[i + 1]])
-                            else:
-                                if not nodes[i + 1] in all_links[nodes[i]][relation][-1]:
-                                    all_links[nodes[i]][relation][-1].append(nodes[i + 1])
-
-                    i += 1
-
-            # Finally get all entities from their IDs
+            # Get all entities from their IDs
             query = """
                 START root = node({0})
                 MATCH (root)-[:`<<INSTANCE>>`]-(type)
+                WHERE type.app_label = '{1}'
                 RETURN ID(root) as ID, root, type
-            """.format(','.join([str(ID) for ID in IDs]))
-            rows = connection.cypher(query).to_dicts()
-            for row in rows:
+            """.format(','.join([str(ID) for ID in IDs]), get_model_topic(self.get_model()))
+            all_raw_nodes = connection.cypher(query).to_dicts()
+            for row in all_raw_nodes:
                 # Twist some data in the entity
                 for key in row['root']['data'].keys():
                     if key[0] == '_': del row['root']['data'][key]
@@ -536,12 +512,50 @@ class IndividualResource(ModelResource):
 
                 all_nodes[row['ID']] = row['root']['data']
 
+            for row in rows:
+                nodes = row['nodes']
+                i = 0
+                for relation in row['relations']:
+                    try:
+                        if all_nodes[nodes[i]] is None or all_nodes[nodes[i + 1]] is None: continue
+                        (a, b) = (nodes[i], nodes[i + 1])
+                        if re.search('^'+to_underscores(all_nodes[nodes[i]]['_type']), relation) is None:
+                            (a, b) = (nodes[i + 1], nodes[i])
+                        if not b in all_links[a]['__relations'][relation]:
+                            all_links[a]['__count'] += 1
+                            all_links[a]['__relations'][relation].append(b)
+                    except KeyError: pass
+                    i += 1
+
+            # Sort and aggregate nodes when we're over the threshold
+            for node in all_links.keys():
+                shortcut = all_links[node]['__relations']
+                if all_links[node]['__count'] >= aggregation_threshold:
+                    sorted_relations = sorted([(len(shortcut[rel]), rel) for rel in shortcut],
+                                              key=lambda to_sort: to_sort[0])
+                    shortcut = defaultdict(list)
+                    i = 0
+                    while i < aggregation_threshold:
+                        for rel in sorted_relations:
+                            try:
+                                node_id = all_links[node]['__relations'][rel[1]].pop()
+                                shortcut[rel[1]].append(node_id)
+                                i += 1
+                            except IndexError:
+                                # Must except IndexError if we .pop() on an empty list
+                                pass
+                            if i >= aggregation_threshold: break
+                    shortcut['_AGGREGATION_'] = sum(all_links[node]['__relations'].values(), [])
+                all_links[node] = shortcut
+
             return (all_nodes, all_links)
 
         query = """
             START root=node({0})
             MATCH path = (root)-[*1..{1}]-(leaf)
-            RETURN extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|ID(n)) as nodes
+            WITH extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|ID(n)) as nodes
+            WHERE ALL(rel  in relations WHERE rel <> "<<INSTANCE>>")
+            RETURN relations, nodes
         """.format(kwargs['pk'], depth)
         rows = connection.cypher(query).to_dicts()
 
@@ -549,3 +563,12 @@ class IndividualResource(ModelResource):
 
         self.log_throttled_access(request)
         return self.create_response(request, {'nodes':nodes,'links':links})
+
+'''
+START root=node(273)
+MATCH path = (root)-[*1..2]-(leaf)
+WITH extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|n) as nodes
+WHERE ALL(rel  in relations WHERE rel <> "<<INSTANCE>>")
+AND   ALL(node in nodes     WHERE (node)<-[:`<<INSTANCE>>`]-({ app_label : 'energy' }))
+RETURN nodes, relations
+'''

@@ -79,11 +79,7 @@ body {
 	}
 
 	.bg-light {
-		background:contrast(@header-bg);
-		color:@header-bg;
-		a {
-			color:mix(contrast(@brand-secondary), @header-bg);
-		}
+		background:#fff;
 	}
 
 
@@ -530,6 +526,18 @@ html body {
 			position:relative;
 			z-index:10;
 		}
+
+		.network {
+			position:absolute;
+			top:-60px;
+			bottom:-60px;
+			right:10px;
+			left:20%;
+			div {
+				height:100%;
+				width:100%;
+			}
+		}
 	}
 
 
@@ -717,11 +725,6 @@ html body {
   		z-index:10;
 	}
 
-	.detective-preview {
-		height:350px;
-		overflow: hidden;
-	}
-
 
 	.stack-stripe {
 		position:relative;
@@ -872,6 +875,7 @@ svg {
 	}
 
 	.name {
+		fill:white;
 		font: 10px sans-serif;
 		pointer-events: none;
 		text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;

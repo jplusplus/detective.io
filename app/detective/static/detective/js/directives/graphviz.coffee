@@ -23,9 +23,13 @@ HashMerge = (a, b) ->
         data : '='
         topic : '='
     link: (scope, element, attr)->
-        size = [ element.width(), element.width()*0.8 ]
-        node_size = 6
-        absUrl = do $location.absUrl
+        size       = [ element.width(), element.height() ]
+        node_size  = 6
+        absUrl     = do $location.absUrl
+        # Colors
+        fadedWhite = "rgba(255,255,255,0.7)"
+        fadedBlack = "rgba(0,0,0,0.2)"
+        white      = "#fff"
 
         svg = ((d3.select element[0]).append 'svg').attr
             width : size[0]
@@ -61,9 +65,9 @@ HashMerge = (a, b) ->
             (pattern.append 'svg:rect').attr
                 x : 0
                 y : 0
-                width : _node_size * 2
+                width  : _node_size * 2
                 height : _node_size * 2
-                fill : '#999'
+                fill   : fadedWhite
             image = pattern.append 'svg:image'
             image.attr
                 'xlink:href' : d.image
@@ -171,6 +175,7 @@ HashMerge = (a, b) ->
                 refY : -1.5
                 markerWidth : node_size
                 markerHeight : node_size
+                fill: fadedWhite
                 orient : "auto").append 'path').attr 'd', "M0,-5L10,0L0,5"
 
             # Create all new links
@@ -180,7 +185,7 @@ HashMerge = (a, b) ->
                     class : 'link'
                     d : linkUpdate
                     'marker-end' : 'url(' + absUrl + '#marker-end)'
-                    stroke : (d) -> ($filter "strToColor") d._type
+                    stroke : (d) -> fadedWhite # ($filter "strToColor") d._type
             # Remove old links
             do (do the_links.exit).remove
 
@@ -195,7 +200,7 @@ HashMerge = (a, b) ->
                         if d.image?
                             return 'url(' + absUrl + '#pattern' + d._id + ')'
                         ($filter "strToColor") d._type
-                    stroke : (d) -> ($filter "strToColor") d._type
+                    stroke : (d) -> fadedWhite # ($filter "strToColor") d._type
                 .each (d) ->
                     (createPattern d, defs) if d.image?
                     null

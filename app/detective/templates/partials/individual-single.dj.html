@@ -4,10 +4,15 @@
 
 		<div class="container">
 			<div class="pull-left">
-				<div color-tag ref="type" />
+				<div class="pull-left">
+					<div color-tag ref="type" />
+				</div>
+				<h2 class="bottom0 top0 left60">[[individual|individualPreview]]</h2>
+				<p class="lead text-muted left60">[[meta.verbose_name]]</p>
 			</div>
-			<h2 class="bottom0 top0 left60">[[individual|individualPreview]]</h2>
-			<p class="lead text-muted left60">[[meta.verbose_name]]</p>
+			<div ng-show="hasRels()" class="network">
+				<graphviz data="graphnodes" topic="topic"></graphviz>
+			</div>
 		</div>
 
 	</div>
@@ -41,13 +46,6 @@
 							XML
 						</a>
 					</span>
-				</div>
-
-				<div ng-show="hasRels()">
-					<h3>Network</h3>
-					<div class="well padding10">
-						<graphviz data="graphnodes" topic="topic"></graphviz>
-					</div>
 				</div>
 
 				<div ng-show="hasRels()">

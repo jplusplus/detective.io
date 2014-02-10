@@ -91,9 +91,7 @@ HashMerge = (a, b) ->
                 scope.data.links[d._parent]['test'] = scope.data.links[d._parent]['test'] or []
                 for i in [0..9]
                     tmp_node = scope.data.links[d._parent]['_AGGREGATION_'].shift()
-                    console.debug tmp_node
-                    if not tmp_node?
-                        break
+                    break if not tmp_node?
                     scope.data.links[d._parent]['test'].push tmp_node
                 delete scope.data.links[d._parent]['_AGGREGATION_'] if scope.data.links[d._parent]['_AGGREGATION_'].length is 0
                 do update
@@ -117,27 +115,31 @@ HashMerge = (a, b) ->
             aggregation = 1
 
             _.map (_.pairs scope.data.links), ([source_id, relations]) ->
-                _.map (_.pairs relations), ([relation, targets]) ->
-                    if relation isnt '_AGGREGATION_'
-                        _.map targets, (target_id) ->
-                            if scope.data.nodes[source_id]? and scope.data.nodes[target_id]?
-                                links.push
-                                    source : scope.data.nodes[source_id]
-                                    target : scope.data.nodes[target_id]
-                                    _type : relation
-                            null
-                    else
-                        if scope.data.nodes[source_id]?
-                            nodes.push
-                                _id : -(aggregation++)
-                                _type : '_AGGREGATION_'
-                                _parent : source_id
-                                name : "#{targets.length} entities"
-                            links.push
-                                source : scope.data.nodes[source_id]
-                                target : nodes[nodes.length - 1]
-                                _type : relation
-                    null
+                if scope.data.nodes[source_id]?
+                    hasAggreg = "_AGGREGATION_" in _.keys relations
+                    aggreg = relations['_AGGREGATION_']
+                    _.map (_.pairs relations), ([relation, targets]) ->
+                        if relation isnt '_AGGREGATION_'
+                            _.map targets, (target_id) ->
+                                if scope.data.nodes[target_id]?
+                                    links.push
+                                        source : scope.data.nodes[source_id]
+                                        target : scope.data.nodes[target_id]
+                                        _type : relation
+                                    if hasAggreg and (i = _.indexOf aggreg, target_id) >= 0
+                                        aggreg.splice i, 1
+                                null
+                        null
+                    if hasAggreg and aggreg.length
+                        nodes.push
+                            _id : -(aggregation++)
+                            _type : '_AGGREGATION_'
+                            _parent : source_id
+                            name : "#{aggreg.length} entities"
+                        links.push
+                            source : scope.data.nodes[source_id]
+                            target : nodes[nodes.length - 1]
+                            _type : '_AGGREGATION_'
                 null
 
             notlinked = -1

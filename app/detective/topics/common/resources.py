@@ -43,6 +43,8 @@ class TopicResource(ModelResource):
         in_topic = lambda m: m.__module__.startswith("app.detective.topics.%s." % bundle.obj.module)
         # Filter model to the one under app.detective.topics
         bundle.data["models"] = [ m.__name__ for m in models if in_topic(m) ]
+        # Every topic has a single permalink
+        bundle.data['link']   = bundle.obj.get_absolute_path()
         return bundle
 
     def get_object_list(self, request):

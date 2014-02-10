@@ -69,6 +69,11 @@ detective = angular
                     .when('/account', redirectTo: '/')
                     .when('/common/contribute', redirectTo: '/')
                     .when('/:username/:topic/p/', redirectTo: '/:username/:topic/')
+                    .when('/:username', {
+                        controller: ProfileCtrl
+                        templateUrl: "/partial/profile.html"
+                        resolve: UserCtrl.resolve
+                    })
                     .when('/:username/:topic/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"

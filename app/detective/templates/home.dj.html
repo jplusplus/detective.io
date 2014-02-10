@@ -49,7 +49,9 @@
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualSingleCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/NotFoundCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/PageCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/ProfileCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserTopicCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/card.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/changeOnBlur.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/colorTag.coffee' %}"></script>
@@ -74,7 +76,7 @@
 {% endblock %}
 
 {% block content %}
-    <div watch-login-mandatory>
+    <div watch-login-mandatory watch-topic-exists>
     	{% include "partials/header.dj.html" %}
         <div ng-view id="content" ng-class="{ freeze: Page.loading() }"></div>
     </div>

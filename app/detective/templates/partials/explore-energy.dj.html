@@ -12,7 +12,7 @@
 				<h2>Innovative energy projects in developing countries</h2>
 				<p class="lead">A comprehensive database of every person and every organization linked to innovative energy projects.</p>
 				<p class="top40">
-					<a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission('energy')" ng-href="/energy/contribute">Contribute</a>
+					<a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission('energy')" ng-href="/[[username]]/energy/contribute">Contribute</a>
 					<a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">Start to explore</a>
 				</p>
 			</div>
@@ -43,9 +43,9 @@
 					</form>
 					<div class="col-md-8 col-md-push-2 lead top20" ng-if="types">
 						Navigate through
-						<a ng-href="/energy/energyproject"><strong>[[getTypeCount("energyproject")]]</strong> projects</a>,
-						<a ng-href="/energy/person"><strong>[[getTypeCount("person")]]</strong> persons</a> and
-						<a ng-href="/energy/organization"><strong>[[getTypeCount("organization")]]</strong> organizations</a>.
+						<a ng-href="/[[username]]/energy/energyproject"><strong>[[getTypeCount("energyproject")]]</strong> projects</a>,
+						<a ng-href="/[[username]]/energy/person"><strong>[[getTypeCount("person")]]</strong> persons</a> and
+						<a ng-href="/[[username]]/energy/organization"><strong>[[getTypeCount("organization")]]</strong> organizations</a>.
 					</div>
 				</div>
 			</div>

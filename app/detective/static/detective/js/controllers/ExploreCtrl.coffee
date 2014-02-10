@@ -1,33 +1,30 @@
 class ExploreCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Summary', 'Individual', '$location', '$timeout', '$filter', 'Page']
+    @$inject: ['$scope', '$routeParams', 'Summary', '$location', '$timeout', '$filter', 'Page', 'topic']
 
-    constructor: (@scope, @routeParams, @Summary, @Individual, @location, @timeout, @filter, @Page)->
+    constructor: (@scope, @routeParams, @Summary, @location, @timeout, @filter, @Page, topic)->
         @scope.getTypeCount = @getTypeCount
         @Page.loading yes
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Current individual scope
-        @scope.topic = @routeParams.topic
-        # Topic control
-        @Individual.get {type: "topic", slug: @scope.topic, topic: "common" }, (data)=>
-            # Disable loading mode
-            @Page.loading no
-            # Stop if it's an unkown topic
-            return @location.path "/404" unless data.objects and data.objects.length
-            # Meta data about this topic
-            @scope.meta = data.objects[0]
-            # Set page's title
-            @Page.title @scope.meta.title
-            # Build template url
-            @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
-            # Countries info
-            @scope.countries = @Summary.get id:"countries"
-            # Types info
-            @Summary.get id:"types", (d)=> @scope.types = d
-            # Types info
-            @Summary.get id:"forms", (d)=> @scope.forms = _.values(d)
+        @scope.topic    = @routeParams.topic
+        @scope.username = @routeParams.username
+        # Disable loading mode
+        @Page.loading no
+        # Meta data about this topic
+        @scope.meta = topic
+        # Set page's title
+        @Page.title @scope.meta.title
+        # Build template url
+        @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
+        # Countries info
+        @scope.countries = @Summary.get id:"countries"
+        # Types info
+        @Summary.get id:"types", (d)=> @scope.types = d
+        # Types info
+        @Summary.get id:"forms", (d)=> @scope.forms = _.values(d)
         # Country where the user click
         @scope.selectedCountry = {}
         @scope.selectedIndividual = {}
@@ -47,14 +44,14 @@ class ExploreCtrl
     selectIndividual: (val, old)=>
         # Single entity selected
         if val.predicate? and val.predicate.name is "<<INSTANCE>>"
-            @location.path "/#{@scope.topic}/#{val.object.toLowerCase()}/#{val.subject.name}"
+            @location.path "/#{@scope.username}/#{@scope.topic}/#{val.object.toLowerCase()}/#{val.subject.name}"
         # Full RDF-formated research
         else if val.predicate? and val.object? and val.object != ""
             # Do not pass the label
             delete val.label
             # Create a JSON query to pass though the URL
             query = angular.toJson val
-            @location.path "/#{@scope.topic}/search/"
+            @location.path "/#{@scope.username}/#{@scope.topic}/search/"
             @location.search "q", query
 
     getTypeCount: ()=>

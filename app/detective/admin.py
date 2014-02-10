@@ -76,10 +76,10 @@ class SearchTermInline(admin.TabularInline):
 class TopicAdmin(admin.ModelAdmin):
     save_on_top         = True
     prepopulated_fields = {'slug': ('title',)}
-    list_display        = ("title", "link", "public", )
+    list_display        = ("title", "link", "public",)
     fieldsets = (
         (None, {
-            'fields':  ( ('title', 'slug',), 'ontology', 'module', 'public')
+            'fields':  ( ('title', 'slug',), 'ontology', 'module', ('public', 'author'))
         }),
         ('Advanced options', {
             'classes': ('collapse',),

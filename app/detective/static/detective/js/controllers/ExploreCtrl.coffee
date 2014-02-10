@@ -4,8 +4,6 @@ class ExploreCtrl
 
     constructor: (@scope, @routeParams, @Summary, @Individual, @location, @timeout, @filter, @Page)->
         @scope.getTypeCount = @getTypeCount
-        # Set page's title
-        @Page.title @routeParams.topic
         @Page.loading yes
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
@@ -20,6 +18,8 @@ class ExploreCtrl
             return @location.path "/404" unless data.objects and data.objects.length
             # Meta data about this topic
             @scope.meta = data.objects[0]
+            # Set page's title
+            @Page.title @scope.meta.title
             # Build template url
             @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
             # Countries info

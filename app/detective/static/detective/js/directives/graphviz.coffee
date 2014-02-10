@@ -30,6 +30,7 @@ HashMerge = (a, b) ->
         svg = ((d3.select element[0]).append 'svg').attr
             width : size[0]
             height : size[1]
+        defs = svg.insert 'svg:defs', 'path'
 
         graph = (((do d3.layout.force).size size).linkDistance 60).charge -300
 
@@ -158,9 +159,6 @@ HashMerge = (a, b) ->
 
             cleanWeightZero nodes, links
 
-            do (svg.selectAll 'defs').remove
-            defs = svg.insert 'svg:defs', 'path'
-
             # Sort by weight (DESC) to know which node should should always display its name
             nodes = _.sortBy nodes, (elem) -> -elem.weight
             for i in [0..(Math.min nodes.length, 3)]
@@ -197,7 +195,6 @@ HashMerge = (a, b) ->
                             return 'url(' + absUrl + '#pattern' + d._id + ')'
                         ($filter "strToColor") d._type
                     stroke : (d) -> ($filter "strToColor") d._type
-                .call(graph.drag)
                 .each (d) ->
                     (createPattern d, defs) if d.image?
                     null

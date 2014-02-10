@@ -44,7 +44,8 @@ class ContributeCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @scope.topic = @routeParams.topic
+        @scope.topic    = @routeParams.topic
+        @scope.username = @routeParams.username
         # By default, hide the kick-start form
         showKickStart = false
         # Shortcuts for child classes
@@ -148,7 +149,7 @@ class ContributeCtrl
         # Generates the permalink to this individual
         permalink: =>
             return false unless @fields.id? and @scope.topic
-            return "/#{@scope.topic}/#{@type}/#{@fields.id}"
+            return "/#{@scope.username}/#{@scope.topic}/#{@type}/#{@fields.id}"
 
         # Event when fields changed
         update: (data)=>

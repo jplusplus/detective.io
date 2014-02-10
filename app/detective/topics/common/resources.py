@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-from .models                  import *
-from app.detective.models     import QuoteRequest, Topic, Article
-from app.detective.utils      import get_registered_models
-from tastypie                 import fields
-from tastypie.authorization   import ReadOnlyAuthorization
-from tastypie.constants       import ALL, ALL_WITH_RELATIONS
-from tastypie.exceptions      import Unauthorized
-from tastypie.resources       import ModelResource
+from .models                          import *
+from app.detective.models             import QuoteRequest, Topic, Article
+from app.detective.utils              import get_registered_models
+from app.detective.topics.common.user import UserResource
+from tastypie                         import fields
+from tastypie.authorization           import ReadOnlyAuthorization
+from tastypie.constants               import ALL, ALL_WITH_RELATIONS
+from tastypie.exceptions              import Unauthorized
+from tastypie.resources               import ModelResource
 
 # Only staff can consult QuoteRequests
 class QuoteRequestAuthorization(ReadOnlyAuthorization):
@@ -30,9 +31,11 @@ class QuoteRequestResource(ModelResource):
 
 class TopicResource(ModelResource):
 
+    author = fields.ToOneField(UserResource, 'author', full=False)
+
     class Meta:
         queryset = Topic.objects.all()
-        filtering = {'slug': ALL, 'module': ALL, 'public': ALL, 'title': ALL}
+        filtering = {'slug': ALL, 'author': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
 
     def dehydrate(self, bundle):
         # Get all registered models

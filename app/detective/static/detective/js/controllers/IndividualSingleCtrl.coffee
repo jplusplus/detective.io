@@ -22,9 +22,10 @@ class IndividualSingleCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Read route params
-        @scope.topic = @routeParams.topic
-        @scope.type  = @routeParams.type
-        @scope.id    = @routeParams.id
+        @scope.topic     = @routeParams.topic
+        @scope.username  = @routeParams.username
+        @scope.type      = @routeParams.type
+        @scope.id        = @routeParams.id
         params =
             topic: @scope.topic
             type : @scope.type
@@ -65,7 +66,7 @@ class IndividualSingleCtrl
     singleUrl: (individual, type=false)=>
         type  = (type or @scope.type).toLowerCase()
         topic = (@scope.resource[type] and @scope.resource[type].topic) or @scope.topic
-        "/#{topic}/#{type}/#{individual.id}/"
+        "/#{@scope.username}/#{topic}/#{type}/#{individual.id}/"
     # True if the given type is literal
     isLiteral: (field)=>
         [
@@ -84,7 +85,7 @@ class IndividualSingleCtrl
                 type : @scope.type
             # Redirect to the type list
             setTimeout (=>
-                @location.url("/#{@scope.topic}/#{@scope.type}")
+                @location.url("/#{@scope.username}/#{@scope.topic}/#{@scope.type}")
             ), 500
 
 

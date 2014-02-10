@@ -50,6 +50,7 @@ class ContributeCtrl
         # Shortcuts for child classes
         @scope.Individual  = @Individual
         @scope.routeParams = @routeParams
+        @scope.resources   = {}
         # Get the list of available resources
         @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
         # Prepare future individual

@@ -180,6 +180,7 @@ HashMerge = (a, b) ->
                     class : 'link'
                     d : linkUpdate
                     'marker-end' : 'url(' + absUrl + '#marker-end)'
+                    stroke : (d) -> ($filter "strToColor") d._type
             # Remove old links
             do (do the_links.exit).remove
 

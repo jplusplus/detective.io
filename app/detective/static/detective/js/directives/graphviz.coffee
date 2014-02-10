@@ -119,6 +119,7 @@ HashMerge = (a, b) ->
                 do ((graph.nodes nodes).links links).start
 
         update = =>
+            # It's useless to process if we do not have any data
             return if not scope.data.nodes?
 
             # Extract nodes and links from data
@@ -198,6 +199,7 @@ HashMerge = (a, b) ->
             # Remove old nodes
             do (do the_nodes.exit).remove
 
+            # Define action handlers
             the_nodes.on 'dblclick', deleteNode
             the_nodes.on 'click', (d) ->
                 if not d._timer?

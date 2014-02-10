@@ -149,7 +149,6 @@ class SummaryResource(Resource):
         rulesManager = topics_rules()
         # Fetch every registered model
         # to print out its rules
-        print self.topic.module, hex(id(self.topic.get_module()))
         for model in self.topic.get_models():
             name                = model.__name__.lower()
             rules               = rulesManager.model(model).all()

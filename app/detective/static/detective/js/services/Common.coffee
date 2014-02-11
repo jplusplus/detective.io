@@ -3,7 +3,6 @@ angular.module('detectiveServices').factory("Common", [ '$resource', '$http', ($
         get:
             method : 'GET'
             isArray: false
-            cache  : false
         query:
             method : 'GET'
             isArray: true

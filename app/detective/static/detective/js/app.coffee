@@ -18,7 +18,11 @@ detective = angular
             '$interpolateProvider',
             '$routeProvider',
             '$locationProvider'
-            ($interpolateProvider, $routeProvider, $locationProvider)->
+            '$httpProvider',
+            ($interpolateProvider, $routeProvider, $locationProvider, $httpProvider)->
+                # Intercepts HTTP request to add cache for anonymous user
+                # and to set the right csrf token from the cookies
+                $httpProvider.interceptors.push('AuthHttpInterceptor');
                 # Avoid a conflict with Django Template's tags
                 $interpolateProvider.startSymbol '[['
                 $interpolateProvider.endSymbol   ']]'

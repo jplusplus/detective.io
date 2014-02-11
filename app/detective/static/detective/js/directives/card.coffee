@@ -6,7 +6,7 @@ angular.module('detective').directive "card", ['Summary', (Summary)->
         topic     : "="
         username  : "="
         getType   : "&type"
-    templateUrl: "/partial/card.html"
+    templateUrl: "/partial/topic.single.card.html"
     replace: true
     link: (scope, elm, attr) ->
         scope.type = scope.getType().toLowerCase()

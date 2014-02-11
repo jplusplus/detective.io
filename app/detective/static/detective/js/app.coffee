@@ -1,5 +1,12 @@
 detective = angular
-    .module('detective', ["detectiveServices", "detectiveFilters", "ui.bootstrap", "monospaced.elastic", "angularFileUpload", "ngProgressLite"])
+    .module('detective', [
+        "detective.service"
+        "detective.filter"
+        "ui.bootstrap"
+        "monospaced.elastic"
+        "angularFileUpload"
+        "ngProgressLite"
+    ])
     .run(
         [
             '$rootScope',
@@ -134,4 +141,4 @@ detective = angular
     )
 
 # Services module
-angular.module('detectiveServices', ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detective.service', ['ngResource', 'ngSanitize', 'ngCookies'])

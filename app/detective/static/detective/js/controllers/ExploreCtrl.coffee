@@ -49,4 +49,4 @@ class ExploreCtrl
 
 
 
-angular.module('detective').controller 'exploreCtrl', ExploreCtrl
+angular.module('detective.controller').controller 'exploreCtrl', ExploreCtrl

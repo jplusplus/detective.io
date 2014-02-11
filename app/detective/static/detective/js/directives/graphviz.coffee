@@ -15,7 +15,7 @@ HashMerge = (a, b) ->
         result[i] = b[i]
     result
 
-(angular.module 'detective').directive "graphviz", ['$filter', '$routeParams', '$location', '$rootScope', 'Individual', ($filter, $routeParams, $location, $rootScope, Individual)->
+(angular.module 'detective.directive').directive "graphviz", ['$filter', '$routeParams', '$location', '$rootScope', 'Individual', ($filter, $routeParams, $location, $rootScope, Individual)->
     restrict: "AE"
     template : "<div></div>"
     replace : yes

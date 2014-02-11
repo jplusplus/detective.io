@@ -230,4 +230,4 @@ class UserCtrl
     unknownError: ()=>
         @scope.error = "An unexpected error happened, sorry for that."
 
-angular.module('detective').controller 'userCtrl', UserCtrl
+angular.module('detective.controller').controller 'userCtrl', UserCtrl

@@ -91,4 +91,4 @@ class IndividualSingleCtrl
             ), 500
 
 
-angular.module('detective').controller 'individualSingleCtrl', IndividualSingleCtrl
+angular.module('detective.controller').controller 'individualSingleCtrl', IndividualSingleCtrl

@@ -10,4 +10,4 @@ class PageCtrl
         if @routeParams.slug?
             @scope.templateUrl  = "/partial/page.#{@routeParams.slug}.html"
 
-angular.module('detective').controller 'pageCtrl', PageCtrl
+angular.module('detective.controller').controller 'pageCtrl', PageCtrl

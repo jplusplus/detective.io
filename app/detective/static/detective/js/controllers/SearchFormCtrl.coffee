@@ -28,4 +28,4 @@ class SearchFormCtrl
             @location.path "/#{@scope.topic}/search/"
             @location.search "q", query
 
-angular.module('detective').controller 'searchFormCtrl', SearchFormCtrl
+angular.module('detective.controller').controller 'searchFormCtrl', SearchFormCtrl

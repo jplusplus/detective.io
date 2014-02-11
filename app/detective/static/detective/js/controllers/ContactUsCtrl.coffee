@@ -48,4 +48,4 @@ class ContactUsCtrl
 
 
 
-angular.module('detective').controller 'contactUsCtrl', ContactUsCtrl
+angular.module('detective.controller').controller 'contactUsCtrl', ContactUsCtrl

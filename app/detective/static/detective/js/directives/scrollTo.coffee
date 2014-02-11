@@ -1,4 +1,4 @@
-angular.module('detective').directive "scrollTo", ->
+angular.module('detective.directive').directive "scrollTo", ->
     (scope, element, attrs) ->
         scroll = ()->
             $(window).scrollTo element, attrs.scrollTo or 0, ->

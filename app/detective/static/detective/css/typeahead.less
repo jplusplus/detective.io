@@ -1,0 +1,46 @@
+html body {
+
+    .twitter-typeahead {
+        .form-control();
+        padding:0;
+        border:0;
+        outline:0;
+
+        .tt-query, .tt-hint {
+            padding:8px 12px;
+            width:100%;
+            border:0;
+            background:transparent;
+            &[disabled] {
+                display:none;
+            }
+        }
+
+        .model {
+            font-size:90%;
+            color:fade(#000, 60);
+        }
+    }
+
+    .tt-hint {
+        color:@input-color-placeholder;
+    }
+
+    .tt-dropdown-menu {
+        width:100%;
+        color:#000;
+        .dropdown-menu();
+        .box-shadow(0 6px 12px 0 rgba(0, 0, 0, 0.176))
+    }
+
+    .tt-suggestion {
+
+        padding:3px 6px;
+
+        &.tt-is-under-cursor {
+            background-color: @link-color;
+            color:darken(@link-color, 60);
+        }
+    }
+
+}

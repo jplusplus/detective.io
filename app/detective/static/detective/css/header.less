@@ -1,0 +1,79 @@
+header {
+    top:0;
+    left:0;
+    right:0;
+    position:fixed;
+    z-index:@zindex-header;
+    padding:0;
+    height:@header-height;
+    background:@header-bg;
+    color:contract(@header-bg);
+
+    .box-shadow( 0 1px 1px 1px fade(#2E2D2A, 10%) );
+    .transition(@header-open-speed);
+    .opacity(100);
+
+    .is-home & {
+        .opacity(0);
+        .translate(0, -100px);
+    }
+
+    h1 {
+        background: url("@{staticPath}img/white-hat.png") no-repeat 0 0;
+        padding-left:60px;
+        margin:0 15px;
+        font-size: 140%;
+        height:@header-height;
+        line-height:@header-height;
+
+        a, a:hover, a:focus {
+            color: #000;
+            text-decoration:none;
+        }
+
+        i, em {
+            font-style:normal;
+            color:fade(#000, 60);
+        }
+
+        em {
+            float:right;
+            font-size:60%;
+            font-style:italic;
+        }
+    }
+
+    .user-state {
+        height:@header-height;
+        line-height:@header-height;
+        font-size:90%;
+    }
+
+    .topic-search {
+        border-left:#DDD solid 1px;
+        position:absolute;
+        top:0;
+        bottom:0;
+        padding-top:9px;
+        padding-left:9px;
+        left:250px;
+        right:200px;
+
+        .twitter-typeahead, .input-control {
+            width:500px;
+            height: @header-height - 10px;
+            padding-top:0;
+        }
+
+        .btn {
+            float:left;
+            height: @header-height - 17px;
+            margin-right:9px;
+        }
+
+        .form-control,  .tt-query {
+            padding:2px 10px;
+        }
+    }
+
+}

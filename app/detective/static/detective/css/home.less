@@ -1,0 +1,109 @@
+#home {
+
+    .front {
+        position:relative;
+        background:@brand-tertiary;
+        color:#fff;
+        padding-top:100px;
+        margin-top:-1px * @header-height;
+        overflow:hidden;
+
+        &:after {
+            content:"";
+            width:100%;
+            height:200%;
+            position:absolute;
+            top:0;
+            left:50%;
+            background:fade(#fff, 10%);
+            .rotate(25deg);
+        }
+
+        h1 {
+
+            padding-bottom:30px;
+            font-size:60px;
+            position:relative;
+
+            img {
+                position:absolute;
+                right:110%;
+                top:10px;
+            }
+
+            i {
+                font-style:normal;
+                color:fade(#fff, 20);
+            }
+        }
+
+        h3 {
+            position:relative;
+            padding-bottom:40px;
+            margin-bottom:40px;
+
+            &:after {
+                content:"";
+                position:absolute;
+                top:100%;
+                left:0;
+                width:80px;
+                height:1px;
+                background:white;
+            }
+        }
+
+        .middle {
+            position:absolute;
+            left:20%;
+            top:50%;
+            .translate(0, -50%);
+        }
+    }
+
+
+    .bg-light, .bg-secondary {
+        position:relative;
+        z-index:10;
+    }
+
+
+    .features .illustration {
+        margin:10px 0;
+        padding:0 10px;
+        max-width: 100%;
+    }
+
+    .get-a-quote {
+        text-transform:uppercase;
+        font-weight:bold;
+    }
+
+    .featured-investigations {
+        padding:40px 0;
+        background: #262420;
+        color: contrast(#262420);
+        position:relative;
+        overflow:hidden;
+
+        &:after {
+            content:"";
+            width:100%;
+            height:200%;
+            position:absolute;
+            top:0;
+            left:-50%;
+            background:fade(#000, 10%);
+            .rotate(-25deg);
+        }
+
+        .boxes {
+            h4 {
+                a {
+                    color:white;
+                }
+            }
+        }
+    }
+
+}

@@ -1,0 +1,127 @@
+#individual-single {
+
+    .front {
+        padding:80px 0;
+        color:white;
+        margin-bottom:20px;
+        .box-shadow(0 -1px 10px 0 fade(black, 40%) inset);
+        border-bottom:1px solid white;
+        position:relative;
+        overflow:hidden;
+
+        &:before,
+        &:after {
+            z-index:1;
+            content:"";
+            position:absolute;
+            left:-200px;
+            top:-50%;
+            height:200%;
+            width:400px;
+            background:fade(black, 20%);
+            .rotate(-25deg);
+        }
+
+        &:after {
+            width:300px;
+            background:fade(white, 20%);
+        }
+
+        .container {
+            position:relative;
+            z-index:10;
+        }
+
+        .network {
+            position:absolute;
+            top:-60px;
+            bottom:-60px;
+            right:10px;
+            left:20%;
+            div {
+                height:100%;
+                width:100%;
+            }
+
+            .graphviz {
+                input[type='range'] {
+                    background: none;
+                    border: none;
+                    outline: none;
+                }
+            }
+
+            svg {
+                .node {
+                    stroke: @brand-secondary;
+                    stroke-width: 1.5px;
+                    cursor: pointer;
+                    fill: lighten(@body-bg, 20%);
+
+                    &:hover {
+                        stroke-width: 2.5px;
+                    }
+                }
+
+                .link {
+                    fill: none;
+                    stroke-width: 1.5px;
+                }
+
+                .name {
+                    fill:white;
+                    font: 10px sans-serif;
+                    pointer-events: none;
+                    text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+
+                    &.toggle-display {
+                        display: none;
+                    }
+                }
+            }
+        }
+    }
+
+
+    table {
+        // Thanks to! http://blog.room34.com/archives/5042
+        table-layout: fixed;
+        word-wrap:break-word;
+    }
+
+    .map {
+        position:relative;
+        display:block;
+
+        .lab {
+            display:block;
+            position: absolute;
+            top:0;
+            left:0;
+            right:0;
+            padding:10px;
+            background:fade(white, 80);
+            color:@body-bg;
+        }
+
+        img {
+            margin:5px 0;
+            max-width: 100%;
+            min-width: 100%;
+            height:auto;
+        }
+    }
+
+}
+
+
+
+.tooltip {
+    .border-radius(5px);
+    padding: 7px;
+    position: absolute;
+    opacity: 0;
+    background: darken(@brand-primary, 10%);
+    color: #000;
+    pointer-events: none;
+}

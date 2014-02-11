@@ -97,9 +97,9 @@ class ApiTestCase(ResourceTestCase):
             self.pb.save()
 
             ontology = File(open(settings.DATA_ROOT + "/ontology-v5.7.owl"))
-            self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology)
+            self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology, author=self.super_username)
             self.christmas.save()
-            self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology)
+            self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology, author=self.super_username)
             self.thanksgiving.save()
 
 
@@ -737,7 +737,6 @@ class ApiTestCase(ResourceTestCase):
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/common/v1/topic/?slug=christmas', follow=True, format='json')
-        print resp.content
         # Parse data to check the number of result
         data = json.loads(resp.content)
         # 1 result

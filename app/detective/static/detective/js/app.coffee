@@ -1,13 +1,16 @@
-angular.module('detective.service',    ['ngResource', 'ngSanitize', 'ngCookies'])
-angular.module('detective.filter',     ['ngResource', 'ngSanitize', 'ngCookies'])
-angular.module('detective.directive',  ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detective.config',     ['ngResource', 'ngSanitize', 'ngCookies'])
 angular.module('detective.controller', ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detective.directive',  ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detective.filter',     ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detective.service',    ['ngResource', 'ngSanitize', 'ngCookies'])
 
 detective = angular
     .module('detective', [
-        "detective.service"
-        "detective.filter"
+        "detective.config"
+        "detective.controller"
         "detective.directive"
+        "detective.filter"
+        "detective.service"
         "ui.bootstrap"
         "monospaced.elastic"
         "angularFileUpload"

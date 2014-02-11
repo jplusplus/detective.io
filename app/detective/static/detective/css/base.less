@@ -12,16 +12,24 @@
 @zindex-breadcrumb: @zindex-loading+100;
 @zindex-header    : @zindex-breadcrumb+100;
 
-@brand-secondary: #CB5B5E;
-@brand-tertiary: #BFB8A6;
+@brand-secondary: #BFB8A6;
+@brand-tertiary: #CB5B5E;
 @header-bg:#fff;
 @header-height: 50px;
+@header-open-speed: 0.4s;
 
 .ngProgressLite .ngProgressLiteBar  {
 	z-index: @zindex-loading;
-	background: @brand-secondary;
+	background: @brand-tertiary;
 	position:absolute;
 	top:@header-height;
+
+	.transition(@header-open-speed);
+	.translate(0, 0);
+
+	.is-home & {
+		.translate(0, -100px);
+	}
 
 	.ngProgressLiteBarShadow {
 		.box-shadow(~"0 0 10px @{brand-tertiary}, 0 0 5px @{brand-tertiary}");
@@ -29,6 +37,7 @@
 }
 
 body {
+	font-weight: 200;
 	padding-top:@header-height;
     position:relative;
     z-index:@zindex-context;
@@ -144,7 +153,6 @@ body {
 }
 
 header {
-	@open-speed: 0.4s;
 	top:0;
 	left:0;
 	right:0;
@@ -156,9 +164,13 @@ header {
 	color:contract(@header-bg);
 
 	.box-shadow( 0 2px 1px 1px fade(#2E2D2A, 10%) );
-	.transition(@open-speed);
+	.transition(@header-open-speed);
 	.opacity(100);
 
+	.is-home & {
+		.opacity(0);
+		.translate(0, -100px);
+	}
 
 	h1 {
 		background: url("@{staticPath}img/white-hat.png") no-repeat 0 0;
@@ -632,11 +644,25 @@ html body {
 .boxes {
 
 	@box-height:240px;
-		.make-row();
-		position:relative;
-		z-index:5;
-		padding:0 20px;
-		padding-top:10px;
+	.make-row();
+	position:relative;
+	z-index:5;
+	padding:0 20px;
+	padding-top:10px;
+
+	h4 {
+
+		a {
+			color:inherit;
+			text-decoration: none;
+			color:inherit;
+			font-weight:bold;
+			font-size:100%;
+			font-family: @headings-font-family;
+			text-decoration:none;
+
+		}
+	}
 
 	.box {
 		overflow: hidden;
@@ -646,36 +672,31 @@ html body {
 		margin-top:20px;
 		margin-bottom:30px;
 		text-align:left;
-		border:1px solid darken(#BCB5A6, 10%);
-		border-bottom-width:3px;
 		height:@box-height;
 		background:#BCB5A6;
 		color:@text-color;
+		.border-radius(3px);
 
-		&.bg-primary .fg {
-			background: @brand-primary;
-			color: contrast(@brand-primary);
-			a.label {
-				background:@body-bg;
-				color: contrast(@body-bg);
+		&.box-placeholder  {
+			background:transparent;
+			border:1px dashed #fff;
+
+			.fg {
+				line-height:@box-height;
+				font-size:25px;
+				text-align:center;
+				color: #fff;
+				text-decoration:none;
+				background:transparent;
 			}
 		}
 
-
-		h3 {
-			margin-top:0;
-
-			a {
-				color:inherit;
-				text-decoration: none;
-			}
-		}
 
 		.bg {
-			margin-top:-@box-height/2px;
 			position:absolute;
 			top:50%;
-			left:0;
+			left:50%;
+			.translate(-50%,-50%);
 			min-height:@box-height;
 			height:auto;
 			min-width: 100%;
@@ -691,12 +712,19 @@ html body {
 			left:0;
 			right:0;
 			background:fade(@body-bg, 30%);
-			padding:20px;
 			display:block;
 
-			a.label {
-				color:contrast(@brand-primary);
-				text-decoration: none;
+			.coming-soon {
+				display:block;
+				background:#fff;
+				color:#000;
+				padding:5px 10px;
+				position:absolute;
+				top:50%;
+				left:50%;
+				.translate(-50%, -50%);
+				.border-radius(3px);
+				text-align:center;
 			}
 		}
 
@@ -706,47 +734,109 @@ html body {
 
 #home {
 
-	h1 {
-		padding-bottom:30px;
+	.front {
+		position:relative;
+		background:@brand-tertiary;
+		color:#fff;
+		padding-top:100px;
+		margin-top:-1px * @header-height;
+		overflow:hidden;
 
-		a, a:hover, a:focus {
-			color:inherit;
-			text-decoration:none;
+		&:after {
+			content:"";
+			width:100%;
+			height:200%;
+			position:absolute;
+			top:0;
+			left:50%;
+			background:fade(#fff, 10%);
+			.rotate(25deg);
 		}
 
-		i {
-			font-style:normal;
-			color:fade(#fff, 20);
+		h1 {
+
+			padding-bottom:30px;
+			font-size:60px;
+			position:relative;
+
+			img {
+				position:absolute;
+				right:110%;
+				top:10px;
+			}
+
+			i {
+				font-style:normal;
+				color:fade(#fff, 20);
+			}
+		}
+
+		h3 {
+			position:relative;
+			padding-bottom:40px;
+			margin-bottom:40px;
+
+			&:after {
+				content:"";
+				position:absolute;
+				top:100%;
+				left:0;
+				width:80px;
+				height:1px;
+				background:white;
+			}
+		}
+
+		.middle {
+			position:absolute;
+			left:20%;
+			top:50%;
+			.translate(0, -50%);
 		}
 	}
 
+
 	.bg-light, .bg-secondary {
-		.box-shadow(0 -2px 4px 0 fade(@body-bg, 20) );
 		position:relative;
   		z-index:10;
 	}
 
 
-	.stack-stripe {
-		position:relative;
-		padding-bottom:30px;
-		margin-bottom:30px;
-		&:before {
-			content:"";
-			display:block;
-			height:1px;
-			position:absolute;
-			left:30%;
-			right:30%;
-			bottom:0px;
-			background:@gray-lighter;
-		}
+	.features .illustration {
+		margin:10px 0;
+		padding:0 10px;
+		max-width: 100%;
 	}
 
-	.features .illustration {
-		img {
-			margin:20px 10px;
-			max-width: 100%;
+	.get-a-quote {
+		text-transform:uppercase;
+		font-weight:bold;
+	}
+
+	.featured-investigations {
+		padding:40px 0;
+		background: #262420;
+		color: contrast(#262420);
+		position:relative;
+		overflow:hidden;
+
+		&:after {
+			content:"";
+			width:100%;
+			height:200%;
+			position:absolute;
+			top:0;
+			left:-50%;
+			background:fade(#000, 10%);
+			.rotate(-25deg);
+		}
+
+		.boxes {
+			h4 {
+				a {
+					color:white;
+				}
+			}
 		}
 	}
 

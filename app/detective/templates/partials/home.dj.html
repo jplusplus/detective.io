@@ -1,152 +1,112 @@
 {% load staticfiles %}
 
 <div id="home">
-    <div class="container">
-        <div class="row bottom90 top90">
-            <div class="col-md-8 col-md-push-2 text-center">
-                <h1 class="bottom0">
+
+    <div class="front" screen-height="600">
+        <div class="container">
+            <div class="middle">
+                <h1>
                     <img src="{% static 'detective/img/white-hat.png' %}" />
-                    <a href="#/">
-                        Detective<i>.io</i>
-                    </a>
+                    Detective<i>.io</i>
                 </h1>
-                <h3 class="top0">Structure your investigation &amp; mine your data</h3>
-                <div class="lead">
-                    <p>Throw away your Moleskine! Detective.io is a platform that hosts your investigation and lets you mine it with powerful queries.</p>
-                    <p class="text-muted">
-                        Want to set up your own investigation?<br />
-                        <a ng-href="/contact-us">Get a quote</a> or <a ng-click="scrollToBoxes = true">See all open investigations</a>!
-                    </p>
-                </div>
+                <h3 class="top0">Structure your investigation<br />&amp; mine your data</h3>
             </div>
         </div>
     </div>
-    <div class="bg-secondary">
+
+
+    <div class="features bg-light">
         <div class="container">
-            <h3 class="container">Open investigations</h3>
+
+            <div class="text-center top40 bottom40">
+                <p class="lead">
+                    Simply describe your field of inquiry and <strong>Detective.io builds</strong><br />
+                    the input interface as well as a state of the art front-end.
+                </p>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-6 col-md-3">
+                    <img class="illustration" src="{% static 'detective/img/mobile.png' %}" />
+                    <div>
+                        <h4>Mobile-first</h4>
+                        <p class="text-muted">Why store your data in a notebook when you can access Detective.io on your tablet or mobile? Database replication means it's much safer than notes on paper, too.</p>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-3">
+                    <img class="illustration" src="{% static 'detective/img/semantic.png' %}" />
+                    <div>
+                        <h4>Semantic</h4>
+                        <p class="text-muted">Detective.io relies on purpose-built ontologies for each topic. They can be plugged into other ontologies to unleash the power of linked data.</p>
+                    </div>
+                </div>
+
+                <div class="clearfix visible-sm"></div>
+
+                <div class="col-sm-6 col-md-3">
+                    <img class="illustration" src="{% static 'detective/img/journo-tools.png' %}" />
+                    <div>
+                        <h4>By journalists, for journalists</h4>
+                        <p class="text-muted">Journalism++ is a team of news nerds working for news nerds. We build tools - and use them in our daily work.</p>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-3">
+                    <img class="illustration" src="{% static 'detective/img/network.png' %}" />
+                    <div>
+                        <h4>Graph search</h4>
+                        <p class="text-muted">Your own graph search module for each investigation. Make complex queries in a breeze and find hidden patterns in your data.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom50 text-center top20">
+                <a class="btn btn-primary btn-lg get-a-quote" ng-href="/contact-us">
+                    Get a quote
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="featured-investigations pull-footer">
+        <div class="container">
+            <h3 class="container">Featured investigations</h3>
             <div class="boxes">
-                <a scroll-to="600" ng-if="scrollToBoxes == true" reset="scrollToBoxes"></a>
                 <div class="col-sm-4">
                     <div class="box">
-                        <div class="fg">
-                            <h3>
-                                <a ng-href="/detective/energy">
-                                    Innovative energy projects in developing countries
-                                </a>
-                            </h3>
-                            <a ng-href="/detective/energy" class="label label-primary">
-                                Discover now
-                                <i class="fa fa-arrow-right left05"></i>
-                            </a>
-                        </div>
+                        <a class="fg" ng-href="/detective/energy"></a>
                         <img src="{% static 'detective-energy/heading-thumb.jpg' %}" class="bg" />
                     </div>
+                    <h4>
+                        <a ng-href="/detective/energy">
+                            Innovative energy projects in developing countries
+                        </a>
+                    </h4>
                 </div>
                 <div class="col-sm-4">
                     <div class="box">
                         <div class="fg">
-                            <h3>
-                                Microfinance<br />in the DRC
-                            </h3>
-                            <span class="label padding0">
+                            <span class="coming-soon">
                                 Coming soon
                             </span>
                         </div>
                         <img src="{% static 'detective/img/microfinance-drc-thumb.jpg' %}" class="bg" />
                     </div>
+                    <h4>
+                        Microfinance<br />in the DRC
+                    </h4>
                 </div>
                 <div class="col-sm-4">
-                    <div class="box bg-primary">
-                        <div class="fg">
-                            <h3>
-                                <a ng-href="/contact-us">
-                                    More coming up
-                                </a>
-                            </h3>
-                            <p class="lead bottom10">
-                                Detective.io gives you a way to structure your investigation.
-                            </p>
-                            <a ng-href="/contact-us" class="label label-primary">
-                                Contact us
-                                <i class="fa fa-envelope left05"></i>
-                            </a>
-                        </div>
+                    <div class="box box-placeholder">
+                        <a class="fg" href="/contact-us">
+                            And yours?
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="pull-footer features bg-light">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-offset-1 col-sm-10 top50 bottom50">
 
-                    <div class="text-center stack-stripe">
-                        <h3>Simply describe your field of inquiry</h3>
-                        <p class="lead text-muted">
-                            and Detective.io builds the input interface<br />
-                            as well as a state of the art front-end.
-                        </p>
-                    </div>
-
-                    <div class="row stack-stripe">
-                        <div class="col-md-6 illustration">
-                            <img src="{% static 'detective/img/mobile.png' %}" />
-                        </div>
-                        <div class="col-md-6">
-                            <h3>Mobile-first</h3>
-                            <p class="lead text-muted">Why store your data in a notebook when you can access Detective.io on your tablet or mobile? Database replication means it's much safer than notes on paper, too.</p>
-                        </div>
-                    </div>
-
-                    <div class="row stack-stripe">
-                        <div class="col-md-6 illustration col-md-push-6 top20">
-                            <img src="{% static 'detective/img/semantic.png' %}" />
-                        </div>
-                        <div class="col-md-6 col-md-pull-6 text-right">
-                            <h3>Semantic</h3>
-                            <p class="lead text-muted">Detective.io relies on purpose-built ontologies for each topic. They can be plugged into other ontologies to unleash the power of linked data.</p>
-                        </div>
-                    </div>
-
-                    <div class="row stack-stripe">
-                        <div class="col-md-6 illustration">
-                            <img src="{% static 'detective/img/journo-tools.png' %}" />
-                        </div>
-                        <div class="col-md-6">
-                            <h3>By journalists, for journalists</h3>
-                            <p class="lead text-muted">Journalism++ is a team of news nerds working for news nerds. We build tools - and use them in our daily work.</p>
-                        </div>
-                    </div>
-
-                    <div class="row stack-stripe">
-                        <div class="col-md-6 illustration col-md-push-6">
-                            <img src="{% static 'detective/img/open-source.png' %}" />
-                        </div>
-                        <div class="col-md-6 col-md-pull-6 text-right">
-                            <h3>Open source</h3>
-                            <p class="lead text-muted">And best of all, Detective.io is all open source. You can install and run it yourself. <a href="http://github.com/jplusplus/detective.io" target="_blank">Grab the code on Github</a>!</p>
-                        </div>
-                    </div>
-
-                    <div class="row bottom10">
-                        <div class="col-md-6 illustration">
-                            <img src="{% static 'detective/img/network.png' %}" />
-                        </div>
-                        <div class="col-md-6">
-                            <h3>Graph search</h3>
-                            <p class="lead text-muted">Your own graph search module for each investigation. Make complex queries in a breeze and find hidden patterns in your data.</p>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div class="bottom50 text-center top20">
-                <a class="btn btn-primary btn-lg" ng-href="/contact-us">
-                    <i class="fa fa-envelope-o right05"></i>
-                    Get a quote!
-                </a>
-            </div>
-        </div>
-    </div>
 </div>

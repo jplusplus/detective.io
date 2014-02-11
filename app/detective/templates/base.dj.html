@@ -17,7 +17,7 @@
         {% block extracss %}{% endblock %}
         <base href="{% url 'home' %}" />
     </head>
-    <body ng-cloak>
+    <body ng-cloak  ng-class="{ 'is-home': location.path() == '/' }">
         {% load cache %}
         {% cache 3600 fullpage %}
             {% block content %}{% endblock %}

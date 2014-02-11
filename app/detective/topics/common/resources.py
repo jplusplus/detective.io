@@ -31,7 +31,7 @@ class QuoteRequestResource(ModelResource):
 
 class TopicResource(ModelResource):
 
-    author = fields.ToOneField(UserResource, 'author', full=False)
+    author = fields.ToOneField(UserResource, 'author', full=False, null=True)
 
     class Meta:
         queryset = Topic.objects.all()

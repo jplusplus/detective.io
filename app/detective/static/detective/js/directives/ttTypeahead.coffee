@@ -48,11 +48,11 @@ angular.module('detective').directive "ttTypeahead", ($parse, $routeParams, User
             engine: engine
             valueKey: scope.valueKey or "name"
             prefetch:
-                cache: User.is_logged
+                cache: !User.is_logged
                 url: scope.prefetch or "/api/#{itopic}/v1/#{individual}/mine/"
                 filter: saveResponse
             remote:
-                cache: User.is_logged
+                cache: !User.is_logged
                 url: scope.remote or "/api/#{itopic}/v1/#{individual}/search/?q=%QUERY"
                 filter: saveResponse
 

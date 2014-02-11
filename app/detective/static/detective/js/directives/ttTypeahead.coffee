@@ -1,4 +1,4 @@
-angular.module('detective').directive "ttTypeahead", ($parse, $routeParams)->
+angular.module('detective').directive "ttTypeahead", ($parse, $routeParams, User)->
     lastDataset = []
     # Use underscore's template
     # @TODO use $compile from angular
@@ -48,11 +48,11 @@ angular.module('detective').directive "ttTypeahead", ($parse, $routeParams)->
             engine: engine
             valueKey: scope.valueKey or "name"
             prefetch:
-                cache: false
+                cache: User.is_logged
                 url: scope.prefetch or "/api/#{itopic}/v1/#{individual}/mine/"
                 filter: saveResponse
             remote:
-                cache: false
+                cache: User.is_logged
                 url: scope.remote or "/api/#{itopic}/v1/#{individual}/search/?q=%QUERY"
                 filter: saveResponse
 

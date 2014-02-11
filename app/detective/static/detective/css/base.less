@@ -12,14 +12,14 @@
 @zindex-breadcrumb: @zindex-loading+100;
 @zindex-header    : @zindex-breadcrumb+100;
 
+@brand-secondary: #CB5B5E;
+@brand-tertiary: #BFB8A6;
 @header-bg:#fff;
 @header-height: 50px;
-@brand-secondary: #BFB8A6;
-@brand-tertiary: #CB5B5E;
 
 .ngProgressLite .ngProgressLiteBar  {
 	z-index: @zindex-loading;
-	background: @brand-tertiary;
+	background: @brand-secondary;
 	position:absolute;
 	top:@header-height;
 
@@ -153,6 +153,7 @@ header {
 	padding:0;
 	height:@header-height;
 	background:@header-bg;
+	color:contract(@header-bg);
 
 	.box-shadow( 0 2px 1px 1px fade(#2E2D2A, 10%) );
 	.transition(@open-speed);

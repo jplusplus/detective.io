@@ -67,13 +67,23 @@ detective = angular
                     .when('/common',  redirectTo: '/')
                     .when('/page',    redirectTo: '/')
                     .when('/account', redirectTo: '/')
+
+                    # Retrop compatibility
+                    .when('/energy/',           redirectTo: '/detective/energy/')
+                    .when('/energy/:type',      redirectTo: '/detective/energy/:type')
+                    .when('/energy/search',     redirectTo: '/detective/energy/search')
+                    .when('/energy/:type/:id',  redirectTo: '/detective/energy/:type/:id')
+                    .when('/energy/contribute', redirectTo: '/detective/energy/contribute')
+                    # Disable endpoint
                     .when('/:username/common/contribute', redirectTo: '/')
                     .when('/:username/:topic/p/', redirectTo: '/:username/:topic/')
+                    # User-related url
                     .when('/:username', {
                         controller: ProfileCtrl
                         templateUrl: "/partial/profile.html"
                         resolve: UserCtrl.resolve
                     })
+                    # Topic-related url
                     .when('/:username/:topic/search', {
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/individual-list.html"

@@ -737,6 +737,7 @@ class ApiTestCase(ResourceTestCase):
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/common/v1/topic/?slug=christmas', follow=True, format='json')
+        print resp.content
         # Parse data to check the number of result
         data = json.loads(resp.content)
         # 1 result

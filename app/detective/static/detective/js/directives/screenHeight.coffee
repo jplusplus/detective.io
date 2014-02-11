@@ -2,7 +2,6 @@ angular.module('detective').directive "screenHeight", ["$window", ($window)->
     (scope, element, attrs) ->
         ev = "screenHeight resize"
         resize = ->
-            console.log 1
             element.css "height", $window.innerHeight
             element.css("min-height", 1*attrs.screenHeight) unless isNaN(attrs.screenHeight)
 

@@ -97,9 +97,9 @@ class ApiTestCase(ResourceTestCase):
             self.pb.save()
 
             ontology = File(open(settings.DATA_ROOT + "/ontology-v5.7.owl"))
-            self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology)
+            self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology, author=super_user)
             self.christmas.save()
-            self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology)
+            self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology, author=super_user)
             self.thanksgiving.save()
 
 

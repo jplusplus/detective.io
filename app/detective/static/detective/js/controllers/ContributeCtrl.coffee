@@ -301,7 +301,7 @@ class ContributeCtrl
                 params =
                     type:  @scope.new.type
                     id:    "search"
-                    q:     @scope.new.fields.names
+                    q:     @scope.new.fields.name
                 # Look for individual with the same name
                 @Individual.query params, (d)=>
                     # Remove the one we just created

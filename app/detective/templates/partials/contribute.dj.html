@@ -60,7 +60,14 @@
 
 			<div class="head panel-heading">
 				<div class="btns">
-					<a class="left10" ng-if="individual.permalink()" ng-href="[[individual.permalink()]]">See in detail</a>
+					<span ng-if="individual.permalink()" >
+						<a class="left10" ng-href="[[individual.permalink()]]">See in detail</a>
+						<button class="btn btn-default left10"
+						   ng-if="user.hasDeletePermission(topic)"
+						   ng-click="individual.delete($index)">
+							<i class="fa fa-trash-o"></i>
+						</button>
+					</span>
 					<button ng-click="individual.close()" class="btn btn-default left10">
 						<i class="fa fa-times"></i>
 					</button>
@@ -94,9 +101,9 @@
 
 			<div class="restore" ng-show="individual.isClosed">
 				<div class="btns">
-						<button ng-click="removeIndividual($index)" class="btn btn-default left10">
-							<i class="fa fa-times"></i>
-						</button>
+					<button ng-click="removeIndividual($index)" class="btn btn-default left10">
+						<i class="fa fa-times"></i>
+					</button>
 				</div>
 				<!-- [[ individual.fields ]] -->
 				<strong ng-hide="individual.isNotFound">[[individual.fields|individualPreview:"unkown"]]</strong>

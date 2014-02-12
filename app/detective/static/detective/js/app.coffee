@@ -30,6 +30,12 @@ detective = angular
                 $locationProvider.html5Mode true
                 # Bind routes to the controllers
                 $routeProvider
+                    # Retrop compatibility
+                    .when('/energy/',                     redirectTo: '/detective/energy/')
+                    .when('/energy/:type',                redirectTo: '/detective/energy/:type')
+                    .when('/energy/search',               redirectTo: '/detective/energy/search')
+                    .when('/energy/:type/:id',            redirectTo: '/detective/energy/:type/:id')
+                    .when('/energy/contribute',           redirectTo: '/detective/energy/contribute')
                     .when('/', {
                         controller: HomeCtrl
                         templateUrl: "/partial/home.html"

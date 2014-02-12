@@ -27,7 +27,7 @@ class ContributeCtrl
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
-        @scope.modelTopic          = (m)=> if @scope.resources? then @scope.resources[m.toLowerCase()].topic
+        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
@@ -44,12 +44,14 @@ class ContributeCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @scope.topic = @routeParams.topic
+        @scope.topic    = @routeParams.topic
+        @scope.username = @routeParams.username
         # By default, hide the kick-start form
         showKickStart = false
         # Shortcuts for child classes
         @scope.Individual  = @Individual
         @scope.routeParams = @routeParams
+        @scope.resources   = {}
         # Get the list of available resources
         @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
         # Prepare future individual
@@ -147,7 +149,7 @@ class ContributeCtrl
         # Generates the permalink to this individual
         permalink: =>
             return false unless @fields.id? and @scope.topic
-            return "/#{@scope.topic}/#{@type}/#{@fields.id}"
+            return "/#{@scope.username}/#{@scope.topic}/#{@type}/#{@fields.id}"
 
         # Event when fields changed
         update: (data)=>

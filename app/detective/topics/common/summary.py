@@ -46,6 +46,7 @@ class SummaryResource(Resource):
         self.topic = self.get_topic_or_404(request=request)
         # Check for an optional method to do further dehydration.
         method = getattr(self, "summary_%s" % kwargs["pk"], None)
+
         if method:
             try:
                 self.throttle_check(kwargs["bundle"].request)
@@ -441,20 +442,20 @@ class SummaryResource(Resource):
         return [ output(m) for m in self.topic.get_models() ]
 
     def get_relationship_search(self):
-        isRelationship = lambda t: t.type == "relationship"
-        return [ rs for rs in SearchTerm.objects.filter(topic=self.topic) if isRelationship(rs) ]
+        return  SearchTerm.objects.filter(topic=self.topic, is_literal=False)
 
     def get_relationship_search_output(self):
         output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
-        return [ output(rs) for rs in self.get_relationship_search() ]
+        terms  = self.get_relationship_search()
+        return [ output(rs) for rs in terms ]
 
     def get_literal_search(self):
-        isLiteral = lambda t: t.type == "literal"
-        return [ rs for rs in SearchTerm.objects.filter(topic=self.topic) if isLiteral(rs) ]
+        return SearchTerm.objects.filter(topic=self.topic, is_literal=True)
 
     def get_literal_search_output(self):
         output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
-        return [ output(rs) for rs in self.get_literal_search() ]
+        terms  = self.get_literal_search()
+        return [ output(rs) for rs in terms ]
 
     def ngrams(self, input):
         input = input.split(' ')

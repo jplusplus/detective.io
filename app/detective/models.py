@@ -1,9 +1,10 @@
-from .utils                    import get_topics
-from app.detective             import utils
-from app.detective.permissions import create_permissions, remove_permissions
-from django.core.exceptions    import ValidationError
-from django.db                 import models
-from tinymce.models            import HTMLField
+from .utils                     import get_topics
+from app.detective              import utils
+from app.detective.permissions  import create_permissions, remove_permissions
+from django.core.exceptions     import ValidationError
+from django.db                  import models
+from django.contrib.auth.models import User
+from tinymce.models             import HTMLField
 
 import inspect
 import os
@@ -53,6 +54,7 @@ class Topic(models.Model):
     public      = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
     ontology    = models.FileField(null=True, blank=True, upload_to="ontologies", help_text="Ontology file that descibes your field of study.")
     background  = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
+    author      = models.ForeignKey(User, help_text="Author of this topic.", null=True)
 
     def __unicode__(self):
         return self.title
@@ -117,7 +119,7 @@ class Topic(models.Model):
     def reload(self):
         from app.detective.register import topic_models
         # Register the topic's models again
-        topic_models(self.get_module().__name__)
+        topic_models(self.get_module().__name__, force=True)
 
     def has_default_ontology(self):
         try:
@@ -132,11 +134,18 @@ class Topic(models.Model):
 
 
     def get_absolute_path(self):
-        return "/%s/" % self.slug
+        if self.author is None:
+            return None
+        else:
+            return "/%s/%s/" % (self.author.username, self.slug,)
 
     def link(self):
         path = self.get_absolute_path()
-        return '<a href="%s">%s</a>' % (path, path, )
+        if path is None:
+            return ''
+        else:
+            return '<a href="%s">%s</a>' % (path, path, )
+
     link.allow_tags = True
 
 
@@ -163,13 +172,15 @@ class Article(models.Model):
 # This model aims to describe a research alongside a relationship.
 class SearchTerm(models.Model):
     # This field is deduced from the relationship name
-    subject = models.CharField(null=True, blank=True, default='', editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    subject    = models.CharField(null=True, blank=True, default='', editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    # This field is set automaticly too according the choosen name
+    is_literal = models.BooleanField(editable=False, default=False)
     # Every field are required
-    label   = models.CharField(null=True, blank=True, default='', max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
+    label      = models.CharField(null=True, blank=True, default='', max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
     # This field will be re-written by app.detective.admin
     # to be allow dynamic setting of the choices attribute.
-    name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
-    topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
+    name       = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
+    topic      = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
 
     def find_subject(self):
         subject = None
@@ -180,7 +191,8 @@ class SearchTerm(models.Model):
         return subject
 
     def clean(self):
-        self.subject = self.find_subject()
+        self.subject    = self.find_subject()
+        self.is_literal = self.type == "literal"
         models.Model.clean(self)
 
     @property

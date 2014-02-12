@@ -1,15 +1,8 @@
-angular.module('detectiveServices').factory('User', ['$cookies', '$http', '$timeout', ($cookies, $http, $timeout)->
+angular.module('detectiveServices').factory('User', ['$cookies', '$timeout', ($cookies, $timeout)->
     sdo = {}
     # Function to set the value that update CSRF token and return the object
     sdo.set = (data)->
         $.extend sdo, data, true
-        # Wait a short delay because angular's $cookies
-        # isn't updated in real time
-        $timeout ->
-            # Add CSRF Token for post request
-            if $cookies.csrftoken?
-                $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken
-        , 250
         # Return sdo explicitely
         return sdo
 

@@ -11,6 +11,7 @@ import os
 import sys
 import imp
 
+
 def topics_rules():
     """
         Auto-discover topic-related rules by looking into
@@ -71,21 +72,29 @@ def default_rules(topic):
                 rules.model(model).field(field.name).add(is_editable=modelRules["is_editable"])
     return rules
 
-def import_or_create(path, register=True):
+def import_or_create(path, register=True, force=False):
     try:
+        # For the new module to be written
+        if force:
+            if path in sys.modules: del( sys.modules[path] )
+            raise ImportError
         # Import the models.py file
         module = importlib.import_module(path)
     # File dosen't exist, we create it virtually!
     except ImportError:
-        path_parts = path.split(".")
-        module     = imp.new_module(path_parts[-1])
+        path_parts      = path.split(".")
+        module          = imp.new_module(path)
         module.__name__ = path
+        name            = path_parts[-1]
         # Register the new module in the global scope
         if register:
             # Get the parent module
-            parent      = import_or_create( ".".join( path_parts[0:-1]) )
+            parent = import_or_create( ".".join( path_parts[0:-1]) )
+            # Avoid memory leak
+            if force and hasattr(parent, name):
+                delattr(parent, name)
             # Register this module as attribute of its parent
-            setattr( parent, path_parts[-1], module)
+            setattr(parent, name, module)
             # Register the virtual module
             sys.modules[path] = module
     return module
@@ -97,7 +106,7 @@ def reload_urlconf(urlconf=None):
     if urlconf in sys.modules:
         reload(sys.modules[urlconf])
 
-def topic_models(path, with_api=True):
+def topic_models(path, force=False):
     """
         Auto-discover topic-related model by looking into
         a topic package for an ontology file. This will also
@@ -110,7 +119,7 @@ def topic_models(path, with_api=True):
             {path}.summary
             {path}.urls
     """
-    topic_module = import_or_create(path)
+    topic_module = import_or_create(path, force=force)
     topic_name   = path.split(".")[-1]
     # Ensure that the topic's model exist
     topic = Topic.objects.get(module=topic_name)
@@ -119,7 +128,7 @@ def topic_models(path, with_api=True):
     models_path = path if path.endswith(".models") else '%s.models' % path
     urls_path   = "%s.urls" % path
     # Import or create virtually the models.py file
-    models_module = import_or_create(models_path)
+    models_module = import_or_create(models_path, force=force)
     if topic.ontology is None:
         directory     = os.path.dirname(os.path.realpath( models_module.__file__ ))
         # Path to the ontology file
@@ -132,17 +141,17 @@ def topic_models(path, with_api=True):
         # Also overides the default app label to allow data persistance
         models = owl.parse(ontology, path, app_label=app_label)
         # Makes every model available through this module
-        for m in models: setattr(models_module, m, models[m])
+        for m in models:
+            # Record the model
+            setattr(models_module, m, models[m])
     except TypeError:
         models = []
     except ValueError:
         models = []
-    # No API creation request!
-    if not with_api: return topic_module
     # Generates the API endpoints
     api = NamespacedApi(api_name='v1', urlconf_namespace=app_label)
     # Create resources root if needed
-    resources = import_or_create("%s.resources" % path)
+    resources = import_or_create("%s.resources" % path, force=force)
     # Creates a resource for each model
     for name in models:
         Resource = utils.create_model_resource(models[name])
@@ -158,7 +167,7 @@ def topic_models(path, with_api=True):
         api.register(Resource())
     # Every app have to instance a SummaryResource class
     summary_path   = "%s.summary" % path
-    summary_module = import_or_create(summary_path)
+    summary_module = import_or_create(summary_path, force=force)
     # Take the existing summary resource
     if hasattr(summary_module, 'SummaryResource'):
         SummaryResource = summary_module.SummaryResource
@@ -172,7 +181,7 @@ def topic_models(path, with_api=True):
     # Create url patterns
     urlpatterns = patterns(path, url('', include(api.urls)), )
     # Import or create virtually the url path
-    urls_modules = import_or_create(urls_path)
+    urls_modules = import_or_create(urls_path, force=force)
     # Merge the two url patterns if needed
     if hasattr(urls_modules, "urlpatterns"): urlpatterns += urls_modules.urlpatterns
     # Update the current url pattern

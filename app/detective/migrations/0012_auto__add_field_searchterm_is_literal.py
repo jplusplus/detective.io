@@ -1,20 +1,28 @@
 # -*- coding: utf-8 -*-
-from south.v2    import DataMigration
-import json
+from south.db import db
+from south.v2 import SchemaMigration
+# We can't use the context given orm object
+# if we want to keep the SearchTerm method
+from app.detective.models import SearchTerm
 
-class Migration(DataMigration):
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        json_data=open("app/detective/fixtures/search_terms.json")
-        search_terms = json.load(json_data)
-        for st in search_terms:
-            st["fields"]["topic"] = orm["detective.topic"].objects.get(id=st["fields"]["topic"])
-            obj = orm["detective.searchterm"](**st["fields"])
-            obj.save()
-        json_data.close()
+        # Adding field 'SearchTerm.is_literal'
+        db.add_column(u'detective_searchterm', 'is_literal',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
+
+        sts = SearchTerm.objects.all()
+        # By cleaning the object, we ensure that we set the "is_literal" field
+        for st in sts:
+            st.clean()
+            st.save()
+
 
     def backwards(self, orm):
-        "Write your backwards methods here."
+        # Deleting field 'SearchTerm.is_literal'
+        db.delete_column(u'detective_searchterm', 'is_literal')
 
     no_dry_run = True
     models = {
@@ -44,6 +52,7 @@ class Migration(DataMigration):
         u'detective.searchterm': {
             'Meta': {'object_name': 'SearchTerm'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_literal': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'label': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '250', 'null': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '250'}),
             'subject': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '250', 'null': 'True', 'blank': 'True'}),
@@ -63,6 +72,4 @@ class Migration(DataMigration):
         }
     }
 
-
     complete_apps = ['detective']
-    symmetrical = True

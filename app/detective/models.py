@@ -1,6 +1,7 @@
 from .utils                     import get_topics
 from app.detective              import utils
 from app.detective.permissions  import create_permissions, remove_permissions
+from django.core.cache          import cache
 from django.core.exceptions     import ValidationError
 from django.db                  import models
 from django.contrib.auth.models import User
@@ -94,6 +95,7 @@ class Topic(models.Model):
 
     def get_models(self):
         """ return a list of Model """
+        # We have to load the topic's model
         models_module = self.get_models_module()
         models_list   = []
         for i in dir(models_module):
@@ -199,12 +201,20 @@ class SearchTerm(models.Model):
     def field(self):
         field = None
         if self.name:
-            topic_models = self.topic.get_models()
-            for model in topic_models:
-                # Retreive every relationship field for this model
-                for f in utils.get_model_fields(model):
-                    if f["name"] == self.name:
-                        field = f
+            # Build a cache key with the topic token
+            cache_key = "%s__%s__field" % ( self.topic.module, self.name )
+            # Try to use the cache value
+            if cache.get(cache_key) is not None:
+                field = cache.get(cache_key)
+            else:
+                topic_models = self.topic.get_models()
+                for model in topic_models:
+                    # Retreive every relationship field for this model
+                    for f in utils.get_model_fields(model):
+                        if f["name"] == self.name:
+                            field = f
+        # Very small cache to optimize recording
+        cache.set(cache_key, field, 10)
         return field
 
     @property

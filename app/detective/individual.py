@@ -486,6 +486,8 @@ class IndividualResource(ModelResource):
         aggregation_threshold = 10
 
         def reduce_result(rows):
+            # No nodes, no links
+            if len(rows) == 0: return ([], [],)
             # Initialize structures
             all_nodes = dict()
             # Use defaultdict() to create somewhat of an autovivificating list
@@ -552,7 +554,7 @@ class IndividualResource(ModelResource):
 
         query = """
             START root=node({0})
-            MATCH path = (root)-[*1..{1}]-(leaf)
+            MATCH path = (root)-[*0..{1}]-(leaf)
             WITH extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|ID(n)) as nodes
             WHERE ALL(rel  in relations WHERE rel <> "<<INSTANCE>>")
             RETURN relations, nodes
@@ -563,12 +565,3 @@ class IndividualResource(ModelResource):
 
         self.log_throttled_access(request)
         return self.create_response(request, {'nodes':nodes,'links':links})
-
-'''
-START root=node(273)
-MATCH path = (root)-[*1..2]-(leaf)
-WITH extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|n) as nodes
-WHERE ALL(rel  in relations WHERE rel <> "<<INSTANCE>>")
-AND   ALL(node in nodes     WHERE (node)<-[:`<<INSTANCE>>`]-({ app_label : 'energy' }))
-RETURN nodes, relations
-'''

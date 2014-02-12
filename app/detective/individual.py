@@ -486,6 +486,8 @@ class IndividualResource(ModelResource):
         aggregation_threshold = 10
 
         def reduce_result(rows):
+            # No nodes, no links
+            if len(rows) == 0: return ([], [],)
             # Initialize structures
             all_nodes = dict()
             # Use defaultdict() to create somewhat of an autovivificating list

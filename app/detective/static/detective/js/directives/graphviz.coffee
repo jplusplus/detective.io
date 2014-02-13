@@ -103,7 +103,7 @@ HashMerge = (a={}, b={}) ->
                     depth : 2
                 Individual.graph params, (d) ->
                     scope.data.nodes = HashMerge scope.data.nodes, d.nodes
-                    scope.data.outgoing_links = HashMerge scope.data.outgoing_links, d.links
+                    scope.data.outgoing_links = HashMerge scope.data.outgoing_links, d.outgoing_links
                     do update
 
         cleanWeightZero = (nodes, links) =>

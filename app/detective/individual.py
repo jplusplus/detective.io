@@ -482,7 +482,7 @@ class IndividualResource(ModelResource):
         depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
         aggregation_threshold = 10
 
-        def reduce_destination(outgoing_links):
+        def reduce_destination(outgoing_links, keep_id=None):
             # We count the popularity of each entering relationsip by node
             counter = {}
             # Counter will have the following structure
@@ -494,9 +494,10 @@ class IndividualResource(ModelResource):
             for origin in outgoing_links:
                 for rel in outgoing_links[origin]:
                     for dest in outgoing_links[origin][rel]:
-                        counter[rel]       = counter.get(rel, {})
-                        counter[rel][dest] = counter[rel].get(dest, set())
-                        counter[rel][dest].add(origin)
+                        if int(origin) != int(keep_id):
+                            counter[rel]       = counter.get(rel, {})
+                            counter[rel][dest] = counter[rel].get(dest, set())
+                            counter[rel][dest].add(origin)
             # List of entering link (aggregate outside 'outgoing_links')
             entering_links = {}
             # Check now witch link must be move to entering outgoing_links
@@ -514,12 +515,13 @@ class IndividualResource(ModelResource):
                 entering_links[i]["_AGGREGATION_"] = list( entering_links[i]["_AGGREGATION_"] )
                 # Remove entering_links from
                 for j in outgoing_links:
+                    if int(j) == int(keep_id): continue
                     for rel in outgoing_links[j]:
                         if i in outgoing_links[j][rel]:
                             # Remove the enterging id
                             outgoing_links_copy[j][rel].remove(i)
                         # Remove the relationship
-                        if len(outgoing_links_copy[j][rel]) == 0:
+                        if rel in outgoing_links_copy[j] and len(outgoing_links_copy[j][rel]) == 0:
                             del outgoing_links_copy[j][rel]
                     # Remove the origin
                     if len(outgoing_links_copy[j]) == 0:
@@ -605,7 +607,7 @@ class IndividualResource(ModelResource):
         rows = connection.cypher(query).to_dicts()
 
         nodes, links                   = reduce_origin(rows)
-        outgoing_links, entering_links = reduce_destination(links)
+        outgoing_links, entering_links = reduce_destination(links, keep_id=kwargs['pk'])
 
         self.log_throttled_access(request)
         return self.create_response(request, {'nodes':nodes,'outgoing_links': outgoing_links, 'entering_links': entering_links})

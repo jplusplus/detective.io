@@ -212,14 +212,20 @@ HashMerge = (a, b) ->
                         $rootScope.safeApply()
                     , 200
 
+            textClasses = (d) -> [
+                'name'
+                if not d._displayName then 'toggle-display' else ''
+            ].join ' '
+            # Display name on hover
+            the_nodes.on 'mouseenter', (d)-> svg.select(".name[data-index='#{d.index}']").attr("class", "name")
+            the_nodes.on 'mouseleave', (d)-> svg.select(".name[data-index='#{d.index}']").attr("class", textClasses)
+
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id
             (do the_names.enter).append('svg:text').attr
                     d : nodeUpdate
-                    class : (d) -> [
-                        'name'
-                        if not d._displayName then 'toggle-display' else ''
-                    ].join ' '
+                    'data-index': (d)-> d.index
+                    class : textClasses
                 .text (d) -> d.name
             do (do the_names.exit).remove
             null

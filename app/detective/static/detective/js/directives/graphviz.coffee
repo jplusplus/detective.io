@@ -165,6 +165,7 @@ HashMerge = (a={}, b={}) ->
                 markerHeight : node_size
                 orient : "auto").append 'path').attr 'd', "M0,-5L10,0L0,5"
 
+            is_current = (id) => id is parseInt $routeParams.id
             # Create all new links
             the_links = (svg.selectAll '.link').data links, (d) ->
                 d.source._id + '-' + d._type + '-' + d.target._id
@@ -178,8 +179,7 @@ HashMerge = (a={}, b={}) ->
             # Create all new nodes
             the_nodes = (svg.selectAll '.node').data nodes, (d) -> d._id
             (do the_nodes.enter).insert('svg:circle', 'text').attr('class', 'node').attr
-                    r : (d) =>
-                        if d._id is parseInt $routeParams.id then node_size * 2 else node_size
+                    r : (d) => node_size * ( 1 + 1 * is_current(d._id) )
                     d : nodeUpdate
                 .style
                     fill : (d) -> ($filter "strToColor") d._type
@@ -211,9 +211,11 @@ HashMerge = (a={}, b={}) ->
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id
             (do the_names.enter).append('svg:text').attr
-                    d : nodeUpdate
-                    'data-id': (d)-> d._id
-                    class : textClasses
+                    d            : nodeUpdate
+                    dy           : (d)-> - node_size * ( 1 + 1 * is_current(d._id) )
+                    'data-id'    : (d)-> d._id
+                    class        : textClasses
+                    'text-anchor': "middle"
                 .text (d) -> d.name
             do (do the_names.exit).remove
             null

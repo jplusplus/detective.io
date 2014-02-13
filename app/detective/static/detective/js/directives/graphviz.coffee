@@ -128,7 +128,7 @@ HashMerge = (a, b) ->
             links = []
 
             aggregation = 1
-
+            console.log (_.pairs scope.data.outgoing_links)
             _.map (_.pairs scope.data.outgoing_links), ([source_id, relations]) ->
                 if scope.data.nodes[source_id]?
                     hasAggreg = "_AGGREGATION_" in _.keys relations

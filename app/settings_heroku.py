@@ -86,8 +86,7 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
 # Activate the cache, for true
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
     }
 }
 

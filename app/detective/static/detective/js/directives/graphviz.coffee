@@ -26,10 +26,6 @@ HashMerge = (a={}, b={}) ->
         size       = [ element.width(), element.height() ]
         node_size  = 6
         absUrl     = do $location.absUrl
-        # Colors
-        fadedWhite = "rgba(255,255,255,0.7)"
-        fadedBlack = "rgba(0,0,0,0.2)"
-        white      = "#fff"
 
         svg = ((d3.select element[0]).append 'svg').attr
             width : size[0]
@@ -66,14 +62,6 @@ HashMerge = (a={}, b={}) ->
                 x : 0
                 y : 0
                 width  : _node_size * 2
-                height : _node_size * 2
-                fill   : fadedWhite
-            image = pattern.append 'svg:image'
-            image.attr
-                'xlink:href' : d.image
-                x : 0
-                y : 0
-                width : _node_size * 2
                 height : _node_size * 2
             null
 
@@ -169,12 +157,12 @@ HashMerge = (a={}, b={}) ->
 
             (((defs.append 'marker').attr
                 id : 'marker-end'
+                class: 'arrow'
                 viewBox : "0 -5 10 10"
                 refX : 15
                 refY : -1.5
                 markerWidth : node_size
                 markerHeight : node_size
-                fill: fadedWhite
                 orient : "auto").append 'path').attr 'd', "M0,-5L10,0L0,5"
 
             # Create all new links
@@ -184,7 +172,6 @@ HashMerge = (a={}, b={}) ->
                     class : 'link'
                     d : linkUpdate
                     'marker-end' : 'url(' + absUrl + '#marker-end)'
-                    stroke : (d) -> fadedWhite # ($filter "strToColor") d._type
             # Remove old links
             do (do the_links.exit).remove
 
@@ -195,13 +182,9 @@ HashMerge = (a={}, b={}) ->
                         if d._id is parseInt $routeParams.id then node_size * 2 else node_size
                     d : nodeUpdate
                 .style
-                    fill : (d) ->
-                        if d.image?
-                            return 'url(' + absUrl + '#pattern' + d._id + ')'
-                        ($filter "strToColor") d._type
-                    stroke : (d) -> fadedWhite # ($filter "strToColor") d._type
+                    fill : (d) -> ($filter "strToColor") d._type
                 .each (d) ->
-                    (createPattern d, defs) if d.image?
+                    (createPattern d, defs)
                     null
             # Remove old nodes
             do (do the_nodes.exit).remove

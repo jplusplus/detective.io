@@ -7,6 +7,7 @@ class IndividualSingleCtrl
         Page.loading true
         @scope.get            = (n)=> @scope.individual[n] or false if @scope.individual?
         @scope.hasRels        = @hasRels
+        @scope.hasNetwork     = => not _.isEmpty(@scope.graphnodes.outgoing_links or [])
         @scope.isLiteral      = @isLiteral
         @scope.isString       = (t)=> ["CharField", "URLField"].indexOf(t) > -1
         @scope.isRelationship = (d)=> ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1

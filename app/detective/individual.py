@@ -4,16 +4,14 @@ from app.detective                      import register
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class, to_underscores, get_model_topic
 from django.conf.urls                   import url
-from django.core.exceptions             import ObjectDoesNotExist, ValidationError
+from django.core.exceptions             import ObjectDoesNotExist
 from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
 from django.db.models.query             import QuerySet
-from django.http                        import Http404, HttpResponseBadRequest
 from django.http                        import Http404
 from neo4django.db                      import connection
 from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
-from neo4django.rest_utils              import id_from_url
 from tastypie                           import fields
 from tastypie.authentication            import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization             import Authorization
@@ -26,8 +24,7 @@ from datetime                           import datetime
 from collections                        import defaultdict
 import json
 import re
-import csv
-import tempfile
+import copy
 
 # inspired from django.utils.formats.ISO_FORMATS['DATE_INPUT_FORMATS'][1]
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -485,7 +482,57 @@ class IndividualResource(ModelResource):
         depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
         aggregation_threshold = 10
 
-        def reduce_result(rows):
+        def reduce_destination(outgoing_links, keep_id=None):
+            # We count the popularity of each entering relationsip by node
+            counter = {}
+            # Counter will have the following structure
+            # {
+            #   "<NAME_OF_A_RELATIONSHIP>" : {
+            #       "<IDX_OF_A_DESTINATION>": set("<IDX_OF_AN_ORIGIN>", ...)
+            #   }
+            # }
+            for origin in outgoing_links:
+                for rel in outgoing_links[origin]:
+                    for dest in outgoing_links[origin][rel]:
+                        if int(origin) != int(keep_id):
+                            counter[rel]       = counter.get(rel, {})
+                            counter[rel][dest] = counter[rel].get(dest, set())
+                            counter[rel][dest].add(origin)
+            # List of entering link (aggregate outside 'outgoing_links')
+            entering_links = {}
+            # Check now witch link must be move to entering outgoing_links
+            for rel in counter:
+                for dest in counter[rel]:
+                    # Too much entering  outgoing_links!
+                    if len(counter[rel][dest]) > aggregation_threshold:
+                        entering_links[dest] = entering_links.get(dest, {"_AGGREGATION_": set() })
+                        entering_links[dest]["_AGGREGATION_"] = entering_links[dest]["_AGGREGATION_"].union(counter[rel][dest])
+            # We remove element within a copy to avoid changing the size of the
+            # dict durring an itteration
+            outgoing_links_copy = copy.deepcopy(outgoing_links)
+            for i in entering_links:
+                # Convert aggregation set to list for JSON serialization
+                entering_links[i]["_AGGREGATION_"] = list( entering_links[i]["_AGGREGATION_"] )
+                # Remove entering_links from
+                for j in outgoing_links:
+                    if int(j) == int(keep_id): continue
+                    for rel in outgoing_links[j]:
+                        if i in outgoing_links[j][rel]:
+                            # Remove the enterging id
+                            outgoing_links_copy[j][rel].remove(i)
+                        # Remove the relationship
+                        if rel in outgoing_links_copy[j] and len(outgoing_links_copy[j][rel]) == 0:
+                            del outgoing_links_copy[j][rel]
+                    # Remove the origin
+                    if len(outgoing_links_copy[j]) == 0:
+                        del outgoing_links_copy[j]
+
+            return outgoing_links_copy, entering_links
+
+
+        def reduce_origin(rows):
+            # No nodes, no links
+            if len(rows) == 0: return ([], [],)
             # Initialize structures
             all_nodes = dict()
             # Use defaultdict() to create somewhat of an autovivificating list
@@ -500,6 +547,7 @@ class IndividualResource(ModelResource):
                 START root = node({0})
                 MATCH (root)-[:`<<INSTANCE>>`]-(type)
                 WHERE type.app_label = '{1}'
+                AND HAS(root.name)
                 RETURN ID(root) as ID, root, type
             """.format(','.join([str(ID) for ID in IDs]), get_model_topic(self.get_model()))
             all_raw_nodes = connection.cypher(query).to_dicts()
@@ -559,16 +607,8 @@ class IndividualResource(ModelResource):
         """.format(kwargs['pk'], depth)
         rows = connection.cypher(query).to_dicts()
 
-        (nodes, links) = reduce_result(rows)
+        nodes, links                   = reduce_origin(rows)
+        outgoing_links, entering_links = reduce_destination(links, keep_id=kwargs['pk'])
 
         self.log_throttled_access(request)
-        return self.create_response(request, {'nodes':nodes,'links':links})
-
-'''
-START root=node(273)
-MATCH path = (root)-[*1..2]-(leaf)
-WITH extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|n) as nodes
-WHERE ALL(rel  in relations WHERE rel <> "<<INSTANCE>>")
-AND   ALL(node in nodes     WHERE (node)<-[:`<<INSTANCE>>`]-({ app_label : 'energy' }))
-RETURN nodes, relations
-'''
+        return self.create_response(request, {'nodes':nodes,'outgoing_links': outgoing_links, 'entering_links': entering_links})

@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from south.db import db
 from south.v2 import SchemaMigration
-# We can't use the context given orm object
-# if we want to keep the SearchTerm method
-from app.detective.models import SearchTerm
 
 class Migration(SchemaMigration):
 
@@ -12,13 +9,6 @@ class Migration(SchemaMigration):
         db.add_column(u'detective_searchterm', 'is_literal',
                       self.gf('django.db.models.fields.BooleanField')(default=False),
                       keep_default=False)
-
-        sts = SearchTerm.objects.all()
-        # By cleaning the object, we ensure that we set the "is_literal" field
-        for st in sts:
-            st.clean()
-            st.save()
-
 
     def backwards(self, orm):
         # Deleting field 'SearchTerm.is_literal'

@@ -37,7 +37,7 @@ class ExploreCtrl
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
     selectCountry: (val, old)=>
-        @location.path "/#{@scope.topic}/country/#{val.id}" if val.id?
+        @location.path "/#{@scope.username}/#{@scope.topic}/country/#{val.id}" if val.id?
 
     getTypeCount: ()=>
         return '∞' unless @scope.types?

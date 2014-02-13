@@ -200,7 +200,7 @@ def get_model_node_id(model):
         return None
 
 def get_model_topic(model):
-    return model.__module__.split(".")[-2]
+    return model._meta.app_label or model.__module__.split(".")[-2]
 
 def to_class_name(value=""):
     """

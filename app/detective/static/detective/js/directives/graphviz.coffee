@@ -1,4 +1,4 @@
-HashMerge = (a, b) ->
+HashMerge = (a={}, b={}) ->
     result = { }
     for i of a
         if (i of b) and a[i] isnt b[i]
@@ -86,19 +86,19 @@ HashMerge = (a, b) ->
             if d._id > 0
                 delete scope.data.nodes[d._id]
             else
-                delete scope.data.links[d._parent]['_AGGREGATION_']
+                delete scope.data.outgoing_links[d._parent]['_AGGREGATION_']
 
             do update
 
         loadNode = (d) ->
             if d._id is -1
                 # If it's an aggregation we need to shift 10 elements from it
-                scope.data.links[d._parent]['test'] = scope.data.links[d._parent]['test'] or []
+                scope.data.outgoing_links[d._parent]['test'] = scope.data.outgoing_links[d._parent]['test'] or []
                 for i in [0..9]
-                    tmp_node = scope.data.links[d._parent]['_AGGREGATION_'].shift()
+                    tmp_node = scope.data.outgoing_links[d._parent]['_AGGREGATION_'].shift()
                     break if not tmp_node?
-                    scope.data.links[d._parent]['test'].push tmp_node
-                delete scope.data.links[d._parent]['_AGGREGATION_'] if scope.data.links[d._parent]['_AGGREGATION_'].length is 0
+                    scope.data.outgoing_links[d._parent]['test'].push tmp_node
+                delete scope.data.outgoing_links[d._parent]['_AGGREGATION_'] if scope.data.outgoing_links[d._parent]['_AGGREGATION_'].length is 0
                 do update
             else
                 params =
@@ -107,7 +107,7 @@ HashMerge = (a, b) ->
                     depth : 2
                 Individual.graph params, (d) ->
                     scope.data.nodes = HashMerge scope.data.nodes, d.nodes
-                    scope.data.links = HashMerge scope.data.links, d.links
+                    scope.data.outgoing_links = HashMerge scope.data.outgoing_links, d.links
                     do update
 
         cleanWeightZero = (nodes, links) =>
@@ -132,8 +132,7 @@ HashMerge = (a, b) ->
             links = []
 
             aggregation = 1
-
-            _.map (_.pairs scope.data.links), ([source_id, relations]) ->
+            _.map (_.pairs scope.data.outgoing_links), ([source_id, relations]) ->
                 if scope.data.nodes[source_id]?
                     hasAggreg = "_AGGREGATION_" in _.keys relations
                     aggreg = relations['_AGGREGATION_']
@@ -166,7 +165,7 @@ HashMerge = (a, b) ->
             # Sort by weight (DESC) to know which node should should always display its name
             nodes = _.sortBy nodes, (elem) -> -elem.weight
             for i in [0..(Math.min nodes.length, 3)]
-                nodes[i]._displayName = yes
+                nodes[i]._displayName = yes if nodes[i]?
 
             (((defs.append 'marker').attr
                 id : 'marker-end'
@@ -217,14 +216,21 @@ HashMerge = (a, b) ->
                         $rootScope.safeApply()
                     , 200
 
+            textClasses = (d) ->
+                [
+                    'name'
+                    if not d._displayName then 'toggle-display' else ''
+                ].join ' '
+            # Display name on hover
+            the_nodes.on 'mouseenter', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", "name")
+            the_nodes.on 'mouseleave', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", textClasses)
+
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id
             (do the_names.enter).append('svg:text').attr
                     d : nodeUpdate
-                    class : (d) -> [
-                        'name'
-                        if not d._displayName then 'toggle-display' else ''
-                    ].join ' '
+                    'data-id': (d)-> d._id
+                    class : textClasses
                 .text (d) -> d.name
             do (do the_names.exit).remove
             null

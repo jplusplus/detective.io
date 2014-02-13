@@ -32,7 +32,7 @@ HashMerge = (a={}, b={}) ->
             height : size[1]
         defs = svg.insert 'svg:defs', 'path'
 
-        graph = (((do d3.layout.force).size size).linkDistance 60).charge -300
+        graph = (((do d3.layout.force).size size).linkDistance 90).charge -300
 
         the_links = null
         the_nodes = null
@@ -66,17 +66,18 @@ HashMerge = (a={}, b={}) ->
             null
 
         deleteNode = (d) =>
-            # Make a diference between click and dblclick
-            if d._timer?
-                clearTimeout d._timer
-                d._timer = undefined
+            unless is_current(d._id)
+                # Make a diference between click and dblclick
+                if d._timer?
+                    clearTimeout d._timer
+                    d._timer = undefined
 
-            if d._id > 0
-                delete scope.data.nodes[d._id]
-            else
-                delete scope.data.outgoing_links[d._parent]['_AGGREGATION_']
+                if d._id > 0
+                    delete scope.data.nodes[d._id]
+                else
+                    delete scope.data.outgoing_links[d._parent]['_AGGREGATION_']
 
-            do update
+                do update
 
         loadNode = (d) ->
             if d._id is -1
@@ -110,6 +111,14 @@ HashMerge = (a={}, b={}) ->
                         ++notlinked
 
                 do ((graph.nodes nodes).links links).start
+
+        is_current = (id)=> id is parseInt $routeParams.id
+
+        text_classes = (d) ->
+            [
+                'name'
+                if not d._displayName then 'toggle-display' else ''
+            ].join ' '
 
         update = =>
             # It's useless to process if we do not have any data
@@ -165,7 +174,6 @@ HashMerge = (a={}, b={}) ->
                 markerHeight : node_size
                 orient : "auto").append 'path').attr 'd', "M0,-5L10,0L0,5"
 
-            is_current = (id) => id is parseInt $routeParams.id
             # Create all new links
             the_links = (svg.selectAll '.link').data links, (d) ->
                 d.source._id + '-' + d._type + '-' + d.target._id
@@ -186,6 +194,7 @@ HashMerge = (a={}, b={}) ->
                 .each (d) ->
                     (createPattern d, defs)
                     null
+                .call graph.drag
             # Remove old nodes
             do (do the_nodes.exit).remove
 
@@ -198,15 +207,9 @@ HashMerge = (a={}, b={}) ->
                         loadNode(d)
                         $rootScope.safeApply()
                     , 200
-
-            textClasses = (d) ->
-                [
-                    'name'
-                    if not d._displayName then 'toggle-display' else ''
-                ].join ' '
             # Display name on hover
             the_nodes.on 'mouseenter', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", "name")
-            the_nodes.on 'mouseleave', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", textClasses)
+            the_nodes.on 'mouseleave', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", text_classes)
 
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id
@@ -214,7 +217,7 @@ HashMerge = (a={}, b={}) ->
                     d            : nodeUpdate
                     dy           : (d)-> - node_size * ( 1 + 1 * is_current(d._id) )
                     'data-id'    : (d)-> d._id
-                    class        : textClasses
+                    class        : text_classes
                     'text-anchor': "middle"
                 .text (d) -> d.name
             do (do the_names.exit).remove

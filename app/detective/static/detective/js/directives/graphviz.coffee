@@ -162,7 +162,7 @@ HashMerge = (a, b) ->
             # Sort by weight (DESC) to know which node should should always display its name
             nodes = _.sortBy nodes, (elem) -> -elem.weight
             for i in [0..(Math.min nodes.length, 3)]
-                nodes[i]._displayName = yes
+                nodes[i]._displayName = yes if nodes[i]?
 
             (((defs.append 'marker').attr
                 id : 'marker-end'

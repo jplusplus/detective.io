@@ -1,4 +1,4 @@
-HashMerge = (a, b) ->
+HashMerge = (a={}, b={}) ->
     result = { }
     for i of a
         if (i of b) and a[i] isnt b[i]
@@ -128,7 +128,6 @@ HashMerge = (a, b) ->
             links = []
 
             aggregation = 1
-            console.log (_.pairs scope.data.outgoing_links)
             _.map (_.pairs scope.data.outgoing_links), ([source_id, relations]) ->
                 if scope.data.nodes[source_id]?
                     hasAggreg = "_AGGREGATION_" in _.keys relations
@@ -212,10 +211,11 @@ HashMerge = (a, b) ->
                         $rootScope.safeApply()
                     , 200
 
-            textClasses = (d) -> [
-                'name'
-                if not d._displayName then 'toggle-display' else ''
-            ].join ' '
+            textClasses = (d) ->
+                [
+                    'name'
+                    if not d._displayName then 'toggle-display' else ''
+                ].join ' '
             # Display name on hover
             the_nodes.on 'mouseenter', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", "name")
             the_nodes.on 'mouseleave', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", textClasses)

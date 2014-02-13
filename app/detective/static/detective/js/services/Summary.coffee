@@ -6,8 +6,7 @@ angular.module('detectiveServices').factory("Summary", [ '$resource', '$http', '
     $resource '/api/:topic/v1/summary/:id/', defaultsParams, {
         get: {
             method : 'GET',
-            isArray: false,
-            cache  : true
+            isArray: false
         }
     }
 ])

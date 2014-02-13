@@ -547,6 +547,7 @@ class IndividualResource(ModelResource):
                 START root = node({0})
                 MATCH (root)-[:`<<INSTANCE>>`]-(type)
                 WHERE type.app_label = '{1}'
+                AND HAS(root.name)
                 RETURN ID(root) as ID, root, type
             """.format(','.join([str(ID) for ID in IDs]), get_model_topic(self.get_model()))
             all_raw_nodes = connection.cypher(query).to_dicts()

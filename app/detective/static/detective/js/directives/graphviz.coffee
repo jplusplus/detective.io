@@ -217,14 +217,14 @@ HashMerge = (a, b) ->
                 if not d._displayName then 'toggle-display' else ''
             ].join ' '
             # Display name on hover
-            the_nodes.on 'mouseenter', (d)-> svg.select(".name[data-index='#{d.index}']").attr("class", "name")
-            the_nodes.on 'mouseleave', (d)-> svg.select(".name[data-index='#{d.index}']").attr("class", textClasses)
+            the_nodes.on 'mouseenter', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", "name")
+            the_nodes.on 'mouseleave', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", textClasses)
 
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id
             (do the_names.enter).append('svg:text').attr
                     d : nodeUpdate
-                    'data-index': (d)-> d.index
+                    'data-id': (d)-> d._id
                     class : textClasses
                 .text (d) -> d.name
             do (do the_names.exit).remove

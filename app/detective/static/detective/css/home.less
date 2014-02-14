@@ -68,10 +68,29 @@
     }
 
 
-    .features .illustration {
-        margin:10px 0;
-        padding:0 10px;
-        max-width: 100%;
+    .features {
+
+        .illustration {
+            margin:10px 0;
+            padding:0 10px;
+            max-width: 100%;
+        }
+
+        .card {
+            border:@gray-lighter 1px solid;
+            height:350px;
+            margin:40px 0;
+            position:relative;
+
+            .text {
+                padding:10px;
+                position:absolute;
+                bottom:0;
+                left:0;
+                right:0;
+                background:@gray-lighter;
+            }
+        }
     }
 
     .get-a-quote {
@@ -81,8 +100,8 @@
 
     .featured-investigations {
         padding:40px 0;
-        background: #262420;
-        color: contrast(#262420);
+        background: @brand-secondary;
+        color: contrast(@brand-secondary);
         position:relative;
         overflow:hidden;
 

@@ -8,6 +8,25 @@
         margin-top:-1px * @header-height;
         overflow:hidden;
 
+        .go-down {
+            position:absolute;
+            bottom:20px;
+            left:50%;
+            width:100px;
+            margin-left:-50px;
+            text-align:center;
+            color:white;
+            text-decoration:none;
+            font-weight:bold;
+            .text {
+                font-family: @headings-font-family;
+            }
+            .fa {
+                margin-top:20px;
+                animation: bounce 0.7s ease infinite;
+            }
+        }
+
         &:after {
             content:"";
             width:100%;
@@ -70,33 +89,48 @@
 
     .features {
 
-        .illustration {
-            margin:10px 0;
-            padding:0 10px;
-            max-width: 100%;
-        }
 
         .card {
-            border:@gray-lighter 1px solid;
-            height:350px;
-            margin:40px 0;
+
+            padding-top:40px;
+            background: @brand-secondary;
             position:relative;
+            overflow:hidden;
+
+            &:after {
+                z-index:1;
+                position:absolute;
+                width:300px;
+                height:300px;
+                content:"";
+                background:fade(white, 5);
+                position:absolute;
+                left:50%;
+                margin-left:300px/-2px;
+                top:60px;
+                .rotate(45deg);
+            }
+
+            .illustration {
+                display:block;
+                margin:auto;
+                margin-bottom:40px;
+                width:200px;
+                height:75px;
+                position:relative;
+                z-index:2;
+            }
 
             .text {
                 padding:10px;
-                position:absolute;
-                bottom:0;
-                left:0;
-                right:0;
-                background:@gray-lighter;
+                background:white;
+                display:block;
+                position:relative;
+                z-index:3;
             }
         }
     }
 
-    .get-a-quote {
-        text-transform:uppercase;
-        font-weight:bold;
-    }
 
     .featured-investigations {
         padding:40px 0;

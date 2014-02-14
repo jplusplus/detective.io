@@ -10,7 +10,7 @@
                 </h1>
                 <h3 class="top0">Structure your investigation<br />&amp; mine your data</h3>
             </div>
-            <a class="go-down">
+            <a class="go-down" ng-click="scrollToFeatures = true">
                 <span class="text">Discover how</span><br />
                 <i class="fa fa-arrow-down"></i>
             </a>
@@ -20,8 +20,8 @@
 
     <div class="features bg-light">
         <div class="container">
-
             <div class="text-center top40 bottom40">
+                <a scroll-to="600" ng-if="scrollToFeatures == true" reset="scrollToFeatures"></a>
                 <p class="lead">
                     Simply describe your field of inquiry and <strong>Detective.io builds</strong><br />
                     the input interface as well as a state of the art front-end.

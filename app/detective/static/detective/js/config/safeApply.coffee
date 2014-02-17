@@ -1,4 +1,4 @@
-angular.module('detective').config ["$provide", ($provide)->
+angular.module('detective.config').config ["$provide", ($provide)->
     return $provide.decorator "$rootScope", [
         "$delegate"
         ($delegate) ->

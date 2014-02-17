@@ -114,4 +114,4 @@ class IndividualListCtrl
 
 
 
-angular.module('detective').controller 'individualListCtrl', IndividualListCtrl
+angular.module('detective.controller').controller 'individualListCtrl', IndividualListCtrl

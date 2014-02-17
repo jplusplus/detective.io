@@ -1,0 +1,47 @@
+html body .panel {
+    color:@gray-darker;
+    .border-radius(2px);
+    .box-shadow( ~"0 -2px 0 rgba(0,0,0, 0.2) inset, 0 1px 2px rgba(0,0,0, 0.07)" );
+    border-bottom:0;
+
+    .panel-heading {
+        margin-top:0;
+        background:fade(#fff, 5);
+        border-bottom:1px solid fade(#fff, 20);
+    }
+
+    a {
+        color:mix(@gray-darker, @link-color);
+    }
+
+    &.panel-colored {
+        color:white;
+        a {
+            color:mix(#fff, @link-color);
+        }
+    }
+
+    &.panel-bg {
+
+        &.panel-primary {
+            background:@brand-primary;
+        }
+
+        &.panel-danger {
+            background:@brand-danger;
+        }
+
+        &.panel-success {
+            background:@brand-success;
+        }
+
+        &.panel-warning {
+            background:@brand-warning;
+        }
+
+        &.panel-info {
+            background:@brand-info;
+        }
+
+    }
+}

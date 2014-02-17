@@ -19,6 +19,7 @@ class IndividualSingleCtrl
         @scope.isImg          = (f)=> f.name is 'image'
         @scope.isMono         = (f)=> @scope.isAddr(f) or @scope.isImg(f)
         @scope.graphnodes     = []
+        @scope.frontStyle     = (ref)=> 'background-color': @filter("strToColor")(ref)
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -91,4 +92,4 @@ class IndividualSingleCtrl
             ), 500
 
 
-angular.module('detective').controller 'individualSingleCtrl', IndividualSingleCtrl
+angular.module('detective.controller').controller 'individualSingleCtrl', IndividualSingleCtrl

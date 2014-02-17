@@ -1,0 +1,17 @@
+.ngProgressLite .ngProgressLiteBar  {
+    z-index: @zindex-loading;
+    background: @brand-tertiary;
+    position:absolute;
+    top:@header-height;
+
+    .transition(@header-open-speed);
+    .translate(0, 0);
+
+    .is-home & {
+        .translate(0, -100px);
+    }
+
+    .ngProgressLiteBarShadow {
+        .box-shadow(~"0 0 10px @{brand-tertiary}, 0 0 5px @{brand-tertiary}");
+    }
+}

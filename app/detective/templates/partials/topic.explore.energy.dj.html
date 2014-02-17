@@ -1,6 +1,6 @@
 {% load staticfiles %}
 
-<div id="energy">
+<div class="explore">
 
 	<div class="banner banner-big" parallax=".bg" speed="0.9">
 		<img src="{% static 'detective-energy/heading.jpg' %}" class="bg" />
@@ -24,7 +24,7 @@
 			<a scroll-to="600" ng-if="scrollToExplore == true" reset="scrollToExplore"></a>
 			<div class="top50 bottom40">
 				<div class="row">
-					<form class="col-md-8 col-md-push-2" role="search">
+					<form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl">
 						<div class="input-group">
 	  						<span class="input-group-addon"><i class="fa fa-search"></i></span>
 							<input type="search"

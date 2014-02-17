@@ -6,4 +6,4 @@ class HomeCtrl
     	@Page.title "Structure your investigation and mine your data", false
 
 
-angular.module('detective').controller 'homeCtrl', HomeCtrl
+angular.module('detective.controller').controller 'homeCtrl', HomeCtrl

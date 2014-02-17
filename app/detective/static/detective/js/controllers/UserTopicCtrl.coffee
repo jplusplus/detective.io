@@ -25,4 +25,4 @@ class UserTopicCtrl
             # Return a deffered object
             deferred.promise
 
-angular.module('detective').controller 'userTopicCtrl', UserTopicCtrl
+angular.module('detective.controller').controller 'userTopicCtrl', UserTopicCtrl

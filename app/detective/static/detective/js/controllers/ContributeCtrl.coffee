@@ -415,4 +415,4 @@ class ContributeCtrl
         (field)=>
             not individual.isVisible(field) and @isAllowedType(field.type)
 
-angular.module('detective').controller 'contributeCtrl', ContributeCtrl
+angular.module('detective.controller').controller 'contributeCtrl', ContributeCtrl

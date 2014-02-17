@@ -557,8 +557,8 @@ class SummaryResource(Resource):
                 # Store the token as an object
                 objects += self.search(token)[:5]
             # Or if the previous word is a preposition
-            elif is_object(query, token) and is_last_token:
-                if token not in searched_tokens and len(token) > 3:
+            elif is_object(query, token) or is_last_token:
+                if token not in searched_tokens and len(token) > 1:
                     # Looks for entities into the database
                     entities = self.search(token)[:5]
                     # Do not search this token again

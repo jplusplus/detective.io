@@ -18,7 +18,7 @@ class ExploreCtrl
         # Set page's title
         @Page.title @scope.meta.title
         # Build template url
-        @scope.templateUrl = "/partial/explore-#{@scope.topic}.html"
+        @scope.templateUrl = "/partial/topic.explore-#{@scope.topic}.html"
         # Countries info
         @scope.countries = @Summary.get id:"countries"
         # Types info
@@ -27,32 +27,17 @@ class ExploreCtrl
         @Summary.get id:"forms", (d)=> @scope.forms = _.values(d)
         # Country where the user click
         @scope.selectedCountry = {}
-        @scope.selectedIndividual = {}
         @scope.isSearchable = (f)-> f.rules? && f.rules.is_searchable
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
         @scope.$watch "selectedCountry", @selectCountry, true
-        @scope.$watch "selectedIndividual", @selectIndividual, true
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
     selectCountry: (val, old)=>
         @location.path "/#{@scope.username}/#{@scope.topic}/country/#{val.id}" if val.id?
-
-    selectIndividual: (val, old)=>
-        # Single entity selected
-        if val.predicate? and val.predicate.name is "<<INSTANCE>>"
-            @location.path "/#{@scope.username}/#{@scope.topic}/#{val.object.toLowerCase()}/#{val.subject.name}"
-        # Full RDF-formated research
-        else if val.predicate? and val.object? and val.object != ""
-            # Do not pass the label
-            delete val.label
-            # Create a JSON query to pass though the URL
-            query = angular.toJson val
-            @location.path "/#{@scope.username}/#{@scope.topic}/search/"
-            @location.search "q", query
 
     getTypeCount: ()=>
         return '∞' unless @scope.types?
@@ -64,4 +49,4 @@ class ExploreCtrl
 
 
 
-angular.module('detective').controller 'exploreCtrl', ExploreCtrl
+angular.module('detective.controller').controller 'exploreCtrl', ExploreCtrl

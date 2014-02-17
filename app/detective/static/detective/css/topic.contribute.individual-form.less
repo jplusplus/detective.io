@@ -1,0 +1,110 @@
+#contribute {
+
+    .individual-forms {
+
+        .individual {
+            margin-top:30px;
+            margin-bottom:30px;
+            position:relative;
+            .box-shadow( 0 -3px 0 fade(#000, 40) inset);
+
+
+            &.closed {
+                padding:10px 30px;
+                .head, .form-horizontal, .errors, .form-footer {
+                    display:none;
+                }
+            }
+
+            .head {
+                position:relative;
+                margin:0 20px;
+                padding:30px 10px;
+                padding-bottom:20px;
+                border-bottom:fade(#000, 10) 1px solid;
+
+                .color-tag {
+                    margin-right:10px;
+                }
+
+                h3 {
+                    margin:0;
+                    margin-right:200px;
+                    &:first-letter {
+                        text-transform:uppercase;
+                    }
+                    a {
+                        text-decoration:underline;
+                    }
+                }
+
+                h4 {
+                    margin:0;
+                    color:mix(#000, white);
+                }
+
+            }
+            .head, .restore {
+                .btns {
+                    float:right;
+                    margin-left:10px;
+                }
+            }
+
+            .field.loading {
+                min-height:auto;
+
+                input, button {
+                    .progress-striped .progress-bar();
+                    .progress-bar-variant(#eee);
+                    .progress.active .progress-bar();
+                }
+
+                &:before {
+                    background:white;
+                }
+            }
+
+            .help-block {
+                color:mix(#000, white);
+            }
+
+            .multiple {
+                margin-bottom:5px;
+            }
+
+            .input-group-addon {
+                cursor:pointer;
+            }
+
+            .ask-for-new {
+                padding:10px;
+                background:fade(#000, 10);
+                margin-bottom:5px;
+            }
+
+            label:first-letter {
+                text-transform: uppercase;
+            }
+        }
+
+        .form-footer {
+            margin-top:20px;
+            background:#fefefe;
+            border-top:1px solid #eee;
+        }
+
+        .saved .form-footer {
+            color: @panel-success-text;
+            background: @panel-success-heading-bg;
+            border-color: darken(@panel-success-border, 5);
+        }
+
+        .failed .form-footer {
+            color: @panel-warning-text;
+            background: @panel-warning-heading-bg;
+            border-color: darken(@panel-warning-border, 5);
+        }
+    }
+
+}

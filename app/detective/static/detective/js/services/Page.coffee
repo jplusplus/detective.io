@@ -1,4 +1,4 @@
-angular.module('detective').factory "Page", ["ngProgressLite", (ngProgressLite)->
+angular.module('detective.service').factory "Page", ["ngProgressLite", (ngProgressLite)->
     # ──────────────────────────────────────────────────────────────────────────
     # Private attributes and methods
     # ──────────────────────────────────────────────────────────────────────────

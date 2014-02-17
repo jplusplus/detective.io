@@ -22,7 +22,7 @@ DATABASES = {
 DATABASES['default']['OPTIONS'] = {'autocommit': True,}
 
 # Parse url given into environment variable
-NEO4J_URL  = urlparse( os.getenv('NEO4J_URL') )
+NEO4J_URL  = urlparse( os.getenv('NEO4J_URL', '') )
 NEO4J_OPTIONS = {}
 
 # Determines the hostname
@@ -79,6 +79,10 @@ COMPRESS_JS_FILTERS = (
     "compressor.filters.jsmin.JSMinFilter",
     "compressor.filters.template.TemplateFilter",
 )
+
+COMPRESS_OFFLINE_CONTEXT = {
+    'STATIC_URL': STATIC_URL
+}
 
 COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL

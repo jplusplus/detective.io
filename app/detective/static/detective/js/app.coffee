@@ -34,7 +34,7 @@ detective = angular
                         # Set the 404
                         $rootScope._is404 = is404
                         # Disabled loading
-                        Page.loading false                        
+                        Page.loading false if is404
                     $rootScope._is404
                 $rootScope.$on "$routeChangeStart", -> $rootScope.is404(no)                
         ]

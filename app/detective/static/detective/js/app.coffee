@@ -27,6 +27,16 @@ detective = angular
                 $rootScope.location  = $location;
                 $rootScope.user      = user
                 $rootScope.Page      = Page
+                # Update global render
+                $rootScope.is404     = (is404)-> 
+                    # Value given
+                    if is404?
+                        # Set the 404
+                        $rootScope._is404 = is404
+                        # Disabled loading
+                        Page.loading false                        
+                    $rootScope._is404
+                $rootScope.$on "$routeChangeStart", -> $rootScope.is404(no)                
         ]
     )
     .config(
@@ -145,7 +155,7 @@ detective = angular
                         reloadOnSearch: false
                         resolve: UserTopicCtrl.resolve
                     })
-                    .otherwise redirectTo: '/404'
+                    .otherwise templateUrl: '/partial/404.html'
         ]
     )
 

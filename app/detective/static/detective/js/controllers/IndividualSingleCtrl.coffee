@@ -43,7 +43,7 @@ class IndividualSingleCtrl
                  # Global loading off
                 Page.loading false
         # Not found
-        , => @location.path "/404"
+        , => @scope.is404(yes)
         # Get meta information for this type
         @Summary.get { id: "forms", topic: @scope.topic}, (data)=>
             @scope.resource = data

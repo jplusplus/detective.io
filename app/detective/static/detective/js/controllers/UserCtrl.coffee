@@ -8,7 +8,7 @@ class UserCtrl
         user: ($rootScope, $route, $q, $location, Common)->
             notFound    = ->
                 deferred.reject()
-                $location.path "/404"
+                $scope.is404(yes)
                 deferred
             deferred    = $q.defer()
             routeParams = $route.current.params

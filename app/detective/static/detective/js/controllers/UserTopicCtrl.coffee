@@ -4,7 +4,7 @@ class UserTopicCtrl
         topic: ($rootScope, $route, $q, $location, Common)->
             notFound    = ->
                 deferred.reject()
-                $location.path "/404"
+                $rootScope.is404(yes)
                 deferred
             deferred    = $q.defer()
             routeParams = $route.current.params

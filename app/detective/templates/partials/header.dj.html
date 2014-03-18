@@ -16,24 +16,24 @@
 
     <form class="topic-search" role="search" ng-controller="SearchFormCtrl">
 
-        <div ng-if="topic">
-        	<select class="btn btn-default">
-        		<option value="energy" selected>Energy</option>
-        	</select>
+    	<select class="btn btn-default" ng-model="topic" ng-options="t.slug as t.title for t in topics">
+            <option value="">Choose...</option>   
+        </select>
+
+        <span ng-repeat="t in topics" ng-show="t.slug == topic">
 
             <input type="search"
                     placeholder="Search linked individuals in our graph database..."
                     tt-typeahead
-                    tt-individual="'summary'"
-                    tt-topic="'[[topic]]'"
                     tt-model="selectedIndividual"
-                    remote="/api/[[topic]]/v1/summary/human/?q=%QUERY"
-                    prefetch="/api/[[topic]]/v1/summary/mine/"
+                    remote="/api/[[t.slug]]/v1/summary/human/?q=%QUERY"
+                    prefetch="/api/[[t.slug]]/v1/summary/mine/"
                     value-key="label"
                     limit="10"
                     class="form-control"
                     id="input-search" />
-        </div>
+        </span>
+
     </form>
 
 </header>

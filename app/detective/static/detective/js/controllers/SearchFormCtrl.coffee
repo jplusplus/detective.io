@@ -1,18 +1,27 @@
 class SearchFormCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$location', 'Common']
+    @$inject: ['$scope', '$routeParams', '$location', 'Common', 'User']
 
-    constructor: (@scope, @routeParams, @location, @Common)->
+    constructor: (@scope, @routeParams, @location, @Common, @User)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @scope.selectedIndividual = {}
-        @Common.query type: 'topic', (topics)=> @scope.topics = topics
+        @scope.selectedIndividual = {}        
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
+        @scope.$watch (=>@User), @fetchTopics, true
         @scope.$watch "selectedIndividual", @selectIndividual, true
-        @scope.$watch (=>@routeParams), (=> @scope.topic = @routeParams.topic), yes
+        @scope.$watch (=>@routeParams), (=> @scope.topic = @routeParams.topic or @scope.topic), yes
+
+
+    fetchTopics: (v,w)=>
+        @Common.query type: 'topic', (topics)=> 
+            # Every available topic execpt common
+            @scope.topics = _.reject topics, (t)-> t.slug is "common"
+            # Take the first topic as default topic
+            @scope.topic = @scope.topics[0].slug unless @scope.topic            
+
 
 
     selectIndividual: (val, old)=>

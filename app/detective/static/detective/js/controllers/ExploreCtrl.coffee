@@ -4,15 +4,13 @@ class ExploreCtrl
 
     constructor: (@scope, @routeParams, @Summary, @location, @timeout, @filter, @Page, topic)->
         @scope.getTypeCount = @getTypeCount
-        @Page.loading yes
+        @Page.loading no
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Current individual scope
         @scope.topic    = @routeParams.topic
-        @scope.username = @routeParams.username
-        # Disable loading mode
-        @Page.loading no
+        @scope.username = @routeParams.username        
         # Meta data about this topic
         @scope.meta = topic
         # Set page's title

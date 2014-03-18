@@ -32,7 +32,7 @@ angular.module('detective.directive').directive "parallax", ["$window", ($window
             # First positioning of the bg
             update() unless is_touch_device
         target  = angular.element(elm).find(attr.parallax)
-        overlay = angular.element(elm).find(attr.overlay)
+        overlay = angular.element(elm).find(attr.overlay)        
         # Window element
         wdw = angular.element($window)
         # Unbind existing scroll handler
@@ -41,6 +41,8 @@ angular.module('detective.directive').directive "parallax", ["$window", ($window
         wdw.bind "scroll.parallax resize.parallax", ()-> update(target, wdw) unless is_touch_device
         # Unbind existing scroll handler when destroying the directive
         scope.$on '$destroy', -> wdw.unbind "scroll.parallax resize.parallax"
+        # Init again if image height change (Firefox fix)
+        scope.$watch (-> target.height() ), init
         # First initialization
         init()
 ]

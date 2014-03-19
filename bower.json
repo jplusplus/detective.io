@@ -1,6 +1,6 @@
 {
   "name": "detective",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "dependencies": {
     "angular-all-unstable": "1.1.5",
     "angular-elastic": "2.2.0",

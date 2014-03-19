@@ -198,15 +198,18 @@ HashMerge = (a={}, b={}) ->
             # Remove old nodes
             do (do the_nodes.exit).remove
 
+            ###
             # Define action handlers
             the_nodes.on 'dblclick', deleteNode
-            the_nodes.on 'click', (d) ->
+            the_nodes.on 'click', (d) ->                
                 if not d._timer?
                     d._timer = setTimeout =>
                         d._timer = undefined
                         loadNode(d)
                         $rootScope.safeApply()
                     , 200
+            ###
+            
             # Display name on hover
             the_nodes.on 'mouseenter', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", "name")
             the_nodes.on 'mouseleave', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", text_classes)

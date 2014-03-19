@@ -4,6 +4,7 @@ class BulkUploadCtrl
 
     constructor: (@scope, @http, @routeParams, @Page, @Individual, @timeout, @Common)->
         @Page.title "Bulk Upload", no
+        @Page.loading no
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────

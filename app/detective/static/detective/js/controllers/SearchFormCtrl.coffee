@@ -39,7 +39,7 @@ class SearchFormCtrl
             delete val.label
             # Create a JSON query to pass though the URL
             query = angular.toJson val
-            @location.path "/#{@scope.link}/search/"
+            @location.path "#{@scope.link}search"
             @location.search "q", query
 
 angular.module('detective.controller').controller 'searchFormCtrl', SearchFormCtrl

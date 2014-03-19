@@ -3,7 +3,7 @@ Load Django static tags
 {% load staticfiles %}
 ###
 
-angular.module('detective').directive "countryMap", ()->
+angular.module('detective.directive').directive "countryMap", ()->
     scope:
         # What to when clicking a country
         click: "&?"
@@ -26,8 +26,8 @@ angular.module('detective').directive "countryMap", ()->
             # Draw the values on the map (chloroplete)
             draw = ()->
                 values       = _.map _.filter(scope.values, (d)-> d.count?), (d)-> d.count
-                disableColor = "#413C38"
-                colorscale   = chroma.scale(["#fff", "#BFB8A6"]).domain([_.min(values), _.max(values)])
+                disableColor = "#fff"
+                colorscale   = chroma.scale(["#978E73", "#FFE8A3"]).domain([_.min(values), _.max(values)])
                 map.getLayer("countries").style
                     fill: (country, path) ->
                         item = scope.values[country["iso-a3"]]

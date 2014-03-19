@@ -7,6 +7,7 @@ class IndividualSingleCtrl
         Page.loading true
         @scope.get            = (n)=> @scope.individual[n] or false if @scope.individual?
         @scope.hasRels        = @hasRels
+        @scope.hasNetwork     = => not _.isEmpty(@scope.graphnodes.outgoing_links or [])
         @scope.isLiteral      = @isLiteral
         @scope.isString       = (t)=> ["CharField", "URLField"].indexOf(t) > -1
         @scope.isRelationship = (d)=> ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
@@ -18,6 +19,7 @@ class IndividualSingleCtrl
         @scope.isImg          = (f)=> f.name is 'image'
         @scope.isMono         = (f)=> @scope.isAddr(f) or @scope.isImg(f)
         @scope.graphnodes     = []
+        @scope.frontStyle     = (ref)=> 'background-color': @filter("strToColor")(ref)
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -41,7 +43,7 @@ class IndividualSingleCtrl
                  # Global loading off
                 Page.loading false
         # Not found
-        , => @location.path "/404"
+        , => @scope.is404(yes)
         # Get meta information for this type
         @Summary.get { id: "forms", topic: @scope.topic}, (data)=>
             @scope.resource = data
@@ -90,4 +92,4 @@ class IndividualSingleCtrl
             ), 500
 
 
-angular.module('detective').controller 'individualSingleCtrl', IndividualSingleCtrl
+angular.module('detective.controller').controller 'individualSingleCtrl', IndividualSingleCtrl

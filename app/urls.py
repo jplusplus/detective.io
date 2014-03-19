@@ -34,8 +34,8 @@ urlpatterns = patterns('',
     url(r'^[a-zA-Z0-9_\-/]+/[a-zA-Z0-9_\-/]+/\w+/$',              'app.detective.views.home', name='list'),
     url(r'^[a-zA-Z0-9_\-/]+/[a-zA-Z0-9_\-/]+/\w+/\d+/$',          'app.detective.views.home', name='single'),
     url(r'^[a-zA-Z0-9_\-/]+/[a-zA-Z0-9_\-/]+/contribute/$',       'app.detective.views.home', name='contribute'),
-    url(r'^partial/explore-(?P<topic>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial_explore', name='partial_explore'),
-    url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/]+))\.html$',  'app.detective.views.partial', name='partial'),
+    url(r'^partial/topic.explore.(?P<topic>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial_explore', name='partial_explore'),
+    url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/.]+))\.html$',  'app.detective.views.partial', name='partial'),
     url(r'^tinymce/', include('tinymce.urls')),
 )
 

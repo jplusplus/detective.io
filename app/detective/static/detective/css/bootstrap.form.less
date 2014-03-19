@@ -1,0 +1,20 @@
+.form-control, .form-control:focus {
+    .box-shadow(none);
+    border-width:0;
+    outline:1px solid fade(#000, 10);
+    &.disabled {
+        background-color:@input-bg-disabled;
+    }
+}
+
+.btn {
+    border-bottom-width:2px;
+
+    .input-group-btn & {
+        padding-bottom:@padding-base-vertical - 2px;
+    }
+}
+
+.btn-stroke {
+  .button-variant(white, fade(white, 0), white);
+}

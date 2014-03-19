@@ -155,6 +155,7 @@ COMPRESS_CSS_FILTERS = (
 
 COMPRESS_JS_FILTERS = (
     "compressor.filters.template.TemplateFilter",
+    "compressor.filters.jsmin.JSMinFilter",
 )
 
 COMPRESS_TEMPLATE_FILTER_CONTEXT = {
@@ -163,7 +164,7 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
 
 # Remove BeautifulSoup requirement
 COMPRESS_PARSER = 'compressor.parser.HtmlParser'
-COMPRESS_ENABLED = False
+COMPRESS_ENABLED = True
 #INTERNAL_IPS = ('127.0.0.1',)
 
 TASTYPIE_DEFAULT_FORMATS = ['json']

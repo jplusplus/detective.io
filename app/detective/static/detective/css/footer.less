@@ -1,0 +1,48 @@
+.pull-footer {
+    margin-bottom:-80px !important;
+}
+
+footer {
+    padding-top:80px;
+    font-size:90%;
+    clear:both;
+
+    .links {
+        @bg:lighten(@body-bg, 5);
+        @color:contrast(@bg);
+        background:@bg;
+
+        ul, li {
+            margin:0;
+            padding:0;
+            display:block;
+            float:left;
+
+            a {
+                text-transform: uppercase;
+                text-decoration: none;
+                font-size:80%;
+                display:inline-block;
+                padding:0 30px;
+                height:70px;
+                line-height:70px;
+                border-left:1px @body-bg solid;
+                color:mix(@link-color, @color);
+                .transition(0.7s);
+
+                &:hover {
+                    background:lighten(@bg, 20);
+                }
+
+            }
+
+            .last a {
+                border-right:1px @body-bg solid;
+            }
+        }
+    }
+
+    .legals {
+        padding:10px;
+    }
+}

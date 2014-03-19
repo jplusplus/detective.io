@@ -1,11 +1,11 @@
 {
   "name": "detective",
-  "version": "1.3.0",
+  "version": "1.3.3",
   "dependencies": {
     "angular-all-unstable": "1.1.5",
     "angular-elastic": "2.2.0",
     "angular-ui-bootstrap-bower": "0.6.0",
-    "bootstrap": "3.0.0",
+    "bootstrap": "3.1.1",
     "chroma-js": "https://raw.github.com/gka/chroma.js/7b06f8df0e95450fa6ed9266c3cc3efbf3e53fc9/chroma.min.js",
     "d3": "~3.4.0",
     "jquery": "1.9.1",

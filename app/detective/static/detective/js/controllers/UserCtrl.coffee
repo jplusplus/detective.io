@@ -8,7 +8,7 @@ class UserCtrl
         user: ($rootScope, $route, $q, $location, Common)->
             notFound    = ->
                 deferred.reject()
-                $location.path "/404"
+                $scope.is404(yes)
                 deferred
             deferred    = $q.defer()
             routeParams = $route.current.params
@@ -230,4 +230,4 @@ class UserCtrl
     unknownError: ()=>
         @scope.error = "An unexpected error happened, sorry for that."
 
-angular.module('detective').controller 'userCtrl', UserCtrl
+angular.module('detective.controller').controller 'userCtrl', UserCtrl

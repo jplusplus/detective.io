@@ -1,15 +1,17 @@
 class UserTopicCtrl
     # Public method to resolve
     @resolve:
-        topic: ($rootScope, $route, $q, $location, Common)->
+        topic: ($rootScope, $route, $q, $location, Common, Page)->
             notFound    = ->
                 deferred.reject()
-                $location.path "/404"
+                $rootScope.is404(yes)
                 deferred
             deferred    = $q.defer()
             routeParams = $route.current.params
             # Checks that the current topic and user exists together
             if routeParams.topic? and routeParams.username?
+                # Activate loading mode
+                Page.loading yes       
                 # Retreive the topic for this user
                 params =
                     type: "topic"
@@ -25,4 +27,4 @@ class UserTopicCtrl
             # Return a deffered object
             deferred.promise
 
-angular.module('detective').controller 'userTopicCtrl', UserTopicCtrl
+angular.module('detective.controller').controller 'userTopicCtrl', UserTopicCtrl

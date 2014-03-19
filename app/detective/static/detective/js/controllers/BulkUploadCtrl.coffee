@@ -4,6 +4,7 @@ class BulkUploadCtrl
 
     constructor: (@scope, @http, @routeParams, @Page, @Individual, @timeout, @Common)->
         @Page.title "Bulk Upload", no
+        @Page.loading no
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
@@ -36,7 +37,7 @@ class BulkUploadCtrl
 
         @timeout( =>
             if @scope.feedback and @scope.feedback.status == "enqueued" and @scope.feedback.token
-                params = { 
+                params = {
                     type: "jobs"
                     id  : @scope.feedback.token
                 }
@@ -67,6 +68,6 @@ class BulkUploadCtrl
         field_name = "file" + (@scope.file_fields.length + 1)
         @scope.file_fields.push(field_name)
 
-angular.module('detective').controller 'BulkUploadCtrl', BulkUploadCtrl
+angular.module('detective.controller').controller 'BulkUploadCtrl', BulkUploadCtrl
 
 # EOF

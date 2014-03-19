@@ -72,7 +72,7 @@ class IndividualListCtrl
                     # Set page's title
                     @Page.title meta.verbose_name_plural
                 # Unkown type
-                else @location.path "/404"
+                else @scope.is404(yes)
 
     # List parameters
     getParams: =>
@@ -114,4 +114,4 @@ class IndividualListCtrl
 
 
 
-angular.module('detective').controller 'individualListCtrl', IndividualListCtrl
+angular.module('detective.controller').controller 'individualListCtrl', IndividualListCtrl

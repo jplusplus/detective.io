@@ -1,4 +1,4 @@
-angular.module('detectiveServices').factory("Search", [ '$resource', '$http', ($resource, $http)->
+angular.module('detective.service').factory("Search", [ '$resource', '$http', ($resource, $http)->
     $resource '/api/:topic/v1/:type/search/#', { topic: "common" }, {
         query: {
             method : 'GET',

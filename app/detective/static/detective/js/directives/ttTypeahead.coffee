@@ -1,4 +1,4 @@
-angular.module('detective').directive "ttTypeahead", ($parse, $routeParams, User)->
+angular.module('detective.directive').directive "ttTypeahead", ($parse, $routeParams, User)->
     lastDataset = []
     # Use underscore's template
     # @TODO use $compile from angular

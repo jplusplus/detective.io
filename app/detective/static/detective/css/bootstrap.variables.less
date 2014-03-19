@@ -18,7 +18,7 @@
 // Brand colors
 // -------------------------
 
-@brand-primary:         #FDE59F;
+@brand-primary:         #ffeebc;
 @brand-success:         #5cb85c;
 @brand-warning:         #F9E76D;
 @brand-danger:          #d9534f;
@@ -28,14 +28,14 @@
 // Scaffolding
 // -------------------------
 
-@body-bg:               darken(#2E2D2A, 5%);
-@text-color:            white;
+@body-bg:               #F0F0F0;
+@text-color:            #2E2D2A;
 
 // Links
 // -------------------------
 
-@link-color:            @brand-primary;
-@link-hover-color:      darken(@link-color, 15%);
+@link-color:            mix(@brand-primary, @text-color);
+@link-hover-color:      darken(@link-color, 30%);
 
 // Typography
 // -------------------------
@@ -45,14 +45,14 @@
 @font-family-monospace:   Monaco, Menlo, Consolas, "Courier New", monospace;
 @font-family-base:        @font-family-sans-serif;
 
-@font-size-base:          16px;
+@font-size-base:          15px;
 @font-size-large:         ceil(@font-size-base * 1.25); // ~18px
 @font-size-small:         ceil(@font-size-base * 0.85); // ~12px
 
 @line-height-base:        1.428571429; // 20/14
 @line-height-computed:    floor(@font-size-base * @line-height-base); // ~20px
 
-@headings-font-family:    'Merriweather', @font-family-serif;
+@headings-font-family:    'Arvo', @font-family-serif;
 @headings-font-weight:    500;
 @headings-line-height:    1.1;
 
@@ -67,8 +67,8 @@
 // -------------------------
 // Based on 14px font-size and 1.428 line-height (~20px to start)
 
-@padding-base-vertical:          8px;
-@padding-base-horizontal:        12px;
+@padding-base-vertical:          4px;
+@padding-base-horizontal:        6px;
 
 @padding-large-vertical:         14px;
 @padding-large-horizontal:       16px;
@@ -80,7 +80,7 @@
 @line-height-small:              1.5;
 
 @border-radius-base:             2px;
-@border-radius-large:            4px;
+@border-radius-large:            2px;
 @border-radius-small:            2px;
 
 @component-active-bg:            @brand-primary;
@@ -111,7 +111,7 @@
 @btn-default-bg:                 #fafafa;
 @btn-default-border:             #ccc;
 
-@btn-primary-color:              darken(@brand-primary, 80%);
+@btn-primary-color:              contrast(@brand-primary);
 @btn-primary-bg:                 @brand-primary;
 @btn-primary-border:             rgba(0,0,0,.2);
 
@@ -591,7 +591,7 @@
 
 // Type
 // ------------------------
-@text-muted:                  @gray-light;
+@text-muted:                  fade(@text-color, 60%);
 @abbr-border-color:           @gray-light;
 @headings-small-color:        @gray-light;
 @blockquote-small-color:      @gray-light;

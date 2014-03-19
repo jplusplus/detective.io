@@ -1,4 +1,4 @@
-HashMerge = (a, b) ->
+HashMerge = (a={}, b={}) ->
     result = { }
     for i of a
         if (i of b) and a[i] isnt b[i]
@@ -15,7 +15,7 @@ HashMerge = (a, b) ->
         result[i] = b[i]
     result
 
-(angular.module 'detective').directive "graphviz", ['$filter', '$routeParams', '$location', '$rootScope', 'Individual', ($filter, $routeParams, $location, $rootScope, Individual)->
+(angular.module 'detective.directive').directive "graphviz", ['$filter', '$routeParams', '$location', '$rootScope', 'Individual', ($filter, $routeParams, $location, $rootScope, Individual)->
     restrict: "AE"
     template : "<div></div>"
     replace : yes
@@ -23,16 +23,16 @@ HashMerge = (a, b) ->
         data : '='
         topic : '='
     link: (scope, element, attr)->
-        size = [ element.width(), element.width()*0.8 ]
-        node_size = 6
-        absUrl = do $location.absUrl
+        size       = [ element.width(), element.height() ]
+        node_size  = 6
+        absUrl     = do $location.absUrl
 
         svg = ((d3.select element[0]).append 'svg').attr
             width : size[0]
             height : size[1]
         defs = svg.insert 'svg:defs', 'path'
 
-        graph = (((do d3.layout.force).size size).linkDistance 60).charge -300
+        graph = (((do d3.layout.force).size size).linkDistance 90).charge -300
 
         the_links = null
         the_nodes = null
@@ -61,40 +61,33 @@ HashMerge = (a, b) ->
             (pattern.append 'svg:rect').attr
                 x : 0
                 y : 0
-                width : _node_size * 2
-                height : _node_size * 2
-                fill : '#999'
-            image = pattern.append 'svg:image'
-            image.attr
-                'xlink:href' : d.image
-                x : 0
-                y : 0
-                width : _node_size * 2
+                width  : _node_size * 2
                 height : _node_size * 2
             null
 
         deleteNode = (d) =>
-            # Make a diference between click and dblclick
-            if d._timer?
-                clearTimeout d._timer
-                d._timer = undefined
+            unless is_current(d._id)
+                # Make a diference between click and dblclick
+                if d._timer?
+                    clearTimeout d._timer
+                    d._timer = undefined
 
-            if d._id > 0
-                delete scope.data.nodes[d._id]
-            else
-                delete scope.data.links[d._parent]['_AGGREGATION_']
+                if d._id > 0
+                    delete scope.data.nodes[d._id]
+                else
+                    delete scope.data.outgoing_links[d._parent]['_AGGREGATION_']
 
-            do update
+                do update
 
         loadNode = (d) ->
             if d._id is -1
                 # If it's an aggregation we need to shift 10 elements from it
-                scope.data.links[d._parent]['test'] = scope.data.links[d._parent]['test'] or []
+                scope.data.outgoing_links[d._parent]['test'] = scope.data.outgoing_links[d._parent]['test'] or []
                 for i in [0..9]
-                    tmp_node = scope.data.links[d._parent]['_AGGREGATION_'].shift()
+                    tmp_node = scope.data.outgoing_links[d._parent]['_AGGREGATION_'].shift()
                     break if not tmp_node?
-                    scope.data.links[d._parent]['test'].push tmp_node
-                delete scope.data.links[d._parent]['_AGGREGATION_'] if scope.data.links[d._parent]['_AGGREGATION_'].length is 0
+                    scope.data.outgoing_links[d._parent]['test'].push tmp_node
+                delete scope.data.outgoing_links[d._parent]['_AGGREGATION_'] if scope.data.outgoing_links[d._parent]['_AGGREGATION_'].length is 0
                 do update
             else
                 params =
@@ -103,7 +96,7 @@ HashMerge = (a, b) ->
                     depth : 2
                 Individual.graph params, (d) ->
                     scope.data.nodes = HashMerge scope.data.nodes, d.nodes
-                    scope.data.links = HashMerge scope.data.links, d.links
+                    scope.data.outgoing_links = HashMerge scope.data.outgoing_links, d.outgoing_links
                     do update
 
         cleanWeightZero = (nodes, links) =>
@@ -119,6 +112,14 @@ HashMerge = (a, b) ->
 
                 do ((graph.nodes nodes).links links).start
 
+        is_current = (id)=> id is parseInt $routeParams.id
+
+        text_classes = (d) ->
+            [
+                'name'
+                if not d._displayName then 'toggle-display' else ''
+            ].join ' '
+
         update = =>
             # It's useless to process if we do not have any data
             return if not scope.data.nodes?
@@ -128,8 +129,7 @@ HashMerge = (a, b) ->
             links = []
 
             aggregation = 1
-
-            _.map (_.pairs scope.data.links), ([source_id, relations]) ->
+            _.map (_.pairs scope.data.outgoing_links), ([source_id, relations]) ->
                 if scope.data.nodes[source_id]?
                     hasAggreg = "_AGGREGATION_" in _.keys relations
                     aggreg = relations['_AGGREGATION_']
@@ -162,10 +162,11 @@ HashMerge = (a, b) ->
             # Sort by weight (DESC) to know which node should should always display its name
             nodes = _.sortBy nodes, (elem) -> -elem.weight
             for i in [0..(Math.min nodes.length, 3)]
-                nodes[i]._displayName = yes
+                nodes[i]._displayName = yes if nodes[i]?
 
             (((defs.append 'marker').attr
                 id : 'marker-end'
+                class: 'arrow'
                 viewBox : "0 -5 10 10"
                 refX : 15
                 refY : -1.5
@@ -180,25 +181,20 @@ HashMerge = (a, b) ->
                     class : 'link'
                     d : linkUpdate
                     'marker-end' : 'url(' + absUrl + '#marker-end)'
-                    stroke : (d) -> ($filter "strToColor") d._type
             # Remove old links
             do (do the_links.exit).remove
 
             # Create all new nodes
             the_nodes = (svg.selectAll '.node').data nodes, (d) -> d._id
             (do the_nodes.enter).insert('svg:circle', 'text').attr('class', 'node').attr
-                    r : (d) =>
-                        if d._id is parseInt $routeParams.id then node_size * 2 else node_size
+                    r : (d) => node_size * ( 1 + 1 * is_current(d._id) )
                     d : nodeUpdate
                 .style
-                    fill : (d) ->
-                        if d.image?
-                            return 'url(' + absUrl + '#pattern' + d._id + ')'
-                        ($filter "strToColor") d._type
-                    stroke : (d) -> ($filter "strToColor") d._type
+                    fill : (d) -> ($filter "strToColor") d._type
                 .each (d) ->
-                    (createPattern d, defs) if d.image?
+                    (createPattern d, defs)
                     null
+                .call graph.drag
             # Remove old nodes
             do (do the_nodes.exit).remove
 
@@ -211,15 +207,18 @@ HashMerge = (a, b) ->
                         loadNode(d)
                         $rootScope.safeApply()
                     , 200
+            # Display name on hover
+            the_nodes.on 'mouseenter', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", "name")
+            the_nodes.on 'mouseleave', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", text_classes)
 
             # Create all new names
             the_names = (svg.selectAll '.name').data nodes, (d) -> d._id
             (do the_names.enter).append('svg:text').attr
-                    d : nodeUpdate
-                    class : (d) -> [
-                        'name'
-                        if not d._displayName then 'toggle-display' else ''
-                    ].join ' '
+                    d            : nodeUpdate
+                    dy           : (d)-> - node_size * ( 1 + 1 * is_current(d._id) )
+                    'data-id'    : (d)-> d._id
+                    class        : text_classes
+                    'text-anchor': "middle"
                 .text (d) -> d.name
             do (do the_names.exit).remove
             null

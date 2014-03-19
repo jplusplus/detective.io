@@ -16,4 +16,4 @@ class ProfileCtrl
         # ──────────────────────────────────────────────────────────────────────
         @scope.$watch "userTopics", ( (u)=> @Page.loading(not u.$resolved) ), yes
 
-angular.module('detective').controller 'profileCtrl', ProfileCtrl
+angular.module('detective.controller').controller 'profileCtrl', ProfileCtrl

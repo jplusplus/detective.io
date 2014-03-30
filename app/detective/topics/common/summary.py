@@ -183,55 +183,64 @@ class SummaryResource(Resource):
     def summary_mine(self, bundle, request):
         app_label = self.topic.app_label()
         self.method_check(request, allowed=['get'])
-        if not request.user.id:
-            raise UnauthorizedError('This method require authentication')
 
-        query = """
-            START root=node(*)
-            MATCH (type)-[`<<INSTANCE>>`]->(root)
-            WHERE HAS(root.name)
-            AND HAS(root._author)
-            AND HAS(type.model_name)
-            AND %s IN root._author
-            AND type.app_label = '%s'
-            RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
-        """ % ( int(request.user.id), app_label )
+        limit = int(request.GET.get('limit', 20))
 
-        matches      = connection.cypher(query).to_dicts()
-        count        = len(matches)
-        limit        = int(request.GET.get('limit', 20))
-        paginator    = Paginator(matches, limit)
-
-        try:
-            p     = int(request.GET.get('page', 1))
-            page  = paginator.page(p)
-        except InvalidPage:
-            raise Http404("Sorry, no results on that page.")
-
-        objects = []
-        for result in page.object_list:
-            label = result.get("name", None)
-            objects.append({
-                'label': label,
-                'subject': {
-                    "name": result.get("id", None),
-                    "label": label
-                },
-                'predicate': {
-                    "label": "is instance of",
-                    "name": "<<INSTANCE>>"
-                },
-                'object': result.get("model", None)
-            })
-
-        object_list = {
-            'objects': objects,
-            'meta': {
-                'page': p,
-                'limit': limit,
-                'total_count': count
+        if request.user.id is None:            
+            object_list = {
+                'objects': [],
+                'meta': {
+                    'page': 1,
+                    'limit': limit,
+                    'total_count': 0
+                }
             }
-        }
+        else:
+            query = """
+                START root=node(*)
+                MATCH (type)-[`<<INSTANCE>>`]->(root)
+                WHERE HAS(root.name)
+                AND HAS(root._author)
+                AND HAS(type.model_name)
+                AND %s IN root._author
+                AND type.app_label = '%s'
+                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+            """ % ( int(request.user.id), app_label )
+
+            matches      = connection.cypher(query).to_dicts()
+            count        = len(matches)
+            paginator    = Paginator(matches, limit)
+
+            try:
+                p     = int(request.GET.get('page', 1))
+                page  = paginator.page(p)
+            except InvalidPage:
+                raise Http404("Sorry, no results on that page.")
+
+            objects = []
+            for result in page.object_list:
+                label = result.get("name", None)
+                objects.append({
+                    'label': label,
+                    'subject': {
+                        "name": result.get("id", None),
+                        "label": label
+                    },
+                    'predicate': {
+                        "label": "is instance of",
+                        "name": "<<INSTANCE>>"
+                    },
+                    'object': result.get("model", None)
+                })
+
+            object_list = {
+                'objects': objects,
+                'meta': {
+                    'page': p,
+                    'limit': limit,
+                    'total_count': count
+                }
+            }
 
         return object_list
 

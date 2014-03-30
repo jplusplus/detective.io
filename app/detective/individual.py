@@ -373,38 +373,49 @@ class IndividualResource(ModelResource):
         return self.create_response(request, object_list)
 
     def get_mine(self, request, **kwargs):
-        self.method_check(request, allowed=['get'])
-        self.is_authenticated(request)
+        self.method_check(request, allowed=['get'])        
         self.throttle_check(request)
 
-        # Do the query.
-        limit     = int(request.GET.get('limit', 20))
-        results   = self._meta.queryset.filter(_author__contains=request.user.id)
-        count     = len(results)
-        paginator = Paginator(results, limit)
+        limit = int(request.GET.get('limit', 20))
 
-        try:
-            p     = int(request.GET.get('page', 1))
-            page  = paginator.page(p)
-        except InvalidPage:
-            raise Http404("Sorry, no results on that page.")
-
-        objects = []
-
-        for result in page.object_list:
-            bundle = self.build_bundle(obj=result, request=request)
-            bundle = self.full_dehydrate(bundle, for_list=True)
-            objects.append(bundle)
-
-        object_list = {
-            'objects': objects,
-            'meta': {
-                'author': request.user,
-                'page': p,
-                'limit': limit,
-                'total_count': count
+        if request.user.id is None:            
+            object_list = {
+                'objects': [],
+                'meta': {
+                    'author': request.user,
+                    'page': 1,
+                    'limit': limit,
+                    'total_count': 0
+                }
             }
-        }
+        else:
+            # Do the query.
+            results   = self._meta.queryset.filter(_author__contains=request.user.id)
+            count     = len(results)
+            paginator = Paginator(results, limit)
+
+            try:
+                p     = int(request.GET.get('page', 1))
+                page  = paginator.page(p)
+            except InvalidPage:
+                raise Http404("Sorry, no results on that page.")
+
+            objects = []
+
+            for result in page.object_list:
+                bundle = self.build_bundle(obj=result, request=request)
+                bundle = self.full_dehydrate(bundle, for_list=True)
+                objects.append(bundle)
+
+            object_list = {
+                'objects': objects,
+                'meta': {
+                    'author': request.user,
+                    'page': p,
+                    'limit': limit,
+                    'total_count': count
+                }
+            }
 
         self.log_throttled_access(request)
         return self.create_response(request, object_list)

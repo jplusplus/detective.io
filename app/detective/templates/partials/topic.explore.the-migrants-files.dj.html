@@ -41,16 +41,10 @@
                     </form>
                     <div class="col-md-8 col-md-push-2 lead top20" ng-if="types">
                         Navigate through
-                        <span ng-repeat="form in filtered = ( forms | filter:isSearchable )">
-                            <span ng-if="$last && !$first"> and </span>
-                            <span ng-if="!$last && !$first">, </span>
-                            <a ng-href="/[[username]]/[[topic]]/[[form.name]]" ng-init="count = getTypeCount(form.name)">
-                                <strong>[[count]]</strong>
-                                <span ng-if="count <= 1">[[form.verbose_name|lowercase]]</span>
-                                <span ng-if="count > 1">[[form.verbose_name_plural|lowercase]]</span>
-                            </a>
-                            <span ng-if="$last">.</span>
-                        </span>
+                        <a ng-href="/[[username]]/[[topic]]/detentioncenter"><strong>[[getTypeCount("detentioncenter")]]</strong> detention centers</a>,
+                        <a ng-href="/[[username]]/[[topic]]/event"><strong>[[getTypeCount("event")]]</strong> events</a>,
+                        <a ng-href="/[[username]]/[[topic]]/territory"><strong>[[getTypeCount("territory")]]</strong> territories</a> and
+                        <a ng-href="/[[username]]/[[topic]]/migrant"><strong>[[getTypeCount("migrants")]]</strong> migrants</a> for which some data is available.
                     </div>
                 </div>
             </div>

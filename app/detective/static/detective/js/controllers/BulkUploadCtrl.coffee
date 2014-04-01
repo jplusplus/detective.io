@@ -1,8 +1,8 @@
 class BulkUploadCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$http', '$routeParams', 'Page', 'Individual', '$timeout','Common']
+    @$inject: ['$scope', '$http', '$routeParams', '$location', 'Page', 'Individual', '$timeout','Common', 'User']
 
-    constructor: (@scope, @http, @routeParams, @Page, @Individual, @timeout, @Common)->
+    constructor: (@scope, @http, @routeParams, @location, @Page, @Individual, @timeout, @Common, @User)->
         @Page.title "Bulk Upload", no
         @Page.loading no
         # ──────────────────────────────────────────────────────────────────────
@@ -20,6 +20,11 @@ class BulkUploadCtrl
         # start with one file field
         @scope.file_fields    = ["file1"]
         @scope.files          = {}
+
+        # Redirect unauthorized user
+        @scope.$watch (=> User), =>
+            @location.url("/#{@scope.username}/#{@scope.topic}/") unless User.hasChangePermission(@topic)
+        , true
 
         # CONFIG
         @delay = 3000

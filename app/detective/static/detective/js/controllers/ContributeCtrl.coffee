@@ -1,12 +1,13 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', 'Individual', 'Summary', 'IndividualForm', 'Page']
+    @$inject: ['$scope', '$routeParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User']
 
 
-    constructor: (@scope, @routeParams, @filter, @Individual,  @Summary, @IndividualForm, @Page)->
+    constructor: (@scope, @routeParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User)->
         @Page.title "Contribute"
         # Global loading mode
-        Page.loading true
+        Page.loading true        
+
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
@@ -27,7 +28,7 @@ class ContributeCtrl
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
-        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic
+        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic        
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
@@ -40,6 +41,12 @@ class ContributeCtrl
                 @scope.scrollIdx = -1
                 @scope.$apply()
             , 1200
+
+        # Redirect unauthorized user
+        @scope.$watch (=> User), (v)=>
+            @location.url("/#{@scope.username}/#{@scope.topic}/") unless User.hasChangePermission(@topic)
+        , true
+            
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes

@@ -1,6 +1,6 @@
 <div class="container">
     <h2 class="container">[[user.username]]'s open topics</h2>
-    <div class="boxes">
+    <div class="boxes" ng-if="shouldShowTopics()">
         <div class="col-sm-4" ng-repeat="topic in userTopics">
             <div class="box">
                 <a ng-href="[[topic.link]]" class="fg"></a>
@@ -13,4 +13,5 @@
             </h4>
         </div>
     </div>
+    <h3 ng-if="!shouldShowTopics()">This user has no open investigations</h3>
 </div>

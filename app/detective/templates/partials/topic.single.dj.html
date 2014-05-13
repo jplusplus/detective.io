@@ -78,7 +78,7 @@
 							 			<span ng-bind-html="get(field.name) | linky:'_blank'" ng-if="isString(field.type) && field.name != 'imageURL'"></span>
 							 		</td>
 						 			<td ng-if="isMono(field) && get(field.name)" colspan="2">
-						 				<div ng-if="isAddr(field)">
+						 				<div ng-if="isAddr(field) || isGeoloc(field)">
 								 			<strong>[[field.verbose_name]]</strong>
 								 			<a class="map" ng-href="https://www.google.fr/maps/?q=[[get(field.name)]]" target="_blank">
 								 				<span class="lab">

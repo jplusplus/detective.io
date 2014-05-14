@@ -23,12 +23,13 @@ OPERATIONS = (
     ('add'   , 'Add an individual to {app_name}'),
     ('delete', 'Delete an individual from {app_name}'),
     ('change', 'Edit an individual of {app_name}'),
+    ('read', 'Read {app_name}')
 )
 
 GROUPS = (dict(
     name        = '{app_name}_contributor',
     description = 'Contributors of an application, can create',
-    permissions = ('change', 'add', 'delete')),
+    permissions = ('change', 'add', 'delete', 'read')),
 )
 
 def _create_groups(app_label):

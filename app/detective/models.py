@@ -148,13 +148,6 @@ class Topic(models.Model):
         else:
             return '<a href="%s">%s</a>' % (path, path, )
 
-    def delete(self, *args, **kwargs):
-        associated_groups = Group.objects.filter(name__startswith=self.module)
-        if associated_groups and len(associated_groups) > 0:
-            for group in associated_groups:
-                group.delete()
-        super(Topic, self).delete(*args, **kwargs)
-
     link.allow_tags = True
 
 

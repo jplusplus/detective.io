@@ -104,7 +104,7 @@ def create_permissions(app, app_label=None, created_models=None, verbosity=False
         _create_groups(app_label)
 
 def remove_permissions(sender, instance, using, **kwargs):
-    app_label = instance.slug
+    app_label = instance.module
     for op in OPERATIONS:
         perm_args = _get_permission_args(app_label, op)
         _remove_permission(app_label, perm_args)

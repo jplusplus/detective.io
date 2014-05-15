@@ -148,6 +148,13 @@ class Topic(models.Model):
         else:
             return '<a href="%s">%s</a>' % (path, path, )
 
+    def delete(self, *args, **kwargs):
+        associated_groups = Group.objects.filter(name__startswith=self.module)
+        if associated_groups and len(associated_groups) > 0:
+            for group in associated_groups:
+                group.delete()
+        super(Topic, self).delete(*args, **kwargs)
+
     link.allow_tags = True
 
 
@@ -239,7 +246,7 @@ def update_permissions(*args, **kwargs):
     assert kwargs.get('instance')
     # @TODO check that the slug changed or not to avoid permissions hijacking
     if kwargs.get('created', False):
-        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').slug)
+        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').module)
 
 signals.post_delete.connect(remove_permissions, sender=Topic)
 signals.post_save.connect(update_permissions, sender=Topic)

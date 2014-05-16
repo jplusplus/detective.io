@@ -3,6 +3,7 @@ from app.detective.modelrules            import ModelRules
 from app.detective.models                import Topic
 from django.conf.urls                    import url, include, patterns
 from django.conf                         import settings
+from django.core.cache                   import cache         
 from django.core.urlresolvers            import clear_url_caches
 from tastypie.api                        import NamespacedApi
 
@@ -42,9 +43,18 @@ def default_rules(topic):
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     # We cant import this early to avoid bi-directional dependancies
-    from app.detective.utils import import_class
-    # Get all registered models
-    models = Topic.objects.get(module=topic).get_models()
+    from app.detective.utils import import_class        
+    # Store topic object in a temporary attribute       
+    # to avoid SQL lazyness                     
+    cache_key = "prefetched_topic_%s" % topic  
+    if cache.get(cache_key, None) is None:     
+        # Get all registered models for this topic
+        models = Topic.objects.get(module=topic).get_models()                
+        cache.set(cache_key, models, 100)
+    else:
+        # Get all registered models
+        models = cache.get(cache_key)
+
     # Set "is_searchable" to true on every model with a name
     for model in models:
         # If the current model has a name

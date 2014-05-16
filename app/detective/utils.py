@@ -1,7 +1,8 @@
-from django.forms.forms       import pretty_name
-from random                   import randint
-from os                       import listdir
-from os.path                  import isdir, join
+from django.core.cache  import cache         
+from django.forms.forms import pretty_name
+from random             import randint
+from os.path            import isdir, join
+from os                 import listdir
 import importlib
 import inspect
 import re
@@ -66,9 +67,18 @@ def get_topics(offline=True):
         # Load topics' names
         appsdir = "./app/detective/topics"
         return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
-    else:
+    else:                 
         from app.detective.models import Topic
-        return [t.module for t in Topic.objects.all()]
+        # Store topic object in a temporary attribute       
+        # to avoid SQL lazyness                     
+        cache_key = "prefetched_topics" 
+        if cache.get(cache_key, None) is None:     
+            topics = Topic.objects.all()
+            cache.set(cache_key, topics, 100)
+        else:
+            # Get all registered models
+            topics = cache.get(cache_key)
+        return [t.module for t in topics]
 
 def get_topics_modules():
     # Import the whole topics directory automaticly

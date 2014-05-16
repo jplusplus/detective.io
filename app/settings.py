@@ -208,8 +208,8 @@ ACCOUNT_ACTIVATION_DAYS = 7
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        #'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/tmp/django_cache',
     }
 }

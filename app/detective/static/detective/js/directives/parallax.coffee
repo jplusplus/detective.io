@@ -45,4 +45,7 @@ angular.module('detective.directive').directive "parallax", ["$window", ($window
         scope.$watch (-> target.height() ), init
         # First initialization
         init()
+        # Also call init when the image is loaded
+        target.on("load", init) if target.is("img")
+            
 ]

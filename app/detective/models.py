@@ -4,7 +4,7 @@ from app.detective.permissions  import create_permissions, remove_permissions
 from django.core.cache          import cache
 from django.core.exceptions     import ValidationError
 from django.db                  import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from tinymce.models             import HTMLField
 
 import inspect

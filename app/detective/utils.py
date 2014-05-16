@@ -1,4 +1,3 @@
-from django.core.cache  import cache         
 from django.forms.forms import pretty_name
 from random             import randint
 from os.path            import isdir, join
@@ -69,6 +68,7 @@ def get_topics(offline=True):
         return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
     else:                 
         from app.detective.models import Topic
+        from django.core.cache    import cache    
         # Store topic object in a temporary attribute       
         # to avoid SQL lazyness                     
         cache_key = "prefetched_topics" 

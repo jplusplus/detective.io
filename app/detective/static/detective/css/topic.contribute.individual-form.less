@@ -49,45 +49,73 @@
                 }
             }
 
-            .field.loading {
-                min-height:auto;
 
-                input, button {
-                    .progress-striped .progress-bar();
-                    .progress-bar-variant(#eee);
-                    .progress.active .progress-bar();
+            .field {
+
+                padding-top:15px;
+                padding-bottom:15px;
+                margin-bottom:0;
+
+                .loading {
+                    min-height:auto;
+
+                    input, button {
+                        .progress-striped .progress-bar();
+                        .progress-bar-variant(#eee);
+                        .progress.active .progress-bar();
+                    }
+
+                    &:before {
+                        background:white;
+                    }
                 }
 
-                &:before {
-                    background:white;
+
+                .help-block {
+                    color:mix(#000, white);
+                    overflow: hidden;
+                    max-height:0px;
+                    margin-top:0;
+                    opacity:0;
+                    .transition(0.4s);
+                }
+
+                &.is-active {
+                    background:#efefef;
+
+                    .help-block {
+                        opacity:1;
+                        max-height:300px;
+                    }
+                }
+
+                .multiple {
+                    margin-bottom:5px;
+                }
+
+                .input-group-addon {
+                    cursor:pointer;
+                }
+
+                span.form-control {
+                    overflow: hidden;
+                }
+
+                .ask-for-new {
+                    padding:10px;
+                    background:fade(#000, 10);
+                    margin-bottom:5px;
+                }
+
+                label {
+                    font-size:1.1em;
+                       
+                    &:first-letter {
+                        text-transform: uppercase;
+                    }
                 }
             }
 
-            .help-block {
-                color:mix(#000, white);
-            }
-
-            .multiple {
-                margin-bottom:5px;
-            }
-
-            .input-group-addon {
-                cursor:pointer;
-            }
-
-            span.form-control {
-                overflow: hidden;
-            }
-
-            .ask-for-new {
-                padding:10px;
-                background:fade(#000, 10);
-                margin-bottom:5px;
-            }
-
-            label:first-letter {
-                text-transform: uppercase;
-            }
         }
 
         .form-footer {

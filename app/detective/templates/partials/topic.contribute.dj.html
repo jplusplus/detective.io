@@ -137,16 +137,22 @@
 					</span>
 				</div>
 
-				<div class="row field top20 form-group"
+				<div class="row field form-group"
+					 class-on-focus="is-active"
 					 ng-class="{loading: individual.updating[field.name] && !individual.loading}"
 				     ng-hide="!isAllowedType(field.type) || !individual.isVisible(field)"
 					 ng-repeat="field in individual.meta.fields track by $index">
 
-					<label class="col-sm-3 tr form-label top05" for="id_[[field.name]]">
-						[[field.verbose_name]]
-					</label>
+					<div class="col-sm-3 tr form-label top05">
+						<label for="id_[[field.name]]">
+							[[field.verbose_name]]
+						</label>
+						<p ng-if="field.help_text" class="help-block">
+							[[field.help_text]]
+						</p>
+					</div>
 
-					<div class="col-sm-4" ng-if="field.type == 'Relationship' && !field.rules.is_searchable">
+					<div class="col-sm-6" ng-if="field.type == 'Relationship' && !field.rules.is_searchable">
 
 						<div ng-repeat="f in individual.fields[field.name]" class="bottom05 input-group">
 							<span class="form-control disabled">
@@ -172,7 +178,7 @@
 
 					</div>
 
-					<div class="col-sm-4" ng-if="field.type == 'Relationship' && field.rules.is_searchable">
+					<div class="col-sm-6" ng-if="field.type == 'Relationship' && field.rules.is_searchable">
 
 						<div ng-repeat="f in individual.fields[field.name]">
 							<div class="input-group multiple">
@@ -233,7 +239,7 @@
 					</div>
 
 
-					<div class="col-sm-4" ng-if="field.type == 'URLField'">
+					<div class="col-sm-6" ng-if="field.type == 'URLField'">
 
 						<input type="url"
 							   placeholder="http://"
@@ -243,7 +249,7 @@
 							   class="form-control" />
 					</div>
 
-					<div class="col-sm-4" ng-if="field.type == 'DateTimeField'">
+					<div class="col-sm-6" ng-if="field.type == 'DateTimeField'">
 						<div class="input-group">
 							<span class="input-group-addon">
 								<i class="gray-darker fa fa-calendar"></i>
@@ -259,7 +265,7 @@
 						</div>
 					</div>
 
-					<div class="col-sm-4" ng-if="field.type == 'CharField' && field.name != 'comment'">
+					<div class="col-sm-6" ng-if="field.type == 'CharField' && field.name != 'comment'">
 						<input  type="text"
 								class="form-control"
 								ng-model="individual.fields[field.name]"
@@ -267,7 +273,7 @@
 								id="id_[[field.name]]" />
 					</div>
 
-					<div class="col-sm-4" ng-if="field.type == 'CharField' && field.name == 'comment'">
+					<div class="col-sm-6" ng-if="field.type == 'CharField' && field.name == 'comment'">
 						<textarea rows="5"
 						          id="id_[[field.name]]"
 								  change-on-blur
@@ -275,17 +281,13 @@
 						          class="form-control"></textarea>
 					</div>
 
-					<div class="col-sm-4" ng-if="field.type == 'IntegerField'">
+					<div class="col-sm-6" ng-if="field.type == 'IntegerField'">
 						<input  type="number"
 								id="id_[[field.name]]"
 							    change-on-blur
 								ng-model="individual.fields[field.name]"
 								class="form-control" />
 					</div>
-
-					<span class="col-sm-5 help-block">
-						<p class="top10">[[field.help_text]]</p>
-					</span>
 
 				</div>
 

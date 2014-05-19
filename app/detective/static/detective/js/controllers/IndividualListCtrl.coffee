@@ -1,8 +1,8 @@
 class IndividualListCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$location',  'Page']
+    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', 'Common', '$location',  'Page']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @location, @Page)->
+    constructor: (@scope, @routeParams, @Individual, @Summary, @Common, @location, @Page)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
@@ -19,6 +19,7 @@ class IndividualListCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Read route params
+        @scope.username           = @routeParams.username
         @scope.topic              = @routeParams.topic
         @scope.type               = @routeParams.type or ""
         @scope.page               = @routeParams.page or 1
@@ -30,6 +31,8 @@ class IndividualListCtrl
         # ──────────────────────────────────────────────────────────────────────
         @scope.$watch "selectedIndividual", @selectIndividual, true
         @scope.$watch "page", =>
+            # Global loading mode
+            @Page.loading false
             # Get parameters from context method (could be overloaded)
             params = @getParams()
             # Only if params are valid
@@ -50,7 +53,7 @@ class IndividualListCtrl
     selectIndividual: (val, old)=>
         # Single entity selected
         if val.id?
-            @location.path "/#{@scope.topic}/#{@scope.type.toLowerCase()}/#{val.id}"
+            @location.path "/#{@scope.username}/#{@scope.topic}/#{@scope.type.toLowerCase()}/#{val.id}"
 
     # Verbose informations
     # (loaded contexualy)
@@ -63,13 +66,13 @@ class IndividualListCtrl
                 @scope.meta = meta = data[@scope.type.toLowerCase()]
                 if meta?
                     # Redirect "unlistable" resource
-                    return @location.path "/#{@scope.topic}" unless meta.rules.is_searchable
+                    return @location.path "/#{@scope.username}/#{@scope.topic}" unless meta.rules.is_searchable
                     @scope.verbose_name        = meta.verbose_name
                     @scope.verbose_name_plural = meta.verbose_name_plural
                     # Set page's title
                     @Page.title meta.verbose_name_plural
                 # Unkown type
-                else @location.path "/404"
+                else @scope.is404(yes)
 
     # List parameters
     getParams: =>
@@ -80,7 +83,7 @@ class IndividualListCtrl
 
     singleUrl: (individual)=>
         type = (@scope.type or individual.model).toLowerCase()
-        "/#{@scope.topic}/#{type}/#{individual.id}"
+        "/#{@scope.username}/#{@scope.topic}/#{type}/#{individual.id}"
     # Pages list
     pages: =>
         # No page yet
@@ -111,4 +114,4 @@ class IndividualListCtrl
 
 
 
-angular.module('detective').controller 'individualListCtrl', IndividualListCtrl
+angular.module('detective.controller').controller 'individualListCtrl', IndividualListCtrl

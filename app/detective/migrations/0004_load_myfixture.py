@@ -3,12 +3,17 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
+import json
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        from django.core.management import call_command
-        call_command("loaddata", "app/detective/fixtures/initial_data.json")
+        json_data = open("app/detective/fixtures/initial_data.json")        
+        items = json.load(json_data)
+        for item in items:
+            obj = orm[ item["model"] ](**item["fields"])
+            obj.save()
+        json_data.close()
 
     def backwards(self, orm):
         "Write your backwards methods here."

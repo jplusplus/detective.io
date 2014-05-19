@@ -1,5 +1,21 @@
+angular.module('detective.config',     ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detective.controller', ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detective.directive',  ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detective.filter',     ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detective.service',    ['ngResource', 'ngSanitize', 'ngCookies'])
+
 detective = angular
-    .module('detective', ["detectiveServices", "detectiveFilters", "ui.bootstrap", "monospaced.elastic", "angularFileUpload", "ngProgressLite"])
+    .module('detective', [
+        "detective.config"
+        "detective.controller"
+        "detective.directive"
+        "detective.filter"
+        "detective.service"
+        "ui.bootstrap"
+        "monospaced.elastic"
+        "angularFileUpload"
+        "ngProgressLite"
+    ])
     .run(
         [
             '$rootScope',
@@ -8,9 +24,19 @@ detective = angular
             'Page',
             ($rootScope, $location, user, Page)->
                 # Location available within templates
-                $rootScope.location = $location;
-                $rootScope.user     = user
-                $rootScope.Page     = Page
+                $rootScope.location  = $location;
+                $rootScope.user      = user
+                $rootScope.Page      = Page
+                # Update global render
+                $rootScope.is404     = (is404)-> 
+                    # Value given
+                    if is404?
+                        # Set the 404
+                        $rootScope._is404 = is404
+                        # Disabled loading
+                        Page.loading false if is404
+                    $rootScope._is404
+                $rootScope.$on "$routeChangeStart", -> $rootScope.is404(no)                
         ]
     )
     .config(
@@ -18,7 +44,11 @@ detective = angular
             '$interpolateProvider',
             '$routeProvider',
             '$locationProvider'
-            ($interpolateProvider, $routeProvider, $locationProvider)->
+            '$httpProvider',
+            ($interpolateProvider, $routeProvider, $locationProvider, $httpProvider)->
+                # Intercepts HTTP request to add cache for anonymous user
+                # and to set the right csrf token from the cookies
+                $httpProvider.interceptors.push('AuthHttpInterceptor');
                 # Avoid a conflict with Django Template's tags
                 $interpolateProvider.startSymbol '[['
                 $interpolateProvider.endSymbol   ']]'
@@ -26,89 +56,106 @@ detective = angular
                 $locationProvider.html5Mode true
                 # Bind routes to the controllers
                 $routeProvider
+                    # Disable common endpoints
+                    .when('/common',                      redirectTo: '/')
+                    .when('/page',                        redirectTo: '/')
+                    .when('/account',                     redirectTo: '/')
+                    .when('/:username/common/contribute', redirectTo: '/')
+                    .when('/:username/:topic/p/',         redirectTo: '/:username/:topic/')
+                    # Retrop compatibility
+                    .when('/energy/',                     redirectTo: '/detective/energy/')
+                    .when('/energy/:type',                redirectTo: '/detective/energy/:type')
+                    .when('/energy/search',               redirectTo: '/detective/energy/search')
+                    .when('/energy/:type/:id',            redirectTo: '/detective/energy/:type/:id')
+                    .when('/energy/contribute',           redirectTo: '/detective/energy/contribute')
+                    # Core endpoints
                     .when('/', {
                         controller: HomeCtrl
                         templateUrl: "/partial/home.html"
-                    })
-                    .when('/account/activate', {
-                        controller: UserCtrl
-                        templateUrl: "/partial/account-activation.html"
-                    })
-                    .when('/account/reset-password', {
-                        controller: UserCtrl
-                        templateUrl: "/partial/reset-password.html"
-                    })
-                    .when('/account/reset-password-confirm', {
-                        controller: UserCtrl
-                        templateUrl: "/partial/reset-password-confirm.html"
                     })
                     .when('/404', {
                         controller: NotFoundCtrl
                         templateUrl: "/partial/404.html"
                     })
+                    # Accounts
+                    .when('/account/activate', {
+                        controller: UserCtrl
+                        templateUrl: "/partial/account.activation.html"
+                    })
+                    .when('/account/reset-password', {
+                        controller: UserCtrl
+                        templateUrl: "/partial/account.reset-password.html"
+                    })
+                    .when('/account/reset-password-confirm', {
+                        controller: UserCtrl
+                        templateUrl: "/partial/account.reset-password.confirm.html"
+                    })
                     .when('/login', {
                         controller: UserCtrl
-                        templateUrl: "/partial/login.html"
+                        templateUrl: "/partial/account.login.html"
                     })
                     .when('/signup', {
                         controller: UserCtrl
-                        templateUrl: "/partial/signup.html"
+                        templateUrl: "/partial/account.signup.html"
                     })
                     .when('/contact-us', {
                         controller: ContactUsCtrl
                         templateUrl: "/partial/contact-us.html"
                     })
+                    # Pages
                     .when('/page/:slug', {
                         controller: PageCtrl
                         # Allow a dynamic loading by setting the templateUrl within controller
                         template: "<div ng-include src='templateUrl'></div>"
                     })
-                    # Disable common endpoints
-                    .when('/common',  redirectTo: '/')
-                    .when('/page',    redirectTo: '/')
-                    .when('/account', redirectTo: '/')
-                    .when('/common/contribute', redirectTo: '/')
-                    .when('/:topic/p/', redirectTo: '/:topic/')
-                    .when('/:topic/search', {
-                        controller: IndividualSearchCtrl
-                        templateUrl: "/partial/individual-list.html"
+                    # User-related url
+                    .when('/:username', {
+                        controller: ProfileCtrl
+                        templateUrl: "/partial/account.html"
+                        resolve: UserCtrl.resolve
                     })
-                    .when('/:topic/p/:slug',
+                    # Topic-related url
+                    .when('/:username/:topic/search', {
+                        controller: IndividualSearchCtrl
+                        templateUrl: "/partial/topic.list.html"
+                        resolve: UserTopicCtrl.resolve
+                    })
+                    .when('/:username/:topic/p/:slug',
                         controller: ArticleCtrl
-                        templateUrl: "/partial/article.html"
+                        templateUrl: "/partial/topic.article.html"
+                        resolve: UserTopicCtrl.resolve
                     )
-                    .when('/:topic/contribute', {
+                    .when('/:username/:topic/contribute', {
                         controller: ContributeCtrl
-                        templateUrl: "/partial/contribute.html"
+                        templateUrl: "/partial/topic.contribute.html"
+                        resolve: UserTopicCtrl.resolve
                         auth: true
                     })
-                    .when('/:topic/contribute/upload', {
+                    .when('/:username/:topic/contribute/upload', {
                         controller: BulkUploadCtrl
-                        templateUrl: "/partial/bulk-upload.html"
+                        templateUrl: "/partial/topic.contribute.bulk-upload.html"
+                        resolve: UserTopicCtrl.resolve
+                        auth: true
                     })
-                    .when('/:topic', {
+                    .when('/:username/:topic', {
                         controller: ExploreCtrl
                         # Allow a dynamic loading by setting the templateUrl within controller
                         template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+                        resolve: UserTopicCtrl.resolve
                     })
-                    .when('/:topic/:type', {
+                    .when('/:username/:topic/:type', {
                         controller: IndividualListCtrl
-                        templateUrl: "/partial/individual-list.html"
+                        templateUrl: "/partial/topic.list.html"
                         reloadOnSearch: false
+                        resolve: UserTopicCtrl.resolve
                     })
-                    .when('/:topic/:type/:id', {
+                    .when('/:username/:topic/:type/:id', {
                         controller: IndividualSingleCtrl
-                        templateUrl: "/partial/individual-single.html"
+                        templateUrl: "/partial/topic.single.html"
                         reloadOnSearch: false
+                        resolve: UserTopicCtrl.resolve
                     })
-                    .when('/:topic/:type/:id/graph', {
-                        controller: IndividualGraphCtrl
-                        templateUrl: "/partial/individual-graph.html"
-                        reloadOnSearch: false
-                    })
-                    .otherwise redirectTo: '/404'
+                    .otherwise templateUrl: '/partial/404.html'
         ]
     )
 
-# Services module
-angular.module('detectiveServices', ['ngResource', 'ngSanitize', 'ngCookies'])

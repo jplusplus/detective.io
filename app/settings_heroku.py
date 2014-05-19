@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Django Heroku settings for barometre project.
+Django Heroku settings for Detective.io project.
 Packages required:
     * boto
     * django-storages
@@ -22,7 +22,7 @@ DATABASES = {
 DATABASES['default']['OPTIONS'] = {'autocommit': True,}
 
 # Parse url given into environment variable
-NEO4J_URL  = urlparse( os.getenv('NEO4J_URL') )
+NEO4J_URL  = urlparse( os.getenv('NEO4J_URL', '') )
 NEO4J_OPTIONS = {}
 
 # Determines the hostname
@@ -47,7 +47,7 @@ AWS_ACCESS_KEY_ID          = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY      = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME    = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_QUERYSTRING_AUTH       = False
-AWS_S3_FILE_OVERWRITE      = False
+AWS_S3_FILE_OVERWRITE      = os.getenv('AWS_S3_FILE_OVERWRITE') == "True" and True or False
 
 # Enable debug for minfication
 DEBUG                      = bool(os.getenv('DEBUG', False))
@@ -66,6 +66,8 @@ COMPRESS_ENABLED           = True
 COMPRESS_ROOT              = STATIC_ROOT
 COMPRESS_URL               = STATIC_URL
 COMPRESS_STORAGE           = STATICFILES_STORAGE
+COMPRESS_OFFLINE           = True
+
 # Activate CSS minifier
 COMPRESS_CSS_FILTERS       = (
     "app.detective.compress_filter.CustomCssAbsoluteFilter",
@@ -78,16 +80,19 @@ COMPRESS_JS_FILTERS = (
     "compressor.filters.template.TemplateFilter",
 )
 
+COMPRESS_OFFLINE_CONTEXT = {
+    'STATIC_URL': STATIC_URL
+}
+
 COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
 }
 
-
 # Activate the cache, for true
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
     }
 }
 
+# EOF

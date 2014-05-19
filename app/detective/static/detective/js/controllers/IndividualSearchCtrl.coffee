@@ -41,4 +41,4 @@ class IndividualSearchCtrl extends IndividualListCtrl
         type  : "summary"
 
 # Register the controller
-angular.module('detective').controller 'individualSearchCtrl', IndividualSearchCtrl
+angular.module('detective.controller').controller 'individualSearchCtrl', IndividualSearchCtrl

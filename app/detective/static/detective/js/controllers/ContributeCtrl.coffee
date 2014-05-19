@@ -1,12 +1,13 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', 'Individual', 'Summary', 'IndividualForm', 'Page']
+    @$inject: ['$scope', '$routeParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User']
 
 
-    constructor: (@scope, @routeParams, @filter, @Individual,  @Summary, @IndividualForm, @Page)->
+    constructor: (@scope, @routeParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User)->
         @Page.title "Contribute"
         # Global loading mode
-        Page.loading true
+        Page.loading true        
+
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
@@ -27,7 +28,7 @@ class ContributeCtrl
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
-        @scope.modelTopic          = (m)=> if @scope.resources? then @scope.resources[m.toLowerCase()].topic
+        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic        
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
@@ -41,15 +42,23 @@ class ContributeCtrl
                 @scope.$apply()
             , 1200
 
+        # Redirect unauthorized user
+        @scope.$watch (=> User), (v)=>
+            @location.url("/#{@scope.username}/#{@scope.topic}/") unless User.hasChangePermission(@topic)
+        , true
+            
+
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @scope.topic = @routeParams.topic
+        @scope.topic    = @routeParams.topic
+        @scope.username = @routeParams.username
         # By default, hide the kick-start form
         showKickStart = false
         # Shortcuts for child classes
         @scope.Individual  = @Individual
         @scope.routeParams = @routeParams
+        @scope.resources   = {}
         # Get the list of available resources
         @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
         # Prepare future individual
@@ -147,7 +156,7 @@ class ContributeCtrl
         # Generates the permalink to this individual
         permalink: =>
             return false unless @fields.id? and @scope.topic
-            return "/#{@scope.topic}/#{@type}/#{@fields.id}"
+            return "/#{@scope.username}/#{@scope.topic}/#{@type}/#{@fields.id}"
 
         # Event when fields changed
         update: (data)=>
@@ -229,6 +238,14 @@ class ContributeCtrl
             # Or the value of this field ins't empty
             (value? and value != null and value.length)
 
+        delete: (index, msg='Are you sure you want to delete this node?')=>
+            # Ask user for confirmation
+            if confirm(msg)
+                @Individual.delete
+                    id   : @fields.id
+                    type : @type
+                @scope.removeIndividual(index)
+
         # Toggle the close attribute
         close: => @isClosed = not @isClosed
         # Get invisible field with this individual
@@ -299,7 +316,7 @@ class ContributeCtrl
                 params =
                     type:  @scope.new.type
                     id:    "search"
-                    q:     @scope.new.fields.names
+                    q:     @scope.new.fields.name
                 # Look for individual with the same name
                 @Individual.query params, (d)=>
                     # Remove the one we just created
@@ -405,4 +422,4 @@ class ContributeCtrl
         (field)=>
             not individual.isVisible(field) and @isAllowedType(field.type)
 
-angular.module('detective').controller 'contributeCtrl', ContributeCtrl
+angular.module('detective.controller').controller 'contributeCtrl', ContributeCtrl

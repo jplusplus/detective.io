@@ -7,6 +7,7 @@ class IndividualSingleCtrl
         Page.loading true
         @scope.get            = (n)=> @scope.individual[n] or false if @scope.individual?
         @scope.hasRels        = @hasRels
+        @scope.hasNetwork     = => not _.isEmpty(@scope.graphnodes.outgoing_links or [])
         @scope.isLiteral      = @isLiteral
         @scope.isString       = (t)=> ["CharField", "URLField"].indexOf(t) > -1
         @scope.isRelationship = (d)=> ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
@@ -16,15 +17,20 @@ class IndividualSingleCtrl
         @scope.deleteNode     = @deleteNode
         @scope.isAddr         = (f)=> f.name.toLowerCase().indexOf('address') > -1
         @scope.isImg          = (f)=> f.name is 'image'
-        @scope.isMono         = (f)=> @scope.isAddr(f) or @scope.isImg(f)
+        @scope.isMono         = (f)=> @scope.isAddr(f) or @scope.isImg(f) or @scope.isGeoloc(f)
         @scope.graphnodes     = []
+        @scope.frontStyle     = (ref)=> 'background-color': @filter("strToColor")(ref)
+        @scope.isLatitude     = (f) => ((do f.name.toLowerCase).indexOf 'latitude') >= 0
+        @scope.isLongitude    = (f) => ((do f.name.toLowerCase).indexOf 'longitude') >= 0
+        @scope.isGeoloc       = (f) => ((do f.name.toLowerCase).indexOf 'geolocation') >= 0
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Read route params
-        @scope.topic = @routeParams.topic
-        @scope.type  = @routeParams.type
-        @scope.id    = @routeParams.id
+        @scope.topic     = @routeParams.topic
+        @scope.username  = @routeParams.username
+        @scope.type      = @routeParams.type
+        @scope.id        = @routeParams.id
         params =
             topic: @scope.topic
             type : @scope.type
@@ -35,12 +41,13 @@ class IndividualSingleCtrl
             # (when the controller is destroyed)
             unless @scope.$$destroyed
                 @scope.individual = data
+                do @computeGeolocation
                 # Set page's title
                 @Page.title @filter("individualPreview")(data)
                  # Global loading off
                 Page.loading false
         # Not found
-        , => @location.path "/404"
+        , => @scope.is404(yes)
         # Get meta information for this type
         @Summary.get { id: "forms", topic: @scope.topic}, (data)=>
             @scope.resource = data
@@ -48,6 +55,7 @@ class IndividualSingleCtrl
 
         graph_params = angular.copy params
         graph_params.depth = 2
+
         @Individual.graph graph_params, (data) =>
             @scope.graphnodes = data
 
@@ -65,7 +73,7 @@ class IndividualSingleCtrl
     singleUrl: (individual, type=false)=>
         type  = (type or @scope.type).toLowerCase()
         topic = (@scope.resource[type] and @scope.resource[type].topic) or @scope.topic
-        "/#{topic}/#{type}/#{individual.id}/"
+        "/#{@scope.username}/#{topic}/#{type}/#{individual.id}/"
     # True if the given type is literal
     isLiteral: (field)=>
         [
@@ -84,8 +92,30 @@ class IndividualSingleCtrl
                 type : @scope.type
             # Redirect to the type list
             setTimeout (=>
-                @location.url("/#{@scope.topic}/#{@scope.type}")
+                @location.url("/#{@scope.username}/#{@scope.topic}/#{@scope.type}")
             ), 500
 
+    computeGeolocation: =>
+        if @scope.meta? and @scope.meta.fields?
+            geoloc =
+                meta :
+                    name : 'geolocation'
+                    verbose_name : 'Latitude/Longitude'
+                    type : "CharField"
+                individual :
+                    longitude : undefined
+                    latitude : undefined
 
-angular.module('detective').controller 'individualSingleCtrl', IndividualSingleCtrl
+            for index, field of @scope.meta.fields
+                if @scope.isLatitude field
+                    geoloc.individual.latitude = @scope.get field.name
+                else if @scope.isLongitude field
+                    geoloc.individual.longitude = @scope.get field.name
+
+                break if geoloc.individual.longitude? and geoloc.individual.latitude?
+            if geoloc.individual.longitude? and geoloc.individual.latitude?
+                @scope.meta.fields.push geoloc.meta
+                @scope.individual['geolocation'] = "#{geoloc.individual.latitude}, #{geoloc.individual.longitude}"
+
+
+angular.module('detective.controller').controller 'individualSingleCtrl', IndividualSingleCtrl

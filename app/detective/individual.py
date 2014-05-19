@@ -2,19 +2,17 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class
+from app.detective.utils                import import_class, to_underscores, get_model_topic
 from app.detective.topics.common.models import FieldSource
 from django.conf.urls                   import url
-from django.core.exceptions             import ObjectDoesNotExist, ValidationError
+from django.core.exceptions             import ObjectDoesNotExist
 from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
 from django.db.models.query             import QuerySet
-from django.http                        import Http404, HttpResponseBadRequest
 from django.http                        import Http404
 from neo4django.db                      import connection
 from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
-from neo4django.rest_utils              import id_from_url
 from tastypie                           import fields
 from tastypie.authentication            import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization             import Authorization
@@ -27,8 +25,7 @@ from datetime                           import datetime
 from collections                        import defaultdict
 import json
 import re
-import csv
-import tempfile
+import copy
 
 # inspired from django.utils.formats.ISO_FORMATS['DATE_INPUT_FORMATS'][1]
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -394,38 +391,49 @@ class IndividualResource(ModelResource):
         return self.create_response(request, object_list)
 
     def get_mine(self, request, **kwargs):
-        self.method_check(request, allowed=['get'])
-        self.is_authenticated(request)
+        self.method_check(request, allowed=['get'])        
         self.throttle_check(request)
 
-        # Do the query.
-        limit     = int(request.GET.get('limit', 20))
-        results   = self._meta.queryset.filter(_author__contains=request.user.id)
-        count     = len(results)
-        paginator = Paginator(results, limit)
+        limit = int(request.GET.get('limit', 20))
 
-        try:
-            p     = int(request.GET.get('page', 1))
-            page  = paginator.page(p)
-        except InvalidPage:
-            raise Http404("Sorry, no results on that page.")
-
-        objects = []
-
-        for result in page.object_list:
-            bundle = self.build_bundle(obj=result, request=request)
-            bundle = self.full_dehydrate(bundle, for_list=True)
-            objects.append(bundle)
-
-        object_list = {
-            'objects': objects,
-            'meta': {
-                'author': request.user,
-                'page': p,
-                'limit': limit,
-                'total_count': count
+        if request.user.id is None:            
+            object_list = {
+                'objects': [],
+                'meta': {
+                    'author': request.user,
+                    'page': 1,
+                    'limit': limit,
+                    'total_count': 0
+                }
             }
-        }
+        else:
+            # Do the query.
+            results   = self._meta.queryset.filter(_author__contains=request.user.id)
+            count     = len(results)
+            paginator = Paginator(results, limit)
+
+            try:
+                p     = int(request.GET.get('page', 1))
+                page  = paginator.page(p)
+            except InvalidPage:
+                raise Http404("Sorry, no results on that page.")
+
+            objects = []
+
+            for result in page.object_list:
+                bundle = self.build_bundle(obj=result, request=request)
+                bundle = self.full_dehydrate(bundle, for_list=True)
+                objects.append(bundle)
+
+            object_list = {
+                'objects': objects,
+                'meta': {
+                    'author': request.user,
+                    'page': p,
+                    'limit': limit,
+                    'total_count': count
+                }
+            }
 
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
@@ -456,7 +464,7 @@ class IndividualResource(ModelResource):
                 if hasattr(attr, "_rel"):
                     related_model = attr._rel.relationship.target_model
                     # Clean the field to avoid duplicates
-                    if attr.count() > 0: attr.clear()
+                    attr.clear()
                     # Load the json-formated relationships
                     data[field] = rels = value
                     # For each relation...
@@ -487,7 +495,6 @@ class IndividualResource(ModelResource):
             del data[field]
 
         if len(data) > 0:
-            val = (getattr(node, field), field)
             # Convert author to set to avoid duplicate
             node._author = set(node._author)
             node._author.add(request.user.id)
@@ -501,51 +508,78 @@ class IndividualResource(ModelResource):
         self.throttle_check(request)
 
         depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
-        aggregation_threshold = 2
+        aggregation_threshold = 10
 
-        def reduce_result(rows):
+        def reduce_destination(outgoing_links, keep_id=None):
+            # We count the popularity of each entering relationsip by node
+            counter = {}
+            # Counter will have the following structure
+            # {
+            #   "<NAME_OF_A_RELATIONSHIP>" : {
+            #       "<IDX_OF_A_DESTINATION>": set("<IDX_OF_AN_ORIGIN>", ...)
+            #   }
+            # }
+            for origin in outgoing_links:
+                for rel in outgoing_links[origin]:
+                    for dest in outgoing_links[origin][rel]:
+                        if int(origin) != int(keep_id):
+                            counter[rel]       = counter.get(rel, {})
+                            counter[rel][dest] = counter[rel].get(dest, set())
+                            counter[rel][dest].add(origin)
+            # List of entering link (aggregate outside 'outgoing_links')
+            entering_links = {}
+            # Check now witch link must be move to entering outgoing_links
+            for rel in counter:
+                for dest in counter[rel]:
+                    # Too much entering  outgoing_links!
+                    if len(counter[rel][dest]) > aggregation_threshold:
+                        entering_links[dest] = entering_links.get(dest, {"_AGGREGATION_": set() })
+                        entering_links[dest]["_AGGREGATION_"] = entering_links[dest]["_AGGREGATION_"].union(counter[rel][dest])
+            # We remove element within a copy to avoid changing the size of the
+            # dict durring an itteration
+            outgoing_links_copy = copy.deepcopy(outgoing_links)
+            for i in entering_links:
+                # Convert aggregation set to list for JSON serialization
+                entering_links[i]["_AGGREGATION_"] = list( entering_links[i]["_AGGREGATION_"] )
+                # Remove entering_links from
+                for j in outgoing_links:
+                    if int(j) == int(keep_id): continue
+                    for rel in outgoing_links[j]:
+                        if i in outgoing_links[j][rel]:
+                            # Remove the enterging id
+                            outgoing_links_copy[j][rel].remove(i)
+                        # Remove the relationship
+                        if rel in outgoing_links_copy[j] and len(outgoing_links_copy[j][rel]) == 0:
+                            del outgoing_links_copy[j][rel]
+                    # Remove the origin
+                    if len(outgoing_links_copy[j]) == 0:
+                        del outgoing_links_copy[j]
+
+            return outgoing_links_copy, entering_links
+
+
+        def reduce_origin(rows):
+            # No nodes, no links
+            if len(rows) == 0: return ([], [],)
             # Initialize structures
             all_nodes = dict()
             # Use defaultdict() to create somewhat of an autovivificating list
             # We want to build a structure of the form:
             # { source_id : { relation_name : [ target_ids ] } }
             # Must use a set() instead of list() to avoid checking duplicates but it screw up json.dumps()
-            all_links = defaultdict(lambda: defaultdict(list))
-            IDs = set()
+            all_links = defaultdict(lambda: dict(__count=0, __relations=defaultdict(list)))
+            IDs = set(sum([row['nodes'] for row in rows], []))
 
-            for row in rows:
-                nodes = row['nodes']
-                i = 0
-                for relation in row['relations']:
-                    # If link is <<INSTANCE>>, then we're over
-                    if relation == '<<INSTANCE>>':
-                        break
-
-                    if not nodes[i + 1] in all_links[nodes[i]][relation]:
-                        links_len = len(all_links[nodes[i]][relation])
-                        if links_len < aggregation_threshold:
-                            all_links[nodes[i]][relation].append(nodes[i + 1])
-
-                            # Push IDs if not already in
-                            for node in [nodes[i], nodes[i + 1]]:
-                                IDs.add(node)
-                        else:
-                            if links_len == aggregation_threshold:
-                                all_links[nodes[i]][relation].append([nodes[i + 1]])
-                            else:
-                                if not nodes[i + 1] in all_links[nodes[i]][relation][-1]:
-                                    all_links[nodes[i]][relation][-1].append(nodes[i + 1])
-
-                    i += 1
-
-            # Finally get all entities from their IDs
+            # Get all entities from their IDs
             query = """
                 START root = node({0})
                 MATCH (root)-[:`<<INSTANCE>>`]-(type)
+                WHERE type.app_label = '{1}'
+                AND HAS(root.name)
                 RETURN ID(root) as ID, root, type
-            """.format(','.join([str(ID) for ID in IDs]))
-            rows = connection.cypher(query).to_dicts()
-            for row in rows:
+            """.format(','.join([str(ID) for ID in IDs]), get_model_topic(self.get_model()))
+            all_raw_nodes = connection.cypher(query).to_dicts()
+            for row in all_raw_nodes:
                 # Twist some data in the entity
                 for key in row['root']['data'].keys():
                     if key[0] == '_': del row['root']['data'][key]
@@ -554,16 +588,55 @@ class IndividualResource(ModelResource):
 
                 all_nodes[row['ID']] = row['root']['data']
 
+            for row in rows:
+                nodes = row['nodes']
+                i = 0
+                for relation in row['relations']:
+                    try:
+                        if all_nodes[nodes[i]] is None or all_nodes[nodes[i + 1]] is None: continue
+                        (a, b) = (nodes[i], nodes[i + 1])
+                        if re.search('^'+to_underscores(all_nodes[nodes[i]]['_type']), relation) is None:
+                            (a, b) = (nodes[i + 1], nodes[i])
+                        if not b in all_links[a]['__relations'][relation]:
+                            all_links[a]['__count'] += 1
+                            all_links[a]['__relations'][relation].append(b)
+                    except KeyError: pass
+                    i += 1
+
+            # Sort and aggregate nodes when we're over the threshold
+            for node in all_links.keys():
+                shortcut = all_links[node]['__relations']
+                if all_links[node]['__count'] >= aggregation_threshold:
+                    sorted_relations = sorted([(len(shortcut[rel]), rel) for rel in shortcut],
+                                              key=lambda to_sort: to_sort[0])
+                    shortcut = defaultdict(list)
+                    i = 0
+                    while i < aggregation_threshold:
+                        for rel in sorted_relations:
+                            try:
+                                node_id = all_links[node]['__relations'][rel[1]].pop()
+                                shortcut[rel[1]].append(node_id)
+                                i += 1
+                            except IndexError:
+                                # Must except IndexError if we .pop() on an empty list
+                                pass
+                            if i >= aggregation_threshold: break
+                    shortcut['_AGGREGATION_'] = sum(all_links[node]['__relations'].values(), [])
+                all_links[node] = shortcut
+
             return (all_nodes, all_links)
 
         query = """
             START root=node({0})
             MATCH path = (root)-[*1..{1}]-(leaf)
-            RETURN extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|ID(n)) as nodes
+            WITH extract(r in relationships(path)|type(r)) as relations, extract(n in nodes(path)|ID(n)) as nodes
+            WHERE ALL(rel  in relations WHERE rel <> "<<INSTANCE>>")
+            RETURN relations, nodes
         """.format(kwargs['pk'], depth)
         rows = connection.cypher(query).to_dicts()
 
-        (nodes, links) = reduce_result(rows)
+        nodes, links                   = reduce_origin(rows)
+        outgoing_links, entering_links = reduce_destination(links, keep_id=kwargs['pk'])
 
         self.log_throttled_access(request)
-        return self.create_response(request, {'nodes':nodes,'links':links})
+        return self.create_response(request, {'nodes':nodes,'outgoing_links': outgoing_links, 'entering_links': entering_links})

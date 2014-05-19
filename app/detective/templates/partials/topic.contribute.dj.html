@@ -1,0 +1,328 @@
+<div id="contribute" ng-cloak>
+	<div class="contribute-start panel" ng-class="{ open: showKickStart || !individuals.length }">
+		<div class="container">
+			<h2>Add a new individual to the database</h2>
+
+			<div ng-repeat="resource in topicResources() track by $index">
+				<div class="row top30">
+					<div class="col-sm-3">
+						<label class="btn btn-block btn-default btn-large">
+							<input type="radio" value="[[resource.name]]" ng-model="new.type" class="hidden" />
+							<div class="pull-left left10" ng-style="{color: strToColor(resource.name)}">
+								<i class="fa fa-check-square" ng-show="new.type == resource.name"></i>
+								<i class="fa fa-square-o" ng-hide="new.type == resource.name"></i>
+							</div>
+							[[resource.verbose_name]]
+						</label>
+					</div>
+					<div class="col-sm-9 desc">
+						[[resource.description]]
+					</div>
+				</div>
+				<form class="row kick-start form-inline"
+					  ng-if="new.type == resource.name"
+					  ng-submit="addIndividual().save()">
+					<label class="col-sm-3 control-label top10">
+						Name of the [[resource.verbose_name]]
+					</label>
+					<div class="col-sm-9 input-group">
+						<input type="text" class="form-control" ng-model="new.fields.name" />
+						<button class="btn btn-primary">Create</button>
+					</div>
+				</form>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="container tr top20">
+		<a class="btn btn-default btn-large" ng-click="showKickStart = true"  ng-hide="showKickStart || !individuals.length">
+			<i class="fa fa-plus right10"></i>
+			Add a new individual
+		</a>
+		<a class="btn btn-default btn-large" ng-href="[[username]]/[[topic]]/contribute/upload">
+			<i class="fa fa-upload right10"></i>
+			Bulk upload
+		</a>
+	</div>
+
+	<div class="individual-forms container" ng-if="individuals.length">
+
+		<div class="individual panel panel-default"
+			 ng-repeat="individual in individuals"
+			 ng-class="{
+			 	'loading': individual.loading,
+			 	'closed': individual.isClosed,
+			 	'saved': individual.isSaved()
+			}">
+
+			<a scroll-to="600" ng-if="scrollIdx == $index"></a>
+
+			<div class="head panel-heading">
+				<div class="btns">
+					<span ng-if="individual.permalink()" >
+						<a class="left10" ng-href="[[individual.permalink()]]">See in detail</a>
+						<button class="btn btn-default left10"
+						   ng-if="user.hasDeletePermission(topic)"
+						   ng-click="individual.delete($index)">
+							<i class="fa fa-trash-o"></i>
+						</button>
+					</span>
+					<button ng-click="individual.close()" class="btn btn-default left10">
+						<i class="fa fa-times"></i>
+					</button>
+				</div>
+				<h3>
+					<div class="pull-left">
+						<div color-tag ref="individual.type" />
+					</div>
+					<strong>
+						[[individual.fields|individualPreview:"unkown"]]
+					</strong>
+					<span ng-if="individual.related_to">
+						related to
+						<a ng-click="scrollTo(individual.related_to)" href="">
+							[[individual.related_to.fields|individualPreview:"unkown"]]
+						</a>
+					</span>
+				</h3>
+				<h4>[[individual.meta.verbose_name]]</h4>
+			</div>
+
+			<div class="alert alert-danger errors" ng-if="individual.error_message">
+				[[individual.error_message]]
+				<div ng-if="individual.error_traceback" class="pull-right">
+					<button class="btn btn-xs btn-default" ng-click="individual.show_traceback = !individual.show_traceback" href="">
+						Show traceback
+					</button>
+				</div>
+				<div ng-if="individual.show_traceback" ng-bind-html-unsafe="individual.error_traceback|nl2br" class="top10"></div>
+			</div>
+
+			<div class="restore" ng-show="individual.isClosed">
+				<div class="btns">
+					<button ng-click="removeIndividual($index)" class="btn btn-default left10">
+						<i class="fa fa-times"></i>
+					</button>
+				</div>
+				<!-- [[ individual.fields ]] -->
+				<strong ng-hide="individual.isNotFound">[[individual.fields|individualPreview:"unkown"]]</strong>
+				<span ng-if="!individual.isRemoved && !individual.isNotFound">
+					 has been closed.
+					<a class="left10" ng-click="individual.close()">Undo</a>
+					<a class="left10" ng-click="removeIndividual($index)">Ignore</a>
+				</span>
+				<span ng-if="individual.isRemoved" class="text-danger">
+					 has been removed. Your changes have not been registered.
+				</span>
+				<span ng-if="individual.isNotFound">
+					<h4>Requested element cannot be found, <strong>don't panic</strong>.</h4>
+					<p>
+						You can go back to <a href="{% url 'home' %}">home page</a>.
+					</p>
+				</span>
+				<div class="clearfix"></div>
+			</div>
+
+
+			<form class="form-horizontal panel-body">
+
+				<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">
+					<strong>Individuals with similar name already exist!</strong>
+					Switch to
+					<span ng-repeat="similar in individual.similars">
+						<a class="alert-link" ng-click="replaceIndividual($parent.$index, similar.id)" href="">[[similar.name]]</a>
+						<span ng-if="!$last">,</span>
+						<span ng-if="$last">.</span>
+					</span>
+				</div>
+
+				<div class="row field top20 form-group"
+					 ng-class="{loading: individual.updating[field.name] && !individual.loading}"
+				     ng-hide="!isAllowedType(field.type) || !individual.isVisible(field)"
+					 ng-repeat="field in individual.meta.fields track by $index">
+
+					<label class="col-sm-3 tr form-label top05" for="id_[[field.name]]">
+						[[field.verbose_name]]
+					</label>
+
+					<div class="col-sm-4" ng-if="field.type == 'Relationship' && !field.rules.is_searchable">
+
+						<div ng-repeat="f in individual.fields[field.name]" class="bottom05 input-group">
+							<span class="form-control disabled">
+								[[f|individualPreview:"no preview available"]]
+								<span ng-hide="f.id">
+									(not saved yet)
+								</span>
+							</span>
+							<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
+								<i class="gray-darker fa fa-times"></i>
+							</span>
+							<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id">
+								<i class="gray-darker fa fa-edit"></i>
+							</span>
+						</div>
+
+    					<button class="btn btn-default btn-sm"
+    					   type="button"
+    					   ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
+    					   <i class="fa fa-plus right05"></i>
+    						Create a new [[field.verbose_name]]
+    					</button>
+
+					</div>
+
+					<div class="col-sm-4" ng-if="field.type == 'Relationship' && field.rules.is_searchable">
+
+						<div ng-repeat="f in individual.fields[field.name]">
+							<div class="input-group multiple">
+								<input
+									type="search"
+									placeholder="Search..."
+									tt-typeahead
+									tt-individual="field.related_model"
+									tt-topic="modelTopic(field.related_model)"
+									tt-model="individual.fields[field.name][$index]"
+									ng-disabled="individual.loading"
+									ng-if="relatedState(f) == 'input'" />
+								<span class="form-control disabled" ng-if="relatedState(f) != 'input'">
+									[[f|individualPreview:"no preview available"]]
+									<span ng-hide="f.id">
+										(not saved yet)
+									</span>
+								</span>
+								<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
+									<i class="gray-darker fa fa-times"></i>
+								</span>
+								<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable ">
+									<i class="gray-darker fa fa-edit"></i>
+								</span>
+							</div>
+
+			    			<div class="ask-for-new" ng-show="askForNew(f) && relatedState(f) == 'input'">
+			    				<div class="pan" ng-if="field.rules.is_editable">
+			    					<h4>Heads Up!</h4>
+			    					<p>The entry you just typed in is new in the base.</p>
+			    					<div class="tr">
+				    					<button class="btn btn-default btn-sm"
+    					   				   type="button"
+				    					   ng-click="setNewIndividual({name: f.name}, field.related_model, individual, field.name, $index)">
+				    						Create <strong>[[f.name]]</strong>
+				    					</button>
+				    				</div>
+			    				</div>
+			    				<div class="pan" ng-if="!field.rules.is_editable">
+			    					Please choose an existing entry.
+			    				</div>
+			    			</div>
+
+						</div>
+
+						<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">
+							<button
+    					   		type="button"
+								ng-click="addRelated(individual, field.name, field.related_model)"
+								class="btn btn-default btn-sm">
+								<i class="fa fa-search right05"></i>
+								Search
+								<span ng-if="individual.fields[field.name].length">another</span>
+								one
+							</button>
+						</div>
+
+					</div>
+
+
+					<div class="col-sm-4" ng-if="field.type == 'URLField'">
+
+						<input type="url"
+							   placeholder="http://"
+							   id="id_[[field.name]]"
+							   change-on-blur
+							   ng-model="individual.fields[field.name]"
+							   class="form-control" />
+					</div>
+
+					<div class="col-sm-4" ng-if="field.type == 'DateTimeField'">
+						<div class="input-group">
+							<span class="input-group-addon">
+								<i class="gray-darker fa fa-calendar"></i>
+							</span>
+							<input type="text"
+								   id="id_[[field.name]]"
+								   change-on-blur
+								   ng-model="individual.fields[field.name]"
+								   ng-disabled="individual.loading"
+								   datepicker-popup="dd-MMMM-yyyy"
+								   show-weeks="false"
+								   class="form-control" />
+						</div>
+					</div>
+
+					<div class="col-sm-4" ng-if="field.type == 'CharField' && field.name != 'comment'">
+						<input  type="text"
+								class="form-control"
+								ng-model="individual.fields[field.name]"
+								change-on-blur
+								id="id_[[field.name]]" />
+					</div>
+
+					<div class="col-sm-4" ng-if="field.type == 'CharField' && field.name == 'comment'">
+						<textarea rows="5"
+						          id="id_[[field.name]]"
+								  change-on-blur
+						          ng-model="individual.fields[field.name]"
+						          class="form-control"></textarea>
+					</div>
+
+					<div class="col-sm-4" ng-if="field.type == 'IntegerField'">
+						<input  type="number"
+								id="id_[[field.name]]"
+							    change-on-blur
+								ng-model="individual.fields[field.name]"
+								class="form-control" />
+					</div>
+
+					<span class="col-sm-5 help-block">
+						<p class="top10">[[field.help_text]]</p>
+					</span>
+
+				</div>
+
+				<div class="more-fields row field top20 form-group"
+				     ng-show="individual.invisibleFields().length">
+
+					<span class="col-sm-3 tr form-label ">
+						Add more information
+					</span>
+
+					<div class="col-sm-9">
+						<span ng-repeat="field in individual.meta.fields | filter:isVisibleAdditional(individual)">
+							<a href="" ng-click="individual.showField(field)">[[field.verbose_name]]</a><span ng-if="!$last">, </span>
+						</span>
+					</div>
+				</div>
+
+			</form>
+
+ 			<div class="form-footer panel-footer">
+ 				<div class="row">
+ 					<div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+ 						<span ng-if="individual.loading">
+ 							Loading...
+ 						</span>
+ 						<span ng-if="!individual.isSaved() && !individual.loading">
+ 							Saving changes...
+ 						</span>
+ 						<span ng-if="individual.isSaved() && !individual.loading">
+ 							<i class="fa fa-check right05"></i>
+ 							Changes saved!
+ 						</span>
+ 					</div>
+ 				</div>
+ 			</div>
+		</div>
+	</div>
+</div>
+
+

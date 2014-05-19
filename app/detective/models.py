@@ -1,9 +1,11 @@
-from .utils                    import get_topics
-from app.detective             import utils
-from app.detective.permissions import create_permissions, remove_permissions
-from django.core.exceptions    import ValidationError
-from django.db                 import models
-from tinymce.models            import HTMLField
+from .utils                     import get_topics
+from app.detective              import utils
+from app.detective.permissions  import create_permissions, remove_permissions
+from django.core.cache          import cache
+from django.core.exceptions     import ValidationError
+from django.db                  import models
+from django.contrib.auth.models import User, Group
+from tinymce.models             import HTMLField
 
 import inspect
 import os
@@ -53,18 +55,27 @@ class Topic(models.Model):
     public      = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
     ontology    = models.FileField(null=True, blank=True, upload_to="ontologies", help_text="Ontology file that descibes your field of study.")
     background  = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
+    author      = models.ForeignKey(User, help_text="Author of this topic.", null=True)
 
     def __unicode__(self):
         return self.title
 
-    def app_label(self):
+    def app_label(self):        
         if self.slug in ["common", "energy"]:
             return self.slug
         elif not self.module:
             # Already saved topic
             if self.id:
+                cache_key = "prefetched_topic_%s" % self.id        
+                # Store topic object in a temporary attribute       
+                # to avoid SQL lazyness                            
+                if getattr(self, cache_key, None) is None:     
+                    topic = Topic.objects.get(id=self.id)
+                    setattr(self, cache_key, topic)
+                else:
+                    topic = getattr(self, cache_key)
                 # Restore the previous module value
-                self.module = Topic.objects.get(id=self.id).module
+                self.module = topic.module
                 # Call this function again.
                 # Continue if module is still empty
                 if self.module: return self.app_label()
@@ -92,6 +103,7 @@ class Topic(models.Model):
 
     def get_models(self):
         """ return a list of Model """
+        # We have to load the topic's model
         models_module = self.get_models_module()
         models_list   = []
         for i in dir(models_module):
@@ -117,7 +129,7 @@ class Topic(models.Model):
     def reload(self):
         from app.detective.register import topic_models
         # Register the topic's models again
-        topic_models(self.get_module().__name__)
+        topic_models(self.get_module().__name__, force=True)
 
     def has_default_ontology(self):
         try:
@@ -132,11 +144,18 @@ class Topic(models.Model):
 
 
     def get_absolute_path(self):
-        return "/%s/" % self.slug
+        if self.author is None:
+            return None
+        else:
+            return "/%s/%s/" % (self.author.username, self.slug,)
 
     def link(self):
         path = self.get_absolute_path()
-        return '<a href="%s">%s</a>' % (path, path, )
+        if path is None:
+            return ''
+        else:
+            return '<a href="%s">%s</a>' % (path, path, )
+
     link.allow_tags = True
 
 
@@ -163,13 +182,15 @@ class Article(models.Model):
 # This model aims to describe a research alongside a relationship.
 class SearchTerm(models.Model):
     # This field is deduced from the relationship name
-    subject = models.CharField(null=True, blank=True, default='', editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    subject    = models.CharField(null=True, blank=True, default='', editable=False, max_length=250, help_text="Kind of entity to look for (Person, Organization, ...).")
+    # This field is set automaticly too according the choosen name
+    is_literal = models.BooleanField(editable=False, default=False)
     # Every field are required
-    label   = models.CharField(null=True, blank=True, default='', max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
+    label      = models.CharField(null=True, blank=True, default='', max_length=250, help_text="Label of the relationship (typically, an expression such as 'was educated in', 'was financed by', ...).")
     # This field will be re-written by app.detective.admin
     # to be allow dynamic setting of the choices attribute.
-    name    = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
-    topic   = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
+    name       = models.CharField(max_length=250, help_text="Name of the relationship inside the subject.")
+    topic      = models.ForeignKey(Topic, help_text="The topic this relationship is related to.")
 
     def find_subject(self):
         subject = None
@@ -177,22 +198,31 @@ class SearchTerm(models.Model):
         field = self.field
         # If any related_model is given, that means its subject is is parent model
         subject = field["model"]
-        return subject
+        return subject    
 
     def clean(self):
-        self.subject = self.find_subject()
+        self.subject    = self.find_subject()
+        self.is_literal = self.type == "literal"
         models.Model.clean(self)
 
     @property
     def field(self):
-        field = None
-        if self.name:
-            topic_models = self.topic.get_models()
-            for model in topic_models:
-                # Retreive every relationship field for this model
-                for f in utils.get_model_fields(model):
-                    if f["name"] == self.name:
-                        field = f
+        field = None        
+        if self.name:            
+            # Build a cache key with the topic token
+            cache_key = "%s__%s__field" % ( self.topic.module, self.name )
+            # Try to use the cache value
+            if getattr(self, cache_key, None) is not None:
+                field = getattr(self, cache_key)
+            else:
+                topic_models = self.topic.get_models()
+                for model in topic_models:
+                    # Retreive every relationship field for this model
+                    for f in utils.get_model_fields(model):
+                        if f["name"] == self.name:
+                            field = f
+            # Very small cache to optimize recording
+            setattr(self, cache_key, field)
         return field
 
     @property
@@ -204,6 +234,13 @@ class SearchTerm(models.Model):
             return "relationship"
         else:
             return "literal"
+
+    @property
+    def target(self):        
+        if 'related_model' in self.field:
+            return self.field["related_model"]
+        else:
+            return None
 
 # -----------------------------------------------------------------------------
 #

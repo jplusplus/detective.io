@@ -13,11 +13,11 @@
         <link rel="icon" type="image/png" href="{% static 'detective/img/favicon.ico' %}">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 
-        <link type='text/css' href='http://fonts.googleapis.com/css?family=Merriweather:400,700,300|Lato:400,300,700&amp;subset=latin,latin-ext' rel='stylesheet'>
+        <link type='text/css' href='http://fonts.googleapis.com/css?family=Arvo:400,700,300|Lato:400,300,700&amp;subset=latin,latin-ext' rel='stylesheet'>
         {% block extracss %}{% endblock %}
         <base href="{% url 'home' %}" />
     </head>
-    <body ng-cloak>
+    <body ng-cloak  ng-class="{ 'is-home': location.path() == '/' && !is404() }">
         {% load cache %}
         {% cache 3600 fullpage %}
             {% block content %}{% endblock %}

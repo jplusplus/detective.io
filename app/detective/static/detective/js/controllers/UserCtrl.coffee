@@ -1,9 +1,32 @@
 # See also :
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
 class UserCtrl
-
     # Injects dependancies
     @$inject : ["$scope", "$http", "$location", "$routeParams", "User", "Page", "$rootElement"]
+    # Public method to resolve
+    @resolve:
+        user: ($rootScope, $route, $q, $location, Common)->
+            notFound    = ->
+                deferred.reject()
+                $scope.is404(yes)
+                deferred
+            deferred    = $q.defer()
+            routeParams = $route.current.params
+            # Checks that the current topic and user exists together
+            if routeParams.username?
+                # Retreive the topic for this user
+                params =
+                    type    : "user"
+                    username: routeParams.username
+                Common.get params, (data)=>
+                    # Stop if it's an unkown topic
+                    return notFound() unless data.objects and data.objects.length
+                    # Resolve the deffered result
+                    deferred.resolve(data.objects[0])
+            # Reject now
+            else return notFound()
+            # Return a deffered object
+            deferred.promise
 
     constructor: (@scope, @http, @location, @routeParams, @User, @Page, @rootElement)->
         # ──────────────────────────────────────────────────────────────────────
@@ -23,14 +46,14 @@ class UserCtrl
         # Set page title with no title-case
         switch @location.path()
             when "/signup"
-                @Page.title "Sign up", false
+                @Page.title "Request an account", false
             when "/login"
                 @Page.title "Log in", false
             when "/account/activate"
                 @Page.title "Activate your account", false
                 @readToken()
             when "/account/reset-password"
-                @Page.title "Reset password", false     
+                @Page.title "Reset password", false
             when "/account/reset-password-confirm"
                 @Page.title "Enter a new password", false
 
@@ -72,7 +95,7 @@ class UserCtrl
             if data? and data.success
                 @User.set
                     is_logged   : true
-                    is_staff    : data.is_staff
+                    is_staff    : !! data.is_staff
                     username    : data.username
                     permissions : data.permissions
                 # Redirect to the next URL
@@ -113,7 +136,7 @@ class UserCtrl
                 @scope.error = message if message?
 
     resetPassword: =>
-        config = 
+        config =
             method: "POST"
             url: "/api/common/v1/user/reset_password/"
             data:
@@ -144,11 +167,11 @@ class UserCtrl
             @scope.error = "Invalid URL, please use the link contained in your password reset email."
         else
             @scope.invalidURL = false
-            delete @scope.error 
+            delete @scope.error
             config =
                 method: "POST"
                 url: "/api/common/v1/user/reset_password_confirm/"
-                data: 
+                data:
                     password: @scope.newPassword
                     token: token
                 headers:
@@ -161,9 +184,9 @@ class UserCtrl
                     # Turn off loading mode
                     @scope.loading = false
                     delete @scope.error
-                    @scope.resetPasswordSucceed = true 
+                    @scope.resetPasswordSucceed = true
                 .error (response, error)=>
-                    @scope.resetPasswordSucceed = false 
+                    @scope.resetPasswordSucceed = false
                     @scope.error = response.data.error_message if response.data.error_message?
 
 
@@ -202,9 +225,9 @@ class UserCtrl
                 @scope.state = true
             .error (message)=>
                 @Page.loading false
-                @scope.state = false 
+                @scope.state = false
 
     unknownError: ()=>
         @scope.error = "An unexpected error happened, sorry for that."
 
-angular.module('detective').controller 'userCtrl', UserCtrl
+angular.module('detective.controller').controller 'userCtrl', UserCtrl

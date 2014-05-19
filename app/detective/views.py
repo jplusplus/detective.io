@@ -13,8 +13,8 @@ def home(request):
     if request.user.is_authenticated():
         permissions = request.user.get_all_permissions()
         # Create the cookie
-        response.set_cookie("user__is_logged",   True)
-        response.set_cookie("user__is_staff",    request.user.is_staff)
+        response.set_cookie("user__is_logged",   1)
+        response.set_cookie("user__is_staff",    1*request.user.is_staff)
         response.set_cookie("user__username",    unicode(request.user.username))
         response.set_cookie("user__permissions", unicode(u' '.join(permissions)))
     else:
@@ -34,11 +34,11 @@ def partial(request, partial_name=None):
         raise Http404
 
 def partial_explore(request, topic=None):
-    template_name = 'partials/explore-' + topic + '.dj.html'
+    template_name = 'partials/topic.explore.' + topic + '.dj.html'
     try:
         return render_to_response(template_name)
     except TemplateDoesNotExist:
-        return partial(request, partial_name='explore-common')
+        return partial(request, partial_name='topic.explore.common')
 
 def not_found(request):
     return redirect("/404/")

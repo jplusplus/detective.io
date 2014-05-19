@@ -1,8 +1,8 @@
 class ArticleCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Common', 'Page', '$location']
+    @$inject: ['$scope', '$routeParams', 'Common', 'Page']
 
-    constructor: (@scope,  @routeParams, @Common, @Page, @location)->
+    constructor: (@scope,  @routeParams, @Common, @Page)->
         # Enable loading mode
         @Page.loading yes
         # ──────────────────────────────────────────────────────────────────────
@@ -17,8 +17,8 @@ class ArticleCtrl
             # Disable loading mode
             @Page.loading no
             # Stop if it's an unkown topic or article
-            return @location.path "/404" unless articles.length
+            return @scope.is404(yes) unless articles.length
             # Or take the article at the top of the list
             @scope.article = articles[0]
 
-angular.module('detective').controller 'articleCtrl', ArticleCtrl
+angular.module('detective.controller').controller 'articleCtrl', ArticleCtrl

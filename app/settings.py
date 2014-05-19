@@ -110,13 +110,15 @@ TEMPLATE_LOADERS = (
     # 'django.template.loaders.eggs.Loader',
 )
 
+CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    #'django.middleware.cache.UpdateCacheMiddleware',
-    #'django.middleware.cache.FetchFromCacheMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'app.middleware.cache.FetchFromCacheMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'app.middleware.crossdomainxhr.XsSharing',
@@ -153,6 +155,7 @@ COMPRESS_CSS_FILTERS = (
 
 COMPRESS_JS_FILTERS = (
     "compressor.filters.template.TemplateFilter",
+    "compressor.filters.jsmin.JSMinFilter",
 )
 
 COMPRESS_TEMPLATE_FILTER_CONTEXT = {
@@ -161,7 +164,7 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
 
 # Remove BeautifulSoup requirement
 COMPRESS_PARSER = 'compressor.parser.HtmlParser'
-COMPRESS_ENABLED = False
+COMPRESS_ENABLED = True
 #INTERNAL_IPS = ('127.0.0.1',)
 
 TASTYPIE_DEFAULT_FORMATS = ['json']

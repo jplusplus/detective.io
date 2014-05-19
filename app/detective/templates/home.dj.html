@@ -35,34 +35,39 @@
 
     {% compress js %}
         <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/config/safeApply.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ArticleCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/BreadcrumbCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContactUsCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContributeCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/BulkUploadCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ExploreCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/HeaderCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/HomeCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/BulkUploadCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualListCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualSearchCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualSingleCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualGraphCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/NotFoundCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/PageCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/ProfileCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/SearchFormCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserTopicCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/card.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/changeOnBlur.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/colorTag.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/countryMap.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/parallax.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/pwMatch.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/directives/screenHeight.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/scrollTo.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/ttTypeahead.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/unique.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/watchLoginMandatory.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/graphviz.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/filters.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/Breadcrumb.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/filters/individualPreview.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/filters/nl2br.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/filters/strToColor.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/services/AuthHttpInterceptor.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/Common.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/Individual.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/IndividualForm.coffee' %}"></script>
@@ -74,38 +79,12 @@
 {% endblock %}
 
 {% block content %}
-    <div watch-login-mandatory>
-    	{% include "partials/header.dj.html" %}
-        <div ng-view id="content" ng-class="{ freeze: Page.loading() }"></div>
+    <div watch-login-mandatory watch-topic-exists>
+        {% include "partials/header.dj.html" %}        
+        <div ng-view id="content" ng-hide="is404()" ng-class="{ freeze: Page.loading() }"></div>
+        <div id="content" ng-show="is404()">
+            <div ng-include="'partial/404.html'"></div>
+        </div>
     </div>
-    <footer>
-        <div class="links">
-            <div class="container">
-                <ul class="pull-right list-inline logos">
-                    <li>
-                        <a href="http://journalismgrants.org" target="_blank">
-                            <img src="{% static 'detective/img/jg.png' %}" alt="Journalism Grant" />
-                        </a>
-                    </li>
-                    <li class="last">
-                        <a href="http://jplusplus.org" target="_blank">
-                            <img src="{% static 'detective/img/jpp.png' %}" alt="Journalism++" />
-                        </a>
-                    </li>
-                </ul>
-                <ul class="list-inline">
-                    <li><a ng-href="/page/about">About</a></li>
-                    <li><a href="mailto:contact@detective.io"> Contact</a></li>
-                    <li class=""><a ng-href="/contact-us">Get a quote!</a></li>
-                    <li class="last"><a href="https://github.com/jplusplus/detective.io" target="_blank">Github</a></li>
-                    <li class="last hidden"><a>Facebook</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="legals">
-            <div class="container text-muted">
-                Software under GNU GPLv3
-            </div>
-        </div>
-    </footer>
+    {% include "partials/footer.dj.html" %}
 {% endblock %}

@@ -1,17 +1,18 @@
-angular.module('detective').directive "card", ['Summary', (Summary)->
+angular.module('detective.directive').directive "card", ['Summary', (Summary)->
     restrict: 'E'
     require: "ngModel"
     scope:
         individual: "=ngModel"
-        topic: "="
-        getType: "&type"
-    templateUrl: "/partial/card.html"
+        topic     : "="
+        username  : "="
+        getType   : "&type"
+    templateUrl: "/partial/topic.single.card.html"
     replace: true
     link: (scope, elm, attr) ->
         scope.type = scope.getType().toLowerCase()
         scope.singleUrl = ->
             if scope.meta
-                "/#{scope.topic}/#{scope.type}/#{scope.individual.id}/"
+                "/#{scope.username}/#{scope.topic}/#{scope.type}/#{scope.individual.id}/"
             else null
         scope.attr = (name)->
             if scope.meta

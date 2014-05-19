@@ -11,10 +11,15 @@ virtualenv:
 	# Install pip packages
 	. $(ENV) ; pip install -r requirements.txt
 
+npm_install:
+	# Install npm packages
+	if [ -s npm_requirements.txt ]; then xargs -a npm_requirements.txt npm install -g; else echo '\nNo NPM dependencies found in npm_requirements.txt'; fi
+
+
 install:
 	make virtualenv
 	# Install npm packages
-	cat npm_requirements.txt | echo $1
+	make npm_install
 	# Install bower packages
 	bower install
 	# Install neo4j locally

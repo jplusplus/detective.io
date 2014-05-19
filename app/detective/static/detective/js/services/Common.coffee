@@ -1,9 +1,8 @@
-angular.module('detectiveServices').factory("Common", [ '$resource', '$http', ($resource, $http)->
+angular.module('detective.service').factory("Common", [ '$resource', '$http', ($resource, $http)->
     $resource '/api/common/v1/:type/:id/', {}, {
         get:
             method : 'GET'
             isArray: false
-            cache  : false
         query:
             method : 'GET'
             isArray: true

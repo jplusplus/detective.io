@@ -1,9 +1,10 @@
 class BulkUploadCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$http', '$routeParams', 'Page', 'Individual', '$timeout','Common']
+    @$inject: ['$scope', '$http', '$routeParams', '$location', 'Page', 'Individual', '$timeout','Common', 'User']
 
-    constructor: (@scope, @http, @routeParams, @Page, @Individual, @timeout, @Common)->
+    constructor: (@scope, @http, @routeParams, @location, @Page, @Individual, @timeout, @Common, @User)->
         @Page.title "Bulk Upload", no
+        @Page.loading no
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
@@ -19,6 +20,11 @@ class BulkUploadCtrl
         # start with one file field
         @scope.file_fields    = ["file1"]
         @scope.files          = {}
+
+        # Redirect unauthorized user
+        @scope.$watch (=> User), =>
+            @location.url("/#{@scope.username}/#{@scope.topic}/") unless User.hasChangePermission(@topic)
+        , true
 
         # CONFIG
         @delay = 3000
@@ -36,7 +42,7 @@ class BulkUploadCtrl
 
         @timeout( =>
             if @scope.feedback and @scope.feedback.status == "enqueued" and @scope.feedback.token
-                params = { 
+                params = {
                     type: "jobs"
                     id  : @scope.feedback.token
                 }
@@ -67,6 +73,6 @@ class BulkUploadCtrl
         field_name = "file" + (@scope.file_fields.length + 1)
         @scope.file_fields.push(field_name)
 
-angular.module('detective').controller 'BulkUploadCtrl', BulkUploadCtrl
+angular.module('detective.controller').controller 'BulkUploadCtrl', BulkUploadCtrl
 
 # EOF

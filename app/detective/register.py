@@ -46,14 +46,15 @@ def default_rules(topic):
     from app.detective.utils import import_class        
     # Store topic object in a temporary attribute       
     # to avoid SQL lazyness                     
-    cache_key = "prefetched_topic_%s" % topic  
-    if cache.get(cache_key, None) is None:     
+    cache_key = "prefetched_topic_%s" % topic      
+    if cache.get(cache_key, None) is None:             
         # Get all registered models for this topic
-        models = Topic.objects.get(module=topic).get_models()                
-        cache.set(cache_key, models, 100)
+        topic  = Topic.objects.get(module=topic)
+        models = topic.get_models()        
+        cache.set(cache_key, topic, 10)
     else:
         # Get all registered models
-        models = cache.get(cache_key)
+        models = cache.get(cache_key).get_models()
 
     # Set "is_searchable" to true on every model with a name
     for model in models:

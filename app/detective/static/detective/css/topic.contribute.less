@@ -6,14 +6,15 @@
             overflow:hidden;
             padding:0 30px;
             max-height:0;
-            .translate(0, -1px);
+            .translate(0, -10px);
             .transition(0);
 
 
             &.open {
                 padding:30px;
                 max-height:800px;
-                .transition(max-height 0.7s);
+                .translate(0, -1px);
+                .transition(~"max-height 0.7s, transform 0.7s");
             }
         }
     }

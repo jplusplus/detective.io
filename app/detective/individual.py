@@ -463,6 +463,7 @@ class IndividualResource(ModelResource):
                                 del data[field][idx]
                                 # Too bad! Go to the next related object
                                 continue
+                                
                 # It's a literal value
                 else:
                     field_prop = self.get_model_field(field)._property

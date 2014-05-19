@@ -446,7 +446,7 @@ class IndividualResource(ModelResource):
                 if hasattr(attr, "_rel"):
                     related_model = attr._rel.relationship.target_model
                     # Clean the field to avoid duplicates
-                    if attr.count() > 0: attr.clear()
+                    attr.clear()
                     # Load the json-formated relationships
                     data[field] = rels = value
                     # For each relation...

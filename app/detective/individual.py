@@ -463,7 +463,6 @@ class IndividualResource(ModelResource):
                                 del data[field][idx]
                                 # Too bad! Go to the next related object
                                 continue
-                                
                 # It's a literal value
                 else:
                     field_prop = self.get_model_field(field)._property
@@ -478,7 +477,6 @@ class IndividualResource(ModelResource):
             del data[field]
 
         if len(data) > 0:
-            val = (getattr(node, field), field)
             # Convert author to set to avoid duplicate
             node._author = set(node._author)
             node._author.add(request.user.id)

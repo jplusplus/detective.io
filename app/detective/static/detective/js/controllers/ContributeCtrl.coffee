@@ -243,7 +243,6 @@ class ContributeCtrl
                     # Record the database version of the individual
                     @master  = angular.copy master
                     @sources = _.object _.map(@fields.field_sources, (fs)-> [fs.field, fs.url])
-                    console.log @sources
                 , (error)=>
                     @loading = false
                     # handle 404 response for entity loading

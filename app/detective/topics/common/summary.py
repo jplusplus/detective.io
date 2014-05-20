@@ -551,7 +551,7 @@ class SummaryResource(Resource):
 
         def is_object(match, query, token):
             previous = previous_word(query, token)            
-            return is_preposition(previous) or previous.isdigit() or token.isnumeric()
+            return is_preposition(previous) or previous.isdigit() or token.isnumeric() or token == query
 
         predicates      = []
         subjects        = []
@@ -563,7 +563,7 @@ class SummaryResource(Resource):
         for idx, match in enumerate(matches):            
             subjects     += match["models"]
             predicates   += match["relationships"] + match["literals"]
-            token         = match["token"]
+            token         = match["token"]        
             # True when the current token is the last of the series
             is_last_token = query.endswith(token)
             # Objects are detected when they start and end by double quotes
@@ -573,8 +573,8 @@ class SummaryResource(Resource):
                 # Store the token as an object
                 objects += self.search(token)[:5]
             # Or if the previous word is a preposition
-            elif is_object(match, query, token):
-                if token not in searched_tokens and len(token) > 3:     
+            elif is_object(match, query, token):                
+                if token not in searched_tokens and len(token) > 2:                        
                     # Looks for entities into the database
                     entities = self.search(token)[:5]
                     # Do not search this token again

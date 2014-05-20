@@ -86,11 +86,13 @@ class FieldSourceResource(ModelResource):
 
 class IndividualResource(ModelResource):
 
+
     field_sources = fields.ToManyField(
         FieldSourceResource,
         attribute=lambda bundle: FieldSource.objects.filter(individual=bundle.obj.id),
         full=True,
-        null=True
+        null=True,
+        use_in='detail'
     )
 
     def __init__(self, api_name=None):

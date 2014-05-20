@@ -14,6 +14,7 @@ class IndividualSingleCtrl
         @scope.scrollTo       = @scrollTo
         @scope.singleUrl      = @singleUrl
         @scope.strToColor     = @filter("strToColor")
+        @scope.getSource      = @getSource
         @scope.deleteNode     = @deleteNode
         @scope.isAddr         = (f)=> f.name.toLowerCase().indexOf('address') > -1
         @scope.isImg          = (f)=> f.name is 'image'
@@ -59,6 +60,9 @@ class IndividualSingleCtrl
         @Individual.graph graph_params, (data) =>
             @scope.graphnodes = data
 
+
+    getSource: (field)=>
+        _.find @scope.individual.field_sources, (fs)=> fs.field is field.name   
 
     hasRels: ()=>
         if @scope.meta? and @scope.individual?

@@ -170,9 +170,9 @@
 						</div>
 
     					<button class="btn btn-default btn-sm"
-    					   type="button"
-    					   ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
-    					   <i class="fa fa-plus right05"></i>
+    						type="button"
+    					    ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
+    					    <i class="fa fa-plus right05"></i>
     						Create a new [[field.verbose_name]]
     					</button>
 
@@ -289,7 +289,43 @@
 								class="form-control" />
 					</div>
 
+					<div class="add-source col-sm-3">
+						<span class="add-source-wrapper">
+							<button class="btn btn-primary add-source-toggle"
+									ng-class="{active: field.showSourceForm}" 
+							        ng-click="field.showSourceForm = !field.showSourceForm">
+								<i class="fa-book fa right05"></i>
+								<span ng-if="individual.getSource(field)">
+									Edit source
+								</span>
+								<span ng-if="!individual.getSource(field)">
+									Add source
+								</span>
+							</button>
+							<div class="add-source-form" 
+								  ng-show="field.showSourceForm">
+								<span ng-class="{ 'input-group': individual.getSource(field) }">
+									<input type="url"
+										   ng-change="individual.setSource(field)"
+										   ng-model="individual.sources[field.name]"
+										   change-on-blur
+										   placeholder="http://exemple.com" 
+										   class="form-control" />
+									<span class="input-group-btn" ng-if="individual.getSource(field)">
+										<a target="_blank" 
+										   ng-href="[[individual.getSource(field).url]]" 
+										   class="btn btn-default">
+											<i class="fa fa-external-link"></i>
+										</a>
+									</span>
+								</span>
+							</div>
+						</span>
+						<div class="add-source-overlay" ng-show="field.showSourceForm"></div>
+					</div>
+
 				</div>
+
 
 				<div class="more-fields row field top20 form-group"
 				     ng-show="individual.invisibleFields().length">

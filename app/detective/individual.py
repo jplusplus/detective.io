@@ -455,8 +455,21 @@ class IndividualResource(ModelResource):
         # Copy data to allow dictionary resizing
         data = body.copy()
         for field in body:
+            if field == "field_sources":
+                for source in  data[field]:
+                    fs, created = FieldSource.objects.get_or_create(individual=node.id, 
+                                                                    field=source["field"])
+                    # Update the value
+                    if source["url"] != "" and source["url"] is not None:
+                        fs.url = source["url"]
+                        fs.save()
+                    # Remove source field
+                    else:
+                        fs.delete()
+                # Continue to not deleted the field
+                continue
             # If the field exists into our model
-            if hasattr(node, field) and not field.startswith("_"):
+            elif hasattr(node, field) and not field.startswith("_"):
                 value = data[field]
                 # Get the field
                 attr = getattr(node, field)
@@ -483,7 +496,7 @@ class IndividualResource(ModelResource):
                                 continue
                 # It's a literal value
                 else:
-                    field_prop = self.get_model_field(field)._property
+                    field_prop = self.get_model_field(field)._property                    
                     if isinstance(field_prop, DateProperty):
                         # It's a date and therefor `value` should be converted as it
                         value  = datetime.strptime(value, RFC_DATETIME_FORMAT)

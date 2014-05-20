@@ -6,6 +6,10 @@ angular.module('detective.service',    ['ngResource', 'ngSanitize', 'ngCookies']
 
 detective = angular
     .module('detective', [
+        'ngCookies'
+        'ngResource'
+        'ngRoute'
+        'ngSanitize'
         "detective.config"
         "detective.controller"
         "detective.directive"

@@ -84,7 +84,7 @@
 {% block content %}
     <div watch-login-mandatory watch-topic-exists>
         {% include "partials/header.dj.html" %}        
-        <div ng-view id="content" ng-hide="is404()" ng-class="{ freeze: Page.loading() }"></div>
+        <div ng-view autoscroll id="content" ng-hide="is404()" ng-class="{ freeze: Page.loading() }"></div>
         <div id="content" ng-show="is404()">
             <div ng-include="'partial/404.html'"></div>
         </div>

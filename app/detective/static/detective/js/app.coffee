@@ -43,7 +43,7 @@ detective = angular
                 $rootScope.is403 = (is403) ->
                     if is403?
                         $rootScope._is403 = is403
-                        Page.loading (not is403)
+                        Page.loading false if is403
                     $rootScope._is403
                 $rootScope.$on "$routeChangeStart", ->
                     $rootScope.is404(no)

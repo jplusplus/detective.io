@@ -41,6 +41,8 @@ class IndividualAuthorization(Authorization):
         return authorized
 
     def read_detail(self, object_list, bundle):
+        if not self.check_contribution_permission(object_list, bundle, 'read'):
+            raise Unauthorized("Sorry, only staff or contributors can read resource.")
         return True
 
     def create_detail(self, object_list, bundle):

@@ -125,7 +125,7 @@
 			</div>
 
 
-			<form class="form-horizontal panel-body">
+			<div class="form-horizontal panel-body">
 
 				<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">
 					<strong>Individuals with similar name already exist!</strong>
@@ -302,13 +302,13 @@
 									Add source
 								</span>
 							</button>
-							<div class="add-source-form" 
+							<form class="add-source-form" 
+								  ng-submit="individual.setSource(field)"
 								  ng-show="field.showSourceForm">
 								<span ng-class="{ 'input-group': individual.getSource(field) }">
 									<input type="url"
-										   ng-change="individual.setSource(field)"
+										   ng-blur="individual.setSource(field)"
 										   ng-model="individual.sources[field.name]"
-										   change-on-blur
 										   placeholder="http://exemple.com" 
 										   class="form-control" />
 									<span class="input-group-btn" ng-if="individual.getSource(field)">
@@ -319,10 +319,16 @@
 										</a>
 									</span>
 								</span>
-							</div>
+							</form>
 						</span>
 						<div class="add-source-overlay" ng-show="field.showSourceForm"></div>
 					</div>
+
+
+					<div class="has-source text-success col-sm-3 top05" ng-show="individual.getSource(field)">
+						<i class="fa fa-check-circle-o"></i> Sourced
+					</div>						
+
 
 				</div>
 
@@ -341,7 +347,7 @@
 					</div>
 				</div>
 
-			</form>
+			</div>
 
  			<div class="form-footer panel-footer">
  				<div class="row">

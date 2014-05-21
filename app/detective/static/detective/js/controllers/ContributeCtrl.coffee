@@ -29,7 +29,6 @@ class ContributeCtrl
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
         @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic        
-
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────

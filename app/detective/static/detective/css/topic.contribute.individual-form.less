@@ -92,16 +92,21 @@
                     .add-source {
                         opacity:1;  
                         z-index:auto;
+                        position: static;
                         &-overlay {
                             display:block;
                         }
+                    }
+
+                    .has-source {
+                        display: none;
                     }
                 }
 
                 .add-source {
                     opacity:0;
                     z-index:-1;
-                    position: static;
+                    position: absolute;
 
                     &-wrapper {
                         position: relative;

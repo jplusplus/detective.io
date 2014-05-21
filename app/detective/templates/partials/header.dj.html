@@ -5,6 +5,11 @@
 			Welcome, [[user.username]]!
 			<a ng-click="logout()" href="#">Sign out</a>
 		</div>
+        <div ng-hide="user.is_logged" class="pull-right right20 user-state">
+            <a class="btn btn-link" ng-href="/login">
+                <i class="fa fa-sign-in"></i> Login
+            <a>
+        </div>
 	</div>
 
 	<h1 class="pull-left">

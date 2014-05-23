@@ -38,6 +38,11 @@ HashMerge = (a={}, b={}) ->
         d3Leafs = null
         d3Labels = null
 
+        leafs = []
+        edges = []
+
+        aggregationType = '__aggregation_bubble'
+        aggregationThreshold = 5
 
         edgeUpdate = (datum) ->
             datumX = datum.target.x - datum.source.x
@@ -73,6 +78,11 @@ HashMerge = (a={}, b={}) ->
                 if not datum._shouldDisplayName then 'toggle-display' else ''
             ].join ' '
 
+        sortAndReindex = (array) ->
+            _.map (_.sortBy array, (datum) -> -datum.weight), (datum, i) ->
+                datum._index = i
+                datum
+
         update = =>
             # It's useless to process if we do not have any leaf
             return if not scope.data.leafs?
@@ -92,11 +102,6 @@ HashMerge = (a={}, b={}) ->
             # Start the layout
             do ((d3Graph.nodes leafs).links edges).start
 
-            sortAndReindex = (array) ->
-                _.map (_.sortBy array, (datum) -> -datum.weight), (datum, i) ->
-                    datum._index = i
-                    datum
-
             # Sort by weight (DESC) to know which node should should always display its name
             leafs = sortAndReindex leafs
             for i in [0..(Math.min leafs.length, 3)]
@@ -105,10 +110,7 @@ HashMerge = (a={}, b={}) ->
             ###
             # Time to aggregate!
             ###
-            aggregationType = '__aggregation_bubble'
             do ->
-                aggregationThreshold = 5
-
                 canAggregate = (leaf) ->
                     (not isCurrent leaf._id) and (leaf._type isnt aggregationType)
 
@@ -186,6 +188,9 @@ HashMerge = (a={}, b={}) ->
             # Aggregation is done!
             ###
 
+            do d3Update
+
+        d3Update = =>
             (((d3Defs.append 'marker').attr
                 id : 'marker-end'
                 class: 'arrow'
@@ -228,10 +233,19 @@ HashMerge = (a={}, b={}) ->
                 # Check if we're dragging the leaf
                 return if d3.event.defaultPrevented
                 # Check if we clicked on a aggregation bubble
-                return if datum._type is aggregationType
-                $location.path "/#{$routeParams.username}/#{$routeParams.topic}/#{do datum._type.toLowerCase}/#{datum._id}"
-                # We're in a d3 callback so we need to manually $apply the scope
-                do scope.$apply
+                if datum._type is aggregationType
+                    [leaf] = (datum.leafs.splice 0, 1)
+                    datum.name = "#{datum.leafs.length} more entities"
+
+                    leafs.push leaf
+
+                    do ((d3Graph.nodes leafs).links edges).start
+                    sortAndReindex leafs
+                    do d3Update
+                else
+                    $location.path "/#{$routeParams.username}/#{$routeParams.topic}/#{do datum._type.toLowerCase}/#{datum._id}"
+                    # We're in a d3 callback so we need to manually $apply the scope
+                    do scope.$apply
 
             # Create all new labels
             d3Labels = (d3Svg.selectAll '.name').data leafs, (datum) -> datum._id
@@ -241,7 +255,7 @@ HashMerge = (a={}, b={}) ->
                     'data-id'    : (datum) -> datum._id
                     class        : getTextClasses
                     'text-anchor': "middle"
-                .text (datum) -> datum.name
+            (d3Svg.selectAll '.name').text (datum) -> datum.name
             # Remove old labels
             do (do d3Labels.exit).remove
             null

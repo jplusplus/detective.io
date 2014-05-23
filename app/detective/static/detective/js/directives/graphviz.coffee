@@ -105,8 +105,8 @@ HashMerge = (a={}, b={}) ->
             ###
             # Time to aggregate!
             ###
+            aggregationType = '__aggregation_bubble'
             do ->
-                aggregationType = '__aggregation_bubble'
                 aggregationThreshold = 5
 
                 canAggregate = (leaf) ->
@@ -170,7 +170,7 @@ HashMerge = (a={}, b={}) ->
                                     deleteLeaf edge.target, leaf
                                     break
                                 else if (edge.target._id is leaf._id) and canAggregate edge.source
-                                    deleteLeaf edge.source
+                                    deleteLeaf edge.source, leaf
                                     break
                             leafs = sortAndReindex leafs
                             # Aaaaand, we're going back to the top
@@ -224,7 +224,12 @@ HashMerge = (a={}, b={}) ->
             d3Leafs.on 'mouseenter', (datum) -> d3Svg.select(".name[data-id='#{datum._id}']").attr("class", "name")
             d3Leafs.on 'mouseleave', (datum) -> d3Svg.select(".name[data-id='#{datum._id}']").attr("class", getTextClasses)
             d3Leafs.on 'click', (datum) ->
+                # Check if we're dragging the leaf
+                return if d3.event.defaultPrevented
+                # Check if we clicked on a aggregation bubble
+                return if datum._type is aggregationType
                 $location.path "/#{$routeParams.username}/#{$routeParams.topic}/#{do datum._type.toLowerCase}/#{datum._id}"
+                # We're in a d3 callback so we need to manually $apply the scope
                 do scope.$apply
 
             # Create all new labels

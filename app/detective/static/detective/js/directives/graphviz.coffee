@@ -23,36 +23,37 @@ HashMerge = (a={}, b={}) ->
         data : '='
         topic : '='
     link: (scope, element, attr)->
-        size       = [ element.width(), element.height() ]
-        node_size  = 6
-        absUrl     = do $location.absUrl
+        absUrl = do $location.absUrl
 
-        svg = ((d3.select element[0]).append 'svg').attr
-            width : size[0]
-            height : size[1]
-        defs = svg.insert 'svg:defs', 'path'
+        leafSize = 6
 
-        graph = (((do d3.layout.force).size size).linkDistance 90).charge -300
+        svgSize = [ element.width(), element.height() ]
+        d3Svg = ((d3.select element[0]).append 'svg').attr
+            width : svgSize[0]
+            height : svgSize[1]
+        d3Defs = d3Svg.insert 'svg:defs', 'path'
 
-        the_links = null
-        the_nodes = null
-        the_names = null
+        d3Graph = (((do d3.layout.force).size svgSize).linkDistance 90).charge -300
+
+        d3Edges = null
+        d3Leafs = null
+        d3Labels = null
 
 
-        linkUpdate = (d) ->
+        edgeUpdate = (d) ->
             dx = d.target.x - d.source.x
             dy = d.target.y - d.source.y
             dr = Math.sqrt (dx * dx + dy * dy)
             "M#{d.source.x},#{d.source.y}A#{dr},#{dr} 0 0,1 #{d.target.x},#{d.target.y}"
 
-        nodeUpdate = (d) ->
+        leafUpdate = (d) ->
             "translate(#{d.x}, #{d.y})"
 
-        createPattern = (d, defs) ->
-            _node_size = if d._id is parseInt $routeParams.id then node_size * 2 else node_size
-            pattern = defs.append 'svg:pattern'
+        createPattern = (datum, d3Defs) ->
+            _leafSize = if (isCurrent datum._id) then (leafSize * 2) else leafSize
+            pattern = d3Defs.append 'svg:pattern'
             pattern.attr
-                id : "pattern#{d._id}"
+                id : "pattern#{datum._id}"
                 x : 0
                 y : 0
                 patternUnits : 'objectBoundingBox'
@@ -61,179 +62,98 @@ HashMerge = (a={}, b={}) ->
             (pattern.append 'svg:rect').attr
                 x : 0
                 y : 0
-                width  : _node_size * 2
-                height : _node_size * 2
+                width  : _leafSize * 2
+                height : _leafSize * 2
             null
 
-        deleteNode = (d) =>
-            unless is_current(d._id)
-                # Make a diference between click and dblclick
-                if d._timer?
-                    clearTimeout d._timer
-                    d._timer = undefined
+        isCurrent = (id)=> id is parseInt $routeParams.id
 
-                if d._id > 0
-                    delete scope.data.nodes[d._id]
-                else
-                    delete scope.data.outgoing_links[d._parent]['_AGGREGATION_']
-
-                do update
-
-        loadNode = (d) ->
-            if d._id is -1
-                # If it's an aggregation we need to shift 10 elements from it
-                scope.data.outgoing_links[d._parent]['test'] = scope.data.outgoing_links[d._parent]['test'] or []
-                for i in [0..9]
-                    tmp_node = scope.data.outgoing_links[d._parent]['_AGGREGATION_'].shift()
-                    break if not tmp_node?
-                    scope.data.outgoing_links[d._parent]['test'].push tmp_node
-                delete scope.data.outgoing_links[d._parent]['_AGGREGATION_'] if scope.data.outgoing_links[d._parent]['_AGGREGATION_'].length is 0
-                do update
-            else
-                params =
-                    type  : do d._type.toLowerCase
-                    id    : d._id
-                    depth : 2
-                Individual.graph params, (d) ->
-                    scope.data.nodes = HashMerge scope.data.nodes, d.nodes
-                    scope.data.outgoing_links = HashMerge scope.data.outgoing_links, d.outgoing_links
-                    do update
-
-        cleanWeightZero = (nodes, links) =>
-            notlinked = -1
-            while notlinked isnt 0
-                notlinked = 0
-                do ((graph.nodes nodes).links links).start
-
-                _.map nodes, (node, i) ->
-                    if node.weight is 0
-                        nodes.splice i, 1
-                        ++notlinked
-
-                do ((graph.nodes nodes).links links).start
-
-        is_current = (id)=> id is parseInt $routeParams.id
-
-        text_classes = (d) ->
+        getTextClasses = (datum) ->
             [
                 'name'
-                if not d._displayName then 'toggle-display' else ''
+                if not datum._shouldDisplayName then 'toggle-display' else ''
             ].join ' '
 
         update = =>
-            # It's useless to process if we do not have any data
-            return if not scope.data.nodes?
+            # It's useless to process if we do not have any leaf
+            return if not scope.data.leafs?
 
-            # Extract nodes and links from data
-            nodes = (node for id, node of scope.data.nodes)
-            links = []
+            # Extract leafs and edges from data
+            leafs = (leaf for id, leaf of scope.data.leafs)
+            edges = []
+            for edge in scope.data.edges
+                edges.push
+                    source : scope.data.leafs[edge[0]]
+                    target : scope.data.leafs[edge[2]]
+                    _type : edges[1]
 
-            aggregation = 1
-            _.map (_.pairs scope.data.outgoing_links), ([source_id, relations]) ->
-                if scope.data.nodes[source_id]?
-                    hasAggreg = "_AGGREGATION_" in _.keys relations
-                    aggreg = relations['_AGGREGATION_']
-                    _.map (_.pairs relations), ([relation, targets]) ->
-                        if relation isnt '_AGGREGATION_'
-                            _.map targets, (target_id) ->
-                                if scope.data.nodes[target_id]?
-                                    links.push
-                                        source : scope.data.nodes[source_id]
-                                        target : scope.data.nodes[target_id]
-                                        _type : relation
-                                    if hasAggreg and (i = _.indexOf aggreg, target_id) >= 0
-                                        aggreg.splice i, 1
-                                null
-                        null
-                    if hasAggreg and aggreg.length
-                        nodes.push
-                            _id : -(aggregation++)
-                            _type : '_AGGREGATION_'
-                            _parent : source_id
-                            name : "#{aggreg.length} entities"
-                        links.push
-                            source : scope.data.nodes[source_id]
-                            target : nodes[nodes.length - 1]
-                            _type : '_AGGREGATION_'
-                null
-
-            cleanWeightZero nodes, links
+            # Start the layout
+            do ((d3Graph.nodes leafs).links edges).start
 
             # Sort by weight (DESC) to know which node should should always display its name
-            nodes = _.sortBy nodes, (elem) -> -elem.weight
-            for i in [0..(Math.min nodes.length, 3)]
-                nodes[i]._displayName = yes if nodes[i]?
+            leafs = _.sortBy leafs, (datum) -> -datum.weight
+            for i in [0..(Math.min leafs.length, 3)]
+                leafs[i]._shouldDisplayName = yes if leafs[i]?
 
-            (((defs.append 'marker').attr
+            (((d3Defs.append 'marker').attr
                 id : 'marker-end'
                 class: 'arrow'
                 viewBox : "0 -5 10 10"
                 refX : 15
                 refY : -1.5
-                markerWidth : node_size
-                markerHeight : node_size
+                markerWidth : leafSize
+                markerHeight : leafSize
                 orient : "auto").append 'path').attr 'd', "M0,-5L10,0L0,5"
 
-            # Create all new links
-            the_links = (svg.selectAll '.link').data links, (d) ->
-                d.source._id + '-' + d._type + '-' + d.target._id
-            ((do the_links.enter).insert 'svg:path', 'circle').attr
-                    class : 'link'
-                    d : linkUpdate
+            # Create all new edges
+            d3Edges = (d3Svg.selectAll '.edge').data edges, (datum) ->
+                datum.source._id + '-' + datum._type + '-' + datum.target._id
+            ((do d3Edges.enter).insert 'svg:path', 'circle').attr
+                    class : 'edge'
+                    d : edgeUpdate
                     'marker-end' : 'url(' + absUrl + '#marker-end)'
-            # Remove old links
-            do (do the_links.exit).remove
+            # Remove old edges
+            do (do d3Edges.exit).remove
 
-            # Create all new nodes
-            the_nodes = (svg.selectAll '.node').data nodes, (d) -> d._id
-            (do the_nodes.enter).insert('svg:circle', 'text').attr('class', 'node').attr
-                    r : (d) => node_size * ( 1 + 1 * is_current(d._id) )
-                    d : nodeUpdate
+            # Create all new leafs
+            d3Leafs = (d3Svg.selectAll '.leaf').data leafs, (datum) -> datum._id
+            (do d3Leafs.enter).insert('svg:circle', 'text').attr('class', 'leaf').attr
+                    r : (datum) -> leafSize * ( 1 + (isCurrent datum._id) )
+                    d : leafUpdate
                 .style
-                    fill : (d) -> ($filter "strToColor") d._type
-                .each (d) ->
-                    (createPattern d, defs)
+                    fill : (datum) -> ($filter "strToColor") datum._type
+                .each (datum) ->
+                    (createPattern datum, d3Defs)
                     null
-                .call graph.drag
-            # Remove old nodes
-            do (do the_nodes.exit).remove
+                .call d3Graph.drag
+            # Remove old leafs
+            do (do d3Leafs.exit).remove
 
-            ###
-            # Define action handlers
-            the_nodes.on 'dblclick', deleteNode
-            the_nodes.on 'click', (d) ->                
-                if not d._timer?
-                    d._timer = setTimeout =>
-                        d._timer = undefined
-                        loadNode(d)
-                        $rootScope.safeApply()
-                    , 200
-            ###
-            
             # Display name on hover
-            the_nodes.on 'mouseenter', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", "name")
-            the_nodes.on 'mouseleave', (d)-> svg.select(".name[data-id='#{d._id}']").attr("class", text_classes)
+            d3Leafs.on 'mouseenter', (datum) -> svg.select(".name[data-id='#{datum._id}']").attr("class", "name")
+            d3Leafs.on 'mouseleave', (datum) -> svg.select(".name[data-id='#{datum._id}']").attr("class", getTextClasses)
 
-            # Create all new names
-            the_names = (svg.selectAll '.name').data nodes, (d) -> d._id
-            (do the_names.enter).append('svg:text').attr
-                    d            : nodeUpdate
-                    dy           : (d)-> - node_size * ( 1 + 1 * is_current(d._id) )
-                    'data-id'    : (d)-> d._id
-                    class        : text_classes
+            # Create all new labels
+            d3Labels = (d3Svg.selectAll '.name').data leafs, (datum) -> datum._id
+            (do d3Labels.enter).append('svg:text').attr
+                    d            : leafUpdate
+                    dy           : (datum) -> - leafSize * ( 1 + (isCurrent datum._id) )
+                    'data-id'    : (datum) -> datum._id
+                    class        : getTextClasses
                     'text-anchor': "middle"
-                .text (d) -> d.name
-            do (do the_names.exit).remove
+                .text (datum) -> datum.name
+            # Remove old labels
+            do (do d3Labels.exit).remove
             null
 
-        graph.on 'tick', =>
-            the_nodes.each (d) ->
-                d.x = Math.max node_size, (Math.min size[0] - node_size, d.x)
-                d.y = Math.max node_size, (Math.min size[1] - node_size, d.y)
+        d3Graph.on 'tick', =>
+            d3Leafs.each (datum) ->
+                datum.x = Math.max leafSize, (Math.min svgSize[0] - leafSize, datum.x)
+                datum.y = Math.max leafSize, (Math.min svgSize[1] - leafSize, datum.y)
                 null
-            the_links.attr 'd', linkUpdate
-            the_nodes.attr 'transform', nodeUpdate
-            the_names.attr 'transform', nodeUpdate
+            d3Edges.attr 'd', edgeUpdate
+            d3Leafs.attr 'transform', leafUpdate
+            d3Labels.attr 'transform', leafUpdate
             null
 
         scope.$watch 'data', =>

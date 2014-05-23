@@ -140,7 +140,7 @@
 				<div class="row field form-group"
 					 class-on-focus="is-active"
 					 ng-class="{loading: individual.updating[field.name] && !individual.loading}"
-				     ng-hide="!isAllowedType(field.type) || !individual.isVisible(field)"
+				     ng-show="isAllowedType(field.type) && individual.isVisible(field) && individual.isEditable(field)"
 					 ng-repeat="field in individual.meta.fields track by $index">
 
 					<div class="col-sm-3 tr form-label top05">

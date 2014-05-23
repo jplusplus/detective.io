@@ -137,7 +137,7 @@ def get_model_fields(model):
     fields       = []
     models_rules = register.topics_rules().model(model)
     # Create field object
-    for f in model._meta.fields:
+    for f in model._meta.fields: 
         # Ignores field terminating by + or begining by _
         if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):
             # Find related model for relation
@@ -166,6 +166,7 @@ def get_model_fields(model):
             field = {
                 'name'         : f.name,
                 'type'         : f.get_internal_type(),
+                'direction'    : getattr(f, "direction", ""),
                 'rel_type'     : getattr(f, "rel_type", ""),
                 'help_text'    : getattr(f, "help_text", ""),
                 'verbose_name' : getattr(f, "verbose_name", pretty_name(f.name)),

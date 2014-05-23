@@ -250,6 +250,9 @@ class ContributeCtrl
                         @isRemoved = false
                         @isNotFound = true
 
+        # True if the given field can be edit
+        isEditable: (field)=>            
+            return not field.rules.is_editable? or field.rules.is_editable is yes
 
         # True if the given field is visible
         isVisible: (field)=>

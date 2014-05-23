@@ -57,7 +57,7 @@ class Person(models.NodeModel):
 	website_url = models.StringProperty(null=True,help_text=u'',verbose_name=u'Website URL')
 	image = models.URLProperty(null=True,help_text=u'The URL (starting with http://) where the image is hosted.',verbose_name=u'Image URL')
 	previous_activity_in_organization = models.Relationship("Organization",null=True,rel_type='person_has_previous_activity_in_organization+',help_text=u'Has the entity been active in a specific Organization previsously?',verbose_name=u'Previous activity in')
-	educated_in  = models.Relationship(Country,null=True,rel_type='person_has_educated_in+',help_text=u'',verbose_name=u'Educated in')
+	educated_in  = models.Relationship(Country,null=True, rel_type='person_has_educated_in+',help_text=u'',verbose_name=u'Educated in')
 	based_in  = models.Relationship(Country,null=True,rel_type='person_has_based_in+',help_text=u'',verbose_name=u'Based in')
 	activity_in_organization = models.Relationship("Organization",null=True,rel_type='person_has_activity_in_organization+',help_text=u'The Organization(s) this Person is active in.',verbose_name=u'Activity in Organizations')
 

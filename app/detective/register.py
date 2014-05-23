@@ -77,10 +77,11 @@ def default_rules(topic):
                 # Load class path
                 if type(target_model) is str: target_model = import_class(target_model)
                 # It's a searchable field !
-                modelRules = rules.model(target_model).all()
+                modelRules = rules.model(target_model).all()                
                 # Set it into the rules
                 rules.model(model).field(field.name).add(is_searchable=modelRules["is_searchable"])
-                rules.model(model).field(field.name).add(is_editable=modelRules["is_editable"])
+                # Entering relationship are not editable yet
+                rules.model(model).field(field.name).add(is_editable=field.direction == 'out' and modelRules["is_editable"])
     return rules
 
 def import_or_create(path, register=True, force=False):

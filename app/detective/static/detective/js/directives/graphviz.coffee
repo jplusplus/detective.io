@@ -115,6 +115,7 @@ HashMerge = (a={}, b={}) ->
                     leafs.splice leaf._index, 1
                     do ((d3Graph.nodes leafs).links edges).start
                     sortAndReindex leafs
+
                     # If there is no edge to delete, we can return
                     return unless leaf.weight > 0
 
@@ -128,8 +129,7 @@ HashMerge = (a={}, b={}) ->
                                 edges.splice index, 1
                                 do ((d3Graph.nodes leafs).links edges).start
                                 # If we deleted the last edge of a leaf, we have to delete that leaf
-                                if leafToCheck.weight <= 0
-                                    deleteLeaf leafToCheck
+                                (deleteLeaf leafToCheck) if leafToCheck.weight <= 0
                                 # Aaaaand, we're going back to the top
                                 return no
                         # We're done!

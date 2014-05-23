@@ -7,7 +7,7 @@ class IndividualSingleCtrl
         Page.loading true
         @scope.get            = (n)=> @scope.individual[n] or false if @scope.individual?
         @scope.hasRels        = @hasRels
-        @scope.hasNetwork     = => not _.isEmpty(@scope.graphnodes.outgoing_links or [])
+        @scope.hasNetwork     = => (_.keys (@scope.graphnodes.leafs or {})).length > 1
         @scope.isLiteral      = @isLiteral
         @scope.isString       = (t)=> ["CharField", "URLField"].indexOf(t) > -1
         @scope.isRelationship = (d)=> ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
@@ -59,7 +59,6 @@ class IndividualSingleCtrl
 
         @Individual.graph graph_params, (data) =>
             @scope.graphnodes = data
-
 
     getSource: (field)=>
         _.find @scope.individual.field_sources, (fs)=> fs.field is field.name   

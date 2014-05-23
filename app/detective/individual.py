@@ -540,6 +540,17 @@ class IndividualResource(ModelResource):
         rows = connection.cypher(query).to_dicts()
 
         leafs = {}
+
+        # We need to retrieve the root in another request
+        # TODO : enhance that
+        query = """
+            START root=node({root})
+            MATCH (root)<-[:`<<INSTANCE>>`]-(type)
+            RETURN root as leaf, ID(root) as id_leaf, type
+        """.format(root=kwargs['pk'])
+        for row in connection.cypher(query).to_dicts():
+            rows.append(row)
+
         for row in rows:
             row['leaf']['data']['_id'] = row['id_leaf']
             row['leaf']['data']['_type'] = row['type']['data']['model_name']

@@ -106,12 +106,35 @@ HashMerge = (a={}, b={}) ->
             # Time to aggregate!
             ###
             do ->
+                aggregationType = '__aggregation_bubble'
                 aggregationThreshold = 5
 
+                canAggregate = (leaf) ->
+                    (not isCurrent leaf._id) and (leaf._type isnt aggregationType)
+
                 # Helper function deleting a leaf and all its edges
-                deleteLeaf = (leaf) ->
+                deleteLeaf = (leaf, sourceLeaf=null) ->
                     # We delete the leaf and reindex the array
                     leafs.splice leaf._index, 1
+
+                    # If there's a sourceLeaf we need to move leaf in its aggregation bubble
+                    if sourceLeaf?
+                        if sourceLeaf._bubble
+                            sourceLeaf._bubble.leafs.push leaf
+                            sourceLeaf._bubble.name = "#{sourceLeaf._bubble.leafs.length} more entities"
+                        else
+                            console.debug "Creating an aggregation bubble for #{leaf.name}"
+                            sourceLeaf._bubble =
+                                leafs : [leaf]
+                                _id : ''
+                                _type : aggregationType
+                                name : '1 more entity'
+                            edges.push
+                                source : sourceLeaf
+                                target : sourceLeaf._bubble
+                                _type : 'is_related_to+'
+                            leafs.push sourceLeaf._bubble
+
                     do ((d3Graph.nodes leafs).links edges).start
                     sortAndReindex leafs
 
@@ -135,21 +158,23 @@ HashMerge = (a={}, b={}) ->
                         return yes
                     ) while not clean
 
+                security = 0
                 clean = (do ->
+                    ++security
                     for leaf in leafs
                         # Check if we need to delete a node
                         if leaf.weight > aggregationThreshold
                             # If so, we're removing the first we encounter
                             for edge in edges
-                                if (edge.source._id is leaf._id) and not isCurrent edge.target._id
-                                    deleteLeaf edge.target
+                                if (edge.source._id is leaf._id) and canAggregate edge.target
+                                    deleteLeaf edge.target, leaf
                                     break
-                                else if (edge.target._id is leaf._id) and not isCurrent edge.source._id
+                                else if (edge.target._id is leaf._id) and canAggregate edge.source
                                     deleteLeaf edge.source
                                     break
                             leafs = sortAndReindex leafs
                             # Aaaaand, we're going back to the top
-                            return no
+                            return (if security >= 1000 then yes else no)
                         else
                             # As leafs are sorted by weight
                             # if we encounter one leaf.weight <= threshold then we

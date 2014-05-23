@@ -21,7 +21,6 @@ HashMerge = (a={}, b={}) ->
     replace : yes
     scope :
         data : '='
-        topic : '='
     link: (scope, element, attr)->
         absUrl = do $location.absUrl
 
@@ -199,6 +198,9 @@ HashMerge = (a={}, b={}) ->
             # Display name on hover
             d3Leafs.on 'mouseenter', (datum) -> d3Svg.select(".name[data-id='#{datum._id}']").attr("class", "name")
             d3Leafs.on 'mouseleave', (datum) -> d3Svg.select(".name[data-id='#{datum._id}']").attr("class", getTextClasses)
+            d3Leafs.on 'click', (datum) ->
+                $location.path "/#{$routeParams.username}/#{$routeParams.topic}/#{do datum._type.toLowerCase}/#{datum._id}"
+                do scope.$apply
 
             # Create all new labels
             d3Labels = (d3Svg.selectAll '.name').data leafs, (datum) -> datum._id

@@ -202,7 +202,8 @@ HashMerge = (a={}, b={}) ->
             ((do d3Edges.enter).insert 'svg:path', 'circle').attr
                     class : 'edge'
                     d : edgeUpdate
-                    'marker-end' : 'url(' + absUrl + '#marker-end)'
+                    'marker-end' : (datum) ->
+                        if datum.target._type isnt aggregationType then 'url(' + absUrl + '#marker-end)' else ''
             # Remove old edges
             do (do d3Edges.exit).remove
 

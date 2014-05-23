@@ -40,14 +40,14 @@ HashMerge = (a={}, b={}) ->
         d3Labels = null
 
 
-        edgeUpdate = (d) ->
-            dx = d.target.x - d.source.x
-            dy = d.target.y - d.source.y
-            dr = Math.sqrt (dx * dx + dy * dy)
-            "M#{d.source.x},#{d.source.y}A#{dr},#{dr} 0 0,1 #{d.target.x},#{d.target.y}"
+        edgeUpdate = (datum) ->
+            datumX = datum.target.x - datum.source.x
+            datumY = datum.target.y - datum.source.y
+            datumR = Math.sqrt (datumX * datumX + datumY * datumY)
+            "M#{datum.source.x},#{datum.source.y}A#{datumR},#{datumR} 0 0,1 #{datum.target.x},#{datum.target.y}"
 
-        leafUpdate = (d) ->
-            "translate(#{d.x}, #{d.y})"
+        leafUpdate = (datum) ->
+            "translate(#{datum.x}, #{datum.y})"
 
         createPattern = (datum, d3Defs) ->
             _leafSize = if (isCurrent datum._id) then (leafSize * 2) else leafSize

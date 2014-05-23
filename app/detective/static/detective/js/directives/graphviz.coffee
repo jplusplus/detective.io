@@ -103,32 +103,43 @@ HashMerge = (a={}, b={}) ->
             for i in [0..(Math.min leafs.length, 3)]
                 leafs[i]._shouldDisplayName = yes if leafs[i]?
 
+            ###
+            # Time to aggregate!
+            ###
+            aggregationThreshold = 10
+
+            # Helper function deleting a leaf and all its edges
             deleteLeaf = (leaf) ->
+                # We delete the leaf and reindex the array
                 leafs.splice leaf._index, 1
+                do ((d3Graph.nodes leafs).links edges).start
                 sortAndReindex leafs
+                # If there is no edge to delete, we can return
                 return unless leaf.weight > 0
 
+                # Clean edges, one at a time
                 cleanEdges = ->
                     for index, edge of edges
+                        # Is this edge concerning our leaf?
                         isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
                         if isConcerned >= 0
                             leafToCheck = if isConcerned is 0 then edge.target else edge.source
                             edges.splice index, 1
                             do ((d3Graph.nodes leafs).links edges).start
+                            # If we deleted the last edge of a leaf, we have to delete that leaf
                             if leafToCheck.weight <= 0
                                 deleteLeaf leafToCheck
+                            # Aaaaand, we're going back to the top
                             return no
+                    # We're done!
                     return yes
                 clean = (do cleanEdges) while not clean
 
-                do ((d3Graph.nodes leafs).links edges).start
-
-            aggregationThreshold = 10
             cleanLeafs = ->
-                ++i
                 for leaf in leafs
                     # Check if we need to delete a node
                     if leaf.weight > aggregationThreshold
+                        # If so, we're removing the first we encounter
                         for edge in edges
                             if (edge.source._id is leaf._id) and not isCurrent edge.target._id
                                 deleteLeaf edge.target
@@ -136,13 +147,20 @@ HashMerge = (a={}, b={}) ->
                             else if (edge.target._id is leaf._id) and not isCurrent edge.source._id
                                 deleteLeaf edge.source
                                 break
-                        do ((d3Graph.nodes leafs).links edges).start
                         leafs = sortAndReindex leafs
+                        # Aaaaand, we're going back to the top
                         return no
                     else
+                        # As leafs are sorted by weight
+                        # if we encounter one leaf.weight <= threshold then we
+                        # don't need to iterate to the next one
                         return yes
 
             clean = (do cleanLeafs) while not clean
+
+            ###
+            # Aggregation is done!
+            ###
 
             (((d3Defs.append 'marker').attr
                 id : 'marker-end'

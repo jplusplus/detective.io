@@ -79,7 +79,10 @@ HashMerge = (a={}, b={}) ->
             return if not scope.data.leafs?
 
             # Extract leafs and edges from data
-            leafs = (leaf for id, leaf of scope.data.leafs)
+            leafs = []
+            for id, leaf of scope.data.leafs
+                scope.data.leafs[id]._index = leafs.length
+                leafs.push scope.data.leafs[id]
             edges = []
             for edge in scope.data.edges
                 edges.push
@@ -90,10 +93,56 @@ HashMerge = (a={}, b={}) ->
             # Start the layout
             do ((d3Graph.nodes leafs).links edges).start
 
+            sortAndReindex = (array) ->
+                _.map (_.sortBy array, (datum) -> -datum.weight), (datum, i) ->
+                    datum._index = i
+                    datum
+
             # Sort by weight (DESC) to know which node should should always display its name
-            leafs = _.sortBy leafs, (datum) -> -datum.weight
+            leafs = sortAndReindex leafs
             for i in [0..(Math.min leafs.length, 3)]
                 leafs[i]._shouldDisplayName = yes if leafs[i]?
+
+            deleteLeaf = (leaf) ->
+                leafs.splice leaf._index, 1
+                sortAndReindex leafs
+                return unless leaf.weight > 0
+
+                cleanEdges = ->
+                    for index, edge of edges
+                        isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
+                        if isConcerned >= 0
+                            leafToCheck = if isConcerned is 0 then edge.target else edge.source
+                            edges.splice index, 1
+                            do ((d3Graph.nodes leafs).links edges).start
+                            if leafToCheck.weight <= 0
+                                deleteLeaf leafToCheck
+                            return no
+                    return yes
+                clean = (do cleanEdges) while not clean
+
+                do ((d3Graph.nodes leafs).links edges).start
+
+            aggregationThreshold = 10
+            cleanLeafs = ->
+                ++i
+                for leaf in leafs
+                    # Check if we need to delete a node
+                    if leaf.weight > aggregationThreshold
+                        for edge in edges
+                            if (edge.source._id is leaf._id) and not isCurrent edge.target._id
+                                deleteLeaf edge.target
+                                break
+                            else if (edge.target._id is leaf._id) and not isCurrent edge.source._id
+                                deleteLeaf edge.source
+                                break
+                        do ((d3Graph.nodes leafs).links edges).start
+                        leafs = sortAndReindex leafs
+                        return no
+                    else
+                        return yes
+
+            clean = (do cleanLeafs) while not clean
 
             (((d3Defs.append 'marker').attr
                 id : 'marker-end'
@@ -130,8 +179,8 @@ HashMerge = (a={}, b={}) ->
             do (do d3Leafs.exit).remove
 
             # Display name on hover
-            d3Leafs.on 'mouseenter', (datum) -> svg.select(".name[data-id='#{datum._id}']").attr("class", "name")
-            d3Leafs.on 'mouseleave', (datum) -> svg.select(".name[data-id='#{datum._id}']").attr("class", getTextClasses)
+            d3Leafs.on 'mouseenter', (datum) -> d3Svg.select(".name[data-id='#{datum._id}']").attr("class", "name")
+            d3Leafs.on 'mouseleave', (datum) -> d3Svg.select(".name[data-id='#{datum._id}']").attr("class", getTextClasses)
 
             # Create all new labels
             d3Labels = (d3Svg.selectAll '.name').data leafs, (datum) -> datum._id

@@ -66,9 +66,9 @@
 				<div class="panel panel-default">
 
 					<div class="panel-body">
-						<table class="table">
+						<table class="table table-striped">
 							<tbody>
-							 	<tr ng-repeat="field in meta.fields|filter:isLiteral" ng-show="get(field.name) && field.name != 'name'">
+							 	<tr ng-repeat="field in meta.fields|filter:isLiteral" ng-if="get(field.name) && field.name != 'name'">
 							 		<td class="nowrap field-name" ng-if="!isMono(field)">
 							 			<strong>[[field.verbose_name]]</strong>
 							 		</td>

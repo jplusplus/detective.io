@@ -113,7 +113,6 @@ def parse(ontology, module='', app_label=None):
             if field_opts["related_name"] is not None:
                 # Convert related_name to the same format
                 field_opts["related_name"] = to_underscores(field_opts["related_name"])
-                print field_opts["related_name"]
             # It might be a relationship
             on_class = field.find("owl:onClass", namespaces=NAMESPACES)
             # It's a relationship!

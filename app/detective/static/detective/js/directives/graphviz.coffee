@@ -44,6 +44,7 @@ HashMerge = (a={}, b={}) ->
         aggregationType = '__aggregation_bubble'
         aggregationThreshold = 5
         aggregatedEdges = []
+        aggregationIndex = 0
 
         edgeUpdate = (datum) ->
             datumX = datum.target.x - datum.source.x
@@ -126,10 +127,10 @@ HashMerge = (a={}, b={}) ->
                             sourceLeaf._bubble.leafs.push leaf
                             sourceLeaf._bubble.name = "#{sourceLeaf._bubble.leafs.length} more entities"
                         else
-                            console.debug "Creating an aggregation bubble for #{leaf.name}"
+                            console.debug "Creating an aggregation bubble for #{sourceLeaf.name}"
                             sourceLeaf._bubble =
                                 leafs : [leaf]
-                                _id : ''
+                                _id : --aggregationIndex
                                 _type : aggregationType
                                 name : '1 more entity'
                             edges.push

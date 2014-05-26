@@ -1,23 +1,5 @@
 [
 {
-    "pk": 2, 
-    "model": "auth.user", 
-    "fields": {
-        "username": "detective", 
-        "first_name": "", 
-        "last_name": "", 
-        "is_active": true, 
-        "is_superuser": false, 
-        "is_staff": false, 
-        "last_login": "2014-02-17T13:01:35.260Z", 
-        "groups": [], 
-        "user_permissions": [], 
-        "password": "pbkdf2_sha256$10000$HHUMZuB2nCTR$2rpc/9dnIRcTuJCutxM909uxekspQtatAbfFPXNiRWo=", 
-        "email": "", 
-        "date_joined": "2014-02-17T13:01:35.260Z"
-    }
-},
-{
     "pk": 1,
     "model": "detective.topic",
     "fields": {
@@ -42,8 +24,7 @@
         "ontology": "",
         "about": "",
         "background": "",
-        "public": true,
-        "author": 2
+        "public": true
     }
 }
 ]

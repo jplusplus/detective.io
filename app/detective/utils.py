@@ -244,6 +244,8 @@ def to_underscores(value=""):
     if len(value) > 0:
         value[0] = value[0].lower()
     value = "".join(value)
+    # Space to underscore
+    value = value.replace(" ", "_")
 
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', value)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()

@@ -43,6 +43,7 @@ HashMerge = (a={}, b={}) ->
 
         aggregationType = '__aggregation_bubble'
         aggregationThreshold = 5
+        aggregatedEdges = []
 
         edgeUpdate = (datum) ->
             datumX = datum.target.x - datum.source.x
@@ -150,7 +151,7 @@ HashMerge = (a={}, b={}) ->
                             isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
                             if isConcerned >= 0
                                 leafToCheck = if isConcerned is 0 then edge.target else edge.source
-                                edges.splice index, 1
+                                aggregatedEdges.push (edges.splice index, 1)[0]
                                 do ((d3Graph.nodes leafs).links edges).start
                                 # If we deleted the last edge of a leaf, we have to delete that leaf
                                 (deleteLeaf leafToCheck) if leafToCheck.weight <= 0
@@ -188,6 +189,41 @@ HashMerge = (a={}, b={}) ->
             # Aggregation is done!
             ###
 
+            do d3Update
+
+        loadLeafs = (leafsToLoad) =>
+            if not leafsToLoad.length?
+                leafsToLoad = [leafsToLoad]
+
+            for leaf in leafsToLoad
+                leafs.push leaf
+                sortAndReindex leafs
+                clean = (do ->
+                    for edge, i in aggregatedEdges
+                        isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
+                        if isConcerned >= 0
+                            [_edge] = aggregatedEdges.splice i, 1
+                            edges.push _edge
+
+                            if (isConcerned is 0) and not (_.findWhere leafs, { _id : edge.target._id })?
+                                console.debug "MUST LOAD #{edge.target._id}"
+                                loadLeafs edge.target
+                            else if not (_.findWhere leafs, { _id : edge.source._id })?
+                                console.debug "MUST LOAD #{edge.source._id}"
+                                loadLeafs edge.source
+
+                            do ((d3Graph.nodes leafs).links edges).start
+                            return no
+                    return yes
+                ) while not clean
+
+        loadLeafFrom = (sourceBubble) =>
+            leafsToLoad = (sourceBubble.leafs.splice 0, 1)
+            sourceBubble.name = "#{sourceBubble.leafs.length} more entities"
+
+            loadLeafs leafsToLoad
+
+            sortAndReindex leafs
             do d3Update
 
         d3Update = =>
@@ -234,14 +270,7 @@ HashMerge = (a={}, b={}) ->
                 return if d3.event.defaultPrevented
                 # Check if we clicked on a aggregation bubble
                 if datum._type is aggregationType
-                    [leaf] = (datum.leafs.splice 0, 1)
-                    datum.name = "#{datum.leafs.length} more entities"
-
-                    leafs.push leaf
-
-                    do ((d3Graph.nodes leafs).links edges).start
-                    sortAndReindex leafs
-                    do d3Update
+                    loadLeafFrom datum
                 else
                     $location.path "/#{$routeParams.username}/#{$routeParams.topic}/#{do datum._type.toLowerCase}/#{datum._id}"
                     # We're in a d3 callback so we need to manually $apply the scope

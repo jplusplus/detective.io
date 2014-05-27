@@ -110,100 +110,111 @@ HashMerge = (a={}, b={}) ->
             for i in [0..(Math.min leafs.length, 3)]
                 leafs[i]._shouldDisplayName = yes if leafs[i]?
 
-            ###
-            # Time to aggregate!
-            ###
-            do ->
-                canAggregate = (leaf) ->
-                    (not isCurrent leaf._id) and (leaf._type isnt aggregationType)
+            do aggregate
 
-                # Helper function deleting a leaf and all its edges
-                deleteLeaf = (leaf, sourceLeaf=null) ->
-                    # We delete the leaf and reindex the array
-                    leafs.splice leaf._index, 1
+            do d3Update
 
-                    # If there's a sourceLeaf we need to move leaf in its aggregation bubble
-                    if sourceLeaf?
-                        if sourceLeaf._bubble
-                            sourceLeaf._bubble.leafs.push leaf
-                            sourceLeaf._bubble.name = "#{sourceLeaf._bubble.leafs.length} more entities"
-                        else
-                            console.debug "Creating an aggregation bubble for #{sourceLeaf.name}"
-                            sourceLeaf._bubble =
-                                leafs : [leaf]
-                                _id : --aggregationIndex
-                                _type : aggregationType
-                                name : '1 more entity'
-                            edges.push
-                                source : sourceLeaf
-                                target : sourceLeaf._bubble
-                                _type : 'is_related_to+'
-                            leafs.push sourceLeaf._bubble
+        ###
+        # Time to aggregate!
+        ###
+        aggregate = (leafsToAggregate) ->
+            quick = no
+            if not leafsToAggregate?
+                leafsToAggregate = leafs
+                quick = yes
 
-                    do ((d3Graph.nodes leafs).links edges).start
-                    sortAndReindex leafs
+            canAggregate = (leaf) ->
+                (not isCurrent leaf._id) and (leaf._type isnt aggregationType)
 
-                    # If there is no edge to delete, we can return
-                    return unless leaf.weight > 0
+            # Helper function deleting a leaf and all its edges
+            deleteLeaf = (leaf, sourceLeaf=null) ->
+                # We delete the leaf and reindex the array
+                leafs.splice leaf._index, 1
 
-                    # Clean edges, one at a time
-                    do ->
-                        security = 0
-                        clean = (do ->
-                            console.debug '>>', security
-                            for index, edge of edges
-                                # Is this edge concerning our leaf?
-                                isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
-                                if isConcerned >= 0
-                                    leafToCheck = if isConcerned is 0 then edge.target else edge.source
-                                    aggregatedEdges.push (edges.splice index, 1)[0]
-                                    do ((d3Graph.nodes leafs).links edges).start
-                                    # If we deleted the last edge of a leaf, we have to delete that leaf
-                                    (deleteLeaf leafToCheck) if leafToCheck.weight <= 0
-                                    # Aaaaand, we're going back to the top
-                                    return (if security++ >= 5000 then yes else no)
-                            # We're done!
-                            return yes
-                        ) while not clean
+                # If there's a sourceLeaf we need to move leaf in its aggregation bubble
+                if sourceLeaf?
+                    if sourceLeaf._bubble
+                        sourceLeaf._bubble.leafs.push leaf
+                        sourceLeaf._bubble.name = "#{sourceLeaf._bubble.leafs.length} more entities"
+                    else
+                        console.debug "Creating an aggregation bubble for #{sourceLeaf.name}"
+                        sourceLeaf._bubble =
+                            leafs : [leaf]
+                            _id : --aggregationIndex
+                            _type : aggregationType
+                            name : '1 more entity'
+                        edges.push
+                            source : sourceLeaf
+                            target : sourceLeaf._bubble
+                            _type : 'is_related_to+'
+                        leafs.push sourceLeaf._bubble
 
+                do ((d3Graph.nodes leafs).links edges).start
+                sortAndReindex leafs
+
+                # If there is no edge to delete, we can return
+                return unless leaf.weight > 0
+
+                # Clean edges, one at a time
                 do ->
                     security = 0
                     clean = (do ->
-                        console.debug '>', security
-                        for leaf in leafs
-                            # Check if we need to delete a node
-                            if leaf.weight > aggregationThreshold
-                                # If so, we're removing the first we encounter
-                                for edge in edges
-                                    if (edge.source._id is leaf._id) and canAggregate edge.target
-                                        deleteLeaf edge.target, leaf
-                                        break
-                                    else if (edge.target._id is leaf._id) and canAggregate edge.source
-                                        deleteLeaf edge.source, leaf
-                                        break
-                                leafs = sortAndReindex leafs
+                        # console.debug '>>', security
+                        for index, edge of edges
+                            # Is this edge concerning our leaf?
+                            isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
+                            if isConcerned >= 0
+                                if leaf.name is 'Egypt'
+                                    console.debug "Must delete edge from Egypt to #{if isConcerned is 0 then edge.target.name else edge.source.name}"
+                                leafToCheck = if isConcerned is 0 then edge.target else edge.source
+                                aggregatedEdges.push (edges.splice index, 1)[0]
+                                do ((d3Graph.nodes leafs).links edges).start
+                                # If we deleted the last edge of a leaf, we have to delete that leaf
+                                (deleteLeaf leafToCheck) if leafToCheck.weight <= 0
                                 # Aaaaand, we're going back to the top
                                 return (if security++ >= 5000 then yes else no)
-                            else
-                                # As leafs are sorted by weight
-                                # if we encounter one leaf.weight <= threshold then we
-                                # don't need to iterate to the next one
-                                return yes
+                        # We're done!
+                        return yes
                     ) while not clean
 
-            ###
-            # Aggregation is done!
-            ###
-
-            do d3Update
+            do ->
+                security = 0
+                clean = (do ->
+                    # console.debug '>', security
+                    for leaf in leafsToAggregate
+                        # Check if we need to delete a node
+                        if leaf.weight > aggregationThreshold
+                            # If so, we're removing the first we encounter
+                            for edge in edges
+                                if (edge.source._id is leaf._id) and canAggregate edge.target
+                                    deleteLeaf edge.target, leaf
+                                    break
+                                else if (edge.target._id is leaf._id) and canAggregate edge.source
+                                    deleteLeaf edge.source, leaf
+                                    break
+                            leafs = sortAndReindex leafs
+                            # Aaaaand, we're going back to the top
+                            return (if security++ >= 5000 then yes else no)
+                        else if quick
+                            # As leafs are sorted by weight
+                            # if we encounter one leaf.weight <= threshold then we
+                            # don't need to iterate to the next one
+                            return yes
+                    return yes
+                ) while not clean
+        ###
+        # Aggregation is done!
+        ###
 
         loadLeafs = (leafsToLoad) =>
             if not leafsToLoad.length?
                 leafsToLoad = [leafsToLoad]
 
+            loaded = _.clone leafsToLoad
+
             for leaf in leafsToLoad
                 leafs.push leaf
-                sortAndReindex leafs
+                leafs = sortAndReindex leafs
                 clean = (do ->
                     for edge, i in aggregatedEdges
                         isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
@@ -212,22 +223,22 @@ HashMerge = (a={}, b={}) ->
                             edges.push _edge
 
                             if (isConcerned is 0) and not (_.findWhere leafs, { _id : edge.target._id })?
-                                console.debug "MUST LOAD #{edge.target._id}"
-                                loadLeafs edge.target
+                                loaded = loaded.concat (loadLeafs edge.target)
                             else if not (_.findWhere leafs, { _id : edge.source._id })?
-                                console.debug "MUST LOAD #{edge.source._id}"
-                                loadLeafs edge.source
+                                loaded = loaded.concat (loadLeafs edge.source)
 
                             do ((d3Graph.nodes leafs).links edges).start
                             return no
                     return yes
                 ) while not clean
+            loaded
 
         loadLeafFrom = (sourceBubble) =>
             leafsToLoad = (sourceBubble.leafs.splice 0, 1)
             sourceBubble.name = "#{sourceBubble.leafs.length} more entities"
 
-            loadLeafs leafsToLoad
+            loaded = loadLeafs leafsToLoad
+            aggregate loaded
 
             sortAndReindex leafs
             do d3Update

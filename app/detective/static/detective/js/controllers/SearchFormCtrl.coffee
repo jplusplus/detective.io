@@ -6,7 +6,8 @@ class SearchFormCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @scope.selectedIndividual = {}        
+        @scope.selectedIndividual = {}       
+        @scope.getTopic = @getTopic
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
@@ -25,7 +26,9 @@ class SearchFormCtrl
             # Every available topic execpt common
             @scope.topics = _.reject topics, (t)-> t.slug is "common"
             # Take the first topic as default topic
-            @scope.topic = @scope.topics[0].slug unless @scope.topic            
+            @scope.topic = @scope.topics[0].slug unless @scope.topic 
+
+    getTopic: (slug)=> _.findWhere @scope.topics, slug: slug
 
 
 

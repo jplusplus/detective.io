@@ -209,8 +209,12 @@ HashMerge = (a={}, b={}) ->
             loaded = _.clone leafsToLoad
 
             for leaf in leafsToLoad
+                clean = no
+
                 leafs.push leaf
+                do ((d3Graph.nodes leafs).links edges).start
                 leafs = sortAndReindex leafs
+
                 clean = (do ->
                     for edge, i in aggregatedEdges
                         isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
@@ -230,7 +234,7 @@ HashMerge = (a={}, b={}) ->
             loaded
 
         loadLeafFrom = (sourceBubble) =>
-            leafsToLoad = (sourceBubble.leafs.splice 0, 1)
+            leafsToLoad = (sourceBubble.leafs.splice 0, 2)
 
             if (sourceBubble.leafs.length > 0)
                 sourceBubble.name = "#{sourceBubble.leafs.length} more entities"

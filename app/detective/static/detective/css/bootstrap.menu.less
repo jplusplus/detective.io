@@ -1,11 +1,19 @@
-.dropdown-menu {
-	li a {
+html body .dropdown-menu {
+	li > a {
+		max-width: 400px;
 		text-decoration: none;
+		white-space:normal;
 		&:hover {
 			background:#e7e7e7;
+			color:fade(#000, 90);
 		}
 	}
 
+	li.active {
+		& > a, & > a:hover {			
+			color:fade(#000, 90);
+		}
+	}
 	li table {
 	    font-size:0.9em;
 	    margin:5px 10px;

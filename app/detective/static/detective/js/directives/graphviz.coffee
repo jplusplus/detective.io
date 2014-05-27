@@ -137,7 +137,6 @@ HashMerge = (a={}, b={}) ->
                         sourceLeaf._bubble.leafs.push leaf
                         sourceLeaf._bubble.name = "#{sourceLeaf._bubble.leafs.length} more entities"
                     else
-                        console.debug "Creating an aggregation bubble for #{sourceLeaf.name}"
                         sourceLeaf._bubble =
                             leafs : [leaf]
                             _id : --aggregationIndex
@@ -150,7 +149,7 @@ HashMerge = (a={}, b={}) ->
                         leafs.push sourceLeaf._bubble
 
                 do ((d3Graph.nodes leafs).links edges).start
-                sortAndReindex leafs
+                leafs = sortAndReindex leafs
 
                 # If there is no edge to delete, we can return
                 return unless leaf.weight > 0
@@ -159,13 +158,10 @@ HashMerge = (a={}, b={}) ->
                 do ->
                     security = 0
                     clean = (do ->
-                        # console.debug '>>', security
                         for index, edge of edges
                             # Is this edge concerning our leaf?
                             isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
                             if isConcerned >= 0
-                                if leaf.name is 'Egypt'
-                                    console.debug "Must delete edge from Egypt to #{if isConcerned is 0 then edge.target.name else edge.source.name}"
                                 leafToCheck = if isConcerned is 0 then edge.target else edge.source
                                 aggregatedEdges.push (edges.splice index, 1)[0]
                                 do ((d3Graph.nodes leafs).links edges).start
@@ -180,7 +176,6 @@ HashMerge = (a={}, b={}) ->
             do ->
                 security = 0
                 clean = (do ->
-                    # console.debug '>', security
                     for leaf in leafsToAggregate
                         # Check if we need to delete a node
                         if leaf.weight > aggregationThreshold
@@ -240,7 +235,7 @@ HashMerge = (a={}, b={}) ->
             loaded = loadLeafs leafsToLoad
             aggregate loaded
 
-            sortAndReindex leafs
+            leafs = sortAndReindex leafs
             do d3Update
 
         d3Update = =>

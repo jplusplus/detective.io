@@ -81,9 +81,9 @@ HashMerge = (a={}, b={}) ->
             ].join ' '
 
         sortAndReindex = (array) ->
-            _.map (_.sortBy array, (datum) -> -datum.weight), (datum, i) ->
-                datum._index = i
-                datum
+            array = _.sortBy array, (datum) -> -datum.weight
+            _.each array, (datum, i) -> datum._index = i
+            array
 
         update = =>
             # It's useless to process if we do not have any leaf
@@ -96,10 +96,11 @@ HashMerge = (a={}, b={}) ->
                 leafs.push scope.data.leafs[id]
             edges = []
             for edge in scope.data.edges
-                edges.push
-                    source : scope.data.leafs[edge[0]]
-                    target : scope.data.leafs[edge[2]]
-                    _type : edges[1]
+                if scope.data.leafs[edge[0]]? and scope.data.leafs[edge[2]]?
+                    edges.push
+                        source : scope.data.leafs[edge[0]]
+                        target : scope.data.leafs[edge[2]]
+                        _type : edges[1]
 
             # Start the layout
             do ((d3Graph.nodes leafs).links edges).start
@@ -146,45 +147,49 @@ HashMerge = (a={}, b={}) ->
                     return unless leaf.weight > 0
 
                     # Clean edges, one at a time
-                    clean = (do ->
-                        for index, edge of edges
-                            # Is this edge concerning our leaf?
-                            isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
-                            if isConcerned >= 0
-                                leafToCheck = if isConcerned is 0 then edge.target else edge.source
-                                aggregatedEdges.push (edges.splice index, 1)[0]
-                                do ((d3Graph.nodes leafs).links edges).start
-                                # If we deleted the last edge of a leaf, we have to delete that leaf
-                                (deleteLeaf leafToCheck) if leafToCheck.weight <= 0
-                                # Aaaaand, we're going back to the top
-                                return no
-                        # We're done!
-                        return yes
-                    ) while not clean
-
-                security = 0
-                clean = (do ->
-                    ++security
-                    for leaf in leafs
-                        # Check if we need to delete a node
-                        if leaf.weight > aggregationThreshold
-                            # If so, we're removing the first we encounter
-                            for edge in edges
-                                if (edge.source._id is leaf._id) and canAggregate edge.target
-                                    deleteLeaf edge.target, leaf
-                                    break
-                                else if (edge.target._id is leaf._id) and canAggregate edge.source
-                                    deleteLeaf edge.source, leaf
-                                    break
-                            leafs = sortAndReindex leafs
-                            # Aaaaand, we're going back to the top
-                            return (if security >= 1000 then yes else no)
-                        else
-                            # As leafs are sorted by weight
-                            # if we encounter one leaf.weight <= threshold then we
-                            # don't need to iterate to the next one
+                    do ->
+                        security = 0
+                        clean = (do ->
+                            console.debug '>>', security
+                            for index, edge of edges
+                                # Is this edge concerning our leaf?
+                                isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
+                                if isConcerned >= 0
+                                    leafToCheck = if isConcerned is 0 then edge.target else edge.source
+                                    aggregatedEdges.push (edges.splice index, 1)[0]
+                                    do ((d3Graph.nodes leafs).links edges).start
+                                    # If we deleted the last edge of a leaf, we have to delete that leaf
+                                    (deleteLeaf leafToCheck) if leafToCheck.weight <= 0
+                                    # Aaaaand, we're going back to the top
+                                    return (if security++ >= 5000 then yes else no)
+                            # We're done!
                             return yes
-                ) while not clean
+                        ) while not clean
+
+                do ->
+                    security = 0
+                    clean = (do ->
+                        console.debug '>', security
+                        for leaf in leafs
+                            # Check if we need to delete a node
+                            if leaf.weight > aggregationThreshold
+                                # If so, we're removing the first we encounter
+                                for edge in edges
+                                    if (edge.source._id is leaf._id) and canAggregate edge.target
+                                        deleteLeaf edge.target, leaf
+                                        break
+                                    else if (edge.target._id is leaf._id) and canAggregate edge.source
+                                        deleteLeaf edge.source, leaf
+                                        break
+                                leafs = sortAndReindex leafs
+                                # Aaaaand, we're going back to the top
+                                return (if security++ >= 5000 then yes else no)
+                            else
+                                # As leafs are sorted by weight
+                                # if we encounter one leaf.weight <= threshold then we
+                                # don't need to iterate to the next one
+                                return yes
+                    ) while not clean
 
             ###
             # Aggregation is done!

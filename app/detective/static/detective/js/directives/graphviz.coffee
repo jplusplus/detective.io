@@ -183,13 +183,14 @@ HashMerge = (a={}, b={}) ->
                             for edge in edges
                                 if (edge.source._id is leaf._id) and canAggregate edge.target
                                     deleteLeaf edge.target, leaf
-                                    break
+                                    leafs = sortAndReindex leafs
+                                    # Aaaaand, we're going back to the top
+                                    return (if security++ >= 20000 then yes else no)
                                 else if (edge.target._id is leaf._id) and canAggregate edge.source
                                     deleteLeaf edge.source, leaf
-                                    break
-                            leafs = sortAndReindex leafs
-                            # Aaaaand, we're going back to the top
-                            return (if security++ >= 5000 then yes else no)
+                                    leafs = sortAndReindex leafs
+                                    # Aaaaand, we're going back to the top
+                                    return (if security++ >= 20000 then yes else no)
                         else if quick
                             # As leafs are sorted by weight
                             # if we encounter one leaf.weight <= threshold then we

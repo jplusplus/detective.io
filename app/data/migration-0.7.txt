@@ -1,5 +1,5 @@
 START root=node(*)
-MATCH (root)-[r:`country_organization_has_admin_author+`]-(x)
+MATCH (root)-[r:`country_country_has_admin_author+`]-(x)
 DELETE r
 
 START root=node(*)

@@ -33,10 +33,10 @@ class QuoteRequestResource(ModelResource):
 
 class TopicResource(ModelResource):
 
-    author = fields.ToOneField(UserResource, 'author', full=False, null=True)
+    author = fields.ToOneField(UserResource, 'author', full=True, null=True)
 
     class Meta:
-        queryset = Topic.objects.all()
+        queryset = Topic.objects.all().prefetch_related('author')
         filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
 
     def dehydrate(self, bundle):

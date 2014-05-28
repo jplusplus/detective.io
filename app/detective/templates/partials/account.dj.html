@@ -12,9 +12,13 @@
                     <img ng-src="[[topic.background]]" width="100%" class="bg" />
                 </div>
                 <h4>
-                    <a ng-href="[[topic.link]]">
-                        [[topic.title]]
-                    </a>
+                    <a ng-href="[[topic.link]]">[[topic.title]]</a><br />
+                    <span class="text-muted">
+                        by 
+                        <a ng-href="/[[topic.author.username]]">
+                            [[topic.author.username]]
+                        </a>
+                    </span>
                 </h4>
             </div>
 
@@ -39,9 +43,13 @@
                     <img ng-src="[[topic.background]]" width="100%" class="bg" />
                 </div>
                 <h4>
-                    <a ng-href="[[topic.link]]">
-                        [[topic.title]]
-                    </a>
+                    <a ng-href="[[topic.link]]">[[topic.title]]</a><br />
+                    <span class="text-muted">
+                        by 
+                        <a ng-href="/[[topic.author.username]]">
+                            [[topic.author.username]]
+                        </a>
+                    </span>
                 </h4>
             </div>
 

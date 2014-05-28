@@ -1,5 +1,5 @@
 <div class="container">
-    <h2>[[user.username]]'s open topics</h2>
+    <h2><strong>[[user.username]]</strong>'s open topics</h2>
     <div class="boxes" ng-if="shouldShowTopics()">
         <div ng-repeat-start="topic in userTopics"></div>
 
@@ -22,5 +22,29 @@
     </div>
     <div ng-if="!shouldShowTopics()" class="alert alert-info">
         This user has no open investigations
+    </div>
+</div>
+
+<div class="container" ng-if="shouldShowContributions()">
+    <h2>Topics <strong>[[user.username]]</strong> contributes to</h2>
+    <div class="boxes">
+        <div ng-repeat-start="group in user.groups" ng-init="topic = group.topic"></div>
+
+            <div class="clearfix visible-md visible-lg" ng-if="$index > 0 && $index%3 == 0"></div>
+            <div class="clearfix visible-sm" ng-if="$index > 0 && $index%2 == 0"></div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="box">
+                    <a ng-href="[[topic.link]]" class="fg"></a>
+                    <img ng-src="[[topic.background]]" width="100%" class="bg" />
+                </div>
+                <h4>
+                    <a ng-href="[[topic.link]]">
+                        [[topic.title]]
+                    </a>
+                </h4>
+            </div>
+
+        <div ng-repeat-end></div>
     </div>
 </div>

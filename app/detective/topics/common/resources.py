@@ -37,7 +37,7 @@ class TopicResource(ModelResource):
 
     class Meta:
         queryset = Topic.objects.all()
-        filtering = {'slug': ALL, 'author': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
+        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
 
     def dehydrate(self, bundle):
         # Get all registered models

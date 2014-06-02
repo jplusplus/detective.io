@@ -149,7 +149,7 @@ class ApiTestCase(ResourceTestCase):
         if model_instance:
             model_instance.delete()
 
-    def teardown(self):
+    def tearDown(self):
         # Clean & delete generated data
         # users
         self.cleanModel(self.super_user)

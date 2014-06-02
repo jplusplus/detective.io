@@ -22,7 +22,6 @@ def find(function, iterable):
 
 class ApiTestCase(ResourceTestCase):
 
-    fixtures = []
 
     def setUp(self):
         super(ApiTestCase, self).setUp()

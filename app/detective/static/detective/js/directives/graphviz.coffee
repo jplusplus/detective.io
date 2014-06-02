@@ -107,10 +107,10 @@ HashMerge = (a={}, b={}) ->
 
             # Sort by weight (DESC) to know which node should should always display its name
             leafs = sortAndReindex leafs
-            for i in [0..(Math.min leafs.length, 3)]
-                leafs[i]._shouldDisplayName = yes if leafs[i]?
 
             do aggregate
+            for i in [0..(Math.min leafs.length, 3)]
+                leafs[i]._shouldDisplayName = yes if leafs[i]?
 
             do d3Update
 
@@ -245,6 +245,10 @@ HashMerge = (a={}, b={}) ->
             aggregate loaded
 
             leafs = sortAndReindex leafs
+
+            for i in [0..(Math.min leafs.length, 3)]
+                leafs[i]._shouldDisplayName = yes if leafs[i]?
+
             do d3Update
 
         d3Update = =>

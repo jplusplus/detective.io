@@ -2,6 +2,7 @@
 # Encoding: utf-8
 
 import os
+import dj_database_url
 from settings import *
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 

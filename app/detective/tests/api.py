@@ -106,9 +106,9 @@ class ApiTestCase(ResourceTestCase):
         self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology, author=super_user)
         self.thanksgiving.save()
         # Load default topics
-        management.call_command('loaddata', 'app/detective/fixtures/default_topics.json', verbosity=0)
+        management.call_command('loaddata', 'app/detective/fixtures/default_topics.json', verbosity=0, pythonpath="./")
         # Load search terms
-        management.call_command('loaddata', 'app/detective/fixtures/search_terms.json', verbosity=0)
+        management.call_command('loaddata', 'app/detective/fixtures/search_terms.json', verbosity=0, pythonpath="./")
 
         self.post_data_simple = {
             "name": "Lorem ispum TEST",

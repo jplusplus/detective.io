@@ -22,6 +22,8 @@ def find(function, iterable):
 
 class ApiTestCase(ResourceTestCase):
 
+    fixtures = ['app/detective/fixtures/default_topics.json', 
+                'app/detective/fixtures/search_terms.json',]
 
     def setUp(self):
         super(ApiTestCase, self).setUp()
@@ -105,10 +107,6 @@ class ApiTestCase(ResourceTestCase):
         # Creates Thanksgiving topic
         self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology, author=super_user)
         self.thanksgiving.save()
-        # Load default topics
-        management.call_command('loaddata', 'app/detective/fixtures/default_topics.json', verbosity=0, pythonpath="./")
-        # Load search terms
-        management.call_command('loaddata', 'app/detective/fixtures/search_terms.json', verbosity=0, pythonpath="./")
 
         self.post_data_simple = {
             "name": "Lorem ispum TEST",
@@ -149,21 +147,7 @@ class ApiTestCase(ResourceTestCase):
             model_instance.delete()
 
     def tearDown(self):
-        # Clean & delete generated data
-        # users
-        self.cleanModel(self.super_user)
-        self.cleanModel(self.contrib_user)
-        self.cleanModel(self.lambda_user)
-        # individuals
-        self.cleanModel(self.jpp)  # organization
-        self.cleanModel(self.jg)   # organization
-        self.cleanModel(self.fra)  # country
-        self.cleanModel(self.pr)   # people
-        self.cleanModel(self.pb)   # people
-        # topics
-        self.cleanModel(self.christmas)
-        self.cleanModel(self.thanksgiving)
-        # search terms        
+        # Simply flush the database       
         management.call_command('flush', verbosity=0, interactive=False)
 
 

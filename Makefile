@@ -37,8 +37,8 @@ startdb:
 
 test:
 	make stopdb
-	rm -Rf ./lib/neo4j/data/graph.db
-	rm dev.db
+	rm -Rf ./lib/neo4j/data/graph.db 
+	rm -f dev.db
 	make startdb
 	./manage.py syncdb --noinput --pythonpath=. --settings=app.settings_tests
 	./manage.py test detective --pythonpath=. --settings=app.settings_tests	

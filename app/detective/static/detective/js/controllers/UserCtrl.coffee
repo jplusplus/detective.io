@@ -46,7 +46,7 @@ class UserCtrl
         # Set page title with no title-case
         switch @location.path()
             when "/signup"
-                @Page.title "Sign up", false
+                @Page.title "Request an account", false
             when "/login"
                 @Page.title "Log in", false
             when "/account/activate"
@@ -95,7 +95,7 @@ class UserCtrl
             if data? and data.success
                 @User.set
                     is_logged   : true
-                    is_staff    : data.is_staff
+                    is_staff    : !! data.is_staff
                     username    : data.username
                     permissions : data.permissions
                 # Redirect to the next URL

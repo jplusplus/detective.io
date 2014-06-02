@@ -1,0 +1,51 @@
+START root=node(*)
+MATCH (root)-[r:`country_country_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`energy_product_energy_product_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`organization_organization_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`energy_project_energy_project_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`commentary_commentary_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`person_person_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`price_price_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`distribution_distribution_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`revenue_revenue_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`fundraising_round_fundraising_round_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`amount_amount_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`product_product_has_admin_author+`]-(x)
+DELETE r
+
+START root=node(*)
+MATCH (root)-[r:`project_project_has_admin_author+`]-(x)
+DELETE r

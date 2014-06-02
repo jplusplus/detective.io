@@ -57,7 +57,7 @@
             }
 
             svg {
-                .node {
+                .leaf {
                     stroke: @brand-secondary;
                     stroke-width: 1.5px;
                     cursor: pointer;
@@ -69,7 +69,7 @@
                     }
                 }
 
-                .link {
+                .edge {
                     fill: none;
                     stroke: white;
                     stroke-width: 1px;
@@ -98,6 +98,22 @@
         // Thanks to! http://blog.room34.com/archives/5042
         table-layout: fixed;
         word-wrap:break-word;
+
+        .field-name {
+            width:150px;
+        }
+
+        .field-source {
+            width:100px;
+        }
+    }
+
+    .relationship {
+
+        .field-source {
+            float:right;
+            margin-right:10px;
+        }
     }
 
     .map {

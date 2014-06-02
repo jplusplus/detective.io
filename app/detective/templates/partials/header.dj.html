@@ -5,34 +5,51 @@
 			Welcome, [[user.username]]!
 			<a ng-click="logout()" href="#">Sign out</a>
 		</div>
+        <div ng-hide="user.is_logged" class="pull-right right20 user-state">
+            <a class="btn btn-link" ng-href="/login">
+                <i class="fa fa-sign-in"></i> Login
+            <a>
+        </div>
 	</div>
 
 	<h1 class="pull-left">
-		<a href="#/">
+		<a href="/">
 			Detective<i>.io</i>
 		</a>
 	</h1>
 
 
-    <form class="topic-search" role="search" ng-controller="SearchFormCtrl">
+    <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl">
 
-    	<select class="btn btn-default" ng-model="topic" ng-options="t.slug as t.title for t in topics">
-            <option value="">Choose...</option>   
-        </select>
+        <div class="btn-group" dropdown is-open="showTopics">
+            <button class="btn btn-default dropdown-toggle right10" type="button">
+                <span class="fa fa-search left05"></span>
+                [[getTopic(topic).title]]
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li ng-repeat="t in topics" ng-class="{active: $parent.topic == t.slug}">
+                    <a ng-click="$parent.topic = t.slug">
+                        [[t.title]]
+                        <div class="text-muted" ng-bind-html="t.description"></div>
+                    </a>
+                </li>
+            </ul>
+            <span ng-repeat="t in topics" ng-show="t.slug == topic">
 
-        <span ng-repeat="t in topics" ng-show="t.slug == topic">
+                <input type="search"
+                        placeholder="Search linked individuals in our graph database..."
+                        tt-typeahead
+                        tt-model="selectedIndividual"
+                        remote="/api/[[t.slug]]/v1/summary/human/?q=%QUERY"
+                        prefetch="/api/[[t.slug]]/v1/summary/mine/"
+                        value-key="label"
+                        limit="10"
+                        class="form-control"
+                        id="input-search" />
+            </span>
 
-            <input type="search"
-                    placeholder="Search linked individuals in our graph database..."
-                    tt-typeahead
-                    tt-model="selectedIndividual"
-                    remote="/api/[[t.slug]]/v1/summary/human/?q=%QUERY"
-                    prefetch="/api/[[t.slug]]/v1/summary/mine/"
-                    value-key="label"
-                    limit="10"
-                    class="form-control"
-                    id="input-search" />
-        </span>
+        </div>
+
 
     </form>
 

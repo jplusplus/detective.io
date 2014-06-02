@@ -8,7 +8,7 @@ import json
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        json_data = open("app/detective/fixtures/initial_data.json")        
+        json_data = open("app/detective/fixtures/default_topics.json")        
         items = json.load(json_data)
         for item in items:
             obj = orm[ item["model"] ](**item["fields"])

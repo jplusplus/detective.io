@@ -7,13 +7,29 @@ class ProfileCtrl
         @Page.loading yes
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
-        # ──────────────────────────────────────────────────────────────────────
-        @scope.user = user
+        # ──────────────────────────────────────────────────────────────────────        
         # Get the user's topics
-        @scope.userTopics = @Common.query type: "topic", author__username: user.username
+        @scope.userTopics = @Common.query type: "topic", author__id: user.id
+        # Get the user
+        @scope.user = @Common.get type: "user", id: user.id
+
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
-        @scope.$watch "userTopics", ( (u)=> @Page.loading(not u.$resolved) ), yes
+        @scope.$watchCollection "[userTopics.$resolved, user.$resolved]", (resolved)=>      
+            @Page.loading( angular.equals(resolved, [yes, yes]) ) if @Page.loading()
+        , yes
+
+        # ──────────────────────────────────────────────────────────────────────
+        # Scope functions
+        # ──────────────────────────────────────────────────────────────────────
+        @scope.shouldShowTopics = @shouldShowTopics
+        @scope.shouldShowContributions = @shouldShowContributions
+
+    shouldShowTopics: =>
+        @scope.userTopics.$resolved and @scope.userTopics.length
+
+    shouldShowContributions: =>
+        @scope.user.$resolved and @scope.user.groups.length
 
 angular.module('detective.controller').controller 'profileCtrl', ProfileCtrl

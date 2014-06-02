@@ -23,12 +23,13 @@ OPERATIONS = (
     ('add'   , 'Add an individual to {app_name}'),
     ('delete', 'Delete an individual from {app_name}'),
     ('change', 'Edit an individual of {app_name}'),
+    ('read', 'Read {app_name}')
 )
 
 GROUPS = (dict(
     name        = '{app_name}_contributor',
     description = 'Contributors of an application, can create',
-    permissions = ('change', 'add', 'delete')),
+    permissions = ('change', 'add', 'delete', 'read')),
 )
 
 def _create_groups(app_label):
@@ -103,7 +104,7 @@ def create_permissions(app, app_label=None, created_models=None, verbosity=False
         _create_groups(app_label)
 
 def remove_permissions(sender, instance, using, **kwargs):
-    app_label = instance.slug
+    app_label = instance.module
     for op in OPERATIONS:
         perm_args = _get_permission_args(app_label, op)
         _remove_permission(app_label, perm_args)

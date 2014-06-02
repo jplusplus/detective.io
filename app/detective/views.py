@@ -13,8 +13,8 @@ def home(request):
     if request.user.is_authenticated():
         permissions = request.user.get_all_permissions()
         # Create the cookie
-        response.set_cookie("user__is_logged",   True)
-        response.set_cookie("user__is_staff",    request.user.is_staff)
+        response.set_cookie("user__is_logged",   1)
+        response.set_cookie("user__is_staff",    1*request.user.is_staff)
         response.set_cookie("user__username",    unicode(request.user.username))
         response.set_cookie("user__permissions", unicode(u' '.join(permissions)))
     else:

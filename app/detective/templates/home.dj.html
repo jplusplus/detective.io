@@ -24,10 +24,12 @@
         <script type="text/javascript" src="{% static 'components/d3/d3.js' %}"></script>
     {% endcompress %}
 
-    <script type="text/javascript" src="{% static 'components/angular-all-unstable/angular.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'components/angular-all-unstable/angular-cookies.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'components/angular-all-unstable/angular-resource.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'components/angular-all-unstable/angular-sanitize.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular/angular.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular-route/angular-route.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular-cookies/angular-cookies.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular-resource/angular-resource.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular-sanitize/angular-sanitize.min.js' %}"></script>
+
     <script type="text/javascript" src="{% static 'components/angular-elastic/elastic.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/ng-file-upload/angular-file-upload.min.js' %}"></script>
@@ -64,6 +66,7 @@
         <script type="text/coffeescript" src="{% static 'detective/js/directives/unique.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/watchLoginMandatory.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/graphviz.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/directives/classOnFocus.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/filters/individualPreview.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/filters/nl2br.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/filters/strToColor.coffee' %}"></script>
@@ -81,9 +84,12 @@
 {% block content %}
     <div watch-login-mandatory watch-topic-exists>
         {% include "partials/header.dj.html" %}        
-        <div ng-view id="content" ng-hide="is404()" ng-class="{ freeze: Page.loading() }"></div>
+        <div ng-view autoscroll id="content" ng-hide="is40X()" ng-class="{ freeze: Page.loading() }"></div>
         <div id="content" ng-show="is404()">
             <div ng-include="'partial/404.html'"></div>
+        </div>
+        <div id="content" ng-show="is403()">
+            <div ng-include="'partial/403.html'"></div>
         </div>
     </div>
     {% include "partials/footer.dj.html" %}

@@ -47,6 +47,8 @@ angular.module('detective.directive').directive "ttTypeahead", ($parse, $routePa
             ].join ""
             engine: engine
             valueKey: scope.valueKey or "name"
+            dupChecker: (a)->
+                console.log a
             prefetch:
                 cache: !User.is_logged
                 url: scope.prefetch or "/api/#{itopic}/v1/#{individual}/mine/"

@@ -577,7 +577,12 @@ class ApiTestCase(ResourceTestCase):
         self.assertIsNotNone(find(lambda x: x['label'] == self.jg.name,  objects))
 
     def test_summary_mine_unauthenticated(self):
-        self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/summary/mine/', format='json'))
+        resp = self.api_client.get('/api/energy/v1/summary/mine/', format='json')
+        self.assertValidJSONResponse(resp)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        objects = data['objects']
+        self.assertEqual(len(objects), 0)
 
     def test_countries_summary(self):
         resp = self.api_client.get('/api/energy/v1/summary/countries/', format='json', authentication=self.get_super_credentials())

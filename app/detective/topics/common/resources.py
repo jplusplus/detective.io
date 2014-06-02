@@ -8,6 +8,8 @@ from tastypie.authorization           import ReadOnlyAuthorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
+from django.db.models                 import Q
+import re
 
 # Only staff can consult QuoteRequests
 class QuoteRequestAuthorization(ReadOnlyAuthorization):
@@ -31,11 +33,11 @@ class QuoteRequestResource(ModelResource):
 
 class TopicResource(ModelResource):
 
-    author = fields.ToOneField(UserResource, 'author', full=False, null=True)
+    author = fields.ToOneField(UserResource, 'author', full=True, null=True)
 
     class Meta:
-        queryset = Topic.objects.all()
-        filtering = {'slug': ALL, 'author': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
+        queryset = Topic.objects.all().prefetch_related('author')
+        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
 
     def dehydrate(self, bundle):
         # Get all registered models
@@ -48,10 +50,22 @@ class TopicResource(ModelResource):
         return bundle
 
     def get_object_list(self, request):
+        # Check if the user is staff
         is_staff    = request.user and request.user.is_staff
+
+        # Retrieve all groups in which the user is in
+        can_read    = []
+        if request.user:
+            for permission in request.user.get_all_permissions():
+                matches = re.match('^(\w+)\.contribute_read$', permission)
+                if matches:
+                    can_read.append(matches.group(1))
+
         object_list = super(TopicResource, self).get_object_list(request)
-        # Return only public topics for non-staff user
-        return object_list if is_staff else object_list.filter(public=True)
+        # Return only topics the user can see
+        object_list = object_list if is_staff else object_list.filter(Q(module__in=can_read)|Q(public=True))
+
+        return object_list
 
 
 class ArticleResource(ModelResource):

@@ -2,19 +2,20 @@
 # -*- coding: utf-8 -*-
 from .errors                      import *
 from .message                     import Recover
+from app.detective.models         import Topic
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
-from django.contrib.auth.models   import User
+from django.contrib.auth.models   import User, Group
 from django.contrib.sites.models  import RequestSite
 from django.core                  import signing
 from django.db                    import IntegrityError
 from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
 from password_reset.views         import Reset
 from registration.models          import RegistrationProfile, SHA1_RE
-from tastypie                     import http
+from tastypie                     import http, fields
 from tastypie.authentication      import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization       import ReadOnlyAuthorization
-from tastypie.constants           import ALL
+from tastypie.constants           import ALL, ALL_WITH_RELATIONS
 from tastypie.resources           import ModelResource
 from tastypie.utils               import trailing_slash
 import hashlib
@@ -34,15 +35,34 @@ class UserAuthorization(ReadOnlyAuthorization):
             authorized = ((bundle.obj.user == bundle.request.user) or bundle.request.user.is_staff)
         return authorized
 
+class GroupResource(ModelResource):
+    def getTopic(bundle):
+        try:
+            module = bundle.obj.name.split("_")[0]
+            return Topic.objects.get(module=module)
+        except Topic.DoesNotExist:
+            return None
+
+    topic = fields.ToOneField('app.detective.topics.common.resources.TopicResource', 
+                                attribute=getTopic, 
+                                use_in='detail',
+                                null=True,
+                                full=True)
+    class Meta:
+        excludes = ['topic']
+        queryset = Group.objects.all()
 
 class UserResource(ModelResource):
+
+    groups = fields.ManyToManyField(GroupResource, 'groups', null=True, full=True, use_in='detail')
+
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
         allowed_methods    = ['get', 'post']
         always_return_data = True
-        fields             = ['first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
-        filtering          = {'username': ALL, 'email': ALL}
+        fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password', 'groups']
+        filtering          = {'id': ALL, 'username': ALL, 'email': ALL, 'groups': ALL_WITH_RELATIONS}
         queryset           = User.objects.all()
         resource_name      = 'user'
 

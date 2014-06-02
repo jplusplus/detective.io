@@ -37,7 +37,7 @@ def attr(obj, name, default=None):
         return obj.get("{%s}%s" % ( NAMESPACES[tokens[0]], tokens[1]), default)
 
 def get_field_specials(root, field_name):
-    specials = ["verbose_name", "help_text"]
+    specials = ["verbose_name", "help_text", "related_name"]
     props = {}
     tags  = root.findall("owl:ObjectProperty",   namespaces=NAMESPACES)
     tags += root.findall("owl:DatatypeProperty", namespaces=NAMESPACES)
@@ -107,9 +107,12 @@ def parse(ontology, module='', app_label=None):
             # Get the complete field name using the rdf:resource attribute
             field_name = attr(field_name, "rdf:resource");
             # Get field's special properties
-            field_opts = dict(field_opts.items() + get_field_specials(root, field_name).items() )
+            field_opts = dict(field_opts.items() + get_field_specials(root, field_name).items() )            
             # Convert the name to a python readable format
             field_name = to_underscores(field_name.split("#")[-1])
+            if field_opts["related_name"] is not None:
+                # Convert related_name to the same format
+                field_opts["related_name"] = to_underscores(field_opts["related_name"])
             # It might be a relationship
             on_class = field.find("owl:onClass", namespaces=NAMESPACES)
             # It's a relationship!

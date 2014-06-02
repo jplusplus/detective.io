@@ -57,7 +57,7 @@ class Person(models.NodeModel):
 	website_url = models.StringProperty(null=True,help_text=u'',verbose_name=u'Website URL')
 	image = models.URLProperty(null=True,help_text=u'The URL (starting with http://) where the image is hosted.',verbose_name=u'Image URL')
 	previous_activity_in_organization = models.Relationship("Organization",null=True,rel_type='person_has_previous_activity_in_organization+',help_text=u'Has the entity been active in a specific Organization previsously?',verbose_name=u'Previous activity in')
-	educated_in  = models.Relationship(Country,null=True,rel_type='person_has_educated_in+',help_text=u'',verbose_name=u'Educated in')
+	educated_in  = models.Relationship(Country,null=True, rel_type='person_has_educated_in+',help_text=u'',verbose_name=u'Educated in')
 	based_in  = models.Relationship(Country,null=True,rel_type='person_has_based_in+',help_text=u'',verbose_name=u'Based in')
 	activity_in_organization = models.Relationship("Organization",null=True,rel_type='person_has_activity_in_organization+',help_text=u'The Organization(s) this Person is active in.',verbose_name=u'Activity in Organizations')
 
@@ -116,7 +116,7 @@ class Organization(models.NodeModel):
 	board_member = models.Relationship("Person",null=True,rel_type='organization_has_board_member+',help_text=u'The list of board members of the Organization, if any.',verbose_name=u'Board member')
 	partner = models.Relationship("self",null=True,rel_type='organization_has_partner+',help_text=u'An entity can have Partners, i.e. Organizations that help without making a financial contribution (if financial or substancial help is involved, use Fundraising Round instead).',verbose_name=u'Partner')
 	key_person = models.Relationship("Person",null=True,rel_type='organization_has_key_person+',help_text=u'A Key Person is an executive-level individual within an Organization, such as a CEO, CFO, spokesperson etc.',verbose_name=u'Key Person')
-	litigation_against = models.Relationship("self",null=True,rel_type='organization_has_litigation_against+',help_text=u'An entity is said to litigate against another when it is involved in a lawsuit or an out-of-court settlement with the other.',verbose_name=u'Litigation against')
+	litigation_against = models.Relationship("self",null=True, rel_type='organization_has_litigation_against+',help_text=u'An entity is said to litigate against another when it is involved in a lawsuit or an out-of-court settlement with the other.',verbose_name=u'Litigation against')
 	fundraising_round = models.Relationship("FundraisingRound",null=True,rel_type='organization_has_fundraising_round+',help_text=u'A Fundraising Round represents an event when an Organization was able to raise cash or another asset.',verbose_name=u'Fundraising round')
 	monitoring_body = models.Relationship("self",null=True,rel_type='organization_has_monitoring_body+',help_text=u'The Monitoring Body is the organization that is responsible for overseeing the project. In the case of electricity projects, it is often the national electricity regulator.',verbose_name=u'Monitoring body')
 

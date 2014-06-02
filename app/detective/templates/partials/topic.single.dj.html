@@ -66,10 +66,10 @@
 				<div class="panel panel-default">
 
 					<div class="panel-body">
-						<table class="table">
+						<table class="table table-striped">
 							<tbody>
-							 	<tr ng-repeat="field in meta.fields|filter:isLiteral" ng-show="get(field.name) && field.name != 'name'">
-							 		<td class="nowrap" ng-if="!isMono(field)">
+							 	<tr ng-repeat="field in meta.fields|filter:isLiteral" ng-if="get(field.name) && field.name != 'name'">
+							 		<td class="nowrap field-name" ng-if="!isMono(field)">
 							 			<strong>[[field.verbose_name]]</strong>
 							 		</td>
 							 		<td ng-if="!isMono(field)">
@@ -77,8 +77,8 @@
 							 			<span ng-bind="get(field.name)" ng-if="!isString(field.type) && field.type != 'DateTimeField'"></span>
 							 			<span ng-bind-html="get(field.name) | linky:'_blank'" ng-if="isString(field.type) && field.name != 'imageURL'"></span>
 							 		</td>
-						 			<td ng-if="isMono(field) && get(field.name)" colspan="2">
-						 				<div ng-if="isAddr(field)">
+						 			<td ng-if="isMono(field) && get(field.name)" colspan="3">
+						 				<div ng-if="isAddr(field) || isGeoloc(field)">
 								 			<strong>[[field.verbose_name]]</strong>
 								 			<a class="map" ng-href="https://www.google.fr/maps/?q=[[get(field.name)]]" target="_blank">
 								 				<span class="lab">
@@ -91,11 +91,27 @@
 						 					<img ng-src="[[get(field.name)]]" class="pull-left img-responsive" />
 						 				</div>
 						 			</td>
+						 			<td class="field-source text-right" ng-if="!isMono(field)">
+						 				<a  ng-if="getSource(field)"
+						 				    ng-href="[[getSource(field).url]]"
+						 				    target="_blank">
+						 					Source
+						 				</a>
+						 			</td>
 							 	</tr>
 							 </tbody>
 						</table>
 
-					 	<div ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)" id="rels-[[field.name]]">
+					 	<div class="relationship" 
+					 		  ng-repeat="field in meta.fields|filter:isRelationship" 
+					 		  ng-show="get(field.name)" 
+					 		  id="rels-[[field.name]]">
+			 				<a  ng-if="getSource(field)"
+			 				    ng-href="[[getSource(field).url]]"
+			 				    class="field-source"
+			 				    target="_blank">
+			 					Source
+			 				</a>
 					 		<h3>
 								<div color-tag ref="field.related_model" class="pull-left small right10" />
 					 			[[field.verbose_name]]

@@ -1,12 +1,13 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', 'Individual', 'Summary', 'IndividualForm', 'Page']
+    @$inject: ['$scope', '$routeParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User']
 
 
-    constructor: (@scope, @routeParams, @filter, @Individual,  @Summary, @IndividualForm, @Page)->
+    constructor: (@scope, @routeParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User)->
         @Page.title "Contribute"
         # Global loading mode
-        Page.loading true
+        Page.loading true        
+
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
@@ -27,8 +28,7 @@ class ContributeCtrl
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
-        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic
-
+        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic        
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
@@ -40,6 +40,12 @@ class ContributeCtrl
                 @scope.scrollIdx = -1
                 @scope.$apply()
             , 1200
+
+        # Redirect unauthorized user
+        @scope.$watch (=> User), (v)=>
+            @location.url("/#{@scope.username}/#{@scope.topic}/") unless User.hasChangePermission(@topic)
+        , true
+            
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
@@ -90,6 +96,8 @@ class ContributeCtrl
             @related_to = related_to
             @scope      = scope
             @type       = type.toLowerCase()
+            # All source fields
+            @sources    = {}
             # Field param can be a number to load an individual
             @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
             # Class watchers
@@ -113,13 +121,13 @@ class ContributeCtrl
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
             # Function to remove nested resources without id
-            clean   = (val)->
+            clean   = (val, name="")->
                 # copy the current value
                 val = angular.copy val
                 if val instanceof Date
                     # Convert date object to string
                     val = val.toJSON()
-                else if typeof(val) is "object"
+                else if typeof(val) is "object" and name isnt "field_sources"
                     # Fetch each nested value
                     for pc of val
                         # Remove the nested values without id
@@ -136,13 +144,13 @@ class ContributeCtrl
                     # Empty input must be null
                     val = null
                 val
-            for prop of now
-                val = clean(now[prop])
+            for prop of now                
+                val = clean(now[prop], prop)
                 # Remove resource methods
                 # and angular properties (that start with $)
-                if typeof(val) isnt "function" and prop.indexOf("$") != 0
+                if typeof(val) isnt "function" and prop.indexOf("$") != 0   
                     # Previous and new value are different
-                    unless angular.equals clean(prev[prop]), val
+                    unless angular.equals clean(prev[prop], prop), val
                         changes[prop] = val
             changes
 
@@ -199,6 +207,28 @@ class ContributeCtrl
                     @error_traceback = data.traceback if data.traceback?
                 )
 
+        getSource: (field)=> _.find @fields.field_sources, (fs)=> fs.field is field.name        
+        setSource: (field, value=@sources[field.name])=>             
+            # Close the form
+            field.showSourceForm = no
+            # Get the sourc eobject
+            source = @getSource(field)  
+            # Delete the value
+            if (value is '' or value is null) and source?
+                idx = _.indexOf @fields.field_sources, (fs)=> fs.field is field.name 
+                delete @sources[field.name]
+                delete @fields.field_sources[idx]                
+                @fields.field_sources.splice idx, 1
+            # Update the value
+            else if source? 
+                source.url   = value
+                source.field = field.name
+            # Add te value
+            else
+                @fields.field_sources.push 
+                    url  : value
+                    field: field.name
+
         # Load an individual using its id
         load: (id, related_to=null)=>
             @loading    = true
@@ -211,6 +241,7 @@ class ContributeCtrl
                     @loading = false
                     # Record the database version of the individual
                     @master  = angular.copy master
+                    @sources = _.object _.map(@fields.field_sources, (fs)-> [fs.field, fs.url])
                 , (error)=>
                     @loading = false
                     # handle 404 response for entity loading
@@ -219,6 +250,9 @@ class ContributeCtrl
                         @isRemoved = false
                         @isNotFound = true
 
+        # True if the given field can be edit
+        isEditable: (field)=>            
+            return not field.rules.is_editable? or field.rules.is_editable is yes
 
         # True if the given field is visible
         isVisible: (field)=>

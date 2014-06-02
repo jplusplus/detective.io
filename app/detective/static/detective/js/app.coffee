@@ -6,6 +6,10 @@ angular.module('detective.service',    ['ngResource', 'ngSanitize', 'ngCookies']
 
 detective = angular
     .module('detective', [
+        'ngCookies'
+        'ngResource'
+        'ngRoute'
+        'ngSanitize'
         "detective.config"
         "detective.controller"
         "detective.directive"
@@ -36,7 +40,18 @@ detective = angular
                         # Disabled loading
                         Page.loading false if is404
                     $rootScope._is404
-                $rootScope.$on "$routeChangeStart", -> $rootScope.is404(no)                
+                $rootScope.is403 = (is403) ->
+                    if is403?
+                        $rootScope._is403 = is403
+                        Page.loading false if is403
+                    $rootScope._is403
+                $rootScope.$on "$routeChangeStart", ->
+                    $rootScope.is404(no)
+                    $rootScope.is403 no
+
+                # Helper checking if any 400+ error is set
+                $rootScope.is40X = ->
+                    $rootScope._is404 || $rootScope._is403
         ]
     )
     .config(

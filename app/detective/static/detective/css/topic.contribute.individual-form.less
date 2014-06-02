@@ -6,8 +6,6 @@
             margin-top:30px;
             margin-bottom:30px;
             position:relative;
-            .box-shadow( 0 -3px 0 fade(#000, 40) inset);
-
 
             &.closed {
                 padding:10px 30px;
@@ -20,8 +18,7 @@
                 position:relative;
                 margin:0 20px;
                 padding:30px 10px;
-                padding-bottom:20px;
-                border-bottom:fade(#000, 10) 1px solid;
+                padding-bottom:20px;   
 
                 .color-tag {
                     margin-right:10px;
@@ -44,6 +41,7 @@
                 }
 
             }
+
             .head, .restore {
                 .btns {
                     float:right;
@@ -51,47 +49,143 @@
                 }
             }
 
-            .field.loading {
-                min-height:auto;
 
-                input, button {
-                    .progress-striped .progress-bar();
-                    .progress-bar-variant(#eee);
-                    .progress.active .progress-bar();
+            .field {
+
+                position:relative;
+                padding-top:15px;
+                padding-bottom:15px;
+                margin-bottom:0;
+
+                .loading {
+                    min-height:auto;
+
+                    input, button {
+                        .progress-striped .progress-bar();
+                        .progress-bar-variant(#eee);
+                        .progress.active .progress-bar();
+                    }
+
+                    &:before {
+                        background:white;
+                    }
                 }
 
-                &:before {
-                    background:white;
+
+                .help-block {
+                    color:mix(#000, white);
+                    overflow: hidden;
+                    max-height:0px;
+                    margin-top:0;
+                    opacity:0;
+                    .transition(0.7s);
                 }
+
+                &.is-active {
+                    background:#efefef;
+
+                    .help-block {
+                        opacity:1;
+                        max-height:300px;
+                    }
+
+                    .add-source {
+                        opacity:1;  
+                        z-index:auto;
+                        position: static;
+                        &-overlay {
+                            display:block;
+                        }
+                    }
+
+                    .has-source {
+                        display: none;
+                    }
+                }
+
+                .add-source {
+                    opacity:0;
+                    z-index:-1;
+                    position: absolute;
+
+                    &-wrapper {
+                        position: relative;
+                        display: inline-block;
+                        z-index:@zindex-tooltips;
+                    }
+
+                    &-overlay {
+                        position:absolute;
+                        left:0;
+                        right:0;
+                        top:0;
+                        bottom:0;
+                        background:fade(#efefef, 80);
+                        z-index:@zindex-tooltips - 10;
+                        display:none;
+                    }
+
+                    &-form {
+                        .panel();                        
+                        position:absolute;
+                        top:100%;
+                        right:0;
+                        padding:20px;
+                        width:400px;
+                        margin-top:5px;
+                        border:1px solid fade(#000, 10);
+                        z-index:@zindex-tooltips;
+
+                        &:before {
+                            content:"";
+                            position: absolute;
+                            bottom:100%;
+                            right:40px;
+                            width:7px;
+                            height:7px;
+                            background:white;
+                            border:1px solid fade(#000, 10);
+                            border-right: 0;
+                            border-bottom: 0;
+                            .transform( rotate(45deg) translate(0, 50%));
+                        }
+                    }
+                }
+
+                .multiple {
+                    margin-bottom:5px;
+                }
+
+                .input-group-addon {
+                    cursor:pointer;
+                }
+
+                span.form-control {
+                    overflow: hidden;
+                }
+
+                .ask-for-new {
+                    padding:10px;
+                    background:fade(#000, 10);
+                    margin-bottom:5px;
+                }
+
+                label {
+                        font-size:1.1em;
+                       
+                    &:first-letter {
+                        text-transform: uppercase;
+                    }
+                }
+
             }
 
-            .help-block {
-                color:mix(#000, white);
-            }
-
-            .multiple {
-                margin-bottom:5px;
-            }
-
-            .input-group-addon {
-                cursor:pointer;
-            }
-
-            .ask-for-new {
-                padding:10px;
-                background:fade(#000, 10);
-                margin-bottom:5px;
-            }
-
-            label:first-letter {
-                text-transform: uppercase;
-            }
         }
 
         .form-footer {
             margin-top:20px;
             background:#fefefe;
-            border-top:1px solid #eee;
+            border:1px solid #eee;
         }
 
         .saved .form-footer {

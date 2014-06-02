@@ -5,7 +5,7 @@ angular.module('detective.directive').directive "changeOnBlur", ->
     require: "ngModel"
     link: (scope, elm, attr, ngModelCtrl) ->
         return  if attr.type is "radio" or attr.type is "checkbox"
-        elm.unbind("input").unbind("keydown").unbind "change"
-        elm.bind "blur", ->
+        elm.unbind("input").unbind("keydown").unbind("change")
+        elm.bind "change", ->
             scope.$apply ->
                 ngModelCtrl.$setViewValue elm.val()

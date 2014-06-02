@@ -12,10 +12,7 @@ NEO4J_DATABASES['default']['OPTIONS'] = {
 NEO4J_TEST_DATABASES = NEO4J_DATABASES
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'test.db'
-    }
+    'default' : dj_database_url.config()
 }
 
 DEBUG = False

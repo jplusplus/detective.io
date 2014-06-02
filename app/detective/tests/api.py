@@ -11,6 +11,7 @@ from django.core.files                   import File
 from registration.models                 import RegistrationProfile
 from tastypie.test                       import ResourceTestCase, TestApiClient
 from tastypie.utils                      import timezone
+from neo4django.db                       import connection as gdb
 import json
 import urllib
 
@@ -148,6 +149,7 @@ class ApiTestCase(ResourceTestCase):
 
     def tearDown(self):
         # Simply flush the database       
+        gdb.cleandb()
         management.call_command('flush', verbosity=0, interactive=False)
 
 

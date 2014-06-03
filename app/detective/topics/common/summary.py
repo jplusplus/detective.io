@@ -54,11 +54,14 @@ class SummaryResource(Resource):
             try:
                 self.throttle_check(kwargs["bundle"].request)
                 content = method(kwargs["bundle"], kwargs["bundle"].request)
-                # Serialize content in json
-                # @TODO implement a better format support
-                content  = self.serializer(content, "application/json")
-                # Create an HTTP response
-                response = HttpResponse(content=content, content_type="application/json")
+                if isinstance(content, HttpResponse):
+                    response = content
+                else:
+                    # Serialize content in json
+                    # @TODO implement a better format support
+                    content  = self.serializer(content, "application/json")
+                    # Create an HTTP response
+                    response = HttpResponse(content=content, content_type="application/json")
             except ForbiddenError as e:
                 response = http.HttpForbidden(e)
             except UnauthorizedError as e:

@@ -392,6 +392,7 @@ class SummaryResource(Resource):
 
         models = self.topic.get_models()
         for model in models:
+            edges = dict()
             columns = []
             fields = utils.get_model_fields(model)
             for field in fields:
@@ -399,7 +400,7 @@ class SummaryResource(Resource):
                     if field['name'] not in ['id']:
                         columns.append(field['name'])
                 else:
-                    pass
+                    edges[field['rel_type']] = [field['model'], field['name'], field['related_model']]
             content = "{model_name}_id,{columns}\n".format(model_name=model.__name__, columns=','.join(columns))
             query = """
                 START root=node(*)
@@ -409,17 +410,33 @@ class SummaryResource(Resource):
                 AND type.model_name = '{model_name}'
                 RETURN root, ID(root) as id
             """.format(app_label=self.topic.app_label(), model_name=model.__name__)
-            objects = connection.cypher(query).to_dicts()
-            for obj in objects:
+            rows = connection.cypher(query).to_dicts()
+            all_ids = []
+
+            for row in rows:
+                all_ids.append(row['id'])
+
                 objColumns = []
                 for column in columns:
                     try:
-                        objColumns.append(obj['root']['data'][column].replace(',', '').replace("\n", '').encode('utf-8'))
+                        objColumns.append(row['root']['data'][column].replace(',', '').replace("\n", '').encode('utf-8'))
                     except KeyError:
                         objColumns.append('')
-                content += "{id},{columns}\n".format(id=obj['id'], columns=','.join(objColumns))
-
+                content += "{id},{columns}\n".format(id=row['id'], columns=','.join(objColumns))
             zip.writestr("{0}.csv".format(model.__name__), content)
+
+            for key in edges.keys():
+                query = """
+                    START root=node({nodes})
+                    MATCH (root)-[r:`{rel}`]->(leaf)
+                    RETURN id(root) as id_from, id(leaf) as id_to
+                """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)
+                rows = connection.cypher(query).to_dicts()
+                if len(rows) > 0:
+                    content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
+                    for row in rows:
+                        content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
+                    zip.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
 
         zip.close()
         buffer.flush()

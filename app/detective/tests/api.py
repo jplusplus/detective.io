@@ -148,8 +148,14 @@ class ApiTestCase(ResourceTestCase):
             model_instance.delete()
 
     def tearDown(self):
-        # Simply flush the database       
-        gdb.cleandb()
+        # Clean & delete generated data
+        # individuals
+        self.cleanModel(self.jpp) # organization
+        self.cleanModel(self.jg) # organization
+        self.cleanModel(self.fra) # country
+        self.cleanModel(self.pr) # people
+        self.cleanModel(self.pb) # people
+        # Simply flush the database  
         management.call_command('flush', verbosity=0, interactive=False)
 
 
@@ -171,8 +177,8 @@ class ApiTestCase(ResourceTestCase):
         return self.api_client.post('/api/common/v1/user/signup/', format='json', data=user_dict)
 
     def patch_individual(self, scope=None, model_name=None, model_id=None,
-                         patch_data=None, auth=None, skipAuth=False):
-        if not skipAuth and not auth:
+                         patch_data=None, auth=None, skip_auth=False):
+        if not skip_auth and not auth:
             auth = self.get_super_credentials()
         url = '/api/%s/v1/%s/%d/patch/' % (scope, model_name, model_id)
         return self.api_client.post(url, format='json', data=patch_data, authentication=auth)
@@ -488,14 +494,18 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual(len(data["activity_in_country"]), len(self.post_data_related["activity_in_country"]))
 
     def test_mine(self):
-        resp = self.api_client.get('/api/energy/v1/energyproject/mine/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/energy/v1/organization/mine/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
-        self.assertEqual(
-            min(20, len(data["objects"])),
-            EnergyProject.objects.filter(_author__contains=self.super_user.id).count()
-        )
+        self.assertEqual( len(data["objects"]), 2)
+
+    def test_mine_empty(self):
+        resp = self.api_client.get('/api/energy/v1/organization/mine/', format='json')
+        self.assertValidJSONResponse(resp)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        self.assertEqual( len(data["objects"]), 0)
 
     def test_search_organization(self):
         resp = self.api_client.get('/api/energy/v1/organization/search/?q=Journalism', format='json', authentication=self.get_super_credentials())
@@ -655,7 +665,7 @@ class ApiTestCase(ResourceTestCase):
             'model_id'   : self.jpp.id,
             'model_name' : 'organization',
             'patch_data' : data,
-            'skipAuth'   : True,
+            'skip_auth'   : True,
         }
         resp = self.patch_individual(**args)
         self.assertHttpUnauthorized(resp)

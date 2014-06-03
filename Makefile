@@ -40,7 +40,8 @@ test:
 	rm -Rf ./lib/neo4j/data/graph.db 
 	rm -f dev.db
 	make startdb
-	./manage.py syncdb --noinput --pythonpath=. --settings=app.settings_tests
-	./manage.py test detective --pythonpath=. --settings=app.settings_tests	
+	./manage.py syncdb --verbosity=2 --noinput --pythonpath=. --settings=app.settings_tests
+	coverage run --source=app.detective ./manage.py test detective --pythonpath=. --settings=app.settings_tests	
+	coveralls	
 
 # EOF

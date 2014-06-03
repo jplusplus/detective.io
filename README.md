@@ -1,5 +1,5 @@
 [![Build Status](https://drone.io/github.com/jplusplus/detective.io/status.png)](https://drone.io/github.com/jplusplus/detective.io/latest)
-[![Coverage Status - master](https://coveralls.io/repos/jplusplus/detective.io/badge.png)](https://coveralls.io/r/jplusplus/detective.io)
+[![Coverage Status - master](http://img.shields.io/coveralls/jplusplus/detective.io.svg?style=flat)](https://coveralls.io/r/jplusplus/detective.io)
 
 ## Installation
 

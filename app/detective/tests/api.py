@@ -6,12 +6,12 @@ from app.detective.topics.energy.models  import Organization, EnergyProject, Per
 from datetime                            import datetime
 from django.conf                         import settings
 from django.contrib.auth.models          import User, Group
-from django.core                         import signing
-from django.core.exceptions              import ObjectDoesNotExist
+from django.core                         import management, signing
 from django.core.files                   import File
 from registration.models                 import RegistrationProfile
 from tastypie.test                       import ResourceTestCase, TestApiClient
 from tastypie.utils                      import timezone
+from neo4django.db                       import connection as gdb
 import json
 import urllib
 
@@ -23,7 +23,8 @@ def find(function, iterable):
 
 class ApiTestCase(ResourceTestCase):
 
-    fixtures = ['app/detective/fixtures/search_terms.json',]
+    fixtures = ['app/detective/fixtures/default_topics.json', 
+                'app/detective/fixtures/search_terms.json',]
 
     def setUp(self):
         super(ApiTestCase, self).setUp()
@@ -45,92 +46,68 @@ class ApiTestCase(ResourceTestCase):
 
         contributors = Group.objects.get(name='energy_contributor')
 
-        # Look for the test users
-        try:
-            # get users (superuser, contributor & lambda user)
-            super_user   = User.objects.get(username=self.super_username)
-            contrib_user = User.objects.get(username=self.contrib_username)
-            lambda_user  = User.objects.get(username=self.lambda_username)
+        # Create the new user users
+        super_user = User.objects.create(
+            username=self.super_username,
+            email=self.super_email,
+            is_staff=True,
+            is_superuser = True
+        )
 
-            # fixtures & test data
-            self.jpp  = Organization.objects.filter(name=u"Journalism++")[0]
-            self.jg   = Organization.objects.filter(name=u"Journalism Grant")[0]
-            self.fra  = Country.objects.get(name=u"France")
-            self.pr   = Person.objects.get(name=u"Pierre Roméra")
-            self.pb   = Person.objects.get(name=u"Pierre Bellon")
-            self.common = Topic.objects.get(slug=u"common")
-            self.christmas = Topic.objects.get(slug=u"christmas")
-
-        except ObjectDoesNotExist:
-            # Create the new user users
-            super_user = User.objects.create(
-                username=self.super_username,
-                email=self.super_email,
-            )
-            super_user.set_password(self.super_password)
-            super_user.save()
-
-            contrib_user = User.objects.create(
-                username=self.contrib_username,
-                email=self.contrib_email,
-            )
-            contrib_user.set_password(self.contrib_password)
-            contrib_user.save()
-
-            lambda_user = User.objects.create(
-                username=self.lambda_username,
-                email=self.lambda_email,
-            )
-            lambda_user.set_password(self.lambda_password)
-            lambda_user.save()
-
-            # Create related objects
-            self.jpp = Organization(name=u"Journalism++")
-            self.jpp.save()
-            self.jg  = Organization(name=u"Journalism Grant")
-            self.jg.save()
-            self.fra = Country(name=u"France", isoa3=u"FRA")
-            self.fra.save()
-            self.pr = Person(name=u"Pierre Roméra")
-            self.pr.save()
-            self.pb = Person(name=u"Pierre Bellon")
-            self.pb.save()
-
-            ontology = File(open(settings.DATA_ROOT + "/ontology-v5.7.owl"))
-            self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology, author=super_user)
-            self.christmas.save()
-            self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology, author=super_user)
-            self.thanksgiving.save()
-
-
-
-        super_user.is_staff = True
-        super_user.is_superuser = True
+        super_user.set_password(self.super_password)
         super_user.save()
+        self.super_user = super_user
 
-        contrib_user.is_active = True
+        contrib_user = User.objects.create(
+            username=self.contrib_username,
+            email=self.contrib_email,
+            is_active=True
+        )
+
         contrib_user.groups.add(contributors)
+        contrib_user.set_password(self.contrib_password)
         contrib_user.save()
+        self.contrib_user = contrib_user
 
+        lambda_user = User.objects.create(
+            username=self.lambda_username,
+            email=self.lambda_email,
+        )
+
+        lambda_user.set_password(self.lambda_password)
+        lambda_user.save()
+        self.lambda_user = lambda_user
+
+        # Create related objects
+        self.jpp = Organization(name=u"Journalism++")
         self.jpp._author = [super_user.pk]
         self.jpp.founded = datetime(2011, 4, 3)
-        self.jpp.website_url = 'http://jplusplus.com'
+        self.jpp.website_url = 'http://jplusplus.com'        
         self.jpp.save()
 
+        self.jg  = Organization(name=u"Journalism Grant")
         self.jg._author = [super_user.pk]
         self.jg.save()
 
+        self.fra = Country(name=u"France", isoa3=u"FRA")
+        self.fra.save()
+
+        self.pr = Person(name=u"Pierre Roméra")
         self.pr.based_in.add(self.fra)
         self.pr.activity_in_organization.add(self.jpp)
         self.pr.save()
 
+        self.pb = Person(name=u"Pierre Bellon")        
         self.pb.based_in.add(self.fra)
         self.pb.activity_in_organization.add(self.jpp)
         self.pb.save()
-
-        self.super_user = super_user
-        self.contrib_user = contrib_user
-        self.lambda_user = lambda_user
+        # Creates Christmas topic
+        ontology = File(open(settings.DATA_ROOT + "/ontology-v5.7.owl"))
+        self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology, author=super_user)
+        self.christmas.save()
+        # Creates Thanksgiving topic
+        self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology, author=super_user)
+        self.thanksgiving.save()
 
         self.post_data_simple = {
             "name": "Lorem ispum TEST",
@@ -147,6 +124,7 @@ class ApiTestCase(ResourceTestCase):
                 { "id": self.fra.id }
             ]
         }
+
         self.rdf_jpp = {
             "label": u"Person that has activity in Journalism++",
             "object": {
@@ -171,19 +149,15 @@ class ApiTestCase(ResourceTestCase):
 
     def tearDown(self):
         # Clean & delete generated data
-        # users
-        self.cleanModel(self.super_user)
-        self.cleanModel(self.contrib_user)
-        self.cleanModel(self.lambda_user)
         # individuals
-        self.cleanModel(self.jpp)  # organization
-        self.cleanModel(self.jg)   # organization
-        self.cleanModel(self.fra)  # country
-        self.cleanModel(self.pr)   # people
-        self.cleanModel(self.pb)   # people
-        # topics
-        self.cleanModel(self.christmas)
-        self.cleanModel(self.thanksgiving)
+        self.cleanModel(self.jpp) # organization
+        self.cleanModel(self.jg) # organization
+        self.cleanModel(self.fra) # country
+        self.cleanModel(self.pr) # people
+        self.cleanModel(self.pb) # people
+        # Simply flush the database  
+        management.call_command('flush', verbosity=0, interactive=False)
+
 
     # Utility functions (Auth, operation etc.)
     def login(self, username, password):
@@ -203,8 +177,8 @@ class ApiTestCase(ResourceTestCase):
         return self.api_client.post('/api/common/v1/user/signup/', format='json', data=user_dict)
 
     def patch_individual(self, scope=None, model_name=None, model_id=None,
-                         patch_data=None, auth=None, skipAuth=False):
-        if not skipAuth and not auth:
+                         patch_data=None, auth=None, skip_auth=False):
+        if not skip_auth and not auth:
             auth = self.get_super_credentials()
         url = '/api/%s/v1/%s/%d/patch/' % (scope, model_name, model_id)
         return self.api_client.post(url, format='json', data=patch_data, authentication=auth)
@@ -520,14 +494,18 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual(len(data["activity_in_country"]), len(self.post_data_related["activity_in_country"]))
 
     def test_mine(self):
-        resp = self.api_client.get('/api/energy/v1/energyproject/mine/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/energy/v1/organization/mine/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
-        self.assertEqual(
-            min(20, len(data["objects"])),
-            EnergyProject.objects.filter(_author__contains=self.super_user.id).count()
-        )
+        self.assertEqual( len(data["objects"]), 2)
+
+    def test_mine_empty(self):
+        resp = self.api_client.get('/api/energy/v1/organization/mine/', format='json')
+        self.assertValidJSONResponse(resp)
+        # Parse data to check the number of result
+        data = json.loads(resp.content)
+        self.assertEqual( len(data["objects"]), 0)
 
     def test_search_organization(self):
         resp = self.api_client.get('/api/energy/v1/organization/search/?q=Journalism', format='json', authentication=self.get_super_credentials())
@@ -687,7 +665,7 @@ class ApiTestCase(ResourceTestCase):
             'model_id'   : self.jpp.id,
             'model_name' : 'organization',
             'patch_data' : data,
-            'skipAuth'   : True,
+            'skip_auth'   : True,
         }
         resp = self.patch_individual(**args)
         self.assertHttpUnauthorized(resp)

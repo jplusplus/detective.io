@@ -2,8 +2,10 @@
 
 NEO4J_VERSION = 1.9.1
 ENV           = `pwd`/.env
+COVERAGE      = `which coverage`
 
-run: clear
+run: 
+	make clear
 	. $(ENV) ; python manage.py runserver --nothreading
 
 virtualenv:
@@ -14,7 +16,6 @@ virtualenv:
 npm_install:
 	# Install npm packages
 	if [ -s npm_requirements.txt ]; then xargs -a npm_requirements.txt npm install -g; else echo '\nNo NPM dependencies found in npm_requirements.txt'; fi
-
 
 install:
 	make virtualenv
@@ -36,7 +37,12 @@ startdb:
 	./lib/neo4j/bin/neo4j start || ( cat ./lib/neo4j/data/log/*.log && exit 1 )
 
 test:
-	curl -X DELETE 'http://localhost:7474/cleandb/supersecretdebugkey!'
-	. $(ENV) ; python manage.py test detective --settings=app.settings_tests
+	make stopdb
+	rm -Rf ./lib/neo4j/data/graph.db 
+	rm -f dev.db
+	make startdb
+	./manage.py syncdb --noinput --pythonpath=. --settings=app.settings_tests
+	python -W ignore::DeprecationWarning $(COVERAGE) run --source=app.detective ./manage.py test detective --pythonpath=. --settings=app.settings_tests	
+	coveralls	
 
 # EOF

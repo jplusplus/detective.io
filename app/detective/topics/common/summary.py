@@ -413,26 +413,25 @@ class SummaryResource(Resource):
             rows = connection.cypher(query).to_dicts()
             all_ids = []
 
-            for row in rows:
-                all_ids.append(row['id'])
+            if len(rows) > 0:
+                for row in rows:
+                    all_ids.append(row['id'])
+                    objColumns = []
+                    for column in columns:
+                        try:
+                            objColumns.append(str(row['root']['data'][column]).replace(',', '').replace("\n", '').encode('utf-8'))
+                        except KeyError:
+                            objColumns.append('')
+                    content += "{id},{columns}\n".format(id=row['id'], columns=','.join(objColumns))
+                zip.writestr("{0}.csv".format(model.__name__), content)
 
-                objColumns = []
-                for column in columns:
-                    try:
-                        objColumns.append(row['root']['data'][column].replace(',', '').replace("\n", '').encode('utf-8'))
-                    except KeyError:
-                        objColumns.append('')
-                content += "{id},{columns}\n".format(id=row['id'], columns=','.join(objColumns))
-            zip.writestr("{0}.csv".format(model.__name__), content)
-
-            for key in edges.keys():
-                query = """
-                    START root=node({nodes})
-                    MATCH (root)-[r:`{rel}`]->(leaf)
-                    RETURN id(root) as id_from, id(leaf) as id_to
-                """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)
-                rows = connection.cypher(query).to_dicts()
-                if len(rows) > 0:
+                for key in edges.keys():
+                    query = """
+                        START root=node({nodes})
+                        MATCH (root)-[r:`{rel}`]->(leaf)
+                        RETURN id(root) as id_from, id(leaf) as id_to
+                    """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)
+                    rows = connection.cypher(query).to_dicts()
                     content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
                     for row in rows:
                         content += "{0},,{1}\n".format(row['id_from'], row['id_to'])

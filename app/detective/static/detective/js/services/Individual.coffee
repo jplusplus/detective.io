@@ -20,18 +20,23 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
             url:'/api/:topic/v1/:type/summary/bulk_upload/?'
             method : 'POST'
             isArray: no
-            headers:
-                'Content-Type': no
             paramDefaults:
                 topic: "common"
-            transformRequest: (data)->
+            transformRequest: (data, headersGetter)->
                 fd = new FormData()
                 # We receive an object of array
                 angular.forEach data, (files, field)->
                     # Each array may contain several files
                     angular.forEach files, (file, idx)->
+                        console.debug field + '-' + idx
                         # Use idx to create a single file key
                         fd.append(field + "-" + idx, file)
+
+                # We delete the Content-Type header (angular set it to application/json, it should be empty so the browser
+                # can set it to multipart/form-data, boundary=<boundary>)
+                headers = do headersGetter
+                delete headers['Content-Type']
+
                 fd
         delete:
             url:'/api/:topic/v1/:type/:id/?'

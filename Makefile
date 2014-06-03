@@ -2,6 +2,7 @@
 
 NEO4J_VERSION = 1.9.1
 ENV           = `pwd`/.env
+COVERAGE      = `which coverage`
 
 run: 
 	make clear
@@ -40,8 +41,8 @@ test:
 	rm -Rf ./lib/neo4j/data/graph.db 
 	rm -f dev.db
 	make startdb
-	./manage.py syncdb --verbosity=2 --noinput --pythonpath=. --settings=app.settings_tests
-	coverage run --source=app.detective ./manage.py test detective --pythonpath=. --settings=app.settings_tests	
+	./manage.py syncdb --noinput --pythonpath=. --settings=app.settings_tests
+	python -W ignore::DeprecationWarning $(COVERAGE) run --source=app.detective ./manage.py test detective --pythonpath=. --settings=app.settings_tests	
 	coveralls	
 
 # EOF

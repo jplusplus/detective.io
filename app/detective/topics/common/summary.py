@@ -14,6 +14,7 @@ from tastypie.serializers     import Serializer
 from django.utils.timezone    import utc
 from psycopg2.extensions      import adapt
 from pprint                   import pprint
+from StringIO                 import StringIO
 
 import app.detective.utils    as utils
 import json
@@ -22,6 +23,7 @@ import datetime
 import logging
 import django_rq
 from .errors import *
+import zipfile
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -378,6 +380,25 @@ class SummaryResource(Resource):
             "status" : "enqueued",
             "token"  : job.get_id()
         }
+
+    def summary_export(self, bundle, request):
+        buffer = StringIO()
+        zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
+
+        file = open('Makefile', 'r')
+        c = file.read()
+        print c
+        zip.writestr('Makefile', c)
+        file.close()
+
+        zip.close()
+        buffer.flush()
+        ret_zip = buffer.getvalue()
+        buffer.close()
+
+        response = HttpResponse(ret_zip, mimetype='application/zip')
+        response['Content-Disposition'] = 'attachement; filename=export.zip'
+        return response
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 

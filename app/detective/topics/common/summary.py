@@ -385,14 +385,41 @@ class SummaryResource(Resource):
         }
 
     def summary_export(self, bundle, request):
+        self.method_check(request, allowed=['get'])
+
         buffer = StringIO()
         zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
 
-        file = open('Makefile', 'r')
-        c = file.read()
-        print c
-        zip.writestr('Makefile', c)
-        file.close()
+        models = self.topic.get_models()
+        for model in models:
+            columns = []
+            fields = utils.get_model_fields(model)
+            for field in fields:
+                if field['type'] != 'Relationship':
+                    if field['name'] not in ['id']:
+                        columns.append(field['name'])
+                else:
+                    pass
+            content = "{model_name}_id,{columns}\n".format(model_name=model.__name__, columns=','.join(columns))
+            query = """
+                START root=node(*)
+                MATCH root<-[r:`<<INSTANCE>>`]-(type)
+                WHERE HAS(root.name)
+                AND type.app_label = '{app_label}'
+                AND type.model_name = '{model_name}'
+                RETURN root, ID(root) as id
+            """.format(app_label=self.topic.app_label(), model_name=model.__name__)
+            objects = connection.cypher(query).to_dicts()
+            for obj in objects:
+                objColumns = []
+                for column in columns:
+                    try:
+                        objColumns.append(obj['root']['data'][column].replace(',', '').replace("\n", '').encode('utf-8'))
+                    except KeyError:
+                        objColumns.append('')
+                content += "{id},{columns}\n".format(id=obj['id'], columns=','.join(objColumns))
+
+            zip.writestr("{0}.csv".format(model.__name__), content)
 
         zip.close()
         buffer.flush()

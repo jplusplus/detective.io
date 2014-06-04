@@ -9,7 +9,7 @@ SERVER_PROPERTIES_FILE="lib/neo4j/conf/neo4j-server.properties"
 NEO4J_PORT=${NEO4J_PORT:="7474"}
 
 if [[ ! -d lib/$DIR ]]; then
-    wget http://dist.neo4j.org/$FILE
+    wget -nv http://dist.neo4j.org/$FILE
     tar xvfz $FILE &> /dev/null
     rm $FILE
     [[ ! -d lib ]] && mkdir lib

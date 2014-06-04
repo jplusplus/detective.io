@@ -23,6 +23,7 @@ INSTALLED_APPS = list(INSTALLED_APPS)
 # remove south an djrill to speed up the tests
 INSTALLED_APPS.remove('south')
 INSTALLED_APPS.remove('djrill')
+INSTALLED_APPS.remove('compressor')
 
 NEO4DJANGO_PROFILE_REQUESTS = False
 NEO4DJANGO_DEBUG_GREMLIN = False

@@ -1,5 +1,4 @@
-angular.module('detective.config').config ['ngProgressLiteProvider', (ngProgressLiteProvider)->
-    console.log ngProgressLiteProvider.settings
+angular.module('detective.config').config ['ngProgressLiteProvider', (ngProgressLiteProvider)->    
     ngProgressLiteProvider.settings.speed       = 300
     ngProgressLiteProvider.settings.ease        = 'ease'
     ngProgressLiteProvider.settings.trickleRate = 0.1

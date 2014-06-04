@@ -387,11 +387,19 @@ class SummaryResource(Resource):
     def summary_export(self, bundle, request):
         self.method_check(request, allowed=['get'])
 
+        exportEdges = True
+
         buffer = StringIO()
         zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
 
+        if request.GET['type'] != None:
+            exportEdges = False
+
         models = self.topic.get_models()
         for model in models:
+            if request.GET['type'] != None and utils.to_underscores(model.__name__) != request.GET['type']:
+                continue
+
             edges = dict()
             columns = []
             fields = utils.get_model_fields(model)
@@ -425,17 +433,18 @@ class SummaryResource(Resource):
                     content += "{id},{columns}\n".format(id=row['id'], columns=','.join(objColumns))
                 zip.writestr("{0}.csv".format(model.__name__), content)
 
-                for key in edges.keys():
-                    query = """
-                        START root=node({nodes})
-                        MATCH (root)-[r:`{rel}`]->(leaf)
-                        RETURN id(root) as id_from, id(leaf) as id_to
-                    """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)
-                    rows = connection.cypher(query).to_dicts()
-                    content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
-                    for row in rows:
-                        content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
-                    zip.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
+                if exportEdges:
+                    for key in edges.keys():
+                        query = """
+                            START root=node({nodes})
+                            MATCH (root)-[r:`{rel}`]->(leaf)
+                            RETURN id(root) as id_from, id(leaf) as id_to
+                        """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)
+                        rows = connection.cypher(query).to_dicts()
+                        content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
+                        for row in rows:
+                            content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
+                        zip.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
 
         zip.close()
         buffer.flush()
@@ -443,7 +452,7 @@ class SummaryResource(Resource):
         buffer.close()
 
         response = HttpResponse(ret_zip, mimetype='application/zip')
-        response['Content-Disposition'] = 'attachement; filename=export.zip'
+        response['Content-Disposition'] = "attachement; filename=export-{0}.zip".format(self.topic.slug)
         return response
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)

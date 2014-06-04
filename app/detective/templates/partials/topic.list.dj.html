@@ -52,6 +52,8 @@
 			</div>
 		</form>
 
+		<button class='btn btn-default' ng-click="csvExport()"><i class="fa fa-download"></i> Export as CSV</button>
+
 		<ul class="list-unstyled top10" ng-class="{'col-md-9': query}" ng-if="individuals.objects.length">
 			<li ng-repeat="individual in individuals.objects">
 				<div class="panel panel-default individual">

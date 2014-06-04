@@ -15,6 +15,7 @@ class IndividualListCtrl
         @scope.goToPage        = @goToPage
         @scope.singleUrl       = @singleUrl
         @scope.isLoading       = @isLoading
+        @scope.csvExport       = @csvExport
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -112,6 +113,15 @@ class IndividualListCtrl
     # Loading state
     isLoading: => not @scope.individuals.meta?
 
+    csvExport: =>
+        if @scope.individuals.objects? and @scope.individuals.objects.length > 0
+            @requestCsvExport (d) =>
+                file = new Blob([d.data], { type : 'application/zip' })
+                saveAs(file, d.filename)
+
+    requestCsvExport: (cb) =>
+        console.debug 'csvExport'
+        @Summary.export { type : @scope.type }, cb
 
 
 angular.module('detective.controller').controller 'individualListCtrl', IndividualListCtrl

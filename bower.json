@@ -1,6 +1,6 @@
 {
   "name": "detective",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "dependencies": {
     "angular": "1.2.16",
     "angular-route": "1.2.16",

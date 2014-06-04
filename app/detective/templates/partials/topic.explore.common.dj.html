@@ -9,7 +9,7 @@
                 <h2>[[meta.title]]</h2>
                 <p class="lead" ng-if="meta.description" ng-bind-html="meta.description"></p>
                 <p class="top40">
-                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(topic)" ng-href="/[[username]]/[[topic]]/contribute">
+                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.module)" ng-href="/[[username]]/[[topic]]/contribute">
                         Contribute
                     </a>
                     <a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">
@@ -63,6 +63,10 @@
             <div class="col-md-4">
                 <h3>About the project</h3>
                 <div ng-bind-html="meta.about"></div>
+                <span class='bold'>
+                    <i class='fa fa-download'></i>
+                    <a ng-click='csvExport()'>Download the full dataset</a>
+                </span>
             </div>
             <div class="col-md-8 select-a-country">
                 <div country-map model="selectedCountry" values="countries" class="top60" />

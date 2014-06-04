@@ -21,6 +21,7 @@
     "ngprogress-lite": "~1.0.4",
     "raphael": "2.1.2",
     "typeahead.js": "0.9.3",
-    "underscore": "1.5.2"
+    "underscore": "1.5.2",
+    "FileSaver": "*"
   }
 }

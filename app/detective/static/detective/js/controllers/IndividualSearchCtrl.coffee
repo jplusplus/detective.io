@@ -40,5 +40,8 @@ class IndividualSearchCtrl extends IndividualListCtrl
         q     : @routeParams.q
         type  : "summary"
 
+    requestCsvExport: (cb) =>
+        @Summary.export { query : angular.toJson @scope.query }, cb
+
 # Register the controller
 angular.module('detective.controller').controller 'individualSearchCtrl', IndividualSearchCtrl

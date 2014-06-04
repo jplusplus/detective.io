@@ -387,56 +387,57 @@ class SummaryResource(Resource):
     def summary_export(self, bundle, request):
         self.method_check(request, allowed=['get'])
 
-        exportEdges = True
+        def writeAllInZip(objects, columns, zip):
+            model_name = objects[0].__class__.__name__
+            content = "{model_name}_id,{columns}\n".format(model_name=model_name, columns=','.join(columns))
+            for obj in objects:
+                all_ids.append(obj.id)
+                objColumns = []
+                for column in columns:
+                    val = str(getattr(obj, column)).replace(',', '').replace("\n", '').encode('utf-8')
+                    if val == 'None':
+                        val = ''
+                    objColumns.append(val)
+                content += "{id},{columns}\n".format(id=obj.id, columns=','.join(objColumns))
+            zip.writestr("{0}.csv".format(model_name), content)
 
         buffer = StringIO()
         zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
 
-        if 'type' in request.GET:
-            exportEdges = False
+        if 'query' not in request.GET:
+            exportEdges = not ('type' in request.GET)
+            models = self.topic.get_models()
+            for model in models:
+                if 'type' in request.GET and utils.to_underscores(model.__name__) != request.GET['type']:
+                    continue
 
-        models = self.topic.get_models()
-        for model in models:
-            if 'type' in request.GET and utils.to_underscores(model.__name__) != request.GET['type']:
-                continue
+                edges = dict()
+                columns = []
+                fields = utils.get_model_fields(model)
+                for field in fields:
+                    if field['type'] != 'Relationship':
+                        if field['name'] not in ['id']:
+                            columns.append(field['name'])
+                    else:
+                        edges[field['rel_type']] = [field['model'], field['name'], field['related_model']]
+                objects = model.objects.all()
+                all_ids = []
 
-            edges = dict()
-            columns = []
-            fields = utils.get_model_fields(model)
-            for field in fields:
-                if field['type'] != 'Relationship':
-                    if field['name'] not in ['id']:
-                        columns.append(field['name'])
-                else:
-                    edges[field['rel_type']] = [field['model'], field['name'], field['related_model']]
-            content = "{model_name}_id,{columns}\n".format(model_name=model.__name__, columns=','.join(columns))
-            objects = model.objects.all()
-            all_ids = []
-
-            if len(objects) > 0:
-                for obj in objects:
-                    all_ids.append(obj.id)
-                    objColumns = []
-                    for column in columns:
-                        val = str(getattr(obj, column)).replace(',', '').replace("\n", '').encode('utf-8')
-                        if val == 'None':
-                            val = ''
-                        objColumns.append(val)
-                    content += "{id},{columns}\n".format(id=obj.id, columns=','.join(objColumns))
-                zip.writestr("{0}.csv".format(model.__name__), content)
-
-                if exportEdges:
-                    for key in edges.keys():
-                        query = """
-                            START root=node({nodes})
-                            MATCH (root)-[r:`{rel}`]->(leaf)
-                            RETURN id(root) as id_from, id(leaf) as id_to
-                        """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)
-                        rows = connection.cypher(query).to_dicts()
-                        content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
-                        for row in rows:
-                            content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
-                        zip.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
+                if len(objects) > 0:
+                    writeAllInZip(objects, columns, zip)
+                    if exportEdges:
+                        for key in edges.keys():
+                            rows = connection.cypher("""
+                                START root=node({nodes})
+                                MATCH (root)-[r:`{rel}`]->(leaf)
+                                RETURN id(root) as id_from, id(leaf) as id_to
+                            """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)).to_dicts()
+                            content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
+                            for row in rows:
+                                content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
+                            zip.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
+        else:
+            print "HERE"
 
         zip.close()
         buffer.flush()

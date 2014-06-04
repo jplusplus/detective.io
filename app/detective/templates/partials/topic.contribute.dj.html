@@ -62,13 +62,14 @@
 				<div class="btns">
 					<span ng-if="individual.permalink()" >
 						<a class="left10" ng-href="[[individual.permalink()]]">See in detail</a>
-						<button class="btn btn-default left10"
+						<button class="btn btn-danger left10"
 						   ng-if="user.hasDeletePermission(topic)"
 						   ng-click="individual.delete($index)">
 							<i class="fa fa-trash-o"></i>
+							Delete this [[individual.meta.verbose_name|lowercase]]
 						</button>
 					</span>
-					<button ng-click="individual.close()" class="btn btn-default left10">
+					<button ng-click="individual.close()" class="btn left10">
 						<i class="fa fa-times"></i>
 					</button>
 				</div>
@@ -101,7 +102,7 @@
 
 			<div class="restore" ng-show="individual.isClosed">
 				<div class="btns">
-					<button ng-click="removeIndividual($index)" class="btn btn-default left10">
+					<button ng-click="removeIndividual($index)" class="btn left10">
 						<i class="fa fa-times"></i>
 					</button>
 				</div>
@@ -109,8 +110,10 @@
 				<strong ng-hide="individual.isNotFound">[[individual.fields|individualPreview:"unkown"]]</strong>
 				<span ng-if="!individual.isRemoved && !individual.isNotFound">
 					 has been closed.
-					<a class="left10" ng-click="individual.close()">Undo</a>
-					<a class="left10" ng-click="removeIndividual($index)">Ignore</a>
+					<a class="left10" ng-click="individual.close()">
+						<i class="fa fa-undo"></i>
+						Undo
+					</a>	
 				</span>
 				<span ng-if="individual.isRemoved" class="text-danger">
 					 has been removed. Your changes have not been registered.

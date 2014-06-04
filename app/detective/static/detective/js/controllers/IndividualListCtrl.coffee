@@ -120,7 +120,6 @@ class IndividualListCtrl
                 saveAs(file, d.filename)
 
     requestCsvExport: (cb) =>
-        console.debug 'csvExport'
         @Summary.export { type : @scope.type }, cb
 
 

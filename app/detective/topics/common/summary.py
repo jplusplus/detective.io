@@ -392,12 +392,12 @@ class SummaryResource(Resource):
         buffer = StringIO()
         zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
 
-        if request.GET['type'] != None:
+        if 'type' in request.GET:
             exportEdges = False
 
         models = self.topic.get_models()
         for model in models:
-            if request.GET['type'] != None and utils.to_underscores(model.__name__) != request.GET['type']:
+            if 'type' in request.GET and utils.to_underscores(model.__name__) != request.GET['type']:
                 continue
 
             edges = dict()
@@ -410,27 +410,19 @@ class SummaryResource(Resource):
                 else:
                     edges[field['rel_type']] = [field['model'], field['name'], field['related_model']]
             content = "{model_name}_id,{columns}\n".format(model_name=model.__name__, columns=','.join(columns))
-            query = """
-                START root=node(*)
-                MATCH root<-[r:`<<INSTANCE>>`]-(type)
-                WHERE HAS(root.name)
-                AND type.app_label = '{app_label}'
-                AND type.model_name = '{model_name}'
-                RETURN root, ID(root) as id
-            """.format(app_label=self.topic.app_label(), model_name=model.__name__)
-            rows = connection.cypher(query).to_dicts()
+            objects = model.objects.all()
             all_ids = []
 
-            if len(rows) > 0:
-                for row in rows:
-                    all_ids.append(row['id'])
+            if len(objects) > 0:
+                for obj in objects:
+                    all_ids.append(obj.id)
                     objColumns = []
                     for column in columns:
-                        try:
-                            objColumns.append(str(row['root']['data'][column]).replace(',', '').replace("\n", '').encode('utf-8'))
-                        except KeyError:
-                            objColumns.append('')
-                    content += "{id},{columns}\n".format(id=row['id'], columns=','.join(objColumns))
+                        val = str(getattr(obj, column)).replace(',', '').replace("\n", '').encode('utf-8')
+                        if val == 'None':
+                            val = ''
+                        objColumns.append(val)
+                    content += "{id},{columns}\n".format(id=obj.id, columns=','.join(objColumns))
                 zip.writestr("{0}.csv".format(model.__name__), content)
 
                 if exportEdges:

@@ -411,6 +411,7 @@ class SummaryResource(Resource):
                     objColumns.append(val)
                 content += "{id},{columns}\n".format(id=_getattr(obj, 'id'), columns=','.join(objColumns))
             zip.writestr("{0}.csv".format(model_name), content)
+            return all_ids
 
         def getColumns(model):
             edges = dict()
@@ -431,7 +432,7 @@ class SummaryResource(Resource):
         if 'q' not in request.GET:
             exportEdges = not ('type' in request.GET)
             for model in models:
-                if 'type' in request.GET and utils.to_underscores(model.__name__) != request.GET['type']:
+                if 'type' in request.GET and model.__name__.lower() != request.GET['type']:
                     continue
 
                 (columns, edges) = getColumns(model)

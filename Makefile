@@ -6,7 +6,7 @@ COVERAGE      = `which coverage`
 
 run: 
 	make clear
-	. $(ENV) ; python manage.py runserver --nothreading
+	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading
 
 virtualenv:
 	virtualenv venv --no-site-packages --distribute --prompt=Detective.io

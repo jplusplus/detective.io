@@ -202,7 +202,7 @@ class IndividualResource(ModelResource):
 
     def use_in(self, bundle=None):
         # Use in post/put
-        if bundle.request.method in ['POST', 'PUT']:
+        if bundle.request.method in ['POST', 'PUT']:            
             return bundle.request.path == self.get_resource_uri()
         # Use in detail
         else:
@@ -365,8 +365,7 @@ class IndividualResource(ModelResource):
         query     = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', query).strip()
         limit     = int(request.GET.get('limit', 20))
         # Do the query.
-        results   = self._meta.queryset.filter(name__icontains=query)
-        count     = len(results)
+        results   = self._meta.queryset.filter(name__icontains=query)        
         paginator = Paginator(results, limit)
 
         try:
@@ -388,7 +387,7 @@ class IndividualResource(ModelResource):
                 'q': query,
                 'page': p,
                 'limit': limit,
-                'total_count': count
+                'total_count': paginator.count
             }
         }
 
@@ -413,8 +412,7 @@ class IndividualResource(ModelResource):
             }
         else:
             # Do the query.
-            results   = self._meta.queryset.filter(_author__contains=request.user.id)
-            count     = len(results)
+            results   = self._meta.queryset.filter(_author__contains=request.user.id)            
             paginator = Paginator(results, limit)
 
             try:
@@ -436,7 +434,7 @@ class IndividualResource(ModelResource):
                     'author': request.user,
                     'page': p,
                     'limit': limit,
-                    'total_count': count
+                    'total_count': paginator.count
                 }
             }
 

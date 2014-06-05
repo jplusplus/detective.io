@@ -1,6 +1,6 @@
 {
   "name": "detective",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "dependencies": {
     "angular": "1.2.16",
     "angular-route": "1.2.16",
@@ -18,7 +18,7 @@
     "kartograph.js": "https://raw.github.com/kartograph/kartograph.js/3d89db48d9e1ea020972e8fb9566bea1dc8aa495/kartograph-0.8.2.min.js",
     "modernizr": "2.6.2",
     "ng-file-upload": "~1.2.3",
-    "ngprogress-lite": "~1.0.4",
+    "ngprogress-lite": "1.0.5",
     "raphael": "2.1.2",
     "typeahead.js": "0.9.3",
     "underscore": "1.5.2",

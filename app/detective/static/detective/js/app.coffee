@@ -1,4 +1,4 @@
-angular.module('detective.config',     ['ngResource', 'ngSanitize', 'ngCookies'])
+angular.module('detective.config',     ['ngProgressLite'])
 angular.module('detective.controller', ['ngResource', 'ngSanitize', 'ngCookies'])
 angular.module('detective.directive',  ['ngResource', 'ngSanitize', 'ngCookies'])
 angular.module('detective.filter',     ['ngResource', 'ngSanitize', 'ngCookies'])

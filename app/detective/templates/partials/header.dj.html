@@ -37,7 +37,7 @@
             <span ng-repeat="t in topics" ng-show="t.slug == topic">
 
                 <input type="search"
-                        placeholder="Search linked individuals in our graph database..."
+                        placeholder="[[t.search_placeholder]]"
                         tt-typeahead
                         tt-model="selectedIndividual"
                         remote="/api/[[t.slug]]/v1/summary/human/?q=%QUERY"

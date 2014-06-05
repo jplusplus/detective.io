@@ -33,20 +33,19 @@ class QuoteRequestResource(ModelResource):
 
 class TopicResource(ModelResource):
 
-    author = fields.ToOneField(UserResource, 'author', full=True, null=True)
+    author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
+    link               = fields.CharField(attribute='get_absolute_path', readonly=True)
+    search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
 
     class Meta:
-        queryset = Topic.objects.all().prefetch_related('author')
+        queryset  = Topic.objects.all().prefetch_related('author')
         filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
 
     def dehydrate(self, bundle):
         # Get all registered models
         models = get_registered_models()
-        in_topic = lambda m: m.__module__.startswith("app.detective.topics.%s." % bundle.obj.module)
         # Filter model to the one under app.detective.topics
-        bundle.data["models"] = [ m.__name__ for m in models if in_topic(m) ]
-        # Every topic has a single permalink
-        bundle.data['link']   = bundle.obj.get_absolute_path()
+        bundle.data["models"] = [ m.__name__ for m in bundle.obj.get_models() ]        
         return bundle
 
     def get_object_list(self, request):

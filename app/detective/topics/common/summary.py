@@ -387,44 +387,58 @@ class SummaryResource(Resource):
     def summary_export(self, bundle, request):
         self.method_check(request, allowed=['get'])
 
-        def writeAllInZip(objects, columns, zip):
-            model_name = objects[0].__class__.__name__
+        def writeAllInZip(objects, columns, zip, model_name=None):
+            if isinstance(objects[0], dict):
+                def _getattr(o, prop):
+                    try:
+                        return o[prop]
+                    except KeyError:
+                        return ''
+            else:
+                def _getattr(o, prop):
+                    return getattr(o, prop)
+
+            all_ids = []
+            model_name = model_name or objects[0].__class__.__name__
             content = "{model_name}_id,{columns}\n".format(model_name=model_name, columns=','.join(columns))
             for obj in objects:
-                all_ids.append(obj.id)
+                all_ids.append(_getattr(obj, 'id'))
                 objColumns = []
                 for column in columns:
-                    val = str(getattr(obj, column)).replace(',', '').replace("\n", '').encode('utf-8')
+                    val = str(_getattr(obj, column)).replace(',', '').replace("\n", '').encode('utf-8')
                     if val == 'None':
                         val = ''
                     objColumns.append(val)
-                content += "{id},{columns}\n".format(id=obj.id, columns=','.join(objColumns))
+                content += "{id},{columns}\n".format(id=_getattr(obj, 'id'), columns=','.join(objColumns))
             zip.writestr("{0}.csv".format(model_name), content)
+
+        def getColumns(model):
+            edges = dict()
+            columns = []
+            fields = utils.get_model_fields(model)
+            for field in fields:
+                if field['type'] != 'Relationship':
+                    if field['name'] not in ['id']:
+                        columns.append(field['name'])
+                else:
+                    edges[field['rel_type']] = [field['model'], field['name'], field['related_model']]
+            return (columns, edges)
 
         buffer = StringIO()
         zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
 
-        if 'query' not in request.GET:
+        models = self.topic.get_models()
+        if 'q' not in request.GET:
             exportEdges = not ('type' in request.GET)
-            models = self.topic.get_models()
             for model in models:
                 if 'type' in request.GET and utils.to_underscores(model.__name__) != request.GET['type']:
                     continue
 
-                edges = dict()
-                columns = []
-                fields = utils.get_model_fields(model)
-                for field in fields:
-                    if field['type'] != 'Relationship':
-                        if field['name'] not in ['id']:
-                            columns.append(field['name'])
-                    else:
-                        edges[field['rel_type']] = [field['model'], field['name'], field['related_model']]
+                (columns, edges) = getColumns(model)
                 objects = model.objects.all()
-                all_ids = []
 
                 if len(objects) > 0:
-                    writeAllInZip(objects, columns, zip)
+                    all_ids = writeAllInZip(objects, columns, zip)
                     if exportEdges:
                         for key in edges.keys():
                             rows = connection.cypher("""
@@ -437,7 +451,24 @@ class SummaryResource(Resource):
                                 content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
                             zip.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
         else:
-            print "HERE"
+            request.GET = dict(q=request.GET['q'])
+            page = 1
+            objects = []
+            total = -1
+            while len(objects) != total:
+                try:
+                    request.GET['page'] = page
+                    result = self.summary_rdf_search(bundle, request)
+                    objects += result['objects']
+                    total = result['meta']['total_count']
+                    page += 1
+                except KeyError:
+                    break
+            for model in models:
+                if model.__name__ == objects[0]['model']:
+                    break
+            (columns, _) = getColumns(model)
+            writeAllInZip(objects, columns, zip, model.__name__)
 
         zip.close()
         buffer.flush()

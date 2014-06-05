@@ -387,11 +387,33 @@ class SummaryResource(Resource):
     def summary_export(self, bundle, request):
         self.method_check(request, allowed=['get'])
 
-        buffer = StringIO()
-        zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
+        def writeAllInZip(objects, columns, zip, model_name=None):
+            if isinstance(objects[0], dict):
+                def _getattr(o, prop):
+                    try:
+                        return o[prop]
+                    except KeyError:
+                        return ''
+            else:
+                def _getattr(o, prop):
+                    return getattr(o, prop)
 
-        models = self.topic.get_models()
-        for model in models:
+            all_ids = []
+            model_name = model_name or objects[0].__class__.__name__
+            content = "{model_name}_id,{columns}\n".format(model_name=model_name, columns=','.join(columns))
+            for obj in objects:
+                all_ids.append(_getattr(obj, 'id'))
+                objColumns = []
+                for column in columns:
+                    val = str(_getattr(obj, column)).replace(',', '').replace("\n", '').encode('utf-8')
+                    if val == 'None':
+                        val = ''
+                    objColumns.append(val)
+                content += "{id},{columns}\n".format(id=_getattr(obj, 'id'), columns=','.join(objColumns))
+            zip.writestr("{0}.csv".format(model_name), content)
+            return all_ids
+
+        def getColumns(model):
             edges = dict()
             columns = []
             fields = utils.get_model_fields(model)
@@ -401,41 +423,53 @@ class SummaryResource(Resource):
                         columns.append(field['name'])
                 else:
                     edges[field['rel_type']] = [field['model'], field['name'], field['related_model']]
-            content = "{model_name}_id,{columns}\n".format(model_name=model.__name__, columns=','.join(columns))
-            query = """
-                START root=node(*)
-                MATCH root<-[r:`<<INSTANCE>>`]-(type)
-                WHERE HAS(root.name)
-                AND type.app_label = '{app_label}'
-                AND type.model_name = '{model_name}'
-                RETURN root, ID(root) as id
-            """.format(app_label=self.topic.app_label(), model_name=model.__name__)
-            rows = connection.cypher(query).to_dicts()
-            all_ids = []
+            return (columns, edges)
 
-            if len(rows) > 0:
-                for row in rows:
-                    all_ids.append(row['id'])
-                    objColumns = []
-                    for column in columns:
-                        try:
-                            objColumns.append(str(row['root']['data'][column]).replace(',', '').replace("\n", '').encode('utf-8'))
-                        except KeyError:
-                            objColumns.append('')
-                    content += "{id},{columns}\n".format(id=row['id'], columns=','.join(objColumns))
-                zip.writestr("{0}.csv".format(model.__name__), content)
+        buffer = StringIO()
+        zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
 
-                for key in edges.keys():
-                    query = """
-                        START root=node({nodes})
-                        MATCH (root)-[r:`{rel}`]->(leaf)
-                        RETURN id(root) as id_from, id(leaf) as id_to
-                    """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)
-                    rows = connection.cypher(query).to_dicts()
-                    content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
-                    for row in rows:
-                        content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
-                    zip.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
+        models = self.topic.get_models()
+        if 'q' not in request.GET:
+            exportEdges = not ('type' in request.GET)
+            for model in models:
+                if 'type' in request.GET and model.__name__.lower() != request.GET['type']:
+                    continue
+
+                (columns, edges) = getColumns(model)
+                objects = model.objects.all()
+
+                if len(objects) > 0:
+                    all_ids = writeAllInZip(objects, columns, zip)
+                    if exportEdges:
+                        for key in edges.keys():
+                            rows = connection.cypher("""
+                                START root=node({nodes})
+                                MATCH (root)-[r:`{rel}`]->(leaf)
+                                RETURN id(root) as id_from, id(leaf) as id_to
+                            """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)).to_dicts()
+                            content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
+                            for row in rows:
+                                content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
+                            zip.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
+        else:
+            request.GET = dict(q=request.GET['q'])
+            page = 1
+            objects = []
+            total = -1
+            while len(objects) != total:
+                try:
+                    request.GET['page'] = page
+                    result = self.summary_rdf_search(bundle, request)
+                    objects += result['objects']
+                    total = result['meta']['total_count']
+                    page += 1
+                except KeyError:
+                    break
+            for model in models:
+                if model.__name__ == objects[0]['model']:
+                    break
+            (columns, _) = getColumns(model)
+            writeAllInZip(objects, columns, zip, model.__name__)
 
         zip.close()
         buffer.flush()
@@ -443,7 +477,7 @@ class SummaryResource(Resource):
         buffer.close()
 
         response = HttpResponse(ret_zip, mimetype='application/zip')
-        response['Content-Disposition'] = 'attachement; filename=export.zip'
+        response['Content-Disposition'] = "attachement; filename=export-{0}.zip".format(self.topic.slug)
         return response
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)

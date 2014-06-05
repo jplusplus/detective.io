@@ -1,4 +1,4 @@
-<header>
+<header  ng-controller="HeaderCtrl">
 
 	<div ng-controller="UserCtrl">
 		<div ng-show="user.is_logged" class="pull-right right20 user-state">
@@ -6,7 +6,7 @@
 			<a ng-click="logout()" href="#">Sign out</a>
 		</div>
         <div ng-hide="user.is_logged" class="pull-right right20 user-state">
-            <a class="btn btn-link" ng-href="/login">
+            <a class="btn btn-link" ng-href="/login?next=[[nextLogin]]">
                 <i class="fa fa-sign-in"></i> Login
             <a>
         </div>

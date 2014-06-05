@@ -213,8 +213,7 @@ class SummaryResource(Resource):
                 RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
             """ % ( int(request.user.id), app_label )
 
-            matches      = connection.cypher(query).to_dicts()
-            count        = len(matches)
+            matches      = connection.cypher(query).to_dicts()            
             paginator    = Paginator(matches, limit)
 
             try:
@@ -244,7 +243,7 @@ class SummaryResource(Resource):
                 'meta': {
                     'page': p,
                     'limit': limit,
-                    'total_count': count
+                    'total_count': paginator.count
                 }
             }
 
@@ -259,7 +258,6 @@ class SummaryResource(Resource):
         limit     = int(request.GET.get('limit', 20))
         query     = bundle.request.GET["q"].lower()
         results   = self.search(query)
-        count     = len(results)
         paginator = Paginator(results, limit)
 
         try:
@@ -278,7 +276,7 @@ class SummaryResource(Resource):
                 'q': query,
                 'page': p,
                 'limit': limit,
-                'total_count': count
+                'total_count': paginator.count
             }
         }
 
@@ -295,8 +293,7 @@ class SummaryResource(Resource):
         obj       = query.get("object", None)
         results   = self.rdf_search(subject, predicate, obj)
         # Stop now in case of error
-        if "errors" in results: return results
-        count     = len(results)
+        if "errors" in results: return results        
         paginator = Paginator(results, limit)
         try:
             p     = int(request.GET.get('page', 1))
@@ -314,7 +311,7 @@ class SummaryResource(Resource):
                 'q': query,
                 'page': p,
                 'limit': limit,
-                'total_count': count
+                'total_count': paginator.count
             }
         }
 
@@ -334,7 +331,6 @@ class SummaryResource(Resource):
         propositions = self.build_propositions(matches, query)
 
         # Build paginator
-        count        = len(propositions)
         limit        = int(request.GET.get('limit', 20))
         paginator    = Paginator(propositions, limit)
 
@@ -354,7 +350,7 @@ class SummaryResource(Resource):
                 'q': query,
                 'page': p,
                 'limit': limit,
-                'total_count': count
+                'total_count': paginator.count
             }
         }
 

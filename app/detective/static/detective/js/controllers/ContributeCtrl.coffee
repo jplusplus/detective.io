@@ -1,12 +1,12 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User']
+    @$inject: ['$scope', '$routeParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
 
 
-    constructor: (@scope, @routeParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User)->
+    constructor: (@scope, @routeParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
         @Page.title "Contribute"
         # Global loading mode
-        Page.loading true        
+        Page.loading true
 
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
@@ -43,9 +43,8 @@ class ContributeCtrl
 
         # Redirect unauthorized user
         @scope.$watch (=> User), (v)=>
-            @location.url("/#{@scope.username}/#{@scope.topic}/") unless User.hasChangePermission(@topic)
+            @location.url("/#{@scope.username}/#{@scope.topic}/") unless User.hasChangePermission(topic.module)
         , true
-            
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes

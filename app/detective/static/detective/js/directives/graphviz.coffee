@@ -279,7 +279,7 @@ HashMerge = (a={}, b={}) ->
                     r : (datum) -> leafSize * ( 1 + (isCurrent datum._id) )
                     d : leafUpdate
                 .style
-                    fill : (datum) -> ($filter "strToColor") datum._type
+                    fill : (datum) -> if (datum._type is aggregationType) then '#fff' else ($filter "strToColor") datum._type
                 .each (datum) ->
                     (createPattern datum, d3Defs)
                     null

@@ -401,7 +401,7 @@ class SummaryResource(Resource):
                 all_ids.append(_getattr(obj, 'id'))
                 objColumns = []
                 for column in columns:
-                    val = str(_getattr(obj, column)).replace(',', '').replace("\n", '').encode('utf-8')
+                    val = unicode(_getattr(obj, column)).encode('utf-8', 'ignore').replace(',', '').replace("\n", '')
                     if val == 'None':
                         val = ''
                     objColumns.append(val)

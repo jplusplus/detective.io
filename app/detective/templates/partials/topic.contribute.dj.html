@@ -1,7 +1,7 @@
 <div id="contribute" ng-cloak>
 	<div class="contribute-start panel" ng-class="{ open: showKickStart || !individuals.length }">
 		<div class="container">
-			<h2>Add a new individual to the database</h2>
+			<h2>Add a new entity to the database</h2>
 
 			<div ng-repeat="resource in topicResources() track by $index">
 				<div class="row top30">
@@ -38,7 +38,7 @@
 	<div class="container tr top20">
 		<a class="btn btn-default btn-large" ng-click="showKickStart = true"  ng-hide="showKickStart || !individuals.length">
 			<i class="fa fa-plus right10"></i>
-			Add a new individual
+			Add a new entity
 		</a>
 		<a class="btn btn-default btn-large" ng-href="[[username]]/[[topic]]/contribute/upload">
 			<i class="fa fa-upload right10"></i>
@@ -63,7 +63,7 @@
 					<span ng-if="individual.permalink()" >
 						<a class="left10" ng-href="[[individual.permalink()]]">See in detail</a>
 						<button class="btn btn-danger left10"
-						   ng-if="user.hasDeletePermission(topic)"
+						   ng-if="user.hasDeletePermission(meta.module)"
 						   ng-click="individual.delete($index)">
 							<i class="fa fa-trash-o"></i>
 							Delete this [[individual.meta.verbose_name|lowercase]]
@@ -131,7 +131,7 @@
 			<div class="form-horizontal panel-body">
 
 				<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">
-					<strong>Individuals with similar name already exist!</strong>
+					<strong>Entities with similar name already exist!</strong>
 					Switch to
 					<span ng-repeat="similar in individual.similars">
 						<a class="alert-link" ng-click="replaceIndividual($parent.$index, similar.id)" href="">[[similar.name]]</a>
@@ -211,7 +211,7 @@
 			    			<div class="ask-for-new" ng-show="askForNew(f) && relatedState(f) == 'input'">
 			    				<div class="pan" ng-if="field.rules.is_editable">
 			    					<h4>Heads Up!</h4>
-			    					<p>The entry you just typed in is new in the base.</p>
+			    					<p>The entity you just typed in is new in the base.</p>
 			    					<div class="tr">
 				    					<button class="btn btn-default btn-sm"
     					   				   type="button"
@@ -221,7 +221,7 @@
 				    				</div>
 			    				</div>
 			    				<div class="pan" ng-if="!field.rules.is_editable">
-			    					Please choose an existing entry.
+			    					Please choose an existing entity.
 			    				</div>
 			    			</div>
 

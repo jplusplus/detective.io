@@ -1,7 +1,9 @@
 class HeaderCtrl
-    @$inject: ['$scope', 'Common']
+    @$inject: ['$scope', 'Common', '$location']
 
-    constructor: (@scope, @Common)->
-        super
+    constructor: (@scope, @Common, @location)->
+        @scope.$watch (=>@location.url()), (url)=>
+            @scope.nextLogin = url if url isnt "/login"
+        
 
 angular.module('detective.controller').controller 'headerCtrl', HeaderCtrl

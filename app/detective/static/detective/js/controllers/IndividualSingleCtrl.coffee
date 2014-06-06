@@ -1,8 +1,8 @@
 class IndividualSingleCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$filter', '$anchorScroll', '$location', 'Page']
+    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$filter', '$anchorScroll', '$location', 'Page', 'topic']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @filter, @anchorScroll, @location, @Page)->
+    constructor: (@scope, @routeParams, @Individual, @Summary, @filter, @anchorScroll, @location, @Page, topic)->
         # Global loading mode!
         Page.loading true
         @scope.get            = (n)=> @scope.individual[n] or false if @scope.individual?
@@ -59,6 +59,8 @@ class IndividualSingleCtrl
 
         @Individual.graph graph_params, (data) =>
             @scope.graphnodes = data
+
+        @scope.topicmeta = topic
 
     getSource: (field)=>
         _.find @scope.individual.field_sources, (fs)=> fs.field is field.name   

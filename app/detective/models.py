@@ -3,6 +3,7 @@ from app.detective              import utils
 from app.detective.permissions  import create_permissions, remove_permissions
 from django.core.exceptions     import ValidationError
 from django.db                  import models
+from django.db.models.fields    import FieldDoesNotExist
 from django.contrib.auth.models import User
 from tinymce.models             import HTMLField
 
@@ -156,6 +157,29 @@ class Topic(models.Model):
             return '<a href="%s">%s</a>' % (path, path, )
 
     link.allow_tags = True
+
+    @property
+    def search_placeholder(self, max_suggestion=5):
+        from app.detective import register
+        # Get the model's rules manager
+        rulesManager = register.topics_rules()
+        # List of searchable models
+        searchableModels = []
+        # Filter searchable models
+        for model in self.get_models():
+            if rulesManager.model(model).all().get("is_searchable", False):
+                searchableModels.append(model)
+        names = [ sm._meta.verbose_name_plural.lower() for sm in searchableModels ]
+        random.shuffle(names)        
+        # No more than X names
+        if len(names) > max_suggestion:
+            names = names[0:max_suggestion]
+        if len(names):
+            return "Search for " + ", ".join(names[0:-1]) + " and " + names[-1]
+        else:
+            return "Search..."
+
+        
 
 
 class Article(models.Model):

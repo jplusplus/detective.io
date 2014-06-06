@@ -70,6 +70,7 @@ class ContributeCtrl
         else
             # Index of the individual where to scroll
             @scope.scrollIdx  = -1
+        @scope.meta = topic
 
 
     # ──────────────────────────────────────────────────────────────────────────

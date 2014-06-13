@@ -2,7 +2,7 @@
   "name": "detective",
   "version": "1.4.3",
   "dependencies": {
-    "bower": "1.2.7",
+    "bower": "*",
     "coffee-script": "1.6.2",
     "less": "1.7.1"
   }

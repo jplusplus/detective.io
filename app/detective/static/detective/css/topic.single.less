@@ -43,52 +43,10 @@
             bottom:-80px;
             right:10px;
             left:20%;
+
             div {
                 height:100%;
                 width:100%;
-            }
-
-            .graphviz {
-                input[type='range'] {
-                    background: none;
-                    border: none;
-                    outline: none;
-                }
-            }
-
-            svg {
-                .leaf {
-                    stroke: @brand-secondary;
-                    stroke-width: 1.5px;
-                    cursor: pointer;
-                    fill: lighten(@body-bg, 20%);
-                    stroke: white;
-
-                    &:hover {
-                        stroke-width: 2.5px;
-                    }
-                }
-
-                .edge {
-                    fill: none;
-                    stroke: white;
-                    stroke-width: 1px;
-                }
-
-                .arrow {
-                    fill:white;
-                    stroke-width: 2px;
-                }
-
-                .name {
-                    fill:white;
-                    font: 14px @font-family-base;
-                    pointer-events: none;
-
-                    &.toggle-display {
-                        display: none;
-                    }
-                }
             }
         }
     }

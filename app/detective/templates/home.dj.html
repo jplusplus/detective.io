@@ -81,6 +81,12 @@
         <script type="text/coffeescript" src="{% static 'detective/js/services/Summary.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/User.coffee' %}"></script>
     {% endcompress %}
+
+        <span class='topic__single__graph__worker'>
+            {% compress js %}
+                <script type="text/coffeescript" src="{% static 'detective/js/workers/topic.single.graph.coffee' %}"></script>
+            {% endcompress %}
+        </span>
 {% endblock %}
 
 {% block content %}

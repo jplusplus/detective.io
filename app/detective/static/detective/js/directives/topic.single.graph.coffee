@@ -5,7 +5,12 @@
     scope :
         data : '='
     link: (scope, element, attr) ->
-        worker = new Worker (angular.element '.topic__single__graph__worker script')[0].src
+        src = (angular.element '.topic__single__graph__worker script')[0].src
+        if (src.indexOf 'https') is 0
+            src = src.split 'https'
+            src[0] = 'http'
+            src = src.join ''
+        worker = new Worker src
 
         absUrl = do $location.absUrl
 

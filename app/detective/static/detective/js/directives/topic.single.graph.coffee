@@ -1,20 +1,3 @@
-HashMerge = (a={}, b={}) ->
-    result = { }
-    for i of a
-        if (i of b) and a[i] isnt b[i]
-            if (a[i] instanceof Array) and (b[i] instanceof Array)
-                result[i] = a[i].concat b[i]
-            else if (a[i] instanceof Object) and (b[i] instanceof Object)
-                result[i] = HashMerge a[i], b[i]
-            else
-                result[i] = [a[i], b[i]]
-        else
-            result[i] = a[i]
-    for i of b
-        continue if i of result
-        result[i] = b[i]
-    result
-
 (angular.module 'detective.directive').directive "graphviz", ['$filter', '$routeParams', '$location', '$rootScope', 'Individual', ($filter, $routeParams, $location, $rootScope, Individual)->
     restrict: "AE"
     template: "<div></div>"
@@ -143,7 +126,6 @@ HashMerge = (a={}, b={}) ->
             d3Leafs = (d3Svg.selectAll '.leaf').data leafs, (datum) -> datum._id
             (do d3Leafs.enter).insert('svg:circle', 'text').attr('class', 'leaf').attr
                     r : (datum) -> leafSize * ( 1 + (isCurrent datum._id) )
-                    d : leafUpdate
                 .style
                     fill : (datum) -> if (datum._type is aggregationType) then '#fff' else ($filter "strToColor") datum._type
                 .each (datum) ->
@@ -172,7 +154,6 @@ HashMerge = (a={}, b={}) ->
             # Create all new labels
             d3Labels = (d3Svg.selectAll '.name').data leafs, (datum) -> datum._id
             (do d3Labels.enter).append('svg:text').attr
-                    d            : leafUpdate
                     dy           : (datum) -> - leafSize * ( 1 + (isCurrent datum._id) )
                     'data-id'    : (datum) -> datum._id
                     class        : getTextClasses

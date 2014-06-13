@@ -17,11 +17,13 @@ HashMerge = (a={}, b={}) ->
 
 (angular.module 'detective.directive').directive "graphviz", ['$filter', '$routeParams', '$location', '$rootScope', 'Individual', ($filter, $routeParams, $location, $rootScope, Individual)->
     restrict: "AE"
-    template : "<div></div>"
+    template: "<div></div>"
     replace : yes
     scope :
         data : '='
-    link: (scope, element, attr)->
+    link: (scope, element, attr) ->
+        worker = new Worker (angular.element '.topic__single__graph__worker script')[0].src
+
         absUrl = do $location.absUrl
 
         leafSize = 6

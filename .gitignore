@@ -25,8 +25,9 @@ app/media/*
 venv
 
 # Generated files
-app/static/components/*
+app/static/components
 app/static/CACHE
+app/static/custom_d3/d3.js
 staticfiles
 lib/neo4j*
 node_modules
@@ -35,6 +36,3 @@ catalog-v001.xml
 
 # Configuration file
 .env_dev
-
-!app/static/components/custom_d3/
-app/static/components/custom_d3/*.js

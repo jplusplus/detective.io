@@ -7,7 +7,7 @@ ENV           = ./.env
 
 COVERAGE      = `which coverage`
 
-CUSTOM_D3	  = ./app/static/components/custom_d3/d3.js
+CUSTOM_D3	  = ./app/static/custom_d3/d3.js
 
 all: install startdb run
 

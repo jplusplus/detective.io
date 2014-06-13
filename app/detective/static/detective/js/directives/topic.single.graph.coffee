@@ -94,6 +94,10 @@
                 when 'update' then do ->
                     leafs = event.data.data.leafs
                     edges = event.data.data.edges
+                    for edge in edges
+                        for key in ['source', 'target']
+                            edge[key] = _.findWhere leafs,
+                                _id : edge[key]._id
                     for i in [0..(Math.min leafs.length, 3)]
                         leafs[i]._shouldDisplayName = yes if leafs[i]?
                     do d3Update

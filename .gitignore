@@ -25,8 +25,9 @@ app/media/*
 venv
 
 # Generated files
-app/static/components/*
+app/static/components
 app/static/CACHE
+app/static/custom_d3/d3.js
 staticfiles
 lib/neo4j*
 node_modules

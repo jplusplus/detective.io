@@ -8,14 +8,17 @@ D3_FOLDER = ./node_modules/d3/
 SMASH = ./node_modules/.bin/smash
 RM = rm -rf
 
-_LIBRARY_FILES = src/start.js \
-				src/end.js
-LIBRARY_FILES = $(addprefix $(D3_FOLDER), $(_LIBRARY_FILES))
+_LIBRARY_FILES = start.js        \
+				 layout/force.js \
+				 end.js
+LIBRARY_FILES = $(addprefix $(D3_FOLDER)src/, $(_LIBRARY_FILES))
 
 all: $(D3) clean
 
 $(D3): install_deps
 	$(SMASH) $(LIBRARY_FILES) > $@
+
+build: $(D3)
 
 install_deps:
 	npm install

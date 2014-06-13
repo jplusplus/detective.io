@@ -35,7 +35,7 @@ $(CUSTOM_D3):
 
 bower_install:
 	# Install bower packages
-	bower install
+	./node_modules/.bin/bower install
 
 neo4j_install:
 	# Install neo4j locally

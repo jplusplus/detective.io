@@ -36,17 +36,17 @@ HashMerge = (a={}, b={}) ->
 
         d3Graph = (((do d3.layout.force).size svgSize).linkDistance 90).charge -300
 
+        aggregationType = '__aggregation_bubble'
+
+        isCurrent = (id) =>
+            (parseInt $routeParams.id) is parseInt id
+
         d3Edges = null
         d3Leafs = null
         d3Labels = null
 
         leafs = []
         edges = []
-
-        aggregationType = '__aggregation_bubble'
-        aggregationThreshold = 5
-        aggregatedEdges = []
-        aggregationIndex = 0
 
         edgeUpdate = (datum) ->
             datumX = datum.target.x - datum.source.x
@@ -74,18 +74,11 @@ HashMerge = (a={}, b={}) ->
                 height : _leafSize * 2
             null
 
-        isCurrent = (id)=> id is parseInt $routeParams.id
-
         getTextClasses = (datum) ->
             [
                 'name'
                 if not datum._shouldDisplayName then 'toggle-display' else ''
             ].join ' '
-
-        sortAndReindex = (array) ->
-            array = _.sortBy array, (datum) -> -datum.weight
-            _.each array, (datum, i) -> datum._index = i
-            array
 
         update = =>
             # It's useless to process if we do not have any leaf
@@ -102,158 +95,29 @@ HashMerge = (a={}, b={}) ->
                     edges.push
                         source : scope.data.leafs[edge[0]]
                         target : scope.data.leafs[edge[2]]
-                        _type : edges[1]
+                        _type : edge[1]
 
-            # Start the layout
-            do ((d3Graph.nodes leafs).links edges).start
+            worker.postMessage
+                type : 'init'
+                data :
+                    current_id : $routeParams.id
+                    leafs : leafs
+                    edges : edges
 
-            # Sort by weight (DESC) to know which node should should always display its name
-            leafs = sortAndReindex leafs
-
-            do aggregate
-            for i in [0..(Math.min leafs.length, 3)]
-                leafs[i]._shouldDisplayName = yes if leafs[i]?
-
-            do d3Update
-
-        ###
-        # Time to aggregate!
-        ###
-        aggregate = (leafsToAggregate) ->
-            quick = no
-            if not leafsToAggregate?
-                leafsToAggregate = leafs
-                quick = yes
-
-            canAggregate = (leaf) ->
-                (not isCurrent leaf._id) and (leaf._type isnt aggregationType)
-
-            do ->
-                security = 0
-                clean = (do ->
-                    for leaf in leafsToAggregate
-                        # Check if we need to delete a node
-                        if leaf.weight > aggregationThreshold
-                            # If so, we're removing the first we encounter
-                            for edge in edges
-                                if (edge.source._id is leaf._id) and canAggregate edge.target
-                                    deleteLeaf edge.target, leaf
-                                    leafs = sortAndReindex leafs
-                                    # Aaaaand, we're going back to the top
-                                    return (if security++ >= 10000 then yes else no)
-                                else if (edge.target._id is leaf._id) and canAggregate edge.source
-                                    deleteLeaf edge.source, leaf
-                                    leafs = sortAndReindex leafs
-                                    # Aaaaand, we're going back to the top
-                                    return (if security++ >= 10000 then yes else no)
-                        else if quick
-                            # As leafs are sorted by weight
-                            # if we encounter one leaf.weight <= threshold then we
-                            # don't need to iterate to the next one
-                            return yes
-                    return yes
-                ) while not clean
-        ###
-        # Aggregation is done!
-        ###
-
-        # Helper function deleting a leaf and all its edges
-        deleteLeaf = (leaf, sourceLeaf=null) ->
-            # We delete the leaf and reindex the array
-            leafs.splice leaf._index, 1
-
-            # If there's a sourceLeaf we need to move leaf in its aggregation bubble
-            if sourceLeaf?
-                if sourceLeaf._bubble
-                    sourceLeaf._bubble.leafs.push leaf
-                    sourceLeaf._bubble.name = "#{sourceLeaf._bubble.leafs.length} more entities"
-                else
-                    sourceLeaf._bubble =
-                        leafs : [leaf]
-                        _id : --aggregationIndex
-                        _type : aggregationType
-                        name : '1 more entity'
-                    edges.push
-                        source : sourceLeaf
-                        target : sourceLeaf._bubble
-                        _type : 'is_related_to+'
-                    leafs.push sourceLeaf._bubble
-
-            do ((d3Graph.nodes leafs).links edges).start
-            leafs = sortAndReindex leafs
-
-            # If there is no edge to delete, we can return
-            return unless leaf.weight > 0
-
-            # Clean edges, one at a time
-            do ->
-                security = 0
-                clean = (do ->
-                    for index, edge of edges
-                        # Is this edge concerning our leaf?
-                        isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
-                        if isConcerned >= 0
-                            leafToCheck = if isConcerned is 0 then edge.target else edge.source
-                            aggregatedEdges.push (edges.splice index, 1)[0]
-                            do ((d3Graph.nodes leafs).links edges).start
-                            # If we deleted the last edge of a leaf, we have to delete that leaf
-                            (deleteLeaf leafToCheck) if leafToCheck.weight <= 0
-                            # Aaaaand, we're going back to the top
-                            return (if security++ >= 5000 then yes else no)
-                    # We're done!
-                    return yes
-                ) while not clean
-
-        loadLeafs = (leafsToLoad) =>
-            if not leafsToLoad.length?
-                leafsToLoad = [leafsToLoad]
-
-            loaded = _.clone leafsToLoad
-
-            for leaf in leafsToLoad
-                clean = no
-
-                leafs.push leaf
-                do ((d3Graph.nodes leafs).links edges).start
-                leafs = sortAndReindex leafs
-
-                clean = (do ->
-                    for edge, i in aggregatedEdges
-                        isConcerned = [edge.source._id, edge.target._id].indexOf leaf._id
-                        if isConcerned >= 0
-                            [_edge] = aggregatedEdges.splice i, 1
-                            edges.push _edge
-
-                            if (isConcerned is 0) and not (_.findWhere leafs, { _id : edge.target._id })?
-                                loaded = loaded.concat (loadLeafs edge.target)
-                            else if not (_.findWhere leafs, { _id : edge.source._id })?
-                                loaded = loaded.concat (loadLeafs edge.source)
-
-                            do ((d3Graph.nodes leafs).links edges).start
-                            return no
-                    return yes
-                ) while not clean
-            loaded
-
-        loadLeafFrom = (sourceBubble) =>
-            leafsToLoad = (sourceBubble.leafs.splice 0, 2)
-
-            if (sourceBubble.leafs.length > 0)
-                sourceBubble.name = "#{sourceBubble.leafs.length} more entities"
-            else
-                deleteLeaf sourceBubble
-
-            loaded = loadLeafs leafsToLoad
-            aggregate loaded
-
-            leafs = sortAndReindex leafs
-
-            for i in [0..(Math.min leafs.length, 3)]
-                leafs[i]._shouldDisplayName = yes if leafs[i]?
-
-            do d3Update
+        worker.addEventListener 'message', (event) =>
+            switch event.data.type
+                when 'log' then do ->
+                    console.debug "From worker -> #{event.data.data}"
+                when 'update' then do ->
+                    leafs = event.data.data.leafs
+                    edges = event.data.data.edges
+                    for i in [0..(Math.min leafs.length, 3)]
+                        leafs[i]._shouldDisplayName = yes if leafs[i]?
+                    do d3Update
 
         d3Update = =>
+            do ((d3Graph.nodes leafs).links edges).start
+
             (((d3Defs.append 'marker').attr
                 id : 'marker-end'
                 class: 'arrow'
@@ -297,7 +161,9 @@ HashMerge = (a={}, b={}) ->
                 return if d3.event.defaultPrevented
                 # Check if we clicked on a aggregation bubble
                 if datum._type is aggregationType
-                    loadLeafFrom datum
+                    worker.postMessage
+                        type : 'get_from_leaf'
+                        data : datum
                 else
                     $location.path "/#{$routeParams.username}/#{$routeParams.topic}/#{do datum._type.toLowerCase}/#{datum._id}"
                     # We're in a d3 callback so we need to manually $apply the scope

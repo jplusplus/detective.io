@@ -3,6 +3,8 @@ class GraphWorker
     constructor : (@_) ->
         @_.addEventListener 'message', @on_message
 
+        @d3_layout = d3.layout.force();
+
     on_message : (event) =>
 
     post_message : (data) =>

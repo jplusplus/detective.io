@@ -298,23 +298,23 @@
 									ng-class="{active: field.showSourceForm}" 
 							        ng-click="field.showSourceForm = !field.showSourceForm">
 								<i class="fa-book fa right05"></i>
-								<span ng-if="individual.getSource(field)">
+								<span ng-if="individual.hasSource(field)">
 									Edit source
 								</span>
-								<span ng-if="!individual.getSource(field)">
+								<span ng-if="!individual.hasSource(field)">
 									Add source
 								</span>
 							</button>
 							<form class="add-source-form" 
 								  ng-submit="individual.setSource(field)"
 								  ng-show="field.showSourceForm">
-								<span ng-class="{ 'input-group': individual.getSource(field) }">
+								<span ng-class="{ 'input-group': individual.hasSource(field) }">
 									<input type="url"
 										   ng-blur="individual.setSource(field)"
 										   ng-model="individual.sources[field.name]"
 										   placeholder="http://exemple.com" 
 										   class="form-control" />
-									<span class="input-group-btn" ng-if="individual.getSource(field)">
+									<span class="input-group-btn" ng-if="individual.hasSource(field)">
 										<a target="_blank" 
 										   ng-href="[[individual.getSource(field).url]]" 
 										   class="btn btn-default">
@@ -328,7 +328,7 @@
 					</div>
 
 
-					<div class="has-source text-success col-sm-3 top05" ng-show="individual.getSource(field)">
+					<div class="has-source text-success col-sm-3 top05" ng-show="individual.hasSource(field)">
 						<i class="fa fa-check-circle-o"></i> Sourced
 					</div>						
 

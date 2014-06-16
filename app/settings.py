@@ -155,7 +155,6 @@ COMPRESS_CSS_FILTERS = (
 
 COMPRESS_JS_FILTERS = (
     "compressor.filters.template.TemplateFilter",
-    "compressor.filters.jsmin.JSMinFilter",
 )
 
 COMPRESS_TEMPLATE_FILTER_CONTEXT = {

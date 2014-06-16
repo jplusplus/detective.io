@@ -35,3 +35,4 @@ catalog-v001.xml
 
 # Configuration file
 .env_dev
+*.sublime-*

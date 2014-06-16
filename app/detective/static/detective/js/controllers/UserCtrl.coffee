@@ -8,7 +8,7 @@ class UserCtrl
         user: ($rootScope, $route, $q, $location, Common)->
             notFound    = ->
                 deferred.reject()
-                $scope.is404(yes)
+                $rootScope.is404(yes)
                 deferred
             deferred    = $q.defer()
             routeParams = $route.current.params
@@ -56,6 +56,8 @@ class UserCtrl
                 @Page.title "Reset password", false
             when "/account/reset-password-confirm"
                 @Page.title "Enter a new password", false
+                
+        @Page.loading no
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods

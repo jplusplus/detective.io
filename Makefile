@@ -4,14 +4,17 @@ NEO4J_VERSION = 1.9.1
 
 VENV          = venv
 ENV           = ./.env
-
+RM            = rm -fr
 COVERAGE      = `which coverage`
 
 CUSTOM_D3	  = ./app/static/custom_d3/d3.js
+PYC           = $(wildcard *.pyc */*.pyc app/*/*.pyc app/*/*/*.pyc app/*/*/*/*.pyc app/*/*/*/*/*.pyc)
+CACHE         = $(wildcard app/staticfiles/CACHE)
 
 all: install startdb run
 
 run: clean
+	. $(ENV) ; python -W ignore::DeprecationWarning manage.py rqworker high default low &
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading
 
 ###
@@ -48,7 +51,8 @@ install: $(VENV) pip_install npm_install $(CUSTOM_D3) bower_install neo4j_instal
 ###
 
 clean:
-	rm **/*.pyc -f
+	$(RM) $(PYC)
+	$(RM) $(CACHE)
 
 fclean: clean
 	rm $(CUSTOM_D3)

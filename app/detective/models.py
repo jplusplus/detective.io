@@ -142,12 +142,13 @@ class Topic(models.Model):
         ontology  = "%s/ontology.owl" % directory
         return os.path.exists(ontology) or hasattr(self.get_module(), "models")
 
-
     def get_absolute_path(self):
         if self.author is None:
             return None
         else:
             return "/%s/%s/" % (self.author.username, self.slug,)
+
+    def get_absolute_url(self): return self.get_absolute_path()
 
     def link(self):
         path = self.get_absolute_path()
@@ -178,9 +179,6 @@ class Topic(models.Model):
             return "Search for " + ", ".join(names[0:-1]) + " and " + names[-1]
         else:
             return "Search..."
-
-        
-
 
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")

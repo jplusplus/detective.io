@@ -21,9 +21,10 @@ class Document(object):
         self._id = None
         for key, value in kwargs.iteritems():
             setattr(self, key, value)
+        if hasattr(self,'meta') and self.meta:
+            self.meta = json.dumps(self.meta)
         if hasattr(self,'_result') and self._result:
-            result = json.dumps(self._result)
-            self._result = result
+            self._result = json.dumps(self._result)
 
 class JobResource(Resource):
     id         = fields.CharField(attribute="_id")
@@ -32,6 +33,7 @@ class JobResource(Resource):
     status     = fields.CharField(attribute="_status"    , null=True)
     created_at = fields.CharField(attribute="created_at" , null=True)
     timeout    = fields.CharField(attribute="timeout"    , null=True)
+    exc_info   = fields.CharField(attribute="exc_info"   , null=True)
 
     def obj_get(self, bundle, **kwargs):
         """

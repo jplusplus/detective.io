@@ -13,16 +13,15 @@ from tastypie.resources       import Resource
 from tastypie.serializers     import Serializer
 from django.utils.timezone    import utc
 from psycopg2.extensions      import adapt
-from pprint                   import pprint
 from StringIO                 import StringIO
-
+from rq                       import get_current_job
+from .errors                  import ForbiddenError, UnauthorizedError
 import app.detective.utils    as utils
 import json
 import re
 import datetime
 import logging
 import django_rq
-from .errors import *
 import zipfile
 
 # Get an instance of a logger
@@ -368,14 +367,11 @@ class SummaryResource(Resource):
         return object_list
 
     def summary_bulk_upload(self, request, **kwargs):
-
         # only allow POST requests
         self.method_check(request, allowed=['post'])
-
         # check session
         if not request.user.id:
             raise UnauthorizedError('This method require authentication')
-
         # flattern the list of files
         files = [file for sublist in request.FILES.lists() for file in sublist[1]]
         # reads the files
@@ -787,15 +783,13 @@ def process_parsing(topic, files):
     Job which reads the uploaded files, validate and saves them as model
     """
 
-    entities   = {}
-    relations  = []
-    errors     = []
-    id_mapping = {}
-
-    assert type(files) in (tuple, list)
-    assert len(files) > 0
-    assert type(files[0]) in (tuple, list)
-    assert len(files[0]) == 2
+    entities                 = {}
+    relations                = []
+    errors                   = []
+    id_mapping               = {}
+    nb_lines                 = 0
+    file_reading_progression = 0
+    job                      = get_current_job()
 
     # Define Exceptions
     class Error (Exception):
@@ -822,6 +816,11 @@ def process_parsing(topic, files):
     class RelationDoesntExist         (Error): pass
 
     try:
+        assert type(files) in (tuple, list)
+        if len(files) <= 0 : raise Exception("You need to upload at least one file.")
+        assert type(files[0]) in (tuple, list)
+        assert len(files[0]) == 2
+
         # retrieve all models in current topic
         all_models = dict((model.__name__, model) for model in topic.get_models())
         # iterate over all files and dissociate entities .csv from relations .csv
@@ -829,12 +828,10 @@ def process_parsing(topic, files):
             if type(file) is tuple:
                 file_name = file[0]
                 file      = file[1]
-            elif hasattr(file, "read"):
-                file_name = file.name
             else:
-                raise Exception("ERROR")
+                raise Exception()
             csv_reader = utils.open_csv(file)
-            header = csv_reader.next()
+            header     = csv_reader.next()
             assert len(header) > 1, "header should have at least 2 columns"
             assert header[0].endswith("_id"), "First column should begin with a header like <model_name>_id"
             if len(header) >=3 and header[0].endswith("_id") and header[2].endswith("_id"):
@@ -847,6 +844,7 @@ def process_parsing(topic, files):
                     entities[model_name] = (file_name, file)
                 else:
                     raise ModelDoesntExist(model=model_name, file=file_name, models_availables=all_models.keys())
+            nb_lines += len(file) - 1 # -1 removes headers
 
         # first iterate over entities
         logger.debug("BulkUpload: creating entities")
@@ -854,7 +852,7 @@ def process_parsing(topic, files):
             csv_reader = utils.open_csv(file)
             header     = csv_reader.next()
             # must check that all columns map to an existing model field
-            fields      = utils.get_model_fields(all_models[entity])
+            fields       = utils.get_model_fields(all_models[entity])
             fields_types = {}
             for field in fields:
                 fields_types[field['name']] = field['type']
@@ -902,6 +900,9 @@ def process_parsing(topic, files):
                             item = all_models[entity].objects.create(**data)
                             # map the object with the ID defined in the .csv
                             id_mapping[(entity, id)] = item
+                            file_reading_progression += 1
+                            job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
+                            job.save()
                         except Exception as e:
                             errors.append(
                                 WarningValidationError(
@@ -941,6 +942,9 @@ def process_parsing(topic, files):
                     try:
                         getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
                         inserted_relations += 1
+                        file_reading_progression += 1
+                        job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
+                        job.save()
                     except KeyError as e:
                         errors.append(
                             WarningKeyUnknown(
@@ -977,10 +981,12 @@ def process_parsing(topic, files):
         # Save everything
         saved = 0
         logger.debug("BulkUpload: saving %d objects" % (len(id_mapping)))
+        job.meta["objects_to_save"] = len(id_mapping)
         for item in id_mapping.values():
             item.save()
             saved += 1
-
+            job.meta["saving_progression"] = saved
+            job.save()
         return {
             'inserted' : {
                 'objects' : saved,
@@ -988,9 +994,14 @@ def process_parsing(topic, files):
             },
             "errors" : sorted([dict([(e.__class__.__name__, str(e.__dict__))]) for e in errors])
         }
+
     except Exception as e:
         import traceback
         logger.error(traceback.format_exc())
+        if e.__dict__:
+            message = str(e.__dict__)
+        else:
+            message = e.message
         return {
-            "errors" : [{e.__class__.__name__ : str(e.__dict__)}]
+            "errors" : [{e.__class__.__name__ : message}]
         }

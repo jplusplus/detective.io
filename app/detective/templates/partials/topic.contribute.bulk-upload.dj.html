@@ -27,6 +27,12 @@
 					<!-- Feedback -->
 					<div class="loader" ng-if="feedback">
 						<span>Loading ....</span>
+						<div>[[ job_status.meta.progress_title ]]</div>
+						<div class="progress">
+							<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="[[ job_status.meta.progress ]]" aria-valuemin="0" aria-valuemax="100" style="width: [[ job_status.meta.progress ]]%;">
+								[[ job_status.meta.progress | number:0]] %
+							</div>
+						</div>
 					</div>
 
 					<div class="alert alert-success" ng-if="job_status.result.inserted.objects && job_status.result.inserted.objects > 0">
@@ -34,14 +40,18 @@
 							[[ job_status.result.inserted.objects ]] <span class="objects">objects</span> inserted with [[ job_status.result.inserted.links ]] <span class="relations">relations</span>.
 					</div>
 
-					<div class="alert alert-warning" ng-if="job_status.result.errors">there are some warning about this request:
+					<div class="alert alert-warning" ng-if="job_status.result.errors && job_status.result.errors.length > 0">
+						there are some warning about this request:
 						<div ng-repeat="error in job_status.result.errors">
 							<div ng-repeat="(key, value) in error">
 								[[key]]: [[value]]
 							</div>
 						</div>
 					</div>
-					<div class="alert alert-danger" ng-if="job_status.status == 'failed'">The job failed</div>
+					<div class="alert alert-danger" ng-if="job_status.status == 'failed'">
+						The job has failed.
+						<div class="exc_info" ng-bind-html="job_status.exc_info | nl2br" ></div>
+					</div>
 					<!-- /Feedback -->
 
 					<div class="top20">

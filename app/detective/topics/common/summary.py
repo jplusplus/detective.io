@@ -38,8 +38,11 @@ class SummaryResource(Resource):
         object_class    = object
 
 
-    def get_page_number(self, offset=0, limit=20): 
-        return int(round(offset / limit)) +  1
+    def get_page_number(self, offset=0, limit=20):
+        if offset < 0:
+            return -1
+        else:
+            return int(round(offset / limit)) +  1
 
     def obj_get_list(self, request=None, **kwargs):
         # Nothing yet here!

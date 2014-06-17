@@ -44,8 +44,9 @@ class IndividualListCtrl
                 @scope.individuals = @Individual.get params, =>
                     # Turn off loading mode
                     @Page.loading false
+
         # Update page value
-        @scope.$on "$routeUpdate", => @scope.page = @routeParams.page or 1
+        @scope.$on "$routeUpdate", => @scope.page = parseInt @routeParams.page or 1
         # ──────────────────────────────────────────────────────────────────────
         # Page setup
         # ──────────────────────────────────────────────────────────────────────
@@ -92,6 +93,7 @@ class IndividualListCtrl
         # Use the meta info to determine the page number
         nb = @scope.individuals.meta.total_count/@scope.limit
         new Array Math.ceil(nb)
+
     nearestPages: =>
         pages = []
         scope = 4
@@ -105,7 +107,11 @@ class IndividualListCtrl
     # True if there is a previous page
     hasPreviousPage: => @scope.individuals.meta? and @scope.page > 1
     # True if there is a next page
-    hasNextPage: => @scope.individuals.meta? and @scope.individuals.meta.next? and @scope.individuals.meta.next isnt null
+    hasNextPage: => 
+        return false unless @scope.individuals.meta?
+        meta  = @scope.individuals.meta
+        (meta.limit * @scope.page + meta.limit / meta.total_count) > 1
+
     # Go to the previous page
     previousPage: => @goToPage(1*@scope.page-1) if @hasPreviousPage()
     # Go to the next page

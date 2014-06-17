@@ -37,6 +37,10 @@ class SummaryResource(Resource):
         resource_name   = 'summary'
         object_class    = object
 
+
+    def get_page_number(self, offset=0, limit=20): 
+        return int(round(offset / limit)) +  1
+
     def obj_get_list(self, request=None, **kwargs):
         # Nothing yet here!
         raise Http404("Sorry, not implemented yet!")
@@ -191,6 +195,7 @@ class SummaryResource(Resource):
         self.method_check(request, allowed=['get'])
 
         limit = int(request.GET.get('limit', 20))
+        offset = int(request.GET.get('offset', 0))
 
         if request.user.id is None:            
             object_list = {
@@ -217,7 +222,7 @@ class SummaryResource(Resource):
             paginator    = Paginator(matches, limit)
 
             try:
-                p     = int(request.GET.get('page', 1))
+                p     = self.get_page_number(offset, limit)
                 page  = paginator.page(p)
             except InvalidPage:
                 raise Http404("Sorry, no results on that page.")
@@ -256,12 +261,13 @@ class SummaryResource(Resource):
         if not "q" in request.GET: raise Exception("Missing 'q' parameter")
 
         limit     = int(request.GET.get('limit', 20))
+        offset    = int(request.GET.get('offset', 0))
         query     = bundle.request.GET["q"].lower()
         results   = self.search(query)
         paginator = Paginator(results, limit)
 
         try:
-            p     = int(request.GET.get('page', 1))
+            p     = self.get_page_number(offset, limit )
             page  = paginator.page(p)
         except InvalidPage:
             raise Http404("Sorry, no results on that page.")
@@ -274,7 +280,6 @@ class SummaryResource(Resource):
             'objects': objects,
             'meta': {
                 'q': query,
-                'page': p,
                 'limit': limit,
                 'total_count': paginator.count
             }
@@ -287,6 +292,7 @@ class SummaryResource(Resource):
         self.method_check(request, allowed=['get'])
 
         limit     = int(request.GET.get('limit', 20))
+        offset    = int(request.GET.get('offset', 0))
         query     = json.loads(request.GET.get('q', 'null'))
         subject   = query.get("subject", None)
         predicate = query.get("predicate", None)
@@ -296,7 +302,7 @@ class SummaryResource(Resource):
         if "errors" in results: return results        
         paginator = Paginator(results, limit)
         try:
-            p     = int(request.GET.get('page', 1))
+            p     = self.get_page_number(offset, limit )
             page  = paginator.page(p)
         except InvalidPage:
             raise Http404("Sorry, no results on that page.")
@@ -309,7 +315,7 @@ class SummaryResource(Resource):
             'objects': objects,
             'meta': {
                 'q': query,
-                'page': p,
+                'offset': p,
                 'limit': limit,
                 'total_count': paginator.count
             }
@@ -332,10 +338,11 @@ class SummaryResource(Resource):
 
         # Build paginator
         limit        = int(request.GET.get('limit', 20))
+        offset       = int(request.GET.get('offset', 0))
         paginator    = Paginator(propositions, limit)
 
         try:
-            p     = int(request.GET.get('page', 1))
+            p     = self.get_page_number(offset, limit )
             page  = paginator.page(p)
         except InvalidPage:
             raise Http404("Sorry, no results on that page.")
@@ -348,8 +355,8 @@ class SummaryResource(Resource):
             'objects': objects,
             'meta': {
                 'q': query,
-                'page': p,
                 'limit': limit,
+                'offset': offset,
                 'total_count': paginator.count
             }
         }
@@ -450,11 +457,12 @@ class SummaryResource(Resource):
         else:
             request.GET = dict(q=request.GET['q'])
             page = 1
+            limit = 1 
             objects = []
             total = -1
             while len(objects) != total:
                 try:
-                    request.GET['page'] = page
+                    request.GET['offset'] = (page - 1) * limit 
                     result = self.summary_rdf_search(bundle, request)
                     objects += result['objects']
                     total = result['meta']['total_count']

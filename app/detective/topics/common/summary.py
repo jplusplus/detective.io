@@ -817,7 +817,7 @@ def process_parsing(topic, files):
 
     try:
         assert type(files) in (tuple, list)
-        if len(files) <= 0 : raise Exception("You need to upload at least one file.")
+        assert len(files) > 0, "You need to upload at least one file."
         assert type(files[0]) in (tuple, list)
         assert len(files[0]) == 2
 

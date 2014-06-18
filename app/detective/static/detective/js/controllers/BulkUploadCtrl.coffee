@@ -20,6 +20,7 @@ class BulkUploadCtrl
         # start with one file field
         @scope.file_fields    = ["file1"]
         @scope.files          = {}
+        @scope.files_number   = 0
 
         # Redirect unauthorized user
         @scope.$watch (=> User), =>
@@ -43,7 +44,7 @@ class BulkUploadCtrl
             if @scope.feedback and @scope.feedback.status == "enqueued" and @scope.feedback.token
                 params =
                     type : "jobs"
-                    id   : @scope.feedback.token
+                    id   : @scope.feedback.token + "/"
                 refresh_timeout = @timeout(refresh_status = =>
                     @Common.get params, (data) =>
                         if data.result?
@@ -78,6 +79,7 @@ class BulkUploadCtrl
     onFileSelect: (files, field) =>
         # Queue the file
         @scope.files[field] = files
+        @scope.files_number = _.size(@scope.files)
 
     # User ask for a new file field
     addFileField: =>

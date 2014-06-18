@@ -146,7 +146,7 @@
 				     ng-show="isAllowedType(field.type) && individual.isVisible(field) && individual.isEditable(field)"
 					 ng-repeat="field in individual.meta.fields track by $index">
 
-					<div class="col-sm-3 tr form-label top05">
+					<div class="col-sm-3 form-label top05">
 						<label for="id_[[field.name]]">
 							[[field.verbose_name]]
 						</label>
@@ -339,7 +339,7 @@
 				<div class="more-fields row field top20 form-group"
 				     ng-show="individual.invisibleFields().length">
 
-					<span class="col-sm-3 tr form-label ">
+					<span class="col-sm-3 form-label ">
 						Add more information
 					</span>
 

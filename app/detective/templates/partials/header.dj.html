@@ -1,11 +1,10 @@
-<header  ng-controller="HeaderCtrl">
-
-	<div ng-controller="UserCtrl">
-		<div ng-show="user.is_logged" class="pull-right right20 user-state">
+<header  ng-controller="HeaderCtrl" class="row">
+	<div ng-controller="UserCtrl" class="pull-right">
+		<div ng-show="user.is_logged" class="right20 user-state">
 			Welcome, [[user.username]]!
 			<a ng-click="logout()" href="#">Sign out</a>
 		</div>
-        <div ng-hide="user.is_logged" class="pull-right right20 user-state">
+        <div ng-hide="user.is_logged" class="right20 user-state">
             <a class="btn btn-link" ng-href="/login?next=[[nextLogin]]">
                 <i class="fa fa-sign-in"></i> Login
             <a>
@@ -17,7 +16,6 @@
 			Detective<i>.io</i>
 		</a>
 	</h1>
-
 
     <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl">
 

@@ -131,7 +131,7 @@ def get_registered_models():
             pass
     return mdls
 
-def get_model_fields(model):
+def get_model_fields(model, order_by='name'):
     from app.detective           import register
     from django.db.models.fields import FieldDoesNotExist
     fields       = []
@@ -175,7 +175,10 @@ def get_model_fields(model):
                 'rules'        : field_rules
             }
             fields.append(field)
-
+            
+    get_key=lambda el: el[order_by]
+    
+    fields = sorted(fields, key=get_key)
     return fields
 
 def get_model_nodes():

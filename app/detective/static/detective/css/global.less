@@ -242,5 +242,14 @@ body {
 
         }
     }
-
+    @media(max-width: @screen-tablet){ // for mobile
+        .banner {
+            .bg {
+                min-height: 300px;
+                background-size: cover;
+                width: auto;
+                left: -150px;
+            }
+        }
+    }
 }

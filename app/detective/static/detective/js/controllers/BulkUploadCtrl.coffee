@@ -55,7 +55,7 @@ class BulkUploadCtrl
                                 data.meta.progress_title = "saving objects in database #{data.meta.saving_progression}/#{data.meta.objects_to_save}"
                                 data.meta.progress = (data.meta.saving_progression/data.meta.objects_to_save) * 100
                             else if  data.meta.file_reading_progression?
-                                data.meta.progress_title = "reading files"
+                                data.meta.progress_title = "reading files (#{data.meta.file_reading})"
                                 data.meta.progress = data.meta.file_reading_progression
                             else
                                 data.meta.progress_title = "init"

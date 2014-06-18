@@ -904,6 +904,7 @@ def process_parsing(topic, files):
                             id_mapping[(entity, id)] = item
                             file_reading_progression += 1
                             job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
+                            job.meta["file_reading"] = file_name
                             job.save()
                         except Exception as e:
                             errors.append(
@@ -946,6 +947,7 @@ def process_parsing(topic, files):
                         inserted_relations += 1
                         file_reading_progression += 1
                         job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
+                        job.meta["file_reading"] = file_name
                         job.save()
                     except KeyError as e:
                         errors.append(

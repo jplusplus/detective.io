@@ -37,7 +37,7 @@
 
 					<div class="alert alert-success" ng-if="job_status.result.inserted.objects && job_status.result.inserted.objects > 0">
 						<i class="fa fa-check right05"></i>
-							[[ job_status.result.inserted.objects ]] <span class="objects">objects</span> inserted with [[ job_status.result.inserted.links ]] <span class="relations">relations</span>.
+							[[ job_status.result.inserted.objects ]] <span class="objects">objects</span> inserted with [[ job_status.result.inserted.links ]] <span class="relations">relations</span> in [[ job_status.result.duration | number:2 ]] seconds.
 					</div>
 
 					<div class="alert alert-warning" ng-if="job_status.result.errors && job_status.result.errors.length > 0">

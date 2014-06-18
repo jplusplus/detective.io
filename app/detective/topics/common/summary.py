@@ -23,6 +23,7 @@ import datetime
 import logging
 import django_rq
 import zipfile
+import time
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -783,6 +784,7 @@ def process_parsing(topic, files):
     Job which reads the uploaded files, validate and saves them as model
     """
 
+    start_time               = time.time()
     entities                 = {}
     relations                = []
     errors                   = []
@@ -988,6 +990,7 @@ def process_parsing(topic, files):
             job.meta["saving_progression"] = saved
             job.save()
         return {
+            'duration' : (time.time() - start_time),
             'inserted' : {
                 'objects' : saved,
                 'links'   : inserted_relations

@@ -3,11 +3,12 @@
 	<div class="container">
 
 		<h2>Upload objects and relationship</h2>
-		<form name="uploadForm">
-			<div class="panel panel-default">
-				<div class="panel-body">
+		
+		<div class="panel panel-default">
+			<div class="panel-body">
 
-					<div class="bottom20">
+				<div class="bottom20">
+					<form>
 						<p>Please select a CSV file to upload:</p>
 						<div ng-repeat="field_name in file_fields" class="well">
 							<input type="file" multiple ng-file-select="onFileSelect($files, field_name)" class="form-control">
@@ -20,70 +21,81 @@
 							<i class="fa fa-plus right05"></i>
 							Add a file
 						</button>
-					</div>
+					</form>
+				</div>
 
-					<!-- Feedback -->
-					<div class="loader" ng-if="feedback">
-						<span>Loading ....</span>
-						<div>[[ job_status.meta.progress_title ]]</div>
-						<div class="progress">
-							<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="[[ job_status.meta.progress ]]" aria-valuemin="0" aria-valuemax="100" style="width: [[ job_status.meta.progress ]]%; min-width: 25px;">
-								[[ job_status.meta.progress | number:0]] %
-							</div>
+				<!-- Feedback -->
+				<div class="alert alert-success queue" ng-if="confirmTrackIt">
+					Email [[ email ]] saved. You will recieve an email when we finish.
+				</div>
+				<div class="alert alert-warning queue" ng-if="job_status.status == 'queued' && !confirmTrackIt">
+					we weren't able to upload your files now, but we will sent you an email when they're ready.
+					<div>
+						<form class="form-inline" ng-submit="trackJob()">
+							<input type="email" ng-model="$parent.email" class="form-control" name="email" placeholder="enter email" ng-disabled="disableTrackIt" required />
+							<button type="submit" class="btn btn-default" ng-disabled="disableTrackIt">Track it</button>
+						</form>
+					</div>
+				</div>
+				<div class="loader" ng-if="feedback">
+					<div>[[ job_status.meta.progress_title ]]</div>
+					<div class="progress">
+						<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="[[ job_status.meta.progress ]]" aria-valuemin="0" aria-valuemax="100" style="width: [[ job_status.meta.progress ]]%;">
 						</div>
+						<span>[[ job_status.meta.progress || 0 | number:0]] %</span>
 					</div>
+				</div>
 
-					<div class="alert alert-success" ng-if="job_status.result.inserted.objects && job_status.result.inserted.objects > 0">
-						<i class="fa fa-check right05"></i>
-							[[ job_status.result.inserted.objects ]] <span class="objects">objects</span> inserted with [[ job_status.result.inserted.links ]] <span class="relations">relations</span> in [[ job_status.result.duration | number:2 ]] seconds.
-					</div>
+				<div class="alert alert-success" ng-if="job_status.result.inserted.objects && job_status.result.inserted.objects > 0">
+					<i class="fa fa-check right05"></i>
+						[[ job_status.result.inserted.objects ]] <span class="objects">objects</span> inserted with [[ job_status.result.inserted.links ]] <span class="relations">relations</span> in [[ job_status.result.duration | number:2 ]] seconds.
+				</div>
 
-					<div class="alert alert-warning" ng-if="job_status.result.errors && job_status.result.errors.length > 0">
-						there are some warning about this request:
-						<div ng-repeat="error in job_status.result.errors">
-							<div ng-repeat="(key, value) in error">
-								[[key]]: [[value]]
-							</div>
-						</div>
-					</div>
-					<div class="alert alert-danger" ng-if="job_status.status == 'failed'">
-						The job has failed.
-						<div class="exc_info" ng-bind-html="job_status.exc_info | nl2br" ></div>
-					</div>
-					<!-- /Feedback -->
-
-					<div class="top20">
-						<div class="alert alert-info">
-							<h4>File format</h4>
-							<p>
-								Entities file should respect this header structure:
-							</p>
-							<table class="table table-bordered tabl top10 panel panel-default">
-								<theader>
-									<tr>
-										<td>&lt;object_name&gt;_id</td>
-										<td>&lt;field_name1&gt;</td>
-										<td>&lt;field_name2&gt;</td>
-										<td>etc..</td>
-									</tr>
-								</theader>
-							</table>
-							<p>
-								Relationships file should respect this header structure:
-							</p>
-							<table class="table table-bordered tabl top10 bottom0 panel panel-default">
-								<theader>
-									<tr>
-										<td>&lt;object_1_name&gt;_id</td>
-										<td>&lt;relation_type&gt;</td>
-										<td>&lt;object_2_name&gt;</td>
-									</tr>
-								</theader>
-							</table>
+				<div class="alert alert-warning" ng-if="job_status.result.errors && job_status.result.errors.length > 0">
+					there are some warning about this request:
+					<div ng-repeat="error in job_status.result.errors">
+						<div ng-repeat="(key, value) in error">
+							[[key]]: [[value]]
 						</div>
 					</div>
 				</div>
+				<div class="alert alert-danger" ng-if="job_status.status == 'failed'">
+					The job has failed.
+					<div class="exc_info" ng-bind-html="job_status.exc_info | nl2br" ></div>
+				</div>
+				<!-- /Feedback -->
+
+				<div class="top20">
+					<div class="alert alert-info">
+						<h4>File format</h4>
+						<p>
+							Entities file should respect this header structure:
+						</p>
+						<table class="table table-bordered tabl top10 panel panel-default">
+							<theader>
+								<tr>
+									<td>&lt;object_name&gt;_id</td>
+									<td>&lt;field_name1&gt;</td>
+									<td>&lt;field_name2&gt;</td>
+									<td>etc..</td>
+								</tr>
+							</theader>
+						</table>
+						<p>
+							Relationships file should respect this header structure:
+						</p>
+						<table class="table table-bordered tabl top10 bottom0 panel panel-default">
+							<theader>
+								<tr>
+									<td>&lt;object_1_name&gt;_id</td>
+									<td>&lt;relation_type&gt;</td>
+									<td>&lt;object_2_name&gt;</td>
+								</tr>
+							</theader>
+						</table>
+					</div>
+				</div>
 			</div>
-		</form>
+		</div>
 	</div>
 </div>

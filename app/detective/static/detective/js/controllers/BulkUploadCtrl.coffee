@@ -11,6 +11,7 @@ class BulkUploadCtrl
         @scope.addFileField   = @addFileField
         @scope.selectTopic    = @selectTopic
         @scope.submit         = @submit
+        @scope.trackJob       = @trackJob
         @scope.onFileSelect   = @onFileSelect
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
@@ -21,6 +22,8 @@ class BulkUploadCtrl
         @scope.file_fields    = ["file1"]
         @scope.files          = {}
         @scope.files_number   = 0
+        @scope.disableTrackIt = false
+        @scope.confirmTrackIt = false
 
         # Redirect unauthorized user
         @scope.$watch (=> User), =>
@@ -34,6 +37,9 @@ class BulkUploadCtrl
     submit: =>
         @scope.feedback   = null
         @scope.job_status = null
+        @scope.disableTrackIt = false
+        @scope.confirmTrackIt = false
+
         # Parameters of your request (to build the url)
         params =
             topic: @scope.topic_selected
@@ -58,7 +64,7 @@ class BulkUploadCtrl
                                 data.meta.progress_title = "reading files (#{data.meta.file_reading})"
                                 data.meta.progress = data.meta.file_reading_progression
                             else
-                                data.meta.progress_title = "init"
+                                data.meta.progress_title = "waiting"
                                 data.meta.progress = 0
                         if data.exc_info?
                             data.exc_info = data.exc_info.replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -85,6 +91,15 @@ class BulkUploadCtrl
     addFileField: =>
         field_name = "file" + (@scope.file_fields.length + 1)
         @scope.file_fields.push(field_name)
+
+    # user enter an email to track the job
+    trackJob: =>
+        @scope.disableTrackIt = true
+        params =
+            type : "jobs"
+            id   : @scope.feedback.token + "/"
+        @Common.put params, {"email":@scope.email}, (data) =>
+            @scope.confirmTrackIt = true
 
 angular.module('detective.controller').controller 'BulkUploadCtrl', BulkUploadCtrl
 

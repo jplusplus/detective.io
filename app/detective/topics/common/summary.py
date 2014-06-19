@@ -11,6 +11,7 @@ from tastypie                 import http
 from tastypie.exceptions      import ImmediateHttpResponse
 from tastypie.resources       import Resource
 from tastypie.serializers     import Serializer
+from django.conf              import settings
 from django.utils.timezone    import utc
 from psycopg2.extensions      import adapt
 from StringIO                 import StringIO
@@ -991,6 +992,10 @@ def process_parsing(topic, files):
             saved += 1
             job.meta["saving_progression"] = saved
             job.save()
+        job.refresh()
+        if "email" in job.meta:
+            from django.core.mail import send_mail
+            send_mail("upload finished", "your upload just finished", settings.DEFAULT_FROM_EMAIL, (job.meta["email"],))
         return {
             'duration' : (time.time() - start_time),
             'inserted' : {

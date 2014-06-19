@@ -43,10 +43,17 @@ class JobResource(Resource):
         job = Job.fetch(kwargs['pk'], connection=queue.connection)
         return Document(**job.__dict__)
 
+    def obj_update(self, bundle, **kwargs):
+        queue = django_rq.get_queue('default')
+        job = Job.fetch(kwargs['pk'], connection=queue.connection)
+        if "email" in bundle.data:
+            job.meta["email"] = bundle.data["email"]
+            job.save()
+
     class Meta:
         resource_name          = "jobs"
         include_resource_uri   = False
         list_allowed_methods   = []
-        detail_allowed_methods = ["get"]
+        detail_allowed_methods = ["get", "put"]
 
 # EOF

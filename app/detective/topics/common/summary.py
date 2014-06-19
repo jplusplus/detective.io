@@ -381,6 +381,9 @@ class SummaryResource(Resource):
         # enqueue the parsing job
         queue = django_rq.get_queue('default', default_timeout=7200)
         job   = queue.enqueue(process_parsing, self.topic, files)
+        job.meta["topic_app_label"] = self.topic.app_label()
+        job.meta["topic_slug"]      = self.topic.slug
+        job.save()
         # return a quick response
         self.log_throttled_access(request)
         return {

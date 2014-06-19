@@ -200,19 +200,22 @@ class UserCtrl
                 "Content-Type": "application/json"
         # Turn on loading mode
         @scope.loading = true
+        next_url = @location.url()
+
         # succefull logout
         @http(config).then (response) =>
-            # Turn off loading mode
-            @scope.loading = false
-            # Interpret the respose
-            if response.data? and response.data.success
-                # Redirect to login form
-                @location.path("/login")
-                # Update user data
-                @User.set
-                    is_logged: false
-                    is_staff : false
-                    username : ''
+            @scope.safeApply =>
+                # Turn off loading mode
+                @scope.loading = false
+                # Interpret the respose
+                if response.data? and response.data.success
+                    # Redirect to login form
+                    @location.url("/login?next=#{next_url}")
+                    # Update user data
+                    @User.set
+                        is_logged: false
+                        is_staff : false
+                        username : ''
     readToken: =>
         @Page.loading(true)
         config =

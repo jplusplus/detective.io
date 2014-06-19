@@ -23,6 +23,7 @@ class BulkUploadCtrl
         @scope.files          = {}
         @scope.files_number   = 0
         @scope.disableTrackIt = false
+        @scope.disableForm    = false
         @scope.confirmTrackIt = false
 
         # Redirect unauthorized user
@@ -35,8 +36,9 @@ class BulkUploadCtrl
 
     # User submit the form
     submit: =>
-        @scope.feedback   = null
-        @scope.job_status = null
+        @scope.feedback       = null
+        @scope.job_status     = null
+        @scope.disableForm    = true
         @scope.disableTrackIt = false
         @scope.confirmTrackIt = false
 
@@ -64,7 +66,7 @@ class BulkUploadCtrl
                                 data.meta.progress_title = "reading files (#{data.meta.file_reading})"
                                 data.meta.progress = data.meta.file_reading_progression
                             else
-                                data.meta.progress_title = "waiting"
+                                data.meta.progress_title = "waiting... you are in queue."
                                 data.meta.progress = 0
                         if data.exc_info?
                             data.exc_info = data.exc_info.replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -74,6 +76,7 @@ class BulkUploadCtrl
                             refresh_timeout = @timeout(refresh_status, @delay)
                         else
                             @scope.feedback = null
+                            @scope.disableForm = false
                 , @delay)
                 # cancel the timeout if the view is destroyed
                 @scope.$on '$destroy', =>

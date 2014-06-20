@@ -63,7 +63,8 @@ class IndividualSingleCtrl
         @scope.topicmeta = topic
 
     getSource: (field)=>
-        _.find @scope.individual.field_sources, (fs)=> fs.field is field.name   
+        return unless @scope.individual
+        _.find @scope.individual.field_sources, (fs)=> fs.field is field.name 
 
     hasRels: ()=>
         if @scope.meta? and @scope.individual?

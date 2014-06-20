@@ -41,13 +41,16 @@ class JobResource(Resource):
         """
         queue = django_rq.get_queue('default')
         job = Job.fetch(kwargs['pk'], connection=queue.connection)
+        print job.status
+        job.meta["user"] = bundle.request.user.pk
+        job.save()
         return Document(**job.__dict__)
 
     def obj_update(self, bundle, **kwargs):
         queue = django_rq.get_queue('default')
         job = Job.fetch(kwargs['pk'], connection=queue.connection)
-        if "email" in bundle.data:
-            job.meta["email"] = bundle.data["email"]
+        if "track" in bundle.data:
+            job.meta["track"] = bundle.data["track"]
             job.save()
 
     class Meta:

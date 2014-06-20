@@ -22,9 +22,11 @@ class BulkUploadCtrl
         @scope.file_fields    = ["file1"]
         @scope.files          = {}
         @scope.files_number   = 0
-        @scope.disableTrackIt = false
         @scope.disableForm    = false
-        @scope.confirmTrackIt = false
+        @scope.trackedJob     = false
+        @scope.feedback       = null
+        @scope.job_status     = null
+        @scope.isALongJob     = false
 
         # Redirect unauthorized user
         @scope.$watch (=> User), =>
@@ -39,9 +41,8 @@ class BulkUploadCtrl
         @scope.feedback       = null
         @scope.job_status     = null
         @scope.disableForm    = true
-        @scope.disableTrackIt = false
-        @scope.confirmTrackIt = false
-
+        @started_time         = new Date()
+        @scope.isALongJob     = false
         # Parameters of your request (to build the url)
         params =
             topic: @scope.topic_selected
@@ -55,6 +56,7 @@ class BulkUploadCtrl
                     id   : @scope.feedback.token + "/"
                 refresh_timeout = @timeout(refresh_status = =>
                     @Common.get params, (data) =>
+                        # format data
                         if data.result?
                             data.result = JSON.parse(data.result)
                         if data.meta?
@@ -71,6 +73,15 @@ class BulkUploadCtrl
                         if data.exc_info?
                             data.exc_info = data.exc_info.replace(/</g, '&lt;').replace(/>/g, '&gt;')
                         @scope.job_status = data
+                        # on queue and long job, trackJob
+                        unless @scope.isALongJob or @scope.job_status.status == "queued"
+                            if new Date() - @started_time > 10000
+                                # if progression is under 20 %
+                                if (data.meta.file_reading_progression) < 20
+                                    @scope.isALongJob = true
+                        if @scope.job_status.status == "queued" or @scope.isALongJob
+                            @trackJob() unless @scope.trackedJob
+                            @scope.trackedJob = true
                         # restart this function again
                         if not @scope.job_status? or @scope.job_status.status == "queued" or @scope.job_status.status == "started"
                             refresh_timeout = @timeout(refresh_status, @delay)
@@ -97,12 +108,10 @@ class BulkUploadCtrl
 
     # user enter an email to track the job
     trackJob: =>
-        @scope.disableTrackIt = true
         params =
             type : "jobs"
             id   : @scope.feedback.token + "/"
-        @Common.put params, {"email":@scope.email}, (data) =>
-            @scope.confirmTrackIt = true
+        @Common.put params, {"track":true}, (data) =>
 
 angular.module('detective.controller').controller 'BulkUploadCtrl', BulkUploadCtrl
 

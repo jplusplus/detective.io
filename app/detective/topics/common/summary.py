@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
-from app.detective.models     import Topic, SearchTerm
-from app.detective.neomatch   import Neomatch
-from app.detective.register   import topics_rules
-from difflib                  import SequenceMatcher
-from django.core.paginator    import Paginator, InvalidPage
-from django.core.urlresolvers import resolve
-from django.http              import Http404, HttpResponse
-from neo4django.db            import connection
-from tastypie                 import http
-from tastypie.exceptions      import ImmediateHttpResponse
-from tastypie.resources       import Resource
-from tastypie.serializers     import Serializer
-from django.conf              import settings
-from django.utils.timezone    import utc
-from psycopg2.extensions      import adapt
-from StringIO                 import StringIO
-from rq                       import get_current_job
-from .errors                  import ForbiddenError, UnauthorizedError
-import app.detective.utils    as utils
+from app.detective.models       import Topic, SearchTerm
+from app.detective.neomatch     import Neomatch
+from app.detective.register     import topics_rules
+from difflib                    import SequenceMatcher
+from django.core.paginator      import Paginator, InvalidPage
+from django.core.urlresolvers   import resolve
+from django.http                import Http404, HttpResponse
+from neo4django.db              import connection
+from tastypie                   import http
+from tastypie.exceptions        import ImmediateHttpResponse
+from tastypie.resources         import Resource
+from tastypie.serializers       import Serializer
+from django.conf                import settings
+from django.utils.timezone      import utc
+from psycopg2.extensions        import adapt
+from StringIO                   import StringIO
+from rq                         import get_current_job
+from .errors                    import ForbiddenError, UnauthorizedError
+import app.detective.utils      as utils
+from django.contrib.auth.models import User
 import json
 import re
 import datetime
@@ -383,7 +384,7 @@ class SummaryResource(Resource):
         job   = queue.enqueue(process_parsing, self.topic, files)
         job.meta["topic_app_label"] = self.topic.app_label()
         job.meta["topic_slug"]      = self.topic.slug
-        job.save()
+        # job.save()
         # return a quick response
         self.log_throttled_access(request)
         return {
@@ -996,9 +997,10 @@ def process_parsing(topic, files):
             job.meta["saving_progression"] = saved
             job.save()
         job.refresh()
-        if "email" in job.meta:
+        if "track" in job.meta:
             from django.core.mail import send_mail
-            send_mail("upload finished", "your upload just finished", settings.DEFAULT_FROM_EMAIL, (job.meta["email"],))
+            user = User.objects.get(pk=job.meta["user"])
+            send_mail("upload finished", "your upload just finished", settings.DEFAULT_FROM_EMAIL, (user.email,))
         return {
             'duration' : (time.time() - start_time),
             'inserted' : {

@@ -41,7 +41,6 @@ class JobResource(Resource):
         """
         queue = django_rq.get_queue('default')
         job = Job.fetch(kwargs['pk'], connection=queue.connection)
-        print job.status
         job.meta["user"] = bundle.request.user.pk
         job.save()
         return Document(**job.__dict__)

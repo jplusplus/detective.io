@@ -1,21 +1,18 @@
 class SearchFormCtrl
     # Injects dependancies
-    @$inject: ['$scope',  '$routeParams', '$route',  '$location', 'QueryUtils', 'TopicsFactory', 'Common', 'Page']
+    @$inject: ['$scope', '$location', '$route', 'QueryUtils', 'TopicsFactory', 'UtilsFactory']
     
-    constructor: (@scope, @routeParams, $route, @location, @QueryUtils, @TopicsFactory, @Common, @Page)->
+    constructor: (@scope, @location, @route,  @QueryUtils, @TopicsFactory, @UtilsFactory)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         @selectedIndividual = {}
-
+        @logger = @UtilsFactory.loggerDecorator('SearchFormCtrl')
         @topics = @TopicsFactory.topics
+        @topic  = @TopicsFactory.current
 
-        @scope.$watch (=> @TopicsFactory.topic), (v)=>
-            @topic = v
+        @topic_slug = @route.current.params.topic if @route.current? and @route.current.params? 
 
-        @TopicsFactory.getTopics (data)=>
-            @topics = data
-            @TopicsFactory.topics = @topics
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
@@ -30,6 +27,19 @@ class SearchFormCtrl
             @human_query = val
         , true
 
+        @scope.$watch (=> @route.current), (current)=>
+            return unless current? and current.params?
+            @topic_slug = current.params.topic
+
+        @scope.$watch (=> @topic_slug + @topics), =>
+            @topic = @getTopic @topic_slug
+            @TopicsFactory.topic = @topic
+        
+        # we get all topics here
+        @TopicsFactory.getTopics (data)=>
+            @topics = data
+            @TopicsFactory.topics = @topics
+
     getQuery: =>
         angular.fromJson @location.search().q
 
@@ -37,10 +47,11 @@ class SearchFormCtrl
         @TopicsFactory.getTopic slug
 
     isTopic: (slug)=>
-        @TopicsFactory.isTopic slug
+        return false unless @topic?
+        @topic.slug is slug
 
     setTopic: (slug)=>
-        @TopicsFactory.setTopic slug
+        @topic = @getTopic slug
 
 
 

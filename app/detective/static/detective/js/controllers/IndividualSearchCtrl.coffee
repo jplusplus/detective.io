@@ -14,6 +14,9 @@ class IndividualSearchCtrl extends IndividualListCtrl
         return @location.url("/") unless @routeParams.q?
         # Parse the JSON query
         @scope.query  = @queryUtils.query
+
+        @scope.$watch 'query', (val)=> 
+            @queryUtils.query = val
         # Load the search syntax
         @Individual.get {type: "summary", id: "syntax"}, (d)=>
             @scope.syntax = d
@@ -23,7 +26,15 @@ class IndividualSearchCtrl extends IndividualListCtrl
         @scope.search = @search
 
     search: =>
-        @queryUtils.selectIndividual(@scope.query, @topic.link)
+        query = @queryUtils.query
+
+        # we recreate query
+        if query.predicate
+            predicate = _.findWhere @scope.syntax.predicates, name: query.predicate.name
+            query.predicate = predicate
+
+        @queryUtils.selectIndividual(query, @topic.link)
+        @query = query
 
     currentSubject: (rel)=> rel.subject? and rel.subject == @scope.query.subject.name
 
@@ -40,7 +51,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
         id    : "rdf_search"
         limit : @scope.limit
         offset: @scope.limit * (@scope.page - 1)
-        q     : @routeParams.q
+        q     : @queryUtils.query
         type  : "summary"
 
     requestCsvExport: (cb) =>

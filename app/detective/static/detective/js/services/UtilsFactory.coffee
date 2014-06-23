@@ -4,11 +4,11 @@ angular.module('detective.service').factory 'UtilsFactory', [
             loggerDecorator: (loggerName)=>
                 class WrappedLogger
                     constructor: (name)->
-                        @loggerMame = name
+                        @loggerName = name
 
                     wrappedMethod: (method_name, argsArray)=>
                         args = Array.prototype.slice.call(argsArray)
-                        args.slice(0, 0, @loggerName)
+                        args = [ @loggerName ].concat args
                         console[method_name].apply(console, args)
 
                     log: =>

@@ -1,28 +1,31 @@
 class IndividualSearchCtrl extends IndividualListCtrl
+    @$inject: IndividualListCtrl.$inject.concat ['QueryUtils', 'TopicsFactory']
+
     constructor:->
         super
+        dep_number     = IndividualListCtrl.$inject.length
+        @queryUtils    = arguments[dep_number]
+        @TopicsFactory = arguments[dep_number + 1] 
+        @topic         = @TopicsFactory.topic
+
+        # Custom filter to display only subject related relationship
+        @scope.currentSubject = @currentSubject
+
         return @location.url("/") unless @routeParams.q?
         # Parse the JSON query
-        @scope.query  = angular.fromJson @routeParams.q
+        @scope.query  = @queryUtils.query
         # Load the search syntax
         @Individual.get {type: "summary", id: "syntax"}, (d)=>
             @scope.syntax = d
             # Merge the two predicates array
             @scope.syntax.predicates = d.predicate.literal.concat( d.predicate.relationship )
         # Watch query change to reload the search
-        @scope.search = =>
-            # Extract valid object's name
-            # (we received an RDF formated object, with a tripplet)
-            if not @scope.query.object.name? and @scope.query.object.subject?
-                _.extend(@scope.query.object,
-                    name: @scope.query.object.label
-                    model: @scope.query.object.object
-                    id: @scope.query.object.subject.name
-                )
-            @location.search 'q', angular.toJson(@scope.query)
-        # Custom filter to display only subject related relationship
-        @scope.currentSubject = (rel)=> rel.subject? and rel.subject == @scope.query.subject.name
+        @scope.search = @search
 
+    search: =>
+        @queryUtils.selectIndividual(@scope.query, @topic.link)
+
+    currentSubject: (rel)=> rel.subject? and rel.subject == @scope.query.subject.name
 
     # Manage research here
     getVerbose: =>

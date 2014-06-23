@@ -11,14 +11,10 @@
 			   	id="input-search" />
     </form>
 
-
     <h2 ng-if="individuals.meta.total_count == 0">
 		Sorry, no results for this query.
 	</h2>
 	<h2 ng-if="individuals.meta.total_count == 1">
-		<span>
-			1
-		</span>
 		[[individuals.meta.total_count]] [[verbose_name]]
 	</h2>
 	<h2  ng-if="individuals.meta.total_count > 1">
@@ -45,7 +41,8 @@
 					 	tt-typeahead
 						tt-topic="topic"
 						tt-individual="'summary'"
-						tt-model="query.object" />
+						tt-model="query.object" 
+						value="query.object.name" />
 				<div class="text-right top10">
 					<input type="submit" value="Search" class="btn btn-primary" />
 				</div>

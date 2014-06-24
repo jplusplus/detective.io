@@ -1,6 +1,6 @@
 angular.module('detective.service').service 'QueryUtils', [
-    '$rootScope', '$routeParams', '$location', 'TopicsFactory'
-    ($rootScope, $routeParams, $location, TopicsFactory)->
+    '$rootScope', '$routeParams', '$http',  '$location', 'TopicsFactory'
+    ($rootScope, $routeParams,  $http, $location, TopicsFactory)->
         new class QueryUtils
             constructor: ->
                 @query = {}
@@ -10,6 +10,10 @@ angular.module('detective.service').service 'QueryUtils', [
                 $rootScope.safeApply =>
                     @query       = query
                     @human_query = @toHumanQuery @query
+
+            humanSearch: (query, topic)=>
+                QUERY = encodeURIComponent query
+                $http.get("/api/#{topic.slug}/v1/summary/human/?q=#{QUERY}")
 
             toHumanQuery: (query_obj=@query)=>
                 return unless query_obj?

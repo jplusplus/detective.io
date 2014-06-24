@@ -14,6 +14,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($parse, $routePa
         remote    : "@"
         prefetch  : "@"
         valueKey  : "@"
+        value     : '='
         limit     : "@"
         change    : "&"
     link: (scope, element, attrs) ->
@@ -25,6 +26,11 @@ angular.module('detective.directive').directive "ttTypeahead", ($parse, $routePa
 
         scope.$parent.$watch attrs.value, (val)->
             element.val val
+
+        scope.$parent.$watch (-> element.val()), (val)->
+            scope.value = val
+            
+
         # Helper to save the search response
         saveResponse = (response)-> lastDataset = response.objects
         # Create the typehead

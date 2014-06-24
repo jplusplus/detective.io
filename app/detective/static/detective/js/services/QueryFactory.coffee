@@ -1,7 +1,7 @@
-angular.module('detective.service').service 'QueryUtils', [
+angular.module('detective.service').service 'QueryFactory', [
     '$rootScope', '$routeParams', '$http',  '$location', 'TopicsFactory'
     ($rootScope, $routeParams,  $http, $location, TopicsFactory)->
-        new class QueryUtils
+        new class QueryFactory
             constructor: ->
                 @query = {}
                 @human_query = undefined

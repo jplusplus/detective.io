@@ -1,10 +1,10 @@
 class IndividualSearchCtrl extends IndividualListCtrl
-    @$inject: IndividualListCtrl.$inject.concat ['QueryUtils', 'TopicsFactory']
+    @$inject: IndividualListCtrl.$inject.concat ['QueryFactory', 'TopicsFactory']
 
     constructor:->
         super
         dep_number     = IndividualListCtrl.$inject.length
-        @queryUtils    = arguments[dep_number]
+        @QueryFactory    = arguments[dep_number]
         @TopicsFactory = arguments[dep_number + 1] 
         @topic         = @TopicsFactory.topic
 
@@ -13,10 +13,10 @@ class IndividualSearchCtrl extends IndividualListCtrl
 
         return @location.url("/") unless @routeParams.q?
         # Parse the JSON query
-        @scope.query  = @queryUtils.query
+        @scope.query  = @QueryFactory.query
 
         @scope.$watch 'query', (val)=> 
-            @queryUtils.query = val
+            @QueryFactory.query = val
         # Load the search syntax
         @Individual.get {type: "summary", id: "syntax"}, (d)=>
             @scope.syntax = d
@@ -26,14 +26,14 @@ class IndividualSearchCtrl extends IndividualListCtrl
         @scope.search = @search
 
     search: =>
-        query = @queryUtils.query
+        query = @QueryFactory.query
 
         # we recreate query
         if query.predicate
             predicate = _.findWhere @scope.syntax.predicates, name: query.predicate.name
             query.predicate = predicate
 
-        @queryUtils.selectIndividual(query, @topic.link)
+        @QueryFactory.selectIndividual(query, @topic.link)
         @query = query
 
     currentSubject: (rel)=> rel.subject? and rel.subject == @scope.query.subject.name
@@ -51,7 +51,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
         id    : "rdf_search"
         limit : @scope.limit
         offset: @scope.limit * (@scope.page - 1)
-        q     : @queryUtils.query
+        q     : @QueryFactory.query
         type  : "summary"
 
     requestCsvExport: (cb) =>

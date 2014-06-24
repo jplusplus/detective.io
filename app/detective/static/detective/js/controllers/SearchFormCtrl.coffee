@@ -1,8 +1,8 @@
 class SearchFormCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$location', '$route', 'QueryUtils', 'TopicsFactory', 'UtilsFactory']
+    @$inject: ['$scope', '$location', '$route', 'Page', 'QueryFactory', 'TopicsFactory', 'UtilsFactory']
     
-    constructor: (@scope, @location, @route,  @QueryUtils, @TopicsFactory, @UtilsFactory)->
+    constructor: (@scope, @location, @route, @Page,  @QueryFactory, @TopicsFactory, @UtilsFactory)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -10,6 +10,7 @@ class SearchFormCtrl
         @logger = @UtilsFactory.loggerDecorator('SearchFormCtrl')
         @topics = @TopicsFactory.topics
         @topic  = @TopicsFactory.current
+        @scope.human_query = ''
 
         @topic_slug = @route.current.params.topic if @route.current? and @route.current.params? 
 
@@ -18,13 +19,13 @@ class SearchFormCtrl
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
         @scope.$watch (=> @selectedIndividual),=>
-            @QueryUtils.selectIndividual(@selectedIndividual)
+            @QueryFactory.selectIndividual(@selectedIndividual)
         , true
 
-        @scope.$watch @getQuery, @QueryUtils.updateQuery, yes
+        @scope.$watch @getQuery, @QueryFactory.updateQuery, yes
 
-        @scope.$watch (=>@QueryUtils.human_query), (val)=> 
-            @human_query = val
+        @scope.$watch (=>@human_query), (val)=>
+            @QueryFactory.human_query = @human_query
         , true
 
         @scope.$watch (=> @route.current), (current)=>
@@ -52,6 +53,16 @@ class SearchFormCtrl
 
     setTopic: (slug)=>
         @topic = @getTopic slug
+
+    showResults: =>
+        @Page.loading true
+        # @logger.log 'showResults', "@human_query", @human_query
+        @QueryFactory.humanSearch(@human_query, @topic).then (results)=>
+            return unless results.data.objects
+            objects = results.data.objects
+            @Page.loading false
+            if objects.length > 0 
+                @QueryFactory.selectIndividual objects[0], @topic.link
 
 
 

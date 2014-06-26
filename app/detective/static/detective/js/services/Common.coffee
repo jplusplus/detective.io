@@ -3,6 +3,9 @@ angular.module('detective.service').factory("Common", [ '$resource', '$http', ($
         get:
             method : 'GET'
             isArray: false
+        put:
+            method : 'put'
+            isArray: false
         query:
             method : 'GET'
             isArray: true

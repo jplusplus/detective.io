@@ -28,10 +28,8 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
                 angular.forEach data, (files, field)->
                     # Each array may contain several files
                     angular.forEach files, (file, idx)->
-                        console.debug field + '-' + idx
                         # Use idx to create a single file key
                         fd.append(field + "-" + idx, file)
-
                 # We delete the Content-Type header (angular set it to application/json, it should be empty so the browser
                 # can set it to multipart/form-data, boundary=<boundary>)
                 headers = do headersGetter

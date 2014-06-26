@@ -155,7 +155,6 @@ COMPRESS_CSS_FILTERS = (
 
 COMPRESS_JS_FILTERS = (
     "compressor.filters.template.TemplateFilter",
-    "compressor.filters.jsmin.JSMinFilter",
 )
 
 COMPRESS_TEMPLATE_FILTER_CONTEXT = {
@@ -184,7 +183,6 @@ INSTALLED_APPS = (
     # API generator
     'tastypie',
     # Email backend
-    "djrill",
     'password_reset',
     # Manage migrations
     'south',
@@ -201,8 +199,8 @@ INSTALLED_APPS = (
 from app.detective.utils import get_topics_modules
 INSTALLED_APPS = INSTALLED_APPS + get_topics_modules()
 
-MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")
-EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # One-week activation window
 ACCOUNT_ACTIVATION_DAYS = 7
 

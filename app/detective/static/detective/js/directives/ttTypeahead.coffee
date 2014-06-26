@@ -1,11 +1,30 @@
-angular.module('detective.directive').directive "ttTypeahead", ($parse, $routeParams, User)->
+angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $routeParams, User)->
     lastDataset = []
     # Use underscore's template
     # @TODO use $compile from angular
     engine =
         compile: (template)->
-            compiled = _.template(template)
-            render: (context)-> compiled(context)
+            compiled = $compile(template)
+            render: (context)->
+                $scope = $rootScope.$new yes
+                $scope = angular.extend($scope, context)
+                $scope.getModel = ->
+                    if context.model?
+                        context.model
+                    else if context.predicate? and context.predicate.name == '<<INSTANCE>>'
+                        context.object
+                    else if context.subject?
+                        context.subject.label
+                    else
+                        no
+                $scope.getFigureBg = -> $filter("strToColor") $scope.getModel()
+
+                element = compiled $scope
+                do $scope.$apply
+                html = do element.html
+                do $scope.$destroy
+                html
+
     scope:
         model     : "=ttModel"
         individual: "&ttIndividual"
@@ -29,8 +48,6 @@ angular.module('detective.directive').directive "ttTypeahead", ($parse, $routePa
 
         scope.$parent.$watch (-> element.val()), (val)->
             scope.value = val
-            
-
         # Helper to save the search response
         saveResponse = (response)-> lastDataset = response.objects
         # Create the typehead
@@ -38,25 +55,19 @@ angular.module('detective.directive').directive "ttTypeahead", ($parse, $routePa
             name: individual
             limit: scope.limit or 5
             template: [
-                "<%= name || label %>",
-                "<% if (typeof(model) != 'undefined') { %>",
-                    "<div class='model'>",
-                        "<%= model %>",
-                    "</div>",
-                "<% } else if (typeof(predicate) != 'undefined' && predicate.name == '<<INSTANCE>>') { %>",
-                    "<div class='model'>",
-                        "<%= object %>",
-                    "</div>",
-                "<% } else if (typeof(subject) != 'undefined') { %>",
-                    "<div class='model'>",
-                        "<i class='icon-list right05'></i>"
-                        "<%= subject.label %>",
-                    "</div>",
-                "<% } %>"
+                '<div>',
+                    '<div class="tt-suggestion__line" ng-class="{\'tt-suggestion__line--with-model\': getModel()}">',
+                        '[[name||label]]',
+                        '<div class="tt-suggestion__line__model" ng-show="getModel()">',
+                            '<div class="tt-suggestion__line__model__figure" ng-style="{ background: getFigureBg()}">',
+                            '</div>',
+                            '[[getModel()]]',
+                        '</div>',
+                    '</div>',
+                '</div>'
             ].join ""
             engine: engine
             valueKey: scope.valueKey or "name"
-            dupChecker: console.log
             prefetch:
                 cache: !User.is_logged
                 url: scope.prefetch or "/api/#{itopic}/v1/#{individual}/mine/"

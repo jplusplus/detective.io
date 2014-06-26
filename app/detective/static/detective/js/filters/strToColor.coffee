@@ -27,6 +27,7 @@ angular.module('detective.filter').filter("strToColor", ->
                 colour += ("00" + ((hash >> i++ * 8) & 0xFF).toString(16)).slice(-2)
             colour
 
-        # Combinate color generation and brightness
-        colorLuminance( generateColor( md5(str.toLowerCase()) ), lum)
+        if str.toLowerCase?
+            # Combinate color generation and brightness
+            colorLuminance( generateColor( md5(str.toLowerCase()) ), lum)
 )

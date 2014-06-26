@@ -14,6 +14,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($parse, $routePa
         remote    : "@"
         prefetch  : "@"
         valueKey  : "@"
+        value     : '='
         limit     : "@"
         change    : "&"
     link: (scope, element, attrs) ->
@@ -22,6 +23,14 @@ angular.module('detective.directive').directive "ttTypeahead", ($parse, $routePa
         itopic     = (scope.topic() or $routeParams.topic or "common").toLowerCase()
         # Set a default value
         element.val scope.model.name if scope.model?
+
+        scope.$parent.$watch attrs.value, (val)->
+            element.val val
+
+        scope.$parent.$watch (-> element.val()), (val)->
+            scope.value = val
+            
+
         # Helper to save the search response
         saveResponse = (response)-> lastDataset = response.objects
         # Create the typehead
@@ -47,8 +56,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($parse, $routePa
             ].join ""
             engine: engine
             valueKey: scope.valueKey or "name"
-            dupChecker: (a)->
-                console.log a
+            dupChecker: console.log
             prefetch:
                 cache: !User.is_logged
                 url: scope.prefetch or "/api/#{itopic}/v1/#{individual}/mine/"

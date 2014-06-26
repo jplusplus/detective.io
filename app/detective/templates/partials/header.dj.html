@@ -21,7 +21,7 @@
 
         <div class="btn-group" dropdown is-open="search.showTopics">
             <button class="btn btn-default dropdown-toggle right10" type="button">
-                [[search.topic.title]]
+                [[search.topic.title | characters:25]]
             </button>
             <ul class="dropdown-menu" role="menu">
                 <li ng-repeat="t in search.topics" ng-class="{active: search.isTopic(t.slug)}">

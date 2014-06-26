@@ -20,9 +20,9 @@ from django.db.models           import signals
 from django.contrib.auth.models import Group, Permission
 
 OPERATIONS = (
-    ('add'   , 'Add an individual to {app_name}'),
-    ('delete', 'Delete an individual from {app_name}'),
-    ('change', 'Edit an individual of {app_name}'),
+    ('add'   , 'Add an entity to {app_name}'),
+    ('delete', 'Delete an entity from {app_name}'),
+    ('change', 'Edit an entity of {app_name}'),
     ('read', 'Read {app_name}')
 )
 

@@ -11,13 +11,14 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 $scope.getModel = ->
                     if context.model?
                         context.model
-                    else if context.predicate? and context.predicate.name == '<<INSTANCE>>'
+                    else if context.predicate? and context.predicate.name is '<<INSTANCE>>'
                         context.object
                     else if context.subject?
                         context.subject.label
                     else
                         no
                 $scope.getFigureBg = -> $filter("strToColor") $scope.getModel()
+                $scope.isList = -> !context.predicate or context.predicate.name isnt '<<INSTANCE>>'
 
                 element = compiled $scope
                 do $scope.$apply
@@ -60,6 +61,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                         '[[name||label]]',
                         '<div class="tt-suggestion__line__model" ng-show="getModel()">',
                             '<div class="tt-suggestion__line__model__figure" ng-style="{ background: getFigureBg()}">',
+                                '<i ng-show="isList()" class="fa fa-list"></i>',
                             '</div>',
                             '[[getModel()]]',
                         '</div>',

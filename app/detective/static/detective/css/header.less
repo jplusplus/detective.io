@@ -62,7 +62,7 @@ header {
         padding-top:9px;
         padding-left:9px;
         left:250px;
-        right:200px;       
+        right:200px;
 
         .twitter-typeahead, .input-control {
             width:50%;
@@ -81,6 +81,20 @@ header {
 
         .form-control,  .tt-query {
             padding:2px 10px;
+        }
+
+        &__input {
+
+            position:relative;
+
+            &__submit-btn {
+                position: absolute;
+                z-index: 4;
+                top:-8px;
+                right:8px;
+                cursor: pointer;
+                background-color:white;
+            }
         }
     }
 }

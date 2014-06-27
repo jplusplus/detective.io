@@ -18,7 +18,7 @@ angular.module('detective.service').factory "Page", ["ngProgressLite", (ngProgre
     # Public attributes and methods
     # ──────────────────────────────────────────────────────────────────────────
     # Show or not the main aside menu
-    showAside: yes
+    showAside: no
     # Page title
     title: (newTitle, titleCase=true)->
         if newTitle?

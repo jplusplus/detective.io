@@ -59,7 +59,7 @@
 
 </header>
 
-<aside class="main-aside">
+<aside class="main-aside" ng-controller="MainAsideCtrl">
 
     <h1 class="main-aside__title">
         <a href="/">
@@ -67,23 +67,25 @@
         </a>
     </h1>
 
-    <div class="main-aside__current-topic">
+    <div class="main-aside__current-topic" ng-if="topicsFactory.topic">
         <h3>
-            The Migrants Files
-            <div class="main-aside__current-topic__author">by <a>Detective</a></div>
+            <a href="[[topicsFactory.topic.link]]" class="main-aside__current-topic__title">
+                <i class="fa fa-home"></i>
+                [[topicsFactory.topic.title]]
+            </a>
+            <div class="main-aside__current-topic__author">
+                by
+                <a href="/[[topicsFactory.topic.author.username]]">
+                    [[topicsFactory.topic.author.username]]
+                </a>
+            </div>
         </h3>
         <ul class="main-aside__current-topic__taxonomy list-unstyled">
-            <li>
-                <a>Energy Product</a>
-            </li>
-            <li>
-                <a>Energy Project</a>
-            </li>
-            <li>
-                <a>Person</a>
-            </li>
-            <li>
-                <a>Organisation</a>
+            <li ng-repeat="model in topicsFactory.topic.models | filter:{is_searchable: true}">
+                <a href="[[topicsFactory.topic.link]][[model.name|lowercase]]">
+                    <div class="small" color-tag ref="model.name|lowercase"></div>
+                    [[model.verbose_name|titlecase]]
+                </a>
             </li>
         </ul>
     </div>

@@ -42,10 +42,21 @@ class TopicResource(ModelResource):
         filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
 
     def dehydrate(self, bundle):
+        from app.detective import register
+        # Get the model's rules manager
+        rulesManager = register.topics_rules()
         # Get all registered models
         models = get_registered_models()
         # Filter model to the one under app.detective.topics
-        bundle.data["models"] = [ m.__name__ for m in bundle.obj.get_models() ]        
+        bundle.data["models"] = []
+        for m in bundle.obj.get_models():
+            model = {
+                'name': m.__name__,
+                'verbose_name': m._meta.verbose_name,
+                'verbose_name_plural': m._meta.verbose_name_plural,
+                'is_searchable': rulesManager.model(m).all().get("is_searchable", False)
+            }
+            bundle.data["models"].append(model)
         return bundle
 
     def get_object_list(self, request):

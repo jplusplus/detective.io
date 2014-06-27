@@ -87,8 +87,8 @@
 {% endblock %}
 
 {% block content %}
-    <div watch-login-mandatory watch-topic-exists class="aslide-wrapper">
-        <div class="aslide-pushed">
+    <div watch-login-mandatory watch-topic-exists class="main-aside-wrapper">
+        <div class="main-aside-pushed">
             {% include "partials/header.dj.html" %}
             <div ng-view autoscroll class="content" ng-hide="is40X()" ng-class="{ freeze: Page.loading() }"></div>
             <div class="content" ng-show="is404()">

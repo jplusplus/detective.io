@@ -1,4 +1,4 @@
-header {
+.header {
     top:0;
     left:0;
     right:0;
@@ -10,7 +10,7 @@ header {
     border-bottom:1px solid #DDD;
     color:contract(@header-bg);
 
-    .box-shadow(0px 1px 2px rgba(0, 0, 0, 0.07));
+    .box-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));
     .transition(@header-open-speed);
     .opacity(100);
 
@@ -19,39 +19,49 @@ header {
         .translate(0, -100px);
     }
 
-    h1 {
-        background: url("@{staticPath}img/favicon.ico") no-repeat left center;
-        background-size:60px auto;
-        margin:0 15px;
-        font-size: 140%;
-        height:@header-height;
-        line-height:@header-height;
-
-        a {
-            padding-left:70px;
-        }
-
-        a, a:hover, a:focus {
-            color: #000;
-            text-decoration:none;
-        }
-
-        i, em {
-            font-style:normal;
-            color:fade(#000, 60);
-        }
-
-        em {
-            float:right;
-            font-size:60%;
-            font-style:italic;
-        }
+    &__toggle-aside {
+        position:absolute;
+        left:0;
+        top:0;
+        width: @header-height;
+        height: @header-height;
+        line-height: @header-height;
+        display: block;
+        font-size: 20px;
+        color:black;
+        text-align: center;
     }
 
-    .user-state {
-        height:@header-height;
-        line-height:@header-height;
-        font-size:90%;
+    &__user {
+        position:absolute;
+        right:0;
+        top:0;
+        height: @header-height;
+        text-align: center;
+        line-height: @header-height;
+        font-size: 20px;
+        color:black;
+        border-left:#DDD solid 1px;
+
+        a {
+            color:inherit;
+        }
+
+        &__sign-in {
+            width: @header-height;
+        }
+
+        &__signed-in {
+            &__profil, &__sign-out {
+                display: inline-block;
+                width: @header-height;
+                height: @header-height;
+            }
+
+            &__sign-out {
+                border-left:#DDD solid 1px;
+            }
+        }
     }
 
     .topic-search {
@@ -61,8 +71,8 @@ header {
         bottom:0;
         padding-top:9px;
         padding-left:9px;
-        left:250px;
-        right:200px;
+        left:@header-height;
+        right:@header-height * 2px;
 
         .twitter-typeahead, .input-control {
             width:50%;

@@ -1,105 +1,114 @@
-<div class="container" id="individual-list">
+<div id="individual-list">
 
-	<form class="form-inline pull-right left20 top20" role="search" ng-if="!query">
-		<input  type="search"
-			    placeholder="Search..."
-			 	tt-typeahead
-				tt-individual="type"
-				tt-model="selectedIndividual"
-				limit="10"
-			   	class="form-control"
-			   	id="input-search" />
-    </form>
+	<div class="panel">
+		<div class="container">
 
-    <h2 ng-if="individuals.meta.total_count == 0">
-		Sorry, no results for this query.
-	</h2>
-	<h2 ng-if="individuals.meta.total_count == 1">
-		[[individuals.meta.total_count]] [[verbose_name]]
-	</h2>
-	<h2  ng-if="individuals.meta.total_count > 1">
-		<span ng-if="individuals.meta.total_count > limit">
-			[[individuals.objects.length]] of
-		</span>
-		[[individuals.meta.total_count]] [[verbose_name_plural]]
-	</h2>
-
-
-	<div ng-class="{'row': query}">
-
-		<form class="top10 col-md-3" ng-if="query" ng-submit="search()">
-			<div class="well query">
-				<select class="form-control bottom10"
-						 ng-options="m.name as m.label for (key, m) in syntax.subject.model"
-						 ng-model="query.subject.name">
-				</select>
-				<select class="form-control bottom10"
-						 ng-options="p.name as p.label for p in syntax.predicates | filter:currentSubject"
-						 ng-model="query.predicate.name">
-				</select>
-				<input class="form-control"
+			<form class="form-inline pull-right left10 top20" role="search" ng-if="!query">
+				<input  type="search"
+					    placeholder="Search..."
 					 	tt-typeahead
-						tt-topic="topic"
-						tt-individual="'summary'"
-						tt-model="query.object" 
-						value="query.object.name" />
-				<div class="text-right top10">
-					<input type="submit" value="Search" class="btn btn-primary" />
-				</div>
-			</div>
-		</form>
+						tt-individual="type"
+						tt-model="selectedIndividual"
+						limit="10"
+					   	class="form-control"
+					   	id="input-search" />
+		    </form>
 
-		<button class='btn btn-default' ng-click="csvExport()" ng-if="individuals.meta.total_count > 0"><i class="fa fa-download"></i> Export as CSV</button>
+			<button class='btn btn-default pull-right left10 top20' ng-click="csvExport()" ng-if="individuals.meta.total_count > 0">
+				<i class="fa fa-download"></i> Export as CSV
+			</button>
 
-		<ul class="list-unstyled top10" ng-class="{'col-md-9': query}" ng-if="individuals.objects.length">
-			<li ng-repeat="individual in individuals.objects">
-				<div class="panel panel-default individual">
-					<div class="thumb">
-						<img ng-src="[[individual.image]]" ng-if="individual.image" />
-					</div>
-					<div class="panel-heading">
-						<div class="pull-right top10">
-							<a ng-href="[[singleUrl(individual)]]">See more</a>
-						</div>
-						<h4>
-							<a ng-href="[[singleUrl(individual)]]">
-								[[individual|individualPreview]]
-							</a>
-						</h4>
-					</div>
-				</div>
-			</li>
-		</ul>
+		    <h2 ng-if="!individuals || individuals.meta.total_count == 0" class="bottom20">
+				Sorry, no results for this query.
+			</h2>
+			<h2  ng-if="individuals.meta.total_count > 0">
+				[[verbose_name_plural]]<br />
+				<small class="text-muted">
+					[[individuals.objects.length]] of [[individuals.meta.total_count]]
+					-
+					Page [[page]]
+				</small>
+			</h2>
+		</div>
 	</div>
-	<div class="tr" ng-if="hasPreviousPage() || hasNextPage()">
-		<ul class="pagination top0">
 
-			<!-- previous -->
-			<li ng-class="{disabled: !hasPreviousPage()}">
-				<a ng-click="previousPage()">&laquo;</a>
-			</li>
+	<div  class="container">
+		<div ng-class="{'row': query}">
 
-			<!-- first page -->
-			<li ng-class="{active: 1 == page}">
-				<a ng-click="goToPage(1)">1</a>
-			</li>
+			<form class="top10 col-md-3" ng-if="query" ng-submit="search()">
+				<div class="well query">
+					<select class="form-control bottom10"
+							 ng-options="m.name as m.label for (key, m) in syntax.subject.model"
+							 ng-model="query.subject.name">
+					</select>
+					<select class="form-control bottom10"
+							 ng-options="p.name as p.label for p in syntax.predicates | filter:currentSubject"
+							 ng-model="query.predicate.name">
+					</select>
+					<input class="form-control"
+						 	tt-typeahead
+							tt-topic="topic"
+							tt-individual="'summary'"
+							tt-model="query.object"
+							value="query.object.name" />
+					<div class="text-right top10">
+						<input type="submit" value="Search" class="btn btn-primary" />
+					</div>
+				</div>
+			</form>
 
-			<!-- nearest pages -->
-			<li class="disabled" ng-if="nearestPages()[0] > 2"><a >...</a></li>
-			<li ng-repeat="p in nearestPages()" ng-class="{active: p == page}">
-				<a ng-click="goToPage(p)">[[p]] <span class="sr-only">(current)</span></a>
-			</li>
-			<li class="disabled" ng-if="nearestPages()[nearestPages().length - 1] && nearestPages()[nearestPages().length - 1] + 1 < pages().length "><a >...</a></li>
-			<!-- last page -->
-			<li ng-if="pages().length > 1" ng-class="{active: pages().length == page}">
-				<a ng-click="goToPage(pages().length)">[[ pages().length ]]</a>
-			</li>
+			<ul class="list-unstyled row top10" ng-class="{'col-md-9': query}" ng-if="individuals.objects.length">
+				<li ng-repeat="individual in individuals.objects">
 
-			<!-- next -->
-			<li ng-class="{disabled: !hasNextPage()}">
-				<a ng-click="nextPage()">&raquo;</a>
-			</li>
-		</ul>
+		            <div class="clearfix" ng-if="$index%2 == 0"></div>
+
+					<div class="col-sm-6">
+						<div class="panel panel-default individual">
+							<div class="thumb">
+								<img ng-src="[[individual.image]]" ng-if="individual.image" />
+							</div>
+							<div class="panel-heading">
+								<h4>
+									<a ng-href="[[singleUrl(individual)]]">
+										[[individual|individualPreview]]
+									</a>
+								</h4>
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div class="tr" ng-if="hasPreviousPage() || hasNextPage()">
+			<ul class="pagination top0">
+
+				<!-- previous -->
+				<li ng-class="{disabled: !hasPreviousPage()}">
+					<a ng-click="previousPage()">&laquo;</a>
+				</li>
+
+				<!-- first page -->
+				<li ng-class="{active: 1 == page}">
+					<a ng-click="goToPage(1)">1</a>
+				</li>
+
+				<!-- nearest pages -->
+				<li class="disabled" ng-if="nearestPages()[0] > 2"><a >...</a></li>
+				<li ng-repeat="p in nearestPages()" ng-class="{active: p == page}">
+					<a ng-click="goToPage(p)">[[p]] <span class="sr-only">(current)</span></a>
+				</li>
+				<li class="disabled" ng-if="nearestPages()[nearestPages().length - 1] && nearestPages()[nearestPages().length - 1] + 1 < pages().length "><a >...</a></li>
+				<!-- last page -->
+				<li ng-if="pages().length > 1" ng-class="{active: pages().length == page}">
+					<a ng-click="goToPage(pages().length)">[[ pages().length ]]</a>
+				</li>
+
+				<!-- next -->
+				<li ng-class="{disabled: !hasNextPage()}">
+					<a ng-click="nextPage()">&raquo;</a>
+				</li>
+			</ul>
+		</div>
 	</div>
 
 </div>

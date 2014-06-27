@@ -1,21 +1,27 @@
-<header  ng-controller="HeaderCtrl" class="row">
-	<div ng-controller="UserCtrl" class="pull-right">
-		<div ng-show="user.is_logged" class="right20 user-state">
-			Welcome, [[user.username]]!
-			<a ng-click="logout()" href="#">Sign out</a>
+<header ng-controller="HeaderCtrl" class="header">
+
+    <a class="header__toggle-aside" ng-click="Page.showAside = !Page.showAside">
+        <i class="fa fa-bars"></i>
+    </a>
+
+	<div ng-controller="UserCtrl" class="header__user">
+		<div ng-show="user.is_logged" class="header__user__signed-in">
+			<a href="/[[user.username]]" class="header__user__signed-in__profil" title="Your profil">
+                <i class="fa fa-user"></i>
+                <span class="sr-only">Your profil</span>
+            </a>
+			<a ng-click="logout()" class="header__user__signed-in__sign-out" title="Sign out">
+                <i class="fa fa-sign-out"></i>
+                <span class="sr-only">Sign out</span>
+            </a>
 		</div>
-        <div ng-hide="user.is_logged" class="right20 user-state">
-            <a class="btn btn-link" ng-href="/login?next=[[nextLogin]]">
-                <i class="fa fa-sign-in"></i> Login
+        <div ng-hide="user.is_logged" class="header__user__sign-in">
+            <a ng-href="/login?next=[[nextLogin]]" title="Login">
+                <i class="fa fa-sign-in"></i>
+                <span class="sr-only">Login</span>
             </a>
         </div>
 	</div>
-
-	<h1 class="pull-left">
-		<a href="/">
-			<span class='hidden-xs'>Detective<i>.io</i></span>
-		</a>
-	</h1>
 
     <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl as search">
 
@@ -49,7 +55,38 @@
             </span>
         </div>
 
-
     </form>
 
 </header>
+
+<aside class="main-aside">
+
+    <h1 class="main-aside__title">
+        <a href="/">
+            Detective<i>.io</i>
+        </a>
+    </h1>
+
+    <div class="main-aside__current-topic">
+        <h3>
+            The Migrants Files
+            <div class="main-aside__current-topic__author">by <a>Detective</a></div>
+        </h3>
+        <ul class="main-aside__current-topic__taxonomy list-unstyled">
+            <li>
+                <a>Energy Product</a>
+            </li>
+            <li>
+                <a>Energy Project</a>
+            </li>
+            <li>
+                <a>Person</a>
+            </li>
+            <li>
+                <a>Organisation</a>
+            </li>
+        </ul>
+    </div>
+
+
+</aside>

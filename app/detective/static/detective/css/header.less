@@ -1,4 +1,4 @@
-header {
+.header {
     top:0;
     left:0;
     right:0;
@@ -10,7 +10,7 @@ header {
     border-bottom:1px solid #DDD;
     color:contract(@header-bg);
 
-    .box-shadow(0px 1px 2px rgba(0, 0, 0, 0.07));
+    .box-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));
     .transition(@header-open-speed);
     .opacity(100);
 
@@ -19,39 +19,49 @@ header {
         .translate(0, -100px);
     }
 
-    h1 {
-        background: url("@{staticPath}img/favicon.ico") no-repeat left center;
-        background-size:60px auto;
-        margin:0 15px;
-        font-size: 140%;
-        height:@header-height;
-        line-height:@header-height;
-
-        a {
-            padding-left:70px;
-        }
-
-        a, a:hover, a:focus {
-            color: #000;
-            text-decoration:none;
-        }
-
-        i, em {
-            font-style:normal;
-            color:fade(#000, 60);
-        }
-
-        em {
-            float:right;
-            font-size:60%;
-            font-style:italic;
-        }
+    &__toggle-aside {
+        position:absolute;
+        left:0;
+        top:0;
+        width: @header-height;
+        height: @header-height;
+        line-height: @header-height;
+        display: block;
+        font-size: 20px;
+        color:black;
+        text-align: center;
     }
 
-    .user-state {
-        height:@header-height;
-        line-height:@header-height;
-        font-size:90%;
+    &__user {
+        position:absolute;
+        right:0;
+        top:0;
+        height: @header-height;
+        text-align: center;
+        line-height: @header-height;
+        font-size: 20px;
+        color:black;
+        border-left:#DDD solid 1px;
+
+        a {
+            color:inherit;
+        }
+
+        &__sign-in {
+            width: @header-height;
+        }
+
+        &__signed-in {
+            &__profil, &__sign-out {
+                display: inline-block;
+                width: @header-height;
+                height: @header-height;
+            }
+
+            &__sign-out {
+                border-left:#DDD solid 1px;
+            }
+        }
     }
 
     .topic-search {
@@ -61,8 +71,8 @@ header {
         bottom:0;
         padding-top:9px;
         padding-left:9px;
-        left:250px;
-        right:200px;
+        left:@header-height;
+        right:@header-height * 2px;
 
         .twitter-typeahead, .input-control {
             width:50%;
@@ -96,6 +106,100 @@ header {
                 right:10px;
                 cursor: pointer;
                 background-color:white;
+            }
+        }
+    }
+}
+
+.main-aside {
+
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width: @aside-width;
+    z-index:@zindex-header;
+    background:@brand-secondary;
+    color: contrast(@brand-secondary);
+    .transition(@header-open-speed);
+    .translate(-100%, 0);
+
+    .show-aside:not(.is-home) & {
+        .translate(0, 0);
+    }
+
+    h1 {
+        background: url("@{staticPath}img/logo-white.svg") no-repeat 15px center;
+        background-size:60px auto;
+        padding:0 15px;
+        margin:0;
+        font-size: 140%;
+        height:@header-height;
+        line-height:@header-height;
+        border-bottom:1px solid fade(#000, 30);
+        .box-shadow(0px 1px 0 fade(#fff, 10));
+
+        a {
+            padding-left:70px;
+        }
+
+        a, a:hover, a:focus {
+            color: #fff;
+            text-decoration:none;
+        }
+
+        i, em {
+            font-style:normal;
+            color:fade(#fff, 60);
+        }
+
+        em {
+            float:right;
+            font-size:60%;
+            font-style:italic;
+        }
+    }
+
+    &__current-topic {
+        margin-top:60px;
+        padding:0 15px;
+
+        h3 {
+            font-size:1em;
+        }
+
+        &__author {
+            color: fade(#fff, 50);
+        }
+
+        &__taxonomy a {
+            color:inherit;
+            text-decoration: none;
+            padding:5px 0;
+        }
+    }
+
+}
+
+
+.aslide-wrapper {
+    width:100%;
+    overflow:hidden;
+    background:@brand-secondary;
+
+    .aslide-pushed {
+        background:@body-bg;
+        position:relative;
+        left:0;
+        width:100%;
+        overflow:hidden;
+        .transition(@header-open-speed);
+
+        .show-aside:not(.is-home) & {
+            left:@aside-width;
+
+            .header {
+                .translate(@aside-width, 0);
             }
         }
     }

@@ -87,15 +87,17 @@
 {% endblock %}
 
 {% block content %}
-    <div watch-login-mandatory watch-topic-exists>
-        {% include "partials/header.dj.html" %}
-        <div ng-view autoscroll id="content" ng-hide="is40X()" ng-class="{ freeze: Page.loading() }"></div>
-        <div id="content" ng-show="is404()">
-            <div ng-include="'partial/404.html'"></div>
-        </div>
-        <div id="content" ng-show="is403()">
-            <div ng-include="'partial/403.html'"></div>
+    <div watch-login-mandatory watch-topic-exists class="aslide-wrapper">
+        <div class="aslide-pushed">
+            {% include "partials/header.dj.html" %}
+            <div ng-view autoscroll class="content" ng-hide="is40X()" ng-class="{ freeze: Page.loading() }"></div>
+            <div class="content" ng-show="is404()">
+                <div ng-include="'partial/404.html'"></div>
+            </div>
+            <div class="content" ng-show="is403()">
+                <div ng-include="'partial/403.html'"></div>
+            </div>
+            {% include "partials/footer.dj.html" %}
         </div>
     </div>
-    {% include "partials/footer.dj.html" %}
 {% endblock %}

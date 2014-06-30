@@ -8,37 +8,39 @@ class SearchFormCtrl
         # ──────────────────────────────────────────────────────────────────────
         @selectedIndividual = {}
         @logger = @UtilsFactory.loggerDecorator('SearchFormCtrl')
-        @topics = @TopicsFactory.topics
-        @topic  = @TopicsFactory.current
-        @scope.human_query = ''
+        @topics = []
+        @topic  = @TopicsFactory.topic
         @topic_slug = @route.current.params.topic if @route.current? and @route.current.params?
-
-
+        @human_query = ''
+        # Get every topics
+        @TopicsFactory.getTopics (topics)=> @topics = @topics.concat topics
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
+        # User select an entity suggested by typeahead
         @scope.$watch (=> @selectedIndividual),=>
-            @QueryFactory.selectIndividual(@selectedIndividual)
+            @QueryFactory.selectIndividual @selectedIndividual
         , true
 
+        # Watch location's query to update this instance of the search form
         @scope.$watch @getQuery, @QueryFactory.updateQuery, yes
 
-        @scope.$watch (=>@human_query), (val)=>
-            @QueryFactory.human_query = @human_query
+        # Update the human query from this controller into the query factory
+        @scope.$watch (=>@human_query), (human_query)=>
+            @QueryFactory.human_query = human_query if human_query?
         , true
 
+        # Watch current location to update the active topic
         @scope.$watch (=> @route.current), (current)=>
             return unless current? and current.params?
             @topic_slug = current.params.topic
 
-        @scope.$watch (=> @topic_slug + @topics), =>
-            @topic = @getTopic @topic_slug
-            @TopicsFactory.topic = @topic
+        # Watch current slug and topics list to find the current topic
+        @scope.$watch (=> [@topic_slug, @topics]), =>
+            if @topic_slug? and @topics.length
+                @TopicsFactory.topic = @topic = @getTopic @topic_slug
+        , yes
 
-        # we get all topics here
-        @TopicsFactory.getTopics (data)=>
-            @topics = data
-            @TopicsFactory.topics = @topics
 
     getQuery: =>
         angular.fromJson @location.search().q
@@ -52,10 +54,17 @@ class SearchFormCtrl
 
     setTopic: (slug)=>
         @topic = @getTopic slug
+        @updateLocation @topic
+
+    updateLocation: (topic)=>
+        # We are not on the selected topic
+        if topic.link? and 0 isnt @location.path().indexOf topic.link
+            # Update the location path
+            @location.path topic.link
+
 
     showResults: =>
         @Page.loading true
-        # @logger.log 'showResults', "@human_query", @human_query
         @QueryFactory.humanSearch(@human_query, @topic).then (results)=>
             return unless results.data.objects
             objects = results.data.objects

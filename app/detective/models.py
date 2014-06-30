@@ -60,16 +60,16 @@ class Topic(models.Model):
     def __unicode__(self):
         return self.title
 
-    def app_label(self):        
+    def app_label(self):
         if self.slug in ["common", "energy"]:
             return self.slug
         elif not self.module:
             # Already saved topic
             if self.id:
-                cache_key = "prefetched_topic_%s" % self.id        
-                # Store topic object in a temporary attribute       
-                # to avoid SQL lazyness                            
-                if getattr(self, cache_key, None) is None:     
+                cache_key = "prefetched_topic_%s" % self.id
+                # Store topic object in a temporary attribute
+                # to avoid SQL lazyness
+                if getattr(self, cache_key, None) is None:
                     topic = Topic.objects.get(id=self.id)
                     setattr(self, cache_key, topic)
                 else:
@@ -146,7 +146,7 @@ class Topic(models.Model):
         if self.author is None:
             return None
         else:
-            return "/%s/%s/" % (self.author.username, self.slug,)
+            return "/%s/%s" % (self.author.username, self.slug,)
 
     def get_absolute_url(self): return self.get_absolute_path()
 
@@ -171,7 +171,7 @@ class Topic(models.Model):
             if rulesManager.model(model).all().get("is_searchable", False):
                 searchableModels.append(model)
         names = [ sm._meta.verbose_name_plural.lower() for sm in searchableModels ]
-        random.shuffle(names)        
+        random.shuffle(names)
         # No more than X names
         if len(names) > max_suggestion:
             names = names[0:max_suggestion]
@@ -219,7 +219,7 @@ class SearchTerm(models.Model):
         field = self.field
         # If any related_model is given, that means its subject is is parent model
         subject = field["model"]
-        return subject    
+        return subject
 
     def clean(self):
         self.subject    = self.find_subject()
@@ -228,8 +228,8 @@ class SearchTerm(models.Model):
 
     @property
     def field(self):
-        field = None        
-        if self.name:            
+        field = None
+        if self.name:
             # Build a cache key with the topic token
             cache_key = "%s__%s__field" % ( self.topic.module, self.name )
             # Try to use the cache value
@@ -257,7 +257,7 @@ class SearchTerm(models.Model):
             return "literal"
 
     @property
-    def target(self):        
+    def target(self):
         if 'related_model' in self.field:
             return self.field["related_model"]
         else:

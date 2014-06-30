@@ -25,18 +25,10 @@
 
     <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl as search">
 
-        <div class="btn-group" dropdown is-open="search.showTopics">
-            <button class="btn btn-default dropdown-toggle" type="button">
+        <div class="btn-group">
+            <a class="btn btn-default" href="[[search.topic.link]]">
                 [[search.topic.title | characters:25]]
-            </button>
-            <ul class="dropdown-menu" role="menu">
-                <li ng-repeat="t in search.topics" ng-class="{active: search.isTopic(t.slug)}">
-                    <a ng-click="search.setTopic(t.slug)">
-                        [[t.title]]
-                        <div class="text-muted" ng-bind-html="t.description"></div>
-                    </a>
-                </li>
-            </ul>
+            </a>
             <span class="topic-search__input" ng-repeat="t in search.topics">
                 <span ng-if="search.isTopic(t.slug)">
                     <input type="search"
@@ -82,7 +74,7 @@
         </h3>
         <ul class="main-aside__current-topic__taxonomy list-unstyled">
             <li ng-repeat="model in topicsFactory.topic.models | filter:{is_searchable: true}">
-                <a href="[[topicsFactory.topic.link]][[model.name|lowercase]]">
+                <a href="[[topicsFactory.topic.link]]/[[model.name|lowercase]]">
                     <div class="small" color-tag ref="model.name|lowercase"></div>
                     [[model.verbose_name|titlecase]]
                 </a>

@@ -31,8 +31,8 @@ angular.module('detective.service').service 'QueryFactory', [
                 query_obj.predicate? and query_obj.object? and query_obj.object != ""
 
             cleanQuery: (query_obj=@query)=>
-                unless query_obj.object?
-                    return query_obj
+                return null unless query_obj?
+                return query_obj unless query_obj.object?
                 # Extract valid object's name
                 # (we received an RDF formated object, with a tripplet)
                 if not query_obj.object.name? and query_obj.object.subject?
@@ -44,14 +44,13 @@ angular.module('detective.service').service 'QueryFactory', [
                     delete query_obj.object.object
                     delete query_obj.object.label
                 query_obj
-                
+
 
             selectIndividual: (query_obj=@query, base_path)=>
-                return if !base_path and !TopicsFactory.topic
                 query_obj = @cleanQuery query_obj
+                return if !base_path and !TopicsFactory.topic or !query_obj?
                 unless base_path
                     base_path = TopicsFactory.topic.link
-
 
                 if _.last(base_path) is '/'
                     base_path = base_path.substr 0, base_path.length - 1

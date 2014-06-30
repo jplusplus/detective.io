@@ -26,7 +26,7 @@
     <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl as search">
 
         <div class="btn-group" ng-if="search.topic.slug">
-            <a class="btn btn-default" href="[[search.topic.link]]">
+            <a class="btn btn-default" href="[[search.topic.link]]" title="[[topic.title]]">
                 [[search.topic.title | characters:25]]
             </a>
             <span class="topic-search__input" ng-repeat="t in search.topics">
@@ -87,7 +87,7 @@
     <div class="main-aside__featured-investigations">
         <h4>Featured investigations</h4>
 
-        <div class="main-aside__featured-investigations__topic" ng-repeat="topic in featured">
+        <div class="main-aside__featured-investigations__topic" ng-repeat="topic in featured" title="[[topic.title]]">
             <a ng-href="[[topic.link]]" class="fg"></a>
             <img ng-src="[[topic.thumbnail.medium]]" width="100%" class="bg" />
             <a ng-href="[[topic.link]]"  class="main-aside__featured-investigations__topic__title">

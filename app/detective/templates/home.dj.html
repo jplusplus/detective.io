@@ -92,6 +92,7 @@
     <div watch-login-mandatory watch-topic-exists class="main-aside-wrapper">
         <div class="main-aside-pushed">
             {% include "partials/header.dj.html" %}
+            {% include "partials/main-aside.dj.html" %}
             <div ng-view autoscroll class="content" ng-hide="is40X()" ng-class="{ freeze: Page.loading() }"></div>
             <div class="content" ng-show="is404()">
                 <div ng-include="'partial/404.html'"></div>

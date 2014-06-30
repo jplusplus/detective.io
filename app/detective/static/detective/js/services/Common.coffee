@@ -2,13 +2,20 @@ angular.module('detective.service').factory("Common", [ '$resource', '$http', ($
     $resource '/api/common/v1/:type/:id/', {}, {
         get:
             method : 'GET'
-            isArray: false
+            isArray: no
         put:
             method : 'put'
-            isArray: false
+            isArray: no
         query:
             method : 'GET'
-            isArray: true
+            isArray: yes
+            transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
+                data.objects
+            ])
+        cachedQuery:
+            method : 'GET'
+            isArray: yes
+            cache  : yes
             transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
                 data.objects
             ])

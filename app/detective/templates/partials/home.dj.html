@@ -86,94 +86,32 @@
         <div class="container">
             <h3 class="container">Featured investigations</h3>
             <div class="boxes">
-                <div class="col-sm-4">
-                    <div class="box">
-                        <a class="fg" ng-href="/detective/energy"></a>
-                        <img src="{% static 'detective-energy/heading-thumb.jpg' %}" class="bg" />
-                    </div>
-                    <h4>
-                        <a ng-href="/detective/energy">
-                            Innovative energy projects in developing countries
-                        </a><br />
-                        <span>
-                            by 
-                            <a ng-href="/detective">
-                                Detective
-                            </a>
-                        </span>
-                    </h4>
-                </div>
-                
-                <div class="col-sm-4">
-                    <div class="box">
-                        <a class="fg" ng-href="/detective/origin-clothes"></a>
-                        <img src="{% static 'detective/img/cover-clothing-thumb.jpg' %}" class="bg" />
-                    </div>
-                    <h4>
-                        <a ng-href="/detective/origin-clothes">
-                            The origin of clothes
-                        </a><br />
-                        <span>
-                            by 
-                            <a ng-href="/detective">
-                                Detective
-                            </a>
-                        </span>
-                    </h4>
-                </div>
 
-                <div class="col-sm-4">
-                    <div class="box">
-                        <a class="fg" ng-href="/detective/the-migrants-files"></a>
-                        <img src="{% static 'detective/img/migrants-files-thumb.jpg' %}" class="bg" />
-                    </div>
-                    <h4>
-                        <a ng-href="/detective/the-migrants-files">
-                            The Migrants Files
-                        </a><br />
-                        <span>
-                            by 
-                            <a ng-href="/detective">
-                                Detective
-                            </a>
-                        </span>
-                    </h4>
-                </div>   
-                
-                <div class="clearfix hidden-xs"></div>
+                <div ng-repeat-start="topic in featured"></div>
 
-                <div class="col-sm-4">
-                    <div class="box">
-                        <a class="fg" ng-href="/Adeline/innovative-water-projects/"></a>
-                        <img src="{% static 'detective/img/water-thumb.jpg' %}" class="bg" />
-                    </div>
-                    <h4>
-                        <a ng-href="/Adeline/innovative-water-projects/">
-                            Innovation in water projects
-                        </a><br />
-                        <span>
-                            by 
-                            <a ng-href="/adeline">
-                                Adeline
-                            </a>
-                        </span>
-                    </h4>
-                </div>              
-
-
-                <div class="col-sm-4">
-                    <div class="box">
-                        <div class="fg">
-                            <span class="coming-soon">
-                                Coming soon
-                            </span>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="box">
+                            <a class="fg" href="[[topic.link]]"></a>
+                            <img src="[[topic.thumbnail_medium]]" class="bg" />
                         </div>
-                        <img src="{% static 'detective/img/microfinance-drc-thumb.jpg' %}" class="bg" />
+                        <h4>
+                            <a href="[[topic.link]]">
+                                [[topic.title]]
+                            </a><br />
+                            <span>
+                                by
+                                <a href="[[topic.author.username]]">
+                                    [[topic.author.username]]
+                                </a>
+                            </span>
+                        </h4>
                     </div>
-                    <h4>
-                        Microfinance<br />in the DRC
-                    </h4>
-                </div>
+
+                    <div class="clearfix visible-md visible-lg" ng-if="$index > 0 && ($index + 1)%3 == 0"></div>
+                    <div class="clearfix visible-sm" ng-if="$index > 0 && ($index + 1)%2 == 0"></div>
+
+                <div ng-repeat-end></div>
+
                 <div class="col-sm-4">
                     <div class="box box-placeholder">
                         <a class="fg" href="/contact-us">

@@ -8,6 +8,8 @@ from tastypie.authorization           import ReadOnlyAuthorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
+from easy_thumbnails.files            import get_thumbnailer
+from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
 import re
 
@@ -39,7 +41,7 @@ class TopicResource(ModelResource):
 
     class Meta:
         queryset  = Topic.objects.all().prefetch_related('author')
-        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
+        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
 
     def dehydrate(self, bundle):
         from app.detective import register
@@ -49,6 +51,15 @@ class TopicResource(ModelResource):
         models = get_registered_models()
         # Filter model to the one under app.detective.topics
         bundle.data["models"] = []
+        # Create a thumbnail for this topic
+        try:
+            thumbnailer = get_thumbnailer(bundle.obj.background)
+            thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
+            bundle.data['thumbnail_medium'] = thumbnailMedium.url
+        # No image available
+        except InvalidImageFormatError:
+            bundle.data['thumbnail'] = None
+
         for m in bundle.obj.get_models():
             model = {
                 'name': m.__name__,

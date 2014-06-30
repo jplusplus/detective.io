@@ -5,9 +5,8 @@ angular.module('detective.service').factory "Page", ["ngProgressLite", "$rootSco
         # ──────────────────────────────────────────────────────────────────────────
         title   = "..."
         loading = false
-        #* To Title Case 2.0.1 – http://individed.com/code/to-title-case/
-        #* Copyright © 2008–2012 David Gouch. Licensed under the MIT License.
-        #
+        # To Title Case 2.0.1 – http://individed.com/code/to-title-case/
+        # Copyright © 2008–2012 David Gouch. Licensed under the MIT License.
         toTitleCase = (str)->
             smallWords = /^(a|an|and|as|at|but|by|en|for|if|in|of|on|or|the|to|vs?\.?|via)$/i
             str.replace /([^\W_]+[^\s-]*) */g, (match, p1, index, title) ->

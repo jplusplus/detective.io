@@ -176,6 +176,8 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
     'django.contrib.auth',
+    # Thumbnails generator
+    'easy_thumbnails',
     # Sign up activation
     'registration',
     # Compresses linked and inline JavaScript or CSS into a single cached file.
@@ -194,6 +196,10 @@ INSTALLED_APPS = (
     'app.detective',
     'app.detective.permissions',
 )
+
+SOUTH_MIGRATION_MODULES = {
+    'easy_thumbnails': 'easy_thumbnails.south_migrations',
+}
 
 # Add customs app to INSTALLED_APPS
 from app.detective.utils import get_topics_modules

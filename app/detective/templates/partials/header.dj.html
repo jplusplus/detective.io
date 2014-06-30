@@ -25,7 +25,7 @@
 
     <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl as search">
 
-        <div class="btn-group">
+        <div class="btn-group" ng-if="search.topic.slug">
             <a class="btn btn-default" href="[[search.topic.link]]">
                 [[search.topic.title | characters:25]]
             </a>
@@ -60,7 +60,7 @@
         </a>
     </h1>
 
-    <div class="main-aside__current-topic" ng-if="topicsFactory.topic">
+    <div class="main-aside__current-topic" ng-if="topicsFactory.topic.slug">
         <h3>
             <a href="[[topicsFactory.topic.link]]" class="main-aside__current-topic__title">
                 <i class="fa fa-home"></i>

@@ -17,6 +17,11 @@ PUBLIC = (
     (False, "No, just for a small group of users"),
 )
 
+FEATURED = (
+    (True, "Yes, show it on the homepage"),
+    (False, "No, stay out of the ligth"),
+)
+
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (
         (0, "Less than 200"),
@@ -53,6 +58,7 @@ class Topic(models.Model):
     description = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
     about       = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public      = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
+    featured    = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
     ontology    = models.FileField(null=True, blank=True, upload_to="ontologies", help_text="Ontology file that descibes your field of study.")
     background  = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
     author      = models.ForeignKey(User, help_text="Author of this topic.", null=True)

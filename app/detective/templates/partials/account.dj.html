@@ -1,5 +1,5 @@
 <div class="container">
-    <h2><strong>[[user.username]]</strong>'s open topics</h2>
+    <h2><strong>[[user.username|titlecase]]</strong>'s open topics</h2>
     <div class="boxes" ng-if="shouldShowTopics()">
         <div ng-repeat-start="topic in userTopics"></div>
 
@@ -14,7 +14,7 @@
                 <h4>
                     <a ng-href="[[topic.link]]">[[topic.title]]</a><br />
                     <span class="text-muted">
-                        by 
+                        by
                         <a ng-href="/[[topic.author.username]]">
                             [[topic.author.username]]
                         </a>
@@ -30,7 +30,7 @@
 </div>
 
 <div class="container" ng-if="shouldShowContributions()">
-    <h2>Topics <strong>[[user.username]]</strong> contributes to</h2>
+    <h2>Topics <strong>[[user.username|titlecase]]</strong> contributes to</h2>
     <div class="boxes">
         <div ng-repeat-start="group in user.groups" ng-init="topic = group.topic"></div>
 
@@ -45,7 +45,7 @@
                 <h4>
                     <a ng-href="[[topic.link]]">[[topic.title]]</a><br />
                     <span class="text-muted">
-                        by 
+                        by
                         <a ng-href="/[[topic.author.username]]">
                             [[topic.author.username]]
                         </a>

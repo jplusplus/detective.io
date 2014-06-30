@@ -54,8 +54,12 @@ class TopicResource(ModelResource):
         # Create a thumbnail for this topic
         try:
             thumbnailer = get_thumbnailer(bundle.obj.background)
+            thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
             thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
-            bundle.data['thumbnail_medium'] = thumbnailMedium.url
+            bundle.data['thumbnail'] = {
+                'small' : thumbnailSmall.url,
+                'medium': thumbnailMedium.url
+            }
         # No image available
         except InvalidImageFormatError:
             bundle.data['thumbnail'] = None

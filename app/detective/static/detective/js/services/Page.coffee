@@ -21,7 +21,7 @@ angular.module('detective.service').factory "Page", ["ngProgressLite", "$rootSco
             $rootScope.$on "$routeChangeStart", =>
                 @showAside = no
         # Show or not the main aside menu
-        showAside: no
+        showAside: yes
         # Page title
         title: (newTitle, titleCase=true)->
             if newTitle?

@@ -84,4 +84,16 @@
     </div>
 
 
+    <div class="main-aside__featured-investigations">
+        <h4>Featured investigations</h4>
+
+        <div class="main-aside__featured-investigations__topic" ng-repeat="topic in featured">
+            <a ng-href="[[topic.link]]" class="fg"></a>
+            <img ng-src="[[topic.thumbnail.medium]]" width="100%" class="bg" />
+            <a ng-href="[[topic.link]]"  class="main-aside__featured-investigations__topic__title">
+                [[topic.title|characters:30]]
+            </a>
+        </div>
+    </div>
+
 </aside>

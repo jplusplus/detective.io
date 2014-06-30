@@ -33,6 +33,7 @@
                 <span ng-if="search.isTopic(t.slug)">
                     <input type="search"
                             placeholder="[[t.search_placeholder]]"
+                            tt-submit="search.goToTopic()"
                             tt-typeahead
                             tt-model="search.selectedIndividual"
                             remote="/api/[[t.slug]]/v1/summary/human/?q=%QUERY"

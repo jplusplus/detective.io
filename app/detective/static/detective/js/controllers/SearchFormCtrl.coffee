@@ -62,6 +62,11 @@ class SearchFormCtrl
             # Update the location path
             @location.path topic.link
 
+    goToTopic: =>
+        # Change only if the query is empty
+        if @human_query is ""
+            # Update the location path
+            @location.path @topic.link
 
     showResults: =>
         @Page.loading true

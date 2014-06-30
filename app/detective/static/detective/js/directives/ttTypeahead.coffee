@@ -31,6 +31,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         individual: "&ttIndividual"
         topic     : "&ttTopic"
         create    : "&ttCreate"
+        submit    : "&ttSubmit"
         remote    : "@"
         prefetch  : "@"
         valueKey  : "@"
@@ -79,12 +80,21 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 url: scope.remote or "/api/#{itopic}/v1/#{individual}/search/?q=%QUERY"
                 filter: saveResponse
 
+        # Watch keys
+        element.on "keyup", (event)->
+            # Enter is pressed
+            if event.keyCode is 13 and scope.submit?
+                do scope.submit
+                # Apply the scope change
+                do scope.$apply
+
+
         # Watch select event
         element.on "typeahead:selected", (input, individual)->
             if scope.model?
                 angular.copy(individual, scope.model);
                 scope.$apply()
-            scope.change() if scope.change?
+            do scope.change if scope.change?
 
         # Watch user value event
         element.on "typeahead:uservalue", ()->
@@ -94,9 +104,9 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             # Record the value
             scope.model.name = $(this).val()
             # Evaluate the 'create' expression
-            scope.create() if typeof(scope.create) is "function"
+            do scope.create if typeof(scope.create) is "function"
             # Apply the scope change
-            scope.$apply()
+            do scope.$apply
 
         # Watch change event
         element.on "change", (input)->

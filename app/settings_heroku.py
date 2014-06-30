@@ -57,6 +57,7 @@ STATIC_ROOT                = here('staticfiles')
 STATICFILES_DIRS          += (here('static'),)
 INSTALLED_APPS            += ('storages',)
 DEFAULT_FILE_STORAGE       = 'storages.backends.s3boto.S3BotoStorage'
+THUMBNAIL_DEFAULT_STORAGE  = 'storages.backends.s3boto.S3BotoStorage'
 # Static storage
 STATICFILES_STORAGE        = DEFAULT_FILE_STORAGE
 ADMIN_MEDIA_PREFIX         = STATIC_URL + 'admin/'

@@ -23,6 +23,7 @@
     "typeahead.js": "0.9.3",
     "underscore": "1.5.2",
     "FileSaver": "*",
-    "angular-truncate": "*"
+    "angular-truncate": "*",
+    "angular-nanoscroller": "~0.2.1"
   }
 }

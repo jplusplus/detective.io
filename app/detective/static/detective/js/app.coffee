@@ -20,6 +20,7 @@ detective = angular
         "angularFileUpload"
         "ngProgressLite"
         "truncate"
+        "sun.scrollable"
     ])
     .run(
         [

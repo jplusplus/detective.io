@@ -8,6 +8,12 @@ body {
         padding-top:0;
     }
 
+    &.show-aside:not(.is-home) {
+        @media (max-width: @screen-xs-max) {
+            overflow:hidden;
+        }
+    }
+
     h4, h5, h6 {
         font-family: inherit;
     }

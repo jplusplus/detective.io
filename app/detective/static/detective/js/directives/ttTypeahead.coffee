@@ -51,11 +51,16 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             scope.value = val
 
         # Helper to save the search response
-        saveResponse = (response) -> lastDataset = response.objects
+        saveResponse = (response) ->
+            lastDataset = response.objects
 
         bh = new Bloodhound
             datumTokenizer : Bloodhound.tokenizers.obj.whitespace (scope.valueKey or "name")
             queryTokenizer : Bloodhound.tokenizers.whitespace
+            dupDetector : (a, b) ->
+                a_id = a.id || a.subject.name
+                b_id = b.id || b.subject.name
+                a_id is b_id
             prefetch :
                 url : scope.prefetch or "/api/#{itopic}/v1/#{individual}/mine/"
                 filter : saveResponse
@@ -91,16 +96,16 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         element.on "keyup", (event)->
             # Enter is pressed
             if event.keyCode is 13 and scope.submit?
-                do scope.submit
                 # Apply the scope change
-                do scope.$apply
+                scope.$apply =>
+                    do scope.submit
 
 
         # Watch select event
         element.on "typeahead:selected", (input, individual)->
             if scope.model?
-                angular.copy(individual, scope.model);
-                scope.$apply()
+                scope.$apply =>
+                    angular.copy(individual, scope.model);
             do scope.change if scope.change?
 
         # Watch user value event

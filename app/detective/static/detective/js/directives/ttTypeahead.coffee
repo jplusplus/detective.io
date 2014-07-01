@@ -1,11 +1,10 @@
 angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $routeParams, User)->
     lastDataset = []
-    # Use underscore's template
-    # @TODO use $compile from angular
-    engine =
-        compile: (template)->
+
+    template =
+        compile: (template) ->
             compiled = $compile(template)
-            render: (context)->
+            render: (context) ->
                 $scope = $rootScope.$new yes
                 $scope = angular.extend($scope, context)
                 $scope.getModel = ->
@@ -50,35 +49,43 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
 
         scope.$parent.$watch (-> element.val()), (val)->
             scope.value = val
+
         # Helper to save the search response
-        saveResponse = (response)-> lastDataset = response.objects
+        saveResponse = (response) -> lastDataset = response.objects
+
+        bh = new Bloodhound
+            datumTokenizer : Bloodhound.tokenizers.obj.whitespace (scope.valueKey or "name")
+            queryTokenizer : Bloodhound.tokenizers.whitespace
+            prefetch :
+                url : scope.prefetch or "/api/#{itopic}/v1/#{individual}/mine/"
+                filter : saveResponse
+            remote :
+                url : scope.remote or "/api/#{itopic}/v1/#{individual}/search/?q=%QUERY"
+                filter : saveResponse
+        do bh.initialize
+
         # Create the typehead
-        element.typeahead
-            name: individual
-            limit: scope.limit or 5
-            template: [
-                '<div>',
-                    '<div class="tt-suggestion__line" ng-class="{\'tt-suggestion__line--with-model\': getModel()}">',
-                        '[[name||label]]',
-                        '<div class="tt-suggestion__line__model" ng-show="getModel()">',
-                            '<div class="tt-suggestion__line__model__figure" ng-style="{ background: getFigureBg()}">',
-                                '<i ng-show="isList()" class="fa fa-list"></i>',
+        options =
+            hint : yes
+            highlight : yes
+        element.typeahead options,
+            name : 'suggestions'
+            source : do bh.ttAdapter
+            templates : {
+                suggestion : (template.compile [
+                    '<div>',
+                        '<div class="tt-suggestion__line" ng-class="{\'tt-suggestion__line--with-model\': getModel()}">',
+                            '[[name||label]]',
+                            '<div class="tt-suggestion__line__model" ng-show="getModel()">',
+                                '<div class="tt-suggestion__line__model__figure" ng-style="{ background: getFigureBg()}">',
+                                    '<i ng-show="isList()" class="fa fa-list"></i>',
+                                '</div>',
+                                '[[getModel()]]',
                             '</div>',
-                            '[[getModel()]]',
                         '</div>',
-                    '</div>',
-                '</div>'
-            ].join ""
-            engine: engine
-            valueKey: scope.valueKey or "name"
-            prefetch:
-                cache: !User.is_logged
-                url: scope.prefetch or "/api/#{itopic}/v1/#{individual}/mine/"
-                filter: saveResponse
-            remote:
-                cache: !User.is_logged
-                url: scope.remote or "/api/#{itopic}/v1/#{individual}/search/?q=%QUERY"
-                filter: saveResponse
+                    '</div>'
+                ].join "").render
+            }
 
         # Watch keys
         element.on "keyup", (event)->

@@ -67,6 +67,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             remote :
                 url : scope.remote or "/api/#{itopic}/v1/#{individual}/search/?q=%QUERY"
                 filter : saveResponse
+        bh.storage = null # Hack to disable localStorage caching
         do bh.initialize
 
         # Create the typehead

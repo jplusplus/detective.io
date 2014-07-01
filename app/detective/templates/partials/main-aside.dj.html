@@ -1,7 +1,10 @@
 <aside class="main-aside" ng-controller="MainAsideCtrl">
     <h1 class="main-aside__title">
-        <a href="/">
-            Detective<i>.io</i>
+        <a href="/" class="main-aside__title__caption">
+            Detective<em>.io</em>
+        </a>
+        <a class="main-aside__title__toggle-aside" ng-click="Page.showAside = !Page.showAside">
+            <i class="fa fa-bars"></i>
         </a>
     </h1>
     <div scrollable class="main-aside__wrapper">

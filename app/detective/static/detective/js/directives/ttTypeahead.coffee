@@ -74,6 +74,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             hint : yes
             highlight : yes
         element.typeahead options,
+            displayKey : (scope.valueKey or "name")
             name : 'suggestions'
             source : do bh.ttAdapter
             templates : {

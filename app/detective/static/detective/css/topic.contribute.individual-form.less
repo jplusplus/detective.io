@@ -178,7 +178,9 @@
                     background:fade(#000, 10);
                     margin-bottom:5px;
                 }
-
+                .form-label  {
+                    text-align: right;
+                }
                 label {
                         font-size:1.1em;
                        
@@ -209,5 +211,31 @@
             border-color: darken(@panel-warning-border, 5);
         }
     }
+    @media(max-width: @screen-tablet){ // for mobile
+        .individual-forms {
+            .individual {
+                .field { 
+                    .form-label {
+                        text-align: left;
+                    }
+                    .add-source {
+                        &-form {
+                            right: auto;
+                            &:before {
+                                right: auto;
+                                left: 40px;
+                            }
+                        }
+                    }
 
+                    // field value suggestion must let some room for sources
+                    .tt-dropdown-menu {
+                        width : 60% !important;
+                        right : 0 !important;
+                        left  : auto !important;
+                    }
+                }
+            }
+        }
+    }
 }

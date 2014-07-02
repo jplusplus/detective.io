@@ -592,8 +592,8 @@ class ApiTestCase(ResourceTestCase):
         # At least 2 results
         self.assertGreater( len(data.items()), 1 )
 
-    def test_search_summary_wrong_page(self):
-        resp = self.api_client.get('/api/energy/v1/summary/search/?q=Journalism&page=-1', format='json', authentication=self.get_super_credentials())
+    def test_search_summary_wrong_offset(self):
+        resp = self.api_client.get('/api/energy/v1/summary/search/?q=Journalism&offset=-1', format='json', authentication=self.get_super_credentials())
         self.assertEqual(resp.status_code in [302, 404], True)
 
     def test_summary_human_search(self):

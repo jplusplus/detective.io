@@ -229,6 +229,10 @@ class ContributeCtrl
                     url  : value
                     field: field.name
 
+        hasSource: (field)-> 
+            source = @getSource field
+            source? and source.url? and source.url != ''
+
         # Load an individual using its id
         load: (id, related_to=null)=>
             @loading    = true

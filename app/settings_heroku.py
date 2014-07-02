@@ -57,6 +57,7 @@ STATIC_ROOT                = here('staticfiles')
 STATICFILES_DIRS          += (here('static'),)
 INSTALLED_APPS            += ('storages',)
 DEFAULT_FILE_STORAGE       = 'storages.backends.s3boto.S3BotoStorage'
+THUMBNAIL_DEFAULT_STORAGE  = 'storages.backends.s3boto.S3BotoStorage'
 # Static storage
 STATICFILES_STORAGE        = DEFAULT_FILE_STORAGE
 ADMIN_MEDIA_PREFIX         = STATIC_URL + 'admin/'
@@ -94,5 +95,9 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
     }
 }
+
+EMAIL_BACKEND    = "djrill.mail.backends.djrill.DjrillBackend"
+MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")
+INSTALLED_APPS  += ('djrill',)
 
 # EOF

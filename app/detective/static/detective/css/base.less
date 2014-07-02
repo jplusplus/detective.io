@@ -10,11 +10,12 @@
 @brand-secondary: #1B2024;
 @brand-tertiary: #2C768F;
 // Header configuration
-@header-bg:#F0F0F0;
+@header-bg:#FFF;
 @header-height: 50px;
 @header-open-speed: 0.4s;
+@aside-width: 250px;
 // Icons font
-@import '//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css';
+@import '//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css';
 // Bootstrap dependancies
 @import './bootstrap.loader.less';
 @import './bootstrap.alert.less';
@@ -26,6 +27,8 @@
 // Custom mixin and helper classes
 @import './tools.less';
 @import './animations.less';
+// Import scrollbar style
+@import "components/nanoscroller/bin/css/nanoscroller.less";
 // Core
 @import './account.less';
 @import './account.login.less';
@@ -33,10 +36,12 @@
 @import './account.password-reset.less';
 @import './account.signup.less';
 @import './animations.less';
+@import './content.less';
 @import './footer.less';
 @import './global.less';
 @import './header.less';
 @import './home.less';
+@import './main-aside.less';
 @import './page.less';
 @import './progressbar.less';
 @import './quote-request.less';

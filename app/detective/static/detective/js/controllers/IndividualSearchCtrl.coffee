@@ -1,28 +1,42 @@
 class IndividualSearchCtrl extends IndividualListCtrl
+    @$inject: IndividualListCtrl.$inject.concat ['QueryFactory', 'TopicsFactory']
+
     constructor:->
         super
+        dep_number     = IndividualListCtrl.$inject.length
+        @QueryFactory    = arguments[dep_number]
+        @TopicsFactory = arguments[dep_number + 1] 
+        @topic         = @TopicsFactory.topic
+
+        # Custom filter to display only subject related relationship
+        @scope.currentSubject = @currentSubject
+
         return @location.url("/") unless @routeParams.q?
         # Parse the JSON query
-        @scope.query  = angular.fromJson @routeParams.q
+        @scope.query  = @QueryFactory.query
+
+        @scope.$watch 'query', (val)=> 
+            @QueryFactory.query = val
         # Load the search syntax
         @Individual.get {type: "summary", id: "syntax"}, (d)=>
             @scope.syntax = d
             # Merge the two predicates array
             @scope.syntax.predicates = d.predicate.literal.concat( d.predicate.relationship )
         # Watch query change to reload the search
-        @scope.search = =>
-            # Extract valid object's name
-            # (we received an RDF formated object, with a tripplet)
-            if not @scope.query.object.name? and @scope.query.object.subject?
-                _.extend(@scope.query.object,
-                    name: @scope.query.object.label
-                    model: @scope.query.object.object
-                    id: @scope.query.object.subject.name
-                )
-            @location.search 'q', angular.toJson(@scope.query)
-        # Custom filter to display only subject related relationship
-        @scope.currentSubject = (rel)=> rel.subject? and rel.subject == @scope.query.subject.name
+        @scope.search = @search
 
+    search: =>
+        query = @QueryFactory.query
+
+        # we recreate query
+        if query.predicate
+            predicate = _.findWhere @scope.syntax.predicates, name: query.predicate.name
+            query.predicate = predicate
+
+        @QueryFactory.selectIndividual(query, @topic.link)
+        @query = query
+
+    currentSubject: (rel)=> rel.subject? and rel.subject == @scope.query.subject.name
 
     # Manage research here
     getVerbose: =>
@@ -37,7 +51,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
         id    : "rdf_search"
         limit : @scope.limit
         offset: @scope.limit * (@scope.page - 1)
-        q     : @routeParams.q
+        q     : @QueryFactory.query
         type  : "summary"
 
     requestCsvExport: (cb) =>

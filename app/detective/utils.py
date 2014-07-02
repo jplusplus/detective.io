@@ -4,8 +4,12 @@ from os.path            import isdir, join
 from os                 import listdir
 import importlib
 import inspect
+import os
 import re
 import tempfile
+
+# for relative paths
+here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
 
 def create_node_model(name, fields=None, app_label='', module='', options=None):
     """
@@ -64,15 +68,15 @@ def import_class(path):
 def get_topics(offline=True):
     if offline:
         # Load topics' names
-        appsdir = "./app/detective/topics"
+        appsdir = here("topics")
         return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
-    else:                 
+    else:
         from app.detective.models import Topic
-        from django.core.cache    import cache    
-        # Store topic object in a temporary attribute       
-        # to avoid SQL lazyness                     
-        cache_key = "prefetched_topics" 
-        if cache.get(cache_key, None) is None:     
+        from django.core.cache    import cache
+        # Store topic object in a temporary attribute
+        # to avoid SQL lazyness
+        cache_key = "prefetched_topics"
+        if cache.get(cache_key, None) is None:
             topics = Topic.objects.all()
             cache.set(cache_key, topics, 100)
         else:
@@ -131,13 +135,13 @@ def get_registered_models():
             pass
     return mdls
 
-def get_model_fields(model):
+def get_model_fields(model, order_by='name'):
     from app.detective           import register
     from django.db.models.fields import FieldDoesNotExist
     fields       = []
     models_rules = register.topics_rules().model(model)
     # Create field object
-    for f in model._meta.fields: 
+    for f in model._meta.fields:
         # Ignores field terminating by + or begining by _
         if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):
             # Find related model for relation
@@ -176,6 +180,9 @@ def get_model_fields(model):
             }
             fields.append(field)
 
+    get_key=lambda el: el[order_by]
+
+    fields = sorted(fields, key=get_key)
     return fields
 
 def get_model_nodes():

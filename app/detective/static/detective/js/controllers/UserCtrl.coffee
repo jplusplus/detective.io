@@ -8,7 +8,7 @@ class UserCtrl
         user: ($rootScope, $route, $q, $location, Common)->
             notFound    = ->
                 deferred.reject()
-                $scope.is404(yes)
+                $rootScope.is404(yes)
                 deferred
             deferred    = $q.defer()
             routeParams = $route.current.params
@@ -56,6 +56,8 @@ class UserCtrl
                 @Page.title "Reset password", false
             when "/account/reset-password-confirm"
                 @Page.title "Enter a new password", false
+                
+        @Page.loading no
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
@@ -69,6 +71,8 @@ class UserCtrl
         @scope.error = error if error?
 
     login: (el)=>
+        # Trigger the event waited in the autofill directive
+        @scope.$broadcast 'autofill:update'
         # Catch a bug with angular and browser autofill
         # Open issue https://github.com/angular/angular.js/issues/1460
         unless @scope.username? or @scope.password?
@@ -198,19 +202,22 @@ class UserCtrl
                 "Content-Type": "application/json"
         # Turn on loading mode
         @scope.loading = true
+        next_url = @location.url()
+
         # succefull logout
         @http(config).then (response) =>
-            # Turn off loading mode
-            @scope.loading = false
-            # Interpret the respose
-            if response.data? and response.data.success
-                # Redirect to login form
-                @location.path("/login")
-                # Update user data
-                @User.set
-                    is_logged: false
-                    is_staff : false
-                    username : ''
+            @scope.safeApply =>
+                # Turn off loading mode
+                @scope.loading = false
+                # Interpret the respose
+                if response.data? and response.data.success
+                    # Redirect to login form
+                    @location.url("/login?next=#{next_url}")
+                    # Update user data
+                    @User.set
+                        is_logged: false
+                        is_staff : false
+                        username : ''
     readToken: =>
         @Page.loading(true)
         config =

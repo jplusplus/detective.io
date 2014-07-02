@@ -19,6 +19,8 @@ detective = angular
         "monospaced.elastic"
         "angularFileUpload"
         "ngProgressLite"
+        "truncate"
+        "sun.scrollable"
     ])
     .run(
         [
@@ -32,7 +34,7 @@ detective = angular
                 $rootScope.user      = user
                 $rootScope.Page      = Page
                 # Update global render
-                $rootScope.is404     = (is404)-> 
+                $rootScope.is404     = (is404)->
                     # Value given
                     if is404?
                         # Set the 404

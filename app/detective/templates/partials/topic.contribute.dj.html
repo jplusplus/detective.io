@@ -66,11 +66,11 @@
 						   ng-if="user.hasDeletePermission(meta.module)"
 						   ng-click="individual.delete($index)">
 							<i class="fa fa-trash-o"></i>
-							Delete this [[individual.meta.verbose_name|lowercase]]
+							Delete this entity
 						</button>
 					</span>
 					<button ng-click="individual.close()" class="btn left10">
-						<i class="fa fa-times"></i>
+						<i class="fa fa-minus"></i>
 					</button>
 				</div>
 				<h3>
@@ -111,8 +111,8 @@
 				<span ng-if="!individual.isRemoved && !individual.isNotFound">
 					 has been closed.
 					<a class="left10" ng-click="individual.close()">
-						<i class="fa fa-undo"></i>
-						Undo
+						<i class="fa fa-plus right05"></i>
+						Show detail
 					</a>	
 				</span>
 				<span ng-if="individual.isRemoved" class="text-danger">
@@ -146,7 +146,7 @@
 				     ng-show="isAllowedType(field.type) && individual.isVisible(field) && individual.isEditable(field)"
 					 ng-repeat="field in individual.meta.fields track by $index">
 
-					<div class="col-sm-3 tr form-label top05">
+					<div class="col-sm-3 form-label top05">
 						<label for="id_[[field.name]]">
 							[[field.verbose_name]]
 						</label>
@@ -298,23 +298,23 @@
 									ng-class="{active: field.showSourceForm}" 
 							        ng-click="field.showSourceForm = !field.showSourceForm">
 								<i class="fa-book fa right05"></i>
-								<span ng-if="individual.getSource(field)">
+								<span ng-if="individual.hasSource(field)">
 									Edit source
 								</span>
-								<span ng-if="!individual.getSource(field)">
+								<span ng-if="!individual.hasSource(field)">
 									Add source
 								</span>
 							</button>
 							<form class="add-source-form" 
 								  ng-submit="individual.setSource(field)"
 								  ng-show="field.showSourceForm">
-								<span ng-class="{ 'input-group': individual.getSource(field) }">
+								<span ng-class="{ 'input-group': individual.hasSource(field) }">
 									<input type="url"
 										   ng-blur="individual.setSource(field)"
 										   ng-model="individual.sources[field.name]"
 										   placeholder="http://exemple.com" 
 										   class="form-control" />
-									<span class="input-group-btn" ng-if="individual.getSource(field)">
+									<span class="input-group-btn" ng-if="individual.hasSource(field)">
 										<a target="_blank" 
 										   ng-href="[[individual.getSource(field).url]]" 
 										   class="btn btn-default">
@@ -328,7 +328,7 @@
 					</div>
 
 
-					<div class="has-source text-success col-sm-3 top05" ng-show="individual.getSource(field)">
+					<div class="has-source text-success col-sm-3 top05" ng-show="individual.hasSource(field)">
 						<i class="fa fa-check-circle-o"></i> Sourced
 					</div>						
 
@@ -339,7 +339,7 @@
 				<div class="more-fields row field top20 form-group"
 				     ng-show="individual.invisibleFields().length">
 
-					<span class="col-sm-3 tr form-label ">
+					<span class="col-sm-3 form-label ">
 						Add more information
 					</span>
 

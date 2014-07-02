@@ -5,7 +5,6 @@
         background:@brand-tertiary;
         color:#fff;
         padding-top:100px;
-        margin-top:-1px * @header-height;
         overflow:hidden;
 
         .go-down {
@@ -26,7 +25,7 @@
             }
             .fa {
                 margin-top:20px;
-                animation: bounce 0.7s ease infinite;
+                .animation(bounce 0.7s ease infinite);
             }
         }
 
@@ -156,8 +155,8 @@
         }
 
         .boxes {
-            
-            padding:0 20px; 
+
+            padding:0 20px;
 
             h4 {
                 a {
@@ -172,4 +171,17 @@
         }
     }
 
+
+    @media(max-width: @screen-tablet){ // for mobile
+        .front  {
+            .middle {
+                left: 5%;
+                right: 5%;
+
+            }
+            h1 {
+                font-size: 52px;
+            }
+        }
+    }
 }

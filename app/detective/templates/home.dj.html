@@ -19,22 +19,25 @@
         <script type="text/javascript" src="{% static 'components/jquery.scrollTo/jquery.scrollTo.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/js-md5/js/md5.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/modernizr/modernizr.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/typeahead.js/dist/typeahead.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'components/typeahead.js/dist/bloodhound.js' %}"></script>
+        <script type="text/javascript" src="{% static 'components/typeahead.js/dist/typeahead.bundle.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/underscore/underscore.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/d3/d3.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/FileSaver/FileSaver.js' %}"></script>
+        <script type="text/javascript" src="{% static 'components/nanoscroller/bin/javascripts/jquery.nanoscroller.min.js' %}"></script>
     {% endcompress %}
+
 
     <script type="text/javascript" src="{% static 'components/angular/angular.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-route/angular-route.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-cookies/angular-cookies.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-resource/angular-resource.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-sanitize/angular-sanitize.min.js' %}"></script>
-
+    <script type="text/javascript" src="{% static 'components/angular-truncate/src/truncate.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-elastic/elastic.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/ng-file-upload/angular-file-upload.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/ngprogress-lite/ngprogress-lite.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular-nanoscroller/scrollable.js' %}"></script>
 
     {% compress js %}
         <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>
@@ -50,6 +53,7 @@
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualListCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualSearchCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualSingleCtrl.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/controllers/MainAsideCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/NotFoundCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/PageCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ProfileCtrl.coffee' %}"></script>
@@ -69,11 +73,16 @@
         <script type="text/coffeescript" src="{% static 'detective/js/directives/watchLoginMandatory.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/graphviz.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/classOnFocus.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/directives/autofill.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/filters/individualPreview.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/filters/nl2br.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/filters/titlecase.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/filters/strToColor.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/AuthHttpInterceptor.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/Common.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/services/QueryFactory.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/services/TopicsFactory.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/services/UtilsFactory.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/Individual.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/IndividualForm.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/Page.coffee' %}"></script>
@@ -84,15 +93,18 @@
 {% endblock %}
 
 {% block content %}
-    <div watch-login-mandatory watch-topic-exists>
-        {% include "partials/header.dj.html" %}        
-        <div ng-view autoscroll id="content" ng-hide="is40X()" ng-class="{ freeze: Page.loading() }"></div>
-        <div id="content" ng-show="is404()">
-            <div ng-include="'partial/404.html'"></div>
-        </div>
-        <div id="content" ng-show="is403()">
-            <div ng-include="'partial/403.html'"></div>
+    <div watch-login-mandatory watch-topic-exists class="main-aside-wrapper">
+        <div class="main-aside-pushed">
+            {% include "partials/header.dj.html" %}
+            {% include "partials/main-aside.dj.html" %}
+            <div ng-view autoscroll class="content" ng-hide="is40X()" ng-class="{ freeze: Page.loading() }"></div>
+            <div class="content" ng-show="is404()">
+                <div ng-include="'partial/404.html'"></div>
+            </div>
+            <div class="content" ng-show="is403()">
+                <div ng-include="'partial/403.html'"></div>
+            </div>
+            {% include "partials/footer.dj.html" %}
         </div>
     </div>
-    {% include "partials/footer.dj.html" %}
 {% endblock %}

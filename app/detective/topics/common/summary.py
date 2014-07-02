@@ -1,29 +1,31 @@
 # -*- coding: utf-8 -*-
-from app.detective.models     import Topic, SearchTerm
-from app.detective.neomatch   import Neomatch
-from app.detective.register   import topics_rules
-from difflib                  import SequenceMatcher
-from django.core.paginator    import Paginator, InvalidPage
-from django.core.urlresolvers import resolve
-from django.http              import Http404, HttpResponse
-from neo4django.db            import connection
-from tastypie                 import http
-from tastypie.exceptions      import ImmediateHttpResponse
-from tastypie.resources       import Resource
-from tastypie.serializers     import Serializer
-from django.utils.timezone    import utc
-from psycopg2.extensions      import adapt
-from pprint                   import pprint
-from StringIO                 import StringIO
-
-import app.detective.utils    as utils
+from app.detective.models       import Topic, SearchTerm
+from app.detective.neomatch     import Neomatch
+from app.detective.register     import topics_rules
+from difflib                    import SequenceMatcher
+from django.core.paginator      import Paginator, InvalidPage
+from django.core.urlresolvers   import resolve
+from django.http                import Http404, HttpResponse
+from neo4django.db              import connection
+from tastypie                   import http
+from tastypie.exceptions        import ImmediateHttpResponse
+from tastypie.resources         import Resource
+from tastypie.serializers       import Serializer
+from django.conf                import settings
+from django.utils.timezone      import utc
+from psycopg2.extensions        import adapt
+from StringIO                   import StringIO
+from rq                         import get_current_job
+from .errors                    import ForbiddenError, UnauthorizedError
+import app.detective.utils      as utils
+from django.contrib.auth.models import User
 import json
 import re
 import datetime
 import logging
 import django_rq
-from .errors import *
 import zipfile
+import time
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -36,6 +38,13 @@ class SummaryResource(Resource):
         allowed_methods = ['get', 'post']
         resource_name   = 'summary'
         object_class    = object
+
+
+    def get_page_number(self, offset=0, limit=20):
+        if offset < 0:
+            return -1
+        else:
+            return int(round(offset / limit)) +  1
 
     def obj_get_list(self, request=None, **kwargs):
         # Nothing yet here!
@@ -191,6 +200,7 @@ class SummaryResource(Resource):
         self.method_check(request, allowed=['get'])
 
         limit = int(request.GET.get('limit', 20))
+        offset = int(request.GET.get('offset', 0))
 
         if request.user.id is None:            
             object_list = {
@@ -217,7 +227,7 @@ class SummaryResource(Resource):
             paginator    = Paginator(matches, limit)
 
             try:
-                p     = int(request.GET.get('page', 1))
+                p     = self.get_page_number(offset, limit)
                 page  = paginator.page(p)
             except InvalidPage:
                 raise Http404("Sorry, no results on that page.")
@@ -256,12 +266,13 @@ class SummaryResource(Resource):
         if not "q" in request.GET: raise Exception("Missing 'q' parameter")
 
         limit     = int(request.GET.get('limit', 20))
+        offset    = int(request.GET.get('offset', 0))
         query     = bundle.request.GET["q"].lower()
         results   = self.search(query)
         paginator = Paginator(results, limit)
 
         try:
-            p     = int(request.GET.get('page', 1))
+            p     = self.get_page_number(offset, limit )
             page  = paginator.page(p)
         except InvalidPage:
             raise Http404("Sorry, no results on that page.")
@@ -274,7 +285,6 @@ class SummaryResource(Resource):
             'objects': objects,
             'meta': {
                 'q': query,
-                'page': p,
                 'limit': limit,
                 'total_count': paginator.count
             }
@@ -287,6 +297,7 @@ class SummaryResource(Resource):
         self.method_check(request, allowed=['get'])
 
         limit     = int(request.GET.get('limit', 20))
+        offset    = int(request.GET.get('offset', 0))
         query     = json.loads(request.GET.get('q', 'null'))
         subject   = query.get("subject", None)
         predicate = query.get("predicate", None)
@@ -296,7 +307,7 @@ class SummaryResource(Resource):
         if "errors" in results: return results        
         paginator = Paginator(results, limit)
         try:
-            p     = int(request.GET.get('page', 1))
+            p     = self.get_page_number(offset, limit )
             page  = paginator.page(p)
         except InvalidPage:
             raise Http404("Sorry, no results on that page.")
@@ -309,7 +320,7 @@ class SummaryResource(Resource):
             'objects': objects,
             'meta': {
                 'q': query,
-                'page': p,
+                'offset': p,
                 'limit': limit,
                 'total_count': paginator.count
             }
@@ -332,10 +343,11 @@ class SummaryResource(Resource):
 
         # Build paginator
         limit        = int(request.GET.get('limit', 20))
+        offset       = int(request.GET.get('offset', 0))
         paginator    = Paginator(propositions, limit)
 
         try:
-            p     = int(request.GET.get('page', 1))
+            p     = self.get_page_number(offset, limit )
             page  = paginator.page(p)
         except InvalidPage:
             raise Http404("Sorry, no results on that page.")
@@ -348,8 +360,8 @@ class SummaryResource(Resource):
             'objects': objects,
             'meta': {
                 'q': query,
-                'page': p,
                 'limit': limit,
+                'offset': offset,
                 'total_count': paginator.count
             }
         }
@@ -358,14 +370,11 @@ class SummaryResource(Resource):
         return object_list
 
     def summary_bulk_upload(self, request, **kwargs):
-
         # only allow POST requests
         self.method_check(request, allowed=['post'])
-
         # check session
         if not request.user.id:
             raise UnauthorizedError('This method require authentication')
-
         # flattern the list of files
         files = [file for sublist in request.FILES.lists() for file in sublist[1]]
         # reads the files
@@ -373,6 +382,9 @@ class SummaryResource(Resource):
         # enqueue the parsing job
         queue = django_rq.get_queue('default', default_timeout=7200)
         job   = queue.enqueue(process_parsing, self.topic, files)
+        job.meta["topic_app_label"] = self.topic.app_label()
+        job.meta["topic_slug"]      = self.topic.slug
+        # job.save()
         # return a quick response
         self.log_throttled_access(request)
         return {
@@ -450,11 +462,12 @@ class SummaryResource(Resource):
         else:
             request.GET = dict(q=request.GET['q'])
             page = 1
+            limit = 1 
             objects = []
             total = -1
             while len(objects) != total:
                 try:
-                    request.GET['page'] = page
+                    request.GET['offset'] = (page - 1) * limit 
                     result = self.summary_rdf_search(bundle, request)
                     objects += result['objects']
                     total = result['meta']['total_count']
@@ -776,15 +789,14 @@ def process_parsing(topic, files):
     Job which reads the uploaded files, validate and saves them as model
     """
 
-    entities   = {}
-    relations  = []
-    errors     = []
-    id_mapping = {}
-
-    assert type(files) in (tuple, list)
-    assert len(files) > 0
-    assert type(files[0]) in (tuple, list)
-    assert len(files[0]) == 2
+    start_time               = time.time()
+    entities                 = {}
+    relations                = []
+    errors                   = []
+    id_mapping               = {}
+    nb_lines                 = 0
+    file_reading_progression = 0
+    job                      = get_current_job()
 
     # Define Exceptions
     class Error (Exception):
@@ -811,6 +823,11 @@ def process_parsing(topic, files):
     class RelationDoesntExist         (Error): pass
 
     try:
+        assert type(files) in (tuple, list)
+        assert len(files) > 0, "You need to upload at least one file."
+        assert type(files[0]) in (tuple, list)
+        assert len(files[0]) == 2
+
         # retrieve all models in current topic
         all_models = dict((model.__name__, model) for model in topic.get_models())
         # iterate over all files and dissociate entities .csv from relations .csv
@@ -818,12 +835,10 @@ def process_parsing(topic, files):
             if type(file) is tuple:
                 file_name = file[0]
                 file      = file[1]
-            elif hasattr(file, "read"):
-                file_name = file.name
             else:
-                raise Exception("ERROR")
+                raise Exception()
             csv_reader = utils.open_csv(file)
-            header = csv_reader.next()
+            header     = csv_reader.next()
             assert len(header) > 1, "header should have at least 2 columns"
             assert header[0].endswith("_id"), "First column should begin with a header like <model_name>_id"
             if len(header) >=3 and header[0].endswith("_id") and header[2].endswith("_id"):
@@ -836,6 +851,7 @@ def process_parsing(topic, files):
                     entities[model_name] = (file_name, file)
                 else:
                     raise ModelDoesntExist(model=model_name, file=file_name, models_availables=all_models.keys())
+            nb_lines += len(file) - 1 # -1 removes headers
 
         # first iterate over entities
         logger.debug("BulkUpload: creating entities")
@@ -843,7 +859,7 @@ def process_parsing(topic, files):
             csv_reader = utils.open_csv(file)
             header     = csv_reader.next()
             # must check that all columns map to an existing model field
-            fields      = utils.get_model_fields(all_models[entity])
+            fields       = utils.get_model_fields(all_models[entity])
             fields_types = {}
             for field in fields:
                 fields_types[field['name']] = field['type']
@@ -891,6 +907,10 @@ def process_parsing(topic, files):
                             item = all_models[entity].objects.create(**data)
                             # map the object with the ID defined in the .csv
                             id_mapping[(entity, id)] = item
+                            file_reading_progression += 1
+                            job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
+                            job.meta["file_reading"] = file_name
+                            job.save()
                         except Exception as e:
                             errors.append(
                                 WarningValidationError(
@@ -930,6 +950,10 @@ def process_parsing(topic, files):
                     try:
                         getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
                         inserted_relations += 1
+                        file_reading_progression += 1
+                        job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
+                        job.meta["file_reading"] = file_name
+                        job.save()
                     except KeyError as e:
                         errors.append(
                             WarningKeyUnknown(
@@ -966,20 +990,33 @@ def process_parsing(topic, files):
         # Save everything
         saved = 0
         logger.debug("BulkUpload: saving %d objects" % (len(id_mapping)))
+        job.meta["objects_to_save"] = len(id_mapping)
         for item in id_mapping.values():
             item.save()
             saved += 1
-
+            job.meta["saving_progression"] = saved
+            job.save()
+        job.refresh()
+        if "track" in job.meta:
+            from django.core.mail import send_mail
+            user = User.objects.get(pk=job.meta["user"])
+            send_mail("upload finished", "your upload just finished", settings.DEFAULT_FROM_EMAIL, (user.email,))
         return {
+            'duration' : (time.time() - start_time),
             'inserted' : {
                 'objects' : saved,
                 'links'   : inserted_relations
             },
             "errors" : sorted([dict([(e.__class__.__name__, str(e.__dict__))]) for e in errors])
         }
+
     except Exception as e:
         import traceback
         logger.error(traceback.format_exc())
+        if e.__dict__:
+            message = str(e.__dict__)
+        else:
+            message = e.message
         return {
-            "errors" : [{e.__class__.__name__ : str(e.__dict__)}]
+            "errors" : [{e.__class__.__name__ : message}]
         }

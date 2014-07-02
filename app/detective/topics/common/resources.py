@@ -8,6 +8,8 @@ from tastypie.authorization           import ReadOnlyAuthorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
+from easy_thumbnails.files            import get_thumbnailer
+from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
 import re
 
@@ -39,13 +41,37 @@ class TopicResource(ModelResource):
 
     class Meta:
         queryset  = Topic.objects.all().prefetch_related('author')
-        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
+        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
 
     def dehydrate(self, bundle):
+        from app.detective import register
+        # Get the model's rules manager
+        rulesManager = register.topics_rules()
         # Get all registered models
         models = get_registered_models()
         # Filter model to the one under app.detective.topics
-        bundle.data["models"] = [ m.__name__ for m in bundle.obj.get_models() ]        
+        bundle.data["models"] = []
+        # Create a thumbnail for this topic
+        try:
+            thumbnailer = get_thumbnailer(bundle.obj.background)
+            thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
+            thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
+            bundle.data['thumbnail'] = {
+                'small' : thumbnailSmall.url,
+                'medium': thumbnailMedium.url
+            }
+        # No image available
+        except InvalidImageFormatError:
+            bundle.data['thumbnail'] = None
+
+        for m in bundle.obj.get_models():
+            model = {
+                'name': m.__name__,
+                'verbose_name': m._meta.verbose_name,
+                'verbose_name_plural': m._meta.verbose_name_plural,
+                'is_searchable': rulesManager.model(m).all().get("is_searchable", False)
+            }
+            bundle.data["models"].append(model)
         return bundle
 
     def get_object_list(self, request):

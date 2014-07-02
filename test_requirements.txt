@@ -16,3 +16,4 @@ redis==2.9.0
 requests==2.2.0
 rq==0.3.13
 times==0.6.2
+easy-thumbnails==2.0.1

@@ -5,7 +5,7 @@
 		<div class="container">
 			<div class="pull-left">
 				<div class="pull-left">
-					<div color-tag ref="type" />
+					<div color-tag ref="type"></div>
 				</div>
 				<h2 class="bottom0 top0 left60">[[individual|individualPreview]]</h2>
 				<a ng-href="/[[username]]/[[topic]]/[[type]]" class="lead text-muted left60">[[meta.verbose_name]]</a>
@@ -102,9 +102,9 @@
 							 </tbody>
 						</table>
 
-					 	<div class="relationship" 
-					 		  ng-repeat="field in meta.fields|filter:isRelationship" 
-					 		  ng-show="get(field.name)" 
+					 	<div class="relationship"
+					 		  ng-repeat="field in meta.fields|filter:isRelationship"
+					 		  ng-show="get(field.name)"
 					 		  id="rels-[[field.name]]">
 			 				<a  ng-if="getSource(field)"
 			 				    ng-href="[[getSource(field).url]]"

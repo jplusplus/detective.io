@@ -17,6 +17,11 @@ PUBLIC = (
     (False, "No, just for a small group of users"),
 )
 
+FEATURED = (
+    (True, "Yes, show it on the homepage"),
+    (False, "No, stay out of the ligth"),
+)
+
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (
         (0, "Less than 200"),
@@ -53,6 +58,7 @@ class Topic(models.Model):
     description = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
     about       = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public      = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
+    featured    = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
     ontology    = models.FileField(null=True, blank=True, upload_to="ontologies", help_text="Ontology file that descibes your field of study.")
     background  = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
     author      = models.ForeignKey(User, help_text="Author of this topic.", null=True)
@@ -60,16 +66,16 @@ class Topic(models.Model):
     def __unicode__(self):
         return self.title
 
-    def app_label(self):        
+    def app_label(self):
         if self.slug in ["common", "energy"]:
             return self.slug
         elif not self.module:
             # Already saved topic
             if self.id:
-                cache_key = "prefetched_topic_%s" % self.id        
-                # Store topic object in a temporary attribute       
-                # to avoid SQL lazyness                            
-                if getattr(self, cache_key, None) is None:     
+                cache_key = "prefetched_topic_%s" % self.id
+                # Store topic object in a temporary attribute
+                # to avoid SQL lazyness
+                if getattr(self, cache_key, None) is None:
                     topic = Topic.objects.get(id=self.id)
                     setattr(self, cache_key, topic)
                 else:
@@ -142,12 +148,13 @@ class Topic(models.Model):
         ontology  = "%s/ontology.owl" % directory
         return os.path.exists(ontology) or hasattr(self.get_module(), "models")
 
-
     def get_absolute_path(self):
         if self.author is None:
             return None
         else:
-            return "/%s/%s/" % (self.author.username, self.slug,)
+            return "/%s/%s" % (self.author.username, self.slug,)
+
+    def get_absolute_url(self): return self.get_absolute_path()
 
     def link(self):
         path = self.get_absolute_path()
@@ -170,7 +177,7 @@ class Topic(models.Model):
             if rulesManager.model(model).all().get("is_searchable", False):
                 searchableModels.append(model)
         names = [ sm._meta.verbose_name_plural.lower() for sm in searchableModels ]
-        random.shuffle(names)        
+        random.shuffle(names)
         # No more than X names
         if len(names) > max_suggestion:
             names = names[0:max_suggestion]
@@ -178,9 +185,6 @@ class Topic(models.Model):
             return "Search for " + ", ".join(names[0:-1]) + " and " + names[-1]
         else:
             return "Search..."
-
-        
-
 
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
@@ -221,7 +225,7 @@ class SearchTerm(models.Model):
         field = self.field
         # If any related_model is given, that means its subject is is parent model
         subject = field["model"]
-        return subject    
+        return subject
 
     def clean(self):
         self.subject    = self.find_subject()
@@ -230,8 +234,8 @@ class SearchTerm(models.Model):
 
     @property
     def field(self):
-        field = None        
-        if self.name:            
+        field = None
+        if self.name:
             # Build a cache key with the topic token
             cache_key = "%s__%s__field" % ( self.topic.module, self.name )
             # Try to use the cache value
@@ -259,7 +263,7 @@ class SearchTerm(models.Model):
             return "literal"
 
     @property
-    def target(self):        
+    def target(self):
         if 'related_model' in self.field:
             return self.field["related_model"]
         else:

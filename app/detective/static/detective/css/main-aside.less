@@ -1,0 +1,209 @@
+
+.main-aside-wrapper {
+    width:100%;
+    overflow:hidden;
+    background:@brand-secondary;
+}
+
+.main-aside-pushed {
+    background:@body-bg;
+    position:relative;
+    left:0;
+    width:100%;
+    overflow:hidden;
+    .transition(@header-open-speed);
+
+    .show-aside:not(.is-home) & {
+        left:@aside-width;
+
+        .header {
+            .translate(@aside-width, 0);
+        }
+
+        @media (max-width: @screen-xs-max) {
+           left:100%;
+
+            .header {
+                .translate(100%, 0);
+            }
+        }
+
+    }
+}
+
+
+.main-aside {
+    overflow: hidden;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width: @aside-width;
+    z-index:@zindex-header;
+    background:@brand-secondary;
+    color: contrast(@brand-secondary);
+    .transition(@header-open-speed);
+    .translate(-100%, 0);
+
+    @media (max-width: @screen-xs-max) {
+       width:100%;
+    }
+
+    .show-aside:not(.is-home) & {
+        .translate(0, 0);
+    }
+
+    &__title {
+        background: url("@{staticPath}img/logo-white.svg") no-repeat 15px center;
+        background-size:60px auto;
+        padding:0 15px;
+        margin:0;
+        position:absolute;
+        top:0;
+        left:0;
+        right:0;
+        font-size: 140%;
+        height:@header-height;
+        line-height:@header-height;
+        border-bottom:1px solid fade(#000, 30);
+        .box-shadow(0px 1px 0 fade(#fff, 10));
+
+        &__toggle-aside {
+            position:absolute;
+            right:0;
+            top:0;
+            width: @header-height;
+            height: @header-height;
+            line-height: @header-height;
+            display: block;
+            font-size: 20px;
+            color:inherit;
+            text-align: center;
+            border-left:1px solid fade(#000, 30);
+        }
+
+
+        &__caption {
+            padding-left:70px;
+
+            em {
+                font-style:normal;
+                color:fade(#fff, 60);
+            }
+        }
+
+        a, a:hover, a:focus {
+            color: #fff;
+            text-decoration:none;
+        }
+
+    }
+
+    &__wrapper {
+        position:absolute;
+        top: @header-height + 5px;
+        bottom:5px;
+        left:0;
+        right:0;
+        overflow:hidden;
+    }
+
+    &__current-topic {
+        margin-top:55px;
+
+        h3 {
+            font-size:1em;
+            margin:0 25px;
+            margin-right:20px;
+            margin-bottom:20px;
+            position:relative;
+        }
+
+        &__title, &__title:hover {
+            color:white;
+            text-decoration: none;
+            i {
+                display:none;
+                position:absolute;
+                right:100%;
+                top:0;
+            }
+        }
+
+        &__author {
+            color: fade(#fff, 50);
+            a, a:hover {
+                color: fade(#fff, 70);
+                text-decoration: none;
+            }
+        }
+
+        &__taxonomy a {
+            color:inherit;
+            text-decoration: none;
+            padding:5px 25px;
+            padding-right:20px;
+            display: block;
+
+            &:hover {
+                background:fade(#fff, 10);
+            }
+
+            .color-tag {
+                .translate(0, 5px);
+                margin-right: 5px;
+            }
+        }
+    }
+
+    &__featured-investigations {
+        margin:0 25px;
+        margin-top:40px;
+
+        h4 {
+            font-size:1em;
+            font-weight: bold;
+            color: mix(white, @brand-secondary);
+        }
+
+        &__topic {
+            height: 65px;
+            margin-bottom: @grid-gutter-width/2px;
+            background:mix(white, @brand-secondary);
+            position:relative;
+            overflow:hidden;
+            border-radius: @border-radius-small;
+
+            .bg {
+                z-index:10;
+                position:absolute;
+                top:50%;
+                left:50%;
+                .translate(-50%, -50%);
+            }
+
+            .fg {
+                z-index:20;
+                position:absolute;
+                top:0;
+                bottom:0;
+                left:0;
+                right:0;
+                #gradient > .vertical(fade(black, 0), fade(black, 80));
+            }
+
+            &__title, &__title:hover {
+                z-index:20;
+                position:absolute;
+                bottom:0;
+                left:0;
+                right:0;
+                color:white;
+                padding:5px;
+                text-decoration: none;
+                white-space: nowrap;
+            }
+        }
+    }
+
+}

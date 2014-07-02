@@ -47,6 +47,16 @@ neo4j_install:
 install: $(VENV) pip_install npm_install $(CUSTOM_D3) bower_install neo4j_install
 
 ###
+# Doc generation
+###
+
+doc:
+	cd docs; make html
+
+livedoc:
+	sphinx-autobuild docs docs/_build/html
+
+###
 # Clean rules
 ###
 

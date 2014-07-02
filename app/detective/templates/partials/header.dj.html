@@ -29,7 +29,10 @@
             <a class="btn btn-default topic-search__home" href="[[search.topic.link]]" title="[[search.topic.title]]">
                 [[search.topic.title | characters:25]]
             </a>
-            <a class="btn btn-default topic-search__add" title="Add an entity to this topic" href="[[search.topic.link]]/contribute">
+            <a class="btn btn-default topic-search__add"
+               ng-if="user.hasAddPermission(search.topic.module)"
+               title="Add an entity to this topic"
+               href="[[search.topic.link]]/contribute">
                 <i class="fa fa-plus"></i>
                 <span class="sr-only">Add an entity</span>
             </a>

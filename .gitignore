@@ -1,4 +1,3 @@
-
 # OS generated files
 .DS_Store
 .DS_Store?
@@ -37,3 +36,7 @@ catalog-v001.xml
 # Configuration file
 .env_dev
 *.sublime-*
+
+# Docs
+docs/_build/
+docs/locale/

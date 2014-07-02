@@ -41,3 +41,4 @@ sphinx-autobuild==0.2.3
 sphinxcontrib-httpdomain==1.2.1
 times==0.6.2
 wsgiref==0.1.2
+unidecode==0.04.16

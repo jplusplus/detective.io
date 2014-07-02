@@ -2,6 +2,7 @@
 from app.detective.utils           import to_class_name, to_underscores, create_node_model
 from django.db.models.fields.files import FieldFile
 from lxml                          import etree as ET
+from unidecode                     import unidecode
 from neo4django.db                 import models
 
 NAMESPACES = {
@@ -48,6 +49,10 @@ def get_field_specials(root, field_name):
             first = lambda a, d=None: a[0].text if len(a) else d
             for s in specials:
                 props[s] = first( prop.xpath("./*[local-name() = '%s']" % s) )
+                # Normalize related_name
+                if props[s] is not None and s == "related_name":
+                    props[s] = unidecode(props[s])
+
     # Return an empty dict by default
     return props
 
@@ -95,7 +100,8 @@ def parse(ontology, module='', app_label=None):
         class_options = {}
         for f in ["verbose_name", "verbose_name_plural"]:
             if class_specials[f] is not None:
-                class_options[f] = class_specials[f]
+                pass
+                #class_options[f] = class_specials[f]
         # List all fields
         for field in clss.findall("rdfs:subClassOf//owl:Restriction", namespaces=NAMESPACES):
             # All field's options
@@ -107,10 +113,10 @@ def parse(ontology, module='', app_label=None):
             # Get the complete field name using the rdf:resource attribute
             field_name = attr(field_name, "rdf:resource");
             # Get field's special properties
-            field_opts = dict(field_opts.items() + get_field_specials(root, field_name).items() )            
+            field_opts = dict(field_opts.items() + get_field_specials(root, field_name).items() )
             # Convert the name to a python readable format
             field_name = to_underscores(field_name.split("#")[-1])
-            if field_opts["related_name"] is not None:
+            if "related_name" in field_opts and field_opts["related_name"] is not None:
                 # Convert related_name to the same format
                 field_opts["related_name"] = to_underscores(field_opts["related_name"])
             # It might be a relationship

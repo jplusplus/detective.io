@@ -28,7 +28,6 @@ neo4jrestclient==1.9.0
 Pillow==2.3.1
 psycopg2==2.4.6
 pyaml==13.07.1
-pylibmc==1.2.3
 python-dateutil==2.1
 pytz==2013b
 PyYAML==3.10

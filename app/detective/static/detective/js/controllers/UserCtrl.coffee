@@ -71,6 +71,8 @@ class UserCtrl
         @scope.error = error if error?
 
     login: (el)=>
+        # Trigger the event waited in the autofill directive
+        @scope.$broadcast 'autofill:update'
         # Catch a bug with angular and browser autofill
         # Open issue https://github.com/angular/angular.js/issues/1460
         unless @scope.username? or @scope.password?

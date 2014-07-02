@@ -4,7 +4,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
     constructor:->
         super
         dep_number     = IndividualListCtrl.$inject.length
-        @QueryFactory    = arguments[dep_number]
+        @QueryFactory  = arguments[dep_number]
         @TopicsFactory = arguments[dep_number + 1] 
         @topic         = @TopicsFactory.topic
 

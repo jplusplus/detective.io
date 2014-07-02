@@ -74,6 +74,12 @@
         left:@header-height;
         right:@header-height * 2px;
 
+        &__home {
+            width:165px;
+            overflow: hidden;
+            border-radius: @border-radius-base 0 0 @border-radius-base;
+        }
+
         .twitter-typeahead, .input-control {
             width:50%;
             height: @header-height - 19px;
@@ -82,11 +88,6 @@
             border-radius:0  @border-radius-base @border-radius-base 0;
         }
 
-        .btn {
-            width:160px;
-            overflow: hidden;
-            border-radius: @border-radius-base 0 0 @border-radius-base;
-        }
 
         .btn-group {
             width: 100%;

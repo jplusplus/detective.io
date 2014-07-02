@@ -6,7 +6,9 @@
 Welcome to Detective.io's documentation!
 ========================================
 
-Contents:
+`Detective.io <http://www.detective.io>`_ is a platform that hosts your investigation and lets you make powerful queries to mine it. Simply describe your field of study and detective.io builds the input interface as well as a state-of-the-art front-end.
+
+
 
 .. toctree::
    :maxdepth: 2

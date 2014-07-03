@@ -8,6 +8,7 @@ RM            = rm -fr
 COVERAGE      = `which coverage`
 
 CUSTOM_D3	  = ./app/static/custom_d3/d3.js
+
 PYC           = $(wildcard *.pyc */*.pyc app/*/*.pyc app/*/*/*.pyc app/*/*/*/*.pyc app/*/*/*/*/*.pyc)
 CACHE         = $(wildcard app/staticfiles/CACHE)
 
@@ -38,7 +39,7 @@ $(CUSTOM_D3):
 
 bower_install:
 	# Install bower packages
-	bower install
+	./node_modules/.bin/bower install
 
 neo4j_install:
 	# Install neo4j locally

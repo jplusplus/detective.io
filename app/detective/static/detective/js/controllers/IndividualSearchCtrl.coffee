@@ -6,7 +6,6 @@ class IndividualSearchCtrl extends IndividualListCtrl
         dep_number     = IndividualListCtrl.$inject.length
         @QueryFactory  = arguments[dep_number]
         @TopicsFactory = arguments[dep_number + 1] 
-        @topic         = @TopicsFactory.topic
 
         # Custom filter to display only subject related relationship
         @scope.currentSubject = @currentSubject
@@ -17,6 +16,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
 
         @scope.$watch 'query', (val)=> 
             @QueryFactory.query = val
+            
         # Load the search syntax
         @Individual.get {type: "summary", id: "syntax"}, (d)=>
             @scope.syntax = d
@@ -33,7 +33,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
             predicate = _.findWhere @scope.syntax.predicates, name: query.predicate.name
             query.predicate = predicate
 
-        @QueryFactory.selectIndividual(query, @topic.link)
+        @QueryFactory.selectIndividual(query, @TopicsFactory.topic.link)
         @query = query
 
     currentSubject: (rel)=> rel.subject? and rel.subject == @scope.query.subject.name

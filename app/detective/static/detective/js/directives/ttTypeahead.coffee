@@ -43,8 +43,9 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         itopic     = (scope.topic() or $routeParams.topic or "common").toLowerCase()
         # Set a default value
         element.val scope.model.name if scope.model?
+        element.val scope.value if scope.value?
 
-        scope.$parent.$watch attrs.value, (val)->
+        scope.$watch 'value', (val)->
             element.val val
 
         scope.$parent.$watch (-> element.val()), (val)->

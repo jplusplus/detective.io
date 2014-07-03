@@ -506,10 +506,10 @@ class SummaryResource(Resource):
         return connection.cypher(query).to_dicts()
 
     def rdf_search(self, subject, predicate, obj):
-        obj = obj["name"] if "name" in obj else obj
+        identifier = obj["id"] if "id" in obj else obj
         # retrieve all models in current topic
         all_models = dict((model.__name__, model) for model in self.topic.get_models())
-        # If the received obj describe a literal value
+        # If the received identifier describe a literal value
         if self.is_registered_literal(predicate["name"]):
             # Get the field name into the database
             field_name = predicate["name"]
@@ -525,11 +525,11 @@ class SummaryResource(Resource):
                 RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
             """.format(
                 field=field_name,
-                value=adapt(obj),
+                value=adapt(identifier),
                 model=adapt(subject["name"]),
                 app=adapt(self.topic.app_label())
             )
-        # If the received obj describe a literal value
+        # If the received identifier describe a literal value
         elif self.is_registered_relationship(predicate["name"]):
             fields        = utils.get_model_fields( all_models[predicate["subject"]] )
             # Get the field name into the database
@@ -538,17 +538,17 @@ class SummaryResource(Resource):
             if not len(relationships): return {'errors': 'Unkown predicate type'}
             relationship  = relationships[0]["rel_type"]
             # Query to get every result
-            query = """
+            query = u"""
                 START st=node(*)
                 MATCH (st)<-[:`{relationship}`]-(root)<-[:`<<INSTANCE>>`]-(type)
                 WHERE HAS(root.name)
                 AND HAS(st.name)
-                AND st.name = {name}
+                AND ID(st) = {id}
                 AND type.app_label = {app}
                 RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
             """.format(
                 relationship=relationship,
-                name=adapt(obj),
+                id=adapt(identifier),
                 app=adapt(self.topic.app_label())
             )
         else:

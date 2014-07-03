@@ -167,13 +167,19 @@ def get_model_fields(model, order_by='name'):
                 # No rules
                 field_rules = []
 
+            verbose_name = getattr(f, "verbose_name", None)
+
+            if verbose_name is None:
+                # Use the name as verbose_name fallback
+                verbose_name = pretty_name(f.name)
+
             field = {
                 'name'         : f.name,
                 'type'         : f.get_internal_type(),
                 'direction'    : getattr(f, "direction", ""),
                 'rel_type'     : getattr(f, "rel_type", ""),
                 'help_text'    : getattr(f, "help_text", ""),
-                'verbose_name' : getattr(f, "verbose_name", pretty_name(f.name)),
+                'verbose_name' : verbose_name,
                 'related_model': related_model,
                 'model'        : model.__name__,
                 'rules'        : field_rules

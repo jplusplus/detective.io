@@ -54,7 +54,7 @@ class SummaryResource(Resource):
         content = {}
         # Refresh syntax cache at each request
         if hasattr(self, "syntax"): delattr(self, "syntax")
-        # Get the current topic        
+        # Get the current topic
         self.topic = self.get_topic_or_404(request=request)
         # Check for an optional method to do further dehydration.
         method = getattr(self, "summary_%s" % kwargs["pk"], None)
@@ -106,7 +106,7 @@ class SummaryResource(Resource):
             raise Http404("Sorry, not implemented yet!")
         raise ImmediateHttpResponse(response=response)
 
-    def get_topic_or_404(self, request=None):        
+    def get_topic_or_404(self, request=None):
         try:
             if request is not None:
                 return Topic.objects.get(module=resolve(request.path).namespace)
@@ -202,7 +202,7 @@ class SummaryResource(Resource):
         limit = int(request.GET.get('limit', 20))
         offset = int(request.GET.get('offset', 0))
 
-        if request.user.id is None:            
+        if request.user.id is None:
             object_list = {
                 'objects': [],
                 'meta': {
@@ -223,7 +223,7 @@ class SummaryResource(Resource):
                 RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
             """ % ( int(request.user.id), app_label )
 
-            matches      = connection.cypher(query).to_dicts()            
+            matches      = connection.cypher(query).to_dicts()
             paginator    = Paginator(matches, limit)
 
             try:
@@ -304,7 +304,7 @@ class SummaryResource(Resource):
         obj       = query.get("object", None)
         results   = self.rdf_search(subject, predicate, obj)
         # Stop now in case of error
-        if "errors" in results: return results        
+        if "errors" in results: return results
         paginator = Paginator(results, limit)
         try:
             p     = self.get_page_number(offset, limit )
@@ -462,12 +462,12 @@ class SummaryResource(Resource):
         else:
             request.GET = dict(q=request.GET['q'])
             page = 1
-            limit = 1 
+            limit = 1
             objects = []
             total = -1
             while len(objects) != total:
                 try:
-                    request.GET['offset'] = (page - 1) * limit 
+                    request.GET['offset'] = (page - 1) * limit
                     result = self.summary_rdf_search(bundle, request)
                     objects += result['objects']
                     total = result['meta']['total_count']
@@ -552,7 +552,7 @@ class SummaryResource(Resource):
                 app=adapt(self.topic.app_label())
             )
         else:
-            return {'errors': 'Unkown predicate type'}
+            return {'errors': 'Unkown predicate type: %s' % predicate["name"]}
 
         return connection.cypher(query).to_dicts()
 
@@ -573,7 +573,7 @@ class SummaryResource(Resource):
         return [ output(rs) for rs in terms ]
 
     def get_literal_search(self):
-        # For an unkown reason I can't filter by "is_literal"        
+        # For an unkown reason I can't filter by "is_literal"
         return [ st for st in SearchTerm.objects.filter(topic=self.topic).prefetch_related('topic') if st.is_literal ]
 
     def get_literal_search_output(self):
@@ -660,7 +660,7 @@ class SummaryResource(Resource):
             return parts[0].strip().split(" ")[-1] if len(parts) else None
 
         def is_object(match, query, token):
-            previous = previous_word(query, token)            
+            previous = previous_word(query, token)
             return is_preposition(previous) or previous.isdigit() or token.isnumeric() or token == query
 
         predicates      = []
@@ -670,10 +670,10 @@ class SummaryResource(Resource):
         ending_tokens   = ""
         searched_tokens = set()
         # Picks candidates for subjects and predicates
-        for idx, match in enumerate(matches):            
+        for idx, match in enumerate(matches):
             subjects     += match["models"]
             predicates   += match["relationships"] + match["literals"]
-            token         = match["token"]        
+            token         = match["token"]
             # True when the current token is the last of the series
             is_last_token = query.endswith(token)
             # Objects are detected when they start and end by double quotes
@@ -683,8 +683,8 @@ class SummaryResource(Resource):
                 # Store the token as an object
                 objects += self.search(token)[:5]
             # Or if the previous word is a preposition
-            elif is_object(match, query, token):                
-                if token not in searched_tokens and len(token) > 2:                        
+            elif is_object(match, query, token):
+                if token not in searched_tokens and len(token) > 2:
                     # Looks for entities into the database
                     entities = self.search(token)[:5]
                     # Do not search this token again
@@ -710,28 +710,28 @@ class SummaryResource(Resource):
         # Generate proposition using RDF's parts
         for subject in remove_duplicates(subjects):
             for predicate in remove_duplicates(predicates):
-                for obj in remove_duplicates(objects):            
+                for obj in remove_duplicates(objects):
                     pred_sub = predicate.get("subject", None)
                     # If the predicate has a subject
                     # and it matches to the current one
                     if pred_sub != None:
-                        
+
                         # Target Model of the predicate
                         target = SearchTerm(
-                            subject=pred_sub, 
-                            name=predicate["name"], 
+                            subject=pred_sub,
+                            name=predicate["name"],
                             topic=self.topic
                         ).target
 
                         if type(obj) is dict:
-                            obj_disp = obj["name"] or obj["label"]                            
+                            obj_disp = obj["name"] or obj["label"]
                             # Pass this predicate if this object doesn't match
                             # with the current predicate's target
-                            if target != obj["model"]: continue                                              
+                            if target != obj["model"]: continue
                         else:
                             obj_disp = obj
                         # Value to inset into the proposition's label
-                        values = (subject["label"], predicate["label"], obj_disp,)                        
+                        values = (subject["label"], predicate["label"], obj_disp,)
                         # Build the label
                         label = '%s that %s %s' % values
                         propositions.append({

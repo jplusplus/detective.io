@@ -71,7 +71,7 @@
         <script type="text/coffeescript" src="{% static 'detective/js/directives/ttTypeahead.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/unique.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/watchLoginMandatory.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/graphviz.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/directives/topic.single.graph.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/classOnFocus.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/autofill.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/filters/individualPreview.coffee' %}"></script>
@@ -90,6 +90,12 @@
         <script type="text/coffeescript" src="{% static 'detective/js/services/Summary.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/User.coffee' %}"></script>
     {% endcompress %}
+
+        <span class='topic__single__graph__worker'>
+            {% compress js %}
+                <script type="text/coffeescript" src="{% static 'detective/js/workers/topic.single.graph.coffee' %}"></script>
+            {% endcompress %}
+        </span>
 {% endblock %}
 
 {% block content %}

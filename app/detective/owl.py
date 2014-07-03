@@ -100,8 +100,7 @@ def parse(ontology, module='', app_label=None):
         class_options = {}
         for f in ["verbose_name", "verbose_name_plural"]:
             if class_specials[f] is not None:
-                pass
-                #class_options[f] = class_specials[f]
+                class_options[f] = class_specials[f]
         # List all fields
         for field in clss.findall("rdfs:subClassOf//owl:Restriction", namespaces=NAMESPACES):
             # All field's options

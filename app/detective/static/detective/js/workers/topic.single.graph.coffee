@@ -204,7 +204,7 @@ if not window? then do ->
     self.document.documentElement.style = do noop
 
     # Import d3
-    importScripts '/proxy/components/custom_d3/d3.js'
+    importScripts '/proxy/custom_d3/d3.js'
     importScripts '/proxy/components/underscore/underscore-min.js'
 
     # Create our Worker instance

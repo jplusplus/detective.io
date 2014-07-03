@@ -8,12 +8,16 @@ class SearchFormCtrl
         # ──────────────────────────────────────────────────────────────────────
         @selectedIndividual = {}
         @logger = @UtilsFactory.loggerDecorator('SearchFormCtrl')
-        @topics = []
+        @topics = @TopicsFactory.topics
         @topic  = @TopicsFactory.topic
         @topic_slug = @route.current.params.topic if @route.current? and @route.current.params?
         @human_query = ''
+        @bindHumanQuery()
+
         # Get every topics
-        @TopicsFactory.getTopics (topics)=> @topics = @topics.concat topics
+        @TopicsFactory.getTopics (topics)=> 
+            @topics = @topics.concat topics
+            @TopicsFactory.topics = @topics
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
@@ -26,7 +30,8 @@ class SearchFormCtrl
         @scope.$watch @getQuery, @QueryFactory.updateQuery, yes
 
         # Update the human query from this controller into the query factory
-        @scope.$watch (=>@human_query), (human_query)=>
+        @scope.$watch (=>@QueryFactory.query), (query)=>
+            @human_query = @QueryFactory.toHumanQuery query
             @QueryFactory.human_query = human_query if human_query?
         , true
 
@@ -38,9 +43,16 @@ class SearchFormCtrl
         # Watch current slug and topics list to find the current topic
         @scope.$watch (=> [@topic_slug, @topics]), =>
             if @topic_slug? and @topics.length
-                @TopicsFactory.topic = @topic = @getTopic @topic_slug
+                @topic = @getTopic @topic_slug
+                @TopicsFactory.topic = @topic
         , yes
 
+
+    # will init @human_query if location contains a query param, see @getQuery
+    bindHumanQuery: =>
+        query = @getQuery()
+        if @human_query is '' and query?
+            @human_query = @QueryFactory.toHumanQuery(query)
 
     getQuery: =>
         angular.fromJson @location.search().q

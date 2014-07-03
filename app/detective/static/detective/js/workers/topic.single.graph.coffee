@@ -204,8 +204,8 @@ if not window? then do ->
     self.document.documentElement.style = do noop
 
     # Import d3
-    importScripts '{{STATIC_URL}}components/custom_d3/d3.js'
-    importScripts '{{STATIC_URL}}components/underscore/underscore-min.js'
+    importScripts '/proxy/components/custom_d3/d3.js'
+    importScripts '/proxy/components/underscore/underscore-min.js'
 
     # Create our Worker instance
     worker = new GraphWorker(self)

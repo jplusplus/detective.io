@@ -86,6 +86,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     # Bower components
     ('components', here('static/components') ),
+    ('custom_d3', here('static/custom_d3') ),
     here("detective/static"),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.

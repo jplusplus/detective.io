@@ -51,8 +51,8 @@ def get_field_specials(root, field_name):
                 props[s] = first( prop.xpath("./*[local-name() = '%s']" % s) )
                 # Normalize related_name
                 if props[s] is not None and s == "related_name":
+                    props[s] = unicode(props[s])
                     props[s] = unidecode(props[s])
-
     # Return an empty dict by default
     return props
 

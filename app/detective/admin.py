@@ -77,20 +77,24 @@ class TopicAdmin(admin.ModelAdmin):
     save_on_top         = True
     prepopulated_fields = {'slug': ('title',)}
     list_display        = ("title", "link", "public","app_label",)
+    list_filter         = ("public","featured","author")
     fieldsets = (
         (None, {
+            'classes': ('wide',),
             'fields':  (
                 ('title', 'slug',),
-                ('public', 'featured'),
+                ('public',),
+                ('featured',),
                 ('author',),
             )
         }),
         ('Describe your field of study', {
             'classes': ('wide',),
+            'description': 'Choose one of this tree ways to define your ontology.',
             'fields': ( ('ontology_as_mod', 'ontology_as_json', 'ontology_as_owl',))
         }),
         ('Advanced options', {
-            'classes': ('collapse', 'wide'),
+            'classes': ('wide',),
             'fields': ( 'description', 'about', 'background', )
         }),
     )

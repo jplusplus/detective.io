@@ -79,7 +79,11 @@ class TopicAdmin(admin.ModelAdmin):
     list_display        = ("title", "link", "public","app_label",)
     fieldsets = (
         (None, {
-            'fields':  ( ('title', 'slug', 'author',), ('public', 'featured'))
+            'fields':  (
+                ('title', 'slug',),
+                ('public', 'featured'),
+                ('author',),
+            )
         }),
         ('Describe your field of study', {
             'classes': ('wide',),

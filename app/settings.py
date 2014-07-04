@@ -135,6 +135,11 @@ TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'django.core.context_processors.request',
 )
 
+SUIT_CONFIG = {
+    'ADMIN_NAME': 'Detective.io',
+    'MENU_EXCLUDE': ('registration', 'tastypie'),
+}
+
 ROOT_URLCONF = 'app.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.

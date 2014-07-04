@@ -83,10 +83,25 @@ startdb:
 ###
 
 test:
+	# Install coveralls
+	pip install --use-mirrors -q coveralls
+	# Stop current database to create some backups
 	make stopdb
-	rm -Rf ./lib/neo4j/data/graph.db
-	rm -f dev.db
+	# Do db backups
+	mv lib/neo4j/data/graph.db lib/neo4j/data/graph.db.backup || true
+	mv dev.db dev.db.backup || true
+	# Start a brand new database
 	make startdb
 	./manage.py syncdb -v 0 --noinput --pythonpath=. --settings=app.settings_tests
-	python -W ignore::DeprecationWarning $(COVERAGE) run --source=app.detective ./manage.py test detective --pythonpath=. --settings=app.settings_tests
+	# Launch test with coverage
+	python -W ignore::DeprecationWarning $(COVERAGE) run --source=app.detective ./manage.py test detective.ApiTestCase.test_rdf_search --pythonpath=. --settings=app.settings_tests
+	# Send report to coveralls
 	coveralls
+	# Stop database in order to restore it
+	make stopdb
+	# Remove temporary databases
+	rm -Rf lib/neo4j/data/graph.db
+	rm -f dev.db
+	# Restore backups
+	mv lib/neo4j/data/graph.db.backup lib/neo4j/data/graph.db|| true
+	mv dev.db.backup dev.db || true

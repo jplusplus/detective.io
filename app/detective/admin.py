@@ -79,7 +79,10 @@ class TopicAdmin(admin.ModelAdmin):
     list_display        = ("title", "link", "public","app_label",)
     fieldsets = (
         (None, {
-            'fields':  ( ('title', 'slug', 'author',), 'ontology', 'module', ('public', 'featured'))
+            'fields':  ( ('title', 'slug', 'author',), ('public', 'featured'))
+        }),
+        ('Describe your field of study', {
+            'fields': ( ('ontology_as_mod', 'ontology_as_json', 'ontology_as_owl',))
         }),
         ('Advanced options', {
             'classes': ('collapse',),

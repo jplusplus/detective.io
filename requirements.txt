@@ -15,6 +15,7 @@ django-storages==1.1.8
 django-tastypie==0.10.0
 django-tinymce==1.5.2
 django-urlmiddleware==0.2.1
+django-suit==0.2.9
 Django==1.5.4
 djrill==0.7.0
 easy-thumbnails==2.0.1

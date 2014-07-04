@@ -23,7 +23,7 @@ def find(function, iterable):
 
 class ApiTestCase(ResourceTestCase):
 
-    fixtures = ['app/detective/fixtures/default_topics.json', 
+    fixtures = ['app/detective/fixtures/default_topics.json',
                 'app/detective/fixtures/search_terms.json',]
 
     def setUp(self):
@@ -82,7 +82,7 @@ class ApiTestCase(ResourceTestCase):
         self.jpp = Organization(name=u"Journalism++")
         self.jpp._author = [super_user.pk]
         self.jpp.founded = datetime(2011, 4, 3)
-        self.jpp.website_url = 'http://jplusplus.com'        
+        self.jpp.website_url = 'http://jplusplus.com'
         self.jpp.save()
 
         self.jg  = Organization(name=u"Journalism Grant")
@@ -97,16 +97,16 @@ class ApiTestCase(ResourceTestCase):
         self.pr.activity_in_organization.add(self.jpp)
         self.pr.save()
 
-        self.pb = Person(name=u"Pierre Bellon")        
+        self.pb = Person(name=u"Pierre Bellon")
         self.pb.based_in.add(self.fra)
         self.pb.activity_in_organization.add(self.jpp)
         self.pb.save()
         # Creates Christmas topic
         ontology = File(open(settings.DATA_ROOT + "/ontology-v5.7.owl"))
-        self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology=ontology, author=super_user)
+        self.christmas = Topic(slug=u"christmas", title="It's christmas!", ontology_as_owl=ontology, author=super_user)
         self.christmas.save()
         # Creates Thanksgiving topic
-        self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology=ontology, author=super_user)
+        self.thanksgiving = Topic(slug=u"thanksgiving", title="It's thanksgiving!", ontology_as_owl=ontology, author=super_user)
         self.thanksgiving.save()
 
         self.post_data_simple = {
@@ -155,7 +155,7 @@ class ApiTestCase(ResourceTestCase):
         self.cleanModel(self.fra) # country
         self.cleanModel(self.pr) # people
         self.cleanModel(self.pb) # people
-        # Simply flush the database  
+        # Simply flush the database
         management.call_command('flush', verbosity=0, interactive=False)
 
 

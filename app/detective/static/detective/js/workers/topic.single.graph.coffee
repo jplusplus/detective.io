@@ -133,6 +133,8 @@ class GraphWorker
         loaded
 
     load_from_leaf : (source_leaf) =>
+        source_leaf = _.findWhere @leafs,
+            _id : source_leaf._id
         leafs_to_load = (source_leaf.leafs.splice 0, 2)
 
         if (source_leaf.leafs.length > 0)
@@ -144,7 +146,7 @@ class GraphWorker
         loaded = @load_leafs leafs_to_load
         @aggregate loaded
 
-        @leafs = @sort_and_reindex @leafs
+        # @leafs = @sort_and_reindex @leafs
 
         do @ask_update
 

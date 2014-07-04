@@ -1,10 +1,11 @@
 from .utils                     import get_topics
 from app.detective              import utils
 from app.detective.permissions  import create_permissions, remove_permissions
+from django.contrib.auth.models import User
 from django.core.exceptions     import ValidationError
 from django.db                  import models
 from django.db.models.fields    import FieldDoesNotExist
-from django.contrib.auth.models import User
+from jsonfield                  import JSONField
 from tinymce.models             import HTMLField
 
 import inspect
@@ -51,17 +52,18 @@ class QuoteRequest(models.Model):
 
 class Topic(models.Model):
     MODULES     = tuple( (topic, topic,) for topic in get_topics() )
-    title       = models.CharField(max_length=250, help_text="Title of your topic.")
+    title            = models.CharField(max_length=250, help_text="Title of your topic.")
     # Value will be set for this field if it's blank
-    module      = models.SlugField(choices=MODULES, blank=True, max_length=250, help_text="Module to use to create your topic. Leave blank to create a virtual one.")
-    slug        = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
-    description = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
-    about       = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
-    public      = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
-    featured    = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
-    ontology    = models.FileField(null=True, blank=True, upload_to="ontologies", help_text="Ontology file that descibes your field of study.")
-    background  = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
-    author      = models.ForeignKey(User, help_text="Author of this topic.", null=True)
+    slug             = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
+    description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
+    about            = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
+    public           = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
+    featured         = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
+    background       = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
+    author           = models.ForeignKey(User, help_text="Author of this topic.", null=True)
+    ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL file (RDF)", help_text="Ontology file that descibes your field of study.")
+    ontology_as_mod  = models.SlugField(choices=MODULES, blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic. Leave blank to create a virtual one.")
+    ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
 
     def __unicode__(self):
         return self.title
@@ -69,7 +71,7 @@ class Topic(models.Model):
     def app_label(self):
         if self.slug in ["common", "energy"]:
             return self.slug
-        elif not self.module:
+        elif not self.ontology_as_mod:
             # Already saved topic
             if self.id:
                 cache_key = "prefetched_topic_%s" % self.id
@@ -80,20 +82,20 @@ class Topic(models.Model):
                     setattr(self, cache_key, topic)
                 else:
                     topic = getattr(self, cache_key)
-                # Restore the previous module value
-                self.module = topic.module
+                # Restore the previous ontology_as_mod value
+                self.ontology_as_mod = topic.ontology_as_mod
                 # Call this function again.
-                # Continue if module is still empty
-                if self.module: return self.app_label()
+                # Continue if ontology_as_mod is still empty
+                if self.ontology_as_mod: return self.app_label()
             while True:
                 token = Topic.get_module_token()
                 # Break the loop only if the token doesn't exist
-                if not Topic.objects.filter(module=token).exists(): break
+                if not Topic.objects.filter(ontology_as_mod=token).exists(): break
             # Save the new token
-            self.module = token
+            self.ontology_as_mod = token
             # Save a first time if no idea given
             models.Model.save(self)
-        return self.module
+        return self.ontology_as_mod
 
     @staticmethod
     def get_module_token(size=10, chars=string.ascii_uppercase + string.digits):
@@ -120,13 +122,11 @@ class Topic(models.Model):
         return models_list
 
     def clean(self):
-        if self.ontology == "" and not self.has_default_ontology():
-            raise ValidationError( 'An ontology file is required with this module.',  code='invalid')
         models.Model.clean(self)
 
     def save(self, *args, **kwargs):
         # Ensure that the module field is populated with app_label()
-        self.module = self.app_label()
+        self.ontology_as_mod = self.app_label()
         # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
         # Refresh the API
@@ -281,7 +281,7 @@ def update_permissions(*args, **kwargs):
     assert kwargs.get('instance')
     # @TODO check that the slug changed or not to avoid permissions hijacking
     if kwargs.get('created', False):
-        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').module)
+        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').ontology_as_mod)
 
 signals.post_delete.connect(remove_permissions, sender=Topic)
 signals.post_save.connect(update_permissions, sender=Topic)

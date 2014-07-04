@@ -62,7 +62,7 @@ class Topic(models.Model):
     background       = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
     author           = models.ForeignKey(User, help_text="Author of this topic.", null=True)
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL file (RDF)", help_text="Ontology file that descibes your field of study.")
-    ontology_as_mod  = models.SlugField(choices=MODULES, blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic. Leave blank to create a virtual one.")
+    ontology_as_mod  = models.SlugField(choices=MODULES, blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
     ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
 
     def __unicode__(self):
@@ -237,7 +237,7 @@ class SearchTerm(models.Model):
         field = None
         if self.name:
             # Build a cache key with the topic token
-            cache_key = "%s__%s__field" % ( self.topic.module, self.name )
+            cache_key = "%s__%s__field" % ( self.topic.ontology_as_mod, self.name )
             # Try to use the cache value
             if getattr(self, cache_key, None) is not None:
                 field = getattr(self, cache_key)

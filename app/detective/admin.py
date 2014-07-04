@@ -82,10 +82,11 @@ class TopicAdmin(admin.ModelAdmin):
             'fields':  ( ('title', 'slug', 'author',), ('public', 'featured'))
         }),
         ('Describe your field of study', {
+            'classes': ('wide',),
             'fields': ( ('ontology_as_mod', 'ontology_as_json', 'ontology_as_owl',))
         }),
         ('Advanced options', {
-            'classes': ('collapse',),
+            'classes': ('collapse', 'wide'),
             'fields': ( 'description', 'about', 'background', )
         }),
     )

@@ -141,24 +141,31 @@ def topic_models(path, force=False):
     urls_path   = "%s.urls" % path
     # Import or create virtually the models.py file
     models_module = import_or_create(models_path, force=force)
-    if topic.ontology_as_owl is None:
-        directory     = os.path.dirname(os.path.realpath( models_module.__file__ ))
-        # Path to the ontology file
-        ontology = "%s/ontology.owl" % directory
+    # JSON ontology
+    if topic.ontology_as_json is not None:
+        try:
+            # Generates all model using the ontology file.
+            # Also overides the default app label to allow data persistance
+            pass
+        except TypeError:
+            models = []
+        except ValueError:
+            models = []
+    # OWL ontology
+    if topic.ontology_as_owl is not None:
+        try:
+            # Generates all model using the ontology file.
+            # Also overides the default app label to allow data persistance
+            models = owl.parse(topic.ontology_as_owl, path, app_label=app_label)
+            # Makes every model available through this module
+            for m in models:
+                # Record the model
+                setattr(models_module, m, models[m])
+        except TypeError:
+            models = []
+        except ValueError:
+            models = []
     else:
-        # Use the provided file
-        ontology = topic.ontology_as_owl
-    try:
-        # Generates all model using the ontology file.
-        # Also overides the default app label to allow data persistance
-        models = owl.parse(ontology, path, app_label=app_label)
-        # Makes every model available through this module
-        for m in models:
-            # Record the model
-            setattr(models_module, m, models[m])
-    except TypeError:
-        models = []
-    except ValueError:
         models = []
     # Generates the API endpoints
     api = NamespacedApi(api_name='v1', urlconf_namespace=app_label)

@@ -109,9 +109,9 @@ class SummaryResource(Resource):
     def get_topic_or_404(self, request=None):
         try:
             if request is not None:
-                return Topic.objects.get(module=resolve(request.path).namespace)
+                return Topic.objects.get(ontology_as_mod=resolve(request.path).namespace)
             else:
-                return Topic.objects.get(module=self._meta.urlconf_namespace)
+                return Topic.objects.get(ontology_as_mod=self._meta.urlconf_namespace)
         except Topic.DoesNotExist:
             raise Http404()
 

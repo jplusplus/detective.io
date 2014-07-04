@@ -14,7 +14,7 @@ class VirtualApi:
                 # This will automaticly create the API if needed
                 # or failed if the topic is unknown
                 try:
-                    getattr(topics, topic.module)
+                    getattr(topics, topic.ontology_as_mod)
                 except AttributeError as e:
                     raise Http404(e)
             except Topic.DoesNotExist:

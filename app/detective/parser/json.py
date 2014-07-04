@@ -45,7 +45,7 @@ def parse(ontology, module='', app_label=None):
         # Every class fields are recorded into an objects
         class_fields = {
             # Additional informations
-            "_description": gn(clss, "help_text"),
+            "_description": gn(clss, "help_text", gn(clss, "description")),
             "_topic"      : gn(clss, "scope"),
             # Default fields
             "_author": models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author'),

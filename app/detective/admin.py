@@ -19,8 +19,9 @@ if settings.DEBUG:
 
 
 class SearchTermInline(admin.TabularInline):
-    model  = SearchTerm
-    extra  = 0
+    model        = SearchTerm
+    suit_classes = 'suit-tab suit-tab-search-terms'
+    extra        = 0
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'name':
@@ -78,9 +79,14 @@ class TopicAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display        = ("title", "link", "public","app_label",)
     list_filter         = ("public","featured","author")
+    suit_form_tabs      = (
+        ('general', 'General'),
+        ('advanced', 'Advanced Settings'),
+        ('search-terms', 'Search Terms')
+    )
     fieldsets = (
         (None, {
-            'classes': ('wide',),
+            'classes': ('wide', 'suit-tab suit-tab-general'),
             'fields':  (
                 ('title', 'slug',),
                 ('public',),
@@ -89,12 +95,12 @@ class TopicAdmin(admin.ModelAdmin):
             )
         }),
         ('Describe your field of study', {
-            'classes': ('wide',),
+            'classes': ('wide', 'suit-tab suit-tab-general'),
             'description': 'Choose one of this tree ways to define your ontology.',
             'fields': ( ('ontology_as_mod', 'ontology_as_json', 'ontology_as_owl',))
         }),
         ('Advanced options', {
-            'classes': ('wide',),
+            'classes': ('wide', 'suit-tab suit-tab-advanced'),
             'fields': ( 'description', 'about', 'background', )
         }),
     )

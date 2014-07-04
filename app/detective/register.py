@@ -49,7 +49,7 @@ def default_rules(topic):
     cache_key = "prefetched_topic_%s" % topic
     if cache.get(cache_key, None) is None:
         # Get all registered models for this topic
-        topic  = Topic.objects.get(module=topic)
+        topic  = Topic.objects.get(ontology_as_mod=topic)
         models = topic.get_models()
         cache.set(cache_key, topic, 10)
     else:
@@ -134,20 +134,20 @@ def topic_models(path, force=False):
     topic_module = import_or_create(path, force=force)
     topic_name   = path.split(".")[-1]
     # Ensure that the topic's model exist
-    topic = Topic.objects.get(module=topic_name)
+    topic = Topic.objects.get(ontology_as_mod=topic_name)
     app_label = topic.app_label()
     # Add '.models to the path if needed
     models_path = path if path.endswith(".models") else '%s.models' % path
     urls_path   = "%s.urls" % path
     # Import or create virtually the models.py file
     models_module = import_or_create(models_path, force=force)
-    if topic.ontology is None:
+    if topic.ontology_as_owl is None:
         directory     = os.path.dirname(os.path.realpath( models_module.__file__ ))
         # Path to the ontology file
         ontology = "%s/ontology.owl" % directory
     else:
         # Use the provided file
-        ontology = topic.ontology
+        ontology = topic.ontology_as_owl
     try:
         # Generates all model using the ontology file.
         # Also overides the default app label to allow data persistance

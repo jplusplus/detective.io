@@ -82,7 +82,7 @@ def get_topics(offline=True):
         else:
             # Get all registered models
             topics = cache.get(cache_key)
-        return [t.module for t in topics]
+        return [t.ontology_as_mod for t in topics]
 
 def get_topics_modules():
     # Import the whole topics directory automaticly

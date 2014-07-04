@@ -1,4 +1,4 @@
-from app.detective                       import owl, utils
+from app.detective                       import parser, utils
 from app.detective.modelrules            import ModelRules
 from app.detective.models                import Topic
 from django.conf.urls                    import url, include, patterns
@@ -141,32 +141,27 @@ def topic_models(path, force=False):
     urls_path   = "%s.urls" % path
     # Import or create virtually the models.py file
     models_module = import_or_create(models_path, force=force)
-    # JSON ontology
-    if topic.ontology_as_json is not None:
-        try:
-            # Generates all model using the ontology file.
-            # Also overides the default app label to allow data persistance
-            pass
-        except TypeError:
+    try:
+        # Generates all model using the ontology file.
+        # Also overides the default app label to allow data persistance
+        if topic.ontology_as_json is not None:
+            # JSON ontology
+            models = parser.json.parse(topic.ontology_as_json, path, app_label=app_label)
+        elif topic.ontology_as_owl is not None:
+            # OWL ontology
+            models = parser.owl.parse(topic.ontology_as_owl, path, app_label=app_label)
+        else:
             models = []
-        except ValueError:
-            models = []
-    # OWL ontology
-    if topic.ontology_as_owl is not None:
-        try:
-            # Generates all model using the ontology file.
-            # Also overides the default app label to allow data persistance
-            models = owl.parse(topic.ontology_as_owl, path, app_label=app_label)
-            # Makes every model available through this module
-            for m in models:
-                # Record the model
-                setattr(models_module, m, models[m])
-        except TypeError:
-            models = []
-        except ValueError:
-            models = []
-    else:
+    except TypeError as e:
+        if settings.DEBUG: print 'TypeError:', e
         models = []
+    except ValueError as e:
+        if settings.DEBUG: print 'ValueError:', e
+        models = []
+    # Makes every model available through this module
+    for m in models:
+        # Record the model
+        setattr(models_module, m, models[m])
     # Generates the API endpoints
     api = NamespacedApi(api_name='v1', urlconf_namespace=app_label)
     # Create resources root if needed

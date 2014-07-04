@@ -94,7 +94,7 @@ test:
 	make startdb
 	./manage.py syncdb -v 0 --noinput --pythonpath=. --settings=app.settings_tests
 	# Launch test with coverage
-	python -W ignore::DeprecationWarning $(COVERAGE) run --source=app.detective ./manage.py test detective.ApiTestCase.test_rdf_search --pythonpath=. --settings=app.settings_tests
+	python -W ignore::DeprecationWarning $(COVERAGE) run --source=app.detective ./manage.py test detective --pythonpath=. --settings=app.settings_tests
 	# Send report to coveralls
 	coveralls
 	# Stop database in order to restore it

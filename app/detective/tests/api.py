@@ -607,7 +607,6 @@ class ApiTestCase(ResourceTestCase):
         # RDF object for persons that have activity in J++, we need to urlencode
         # the JSON string to avoid '+' loss
         rdf_str = urllib.quote(json.dumps(self.rdf_jpp))
-        print rdf_str
         url = '/api/energy/v1/summary/rdf_search/?limit=20&offset=0&q=%s' % rdf_str
         resp = self.api_client.get(url, format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)

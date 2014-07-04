@@ -51,7 +51,6 @@ class QuoteRequest(models.Model):
         return "%s - %s" % (self.name, self.email,)
 
 class Topic(models.Model):
-    MODULES = tuple( (topic, topic,) for topic in get_topics() )
     title            = models.CharField(max_length=250, help_text="Title of your topic.")
     # Value will be set for this field if it's blank
     slug             = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
@@ -62,7 +61,7 @@ class Topic(models.Model):
     background       = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
     author           = models.ForeignKey(User, help_text="Author of this topic.", null=True)
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
-    ontology_as_mod  = models.SlugField(choices=MODULES, blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
+    ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
     ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
 
     def __unicode__(self):

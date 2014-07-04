@@ -5,7 +5,7 @@ class GraphWorker
         @d3_layout = d3.layout.force();
 
         @aggregation_type = '__aggregation_bubble'
-        @aggregation_threshold = 2
+        @aggregation_threshold = 3
         @aggregated_edges = []
         @aggregation_index = 0
 
@@ -30,8 +30,7 @@ class GraphWorker
         do =>
             clean = (do =>
                 for leaf in @leafs
-                    if not leaf in leafs_to_aggregate
-                        continue
+                    continue if not (leaf in leafs_to_aggregate)
                     # Check if we need to delete a node
                     if leaf.weight > @aggregation_threshold
                         # If so, we're removing the first we encounter

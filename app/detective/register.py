@@ -81,7 +81,8 @@ def default_rules(topic):
                 # Set it into the rules
                 rules.model(model).field(field.name).add(is_searchable=modelRules["is_searchable"])
                 # Entering relationship are not editable yet
-                rules.model(model).field(field.name).add(is_editable=modelRules["is_editable"])
+                is_editable = False if field.direction == 'in' and target_model is model else modelRules["is_editable"]
+                rules.model(model).field(field.name).add(is_editable=is_editable)
     return rules
 
 def import_or_create(path, register=True, force=False):

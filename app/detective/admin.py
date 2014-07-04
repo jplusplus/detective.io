@@ -99,7 +99,7 @@ class TopicAdmin(admin.ModelAdmin):
             'description': 'Choose one of this tree ways to define your ontology.',
             'fields': ( ('ontology_as_mod', 'ontology_as_json', 'ontology_as_owl',))
         }),
-        ('Advanced options', {
+        (None, {
             'classes': ('wide', 'suit-tab suit-tab-advanced'),
             'fields': ( 'description', 'about', 'background', )
         }),

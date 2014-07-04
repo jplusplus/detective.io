@@ -42,7 +42,7 @@ class IndividualAuthorization(Authorization):
         return authorized
 
     def read_detail(self, object_list, bundle):
-        if not Topic.objects.get(module=get_model_topic(bundle.obj)).public and not self.check_contribution_permission(object_list, bundle, 'read'):
+        if not Topic.objects.get(ontology_as_mod=get_model_topic(bundle.obj)).public and not self.check_contribution_permission(object_list, bundle, 'read'):
             raise Unauthorized("Sorry, only staff or contributors can read resource.")
         return True
 

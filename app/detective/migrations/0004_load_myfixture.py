@@ -3,17 +3,43 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
-import json
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        json_data = open("app/detective/fixtures/default_topics.json")        
-        items = json.load(json_data)
-        for item in items:
+        fixtures = [
+            {
+                "pk": 1,
+                "model": "detective.topic",
+                "fields": {
+                    "description": "All default resources.",
+                    "title": "Common",
+                    "module": "common",
+                    "slug": "common",
+                    "ontology": "",
+                    "about": "",
+                    "background": "",
+                    "public": True
+                }
+            },
+            {
+                "pk": 2,
+                "model": "detective.topic",
+                "fields": {
+                    "description": "A comprehensive database of every person and every organization linked to innovative energy projects.",
+                    "title": "Innovative energy projects in developing countries ",
+                    "module": "energy",
+                    "slug": "energy",
+                    "ontology": "",
+                    "about": "",
+                    "background": "",
+                    "public": True
+                }
+            }
+        ]
+        for item in fixtures:
             obj = orm[ item["model"] ](**item["fields"])
             obj.save()
-        json_data.close()
 
     def backwards(self, orm):
         "Write your backwards methods here."

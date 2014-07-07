@@ -34,7 +34,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         remote    : "@"
         prefetch  : "@"
         valueKey  : "@"
-        value     : '='
+        value     : '=?'
         limit     : "@"
         change    : "&"
     link: (scope, element, attrs) ->

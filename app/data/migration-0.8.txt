@@ -1,6 +1,7 @@
 START source=node(*)
-MATCH source
-WHERE has(source.url)
+MATCH source<-[:`<<INSTANCE>>`]-(n)
+WHERE n.name = 'common:FieldSource' 
+AND has(source.url)
 SET source.reference = source.url 
-DELETE source.url 
+DELETE source.url
 RETURN source

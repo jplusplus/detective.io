@@ -1,14 +1,14 @@
 [
-
 {
     "pk": 1,
     "model": "detective.topic",
     "fields": {
         "description": "All default resources.",
         "title": "Common",
-        "module": "common",
         "slug": "common",
-        "ontology": "",
+        "ontology_as_json": null,
+        "ontology_as_owl": null,
+        "ontology_as_mod": "common",
         "about": "",
         "background": "",
         "public": true
@@ -20,9 +20,10 @@
     "fields": {
         "description": "A comprehensive database of every person and every organization linked to innovative energy projects.",
         "title": "Innovative energy projects in developing countries ",
-        "module": "energy",
         "slug": "energy",
-        "ontology": "",
+        "ontology_as_json": null,
+        "ontology_as_owl": null,
+        "ontology_as_mod": "energy",
         "about": "",
         "background": "",
         "public": true

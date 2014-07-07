@@ -2,6 +2,7 @@ from django.forms.forms import pretty_name
 from random             import randint
 from os.path            import isdir, join
 from os                 import listdir
+from unidecode          import unidecode
 import importlib
 import inspect
 import os
@@ -23,7 +24,6 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     if app_label in cache.app_models and name.lower() in cache.app_models[app_label]:
         # We just delete it quietly
         del cache.app_models[app_label][name.lower()]
-
     class Meta:
         # Using type('Meta', ...) gives a dictproxy error during model creation
         pass
@@ -62,8 +62,9 @@ def create_model_resource(model, path=None, Resource=None, Meta=None):
 def import_class(path):
     components = path.split('.')
     klass      = components[-1:]
-    mod        = ".".join(components[0:-1])
-    return getattr(__import__(mod, fromlist=klass), klass[0], None)
+    mod_post   = ".".join(components[0:-1])
+    mod        = __import__(mod_post, fromlist=klass)
+    return getattr(mod, klass[0], None)
 
 def get_topics(offline=True):
     if offline:
@@ -82,7 +83,7 @@ def get_topics(offline=True):
         else:
             # Get all registered models
             topics = cache.get(cache_key)
-        return [t.module for t in topics]
+        return [t.ontology_as_mod for t in topics]
 
 def get_topics_modules():
     # Import the whole topics directory automaticly
@@ -232,6 +233,8 @@ def to_class_name(value=""):
         - begin by an uppercase
         - use camelcase
     """
+    if type(value) is unicode:
+        value = unidecode(value)
     value = to_camelcase(value)
     value = list(value)
     if len(value) > 0:

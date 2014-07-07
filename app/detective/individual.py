@@ -42,7 +42,7 @@ class IndividualAuthorization(Authorization):
         return authorized
 
     def read_detail(self, object_list, bundle):
-        if not Topic.objects.get(module=get_model_topic(bundle.obj)).public and not self.check_contribution_permission(object_list, bundle, 'read'):
+        if not Topic.objects.get(ontology_as_mod=get_model_topic(bundle.obj)).public and not self.check_contribution_permission(object_list, bundle, 'read'):
             raise Unauthorized("Sorry, only staff or contributors can read resource.")
         return True
 
@@ -202,7 +202,7 @@ class IndividualResource(ModelResource):
 
     def use_in(self, bundle=None):
         # Use in post/put
-        if bundle.request.method in ['POST', 'PUT']:            
+        if bundle.request.method in ['POST', 'PUT']:
             return bundle.request.path == self.get_resource_uri()
         # Use in detail
         else:
@@ -365,7 +365,7 @@ class IndividualResource(ModelResource):
         query     = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', query).strip()
         limit     = int(request.GET.get('limit', 20))
         # Do the query.
-        results   = self._meta.queryset.filter(name__icontains=query)        
+        results   = self._meta.queryset.filter(name__icontains=query)
         paginator = Paginator(results, limit)
 
         try:
@@ -395,12 +395,12 @@ class IndividualResource(ModelResource):
         return self.create_response(request, object_list)
 
     def get_mine(self, request, **kwargs):
-        self.method_check(request, allowed=['get'])        
+        self.method_check(request, allowed=['get'])
         self.throttle_check(request)
 
         limit = int(request.GET.get('limit', 20))
 
-        if request.user.id is None:            
+        if request.user.id is None:
             object_list = {
                 'objects': [],
                 'meta': {
@@ -412,7 +412,7 @@ class IndividualResource(ModelResource):
             }
         else:
             # Do the query.
-            results   = self._meta.queryset.filter(_author__contains=request.user.id)            
+            results   = self._meta.queryset.filter(_author__contains=request.user.id)
             paginator = Paginator(results, limit)
 
             try:
@@ -460,7 +460,7 @@ class IndividualResource(ModelResource):
         for field in body:
             if field == "field_sources":
                 for source in  data[field]:
-                    fs, created = FieldSource.objects.get_or_create(individual=node.id, 
+                    fs, created = FieldSource.objects.get_or_create(individual=node.id,
                                                                     field=source["field"])
                     # Update the value
                     if source["url"] != "" and source["url"] is not None:
@@ -499,7 +499,7 @@ class IndividualResource(ModelResource):
                                 continue
                 # It's a literal value
                 else:
-                    field_prop = self.get_model_field(field)._property                    
+                    field_prop = self.get_model_field(field)._property
                     if isinstance(field_prop, DateProperty):
                         # It's a date and therefor `value` should be converted as it
                         value  = datetime.strptime(value, RFC_DATETIME_FORMAT)

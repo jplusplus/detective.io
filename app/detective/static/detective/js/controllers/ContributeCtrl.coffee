@@ -207,31 +207,26 @@ class ContributeCtrl
                     @error_traceback = data.traceback if data.traceback?
                 )
 
-        getSource: (field)=> _.find @fields.field_sources, (fs)=> fs.field is field.name        
-        setSource: (field, value=@sources[field.name])=>             
+        getSources: (field)=> _.where @fields.field_sources, field: field.name        
+        
+        setSource: (field, index, value=@sources[field.name])=>             
             # Close the form
             field.showSourceForm = no
-            # Get the sourc eobject
-            source = @getSource(field)  
-            # Delete the value
-            if (value is '' or value is null) and source?
-                idx = _.indexOf @fields.field_sources, (fs)=> fs.field is field.name 
-                delete @sources[field.name]
-                delete @fields.field_sources[idx]                
-                @fields.field_sources.splice idx, 1
-            # Update the value
-            else if source? 
-                source.url   = value
-                source.field = field.name
-            # Add te value
-            else
-                @fields.field_sources.push 
-                    url  : value
-                    field: field.name
+            @fields.field_sources = @getSources(field)
 
-        hasSource: (field)-> 
-            source = @getSource field
-            source? and source.url? and source.url != ''
+        updateSource: (field, index)=>
+            source.showDeleteBtn = !(source.showDeleteBtn or false) 
+
+
+        deleteSource: (field, index)=>
+            delete @sources[field.name][index] if @sources[field.name][index]? 
+
+        hasSource: (field)->
+            sources = @getSources field
+            console.log 'hasSource - sources = ', sources
+            has_source = not _.isEmpty sources and 
+                             _.some sources, (e)-> e? and e.reference?
+            has_source
 
         # Load an individual using its id
         load: (id, related_to=null)=>

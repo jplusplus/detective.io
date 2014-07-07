@@ -441,6 +441,21 @@ class IndividualResource(ModelResource):
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
 
+    def patch_sources(self, field, data):
+        source_list = []
+        for source in data[field]:
+            created_sources = FieldSource.objects.filter(individual=node.id, 
+                                                         field=source["field"])
+            reference = source.get('reference')
+            import pdb; pdb.set_trace()
+            if reference not in ('', None):
+                fs.reference = source["reference"]
+                fs.save()
+            # Remove source field
+            else:
+                fs.delete()
+
+
     def get_patch(self, request, **kwargs):
         self.method_check(request, allowed=['post'])
         #self.is_authenticated(request)
@@ -459,16 +474,7 @@ class IndividualResource(ModelResource):
         data = body.copy()
         for field in body:
             if field == "field_sources":
-                for source in  data[field]:
-                    fs, created = FieldSource.objects.get_or_create(individual=node.id, 
-                                                                    field=source["field"])
-                    # Update the value
-                    if source["url"] != "" and source["url"] is not None:
-                        fs.url = source["url"]
-                        fs.save()
-                    # Remove source field
-                    else:
-                        fs.delete()
+                self.patch_sources( field, data )
                 # Continue to not deleted the field
                 continue
             # If the field exists into our model

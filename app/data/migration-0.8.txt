@@ -1,0 +1,6 @@
+START source=node(*)
+MATCH source
+WHERE has(source.url)
+SET source.reference = source.url 
+DELETE source.url 
+RETURN source

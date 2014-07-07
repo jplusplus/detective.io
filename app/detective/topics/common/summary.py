@@ -908,6 +908,7 @@ def process_parsing(topic, files):
                             # map the object with the ID defined in the .csv
                             id_mapping[(entity, id)] = item
                             file_reading_progression += 1
+                            job.refresh()
                             job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
                             job.meta["file_reading"] = file_name
                             job.save()
@@ -951,6 +952,7 @@ def process_parsing(topic, files):
                         getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
                         inserted_relations += 1
                         file_reading_progression += 1
+                        job.refresh()
                         job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
                         job.meta["file_reading"] = file_name
                         job.save()
@@ -990,10 +992,12 @@ def process_parsing(topic, files):
         # Save everything
         saved = 0
         logger.debug("BulkUpload: saving %d objects" % (len(id_mapping)))
+        job.refresh()
         job.meta["objects_to_save"] = len(id_mapping)
         for item in id_mapping.values():
             item.save()
             saved += 1
+            job.refresh()
             job.meta["saving_progression"] = saved
             job.save()
         job.refresh()

@@ -306,14 +306,28 @@
 								</span>
 							</button>
 							<form class="add-source-form" 
-								  ng-submit="individual.setSource(field)"
+								  ng-submit="individual.updateSources(field)"
 								  ng-show="field.showSourceForm">
-								<span ng-class="{ 'input-group': individual.hasSource(field) }">
-									<input type="url"
-										   ng-blur="individual.setSource(field)"
-										   ng-model="individual.sources[field.name]"
-										   placeholder="http://exemple.com" 
-										   class="form-control" />
+								
+								<ul ng-class="{ 'input-group': individual.hasSources(field) }">
+									<li ng-repeat="source in individual.getSources(field)"
+										ng-init='source.showDeleteBtn=false'>
+										<input type="text"
+											   ng-blur="individual.updateSource(field, $index)"
+											   ng-model="individual.sources[field.name][$index]"
+											   placeholder="http://exemple.com" 
+											   class="form-control pull-left" />
+
+										<a class='btn' ng-class="{ visible: source.showDeleteBtn }" ng-clik="indidual.removeSource(field, $index)"><i class="fa fa-trash-o"></i></a>
+									</li>
+									<li>
+										<input type="text"
+											   ng-blur="individual.addSource(field, $index)"
+											   ng-model="individual.sources[field.name]"
+											   placeholder="http://exemple.com" 
+											   class="form-control pull-left" />
+
+
 									<span class="input-group-btn" ng-if="individual.hasSource(field)">
 										<a target="_blank" 
 										   ng-href="[[individual.getSource(field).url]]" 

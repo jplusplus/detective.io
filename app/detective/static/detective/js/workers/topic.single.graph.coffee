@@ -167,9 +167,9 @@ class GraphWorker
                 @log "Can't perform action <#{event.data.type}>."
 
     log : (message) =>
-        @post_message
-            type : 'log'
-            data : message
+        # @post_message
+        #     type : 'log'
+        #     data : message
 
     ask_update : =>
         @post_message

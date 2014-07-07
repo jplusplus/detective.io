@@ -92,7 +92,7 @@
         worker.addEventListener 'message', (event) =>
             switch event.data.type
                 when 'log' then do ->
-                    console.debug "From worker -> #{event.data.data}"
+                    # console.debug "From worker -> #{event.data.data}"
                 when 'update' then do ->
                     leafs = event.data.data.leafs
                     edges = event.data.data.edges

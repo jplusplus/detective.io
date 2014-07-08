@@ -103,6 +103,6 @@ INSTALLED_APPS  += ('djrill',)
 # https only
 MIDDLEWARE_CLASSES.insert(0, 'sslify.middleware.SSLifyMiddleware') # need to be the first middleware
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SSLIFY_DISABLE          = os.getenv('SSLIFY_DISABLE', "False") == "True" # default: False
+SSLIFY_DISABLE          = os.getenv('SSLIFY_DISABLE', "True") == "True" # default: True
 
 # EOF

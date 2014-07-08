@@ -5,7 +5,7 @@ class GraphWorker
         @d3_layout = d3.layout.force();
 
         @aggregation_type = '__aggregation_bubble'
-        @aggregation_threshold = 2
+        @aggregation_threshold = 3
         @aggregated_edges = []
         @aggregation_index = 0
 
@@ -28,24 +28,25 @@ class GraphWorker
             quick = yes
 
         do =>
-            security_threshold = 100000
-            security = 0
             clean = (do =>
-                for leaf in leafs_to_aggregate
+                for leaf in @leafs
+                    continue if not (leaf in leafs_to_aggregate)
                     # Check if we need to delete a node
                     if leaf.weight > @aggregation_threshold
                         # If so, we're removing the first we encounter
                         for edge in @edges
                             if (edge.source._id is leaf._id) and @can_aggregate edge.target
                                 @delete_leaf edge.target, leaf
-                                leafs = @sort_and_reindex leafs
-                                # Aaaaand, we're going back to the top
-                                return (if security++ >= security_threshold then yes else no)
-                            else if (edge.target._id is leaf._id) and @can_aggregate edge.source
-                                @delete_leaf edge.source, leaf
+                                do ((@d3_layout.nodes @leafs).links @edges).start
                                 @leafs = @sort_and_reindex @leafs
                                 # Aaaaand, we're going back to the top
-                                return (if security++ >= security_threshold then yes else no)
+                                return no
+                            else if (edge.target._id is leaf._id) and @can_aggregate edge.source
+                                @delete_leaf edge.source, leaf
+                                do ((@d3_layout.nodes @leafs).links @edges).start
+                                @leafs = @sort_and_reindex @leafs
+                                # Aaaaand, we're going back to the top
+                                return no
                     else if quick
                         # As leafs are sorted by weight
                         # if we encounter one leaf.weight <= threshold then we
@@ -84,8 +85,6 @@ class GraphWorker
 
         # Clean edges, one at a time
         do =>
-            security_threshold = 100000
-            security = 0
             clean = (do =>
                 for index, edge of @edges
                     # Is this edge concerning our leaf?
@@ -97,7 +96,7 @@ class GraphWorker
                         # If we deleted the last edge of a leaf, we have to delete that leaf
                         (@delete_leaf leaf_to_check) if leaf_to_check.weight <= 0
                         # Aaaaand, we're going back to the top
-                        return (if security++ >= security_threshold then yes else no)
+                        return no
                 # We're done!
                 return yes
             ) while not clean
@@ -111,8 +110,6 @@ class GraphWorker
         for leaf in leafs_to_load
             clean = no
 
-            @log "Loading leaf #{leaf.name}"
-
             @leafs.push leaf
             do ((@d3_layout.nodes @leafs).links @edges).start
             @leafs = @sort_and_reindex @leafs
@@ -121,7 +118,6 @@ class GraphWorker
                 for edge, i in @aggregated_edges
                     is_concerned = [edge.source._id, edge.target._id].indexOf leaf._id
                     if is_concerned >= 0
-                        @log "FOUND AN EDGE : " + edge._type
                         [_edge] = @aggregated_edges.splice i, 1
                         @edges.push _edge
 
@@ -137,19 +133,20 @@ class GraphWorker
         loaded
 
     load_from_leaf : (source_leaf) =>
+        source_leaf = _.findWhere @leafs,
+            _id : source_leaf._id
         leafs_to_load = (source_leaf.leafs.splice 0, 2)
-
-        @log "Loading leafs from #{source_leaf.name} (#{leafs_to_load.length})"
 
         if (source_leaf.leafs.length > 0)
             source_leaf.name = "#{source_leaf.leafs.length} more entities"
+            @log 'update aggregation leaf count ' + source_leaf.leafs.length
         else
             @delete_leaf source_leaf
 
         loaded = @load_leafs leafs_to_load
         @aggregate loaded
 
-        @leafs = @sort_and_reindex @leafs
+        # @leafs = @sort_and_reindex @leafs
 
         do @ask_update
 
@@ -158,6 +155,7 @@ class GraphWorker
         @leafs = data.leafs
         @edges = data.edges
         do ((@d3_layout.nodes @leafs).links @edges).start
+        @leafs = @sort_and_reindex @leafs
         do @aggregate
         do @ask_update
 

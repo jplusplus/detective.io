@@ -19,8 +19,9 @@ if settings.DEBUG:
 
 
 class SearchTermInline(admin.TabularInline):
-    model  = SearchTerm
-    extra  = 0
+    model        = SearchTerm
+    suit_classes = 'suit-tab suit-tab-search-terms'
+    extra        = 0
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'name':
@@ -77,12 +78,29 @@ class TopicAdmin(admin.ModelAdmin):
     save_on_top         = True
     prepopulated_fields = {'slug': ('title',)}
     list_display        = ("title", "link", "public","app_label",)
+    list_filter         = ("public","featured","author")
+    suit_form_tabs      = (
+        ('general', 'General'),
+        ('advanced', 'Advanced Settings'),
+        ('search-terms', 'Search Terms')
+    )
     fieldsets = (
         (None, {
-            'fields':  ( ('title', 'slug', 'author',), 'ontology', 'module', ('public', 'featured'))
+            'classes': ('wide', 'suit-tab suit-tab-general'),
+            'fields':  (
+                ('title', 'slug',),
+                ('public',),
+                ('featured',),
+                ('author',),
+            )
         }),
-        ('Advanced options', {
-            'classes': ('collapse',),
+        ('Describe your field of study', {
+            'classes': ('wide', 'suit-tab suit-tab-general'),
+            'description': 'Choose one of this tree ways to define your ontology.',
+            'fields': ( ('ontology_as_mod', 'ontology_as_json', 'ontology_as_owl',))
+        }),
+        (None, {
+            'classes': ('wide', 'suit-tab suit-tab-advanced'),
             'fields': ( 'description', 'about', 'background', )
         }),
     )

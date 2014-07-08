@@ -1,3 +1,4 @@
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 # -*- coding: utf-8 -*-
 import os, re
 # for relative paths
@@ -130,6 +131,15 @@ MIDDLEWARE_CLASSES = (
 )
 
 
+TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'django.core.context_processors.request',
+)
+
+SUIT_CONFIG = {
+    'ADMIN_NAME': 'Detective.io',
+    'MENU_EXCLUDE': ('registration', 'tastypie'),
+}
+
 ROOT_URLCONF = 'app.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -170,6 +180,8 @@ COMPRESS_ENABLED = True
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
 INSTALLED_APPS = (
+    # 'suit' must be added before 'django.contrib.admin'
+    'suit',
     'neo4django.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',

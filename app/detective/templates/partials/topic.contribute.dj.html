@@ -185,15 +185,16 @@
 
 						<div ng-repeat="f in individual.fields[field.name]">
 							<div class="input-group multiple">
-								<input
-									type="search"
-									placeholder="Search..."
-									tt-typeahead
-									tt-individual="field.related_model"
-									tt-topic="modelTopic(field.related_model)"
-									tt-model="individual.fields[field.name][$index]"
-									ng-disabled="individual.loading"
-									ng-if="relatedState(f) == 'input'" />
+								<span ng-if="relatedState(f) == 'input'">
+									<input
+										type="search"
+										placeholder="Search..."
+										tt-typeahead
+										tt-individual="field.related_model"
+										tt-topic="modelTopic(field.related_model)"
+										tt-model="individual.fields[field.name][$index]"
+										ng-disabled="individual.loading" />
+								</span>
 								<span class="form-control disabled" ng-if="relatedState(f) != 'input'">
 									[[f|individualPreview:"no preview available"]]
 									<span ng-hide="f.id">

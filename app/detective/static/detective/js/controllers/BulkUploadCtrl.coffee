@@ -43,6 +43,7 @@ class BulkUploadCtrl
         @scope.disableForm    = true
         @started_time         = new Date()
         @scope.isALongJob     = false
+        @scope.trackedJob     = false
         # Parameters of your request (to build the url)
         params =
             topic: @scope.topic_selected
@@ -106,7 +107,7 @@ class BulkUploadCtrl
         field_name = "file" + (@scope.file_fields.length + 1)
         @scope.file_fields.push(field_name)
 
-    # user enter an email to track the job
+    # ask to the job to send an email at the end of the proccess
     trackJob: =>
         params =
             type : "jobs"

@@ -41,7 +41,7 @@ class TopicResource(ModelResource):
 
     class Meta:
         queryset  = Topic.objects.all().prefetch_related('author')
-        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'module': ALL, 'public': ALL, 'title': ALL}
+        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
 
     def dehydrate(self, bundle):
         from app.detective import register
@@ -88,7 +88,7 @@ class TopicResource(ModelResource):
 
         object_list = super(TopicResource, self).get_object_list(request)
         # Return only topics the user can see
-        object_list = object_list if is_staff else object_list.filter(Q(module__in=can_read)|Q(public=True))
+        object_list = object_list if is_staff else object_list.filter(Q(ontology_as_mod__in=can_read)|Q(public=True))
 
         return object_list
 

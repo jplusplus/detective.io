@@ -294,56 +294,60 @@
 					</div>
 
 					<div class="add-source col-sm-3">
-						<span class="add-source-wrapper">
+						<div class="add-source-wrapper">
 							<button class="btn btn-primary add-source-toggle"
 									ng-class="{active: field.showSourceForm}" 
 							        ng-click="field.showSourceForm = !field.showSourceForm">
 								<i class="fa-book fa right05"></i>
-								<span ng-if="individual.hasSource(field)">
+								<span ng-if="individual.hasSources(field)">
 									Edit source
 								</span>
-								<span ng-if="!individual.hasSource(field)">
+								<span ng-if="!individual.hasSources(field)">
 									Add source
 								</span>
 							</button>
-							<form class="add-source-form" 
-								  ng-submit="individual.updateSources(field)"
-								  ng-show="field.showSourceForm">
-								
-								<ul ng-class="{ 'input-group': individual.hasSources(field) }">
-									<li ng-repeat="source in individual.getSources(field)"
-										ng-init='source.showDeleteBtn=false'>
-										<input type="text"
-											   ng-blur="individual.updateSource(field, $index)"
-											   ng-model="individual.sources[field.name][$index]"
-											   placeholder="http://exemple.com" 
-											   class="form-control pull-left" />
 
-										<a class='btn' ng-class="{ visible: source.showDeleteBtn }" ng-clik="indidual.removeSource(field, $index)"><i class="fa fa-trash-o"></i></a>
+
+							<div class="add-source-form" ng-show="field.showSourceForm">
+								<ul class="field-sources">
+									<li ng-repeat="source in individual.fields.field_sources | filter:{field:field.name}">
+										<div class='input-group'>
+											<span class="input-group-addon" ng-if="individual.isURLSource(source.reference)">
+												<a target="_blank" 
+												   ng-href="[[source.reference]]" 
+												   class="btn btn-default">
+													<i class="fa fa-external-link"></i>
+												</a>
+											</span>
+											<input type="text"
+												   placeholder="http://exemple.com" 
+												   ng-model="source.reference"
+												   change-on-blur
+												   class="form-control"/>
+										    <span class="input-group-btn">
+												<button type="button" class="btn btn-default delete-source-btn"
+												    ng-click="individual.deleteSource(source)">
+													<i class="fa fa-trash-o"></i>
+												</button>
+											</span>
+										</div>
 									</li>
 									<li>
-										<input type="text"
-											   ng-blur="individual.addSource(field, $index)"
-											   ng-model="individual.sources[field.name]"
+										<form ng-submit="individual.addSource(field, newSource)">
+											<input type="text"
+											   ng-model="newSource"
 											   placeholder="http://exemple.com" 
 											   class="form-control pull-left" />
-
-
-									<span class="input-group-btn" ng-if="individual.hasSource(field)">
-										<a target="_blank" 
-										   ng-href="[[individual.getSource(field).url]]" 
-										   class="btn btn-default">
-											<i class="fa fa-external-link"></i>
-										</a>
-									</span>
-								</span>
-							</form>
-						</span>
+										</form>
+									</li>
+								</ul>
+							</div>
+						</div>
 						<div class="add-source-overlay" ng-show="field.showSourceForm"></div>
 					</div>
 
 
-					<div class="has-source text-success col-sm-3 top05" ng-show="individual.hasSource(field)">
+					<div class="has-source text-success col-sm-3 top05" ng-show="individual.hasSources(field)">
 						<i class="fa fa-check-circle-o"></i> Sourced
 					</div>						
 

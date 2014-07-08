@@ -77,7 +77,6 @@ class ContributeCtrl
     # IndividualForm embeded class
     # ──────────────────────────────────────────────────────────────────────────
     class IndividualForm
-
         constructor: (scope, type="", fields={}, related_to=null)->
             # Class default attributes
             # ──────────────────────────────────────────────────────────────────
@@ -118,6 +117,8 @@ class ContributeCtrl
                 # Looks for the differences and update the db if needed
                 @update(changes) unless _.isEmpty(changes)
 
+
+
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
             # Function to remove nested resources without id
@@ -148,11 +149,12 @@ class ContributeCtrl
                 val = clean(now[prop], prop)
                 # Remove resource methods
                 # and angular properties (that start with $)
-                if typeof(val) isnt "function" and prop.indexOf("$") != 0   
+                if typeof(val) isnt "function" and prop.indexOf("$") != 0
                     # Previous and new value are different
                     unless angular.equals clean(prev[prop], prop), val
                         changes[prop] = val
             changes
+            
 
         # Generates the permalink to this individual
         permalink: =>
@@ -207,26 +209,21 @@ class ContributeCtrl
                     @error_traceback = data.traceback if data.traceback?
                 )
 
-        getSources: (field)=> _.where @fields.field_sources, field: field.name        
-        
-        setSource: (field, index, value=@sources[field.name])=>             
-            # Close the form
-            field.showSourceForm = no
-            @fields.field_sources = @getSources(field)
+        getSources: (field)=> _.where @fields.field_sources, field: field.name
 
-        updateSource: (field, index)=>
-            source.showDeleteBtn = !(source.showDeleteBtn or false) 
+        addSource: (field, value)=> 
+            @fields.field_sources.push
+                reference: value
+                field: field.name
 
+        deleteSource:(source, $event)=>
+            $event.preventDefault() if $event?
+            @fields.field_sources = _.reject @fields.field_sources, (e)->
+                e.field == source.field and e.reference == source.reference
 
-        deleteSource: (field, index)=>
-            delete @sources[field.name][index] if @sources[field.name][index]? 
-
-        hasSource: (field)->
+        hasSources: (field)->
             sources = @getSources field
-            console.log 'hasSource - sources = ', sources
-            has_source = not _.isEmpty sources and 
-                             _.some sources, (e)-> e? and e.reference?
-            has_source
+            (not _.isEmpty sources) and _.some sources, (e)-> e? and e.reference?
 
         # Load an individual using its id
         load: (id, related_to=null)=>
@@ -283,8 +280,6 @@ class ContributeCtrl
             fields
         showField: (field)=> @moreFields.push field
         isSaved: => @fields.id? and _.isEmpty( @getChanges() )
-
-
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods

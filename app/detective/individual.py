@@ -226,7 +226,6 @@ class IndividualResource(ModelResource):
             # Filter rules to keep only Neomatch
             if isinstance(rules[key], Neomatch):
                 bundle.data[key] = rules[key].query(bundle.obj.id)
-
         return bundle
 
     def dehydrate(self, bundle):
@@ -441,20 +440,29 @@ class IndividualResource(ModelResource):
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
 
-    def patch_sources(self, field, data):
-        source_list = []
-        for source in data[field]:
-            created_sources = FieldSource.objects.filter(individual=node.id, 
-                                                         field=source["field"])
-            reference = source.get('reference')
-            import pdb; pdb.set_trace()
-            if reference not in ('', None):
-                fs.reference = source["reference"]
-                fs.save()
-            # Remove source field
-            else:
-                fs.delete()
+    def patch_sources(self, sources, node):
+        def arr_no_dict_dup(in_arr):
+            out_arr = []
+            for el in in_arr:
+                existing = len(
+                        filter(
+                            lambda t: t['field'] == el['field'] and el['reference'] == t['reference'],
+                            out_arr
+                        )
+                    ) > 0
+                if not existing:
+                    out_arr.append(el)
+            return out_arr
 
+        # remove source duplicates
+        all_filtered_sources_data = arr_no_dict_dup(sources)
+        # remove empty references
+        all_filtered_sources_data = filter(lambda el: el['reference'] not in [None, ''], sources)
+
+        # dump patching: remove all old field_sources and put the new ones
+        [ source.delete() for source in  FieldSource.objects.filter(individual=node.id)]
+        for source_data in all_filtered_sources_data:
+            FieldSource.objects.create(individual=node.id, **source_data)
 
     def get_patch(self, request, **kwargs):
         self.method_check(request, allowed=['post'])
@@ -474,7 +482,7 @@ class IndividualResource(ModelResource):
         data = body.copy()
         for field in body:
             if field == "field_sources":
-                self.patch_sources( field, data )
+                self.patch_sources( data[field], node )
                 # Continue to not deleted the field
                 continue
             # If the field exists into our model

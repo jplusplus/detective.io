@@ -11,11 +11,12 @@ django-filter==0.6
 django-password-reset==0.5.1
 django-registration==1.0
 django-rq==0.6.0
+django-sslify==0.2.3
 django-storages==1.1.8
+django-suit==0.2.9
 django-tastypie==0.10.0
 django-tinymce==1.5.2
 django-urlmiddleware==0.2.1
-django-suit==0.2.9
 Django==1.5.4
 djrill==0.7.0
 easy-thumbnails==2.0.1

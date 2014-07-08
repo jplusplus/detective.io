@@ -114,7 +114,7 @@ TEMPLATE_LOADERS = (
 
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -128,7 +128,7 @@ MIDDLEWARE_CLASSES = (
     'urlmiddleware.URLMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
+]
 
 
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (

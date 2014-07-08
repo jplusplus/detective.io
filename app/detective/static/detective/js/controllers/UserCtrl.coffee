@@ -2,22 +2,22 @@
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
 class UserCtrl
     # Injects dependancies
-    @$inject : ["$scope", "$http", "$location", "$routeParams", "User", "Page", "$rootElement"]
+    @$inject : ["$scope", "$http", "$location", "$stateParams", "User", "Page", "$rootElement"]
     # Public method to resolve
     @resolve:
-        user: ($rootScope, $route, $q, $location, Common)->
+        user: ($rootScope, $state, $q, $location, Common)->
             notFound    = ->
                 deferred.reject()
                 $rootScope.is404(yes)
                 deferred
             deferred    = $q.defer()
-            routeParams = $route.current.params
+            stateParams = $state.current.params
             # Checks that the current topic and user exists together
-            if routeParams.username?
+            if stateParams.username?
                 # Retreive the topic for this user
                 params =
                     type    : "user"
-                    username: routeParams.username
+                    username: stateParams.username
                 Common.get params, (data)=>
                     # Stop if it's an unkown topic
                     return notFound() unless data.objects and data.objects.length
@@ -28,12 +28,12 @@ class UserCtrl
             # Return a deffered object
             deferred.promise
 
-    constructor: (@scope, @http, @location, @routeParams, @User, @Page, @rootElement)->
+    constructor: (@scope, @http, @location, @stateParams, @User, @Page, @rootElement)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         @scope.user    = @User
-        @scope.next    = @routeParams.next or "/"
+        @scope.next    = @stateParams.next or "/"
         # ──────────────────────────────────────────────────────────────────────
         # Scope method
         # ──────────────────────────────────────────────────────────────────────
@@ -224,7 +224,7 @@ class UserCtrl
             method: "GET"
             url: "/api/common/v1/user/activate/"
             params:
-                token: @routeParams.token
+                token: @stateParams.token
         # Submits the token for activation
         @http(config)
             .success (response) =>

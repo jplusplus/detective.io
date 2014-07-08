@@ -1,7 +1,7 @@
-angular.module('detective.service').factory("Individual", [ '$resource', '$http', '$routeParams', ($resource, $http, $routeParams)->
+angular.module('detective.service').factory("Individual", [ '$resource', '$http', '$stateParams', ($resource, $http, $stateParams)->
     defaultsParams =
         # Use the current topic parameter as default topic
-        topic: -> $routeParams.topic or "common"
+        topic: -> $stateParams.topic or "common"
 
     $resource '/api/:topic/v1/:type/:id/', defaultsParams,
         query:

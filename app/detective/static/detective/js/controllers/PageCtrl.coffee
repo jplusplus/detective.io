@@ -1,13 +1,13 @@
 class PageCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Page']
+    @$inject: ['$scope', '$stateParams', 'Page']
 
-    constructor: (@scope,  @routeParams, @Page)->
+    constructor: (@scope,  @stateParams, @Page)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Build template url
-        if @routeParams.slug?
-            @scope.templateUrl  = "/partial/page.#{@routeParams.slug}.html"
+        if @stateParams.slug?
+            @scope.templateUrl  = "/partial/page.#{@stateParams.slug}.html"
 
 angular.module('detective.controller').controller 'pageCtrl', PageCtrl

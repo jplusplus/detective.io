@@ -1,8 +1,8 @@
 class IndividualListCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', 'Common', '$location',  'Page']
+    @$inject: ['$scope', '$stateParams', 'Individual', 'Summary', 'Common', '$location',  'Page']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @Common, @location, @Page)->
+    constructor: (@scope, @stateParams, @Individual, @Summary, @Common, @location, @Page)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
@@ -20,10 +20,10 @@ class IndividualListCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Read route params
-        @scope.username           = @routeParams.username
-        @scope.topic              = @routeParams.topic
-        @scope.type               = @routeParams.type or ""
-        @scope.page               = @routeParams.page or 1
+        @scope.username           = @stateParams.username
+        @scope.topic              = @stateParams.topic
+        @scope.type               = @stateParams.type or ""
+        @scope.page               = @stateParams.page or 1
         @scope.limit              = 20
         @scope.individuals        = {}
         @scope.selectedIndividual = {}
@@ -46,7 +46,7 @@ class IndividualListCtrl
                     @Page.loading false
 
         # Update page value
-        @scope.$on "$routeUpdate", => @scope.page = parseInt @routeParams.page or 1
+        @scope.$on "$routeUpdate", => @scope.page = parseInt @stateParams.page or 1
         # ──────────────────────────────────────────────────────────────────────
         # Page setup
         # ──────────────────────────────────────────────────────────────────────

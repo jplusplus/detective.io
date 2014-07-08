@@ -1,9 +1,9 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
+    @$inject: ['$scope', '$stateParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
 
 
-    constructor: (@scope, @routeParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
+    constructor: (@scope, @stateParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading true
@@ -49,13 +49,13 @@ class ContributeCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @scope.topic    = @routeParams.topic
-        @scope.username = @routeParams.username
+        @scope.topic    = @stateParams.topic
+        @scope.username = @stateParams.username
         # By default, hide the kick-start form
         showKickStart = false
         # Shortcuts for child classes
         @scope.Individual  = @Individual
-        @scope.routeParams = @routeParams
+        @scope.stateParams = @stateParams
         @scope.resources   = {}
         # Get the list of available resources
         @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
@@ -64,9 +64,9 @@ class ContributeCtrl
         # Individual list
         @scope.individuals = []
         # Received an individual to edit
-        if @routeParams.type? and @routeParams.id?
+        if @stateParams.type? and @stateParams.id?
             # Load the inidividual
-            @scope.scrollIdx = @scope.loadIndividual @routeParams.type, @routeParams.id
+            @scope.scrollIdx = @scope.loadIndividual @stateParams.type, @stateParams.id
         else
             # Index of the individual where to scroll
             @scope.scrollIdx  = -1
@@ -178,7 +178,7 @@ class ContributeCtrl
                     @isRemoved  = true
 
         # Returns individual's topic
-        getTopic: => @scope.topic or @scope.routeParams.topic
+        getTopic: => @scope.topic or @scope.stateParams.topic
 
         # Save the current individual form
         save: =>

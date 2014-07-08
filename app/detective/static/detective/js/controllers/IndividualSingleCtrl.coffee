@@ -1,8 +1,8 @@
 class IndividualSingleCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$filter', '$anchorScroll', '$location', 'Page', 'topic']
+    @$inject: ['$scope', '$stateParams', 'Individual', 'Summary', '$filter', '$anchorScroll', '$location', 'Page', 'topic']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @filter, @anchorScroll, @location, @Page, topic)->
+    constructor: (@scope, @stateParams, @Individual, @Summary, @filter, @anchorScroll, @location, @Page, topic)->
         # Global loading mode!
         Page.loading true
         @scope.get            = (n)=> @scope.individual[n] or false if @scope.individual?
@@ -28,10 +28,10 @@ class IndividualSingleCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Read route params
-        @scope.topic     = @routeParams.topic
-        @scope.username  = @routeParams.username
-        @scope.type      = @routeParams.type
-        @scope.id        = @routeParams.id
+        @scope.topic     = @stateParams.topic
+        @scope.username  = @stateParams.username
+        @scope.type      = @stateParams.type
+        @scope.id        = @stateParams.id
         params =
             topic: @scope.topic
             type : @scope.type

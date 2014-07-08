@@ -33,5 +33,31 @@
             width:200px;
         }
     }
+    .add-source-form {
+        .field-sources {
+            padding: 0;
+            list-style: none;
+            li {
+                input {
+                    &.is-focused {
+                        width: 330px;
+                    }
+                }
+                .delete-source-btn {
+                    opacity: 0;
+                    width:   0;
+                    height:  0;
+                    padding: 0;
+                    &.is-visible {
+                        .btn();
+                        opacity: 1;
+                        width: 28px;
+                        height: auto;
+                    }
+
+                }
+            }
+        }
+    }
 }
 

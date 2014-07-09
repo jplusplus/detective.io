@@ -159,17 +159,6 @@ COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc --include-path="%s" {infile} {outfile}' % here('static') ),
 )
 
-# Activate CSS minifier
-COMPRESS_CSS_FILTERS = (
-    "app.detective.compress_filter.CustomCssAbsoluteFilter",
-)
-
-COMPRESS_JS_FILTERS = ()
-
-COMPRESS_TEMPLATE_FILTER_CONTEXT = {
-    'STATIC_URL': STATIC_URL
-}
-
 # Remove BeautifulSoup requirement
 COMPRESS_PARSER = 'compressor.parser.HtmlParser'
 COMPRESS_ENABLED = False

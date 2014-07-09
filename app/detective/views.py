@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 from django.http      import Http404, HttpResponse
 from django.shortcuts import render_to_response, redirect
-from django.template  import TemplateDoesNotExist
+from django.template  import TemplateDoesNotExist, RequestContext
 from django.conf      import settings
 import urllib2
 import mimetypes
 
 def home(request):
     # Render template without any argument
-    response = render_to_response('home.dj.html')
+    response = render_to_response('home.dj.html', context_instance=RequestContext(request))
 
     # Add a cookie containing some user information
     if request.user.is_authenticated():

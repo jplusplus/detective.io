@@ -84,7 +84,7 @@ detective = angular
                         templateUrl : '/partial/home.html'
                     )
                     .state('404',
-                        url : "/"
+                        url : "/404/"
                         controller : NotFoundCtrl
                         templateUrl : '/partial/404.html'
                     )

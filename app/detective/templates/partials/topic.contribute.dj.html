@@ -296,8 +296,9 @@
 					<div class="add-source col-sm-3">
 						<div class="add-source-wrapper">
 							<button class="btn btn-primary add-source-toggle"
+								    ng-init="focusAdd=false"
 									ng-class="{active: field.showSourceForm}" 
-							        ng-click="field.showSourceForm = !field.showSourceForm">
+							        ng-click="field.showSourceForm = !field.showSourceForm; field.focusAdd=!field.focusAdd">
 								<i class="fa-book fa right05"></i>
 								<span ng-if="individual.hasSources(field)">
 									Edit source
@@ -306,8 +307,6 @@
 									Add source
 								</span>
 							</button>
-
-
 							<div class="add-source-form" ng-show="field.showSourceForm">
 								<ul class="field-sources">
 									<li ng-repeat="source in individual.fields.field_sources | filter:{field:field.name}">
@@ -326,7 +325,7 @@
 												   class="form-control"/>
 										    <span class="input-group-btn">
 												<button type="button" class="btn btn-default delete-source-btn"
-												    ng-click="individual.deleteSource(source)">
+												    ng-click="field.focusAdd=true; individual.deleteSource(source)">
 													<i class="fa fa-trash-o"></i>
 												</button>
 											</span>
@@ -335,6 +334,8 @@
 									<li>
 										<form ng-submit="individual.addSource(field, newSource); newSource=''">
 											<input type="text"
+											   focus-on="field.focusAdd"
+											   ng-blur="field.focusAdd=false"
 											   ng-model="newSource"
 											   placeholder="http://exemple.com" 
 											   class="form-control pull-left" />
@@ -349,9 +350,7 @@
 
 					<div class="has-source text-success col-sm-3 top05" ng-show="individual.hasSources(field)">
 						<i class="fa fa-check-circle-o"></i> Sourced
-					</div>						
-
-
+					</div>
 				</div>
 
 

@@ -281,6 +281,11 @@ class ContributeCtrl
         showField: (field)=> @moreFields.push field
         isSaved: => @fields.id? and _.isEmpty( @getChanges() )
 
+        isSourceURLValid: (source)=>
+            return false unless source? and source.reference?
+            URL_PATTERN = /^(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/
+            URL_PATTERN.test(source.reference)
+
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────

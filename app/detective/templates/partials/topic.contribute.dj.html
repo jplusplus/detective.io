@@ -312,7 +312,7 @@
 								<ul class="field-sources">
 									<li ng-repeat="source in individual.fields.field_sources | filter:{field:field.name}">
 										<div class='input-group'>
-											<span class="input-group-addon" ng-if="individual.isURLSource(source.reference)">
+											<span class="input-group-btn" ng-if="individual.isSourceURLValid(source)">
 												<a target="_blank" 
 												   ng-href="[[source.reference]]" 
 												   class="btn btn-default">
@@ -333,7 +333,7 @@
 										</div>
 									</li>
 									<li>
-										<form ng-submit="individual.addSource(field, newSource)">
+										<form ng-submit="individual.addSource(field, newSource); newSource=''">
 											<input type="text"
 											   ng-model="newSource"
 											   placeholder="http://exemple.com" 

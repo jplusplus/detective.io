@@ -1,5 +1,7 @@
 <header ng-controller="HeaderCtrl" class="header">
-    <a class="header__toggle-aside" ng-click="Page.showAside = !Page.showAside">
+    <a class="header__toggle-aside"
+       ng-class="{'header__toggle-aside--active': Page.showAside}"
+       ng-click="Page.showAside = !Page.showAside">
         <i class="fa fa-bars"></i>
     </a>
 

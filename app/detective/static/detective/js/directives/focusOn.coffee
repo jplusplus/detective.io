@@ -5,6 +5,5 @@ angular.module('detective.directive').directive 'focusOn', ($timeout) ->
     link: (scope, element) ->
         scope.$watch 'trigger', (value)->
             if value is true
-                console.log 'should focus to ', element
                 element[0].focus()
                 scope.trigger = false

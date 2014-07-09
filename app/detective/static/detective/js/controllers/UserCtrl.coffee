@@ -5,28 +5,35 @@ class UserCtrl
     @$inject : ["$scope", "$http", "$location", "$stateParams", "User", "Page", "$rootElement"]
     # Public method to resolve
     @resolve:
-        user: ($rootScope, $state, $q, $location, Common)->
-            notFound    = ->
-                deferred.reject()
-                $rootScope.is404(yes)
-                deferred
-            deferred    = $q.defer()
-            stateParams = $state.current.params
-            # Checks that the current topic and user exists together
-            if stateParams.username?
-                # Retreive the topic for this user
-                params =
-                    type    : "user"
-                    username: stateParams.username
-                Common.get params, (data)=>
-                    # Stop if it's an unkown topic
-                    return notFound() unless data.objects and data.objects.length
-                    # Resolve the deffered result
-                    deferred.resolve(data.objects[0])
-            # Reject now
-            else return notFound()
-            # Return a deffered object
-            deferred.promise
+        user: [
+            "$rootScope",
+            "$state",
+            "$q",
+            "$location",
+            "Common",
+            ($rootScope, $state, $q, $location, Common)->
+                notFound    = ->
+                    deferred.reject()
+                    $rootScope.is404(yes)
+                    deferred
+                deferred    = $q.defer()
+                stateParams = $state.current.params
+                # Checks that the current topic and user exists together
+                if stateParams.username?
+                    # Retreive the topic for this user
+                    params =
+                        type    : "user"
+                        username: stateParams.username
+                    Common.get params, (data)=>
+                        # Stop if it's an unkown topic
+                        return notFound() unless data.objects and data.objects.length
+                        # Resolve the deffered result
+                        deferred.resolve(data.objects[0])
+                # Reject now
+                else return notFound()
+                # Return a deffered object
+                deferred.promise
+        ]
 
     constructor: (@scope, @http, @location, @stateParams, @User, @Page, @rootElement)->
         # ──────────────────────────────────────────────────────────────────────
@@ -56,7 +63,7 @@ class UserCtrl
                 @Page.title "Reset password", false
             when "/account/reset-password-confirm"
                 @Page.title "Enter a new password", false
-                
+
         @Page.loading no
 
     # ──────────────────────────────────────────────────────────────────────────

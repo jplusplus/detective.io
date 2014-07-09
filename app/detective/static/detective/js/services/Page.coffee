@@ -17,13 +17,10 @@ angular.module('detective.service').factory "Page", ["ngProgressLite", "$rootSco
         # Public attributes and methods
         # ──────────────────────────────────────────────────────────────────────────
         constructor: ->
-            console.debug $state.get('user')
             # Hide sidebar when route change
             $rootScope.$on "$stateChangeSuccess", =>
                 console.debug arguments
                 @showAside = no
-            $rootScope.$on "$stateNotFound", =>
-                console.debug 'notfound', arguments
         # Show or not the main aside menu
         showAside: yes
         # Page title

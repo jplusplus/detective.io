@@ -28,7 +28,7 @@ class ContributeCtrl
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
-        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic        
+        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
@@ -64,9 +64,9 @@ class ContributeCtrl
         # Individual list
         @scope.individuals = []
         # Received an individual to edit
-        if @stateParams.type? and @stateParams.id?
+        if @location.search().type? and @location.search().id?
             # Load the inidividual
-            @scope.scrollIdx = @scope.loadIndividual @stateParams.type, @stateParams.id
+            @scope.scrollIdx = @scope.loadIndividual @location.search().type, @location.search().id
         else
             # Index of the individual where to scroll
             @scope.scrollIdx  = -1
@@ -144,11 +144,11 @@ class ContributeCtrl
                     # Empty input must be null
                     val = null
                 val
-            for prop of now                
+            for prop of now
                 val = clean(now[prop], prop)
                 # Remove resource methods
                 # and angular properties (that start with $)
-                if typeof(val) isnt "function" and prop.indexOf("$") != 0   
+                if typeof(val) isnt "function" and prop.indexOf("$") != 0
                     # Previous and new value are different
                     unless angular.equals clean(prev[prop], prop), val
                         changes[prop] = val
@@ -207,29 +207,29 @@ class ContributeCtrl
                     @error_traceback = data.traceback if data.traceback?
                 )
 
-        getSource: (field)=> _.find @fields.field_sources, (fs)=> fs.field is field.name        
-        setSource: (field, value=@sources[field.name])=>             
+        getSource: (field)=> _.find @fields.field_sources, (fs)=> fs.field is field.name
+        setSource: (field, value=@sources[field.name])=>
             # Close the form
             field.showSourceForm = no
             # Get the sourc eobject
-            source = @getSource(field)  
+            source = @getSource(field)
             # Delete the value
             if (value is '' or value is null) and source?
-                idx = _.indexOf @fields.field_sources, (fs)=> fs.field is field.name 
+                idx = _.indexOf @fields.field_sources, (fs)=> fs.field is field.name
                 delete @sources[field.name]
-                delete @fields.field_sources[idx]                
+                delete @fields.field_sources[idx]
                 @fields.field_sources.splice idx, 1
             # Update the value
-            else if source? 
+            else if source?
                 source.url   = value
                 source.field = field.name
             # Add te value
             else
-                @fields.field_sources.push 
+                @fields.field_sources.push
                     url  : value
                     field: field.name
 
-        hasSource: (field)-> 
+        hasSource: (field)->
             source = @getSource field
             source? and source.url? and source.url != ''
 
@@ -255,7 +255,7 @@ class ContributeCtrl
                         @isNotFound = true
 
         # True if the given field can be edit
-        isEditable: (field)=>            
+        isEditable: (field)=>
             return not field.rules.is_editable? or field.rules.is_editable is yes
 
         # True if the given field is visible

@@ -142,6 +142,53 @@ detective = angular
                         # Allow a dynamic loading by setting the templateUrl within controller
                         template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
                     )
+                    .state('user-topic-search',
+                        url: '/:username/:topic/search/'
+                        controller: IndividualSearchCtrl
+                        templateUrl: "/partial/topic.list.html"
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
+                    )
+                     # Topic-related url
+                    .state('user-topic-article',
+                        url: '/:username/:topic/p/:slug/'
+                        controller: ArticleCtrl
+                        templateUrl: "/partial/topic.article.html"
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
+                    )
+                    .state('user-topic-contribute',
+                        url: '/:username/:topic/contribute/'
+                        controller: ContributeCtrl
+                        templateUrl: "/partial/topic.contribute.html"
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
+                        auth: true
+                    )
+                    .state('user-topic-contribute-upload',
+                        url: '/:username/:topic/contribute/upload/'
+                        controller: BulkUploadCtrl
+                        templateUrl: "/partial/topic.contribute.bulk-upload.html"
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
+                        auth: true
+                    )
+                    .state('user-topic-list',
+                        url: '/:username/:topic/:type/'
+                        controller: IndividualListCtrl
+                        templateUrl: "/partial/topic.list.html"
+                        reloadOnSearch: false
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
+                    )
+                    .state('user-topic-detail',
+                        url: '/:username/:topic/:type/:id/'
+                        controller: IndividualSingleCtrl
+                        templateUrl: "/partial/topic.single.html"
+                        reloadOnSearch: false
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
+                    )
         ]
     )
 

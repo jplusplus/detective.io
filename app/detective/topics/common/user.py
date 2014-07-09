@@ -43,11 +43,12 @@ class GroupResource(ModelResource):
         except Topic.DoesNotExist:
             return None
 
-    topic = fields.ToOneField('app.detective.topics.common.resources.TopicResource', 
-                                attribute=getTopic, 
+    topic = fields.ToOneField('app.detective.topics.common.resources.TopicResource',
+                                attribute=getTopic,
                                 use_in='detail',
                                 null=True,
-                                full=True)
+                                full_list=False,
+                                full_detail=True)
     class Meta:
         excludes = ['topic']
         queryset = Group.objects.all()

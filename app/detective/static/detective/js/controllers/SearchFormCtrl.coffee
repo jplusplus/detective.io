@@ -1,8 +1,8 @@
 class SearchFormCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$location', '$state', 'Page', 'QueryFactory', 'TopicsFactory', 'UtilsFactory']
+    @$inject: ['$scope', '$location', '$stateParams', 'Page', 'QueryFactory', 'TopicsFactory', 'UtilsFactory']
 
-    constructor: (@scope, @location, @state, @Page,  @QueryFactory, @TopicsFactory, @UtilsFactory)->
+    constructor: (@scope, @location, @stateParams, @Page,  @QueryFactory, @TopicsFactory, @UtilsFactory)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -10,12 +10,12 @@ class SearchFormCtrl
         @logger = @UtilsFactory.loggerDecorator('SearchFormCtrl')
         @topics = @TopicsFactory.topics
         @topic  = @TopicsFactory.topic
-        @topic_slug = @state.current.params.topic if @state.current? and @state.current.params?
+        @topic_slug = @stateParams.topic if @stateParams.topic?
         @human_query = ''
         @bindHumanQuery()
 
         # Get every topics
-        @TopicsFactory.getTopics (topics)=> 
+        @TopicsFactory.getTopics (topics)=>
             @topics = @topics.concat topics
             @TopicsFactory.topics = @topics
         # ──────────────────────────────────────────────────────────────────────
@@ -36,9 +36,9 @@ class SearchFormCtrl
         , true
 
         # Watch current location to update the active topic
-        @scope.$watch (=> @state.current), (current)=>
-            return unless current? and current.params?
-            @topic_slug = current.params.topic
+        @scope.$watch (=> @stateParams), (params)=>
+            return unless params and params.topic?
+            @topic_slug = params.topic
 
         # Watch current slug and topics list to find the current topic
         @scope.$watch (=> [@topic_slug, @topics]), =>

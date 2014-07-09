@@ -3,16 +3,19 @@
 <div class="explore">
 
     <div class="banner banner-big" parallax=".bg" speed="0.7" ng-controller="TopicBannerCtrl">
-        <img ng-src="[[meta.background]]" class="bg" />
+        <img ng-src="[[meta.background]]" class="bg" ng-if="!graphNavigationEnabled" />
+        <div class="general-graph-navigation" ng-if="graphNavigationEnabled">
+            <graphviz data="graphnodes" topic="topic"></graphviz>
+        </div>
         <div class="fg top90 container">
-            <div class="intro">
+            <div class="intro" ng-if="!graphNavigationEnabled">
                 <h2>[[meta.title]]</h2>
                 <p class="lead" ng-if="meta.description" ng-bind-html="meta.description"></p>
                 <p class="top40">
                     <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.ontology_as_mod)" ng-href="/[[username]]/[[topic]]/contribute">
                         Contribute
                     </a>
-                    <a class="btn btn-primary btn-lg" ng-click="toggleGraphNavigation">
+                    <a class="btn btn-primary btn-lg" ng-click="toggleGraphNavigation()">
                         Start to explore
                     </a>
                 </p>

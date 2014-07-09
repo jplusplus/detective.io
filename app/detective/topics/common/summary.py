@@ -380,6 +380,47 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
+    def summary_graph(self, bundle, request, **kwargs):
+        leafs = {}
+        edges = []
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+        depth     = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
+        root_node = kwargs.get("pk", "*")
+        ###
+        # First we retrieve every leaf in the graph
+        query = """
+            START root=node({root})
+            MATCH p = (root)-[*1..{depth}]-(leaf)<-[:`<<INSTANCE>>`]-(type)
+            WHERE HAS(leaf.name)
+            AND type.app_label = '{app_label}'
+            AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
+            RETURN leaf, ID(leaf) as id_leaf, type
+        """.format(root=root_node, depth=depth, app_label=self.topic.app_label())
+        rows = connection.cypher(query).to_dicts()
+        for row in rows:
+            row['leaf']['data']['_id'] = row['id_leaf']
+            row['leaf']['data']['_type'] = row['type']['data']['model_name']
+            leafs[row['id_leaf']] = row['leaf']['data']
+        # NOTE : COPYIED FROM app/detective/individual.py
+        # Doesn't work like that
+        # # Then we retrieve all edges
+        # query = """
+        #     START A=node({leafs})
+        #     MATCH (A)-[rel]->(B)
+        #     WHERE type(rel) <> "<<INSTANCE>>"
+        #     RETURN ID(A) as head, type(rel) as relation, id(B) as tail
+        # """.format(leafs=','.join([str(id) for id in leafs.keys()]))
+        # rows = connection.cypher(query).to_dicts()
+        # for row in rows:
+        #     try:
+        #         if (leafs[row['head']] and leafs[row['tail']]):
+        #             edges.append([row['head'], row['relation'], row['tail']])
+        #     except KeyError:
+        #         pass
+        self.log_throttled_access(request)
+        return self.create_response(request, {'leafs': leafs, 'edges' : edges})
+
     def summary_bulk_upload(self, request, **kwargs):
         # only allow POST requests
         self.method_check(request, allowed=['post'])

@@ -10,7 +10,7 @@ class ExploreCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Current individual scope
         @scope.topic    = @stateParams.topic
-        @scope.username = @stateParams.username        
+        @scope.username = @stateParams.username
         # Meta data about this topic
         @scope.meta = topic
         # Set page's title

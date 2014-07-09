@@ -1,11 +1,16 @@
 <header ng-controller="HeaderCtrl" class="header">
-
     <a class="header__toggle-aside" ng-click="Page.showAside = !Page.showAside">
         <i class="fa fa-bars"></i>
     </a>
 
-	<div ng-controller="UserCtrl" class="header__user">
+    <div ng-controller="UserCtrl" class="header__user">
 		<div ng-show="user.is_logged" class="header__user__signed-in">
+            <a class="header__user__signed-in__add"
+               ng-if="user.hasAddPermission(topic.module)"
+               title="Add an entity to this topic"
+               href="[[topic.link]]/contribute">
+                <i class="fa fa-plus right05"></i>Add an entity
+            </a>
 			<a href="/[[user.username]]" class="header__user__signed-in__profil" title="Your profil">
                 <i class="fa fa-user"></i>
                 <span class="sr-only">Your profil</span>
@@ -28,12 +33,6 @@
         <div class="btn-group" ng-if="search.topic.slug">
             <a class="btn btn-default topic-search__home" href="[[search.topic.link]]" title="[[search.topic.title]]">
                 [[search.topic.title | characters:25]]
-            </a>
-            <a class="btn btn-default topic-search__add"
-               ng-if="user.hasAddPermission(search.topic.module)"
-               title="Add an entity to this topic"
-               href="[[search.topic.link]]/contribute">
-                <i class="fa fa-plus right05"></i>Add an entity
             </a>
             <span class="topic-search__input" ng-repeat="t in search.topics">
                 <span ng-if="search.isTopic(t.slug)">

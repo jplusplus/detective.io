@@ -33,18 +33,23 @@
     }
 
     &__user {
+        z-index:@zindex-header+10;
         position:absolute;
         right:0;
         top:0;
         height: @header-height;
         text-align: center;
         line-height: @header-height;
-        font-size: 20px;
         color:black;
         border-left:#DDD solid 1px;
 
         a {
             color:inherit;
+            text-decoration:none;
+        }
+
+        i.fa {
+            font-size: 20px;
         }
 
         &__sign-in {
@@ -52,13 +57,25 @@
         }
 
         &__signed-in {
+
             &__profil, &__sign-out {
                 display: inline-block;
                 width: @header-height;
                 height: @header-height;
             }
 
-            &__sign-out {
+            &__add {
+                display: inline-block;
+                height: @header-height;
+                width: auto;
+                padding:0 10px;
+                i.fa {
+                    position:relative;
+                    top:2px;
+                }
+            }
+
+            &__profil, &__sign-out {
                 border-left:#DDD solid 1px;
             }
         }
@@ -67,6 +84,7 @@
     .topic-search {
         border-left:#DDD solid 1px;
         position:absolute;
+        z-index:@zindex-header;
         top:0;
         bottom:0;
         padding-top:9px;

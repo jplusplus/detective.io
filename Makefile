@@ -76,7 +76,7 @@ stopdb:
 	./lib/neo4j/bin/neo4j stop || true
 
 startdb:
-	./lib/neo4j/bin/neo4j start || ( cat ./lib/neo4j/data/log/*.log && exit 1 )
+	./lib/neo4j/bin/neo4j start || true
 
 ###
 # Test rules

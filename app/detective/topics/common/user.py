@@ -39,7 +39,7 @@ class GroupResource(ModelResource):
     def getTopic(bundle):
         try:
             module = bundle.obj.name.split("_")[0]
-            return Topic.objects.get(module=module)
+            return Topic.objects.get(ontology_as_mod=module)
         except Topic.DoesNotExist:
             return None
 

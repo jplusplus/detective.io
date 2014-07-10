@@ -54,9 +54,10 @@ class ContributeCtrl
         # By default, hide the kick-start form
         showKickStart = false
         # Shortcuts for child classes
-        @scope.Individual  = @Individual
-        @scope.routeParams = @routeParams
-        @scope.resources   = {}
+        @scope.Individual   = @Individual
+        @scope.UtilsFactory = @UtilsFactory
+        @scope.routeParams  = @routeParams
+        @scope.resources    = {}
         # Get the list of available resources
         @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
         # Prepare future individual
@@ -81,24 +82,25 @@ class ContributeCtrl
             # Class default attributes
             # ──────────────────────────────────────────────────────────────────
             # True if the individual is loading
-            @loading    = false
+            @loading      = false
             # List of field that are updating
-            @updating   = {}
+            @updating     = {}
             # Copy of the database's fields
-            @master     = angular.copy fields,
+            @master       = angular.copy fields,
             # List of additional visible fields
-            @moreFields = []
+            @moreFields   = []
             # Class attributes from parameters
             # ──────────────────────────────────────────────────────────────────
-            @Individual = scope.Individual
-            @meta       = scope.resources[type] or {}
-            @related_to = related_to
-            @scope      = scope
-            @type       = type.toLowerCase()
+            @Individual   = scope.Individual
+            @UtilsFactory = scope.UtilsFactory
+            @meta         = scope.resources[type] or {}
+            @related_to   = related_to
+            @scope        = scope
+            @type         = type.toLowerCase()
             # All source fields
-            @sources    = {}
+            @sources      = {}
             # Field param can be a number to load an individual
-            @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
+            @fields       = if isNaN(fields) then new @Individual(fields) else @load(fields)
             # Class watchers
             # ──────────────────────────────────────────────────────────────────
             # Update meta when resources change

@@ -1,0 +1,65 @@
+.field-sources {
+    @border-color: rgba(0, 0, 0, 0.15); 
+    @arrow-width: 15px;
+    @padding: 10px;
+    @background-color: #f9f9f9;
+    @z-index-sources-popover: 4;
+
+    &__popover {
+        // positions & sizes 
+        position: absolute;
+        top: 0;
+        z-index: @z-index-sources-popover;
+        padding: @padding;
+        min-width: 250px;
+        // other styles (font+colors)
+        background: @background-color;
+        border: 1px solid @border-color;
+
+        text-align: left;
+
+        .arrow {
+            border-width: @arrow-width;
+            &:after {
+                content: " ";
+                border-width: @arrow-width - 1px;
+                display: block;
+            }
+        }
+
+        .arrow, .arrow:after {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-color: transparent;
+        }
+
+        &--right {
+            left: 100%;
+            .translate(-20px, 0);
+            
+
+            .arrow {
+                left: -@arrow-width;
+                top: 3px;
+                border-left: 0;
+                border-right-color: @border-color;
+                top: 20px;
+                &:after {
+                    top: -(@arrow-width - 1px);
+                    left: 1px;
+                    border-left: 0;
+                    border-right-color: @background-color;
+                }
+            }
+        }
+
+
+
+        &__list {
+            list-style: none;
+            padding: 0;
+        }
+    }
+}

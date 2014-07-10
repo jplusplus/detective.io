@@ -5,7 +5,25 @@
     <div class="banner banner-big" parallax=".bg" speed="0.7" ng-controller="TopicBannerCtrl">
         <img ng-src="[[meta.background]]" class="bg" ng-if="!graphNavigationEnabled" />
         <div class="general-graph-navigation" ng-if="graphNavigationEnabled">
-            <graphviz data="graphnodes" topic="topic"></graphviz>
+            <a class="close-network-view" ng-click="toggleGraphNavigation()">Close network view</a>
+            <div class="filters-box">
+                <form>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" /> all
+                        </label>
+                    </div>
+                    <div class="checkbox" ng-repeat="form in filtered = ( forms | filter:isSearchable )">
+                        <label ng-init="count = getTypeCount(form.name)">
+                            <input type="checkbox" />
+                            <strong>[[count]]</strong>
+                            <span ng-if="count <= 1">[[form.verbose_name|lowercase]]</span>
+                            <span ng-if="count > 1">[[form.verbose_name_plural|lowercase]]</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <graphviz class="graphviz" data="graphnodes" topic="topic"></graphviz>
         </div>
         <div class="fg top90 container">
             <div class="intro" ng-if="!graphNavigationEnabled">

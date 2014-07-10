@@ -1,5 +1,5 @@
 class TopicBannerCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$routeParams', 'Summary']
 
     constructor: (@scope, @routeParams, @Summary)->

@@ -1,5 +1,5 @@
 class HomeCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', 'Page', "Common"]
     constructor: (@scope, @Page, @Common)->
     	# Set page title with no title-case

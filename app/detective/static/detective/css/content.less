@@ -23,11 +23,37 @@
 
         &.banner-big {
             height:600px;
-
         }
 
         &.banner-border {
             border-bottom: #272624 15px solid;
+        }
+
+        .general-graph-navigation {
+            height:100%;
+            background-color: rgb(105, 99, 99);
+            .close-network-view {
+                position : absolute;
+                top      : 20px;
+                right    : 20px;
+                color    : white;
+            }
+            .filters-box {
+                position           : absolute;
+                background-color   : white;
+                display            : inline-block;
+                color              : black;
+                opacity            : .9em;
+                padding            : 0 10px;
+                margin             : 10px;
+                box-shadow         : 4px 4px 0px rgb(68, 62, 62);
+                -moz-box-shadow    : 4px 4px 0px rgb(68, 62, 62);
+                -webkit-box-shadow : 4px 4px 0px rgb(68, 62, 62);
+                -ms-box-shadow     : 4px 4px 0px rgb(68, 62, 62);
+            }
+            .graphviz {
+                height : 100%;
+            }
         }
     }
 

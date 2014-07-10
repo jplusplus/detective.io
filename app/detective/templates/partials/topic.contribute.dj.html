@@ -311,6 +311,7 @@
 								<ul class="field-sources">
 									<li ng-repeat="source in individual.fields.field_sources | filter:{field:field.name}">
 										<div class='input-group'>
+											<!-- source external link -->
 											<span class="input-group-btn" ng-if="individual.isSourceURLValid(source)">
 												<a target="_blank" 
 												   ng-href="[[source.reference]]" 
@@ -318,11 +319,14 @@
 													<i class="fa fa-external-link"></i>
 												</a>
 											</span>
+											<!-- source input -->
 											<input type="text"
 												   placeholder="http://exemple.com" 
 												   ng-model="source.reference"
 												   change-on-blur
 												   class="form-control"/>
+
+											<!-- source delete button -->
 										    <span class="input-group-btn">
 												<button type="button" class="btn btn-default delete-source-btn"
 												    ng-click="field.focusAdd=true; individual.deleteSource(source)">

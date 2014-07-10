@@ -402,22 +402,20 @@ class SummaryResource(Resource):
             row['leaf']['data']['_id'] = row['id_leaf']
             row['leaf']['data']['_type'] = row['type']['data']['model_name']
             leafs[row['id_leaf']] = row['leaf']['data']
-        # NOTE : COPYIED FROM app/detective/individual.py
-        # Doesn't work like that
-        # # Then we retrieve all edges
-        # query = """
-        #     START A=node({leafs})
-        #     MATCH (A)-[rel]->(B)
-        #     WHERE type(rel) <> "<<INSTANCE>>"
-        #     RETURN ID(A) as head, type(rel) as relation, id(B) as tail
-        # """.format(leafs=','.join([str(id) for id in leafs.keys()]))
-        # rows = connection.cypher(query).to_dicts()
-        # for row in rows:
-        #     try:
-        #         if (leafs[row['head']] and leafs[row['tail']]):
-        #             edges.append([row['head'], row['relation'], row['tail']])
-        #     except KeyError:
-        #         pass
+        # Then we retrieve all edges
+        query = """
+            START A=node({leafs})
+            MATCH (A)-[rel]->(B)
+            WHERE type(rel) <> "<<INSTANCE>>"
+            RETURN ID(A) as head, type(rel) as relation, id(B) as tail
+        """.format(leafs=','.join([str(id) for id in leafs.keys()]))
+        rows = connection.cypher(query).to_dicts()
+        for row in rows:
+            try:
+                if (leafs[row['head']] and leafs[row['tail']]):
+                    edges.append([row['head'], row['relation'], row['tail']])
+            except KeyError:
+                pass
         self.log_throttled_access(request)
         return self.create_response(request, {'leafs': leafs, 'edges' : edges})
 

@@ -11,7 +11,8 @@ class ProfileCtrl
         # Get the user's topics
         @scope.userTopics = @Common.query type: "topic", author__id: user.id
         # Get the user
-        @scope.user = @Common.get type: "user", id: user.id
+        @scope.user = @Common.get type: "user", id: user.id, =>
+            @scope.user.contribution_groups = _.filter @scope.user.groups, (x) => x.topic.author.id isnt @scope.user.id
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
@@ -30,6 +31,6 @@ class ProfileCtrl
         @scope.userTopics.$resolved and @scope.userTopics.length
 
     shouldShowContributions: =>
-        @scope.user.$resolved and @scope.user.groups.length
+        @scope.user.$resolved and @scope.user.contribution_groups.length
 
 angular.module('detective.controller').controller 'profileCtrl', ProfileCtrl

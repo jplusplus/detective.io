@@ -32,7 +32,7 @@
 <div class="container" ng-if="shouldShowContributions()">
     <h2>Topics <strong>[[user.username|titlecase]]</strong> contributes to</h2>
     <div class="boxes">
-        <div ng-repeat-start="group in user.groups" ng-init="topic = group.topic"></div>
+        <div ng-repeat-start="group in user.contribution_groups" ng-init="topic = group.topic"></div>
 
             <div class="clearfix visible-md visible-lg" ng-if="$index > 0 && $index%3 == 0"></div>
             <div class="clearfix visible-sm" ng-if="$index > 0 && $index%2 == 0"></div>

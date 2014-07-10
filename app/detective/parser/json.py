@@ -26,13 +26,13 @@ JSONTYPES = {
 def get_field_specials(field):
     props = {}
     # List all special propertie
-    for prop in ["verbose_name", "help_text", "related_name"]:
+    for prop in ["verbose_name", "help_text", "related_name"," fields"]:
         if prop in field:
             props[prop] = field[prop]
     # Return an empty dict by default
     return props
 
-def get_model_field(field, class_name):
+def get_model_field(field, model_name):
     # All field's options
     field_opts = dict(null=True)
     # Get the name tag
@@ -49,12 +49,23 @@ def get_model_field(field, class_name):
         # Remove "has_" from the begining of the name
         if field_name.startswith("has_"): field_name = field_name[4:]
         # Build rel_type using the name and the class name
-        field_opts["rel_type"] = "%s_has_%s+"  % ( to_underscores(class_name), field_name)
+        field_opts["rel_type"] = "%s_has_%s+"  % ( to_underscores(model_name), field_name)
         field_type = "relationship"
         # Add a related name
         if "related_name" in field_opts and field_opts["related_name"] is not None:
             # Convert related_name to the same format
             field_opts["related_name"] = to_underscores(field_opts["related_name"])
+        # This relationship can embed properties
+        if "fields" in field:
+            # List all fields
+            for rel_field in gn(field, 'fields', []):
+                # Get a field instance and its name
+                field_name, field_instance = get_model_field(rel_field, field_opts["target"])
+                # No error
+                if None not in [field_name, field_instance]:
+                    # Record the field
+                    print field_name, field_instance
+    # It's a literal value
     else:
         # Picks one of the two tags type
         field_type = field["type"].lower()
@@ -70,16 +81,16 @@ def get_model_field(field, class_name):
     return field_name, getattr(models, field_type)(**field_opts)
 
 
-def get_model(clss, module, app_label):
+def get_model(desc, module, app_label):
     # Extract the class name
-    class_name = gn(clss, "name").lower()
+    model_name = gn(desc, "name").lower()
     # Format the class name to be PEP compliant
-    class_name = to_class_name( class_name )
+    model_name = to_class_name( model_name )
     # Every class fields are recorded into an objects
-    class_fields = {
+    model_fields = {
         # Additional informations
-        "_description": gn(clss, "help_text", gn(clss, "description")),
-        "_topic"      : gn(clss, "scope"),
+        "_description": gn(desc, "help_text", gn(desc, "description")),
+        "_topic"      : gn(desc, "scope"),
         # Default fields
         "_author": models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author'),
         "_status": models.IntegerProperty(null=True,help_text=u'',verbose_name=u'status')
@@ -89,31 +100,31 @@ def get_model(clss, module, app_label):
 
     for f in ["verbose_name", "verbose_name_plural"]:
         # Extract those option into a separate class
-        if f in clss: class_options[f] = clss[f]
+        if f in desc: class_options[f] = desc[f]
     # List all fields
-    for field in gn(clss, 'fields', []):
+    for field in gn(desc, 'fields', []):
         # Get a field instance and its name
-        field_name, field_instance = get_model_field(field, class_name)
+        field_name, field_instance = get_model_field(field, model_name)
         # No error
         if None not in [field_name, field_instance]:
             # Record the field
-            class_fields[field_name] = field_instance
+            model_fields[field_name] = field_instance
 
-    return class_name, create_node_model(class_name, class_fields, app_label=app_label, options=class_options, module=module)
+    return model_name, create_node_model(model_name, model_fields, app_label=app_label, options=class_options, module=module)
 
 
 def parse(ontology, module='', app_label=None):
     app_label = app_label if app_label is not None else module.split(".")[-1]
-    # Where record the new classes
-    classes = dict()
-    # List classes
+    # Where record the new models
+    models = dict()
+    # List models
     for name in ontology:
-        clss = ontology[name]
+        desc = ontology[name]
         # Genere a model
-        class_name, model = get_model(clss, module, app_label)
+        model_name, model = get_model(desc, module, app_label)
         # Record the class with this fields
-        classes[class_name] = model
+        models[model_name] = model
         # Prevent a bug with select_related when using neo4django and virtual models
-        if not hasattr(classes[class_name]._meta, '_relationships'):
-            classes[class_name]._meta._relationships = {}
-    return classes
+        if not hasattr(models[model_name]._meta, '_relationships'):
+            models[model_name]._meta._relationships = {}
+    return models

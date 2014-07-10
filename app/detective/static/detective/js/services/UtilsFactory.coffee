@@ -1,6 +1,11 @@
 angular.module('detective.service').factory 'UtilsFactory', [
     ()->
         new class UtilsFactory
+            isValidURL: (url)=>
+                URL_PATTERN = /^(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/
+                URL_PATTERN.test(url)
+
+
             loggerDecorator: (loggerName)=>
                 class WrappedLogger
                     constructor: (name)->

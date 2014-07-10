@@ -1,9 +1,9 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
+    @$inject: ['$scope', '$routeParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic', 'UtilsFactory']
 
 
-    constructor: (@scope, @routeParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
+    constructor: (@scope, @routeParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic, @UtilsFactory)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading true
@@ -282,9 +282,8 @@ class ContributeCtrl
         isSaved: => @fields.id? and _.isEmpty( @getChanges() )
 
         isSourceURLValid: (source)=>
-            return false unless source? and source.reference?
-            URL_PATTERN = /^(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/
-            URL_PATTERN.test(source.reference)
+            return false unless source? 
+            @UtilsFactory.isValidURL(source.reference)
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods

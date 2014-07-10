@@ -59,14 +59,12 @@
         padding:0 15px;
         margin:0;
         position:absolute;
-        top:0;
+        bottom:0;
         left:0;
         right:0;
         font-size: 140%;
         height:@header-height;
         line-height:@header-height;
-        border-bottom:1px solid fade(#000, 30);
-        .box-shadow(0px 1px 0 fade(#fff, 10));
 
         &__toggle-aside {
             position:absolute;
@@ -101,8 +99,8 @@
 
     &__wrapper {
         position:absolute;
-        top: @header-height + 5px;
-        bottom:5px;
+        top: 5px;
+        bottom:@header-height + 5px;
         left:0;
         right:0;
         overflow:hidden;

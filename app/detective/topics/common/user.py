@@ -47,8 +47,7 @@ class GroupResource(ModelResource):
                                 attribute=getTopic,
                                 use_in='detail',
                                 null=True,
-                                full_list=False,
-                                full_detail=True)
+                                full=True)
     class Meta:
         excludes = ['topic']
         queryset = Group.objects.all()
@@ -283,3 +282,8 @@ class UserResource(ModelResource):
         if len(missing_fields) > 0:
             message = "Malformed request. The following fields are required: %s" % ', '.join(missing_fields)
             raise MalformedRequestError(message)
+
+class AuthorResource(UserResource):
+    class Meta(UserResource.Meta):
+        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
+

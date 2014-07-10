@@ -2,7 +2,7 @@
 from .models                          import *
 from app.detective.models             import QuoteRequest, Topic, Article
 from app.detective.utils              import get_registered_models
-from app.detective.topics.common.user import UserResource
+from app.detective.topics.common.user import UserResource, AuthorResource
 from tastypie                         import fields
 from tastypie.authorization           import ReadOnlyAuthorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
@@ -35,7 +35,7 @@ class QuoteRequestResource(ModelResource):
 
 class TopicResource(ModelResource):
 
-    author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
+    author             = fields.ToOneField(AuthorResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path', readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
 

@@ -1,9 +1,10 @@
 # took from http://stackoverflow.com/a/14837021/885541
 angular.module('detective.directive').directive 'focusOn', ($timeout) ->
-    scope: 
-        trigger: '=focusOn' 
-    link: (scope, element) ->
-        scope.$watch 'trigger', (value)->
+    link: (scope, element, attrs) ->
+        getTrigger = -> 
+            scope.$eval attrs.focusOn 
+        scope.$watch getTrigger, (value)->
             if value is true
-                element[0].focus()
-                scope.trigger = false
+                $timeout ->
+                    element[0].focus()
+                    scope[attrs.focusOn] = false

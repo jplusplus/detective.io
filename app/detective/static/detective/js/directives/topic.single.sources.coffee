@@ -5,9 +5,10 @@ angular.module('detective.directive').directive 'fieldSourcesList', [ 'UtilsFact
         transclude: yes
         scope:
             fieldSources: '=fieldSourcesList'
+            orientation: '=?'
 
         link: (scope, elem, attrs)->
-            scope.orientation = 'right'
+            scope.orientation =  scope.orientation || 'up'
             
             scope.isSourceURLValid = (source)=>
                 UtilsFactory.isValidURL(source.reference)

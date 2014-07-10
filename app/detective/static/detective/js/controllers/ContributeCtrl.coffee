@@ -284,7 +284,7 @@ class ContributeCtrl
         isSaved: => @fields.id? and _.isEmpty( @getChanges() )
 
         isSourceURLValid: (source)=>
-            return false unless source? 
+            return false unless source?
             @UtilsFactory.isValidURL(source.reference)
 
     # ──────────────────────────────────────────────────────────────────────────

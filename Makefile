@@ -12,11 +12,15 @@ CUSTOM_D3	  = ./app/static/custom_d3/d3.js
 PYC           = $(wildcard *.pyc */*.pyc app/*/*.pyc app/*/*/*.pyc app/*/*/*/*.pyc app/*/*/*/*/*.pyc)
 CACHE         = $(wildcard app/staticfiles/CACHE)
 
+ifndef PORT
+	PORT = 8000
+endif
+
 all: install startdb run
 
 run: clean
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py rqworker high default low &
-	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading
+	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading 0.0.0.0:$(PORT)
 
 ###
 # Installation rules

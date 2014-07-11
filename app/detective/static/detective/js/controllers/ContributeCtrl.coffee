@@ -213,6 +213,8 @@ class ContributeCtrl
 
         getSources: (field)=> _.where @fields.field_sources, field: field.name
 
+        getSourcesRefs: (field)=> _.map @getSources(field), (s)-> s.reference
+
         addSource: (field, value)=> 
             @fields.field_sources.push
                 reference: value

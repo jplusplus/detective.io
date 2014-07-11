@@ -6,8 +6,6 @@ from neo4django.db       import models
 gn = lambda clss,field,default=None: clss[field] if field in clss else  default
 
 class VirtualApp:
-    # Where record the new models
-    models = dict()
     # This object contains the correspondance between data types
     JSONTYPES = {
         "relationship" : "Relationship",
@@ -27,6 +25,8 @@ class VirtualApp:
     }
 
     def __init__(self, module, app_label, ontology):
+        # Where record the new models
+        self.models    = dict()
         self.module    = module
         self.app_label = app_label if app_label is not None else module.split(".")[-1]
         self.ontology  = ontology

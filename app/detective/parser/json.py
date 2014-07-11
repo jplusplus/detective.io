@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from app.detective.utils import to_class_name, to_underscores, create_node_model
-from neo4django.db       import models
+from app.detective.utils      import to_class_name, to_underscores, create_node_model
+from app.detective.modelrules import ModelRules
+from neo4django.db            import models
 
 # Shortcut to get a field or None
 gn = lambda clss,field,default=None: clss[field] if field in clss else  default
 
 class VirtualApp:
+    modelrules = ModelRules()
     # This object contains the correspondance between data types
     JSONTYPES = {
         "relationship" : "Relationship",
@@ -135,7 +137,9 @@ class VirtualApp:
                 # Build rel_type using the name and the class name
                 field_opts["rel_type"] = "%s_has_%s+"  % ( to_underscores(model_name), to_underscores(compositeModelName))
                 # Create the new model!
-                self.add_model(compositeModel)
+                model = self.add_model(compositeModel)
+                # Add a rules to make this model "special"
+                self.modelrules.model(model).add(is_relationship_properties=True, is_searchable=False)
         # It's a literal value
         else:
             # Picks one of the two tags type

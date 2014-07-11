@@ -302,14 +302,15 @@
 							        ng-click="field.showSourceForm = !field.showSourceForm; field.focusAdd=!field.focusAdd">
 								<i class="fa-book fa right05"></i>
 								<span ng-if="individual.hasSources(field)">
-									Edit source
+									Edit sources
 								</span>
 								<span ng-if="!individual.hasSources(field)">
-									Add source
+									Add sources
 								</span>
 							</button>
 							<div class="add-source-form" ng-show="field.showSourceForm">
 								<ul class="field-sources">
+									<!-- previously created sources -->
 									<li ng-repeat="source in individual.fields.field_sources | filter:{field:field.name}">
 										<div class='input-group'>
 											<!-- source external link -->
@@ -337,6 +338,7 @@
 											</span>
 										</div>
 									</li>
+									<!-- new source form -->
 									<li>
 										<form name="form" 
 											   ng-submit="form.$valid && individual.addSource(field, newSource); newSource=form.$valid ? '' : newSource" novalidate>
@@ -348,6 +350,7 @@
 											   no-duplicates="individual.getSourcesRefs(field)"
 											   placeholder="http://exemple.com" 
 											   class="form-control pull-left" />
+											<!-- duplicate error handling -->
 											<span class='text-danger' ng-if="form.newSource.$error.nodup">Source already exists, please enter another value</span>
 										</form>
 									</li>

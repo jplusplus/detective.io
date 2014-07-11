@@ -93,7 +93,7 @@
 						 				</div>
 						 			</td>
 						 			<td class="field-source text-right" ng-if="!isMono(field)">
-			 							<div field-sources-list='fieldSources'></div>
+			 							<div sources-popover sources-list='fieldSources'></div>
 						 			</td>
 							 	</tr>
 							 </tbody>
@@ -104,11 +104,12 @@
 					 		  ng-show="get(field.name)"
 					 		  ng-init='fieldSources = getSources(field)'
 					 		  id="rels-[[field.name]]">
-			 				<div field-sources-list='fieldSources'></div>
 					 		<h3>
 								<div color-tag ref="field.related_model" class="pull-left small right10" />
 					 			[[field.verbose_name]]
+					 			<div sources-popover sources-list='fieldSources'></div>
 					 		</h3>
+					 		
 					 		<ul class="list-inline">
 					 			<li ng-repeat="rel in get(field.name)">
 					 				<card ng-model="rel" topic="topic" username="username" type="field.related_model"></card>

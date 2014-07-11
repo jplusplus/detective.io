@@ -314,6 +314,7 @@
 											<!-- source external link -->
 											<span class="input-group-btn" ng-if="individual.isSourceURLValid(source)">
 												<a target="_blank" 
+												   ng-click="$event.stopPropagation()"
 												   ng-href="[[source.reference]]" 
 												   class="btn btn-default">
 													<i class="fa fa-external-link"></i>
@@ -336,13 +337,17 @@
 										</div>
 									</li>
 									<li>
-										<form ng-submit="individual.addSource(field, newSource); newSource=''">
+										<form name="form" 
+											   ng-submit="form.$valid && individual.addSource(field, newSource) && newSource=''" novalidate>
 											<input type="text"
+											   name='newSource'
 											   focus-on="field.focusAdd"
 											   ng-blur="field.focusAdd=false"
 											   ng-model="newSource"
+											   no-duplicates="individual.getSourcesRefs(field)"
 											   placeholder="http://exemple.com" 
 											   class="form-control pull-left" />
+											<span class='text-danger' ng-if="form.newSource.$error.nodup">Source already exists, please enter another value</span>
 										</form>
 									</li>
 								</ul>

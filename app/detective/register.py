@@ -154,9 +154,9 @@ def topic_models(path, force=False):
             models = parser.owl.parse(topic.ontology_as_owl, path, app_label=app_label)
         else:
             models = []
-    except TypeError as e:
-        if settings.DEBUG: print 'TypeError:', e
-        models = []
+    # except TypeError as e:
+    #    if settings.DEBUG: print 'TypeError:', e
+    #    models = []
     except ValueError as e:
         if settings.DEBUG: print 'ValueError:', e
         models = []

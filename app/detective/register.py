@@ -74,6 +74,13 @@ def default_rules(topic):
             # Find related model for relation
             if hasattr(field, "target_model"):
                 target_model  = field.target_model
+                # The current relationship has properties
+                if rules.model(target_model).get("is_relationship_properties"):
+                    # Set a rule to notice it
+                    rules.model(model).field(field.name).add(has_properties=True)
+                else:
+                    # Say explicitely that we don't have any properties for this field
+                    rules.model(model).field(field.name).add(has_properties=False)
                 # Load class path
                 if type(target_model) is str: target_model = import_class(target_model)
                 # It's a searchable field !

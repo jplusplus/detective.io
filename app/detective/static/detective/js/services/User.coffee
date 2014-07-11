@@ -22,6 +22,8 @@ angular.module('detective.service').factory('User', ['$cookies', '$timeout', ($c
     sdo.hasReadPermission = (topic) ->
         sdo.hasPermission topic, 'read'
 
+    # Permission as string
+    permissions = if $cookies.user__permissions? then $cookies.user__permissions else ""
     # Set user's values and returns it
     sdo.set(
         # Create basic user using cookies
@@ -29,7 +31,7 @@ angular.module('detective.service').factory('User', ['$cookies', '$timeout', ($c
             is_logged   : !! 1*$cookies.user__is_logged
             is_staff    : !! 1*$cookies.user__is_staff
             username    : $cookies.user__username or ''
-            permissions : $cookies.user__permissions.replace(/["]/g, '').split(' ') or []
+            permissions : permissions.replace(/["]/g, '').split(' ') or []
         # set default values
         else
             is_logged   : false

@@ -9,7 +9,6 @@ angular.module('detective.directive').directive('noDuplicates', [
                 elements = scope.$eval attrs.noDuplicates 
                 elements = elements or []
                 included = elements.indexOf(viewValue) != -1
-                console.log 'validity: ', not included
                 if not included
                     modelCtrl.$setValidity('nodup', yes)
                     return viewValue

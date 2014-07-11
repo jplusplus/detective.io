@@ -283,6 +283,21 @@ class ContributeCtrl
                     fields.push(f) if @scope.isVisibleAdditional(@)(f)
             fields
         showField: (field)=> @moreFields.push field
+
+        focusField: (field)=>
+            # unfocus all previously focused field
+            _.each(
+                _.filter(@meta.fields, @isFieldFocused)
+                , @unfocusField
+            )  
+            # focus targeted field
+            field.isFocused = true 
+
+        unfocusField: (field)=>
+            field.isFocused = false
+
+        isFieldFocused: (field)=> field? and field.isFocused is true
+
         isSaved: => @fields.id? and _.isEmpty( @getChanges() )
 
         isSourceURLValid: (source)=>

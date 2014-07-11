@@ -141,10 +141,11 @@
 				</div>
 
 				<div class="row field form-group"
-					 class-on-focus="is-active"
-					 ng-class="{loading: individual.updating[field.name] && !individual.loading}"
+					 ng-class="{loading: individual.updating[field.name] && !individual.loading, 'is-active': individual.isFieldFocused(field) }"
 				     ng-show="isAllowedType(field.type) && individual.isVisible(field) && individual.isEditable(field)"
-					 ng-repeat="field in individual.meta.fields track by $index">
+					 ng-repeat="field in individual.meta.fields track by $index"
+					 ng-click='individual.focusField(field)'
+					 click-outside='individual.unfocusField(field)'>
 
 					<div class="col-sm-3 form-label top05">
 						<label for="id_[[field.name]]">
@@ -338,7 +339,7 @@
 									</li>
 									<li>
 										<form name="form" 
-											   ng-submit="form.$valid && individual.addSource(field, newSource) && newSource=''" novalidate>
+											   ng-submit="form.$valid && individual.addSource(field, newSource); newSource=form.$valid ? '' : newSource" novalidate>
 											<input type="text"
 											   name='newSource'
 											   focus-on="field.focusAdd"

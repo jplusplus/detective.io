@@ -1,8 +1,8 @@
 class IndividualListCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', 'Individual', 'Summary', 'Common', '$location',  'Page']
+    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', 'Common', '$location',  'Page']
 
-    constructor: (@scope, @stateParams, @Individual, @Summary, @Common, @location, @Page)->
+    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @Common, @location, @Page)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ class IndividualListCtrl
                     # Set page's title
                     @Page.title meta.verbose_name_plural
                 # Unkown type
-                else @scope.is404(yes)
+                else @state.go("404")
 
     # List parameters
     getParams: =>
@@ -107,7 +107,7 @@ class IndividualListCtrl
     # True if there is a previous page
     hasPreviousPage: => @scope.individuals.meta? and @scope.page > 1
     # True if there is a next page
-    hasNextPage: => 
+    hasNextPage: =>
         return false unless @scope.individuals.meta?
         meta  = @scope.individuals.meta
         (meta.limit * @scope.page + meta.limit / meta.total_count) > 1

@@ -6,6 +6,7 @@ VENV          = venv
 ENV           = ./.env
 RM            = rm -fr
 COVERAGE      = `which coverage`
+PWD           = `pwd`
 
 CUSTOM_D3	  = ./app/static/custom_d3/d3.js
 
@@ -49,7 +50,12 @@ neo4j_install:
 	# Install neo4j locally
 	./install_local_neo4j.bash $$NEO4J_VERSION
 
-install: $(VENV) pip_install npm_install $(CUSTOM_D3) bower_install neo4j_install
+statics_install:
+	. $(ENV) ; python manage.py compress --force
+	ln -sf $(PWD)/app/detective/static/detective/img/ ./app/staticfiles/CACHE/img
+	ln -sf $(PWD)/app/detective/static/detective/svg/ ./app/staticfiles/CACHE/svg
+
+install: $(VENV) pip_install npm_install $(CUSTOM_D3) bower_install neo4j_install statics_install
 
 ###
 # Doc generation

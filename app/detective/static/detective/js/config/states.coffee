@@ -35,7 +35,7 @@ angular.module('detective.config').config [
             .state('activate',
                 url : "/account/activate/?token"
                 controller : UserCtrl
-                templateUrl : '/partial/account.activate.html'
+                templateUrl : '/partial/account.activation.html'
             )
             .state('reset-password',
                 url : "/account/reset-password/?token"
@@ -45,7 +45,7 @@ angular.module('detective.config').config [
             .state('reset-password-confirm',
                 url : "/account/reset-password-confirm/"
                 controller : UserCtrl
-                templateUrl : '/partial/account.reset-password-confirm.html'
+                templateUrl : '/partial/account.reset-password.confirm.html'
             )
             .state('login',
                 url : "/login/"

@@ -180,7 +180,7 @@ class UserCtrl
     readToken: =>
         @Page.loading(true)
         # Submits the token for activation
-        @http.get("/api/common/v1/user/activate/", token: @stateParams.token)
+        @http.get("/api/common/v1/user/activate/?token=#{@stateParams.token}")
             .success (response) =>
                 @Page.loading false
                 @scope.state = true

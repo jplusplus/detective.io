@@ -1,4 +1,4 @@
-angular.module('detective.service').factory "Page", ["ngProgressLite", "$rootScope", (ngProgressLite, $rootScope)->
+angular.module('detective.service').factory "Page", ["ngProgressLite", "$rootScope", "$state", (ngProgressLite, $rootScope, $state)->
     new class Page
         # ──────────────────────────────────────────────────────────────────────────
         # Private attributes and methods
@@ -18,8 +18,7 @@ angular.module('detective.service').factory "Page", ["ngProgressLite", "$rootSco
         # ──────────────────────────────────────────────────────────────────────────
         constructor: ->
             # Hide sidebar when route change
-            $rootScope.$on "$routeChangeStart", =>
-                @showAside = no
+            $rootScope.$on "$stateChangeSuccess", => @showAside = no
         # Show or not the main aside menu
         showAside: yes
         # Page title

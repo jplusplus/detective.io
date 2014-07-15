@@ -1,8 +1,8 @@
 class ArticleCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Common', 'Page']
+    @$inject: ['$scope', '$stateParams', 'Common', 'Page']
 
-    constructor: (@scope,  @routeParams, @Common, @Page)->
+    constructor: (@scope,  @stateParams, @Common, @Page)->
         # Enable loading mode
         @Page.loading yes
         # ──────────────────────────────────────────────────────────────────────
@@ -11,8 +11,8 @@ class ArticleCtrl
         # Get the data from the database
         params =
             type       : "article"
-            slug       : @routeParams.slug
-            topic__slug: @routeParams.topic
+            slug       : @stateParams.slug
+            topic__slug: @stateParams.topic
         @Common.query params, (articles)=>
             # Disable loading mode
             @Page.loading no

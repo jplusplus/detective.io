@@ -10,7 +10,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
         # Custom filter to display only subject related relationship
         @scope.currentSubject = @currentSubject
 
-        return @location.url("/") unless @routeParams.q?
+        return @location.url("/") unless @stateParams.q?
         # Parse the JSON query
         @scope.query  = @QueryFactory.query
 
@@ -47,7 +47,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
     # Define search parameter using route's params
     getParams: =>
         # No query, no search
-        return false unless @routeParams.q?
+        return false unless @stateParams.q?
         id    : "rdf_search"
         limit : @scope.limit
         offset: @scope.limit * (@scope.page - 1)

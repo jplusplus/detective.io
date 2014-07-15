@@ -6,9 +6,9 @@ angular.module('detective.service',    ['ngResource', 'ngSanitize', 'ngCookies']
 
 detective = angular
     .module('detective', [
+        'ui.router'
         'ngCookies'
         'ngResource'
-        'ngRoute'
         'ngSanitize'
         "detective.config"
         "detective.controller"
@@ -58,11 +58,12 @@ detective = angular
     )
     .config(
         [
+            '$stateProvider'
+            '$urlRouterProvider'
             '$interpolateProvider',
-            '$routeProvider',
             '$locationProvider'
             '$httpProvider',
-            ($interpolateProvider, $routeProvider, $locationProvider, $httpProvider)->
+            ($stateProvider, $urlRouterProvider, $interpolateProvider, $locationProvider, $httpProvider)->
                 # Intercepts HTTP request to add cache for anonymous user
                 # and to set the right csrf token from the cookies
                 $httpProvider.interceptors.push('AuthHttpInterceptor');
@@ -71,108 +72,123 @@ detective = angular
                 $interpolateProvider.endSymbol   ']]'
                 # HTML5 Mode yeah!
                 $locationProvider.html5Mode true
-                # Bind routes to the controllers
-                $routeProvider
-                    # Disable common endpoints
-                    .when('/common',                      redirectTo: '/')
-                    .when('/page',                        redirectTo: '/')
-                    .when('/account',                     redirectTo: '/')
-                    .when('/:username/common/contribute', redirectTo: '/')
-                    .when('/:username/:topic/p/',         redirectTo: '/:username/:topic/')
-                    # Retrop compatibility
-                    .when('/energy/',                     redirectTo: '/detective/energy/')
-                    .when('/energy/:type',                redirectTo: '/detective/energy/:type')
-                    .when('/energy/search',               redirectTo: '/detective/energy/search')
-                    .when('/energy/:type/:id',            redirectTo: '/detective/energy/:type/:id')
-                    .when('/energy/contribute',           redirectTo: '/detective/energy/contribute')
-                    # Core endpoints
-                    .when('/', {
-                        controller: HomeCtrl
-                        templateUrl: "/partial/home.html"
-                    })
-                    .when('/404', {
-                        controller: NotFoundCtrl
-                        templateUrl: "/partial/404.html"
-                    })
+
+                $urlRouterProvider.otherwise("/404");
+
+                # ui-router configuration
+                $stateProvider
+                    # Core
+                    .state('tour',
+                        url : "/"
+                        controller : HomeCtrl
+                        templateUrl : '/partial/home.html'
+                    )
+                    .state('404',
+                        url : "/404/"
+                        controller : NotFoundCtrl
+                        templateUrl : '/partial/404.html'
+                    )
+                    .state('contact-us',
+                        url : "/contact-us/"
+                        controller : ContactUsCtrl
+                        templateUrl : '/partial/contact-us.html'
+                    )
                     # Accounts
-                    .when('/account/activate', {
-                        controller: UserCtrl
-                        templateUrl: "/partial/account.activation.html"
-                    })
-                    .when('/account/reset-password', {
-                        controller: UserCtrl
-                        templateUrl: "/partial/account.reset-password.html"
-                    })
-                    .when('/account/reset-password-confirm', {
-                        controller: UserCtrl
-                        templateUrl: "/partial/account.reset-password.confirm.html"
-                    })
-                    .when('/login', {
-                        controller: UserCtrl
-                        templateUrl: "/partial/account.login.html"
-                    })
-                    .when('/signup', {
-                        controller: UserCtrl
-                        templateUrl: "/partial/account.signup.html"
-                    })
-                    .when('/contact-us', {
-                        controller: ContactUsCtrl
-                        templateUrl: "/partial/contact-us.html"
-                    })
+                    .state('activate',
+                        url : "/account/activate/"
+                        controller : UserCtrl
+                        templateUrl : '/partial/account.activate.html'
+                    )
+                    .state('reset-password',
+                        url : "/account/reset-password/"
+                        controller : UserCtrl
+                        templateUrl : '/partial/account.reset-password.html'
+                    )
+                    .state('reset-password-confirm',
+                        url : "/account/reset-password-confirm/"
+                        controller : UserCtrl
+                        templateUrl : '/partial/account.reset-password-confirm.html'
+                    )
+                    .state('login',
+                        url : "/login/"
+                        controller : UserCtrl
+                        templateUrl : '/partial/account.login.html'
+                    )
+                    .state('signup',
+                        url : "/signup/"
+                        controller : UserCtrl
+                        templateUrl : '/partial/account.signup.html'
+                    )
                     # Pages
-                    .when('/page/:slug', {
-                        controller: PageCtrl
+                    .state('page',
+                        url : "/page/:slug/"
+                        controller : PageCtrl
                         # Allow a dynamic loading by setting the templateUrl within controller
-                        template: "<div ng-include src='templateUrl'></div>"
-                    })
+                        template : "<div ng-include src='templateUrl'></div>"
+                    )
                     # User-related url
-                    .when('/:username', {
-                        controller: ProfileCtrl
-                        templateUrl: "/partial/account.html"
-                        resolve: UserCtrl.resolve
-                    })
+                    .state('user',
+                        url : "/:username/"
+                        controller : ProfileCtrl
+                        templateUrl : "/partial/account.html"
+                        resolve : UserCtrl.resolve
+                    )
                     # Topic-related url
-                    .when('/:username/:topic/search', {
+                    .state('user-topic',
+                        url : "/:username/:topic/"
+                        controller : ExploreCtrl
+                        resolve :
+                            topic: UserTopicCtrl.resolve.topic
+                        # Allow a dynamic loading by setting the templateUrl within controller
+                        template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+                    )
+                    .state('user-topic-search',
+                        url: '/:username/:topic/search/'
                         controller: IndividualSearchCtrl
                         templateUrl: "/partial/topic.list.html"
-                        resolve: UserTopicCtrl.resolve
-                    })
-                    .when('/:username/:topic/p/:slug',
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
+                    )
+                     # Topic-related url
+                    .state('user-topic-article',
+                        url: '/:username/:topic/p/:slug/'
                         controller: ArticleCtrl
                         templateUrl: "/partial/topic.article.html"
-                        resolve: UserTopicCtrl.resolve
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
                     )
-                    .when('/:username/:topic/contribute', {
+                    .state('user-topic-contribute',
+                        url: '/:username/:topic/contribute/'
                         controller: ContributeCtrl
                         templateUrl: "/partial/topic.contribute.html"
-                        resolve: UserTopicCtrl.resolve
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
                         auth: true
-                    })
-                    .when('/:username/:topic/contribute/upload', {
+                    )
+                    .state('user-topic-contribute-upload',
+                        url: '/:username/:topic/contribute/upload/'
                         controller: BulkUploadCtrl
                         templateUrl: "/partial/topic.contribute.bulk-upload.html"
-                        resolve: UserTopicCtrl.resolve
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
                         auth: true
-                    })
-                    .when('/:username/:topic', {
-                        controller: ExploreCtrl
-                        # Allow a dynamic loading by setting the templateUrl within controller
-                        template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
-                        resolve: UserTopicCtrl.resolve
-                    })
-                    .when('/:username/:topic/:type', {
+                    )
+                    .state('user-topic-list',
+                        url: '/:username/:topic/:type/'
                         controller: IndividualListCtrl
                         templateUrl: "/partial/topic.list.html"
                         reloadOnSearch: false
-                        resolve: UserTopicCtrl.resolve
-                    })
-                    .when('/:username/:topic/:type/:id', {
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
+                    )
+                    .state('user-topic-detail',
+                        url: '/:username/:topic/:type/:id/'
                         controller: IndividualSingleCtrl
                         templateUrl: "/partial/topic.single.html"
                         reloadOnSearch: false
-                        resolve: UserTopicCtrl.resolve
-                    })
-                    .otherwise templateUrl: '/partial/404.html'
+                        resolve:
+                            topic: UserTopicCtrl.resolve.topic
+                    )
         ]
     )
 

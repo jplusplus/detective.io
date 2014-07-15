@@ -1,9 +1,9 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
+    @$inject: ['$scope', '$stateParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
 
 
-    constructor: (@scope, @routeParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
+    constructor: (@scope, @stateParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading true
@@ -28,7 +28,7 @@ class ContributeCtrl
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
-        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic        
+        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
@@ -49,13 +49,13 @@ class ContributeCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @scope.topic    = @routeParams.topic
-        @scope.username = @routeParams.username
+        @scope.topic    = @stateParams.topic
+        @scope.username = @stateParams.username
         # By default, hide the kick-start form
         showKickStart = false
         # Shortcuts for child classes
         @scope.Individual  = @Individual
-        @scope.routeParams = @routeParams
+        @scope.stateParams = @stateParams
         @scope.resources   = {}
         # Get the list of available resources
         @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
@@ -64,9 +64,9 @@ class ContributeCtrl
         # Individual list
         @scope.individuals = []
         # Received an individual to edit
-        if @routeParams.type? and @routeParams.id?
+        if @location.search().type? and @location.search().id?
             # Load the inidividual
-            @scope.scrollIdx = @scope.loadIndividual @routeParams.type, @routeParams.id
+            @scope.scrollIdx = @scope.loadIndividual @location.search().type, @location.search().id
         else
             # Index of the individual where to scroll
             @scope.scrollIdx  = -1
@@ -144,11 +144,11 @@ class ContributeCtrl
                     # Empty input must be null
                     val = null
                 val
-            for prop of now                
+            for prop of now
                 val = clean(now[prop], prop)
                 # Remove resource methods
                 # and angular properties (that start with $)
-                if typeof(val) isnt "function" and prop.indexOf("$") != 0   
+                if typeof(val) isnt "function" and prop.indexOf("$") != 0
                     # Previous and new value are different
                     unless angular.equals clean(prev[prop], prop), val
                         changes[prop] = val
@@ -178,7 +178,7 @@ class ContributeCtrl
                     @isRemoved  = true
 
         # Returns individual's topic
-        getTopic: => @scope.topic or @scope.routeParams.topic
+        getTopic: => @scope.topic or @scope.stateParams.topic
 
         # Save the current individual form
         save: =>
@@ -207,29 +207,29 @@ class ContributeCtrl
                     @error_traceback = data.traceback if data.traceback?
                 )
 
-        getSource: (field)=> _.find @fields.field_sources, (fs)=> fs.field is field.name        
-        setSource: (field, value=@sources[field.name])=>             
+        getSource: (field)=> _.find @fields.field_sources, (fs)=> fs.field is field.name
+        setSource: (field, value=@sources[field.name])=>
             # Close the form
             field.showSourceForm = no
             # Get the sourc eobject
-            source = @getSource(field)  
+            source = @getSource(field)
             # Delete the value
             if (value is '' or value is null) and source?
-                idx = _.indexOf @fields.field_sources, (fs)=> fs.field is field.name 
+                idx = _.indexOf @fields.field_sources, (fs)=> fs.field is field.name
                 delete @sources[field.name]
-                delete @fields.field_sources[idx]                
+                delete @fields.field_sources[idx]
                 @fields.field_sources.splice idx, 1
             # Update the value
-            else if source? 
+            else if source?
                 source.url   = value
                 source.field = field.name
             # Add te value
             else
-                @fields.field_sources.push 
+                @fields.field_sources.push
                     url  : value
                     field: field.name
 
-        hasSource: (field)-> 
+        hasSource: (field)->
             source = @getSource field
             source? and source.url? and source.url != ''
 
@@ -255,7 +255,7 @@ class ContributeCtrl
                         @isNotFound = true
 
         # True if the given field can be edit
-        isEditable: (field)=>            
+        isEditable: (field)=>
             return not field.rules.is_editable? or field.rules.is_editable is yes
 
         # True if the given field is visible

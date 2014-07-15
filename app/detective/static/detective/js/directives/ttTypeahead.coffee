@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $routeParams, User)->
+angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User)->
     lastDataset = []
 
     template =
@@ -40,7 +40,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
     link: (scope, element, attrs) ->
         # Select the individual to look for
         individual = (scope.individual() or "").toLowerCase()
-        itopic     = (scope.topic() or $routeParams.topic or "common").toLowerCase()
+        itopic     = (scope.topic() or $stateParams.topic or "common").toLowerCase()
         # Set a default value
         element.val scope.model.name if scope.model?
         element.val scope.value if scope.value?

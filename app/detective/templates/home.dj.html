@@ -29,7 +29,7 @@
 
 
     <script type="text/javascript" src="{% static 'components/angular/angular.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'components/angular-route/angular-route.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/angular-ui-router/release/angular-ui-router.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-cookies/angular-cookies.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-resource/angular-resource.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'components/angular-sanitize/angular-sanitize.min.js' %}"></script>
@@ -44,6 +44,7 @@
         <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/config/safeApply.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/config/ngProgressLite.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/config/urlRouter.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ArticleCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContactUsCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContributeCtrl.coffee' %}"></script>
@@ -104,7 +105,7 @@
         <div class="main-aside-pushed">
             {% include "partials/header.dj.html" %}
             {% include "partials/main-aside.dj.html" %}
-            <div ng-view autoscroll class="content" ng-hide="is40X()" ng-class="{ freeze: Page.loading() }"></div>
+            <div ui-view autoscroll class="content" ng-hide="is40X()" ng-class="{ freeze: Page.loading() }"></div>
             <div class="content" ng-show="is404()">
                 <div ng-include="'partial/404.html'"></div>
             </div>

@@ -1,6 +1,6 @@
 angular.module('detective.service').factory 'TopicsFactory', [
-    '$q', '$rootScope', '$route', 'Common', 'User', 'UtilsFactory'
-    ($q, $rootScope, $route, Common, User, UtilsFactory)->
+    '$q', '$rootScope', '$state', 'Common', 'User', 'UtilsFactory'
+    ($q, $rootScope, $state, Common, User, UtilsFactory)->
         new class TopicsFactory
             constructor: ->
                 @logger = UtilsFactory.loggerDecorator('TopicsFactory')

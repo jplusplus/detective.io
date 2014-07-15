@@ -1,6 +1,6 @@
 angular.module('detective.service').service 'QueryFactory', [
-    '$rootScope', '$routeParams', '$http',  '$location', 'TopicsFactory'
-    ($rootScope, $routeParams,  $http, $location, TopicsFactory)->
+    '$rootScope', '$stateParams', '$http',  '$location', 'TopicsFactory'
+    ($rootScope, $stateParams,  $http, $location, TopicsFactory)->
         new class QueryFactory
             constructor: ->
                 @query = {}

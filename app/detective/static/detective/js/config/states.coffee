@@ -81,7 +81,7 @@ angular.module('detective.config').config [
                 template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
             )
             .state('user-topic-search',
-                url: '/:username/:topic/search/'
+                url: '/:username/:topic/search/?q'
                 controller: IndividualSearchCtrl
                 templateUrl: "/partial/topic.list.html"
                 reloadOnSearch: true

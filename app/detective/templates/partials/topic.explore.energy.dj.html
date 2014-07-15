@@ -24,13 +24,13 @@
 			<a scroll-to="600" ng-if="scrollToExplore == true" reset="scrollToExplore"></a>
 			<div class="top50 bottom40">
 				<div class="row">
-					<form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl">
+					<form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl as search">
 						<input type="search"
 							    placeholder="Search linked individuals in our graph database..."
 							 	tt-typeahead
 								tt-individual="'summary'"
 								tt-topic="'energy'"
-								tt-model="selectedIndividual"
+								tt-model="search.selectedIndividual"
 								remote="/api/energy/v1/summary/human/?q=%QUERY"
 								prefetch="/api/energy/v1/summary/mine/"
 								value-key="label"

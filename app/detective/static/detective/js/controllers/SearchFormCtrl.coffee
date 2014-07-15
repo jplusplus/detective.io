@@ -1,8 +1,8 @@
 class SearchFormCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$location', '$stateParams', 'Page', 'QueryFactory', 'TopicsFactory', 'UtilsFactory']
+    @$inject: ['$scope', '$location', '$state', 'Page', 'QueryFactory', 'TopicsFactory', 'UtilsFactory']
 
-    constructor: (@scope, @location, @stateParams, @Page,  @QueryFactory, @TopicsFactory, @UtilsFactory)->
+    constructor: (@scope, @location, @state, @Page,  @QueryFactory, @TopicsFactory, @UtilsFactory)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -10,7 +10,7 @@ class SearchFormCtrl
         @logger = @UtilsFactory.loggerDecorator('SearchFormCtrl')
         @topics = @TopicsFactory.topics
         @topic  = @TopicsFactory.topic
-        @topic_slug = @stateParams.topic if @stateParams.topic?
+        @topic_slug = @state.params.topic if @state.params.topic?
         @human_query = ''
         @bindHumanQuery()
 
@@ -30,13 +30,13 @@ class SearchFormCtrl
         @scope.$watch @getQuery, @QueryFactory.updateQuery, yes
 
         # Update the human query from this controller into the query factory
-        @scope.$watch (=>@QueryFactory.query), (query)=>
+        @scope.$watch (=>@QueryFactory.QueryFactoryy), (query)=>
             @human_query = @QueryFactory.toHumanQuery query
             @QueryFactory.human_query = human_query if human_query?
         , true
 
         # Watch current location to update the active topic
-        @scope.$watch (=> @stateParams), (params)=>
+        @scope.$watch (=> @state.params), (params)=>
             return unless params and params.topic?
             @topic_slug = params.topic
 

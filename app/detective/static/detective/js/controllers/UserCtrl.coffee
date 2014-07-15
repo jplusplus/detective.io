@@ -148,7 +148,7 @@ class UserCtrl
 
 
     resetPasswordConfirm: =>
-        token = @location.search()['token']
+        token = @stateParams.token
         if !token?
             @scope.invalidURL = true
             @scope.error = "Invalid URL, please use the link contained in your password reset email."

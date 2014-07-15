@@ -103,7 +103,10 @@ class IndividualListCtrl
         return pages
 
     # Go to the given page
-    goToPage: (page)=> @location.search "page", 1*page
+    goToPage: (page)=>
+        params = @stateParams
+        params.page = 1*page
+        @state.transitionTo @state.current, params, reload: yes
     # True if there is a previous page
     hasPreviousPage: => @scope.individuals.meta? and @scope.page > 1
     # True if there is a next page

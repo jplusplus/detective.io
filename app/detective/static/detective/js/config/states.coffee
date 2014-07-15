@@ -33,12 +33,12 @@ angular.module('detective.config').config [
             )
             # Accounts
             .state('activate',
-                url : "/account/activate/"
+                url : "/account/activate/?token"
                 controller : UserCtrl
                 templateUrl : '/partial/account.activate.html'
             )
             .state('reset-password',
-                url : "/account/reset-password/"
+                url : "/account/reset-password/?token"
                 controller : UserCtrl
                 templateUrl : '/partial/account.reset-password.html'
             )
@@ -81,7 +81,7 @@ angular.module('detective.config').config [
                 template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
             )
             .state('user-topic-search',
-                url: '/:username/:topic/search/?q'
+                url: '/:username/:topic/search/?q&page'
                 controller: IndividualSearchCtrl
                 templateUrl: "/partial/topic.list.html"
                 reloadOnSearch: true
@@ -113,7 +113,7 @@ angular.module('detective.config').config [
                 auth: true
             )
             .state('user-topic-list',
-                url: '/:username/:topic/:type/'
+                url: '/:username/:topic/:type/?page'
                 controller: IndividualListCtrl
                 templateUrl: "/partial/topic.list.html"
                 reloadOnSearch: true

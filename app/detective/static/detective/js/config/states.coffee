@@ -123,7 +123,7 @@ angular.module('detective.config').config [
                 url: '/:username/:topic/:type/:id/'
                 controller: IndividualSingleCtrl
                 templateUrl: "/partial/topic.single.html"
-                reloadOnSearch: false
+                reloadOnSearch: true
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
             )

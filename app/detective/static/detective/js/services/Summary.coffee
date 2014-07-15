@@ -4,15 +4,18 @@ angular.module('detective.service').factory("Summary", [ '$resource', '$http', '
         topic: -> $stateParams.topic or "common"
 
     $resource '/api/:topic/v1/summary/:id/', defaultsParams, {
-        get: {
-            method : 'GET',
+        get:
+            method : 'GET'
             isArray: false
-        },
-        export: {
-            isArray : false,
-            method : 'GET',
-            url :'/api/:topic/v1/summary/export/',
-            responseType : 'arraybuffer',
+        cachedGet:
+            method : 'GET'
+            isArray: false
+            cache  : yes
+        export:
+            isArray : false
+            method : 'GET'
+            url :'/api/:topic/v1/summary/export/'
+            responseType : 'arraybuffer'
             transformResponse : (data, getHeaders) ->
                 filename = 'export.zip'
                 contentDisposition = (do getHeaders)['content-disposition'].split ';'
@@ -21,6 +24,5 @@ angular.module('detective.service').factory("Summary", [ '$resource', '$http', '
                     if contentDisposition[1]?
                         filename = contentDisposition[1]
                 { data : data , filename : filename }
-        }
     }
 ])

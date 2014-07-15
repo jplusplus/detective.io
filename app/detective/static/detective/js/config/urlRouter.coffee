@@ -2,6 +2,7 @@
 angular.module('detective.config').config ["$urlRouterProvider", ($urlRouterProvider)->
   $urlRouterProvider.rule ($injector, $location) ->
     path = $location.path()
+    console.log path
     # Note: misnomer. This returns a query object, not a search string
     search = $location.search()
     params = undefined

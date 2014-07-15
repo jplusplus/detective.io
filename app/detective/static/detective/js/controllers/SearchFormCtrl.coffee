@@ -43,7 +43,7 @@ class SearchFormCtrl
         # Watch current slug and topics list to find the current topic
         @scope.$watch (=> [@topic_slug, @topics]), =>
             if @topic_slug? and @topics.length
-                @topic = @getTopic @topic_slug
+                angular.extend @topic, @getTopic @topic_slug
                 @TopicsFactory.topic = @topic
         , yes
 

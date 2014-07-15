@@ -89,6 +89,11 @@ class ContributeCtrl
             @master     = angular.copy fields,
             # List of additional visible fields
             @moreFields = []
+            @similars   = []
+            # Is that model a searchable individual ?
+            # Load similar individual to avoid duplicates
+            # AFTER the individual is created.
+            scope.$on("individual:created", @getSimilars) if fields.name?
             # Class attributes from parameters
             # ──────────────────────────────────────────────────────────────────
             @Individual = scope.Individual
@@ -98,6 +103,7 @@ class ContributeCtrl
             @type       = type.toLowerCase()
             # All source fields
             @sources    = {}
+            @isNew      = not fields.id?
             # Field param can be a number to load an individual
             @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
             # Class watchers
@@ -109,14 +115,31 @@ class ContributeCtrl
             # The data changed
             @scope.$watch (=>@fields), @onChange, true
 
-        onChange: ()=>
+        onChange: (current)=>
             # Individual not created yet
-            return unless @fields.id?
+            return unless current.id?
+            # Propagation of the new individual
+            if @isNew
+                @scope.$broadcast "individual:created", current
+                # It's not a new individual now
+                @isNew = no
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
                 changes = @getChanges()
                 # Looks for the differences and update the db if needed
                 @update(changes) unless _.isEmpty(changes)
+
+        getSimilars: =>
+            params =
+                type:  @type
+                id:    "search"
+                q:     @fields.name
+            # Look for individual with the same name
+            @Individual.query params, (d)=>
+                # Remove the one we just created
+                d = _.filter d, (e)=> e.id isnt @fields.id
+                # Similar entries
+                @similars = d
 
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
@@ -172,6 +195,8 @@ class ContributeCtrl
                 @updating = _.omit(@updating, _.keys(data))
                 # Prevent communications between forms
                 @updating = angular.copy @updating
+                # Propagation
+                @scope.$broadcast "individual:updated", @fields
             , (error)=>
                 if error.status == 404
                     @isClosed   = true
@@ -246,6 +271,8 @@ class ContributeCtrl
                     # Record the database version of the individual
                     @master  = angular.copy master
                     @sources = _.object _.map(@fields.field_sources, (fs)-> [fs.field, fs.url])
+                    # Propagation
+                    @scope.$broadcast "individual:loaded", @fields
                 , (error)=>
                     @loading = false
                     # handle 404 response for entity loading
@@ -342,18 +369,6 @@ class ContributeCtrl
             @scope.showKickStart = false
             # Create the form
             form = @initNewIndividual(@scope.new.type, @scope.new.fields) if form is null
-            # Is that field a searchable field ?
-            if @scope.new.fields.name
-                params =
-                    type:  @scope.new.type
-                    id:    "search"
-                    q:     @scope.new.fields.name
-                # Look for individual with the same name
-                @Individual.query params, (d)=>
-                    # Remove the one we just created
-                    d = _.filter d, (e)=> e.id isnt form.fields.id
-                    # Similar entries
-                    form.similars = d
             # Reset the new field
             @scope.new = new IndividualForm(@scope)
             # Scroll to the individual

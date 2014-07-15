@@ -84,6 +84,7 @@ angular.module('detective.config').config [
                 url: '/:username/:topic/search/'
                 controller: IndividualSearchCtrl
                 templateUrl: "/partial/topic.list.html"
+                reloadOnSearch: true
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
             )
@@ -115,7 +116,7 @@ angular.module('detective.config').config [
                 url: '/:username/:topic/:type/'
                 controller: IndividualListCtrl
                 templateUrl: "/partial/topic.list.html"
-                reloadOnSearch: false
+                reloadOnSearch: true
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
             )

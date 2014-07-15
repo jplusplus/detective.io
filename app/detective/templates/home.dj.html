@@ -42,9 +42,15 @@
 
     {% compress js %}
         <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/safeApply.coffee' %}"></script>
+        <!-- CONFIG -->
+        <script type="text/coffeescript" src="{% static 'detective/js/config/httpProvider.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/config/interpolation.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/config/ngProgressLite.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/config/rootScope.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/config/safeApply.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'detective/js/config/states.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/config/urlRouter.coffee' %}"></script>
+        <!-- CONTROLLERS -->
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ArticleCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContactUsCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContributeCtrl.coffee' %}"></script>
@@ -62,6 +68,7 @@
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/SearchFormCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserCtrl.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserTopicCtrl.coffee' %}"></script>
+        <!-- DIRECTIVES -->
         <script type="text/coffeescript" src="{% static 'detective/js/directives/card.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/changeOnBlur.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/colorTag.coffee' %}"></script>
@@ -76,10 +83,12 @@
         <script type="text/coffeescript" src="{% static 'detective/js/directives/topic.single.graph.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/classOnFocus.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/autofill.coffee' %}"></script>
+        <!-- FILTERS -->
         <script type="text/coffeescript" src="{% static 'detective/js/filters/individualPreview.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/filters/nl2br.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/filters/titlecase.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/filters/strToColor.coffee' %}"></script>
+        <!-- SERVICES -->
         <script type="text/coffeescript" src="{% static 'detective/js/services/AuthHttpInterceptor.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/Common.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/services/QueryFactory.coffee' %}"></script>

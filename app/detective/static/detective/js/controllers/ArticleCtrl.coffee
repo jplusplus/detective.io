@@ -1,8 +1,8 @@
 class ArticleCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', 'Common', 'Page']
+    @$inject: ['$scope', '$stateParams', '$state', 'Common', 'Page']
 
-    constructor: (@scope,  @stateParams, @Common, @Page)->
+    constructor: (@scope,  @stateParams, @state, @Common, @Page)->
         # Enable loading mode
         @Page.loading yes
         # ──────────────────────────────────────────────────────────────────────
@@ -17,7 +17,7 @@ class ArticleCtrl
             # Disable loading mode
             @Page.loading no
             # Stop if it's an unkown topic or article
-            return @scope.is404(yes) unless articles.length
+            return @state.go("404") unless articles.length
             # Or take the article at the top of the list
             @scope.article = articles[0]
 

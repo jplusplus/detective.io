@@ -13,10 +13,18 @@ angular.module('detective.config').config [
                 controller : HomeCtrl
                 templateUrl : '/partial/home.html'
             )
-            .state('404',
+            .state('404-page',
                 url : "/404/"
                 controller : NotFoundCtrl
                 templateUrl : '/partial/404.html'
+            )
+            .state('404',
+                controller : NotFoundCtrl
+                templateUrl : '/partial/404.html'
+            )
+            .state('403',
+                controller : NotFoundCtrl
+                templateUrl : '/partial/403.html'
             )
             .state('contact-us',
                 url : "/contact-us/"

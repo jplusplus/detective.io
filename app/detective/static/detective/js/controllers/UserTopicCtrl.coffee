@@ -1,14 +1,14 @@
 class UserTopicCtrl
     # Public method to resolve
     @resolve:
-        topic: ($rootScope, $stateParams, $q, Common, Page, User)->
+        topic: ($rootScope, $stateParams, $state, $q, Common, Page, User)->
             notFound = ->
                 do deferred.reject
-                $rootScope.is404(yes)
+                $state.go "404"
                 deferred
             forbidden = ->
                 do deferred.reject
-                $rootScope.is403 yes
+                $state.go "403"
                 deferred
             deferred = do $q.defer
             # Checks that the current topic and user exists together

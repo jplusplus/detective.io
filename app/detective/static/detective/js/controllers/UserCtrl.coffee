@@ -8,13 +8,13 @@ class UserCtrl
         user: [
             "$rootScope",
             "$stateParams",
+            "$state",
             "$q",
-            "$location",
             "Common",
-            ($rootScope, $stateParams, $q, $location, Common)->
+            ($rootScope, $stateParams, $state, $q, Common)->
                 notFound    = ->
                     deferred.reject()
-                    $rootScope.is404(yes)
+                    $state.go "404"
                     deferred
                 deferred    = $q.defer()
                 # Checks that the current topic and user exists together

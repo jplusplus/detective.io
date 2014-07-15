@@ -114,13 +114,7 @@
         <div class="main-aside-pushed">
             {% include "partials/header.dj.html" %}
             {% include "partials/main-aside.dj.html" %}
-            <div ui-view autoscroll class="content" ng-hide="is40X()" ng-class="{ freeze: Page.loading() }"></div>
-            <div class="content" ng-show="is404()">
-                <div ng-include="'partial/404.html'"></div>
-            </div>
-            <div class="content" ng-show="is403()">
-                <div ng-include="'partial/403.html'"></div>
-            </div>
+            <div ui-view autoscroll class="content" ng-class="{ freeze: Page.loading() }"></div>
             {% include "partials/footer.dj.html" %}
         </div>
     </div>

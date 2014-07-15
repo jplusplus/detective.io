@@ -112,7 +112,7 @@ class IndividualResource(ModelResource):
         return super(IndividualResource, self).apply_sorting(obj_list, options_copy)
 
     def determine_format(self, request):
-        """ 
+        """
         Force to render json. XML serializer fails.
         ref https://github.com/jplusplus/detective.io/issues/238
         """

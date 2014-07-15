@@ -12,7 +12,7 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 # and we update factory's topics
                 @getTopics (topics)=> @topics = @topics.concat topics
                 # Update topic list when the user object changes
-                $rootScope.$watch (=> User), @updateTopics, true
+                $rootScope.$on "user:updated", @updateTopics, true
 
             updateTopics: =>
                 @getTopics (data)=>

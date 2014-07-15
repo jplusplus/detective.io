@@ -2,7 +2,7 @@
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
 class UserCtrl
     # Injects dependancies
-    @$inject : ["$scope", "$http", "$location", "$stateParams", "$state", "User", "Page", "$rootElement"]
+    @$inject : ["$scope", "$http", "$location", "$stateParams", "$state", "Auth", "User", "Page", "$rootElement"]
     # Public method to resolve
     @resolve:
         user: [
@@ -34,7 +34,7 @@ class UserCtrl
                 deferred.promise
         ]
 
-    constructor: (@scope, @http, @location, @stateParams, @state, @User, @Page, @rootElement)->
+    constructor: (@scope, @http, @location, @stateParams, @state, @Auth, @User, @Page, @rootElement)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -52,14 +52,14 @@ class UserCtrl
         # Set page title with no title-case
         if @state.is("signup")
             @Page.title "Request an account", false
-        if @state.is("login")
+        else if @state.is("login")
             @Page.title "Log in", false
-        if @state.is("activate")
+        else if @state.is("activate")
             @Page.title "Activate your account", false
             @readToken()
-        if @state.is("reset-password")
+        else if @state.is("reset-password")
             @Page.title "Reset password", false
-        if @state.is("reset-password-confirm")
+        else if @state.is("reset-password-confirm")
             @Page.title "Enter a new password", false
 
         @Page.loading no
@@ -83,30 +83,20 @@ class UserCtrl
         unless @scope.username? or @scope.password?
             @scope.username = @rootElement.find("[ng-model=username]").val()
             @scope.password = @rootElement.find("[ng-model=password]").val()
-
-        config =
-            method: "POST"
-            url: "/api/common/v1/user/login/"
-            data:
-                username    : @scope.username
-                password    : @scope.password
-                remember_me : @scope.remember_me or false
-            headers:
-                "Content-Type": "application/json"
+        # Credidentials
+        credidentials =
+            username   : @scope.username
+            password   : @scope.password
+            remember_me: @scope.remember_me or false
         # Turn on loading mode
         @scope.loading = true
         # succefull login
-        @http(config).then( (response) =>
+        @Auth.login(credidentials).then( (response) =>
             # Turn off loading mode
             @scope.loading = false
             data = response.data
             # Interpret the respose
             if data? and data.success
-                @User.set
-                    is_logged   : true
-                    is_staff    : !! data.is_staff
-                    username    : data.username
-                    permissions : data.permissions
                 # Redirect to the next URL
                 @location.url(@scope.next)
                 # Delete error
@@ -118,19 +108,14 @@ class UserCtrl
         , (response)=> @loginError(response.data.error_message) )
 
     signup: =>
-        config =
-            method: "POST"
-            url: "/api/common/v1/user/signup/"
-            data:
-                username: @scope.username
-                email   : @scope.email
-                password: @scope.password
-            headers:
-                "Content-Type": "application/json"
+        data =
+            username: @scope.username
+            email   : @scope.email
+            password: @scope.password
         # Turn on loading mode
         @scope.loading = true
         # succefull login
-        @http(config)
+        @http.post("/api/common/v1/user/signup/", data)
             .success (response) =>
                 # Turn off loading mode
                 @scope.loading = false
@@ -145,16 +130,9 @@ class UserCtrl
                 @scope.error = message if message?
 
     resetPassword: =>
-        config =
-            method: "POST"
-            url: "/api/common/v1/user/reset_password/"
-            data:
-                email: @scope.email
-            headers:
-                "Content-Type": "application/json"
         # Turn on loading mode
         @scope.loading = true
-        @http(config)
+        @http.post("/api/common/v1/user/reset_password/", email: @scope.email)
             .success (response)=>
                 # Turn off loading mode
                 @scope.loading = false
@@ -177,18 +155,12 @@ class UserCtrl
         else
             @scope.invalidURL = false
             delete @scope.error
-            config =
-                method: "POST"
-                url: "/api/common/v1/user/reset_password_confirm/"
-                data:
-                    password: @scope.newPassword
-                    token: token
-                headers:
-                    "Content-Type": "application/json"
-
+            data =
+                password: @scope.newPassword
+                token: token
             # Turn on loading mode
             @scope.loading = true
-            @http(config)
+            @http.post("/api/common/v1/user/reset_password_confirm/", data)
                 .success (response)=>
                     # Turn off loading mode
                     @scope.loading = false
@@ -200,38 +172,15 @@ class UserCtrl
 
 
     logout: =>
-        config =
-            method: "GET"
-            url: "/api/common/v1/user/logout/"
-            headers:
-                "Content-Type": "application/json"
-        # Turn on loading mode
-        @scope.loading = true
         next_url = @location.url()
+        @Auth.logout().then =>
+            # Redirect to login form
+            @location.url("/login?next=#{next_url}")
 
-        # succefull logout
-        @http(config).then (response) =>
-            @scope.safeApply =>
-                # Turn off loading mode
-                @scope.loading = false
-                # Interpret the respose
-                if response.data? and response.data.success
-                    # Redirect to login form
-                    @location.url("/login?next=#{next_url}")
-                    # Update user data
-                    @User.set
-                        is_logged: false
-                        is_staff : false
-                        username : ''
     readToken: =>
         @Page.loading(true)
-        config =
-            method: "GET"
-            url: "/api/common/v1/user/activate/"
-            params:
-                token: @stateParams.token
         # Submits the token for activation
-        @http(config)
+        @http.get("/api/common/v1/user/activate/", token: @stateParams.token)
             .success (response) =>
                 @Page.loading false
                 @scope.state = true

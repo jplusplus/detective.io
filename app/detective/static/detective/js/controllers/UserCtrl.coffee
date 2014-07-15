@@ -2,7 +2,7 @@
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
 class UserCtrl
     # Injects dependancies
-    @$inject : ["$scope", "$http", "$location", "$stateParams", "User", "Page", "$rootElement"]
+    @$inject : ["$scope", "$http", "$location", "$stateParams", "$state", "User", "Page", "$rootElement"]
     # Public method to resolve
     @resolve:
         user: [
@@ -34,7 +34,7 @@ class UserCtrl
                 deferred.promise
         ]
 
-    constructor: (@scope, @http, @location, @stateParams, @User, @Page, @rootElement)->
+    constructor: (@scope, @http, @location, @stateParams, @state, @User, @Page, @rootElement)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -50,18 +50,17 @@ class UserCtrl
         @scope.resetPassword = @resetPassword
         @scope.resetPasswordConfirm = @resetPasswordConfirm
         # Set page title with no title-case
-        switch @location.path()
-            when "/signup"
-                @Page.title "Request an account", false
-            when "/login"
-                @Page.title "Log in", false
-            when "/account/activate"
-                @Page.title "Activate your account", false
-                @readToken()
-            when "/account/reset-password"
-                @Page.title "Reset password", false
-            when "/account/reset-password-confirm"
-                @Page.title "Enter a new password", false
+        if @state.is("signup")
+            @Page.title "Request an account", false
+        if @state.is("login")
+            @Page.title "Log in", false
+        if @state.is("activate")
+            @Page.title "Activate your account", false
+            @readToken()
+        if @state.is("reset-password")
+            @Page.title "Reset password", false
+        if @state.is("reset-password-confirm")
+            @Page.title "Enter a new password", false
 
         @Page.loading no
 

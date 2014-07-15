@@ -3,6 +3,8 @@ angular.module('detective.service').factory('User', ['$cookies', '$rootScope', (
     # Function to set the value that update CSRF token and return the object
     sdo.set = (data)->
         $.extend sdo, data, true
+        # Propagate changes
+        $rootScope.$broadcast "user:updated", sdo
         # Return sdo explicitely
         return sdo
 

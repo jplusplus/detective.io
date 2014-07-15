@@ -15,7 +15,7 @@
                     <a ng-href="[[topic.link]]">[[topic.title]]</a><br />
                     <span class="text-muted">
                         by
-                        <a ng-href="/[[topic.author.username]]">
+                        <a ui-sref="user({username: topic.author.username})">
                             [[topic.author.username]]
                         </a>
                     </span>
@@ -46,7 +46,7 @@
                     <a ng-href="[[topic.link]]">[[topic.title]]</a><br />
                     <span class="text-muted">
                         by
-                        <a ng-href="/[[topic.author.username]]">
+                        <a ui-sref="user({username: topic.author.username})">
                             [[topic.author.username]]
                         </a>
                     </span>

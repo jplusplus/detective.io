@@ -39,7 +39,11 @@ class UserCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         @scope.user    = @User
-        @scope.next    = @stateParams.next or "/"
+        @scope.nextState  = @stateParams.nextState
+        @scope.nextParams = angular.fromJson @stateParams.nextParams
+
+        console.log 'login success, redirect to', @scope.nextState
+        console.log 'next params: ', @scope.nextParams
         # ──────────────────────────────────────────────────────────────────────
         # Scope method
         # ──────────────────────────────────────────────────────────────────────
@@ -76,6 +80,7 @@ class UserCtrl
         @scope.error = error if error?
 
     login: (el)=>
+        console.log 'UserCtrl.login()'
         # Trigger the event waited in the autofill directive
         @scope.$broadcast 'autofill:update'
         # Catch a bug with angular and browser autofill
@@ -98,7 +103,7 @@ class UserCtrl
             # Interpret the respose
             if data? and data.success
                 # Redirect to the next URL
-                @location.url(@scope.next)
+                @state.go @scope.nextState, @scope.nextParams
                 # Delete error
                 delete @scope.error
             else

@@ -48,7 +48,7 @@ angular.module('detective.config').config [
                 templateUrl : '/partial/account.reset-password.confirm.html'
             )
             .state('login',
-                url : "/login/"
+                url : "/login/?nextState&nextParams"
                 controller : UserCtrl
                 templateUrl : '/partial/account.login.html'
             )
@@ -97,7 +97,7 @@ angular.module('detective.config').config [
                     topic: UserTopicCtrl.resolve.topic
             )
             .state('user-topic-contribute',
-                url: '/:username/:topic/contribute/'
+                url: '/:username/:topic/contribute/?id&type'
                 controller: ContributeCtrl
                 templateUrl: "/partial/topic.contribute.html"
                 resolve:

@@ -43,6 +43,7 @@
     {% compress js %}
         <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>
         <!-- CONFIG -->
+        <script type="text/coffeescript" src="{% static 'detective/js/config/authWatch.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/config/httpProvider.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/config/interpolation.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/config/ngProgressLite.coffee' %}"></script>
@@ -79,7 +80,6 @@
         <script type="text/coffeescript" src="{% static 'detective/js/directives/scrollTo.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/ttTypeahead.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/unique.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/watchLoginMandatory.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/topic.single.graph.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/classOnFocus.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'detective/js/directives/autofill.coffee' %}"></script>
@@ -111,7 +111,7 @@
 {% endblock %}
 
 {% block content %}
-    <div watch-login-mandatory watch-topic-exists class="main-aside-wrapper">
+    <div class="main-aside-wrapper">
         <div class="main-aside-pushed">
             {% include "partials/header.dj.html" %}
             {% include "partials/main-aside.dj.html" %}

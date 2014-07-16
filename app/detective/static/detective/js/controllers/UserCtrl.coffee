@@ -39,7 +39,9 @@ class UserCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         @scope.user    = @User
-        @scope.next    = @stateParams.next or "/"
+        @scope.nextState  = @stateParams.nextState
+        @scope.nextParams = angular.fromJson(@stateParams.nextParams or {})
+
         # ──────────────────────────────────────────────────────────────────────
         # Scope method
         # ──────────────────────────────────────────────────────────────────────
@@ -98,7 +100,7 @@ class UserCtrl
             # Interpret the respose
             if data? and data.success
                 # Redirect to the next URL
-                @location.url(@scope.next)
+                @state.go @scope.nextState, @scope.nextParams
                 # Delete error
                 delete @scope.error
             else

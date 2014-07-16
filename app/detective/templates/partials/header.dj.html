@@ -23,7 +23,7 @@
             </a>
 		</div>
         <div ng-hide="user.is_logged" class="header__user__sign-in">
-            <a ng-href="/login?next=[[nextLogin]]" title="Login">
+            <a ui-sref="login(loginParams())" title="Login">
                 <i class="fa fa-sign-in"></i>
                 <span class="sr-only">Login</span>
             </a>

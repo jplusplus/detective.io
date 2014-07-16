@@ -176,8 +176,11 @@ class UserCtrl
     logout: =>
         next_url = @location.url()
         @Auth.logout().then =>
-            # Redirect to login form
-            @location.url("/login?next=#{next_url}")
+            login_params = 
+                nextState: @state.current.name 
+                nextParams: angular.toJson @state.params
+
+            @state.go 'login', login_params
 
     readToken: =>
         @Page.loading(true)

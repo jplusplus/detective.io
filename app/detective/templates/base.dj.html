@@ -20,7 +20,7 @@
             window.STATIC_URL = "{% static '' %}";
         </script>
     </head>
-    <body ng-cloak  ng-class="{ 'is-home': location.path() == '/' && !is404(), 'show-aside': Page.showAside  }">
+    <body ng-cloak  ng-class="{ 'is-home': $state.is('tour'), 'show-aside': Page.showAside  }">
         {% load cache %}
         {% cache 3600 fullpage %}
             {% block content %}{% endblock %}

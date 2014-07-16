@@ -41,11 +41,6 @@ class ContributeCtrl
                 @scope.$apply()
             , 1200
 
-        # Redirect unauthorized user
-        @scope.$watch (=> User), (v)=>
-            @location.url("/#{@scope.username}/#{@scope.topic}/") unless User.hasChangePermission(topic.module)
-        , true
-
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────

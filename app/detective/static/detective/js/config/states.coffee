@@ -97,7 +97,7 @@ angular.module('detective.config').config [
                     topic: UserTopicCtrl.resolve.topic
             )
             .state('user-topic-contribute',
-                url: '/:username/:topic/contribute/'
+                url: '/:username/:topic/contribute/?id&type'
                 controller: ContributeCtrl
                 templateUrl: "/partial/topic.contribute.html"
                 resolve:

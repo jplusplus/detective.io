@@ -46,6 +46,8 @@ class ContributeCtrl
         # ──────────────────────────────────────────────────────────────────────
         @scope.topic    = @stateParams.topic
         @scope.username = @stateParams.username
+        @scope.type     = @stateParams.type
+        @scope.id       = @stateParams.id
         # By default, hide the kick-start form
         showKickStart = false
         # Shortcuts for child classes
@@ -61,7 +63,7 @@ class ContributeCtrl
         # Received an individual to edit
         if @location.search().type? and @location.search().id?
             # Load the inidividual
-            @scope.scrollIdx = @scope.loadIndividual @location.search().type, @location.search().id
+            @scope.scrollIdx = @scope.loadIndividual @scope.type, @scope.id
         else
             # Index of the individual where to scroll
             @scope.scrollIdx  = -1

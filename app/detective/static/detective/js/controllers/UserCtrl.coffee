@@ -40,10 +40,8 @@ class UserCtrl
         # ──────────────────────────────────────────────────────────────────────
         @scope.user    = @User
         @scope.nextState  = @stateParams.nextState
-        @scope.nextParams = angular.fromJson @stateParams.nextParams
+        @scope.nextParams = angular.fromJson(@stateParams.nextParams or {})
 
-        console.log 'login success, redirect to', @scope.nextState
-        console.log 'next params: ', @scope.nextParams
         # ──────────────────────────────────────────────────────────────────────
         # Scope method
         # ──────────────────────────────────────────────────────────────────────
@@ -80,7 +78,6 @@ class UserCtrl
         @scope.error = error if error?
 
     login: (el)=>
-        console.log 'UserCtrl.login()'
         # Trigger the event waited in the autofill directive
         @scope.$broadcast 'autofill:update'
         # Catch a bug with angular and browser autofill

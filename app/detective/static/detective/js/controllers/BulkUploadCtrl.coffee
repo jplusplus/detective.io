@@ -1,8 +1,8 @@
 class BulkUploadCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$http', '$routeParams', '$location', 'Page', 'Individual', '$timeout', 'Common', 'User']
+    @$inject: ['$scope', '$http', '$stateParams', '$location', 'Page', 'Individual', '$timeout', 'Common', 'User']
 
-    constructor: (@scope, @http, @routeParams, @location, @Page, @Individual, @timeout, @Common, @User)->
+    constructor: (@scope, @http, @stateParams, @location, @Page, @Individual, @timeout, @Common, @User)->
         @Page.title "Bulk Upload", no
         @Page.loading no
         # ──────────────────────────────────────────────────────────────────────
@@ -17,7 +17,7 @@ class BulkUploadCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Get the current topic as default topic
-        @scope.topic_selected = @routeParams.topic
+        @scope.topic_selected = @stateParams.topic
         # start with one file field
         @scope.file_fields    = ["file1"]
         @scope.files          = {}

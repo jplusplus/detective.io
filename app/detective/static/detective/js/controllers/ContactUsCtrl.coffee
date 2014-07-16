@@ -1,8 +1,8 @@
 class ContactUsCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Page', 'Individual']
+    @$inject: ['$scope', '$stateParams', 'Page', 'Individual']
 
-    constructor: (@scope,  @routeParams, @Page, @Individual)->
+    constructor: (@scope,  @stateParams, @Page, @Individual)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────

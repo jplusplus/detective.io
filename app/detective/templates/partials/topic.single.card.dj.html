@@ -1,7 +1,7 @@
 <div class="individual-card panel panel-default">
 	<div ng-if="meta.rules.is_searchable">
 		<h5 class="panel-heading">
-			<a ng-href="[[singleUrl()]]">
+			<a ui-sref="user-topic-detail(singleParams())">
 				[[individual|individualPreview]]
 			</a>
 		</h5>

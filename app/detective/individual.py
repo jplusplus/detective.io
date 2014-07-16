@@ -102,6 +102,14 @@ class IndividualResource(ModelResource):
         super(IndividualResource, self).__init__(api_name)
         # Register relationships fields automaticly
         self.generate_to_many_fields(True)
+        # By default, tastypie detects detail mode globally: it means that
+        # even into an embeded resource (through a relationship), Tastypie will
+        # serialize it as if we are in it's detail view.
+        # We overide 'use_in' for every field with the value "detail"
+        for field_name, field_object in self.fields.items():
+            if field_object.use_in == 'detail':
+                # We use a custom method
+                field_object.use_in = self.use_in
 
     def apply_sorting(self, obj_list, options=None):
         options_copy = options.copy()
@@ -112,7 +120,7 @@ class IndividualResource(ModelResource):
         return super(IndividualResource, self).apply_sorting(obj_list, options_copy)
 
     def determine_format(self, request):
-        """ 
+        """
         Force to render json. XML serializer fails.
         ref https://github.com/jplusplus/detective.io/issues/238
         """
@@ -186,7 +194,7 @@ class IndividualResource(ModelResource):
             target_model = field.target_model
         resource = self.dummy_class_to_ressource(target_model)
         # Do not create a relationship with an empty resource (not resolved)
-        if resource: return fields.ToManyField(resource, field.name, full=full, null=True, use_in=self.use_in)
+        if resource: return fields.ToManyField(resource, field.name, full=full, null=True, use_in='detail')
         else: return None
 
     def generate_to_many_fields(self, full=False):

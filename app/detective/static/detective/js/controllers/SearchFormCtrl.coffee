@@ -1,8 +1,8 @@
 class SearchFormCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$location', '$route', 'Page', 'QueryFactory', 'TopicsFactory', 'UtilsFactory']
+    @$inject: ['$scope', '$location', '$state', 'Page', 'QueryFactory', 'TopicsFactory', 'UtilsFactory']
 
-    constructor: (@scope, @location, @route, @Page,  @QueryFactory, @TopicsFactory, @UtilsFactory)->
+    constructor: (@scope, @location, @state, @Page,  @QueryFactory, @TopicsFactory, @UtilsFactory)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -10,12 +10,12 @@ class SearchFormCtrl
         @logger = @UtilsFactory.loggerDecorator('SearchFormCtrl')
         @topics = @TopicsFactory.topics
         @topic  = @TopicsFactory.topic
-        @topic_slug = @route.current.params.topic if @route.current? and @route.current.params?
+        @topic_slug = @state.params.topic if @state.params.topic?
         @human_query = ''
         @bindHumanQuery()
 
         # Get every topics
-        @TopicsFactory.getTopics (topics)=> 
+        @TopicsFactory.getTopics (topics)=>
             @topics = @topics.concat topics
             @TopicsFactory.topics = @topics
         # ──────────────────────────────────────────────────────────────────────
@@ -30,20 +30,20 @@ class SearchFormCtrl
         @scope.$watch @getQuery, @QueryFactory.updateQuery, yes
 
         # Update the human query from this controller into the query factory
-        @scope.$watch (=>@QueryFactory.query), (query)=>
+        @scope.$watch (=>@QueryFactory.QueryFactoryy), (query)=>
             @human_query = @QueryFactory.toHumanQuery query
             @QueryFactory.human_query = human_query if human_query?
         , true
 
         # Watch current location to update the active topic
-        @scope.$watch (=> @route.current), (current)=>
-            return unless current? and current.params?
-            @topic_slug = current.params.topic
+        @scope.$watch (=> @state.params), (params)=>
+            return unless params and params.topic?
+            @topic_slug = params.topic
 
         # Watch current slug and topics list to find the current topic
         @scope.$watch (=> [@topic_slug, @topics]), =>
             if @topic_slug? and @topics.length
-                @topic = @getTopic @topic_slug
+                angular.extend @topic, @getTopic @topic_slug
                 @TopicsFactory.topic = @topic
         , yes
 

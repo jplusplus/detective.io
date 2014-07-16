@@ -15,7 +15,7 @@
                     </strong>
                 </p>
                 <p class="top40">
-                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.module)" ng-href="/[[username]]/[[topic]]/contribute">
+                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.ontology_as_mod)" ng-href="/[[username]]/[[topic]]/contribute">
                         Contribute
                     </a>
                     <a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">
@@ -31,15 +31,15 @@
             <a scroll-to="600" ng-if="scrollToExplore == true" reset="scrollToExplore"></a>
             <div class="top50 bottom40">
                 <div class="row">
-                    <form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl">
+                    <form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl as search">
                         <input type="search"
-                                placeholder="Search linked individuals in our graph database..."
+                                placeholder="[[ search.topic.search_placeholder]]"
                                 tt-typeahead
                                 tt-individual="'summary'"
-                                tt-topic="topic"
-                                tt-model="selectedIndividual"
-                                remote="/api/[[topic]]/v1/summary/human/?q=%QUERY"
-                                prefetch="/api/[[topic]]/v1/summary/mine/"
+                                tt-topic="search.topic_slug"
+                                tt-model="search.selectedIndividual"
+                                remote="/api/[[search.topic_slug]]/v1/summary/human/?q=%QUERY"
+                                prefetch="/api/[[search.topic_slug]]/v1/summary/mine/"
                                 value-key="label"
                                 limit="10"
                                 class="form-control"

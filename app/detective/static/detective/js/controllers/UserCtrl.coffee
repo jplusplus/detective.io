@@ -2,38 +2,46 @@
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
 class UserCtrl
     # Injects dependancies
-    @$inject : ["$scope", "$http", "$location", "$routeParams", "User", "Page", "$rootElement"]
+    @$inject : ["$scope", "$http", "$location", "$stateParams", "$state", "Auth", "User", "Page", "$rootElement"]
     # Public method to resolve
     @resolve:
-        user: ($rootScope, $route, $q, $location, Common)->
-            notFound    = ->
-                deferred.reject()
-                $rootScope.is404(yes)
-                deferred
-            deferred    = $q.defer()
-            routeParams = $route.current.params
-            # Checks that the current topic and user exists together
-            if routeParams.username?
-                # Retreive the topic for this user
-                params =
-                    type    : "user"
-                    username: routeParams.username
-                Common.get params, (data)=>
-                    # Stop if it's an unkown topic
-                    return notFound() unless data.objects and data.objects.length
-                    # Resolve the deffered result
-                    deferred.resolve(data.objects[0])
-            # Reject now
-            else return notFound()
-            # Return a deffered object
-            deferred.promise
+        user: [
+            "$rootScope",
+            "$stateParams",
+            "$state",
+            "$q",
+            "Common",
+            ($rootScope, $stateParams, $state, $q, Common)->
+                notFound    = ->
+                    deferred.reject()
+                    $state.go "404"
+                    deferred
+                deferred    = $q.defer()
+                # Checks that the current topic and user exists together
+                if $stateParams.username?
+                    # Retreive the topic for this user
+                    params =
+                        type    : "user"
+                        username: $stateParams.username
+                    Common.get params, (data)=>
+                        # Stop if it's an unkown topic
+                        return notFound() unless data.objects and data.objects.length
+                        # Resolve the deffered result
+                        deferred.resolve data.objects[0]
+                # Reject now
+                else return notFound()
+                # Return a deffered object
+                deferred.promise
+        ]
 
-    constructor: (@scope, @http, @location, @routeParams, @User, @Page, @rootElement)->
+    constructor: (@scope, @http, @location, @stateParams, @state, @Auth, @User, @Page, @rootElement)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         @scope.user    = @User
-        @scope.next    = @routeParams.next or "/"
+        @scope.nextState  = @stateParams.nextState
+        @scope.nextParams = angular.fromJson(@stateParams.nextParams or {})
+
         # ──────────────────────────────────────────────────────────────────────
         # Scope method
         # ──────────────────────────────────────────────────────────────────────
@@ -44,19 +52,18 @@ class UserCtrl
         @scope.resetPassword = @resetPassword
         @scope.resetPasswordConfirm = @resetPasswordConfirm
         # Set page title with no title-case
-        switch @location.path()
-            when "/signup"
-                @Page.title "Request an account", false
-            when "/login"
-                @Page.title "Log in", false
-            when "/account/activate"
-                @Page.title "Activate your account", false
-                @readToken()
-            when "/account/reset-password"
-                @Page.title "Reset password", false
-            when "/account/reset-password-confirm"
-                @Page.title "Enter a new password", false
-                
+        if @state.is("signup")
+            @Page.title "Request an account", false
+        else if @state.is("login")
+            @Page.title "Log in", false
+        else if @state.is("activate")
+            @Page.title "Activate your account", false
+            @readToken()
+        else if @state.is("reset-password")
+            @Page.title "Reset password", false
+        else if @state.is("reset-password-confirm")
+            @Page.title "Enter a new password", false
+
         @Page.loading no
 
     # ──────────────────────────────────────────────────────────────────────────
@@ -78,32 +85,22 @@ class UserCtrl
         unless @scope.username? or @scope.password?
             @scope.username = @rootElement.find("[ng-model=username]").val()
             @scope.password = @rootElement.find("[ng-model=password]").val()
-
-        config =
-            method: "POST"
-            url: "/api/common/v1/user/login/"
-            data:
-                username    : @scope.username
-                password    : @scope.password
-                remember_me : @scope.remember_me or false
-            headers:
-                "Content-Type": "application/json"
+        # Credidentials
+        credidentials =
+            username   : @scope.username
+            password   : @scope.password
+            remember_me: @scope.remember_me or false
         # Turn on loading mode
         @scope.loading = true
         # succefull login
-        @http(config).then( (response) =>
+        @Auth.login(credidentials).then( (response) =>
             # Turn off loading mode
             @scope.loading = false
             data = response.data
             # Interpret the respose
             if data? and data.success
-                @User.set
-                    is_logged   : true
-                    is_staff    : !! data.is_staff
-                    username    : data.username
-                    permissions : data.permissions
                 # Redirect to the next URL
-                @location.url(@scope.next)
+                @state.go @scope.nextState, @scope.nextParams
                 # Delete error
                 delete @scope.error
             else
@@ -113,19 +110,14 @@ class UserCtrl
         , (response)=> @loginError(response.data.error_message) )
 
     signup: =>
-        config =
-            method: "POST"
-            url: "/api/common/v1/user/signup/"
-            data:
-                username: @scope.username
-                email   : @scope.email
-                password: @scope.password
-            headers:
-                "Content-Type": "application/json"
+        data =
+            username: @scope.username
+            email   : @scope.email
+            password: @scope.password
         # Turn on loading mode
         @scope.loading = true
         # succefull login
-        @http(config)
+        @http.post("/api/common/v1/user/signup/", data)
             .success (response) =>
                 # Turn off loading mode
                 @scope.loading = false
@@ -140,16 +132,9 @@ class UserCtrl
                 @scope.error = message if message?
 
     resetPassword: =>
-        config =
-            method: "POST"
-            url: "/api/common/v1/user/reset_password/"
-            data:
-                email: @scope.email
-            headers:
-                "Content-Type": "application/json"
         # Turn on loading mode
         @scope.loading = true
-        @http(config)
+        @http.post("/api/common/v1/user/reset_password/", email: @scope.email)
             .success (response)=>
                 # Turn off loading mode
                 @scope.loading = false
@@ -165,25 +150,19 @@ class UserCtrl
 
 
     resetPasswordConfirm: =>
-        token = @location.search()['token']
+        token = @stateParams.token
         if !token?
             @scope.invalidURL = true
             @scope.error = "Invalid URL, please use the link contained in your password reset email."
         else
             @scope.invalidURL = false
             delete @scope.error
-            config =
-                method: "POST"
-                url: "/api/common/v1/user/reset_password_confirm/"
-                data:
-                    password: @scope.newPassword
-                    token: token
-                headers:
-                    "Content-Type": "application/json"
-
+            data =
+                password: @scope.newPassword
+                token: token
             # Turn on loading mode
             @scope.loading = true
-            @http(config)
+            @http.post("/api/common/v1/user/reset_password_confirm/", data)
                 .success (response)=>
                     # Turn off loading mode
                     @scope.loading = false
@@ -195,38 +174,18 @@ class UserCtrl
 
 
     logout: =>
-        config =
-            method: "GET"
-            url: "/api/common/v1/user/logout/"
-            headers:
-                "Content-Type": "application/json"
-        # Turn on loading mode
-        @scope.loading = true
         next_url = @location.url()
+        @Auth.logout().then =>
+            login_params = 
+                nextState: @state.current.name 
+                nextParams: angular.toJson @state.params
 
-        # succefull logout
-        @http(config).then (response) =>
-            @scope.safeApply =>
-                # Turn off loading mode
-                @scope.loading = false
-                # Interpret the respose
-                if response.data? and response.data.success
-                    # Redirect to login form
-                    @location.url("/login?next=#{next_url}")
-                    # Update user data
-                    @User.set
-                        is_logged: false
-                        is_staff : false
-                        username : ''
+            @state.go 'login', login_params
+
     readToken: =>
         @Page.loading(true)
-        config =
-            method: "GET"
-            url: "/api/common/v1/user/activate/"
-            params:
-                token: @routeParams.token
         # Submits the token for activation
-        @http(config)
+        @http.get("/api/common/v1/user/activate/?token=#{@stateParams.token}")
             .success (response) =>
                 @Page.loading false
                 @scope.state = true

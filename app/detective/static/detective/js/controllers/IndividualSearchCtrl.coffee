@@ -5,18 +5,19 @@ class IndividualSearchCtrl extends IndividualListCtrl
         super
         dep_number     = IndividualListCtrl.$inject.length
         @QueryFactory  = arguments[dep_number]
-        @TopicsFactory = arguments[dep_number + 1] 
+        @TopicsFactory = arguments[dep_number + 1]
 
         # Custom filter to display only subject related relationship
         @scope.currentSubject = @currentSubject
 
-        return @location.url("/") unless @routeParams.q?
+        unless @stateParams.q?
+            return @state.go("user-topic", {username: @stateParams.username, topic: @stateParams.topic} )
         # Parse the JSON query
         @scope.query  = @QueryFactory.query
 
-        @scope.$watch 'query', (val)=> 
+        @scope.$watch 'query', (val)=>
             @QueryFactory.query = val
-            
+
         # Load the search syntax
         @Individual.get {type: "summary", id: "syntax"}, (d)=>
             @scope.syntax = d
@@ -47,7 +48,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
     # Define search parameter using route's params
     getParams: =>
         # No query, no search
-        return false unless @routeParams.q?
+        return false unless @stateParams.q?
         id    : "rdf_search"
         limit : @scope.limit
         offset: @scope.limit * (@scope.page - 1)

@@ -12,7 +12,7 @@
 				<h2>Innovative energy projects in developing countries</h2>
 				<p class="lead">A comprehensive database of every person and every organization linked to innovative energy projects.</p>
 				<p class="top40">
-					<a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.module)" ng-href="/[[username]]/energy/contribute">Contribute</a>
+					<a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.ontology_as_mod)" ng-href="/[[username]]/energy/contribute">Contribute</a>
 					<a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">Start to explore</a>
 				</p>
 			</div>
@@ -24,13 +24,13 @@
 			<a scroll-to="600" ng-if="scrollToExplore == true" reset="scrollToExplore"></a>
 			<div class="top50 bottom40">
 				<div class="row">
-					<form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl">
+					<form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl as search">
 						<input type="search"
-							    placeholder="Search linked individuals in our graph database..."
+							    placeholder="[[ search.topic.search_placeholder ]]"
 							 	tt-typeahead
 								tt-individual="'summary'"
 								tt-topic="'energy'"
-								tt-model="selectedIndividual"
+								tt-model="search.selectedIndividual"
 								remote="/api/energy/v1/summary/human/?q=%QUERY"
 								prefetch="/api/energy/v1/summary/mine/"
 								value-key="label"

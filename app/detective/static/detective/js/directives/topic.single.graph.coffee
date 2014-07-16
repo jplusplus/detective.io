@@ -1,4 +1,4 @@
-(angular.module 'detective.directive').directive "graphviz", ['$filter', '$routeParams', '$location', '$rootScope', 'Individual', ($filter, $routeParams, $location, $rootScope, Individual)->
+(angular.module 'detective.directive').directive "graphviz", ['$filter', '$stateParams', '$location', '$rootScope', 'Individual', ($filter, $stateParams, $location, $rootScope, Individual)->
     restrict: "AE"
     template: "<div></div>"
     replace : yes
@@ -24,7 +24,7 @@
         aggregationType = '__aggregation_bubble'
 
         isCurrent = (id) =>
-            (parseInt $routeParams.id) is parseInt id
+            (parseInt $stateParams.id) is parseInt id
 
         d3Edges = null
         d3Leafs = null
@@ -85,7 +85,7 @@
             worker.postMessage
                 type : 'init'
                 data :
-                    current_id : $routeParams.id
+                    current_id : $stateParams.id
                     leafs : leafs
                     edges : edges
 
@@ -153,7 +153,7 @@
                         type : 'get_from_leaf'
                         data : datum
                 else
-                    $location.path "/#{$routeParams.username}/#{$routeParams.topic}/#{do datum._type.toLowerCase}/#{datum._id}"
+                    $location.path "/#{$stateParams.username}/#{$stateParams.topic}/#{do datum._type.toLowerCase}/#{datum._id}"
                     # We're in a d3 callback so we need to manually $apply the scope
                     do scope.$apply
 

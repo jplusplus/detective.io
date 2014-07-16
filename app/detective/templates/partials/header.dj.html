@@ -8,7 +8,7 @@
     <div ng-controller="UserCtrl" class="header__user">
 		<div ng-show="user.is_logged" class="header__user__signed-in">
             <a class="header__user__signed-in__add"
-               ng-if="user.hasAddPermission(topic.module)"
+               ng-if="user.hasAddPermission(topic.ontology_as_mod)"
                title="Add an entity to this topic"
                href="[[topic.link]]/contribute">
                 <i class="fa fa-plus right05"></i>Add an entity
@@ -23,7 +23,7 @@
             </a>
 		</div>
         <div ng-hide="user.is_logged" class="header__user__sign-in">
-            <a ng-href="/login?next=[[nextLogin]]" title="Login">
+            <a ui-sref="login(loginParams())" title="Login">
                 <i class="fa fa-sign-in"></i>
                 <span class="sr-only">Login</span>
             </a>
@@ -31,7 +31,6 @@
 	</div>
 
     <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl as search">
-
         <div class="btn-group" ng-if="search.topic.slug">
             <a class="btn btn-default topic-search__home" href="[[search.topic.link]]" title="[[search.topic.title]]">
                 [[search.topic.title | characters:25]]

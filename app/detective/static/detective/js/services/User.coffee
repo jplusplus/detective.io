@@ -1,14 +1,16 @@
-angular.module('detective.service').factory('User', ['$cookies', '$timeout', ($cookies, $timeout)->
+angular.module('detective.service').factory('User', ['$cookies', '$rootScope', ($cookies, $rootScope)->
     sdo = {}
     # Function to set the value that update CSRF token and return the object
     sdo.set = (data)->
         $.extend sdo, data, true
+        # Propagate changes
+        $rootScope.$broadcast "user:updated", sdo
         # Return sdo explicitely
         return sdo
 
     sdo.hasPermission = (topic, operation)->
         permission_name = "#{topic}.contribute_#{operation}"
-        sdo.is_staff or _.contains(sdo.permissions,permission_name)
+        sdo.is_staff or _.contains(sdo.permissions, permission_name)
 
     sdo.hasDeletePermission = (topic)->
         sdo.hasPermission topic, 'delete'
@@ -22,16 +24,14 @@ angular.module('detective.service').factory('User', ['$cookies', '$timeout', ($c
     sdo.hasReadPermission = (topic) ->
         sdo.hasPermission topic, 'read'
 
-    # Permission as string
-    permissions = if $cookies.user__permissions? then $cookies.user__permissions else ""
-    # Set user's values and returns it
+    # Set user's values
     sdo.set(
         # Create basic user using cookies
         if $cookies.user__is_logged
             is_logged   : !! 1*$cookies.user__is_logged
             is_staff    : !! 1*$cookies.user__is_staff
             username    : $cookies.user__username or ''
-            permissions : permissions.replace(/["]/g, '').split(' ') or []
+            permissions : []
         # set default values
         else
             is_logged   : false
@@ -39,4 +39,6 @@ angular.module('detective.service').factory('User', ['$cookies', '$timeout', ($c
             username    : ''
             permissions : []
     )
+
+    return sdo
 ])

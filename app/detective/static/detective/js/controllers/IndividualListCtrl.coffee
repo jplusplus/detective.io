@@ -1,8 +1,8 @@
 class IndividualListCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', 'Common', '$location',  'Page']
+    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', 'Common', '$location',  'Page']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @Common, @location, @Page)->
+    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @Common, @location, @Page)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
@@ -20,10 +20,10 @@ class IndividualListCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Read route params
-        @scope.username           = @routeParams.username
-        @scope.topic              = @routeParams.topic
-        @scope.type               = @routeParams.type or ""
-        @scope.page               = @routeParams.page or 1
+        @scope.username           = @stateParams.username
+        @scope.topic              = @stateParams.topic
+        @scope.type               = @stateParams.type or ""
+        @scope.page               = @stateParams.page or 1
         @scope.limit              = 20
         @scope.individuals        = {}
         @scope.selectedIndividual = {}
@@ -46,7 +46,7 @@ class IndividualListCtrl
                     @Page.loading false
 
         # Update page value
-        @scope.$on "$routeUpdate", => @scope.page = parseInt @routeParams.page or 1
+        @scope.$on "$routeUpdate", => @scope.page = parseInt @stateParams.page or 1
         # ──────────────────────────────────────────────────────────────────────
         # Page setup
         # ──────────────────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ class IndividualListCtrl
                     # Set page's title
                     @Page.title meta.verbose_name_plural
                 # Unkown type
-                else @scope.is404(yes)
+                else @state.go("404")
 
     # List parameters
     getParams: =>
@@ -103,11 +103,14 @@ class IndividualListCtrl
         return pages
 
     # Go to the given page
-    goToPage: (page)=> @location.search "page", 1*page
+    goToPage: (page)=>
+        params = @stateParams
+        params.page = 1*page
+        @state.transitionTo @state.current, params, reload: yes
     # True if there is a previous page
     hasPreviousPage: => @scope.individuals.meta? and @scope.page > 1
     # True if there is a next page
-    hasNextPage: => 
+    hasNextPage: =>
         return false unless @scope.individuals.meta?
         meta  = @scope.individuals.meta
         (meta.limit * @scope.page + meta.limit / meta.total_count) > 1

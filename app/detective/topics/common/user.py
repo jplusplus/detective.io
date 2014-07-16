@@ -39,12 +39,12 @@ class GroupResource(ModelResource):
     def getTopic(bundle):
         try:
             module = bundle.obj.name.split("_")[0]
-            return Topic.objects.get(module=module)
+            return Topic.objects.get(ontology_as_mod=module)
         except Topic.DoesNotExist:
             return None
 
-    topic = fields.ToOneField('app.detective.topics.common.resources.TopicResource', 
-                                attribute=getTopic, 
+    topic = fields.ToOneField('app.detective.topics.common.resources.TopicResource',
+                                attribute=getTopic,
                                 use_in='detail',
                                 null=True,
                                 full=True)
@@ -282,3 +282,8 @@ class UserResource(ModelResource):
         if len(missing_fields) > 0:
             message = "Malformed request. The following fields are required: %s" % ', '.join(missing_fields)
             raise MalformedRequestError(message)
+
+class AuthorResource(UserResource):
+    class Meta(UserResource.Meta):
+        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
+

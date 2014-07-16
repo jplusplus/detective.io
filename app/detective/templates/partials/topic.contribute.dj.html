@@ -63,7 +63,7 @@
 					<span ng-if="individual.permalink()" >
 						<a class="left10" ng-href="[[individual.permalink()]]">See in detail</a>
 						<button class="btn btn-danger left10"
-						   ng-if="user.hasDeletePermission(meta.module)"
+						   ng-if="user.hasDeletePermission(meta.ontology_as_mod)"
 						   ng-click="individual.delete($index)">
 							<i class="fa fa-trash-o"></i>
 							Delete this entity
@@ -113,7 +113,7 @@
 					<a class="left10" ng-click="individual.close()">
 						<i class="fa fa-plus right05"></i>
 						Show detail
-					</a>	
+					</a>
 				</span>
 				<span ng-if="individual.isRemoved" class="text-danger">
 					 has been removed. Your changes have not been registered.
@@ -185,15 +185,16 @@
 
 						<div ng-repeat="f in individual.fields[field.name]">
 							<div class="input-group multiple">
-								<input
-									type="search"
-									placeholder="Search..."
-									tt-typeahead
-									tt-individual="field.related_model"
-									tt-topic="modelTopic(field.related_model)"
-									tt-model="individual.fields[field.name][$index]"
-									ng-disabled="individual.loading"
-									ng-if="relatedState(f) == 'input'" />
+								<span ng-if="relatedState(f) == 'input'">
+									<input
+										type="search"
+										placeholder="Search..."
+										tt-typeahead
+										tt-individual="field.related_model"
+										tt-topic="modelTopic(field.related_model)"
+										tt-model="individual.fields[field.name][$index]"
+										ng-disabled="individual.loading" />
+								</span>
 								<span class="form-control disabled" ng-if="relatedState(f) != 'input'">
 									[[f|individualPreview:"no preview available"]]
 									<span ng-hide="f.id">
@@ -295,7 +296,7 @@
 					<div class="add-source col-sm-3">
 						<span class="add-source-wrapper">
 							<button class="btn btn-primary add-source-toggle"
-									ng-class="{active: field.showSourceForm}" 
+									ng-class="{active: field.showSourceForm}"
 							        ng-click="field.showSourceForm = !field.showSourceForm">
 								<i class="fa-book fa right05"></i>
 								<span ng-if="individual.hasSource(field)">
@@ -305,18 +306,18 @@
 									Add source
 								</span>
 							</button>
-							<form class="add-source-form" 
+							<form class="add-source-form"
 								  ng-submit="individual.setSource(field)"
 								  ng-show="field.showSourceForm">
 								<span ng-class="{ 'input-group': individual.hasSource(field) }">
 									<input type="url"
 										   ng-blur="individual.setSource(field)"
 										   ng-model="individual.sources[field.name]"
-										   placeholder="http://exemple.com" 
+										   placeholder="http://exemple.com"
 										   class="form-control" />
 									<span class="input-group-btn" ng-if="individual.hasSource(field)">
-										<a target="_blank" 
-										   ng-href="[[individual.getSource(field).url]]" 
+										<a target="_blank"
+										   ng-href="[[individual.getSource(field).url]]"
 										   class="btn btn-default">
 											<i class="fa fa-external-link"></i>
 										</a>
@@ -330,7 +331,7 @@
 
 					<div class="has-source text-success col-sm-3 top05" ng-show="individual.hasSource(field)">
 						<i class="fa fa-check-circle-o"></i> Sourced
-					</div>						
+					</div>
 
 
 				</div>

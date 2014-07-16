@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from django.http      import Http404
+from django.http      import Http404, HttpResponse
 from django.shortcuts import render_to_response, redirect
 from django.template  import TemplateDoesNotExist
-
+from django.conf      import settings
+import urllib2
+import mimetypes
 
 def home(request):
     # Render template without any argument
@@ -42,3 +44,18 @@ def partial_explore(request, topic=None):
 
 def not_found(request):
     return redirect("/404/")
+
+def proxy(request, name=None):
+    if settings.STATIC_URL[0] == '/':
+        return redirect('%s%s' %(settings.STATIC_URL, name));
+    else:
+        url = '%s%s' % (settings.STATIC_URL, name)
+        try :
+            proxied = urllib2.urlopen(url)
+            status_code = proxied.code
+            mimetype = proxied.headers.typeheader or mimetypes.guess_type(url)
+            content = proxied.read()
+        except urllib2.HTTPError as e:
+            return HttpResponse(e.msg, status=e.code, mimetype='text/plain')
+        else:
+            return HttpResponse(content, status=status_code, mimetype=mimetype)

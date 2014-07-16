@@ -1,9 +1,9 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
+    @$inject: ['$scope', '$stateParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
 
 
-    constructor: (@scope, @routeParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
+    constructor: (@scope, @stateParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading true
@@ -28,7 +28,7 @@ class ContributeCtrl
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
-        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic        
+        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
@@ -41,21 +41,18 @@ class ContributeCtrl
                 @scope.$apply()
             , 1200
 
-        # Redirect unauthorized user
-        @scope.$watch (=> User), (v)=>
-            @location.url("/#{@scope.username}/#{@scope.topic}/") unless User.hasChangePermission(topic.module)
-        , true
-
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
-        @scope.topic    = @routeParams.topic
-        @scope.username = @routeParams.username
+        @scope.topic    = @stateParams.topic
+        @scope.username = @stateParams.username
+        @scope.type     = @stateParams.type
+        @scope.id       = @stateParams.id
         # By default, hide the kick-start form
         showKickStart = false
         # Shortcuts for child classes
         @scope.Individual  = @Individual
-        @scope.routeParams = @routeParams
+        @scope.stateParams = @stateParams
         @scope.resources   = {}
         # Get the list of available resources
         @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
@@ -64,9 +61,9 @@ class ContributeCtrl
         # Individual list
         @scope.individuals = []
         # Received an individual to edit
-        if @routeParams.type? and @routeParams.id?
+        if @location.search().type? and @location.search().id?
             # Load the inidividual
-            @scope.scrollIdx = @scope.loadIndividual @routeParams.type, @routeParams.id
+            @scope.scrollIdx = @scope.loadIndividual @scope.type, @scope.id
         else
             # Index of the individual where to scroll
             @scope.scrollIdx  = -1
@@ -89,6 +86,11 @@ class ContributeCtrl
             @master     = angular.copy fields,
             # List of additional visible fields
             @moreFields = []
+            @similars   = []
+            # Is that model a searchable individual ?
+            # Load similar individual to avoid duplicates
+            # AFTER the individual is created.
+            scope.$on("individual:created", @getSimilars) if fields.name?
             # Class attributes from parameters
             # ──────────────────────────────────────────────────────────────────
             @Individual = scope.Individual
@@ -98,6 +100,7 @@ class ContributeCtrl
             @type       = type.toLowerCase()
             # All source fields
             @sources    = {}
+            @isNew      = not fields.id?
             # Field param can be a number to load an individual
             @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
             # Class watchers
@@ -109,14 +112,31 @@ class ContributeCtrl
             # The data changed
             @scope.$watch (=>@fields), @onChange, true
 
-        onChange: ()=>
+        onChange: (current)=>
             # Individual not created yet
-            return unless @fields.id?
+            return unless current.id?
+            # Propagation of the new individual
+            if @isNew
+                @scope.$broadcast "individual:created", current
+                # It's not a new individual now
+                @isNew = no
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
                 changes = @getChanges()
                 # Looks for the differences and update the db if needed
                 @update(changes) unless _.isEmpty(changes)
+
+        getSimilars: =>
+            params =
+                type:  @type
+                id:    "search"
+                q:     @fields.name
+            # Look for individual with the same name
+            @Individual.query params, (d)=>
+                # Remove the one we just created
+                d = _.filter d, (e)=> e.id isnt @fields.id
+                # Similar entries
+                @similars = d
 
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
@@ -144,11 +164,11 @@ class ContributeCtrl
                     # Empty input must be null
                     val = null
                 val
-            for prop of now                
+            for prop of now
                 val = clean(now[prop], prop)
                 # Remove resource methods
                 # and angular properties (that start with $)
-                if typeof(val) isnt "function" and prop.indexOf("$") != 0   
+                if typeof(val) isnt "function" and prop.indexOf("$") != 0
                     # Previous and new value are different
                     unless angular.equals clean(prev[prop], prop), val
                         changes[prop] = val
@@ -172,13 +192,15 @@ class ContributeCtrl
                 @updating = _.omit(@updating, _.keys(data))
                 # Prevent communications between forms
                 @updating = angular.copy @updating
+                # Propagation
+                @scope.$broadcast "individual:updated", @fields
             , (error)=>
                 if error.status == 404
                     @isClosed   = true
                     @isRemoved  = true
 
         # Returns individual's topic
-        getTopic: => @scope.topic or @scope.routeParams.topic
+        getTopic: => @scope.topic or @scope.stateParams.topic
 
         # Save the current individual form
         save: =>
@@ -207,29 +229,29 @@ class ContributeCtrl
                     @error_traceback = data.traceback if data.traceback?
                 )
 
-        getSource: (field)=> _.find @fields.field_sources, (fs)=> fs.field is field.name        
-        setSource: (field, value=@sources[field.name])=>             
+        getSource: (field)=> _.find @fields.field_sources, (fs)=> fs.field is field.name
+        setSource: (field, value=@sources[field.name])=>
             # Close the form
             field.showSourceForm = no
             # Get the sourc eobject
-            source = @getSource(field)  
+            source = @getSource(field)
             # Delete the value
             if (value is '' or value is null) and source?
-                idx = _.indexOf @fields.field_sources, (fs)=> fs.field is field.name 
+                idx = _.indexOf @fields.field_sources, (fs)=> fs.field is field.name
                 delete @sources[field.name]
-                delete @fields.field_sources[idx]                
+                delete @fields.field_sources[idx]
                 @fields.field_sources.splice idx, 1
             # Update the value
-            else if source? 
+            else if source?
                 source.url   = value
                 source.field = field.name
             # Add te value
             else
-                @fields.field_sources.push 
+                @fields.field_sources.push
                     url  : value
                     field: field.name
 
-        hasSource: (field)-> 
+        hasSource: (field)->
             source = @getSource field
             source? and source.url? and source.url != ''
 
@@ -246,6 +268,8 @@ class ContributeCtrl
                     # Record the database version of the individual
                     @master  = angular.copy master
                     @sources = _.object _.map(@fields.field_sources, (fs)-> [fs.field, fs.url])
+                    # Propagation
+                    @scope.$broadcast "individual:loaded", @fields
                 , (error)=>
                     @loading = false
                     # handle 404 response for entity loading
@@ -255,7 +279,7 @@ class ContributeCtrl
                         @isNotFound = true
 
         # True if the given field can be edit
-        isEditable: (field)=>            
+        isEditable: (field)=>
             return not field.rules.is_editable? or field.rules.is_editable is yes
 
         # True if the given field is visible
@@ -342,18 +366,6 @@ class ContributeCtrl
             @scope.showKickStart = false
             # Create the form
             form = @initNewIndividual(@scope.new.type, @scope.new.fields) if form is null
-            # Is that field a searchable field ?
-            if @scope.new.fields.name
-                params =
-                    type:  @scope.new.type
-                    id:    "search"
-                    q:     @scope.new.fields.name
-                # Look for individual with the same name
-                @Individual.query params, (d)=>
-                    # Remove the one we just created
-                    d = _.filter d, (e)=> e.id isnt form.fields.id
-                    # Similar entries
-                    form.similars = d
             # Reset the new field
             @scope.new = new IndividualForm(@scope)
             # Scroll to the individual

@@ -10,9 +10,12 @@ angular.module('detective.directive').directive "card", ['Summary', (Summary)->
     replace: true
     link: (scope, elm, attr) ->
         scope.type = scope.getType().toLowerCase()
-        scope.singleUrl = ->
+        scope.singleParams = ->
             if scope.meta
-                "/#{scope.username}/#{scope.topic}/#{scope.type}/#{scope.individual.id}/"
+                username: scope.username
+                topic: scope.topic
+                type: scope.type
+                id: scope.individual.id
             else null
         scope.attr = (name)->
             if scope.meta
@@ -30,6 +33,6 @@ angular.module('detective.directive').directive "card", ['Summary', (Summary)->
             ].indexOf(field.type) > -1
         scope.isString = (t)=> ["CharField", "URLField"].indexOf(t) > -1
         scope.hasValue = (f)=> f.name != 'name' and scope.get(f.name)
-        Summary.get {id:'forms', topic: scope.topic}, (d)->
+        Summary.cachedGet {id:'forms', topic: scope.topic}, (d)->
             scope.meta = d[scope.type]
 ]

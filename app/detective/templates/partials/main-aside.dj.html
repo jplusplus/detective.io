@@ -1,7 +1,7 @@
 <aside class="main-aside" ng-controller="MainAsideCtrl">
     <h1 class="main-aside__title">
-        <a href="/" class="main-aside__title__caption">
-            Detective<em>.io</em>
+        <a ui-sref="tour" class="main-aside__title__caption">
+            Home
         </a>
         <a class="main-aside__title__toggle-aside visible-xs" ng-click="Page.showAside = !Page.showAside">
             <i class="fa fa-bars"></i>
@@ -17,7 +17,7 @@
                 </a>
                 <div class="main-aside__current-topic__author">
                     by
-                    <a href="/[[topicsFactory.topic.author.username]]">
+                    <a ui-sref="user({username: topicsFactory.topic.author.username})">
                         [[topicsFactory.topic.author.username]]
                     </a>
                 </div>

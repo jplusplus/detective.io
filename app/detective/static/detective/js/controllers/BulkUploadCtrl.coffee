@@ -1,8 +1,8 @@
 class BulkUploadCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$http', '$routeParams', '$location', 'Page', 'Individual', '$timeout', 'Common', 'User']
+    @$inject: ['$scope', '$http', '$stateParams', '$location', 'Page', 'Individual', '$timeout', 'Common', 'User']
 
-    constructor: (@scope, @http, @routeParams, @location, @Page, @Individual, @timeout, @Common, @User)->
+    constructor: (@scope, @http, @stateParams, @location, @Page, @Individual, @timeout, @Common, @User)->
         @Page.title "Bulk Upload", no
         @Page.loading no
         # ──────────────────────────────────────────────────────────────────────
@@ -17,7 +17,7 @@ class BulkUploadCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Get the current topic as default topic
-        @scope.topic_selected = @routeParams.topic
+        @scope.topic_selected = @stateParams.topic
         # start with one file field
         @scope.file_fields    = ["file1"]
         @scope.files          = {}
@@ -43,6 +43,7 @@ class BulkUploadCtrl
         @scope.disableForm    = true
         @started_time         = new Date()
         @scope.isALongJob     = false
+        @scope.trackedJob     = false
         # Parameters of your request (to build the url)
         params =
             topic: @scope.topic_selected
@@ -106,7 +107,7 @@ class BulkUploadCtrl
         field_name = "file" + (@scope.file_fields.length + 1)
         @scope.file_fields.push(field_name)
 
-    # user enter an email to track the job
+    # ask to the job to send an email at the end of the proccess
     trackJob: =>
         params =
             type : "jobs"

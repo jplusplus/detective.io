@@ -109,9 +109,9 @@ class SummaryResource(Resource):
     def get_topic_or_404(self, request=None):
         try:
             if request is not None:
-                return Topic.objects.get(module=resolve(request.path).namespace)
+                return Topic.objects.get(ontology_as_mod=resolve(request.path).namespace)
             else:
-                return Topic.objects.get(module=self._meta.urlconf_namespace)
+                return Topic.objects.get(ontology_as_mod=self._meta.urlconf_namespace)
         except Topic.DoesNotExist:
             raise Http404()
 
@@ -908,6 +908,10 @@ def process_parsing(topic, files):
                             # map the object with the ID defined in the .csv
                             id_mapping[(entity, id)] = item
                             file_reading_progression += 1
+                            # FIXME: job can be accessed somewhere else (i.e detective/topics/common/job.py)
+                            # Concurrent access are not secure here.
+                            # For now we refresh the job just before saving it.
+                            job.refresh()
                             job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
                             job.meta["file_reading"] = file_name
                             job.save()
@@ -951,6 +955,7 @@ def process_parsing(topic, files):
                         getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
                         inserted_relations += 1
                         file_reading_progression += 1
+                        job.refresh()
                         job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
                         job.meta["file_reading"] = file_name
                         job.save()
@@ -990,10 +995,12 @@ def process_parsing(topic, files):
         # Save everything
         saved = 0
         logger.debug("BulkUpload: saving %d objects" % (len(id_mapping)))
+        job.refresh()
         job.meta["objects_to_save"] = len(id_mapping)
         for item in id_mapping.values():
             item.save()
             saved += 1
+            job.refresh()
             job.meta["saving_progression"] = saved
             job.save()
         job.refresh()

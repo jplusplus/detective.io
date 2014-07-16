@@ -1,8 +1,8 @@
 class IndividualSingleCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$routeParams', 'Individual', 'Summary', '$filter', '$anchorScroll', '$location', 'Page', 'topic']
+    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', '$filter', '$anchorScroll', '$location', 'Page', 'topic']
 
-    constructor: (@scope, @routeParams, @Individual, @Summary, @filter, @anchorScroll, @location, @Page, topic)->
+    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @filter, @anchorScroll, @location, @Page, topic)->
         # Global loading mode!
         Page.loading true
         @scope.get            = (n)=> @scope.individual[n] or false if @scope.individual?
@@ -28,10 +28,10 @@ class IndividualSingleCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Read route params
-        @scope.topic     = @routeParams.topic
-        @scope.username  = @routeParams.username
-        @scope.type      = @routeParams.type
-        @scope.id        = @routeParams.id
+        @scope.topic     = @stateParams.topic
+        @scope.username  = @stateParams.username
+        @scope.type      = @stateParams.type
+        @scope.id        = @stateParams.id
         params =
             topic: @scope.topic
             type : @scope.type
@@ -48,7 +48,7 @@ class IndividualSingleCtrl
                  # Global loading off
                 Page.loading false
         # Not found
-        , => @scope.is404(yes)
+        , => @state.go("404")
         # Get meta information for this type
         @Summary.get { id: "forms", topic: @scope.topic}, (data)=>
             @scope.resource = data
@@ -64,7 +64,7 @@ class IndividualSingleCtrl
 
     getSource: (field)=>
         return unless @scope.individual
-        _.find @scope.individual.field_sources, (fs)=> fs.field is field.name 
+        _.find @scope.individual.field_sources, (fs)=> fs.field is field.name
 
     hasRels: ()=>
         if @scope.meta? and @scope.individual?

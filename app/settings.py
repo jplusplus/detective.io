@@ -1,3 +1,4 @@
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 # -*- coding: utf-8 -*-
 import os, re
 # for relative paths
@@ -86,6 +87,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     # Bower components
     ('components', here('static/components') ),
+    ('custom_d3', here('static/custom_d3') ),
     here("detective/static"),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
@@ -112,7 +114,7 @@ TEMPLATE_LOADERS = (
 
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -126,8 +128,17 @@ MIDDLEWARE_CLASSES = (
     'urlmiddleware.URLMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+
+TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'django.core.context_processors.request',
 )
 
+SUIT_CONFIG = {
+    'ADMIN_NAME': 'Detective.io',
+    'MENU_EXCLUDE': ('registration', 'tastypie'),
+}
 
 ROOT_URLCONF = 'app.urls'
 
@@ -163,12 +174,14 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
 
 # Remove BeautifulSoup requirement
 COMPRESS_PARSER = 'compressor.parser.HtmlParser'
-COMPRESS_ENABLED = True
+COMPRESS_ENABLED = False
 #INTERNAL_IPS = ('127.0.0.1',)
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
 INSTALLED_APPS = (
+    # 'suit' must be added before 'django.contrib.admin'
+    'suit',
     'neo4django.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',

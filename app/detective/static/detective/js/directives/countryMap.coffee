@@ -1,8 +1,3 @@
-###
-Load Django static tags
-{% load staticfiles %}
-###
-
 angular.module('detective.directive').directive "countryMap", ()->
     scope:
         # What to when clicking a country
@@ -41,7 +36,7 @@ angular.module('detective.directive').directive "countryMap", ()->
             # (the height will be calculate later)
             map = $K.map( iElement, iElement.width(), iElement.width()*0.4 )
             # Load the SVG
-            map.loadMap '{% static "detective/svg/world.svg" %}', ->
+            map.loadMap "#{window.STATIC_URL}detective/svg/world.svg", ->
                 # Adapt map's sizes to the SVG
                 resizeMap(iElement)
                 # Add layers

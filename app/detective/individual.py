@@ -42,7 +42,7 @@ class IndividualAuthorization(Authorization):
         return authorized
 
     def read_detail(self, object_list, bundle):
-        if not Topic.objects.get(module=get_model_topic(bundle.obj)).public and not self.check_contribution_permission(object_list, bundle, 'read'):
+        if not Topic.objects.get(ontology_as_mod=get_model_topic(bundle.obj)).public and not self.check_contribution_permission(object_list, bundle, 'read'):
             raise Unauthorized("Sorry, only staff or contributors can read resource.")
         return True
 
@@ -102,6 +102,14 @@ class IndividualResource(ModelResource):
         super(IndividualResource, self).__init__(api_name)
         # Register relationships fields automaticly
         self.generate_to_many_fields(True)
+        # By default, tastypie detects detail mode globally: it means that
+        # even into an embeded resource (through a relationship), Tastypie will
+        # serialize it as if we are in it's detail view.
+        # We overide 'use_in' for every field with the value "detail"
+        for field_name, field_object in self.fields.items():
+            if field_object.use_in == 'detail':
+                # We use a custom method
+                field_object.use_in = self.use_in
 
     def apply_sorting(self, obj_list, options=None):
         options_copy = options.copy()
@@ -111,6 +119,12 @@ class IndividualResource(ModelResource):
             options_copy.pop("order_by", None)
         return super(IndividualResource, self).apply_sorting(obj_list, options_copy)
 
+    def determine_format(self, request):
+        """
+        Force to render json. XML serializer fails.
+        ref https://github.com/jplusplus/detective.io/issues/238
+        """
+        return 'application/json'
 
     def build_schema(self):
         """
@@ -180,7 +194,7 @@ class IndividualResource(ModelResource):
             target_model = field.target_model
         resource = self.dummy_class_to_ressource(target_model)
         # Do not create a relationship with an empty resource (not resolved)
-        if resource: return fields.ToManyField(resource, field.name, full=full, null=True, use_in=self.use_in)
+        if resource: return fields.ToManyField(resource, field.name, full=full, null=True, use_in='detail')
         else: return None
 
     def generate_to_many_fields(self, full=False):
@@ -202,7 +216,7 @@ class IndividualResource(ModelResource):
 
     def use_in(self, bundle=None):
         # Use in post/put
-        if bundle.request.method in ['POST', 'PUT']:            
+        if bundle.request.method in ['POST', 'PUT']:
             return bundle.request.path == self.get_resource_uri()
         # Use in detail
         else:
@@ -365,7 +379,7 @@ class IndividualResource(ModelResource):
         query     = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', query).strip()
         limit     = int(request.GET.get('limit', 20))
         # Do the query.
-        results   = self._meta.queryset.filter(name__icontains=query)        
+        results   = self._meta.queryset.filter(name__icontains=query)
         paginator = Paginator(results, limit)
 
         try:
@@ -395,12 +409,12 @@ class IndividualResource(ModelResource):
         return self.create_response(request, object_list)
 
     def get_mine(self, request, **kwargs):
-        self.method_check(request, allowed=['get'])        
+        self.method_check(request, allowed=['get'])
         self.throttle_check(request)
 
         limit = int(request.GET.get('limit', 20))
 
-        if request.user.id is None:            
+        if request.user.id is None:
             object_list = {
                 'objects': [],
                 'meta': {
@@ -412,7 +426,7 @@ class IndividualResource(ModelResource):
             }
         else:
             # Do the query.
-            results   = self._meta.queryset.filter(_author__contains=request.user.id)            
+            results   = self._meta.queryset.filter(_author__contains=request.user.id)
             paginator = Paginator(results, limit)
 
             try:
@@ -460,7 +474,7 @@ class IndividualResource(ModelResource):
         for field in body:
             if field == "field_sources":
                 for source in  data[field]:
-                    fs, created = FieldSource.objects.get_or_create(individual=node.id, 
+                    fs, created = FieldSource.objects.get_or_create(individual=node.id,
                                                                     field=source["field"])
                     # Update the value
                     if source["url"] != "" and source["url"] is not None:
@@ -499,7 +513,7 @@ class IndividualResource(ModelResource):
                                 continue
                 # It's a literal value
                 else:
-                    field_prop = self.get_model_field(field)._property                    
+                    field_prop = self.get_model_field(field)._property
                     if isinstance(field_prop, DateProperty):
                         # It's a date and therefor `value` should be converted as it
                         value  = datetime.strptime(value, RFC_DATETIME_FORMAT)

@@ -25,13 +25,13 @@
 				<div class="panel panel-default padding10 text-right">
 					<span class="btn-group pull-left">
 						<a class="btn btn-default"
-						   ng-if="user.hasChangePermission(topicmeta.module)"
+						   ng-if="user.hasChangePermission(topicmeta.ontology_as_mod)"
 						   ng-href="/[[username]]/[[topic]]/contribute/?type=[[type]]&amp;id=[[individual.id]]">
 							<i class="fa fa-edit"></i>
 							Edit
 						</a>
 						<a class="btn btn-default"
-						   ng-if="user.hasDeletePermission(topicmeta.module)"
+						   ng-if="user.hasDeletePermission(topicmeta.ontology_as_mod)"
 						   ng-click="deleteNode()">
 							<i class="fa fa-trash-o"></i>
 						</a>
@@ -40,10 +40,6 @@
 						<a class="btn btn-default" target="_blank" ng-href="/api/[[topic]]/v1/[[type]]/[[individual.id]]/?format=json">
 							<i class="fa fa-download"></i>
 							JSON
-						</a>
-						<a class="btn btn-default" target="_blank" ng-href="/api/[[topic]]/v1/[[type]]/[[individual.id]]/?format=xml">
-							<i class="fa fa-code"></i>
-							XML
 						</a>
 					</span>
 				</div>

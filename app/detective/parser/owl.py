@@ -143,6 +143,8 @@ def parse(ontology, module='', app_label=None):
             class_fields[field_name] = getattr(models, field_type)(**field_opts)
         # Record the class with this fields
         classes[class_name] = create_node_model(class_name, class_fields, app_label=app_label, options=class_options, module=module)
+
+
         # Prevent a bug with select_related when using neo4django and virtual models
         if not hasattr(classes[class_name]._meta, '_relationships'):
             classes[class_name]._meta._relationships = {}

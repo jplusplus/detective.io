@@ -1,17 +1,21 @@
 {
   "name": "detective",
-  "version": "1.4.5",
+  "version": "1.5.0",
   "dependencies": {
     "angular": "1.2.16",
-    "angular-route": "1.2.16",
-    "angular-resource": "1.2.16",
     "angular-cookies": "1.2.16",
-    "angular-sanitize": "1.2.16",
     "angular-elastic": "2.2.0",
+    "angular-nanoscroller": "~0.2.1",
+    "angular-resource": "1.2.16",
+    "angular-route": "1.2.16",
+    "angular-sanitize": "1.2.16",
+    "angular-truncate": "*",
     "angular-ui-bootstrap-bower": "0.6.0",
+    "angular-ui-router": "~0.2.10",
     "bootstrap": "3.1.1",
     "chroma-js": "https://raw.github.com/gka/chroma.js/7b06f8df0e95450fa6ed9266c3cc3efbf3e53fc9/chroma.min.js",
     "d3": "~3.4.0",
+    "FileSaver": "*",
     "jquery": "1.9.1",
     "jquery.scrollTo": "1.4.6",
     "js-md5": "1.0.3",
@@ -21,9 +25,6 @@
     "ngprogress-lite": "1.0.5",
     "raphael": "2.1.2",
     "typeahead.js": "0.10.2",
-    "underscore": "1.5.2",
-    "FileSaver": "*",
-    "angular-truncate": "*",
-    "angular-nanoscroller": "~0.2.1"
+    "underscore": "1.5.2"
   }
 }

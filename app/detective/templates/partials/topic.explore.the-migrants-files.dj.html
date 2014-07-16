@@ -15,7 +15,7 @@
                     </strong>
                 </p>
                 <p class="top40">
-                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.module)" ng-href="/[[username]]/[[topic]]/contribute">
+                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.ontology_as_mod)" ng-href="/[[username]]/[[topic]]/contribute">
                         Contribute
                     </a>
                     <a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">
@@ -31,15 +31,15 @@
             <a scroll-to="600" ng-if="scrollToExplore == true" reset="scrollToExplore"></a>
             <div class="top50 bottom40">
                 <div class="row">
-                    <form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl">
+                    <form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl as search">
                         <input type="search"
-                                placeholder="Search linked individuals in our graph database..."
+                                placeholder="[[ search.topic.search_placeholder]]"
                                 tt-typeahead
                                 tt-individual="'summary'"
-                                tt-topic="topic"
-                                tt-model="selectedIndividual"
-                                remote="/api/[[topic]]/v1/summary/human/?q=%QUERY"
-                                prefetch="/api/[[topic]]/v1/summary/mine/"
+                                tt-topic="search.topic_slug"
+                                tt-model="search.selectedIndividual"
+                                remote="/api/[[search.topic_slug]]/v1/summary/human/?q=%QUERY"
+                                prefetch="/api/[[search.topic_slug]]/v1/summary/mine/"
                                 value-key="label"
                                 limit="10"
                                 class="form-control"
@@ -58,7 +58,7 @@
     </div>
     <hr class="hr-primary bottom0" />
 
-    <iframe src="http://jplusplus.cartodb.com/viz/60956ce4-9f98-11e3-b9ed-0e49973114de/embed_map?title=false&description=false&search=false&shareable=true&cartodb_logo=true&layer_selector=false&legends=false&scrollwheel=false&fullscreen=false&sublayer_options=1&sql=" width="100%" height="600px" class="hidden-xs"  frameborder="0" allowfullscreen></iframe>
+    <iframe src="//jplusplus.cartodb.com/viz/60956ce4-9f98-11e3-b9ed-0e49973114de/embed_map?title=false&description=false&search=false&shareable=true&cartodb_logo=true&layer_selector=false&legends=false&scrollwheel=false&fullscreen=false&sublayer_options=1&sql=" width="100%" height="600px" class="hidden-xs"  frameborder="0" allowfullscreen></iframe>
 
     <div class="container">
         <div class="row">

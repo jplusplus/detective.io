@@ -15,7 +15,6 @@ angular.module('detective.service').service 'QueryFactory', [
                         @updateHumanQuery("")
 
                 $rootScope.$on @EVENTS.query_updated, (e, query)=>
-                    console.log 'QueryFactory.$on query:updated', query
                     @updateHumanQuery @toHumanQuery query
 
             updateQuery: (query)=>

@@ -35,7 +35,7 @@
             <a class="btn btn-default topic-search__home" href="[[search.topic.link]]" title="[[search.topic.title]]">
                 [[search.topic.title | characters:25]]
             </a>
-            <span class="topic-search__input" ng-repeat="t in search.topics">
+            <div class="topic-search__input" ng-repeat="t in search.topics">
                 <span ng-if="search.isTopic(t.slug)">
                     <input type="search"
                             placeholder="[[t.search_placeholder]]"
@@ -51,7 +51,7 @@
                             id="input-search" />
                     <span ng-click="search.showResults()" class="fa fa-search topic-search__input__submit-btn"></span>
                 </span>
-            </span>
+            </div>
         </div>
 
     </form>

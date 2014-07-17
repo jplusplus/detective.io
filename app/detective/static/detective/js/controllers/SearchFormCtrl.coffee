@@ -7,15 +7,21 @@ class SearchFormCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         @selectedIndividual = {}
-        @logger = @UtilsFactory.loggerDecorator('SearchFormCtrl')
         @topics = @TopicsFactory.topics
         @topic  = @TopicsFactory.topic
-        @topic_slug = @state.params.topic if @state.params.topic?
-        @human_query = ''
+        @topic_slug =  @TopicsFactory.topic.slug if @TopicsFactory.topic?
+        @human_query = @QueryFactory.human_query 
         @bindHumanQuery()
 
+        @scope.$on '$stateChangeStart', (e, current, params)=>
+            @topic_slug = params.topic if params.topic?
+
+        @scope.$on 'human_query:updated', (e, human_query)=>
+            @human_query = human_query
+
+
         # Get every topics
-        @TopicsFactory.getTopics (topics)=>
+        @TopicsFactory.getTopics (topics)=> 
             @topics = @topics.concat topics
             @TopicsFactory.topics = @topics
         # ──────────────────────────────────────────────────────────────────────
@@ -29,24 +35,12 @@ class SearchFormCtrl
         # Watch location's query to update this instance of the search form
         @scope.$watch @getQuery, @QueryFactory.updateQuery, yes
 
-        # Update the human query from this controller into the query factory
-        @scope.$watch (=>@QueryFactory.QueryFactoryy), (query)=>
-            @human_query = @QueryFactory.toHumanQuery query
-            @QueryFactory.human_query = human_query if human_query?
-        , true
-
-        # Watch current location to update the active topic
-        @scope.$watch (=> @state.params), (params)=>
-            return unless params and params.topic?
-            @topic_slug = params.topic
-
         # Watch current slug and topics list to find the current topic
         @scope.$watch (=> [@topic_slug, @topics]), =>
             if @topic_slug? and @topics.length
-                angular.extend @topic, @getTopic @topic_slug
+                @topic = @getTopic @topic_slug
                 @TopicsFactory.topic = @topic
         , yes
-
 
     # will init @human_query if location contains a query param, see @getQuery
     bindHumanQuery: =>
@@ -63,16 +57,6 @@ class SearchFormCtrl
     isTopic: (slug)=>
         return false unless @topic?
         @topic.slug is slug
-
-    setTopic: (slug)=>
-        @topic = @getTopic slug
-        @updateLocation @topic
-
-    updateLocation: (topic)=>
-        # We are not on the selected topic
-        if topic.link? and 0 isnt @location.path().indexOf topic.link
-            # Update the location path
-            @location.path topic.link
 
     goToTopic: =>
         # Change only if the query is empty

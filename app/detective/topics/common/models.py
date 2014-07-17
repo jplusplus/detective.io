@@ -2,8 +2,10 @@
 from neo4django.db import models
 
 class FieldSource(models.NodeModel):
-    url        = models.URLProperty()
+    # binding to entity
     individual = models.IntegerProperty()
+    # actual source value 
+    reference  = models.StringProperty()
     field      = models.StringProperty()
 
     class Meta:
@@ -11,4 +13,4 @@ class FieldSource(models.NodeModel):
         verbose_name_plural = u'Sources'
 
     def __unicode__(self):
-        return self.url or u"Unkown"
+        return self.reference or "Unkown"

@@ -1,9 +1,9 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
+    @$inject: ['$scope', '$stateParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic', 'UtilsFactory']
 
 
-    constructor: (@scope, @stateParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
+    constructor: (@scope, @stateParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic, @UtilsFactory)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading true
@@ -53,6 +53,7 @@ class ContributeCtrl
         # Shortcuts for child classes
         @scope.Individual  = @Individual
         @scope.stateParams = @stateParams
+        @scope.UtilsFactory = @UtilsFactory
         @scope.resources   = {}
         # Get the list of available resources
         @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
@@ -93,11 +94,12 @@ class ContributeCtrl
             scope.$on("individual:created", @getSimilars) if fields.name?
             # Class attributes from parameters
             # ──────────────────────────────────────────────────────────────────
-            @Individual = scope.Individual
-            @meta       = scope.resources[type] or {}
-            @related_to = related_to
-            @scope      = scope
-            @type       = type.toLowerCase()
+            @Individual   = scope.Individual
+            @UtilsFactory = scope.UtilsFactory
+            @meta         = scope.resources[type] or {}
+            @related_to   = related_to
+            @scope        = scope
+            @type         = type.toLowerCase()
             # All source fields
             @sources    = {}
             @isNew      = not fields.id?
@@ -229,31 +231,23 @@ class ContributeCtrl
                     @error_traceback = data.traceback if data.traceback?
                 )
 
-        getSource: (field)=> _.find @fields.field_sources, (fs)=> fs.field is field.name
-        setSource: (field, value=@sources[field.name])=>
-            # Close the form
-            field.showSourceForm = no
-            # Get the sourc eobject
-            source = @getSource(field)
-            # Delete the value
-            if (value is '' or value is null) and source?
-                idx = _.indexOf @fields.field_sources, (fs)=> fs.field is field.name
-                delete @sources[field.name]
-                delete @fields.field_sources[idx]
-                @fields.field_sources.splice idx, 1
-            # Update the value
-            else if source?
-                source.url   = value
-                source.field = field.name
-            # Add te value
-            else
-                @fields.field_sources.push
-                    url  : value
-                    field: field.name
+        getSources: (field)=> _.where @fields.field_sources, field: field.name
 
-        hasSource: (field)->
-            source = @getSource field
-            source? and source.url? and source.url != ''
+        getSourcesRefs: (field)=> _.map @getSources(field), (s)-> s.reference
+
+        addSource: (field, value)=> 
+            @fields.field_sources.push
+                reference: value
+                field: field.name
+
+        deleteSource:(source, $event)=>
+            $event.preventDefault() if $event?
+            @fields.field_sources = _.reject @fields.field_sources, (e)->
+                e.field == source.field and e.reference == source.reference
+
+        hasSources: (field)->
+            sources = @getSources field
+            (not _.isEmpty sources) and _.some sources, (e)-> e? and e.reference?
 
         # Load an individual using its id
         load: (id, related_to=null)=>
@@ -313,7 +307,25 @@ class ContributeCtrl
         showField: (field)=> @moreFields.push field
         isSaved: => @fields.id? and _.isEmpty( @getChanges() )
 
+        focusField: (field)=>
+            # unfocus all previously focused field
+            _.each(
+                _.filter(@meta.fields, @isFieldFocused)
+                , @unfocusField
+            )  
+            # focus targeted field
+            field.isFocused = true 
 
+        unfocusField: (field)=>
+            field.isFocused = false
+
+        isFieldFocused: (field)=> field? and field.isFocused is true
+
+        isSaved: => @fields.id? and _.isEmpty( @getChanges() )
+
+        isSourceURLValid: (source)=>
+            return false unless source?
+            @UtilsFactory.isValidURL(source.reference)
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods

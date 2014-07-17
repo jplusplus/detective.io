@@ -14,7 +14,8 @@ class IndividualSingleCtrl
         @scope.scrollTo       = @scrollTo
         @scope.singleUrl      = @singleUrl
         @scope.strToColor     = @filter("strToColor")
-        @scope.getSource      = @getSource
+        @scope.getSources     = @getSources
+        @scope.hasSources     = @hasSources
         @scope.deleteNode     = @deleteNode
         @scope.isAddr         = (f)=> f.name.toLowerCase().indexOf('address') > -1
         @scope.isImg          = (f)=> f.name is 'image'
@@ -62,9 +63,13 @@ class IndividualSingleCtrl
 
         @scope.topicmeta = topic
 
-    getSource: (field)=>
+    getSources: (field)=>
         return unless @scope.individual
-        _.find @scope.individual.field_sources, (fs)=> fs.field is field.name
+        _.where @scope.individual.field_sources, field: field.name 
+
+    hasSources: (field)=>
+        sources = @getSources field
+        (not _.isEmpty sources) and _.some sources, (e)-> e? and e.reference?
 
     hasRels: ()=>
         if @scope.meta? and @scope.individual?

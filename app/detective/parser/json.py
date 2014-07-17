@@ -36,8 +36,9 @@ class VirtualApp:
         for name in ontology:
             # Each model has its own descriptor
             desc = ontology[name]
-            # Genere a model
-            self.add_model(desc)
+            # Generate a model
+            model = self.add_model(desc)
+
 
     # Simple getter
     def get_models(self): return self.models
@@ -114,15 +115,16 @@ class VirtualApp:
                 field_opts["related_name"] = to_underscores(field_opts["related_name"])
             # This relationship can embed properties
             if "fields" in desc:
+                relationshipTarget = field_opts["target"]
                 compositeModelName = to_class_name("%s%sProperties" % (
                     model_name,
-                    field_opts["target"]
+                    relationshipTarget
                 ))
                 compositeFields = gn(desc, 'fields', [])
                 # Add a relation the final target
                 compositeFields.append({
                     "name"         : to_underscores(field_opts["target"]),
-                    "related_model": field_opts["target"],
+                    "related_model": relationshipTarget,
                     "related_name" : gn(field_opts, "related_name", None)
                 })
                 # Create a Model with the relation
@@ -139,7 +141,9 @@ class VirtualApp:
                 # Create the new model!
                 model = self.add_model(compositeModel)
                 # Add a rules to make this model "special"
-                self.modelrules.model(model).add(is_relationship_properties=True, is_searchable=False)
+                self.modelrules.model(model).add(is_relationship_properties=True,
+                                                 relationship_target=relationshipTarget,
+                                                 is_searchable=False)
         # It's a literal value
         else:
             # Picks one of the two tags type

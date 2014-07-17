@@ -1,0 +1,15 @@
+<div class="col-sm-6" ng-if="field.name != 'comment'">
+	<input  type="text"
+			class="form-control"
+			ng-model="individual.fields[field.name]"
+			change-on-blur
+			id="id_[[field.name]]" />
+</div>
+
+<div class="col-sm-6" ng-if="field.name == 'comment'">
+	<textarea rows="5"
+	          id="id_[[field.name]]"
+			  change-on-blur
+	          ng-model="individual.fields[field.name]"
+	          class="form-control"></textarea>
+</div>

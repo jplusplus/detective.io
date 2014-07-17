@@ -76,8 +76,11 @@ def default_rules(topic):
                 target_model  = field.target_model
                 # The current relationship has properties
                 if rules.model(target_model).get("is_relationship_properties"):
+                    # The final target of the relationship
+                    target = rules.model(target_model).get('relationship_target')
                     # Set a rule to notice it
-                    rules.model(model).field(field.name).add(has_properties=True)
+                    rules.model(model).field(field.name).add(has_properties=True,
+                                                             properties_related_model=target)
                 else:
                     # Say explicitely that we don't have any properties for this field
                     rules.model(model).field(field.name).add(has_properties=False)

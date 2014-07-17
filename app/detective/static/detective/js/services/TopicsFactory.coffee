@@ -21,7 +21,7 @@ angular.module('detective.service').factory 'TopicsFactory', [
 
             onStateChanged: (e, current, params)=>
                 if params.topic and @topics 
-                    @setCurrent @@getTopic params.topic
+                    @setCurrent @getTopic params.topic
 
             updateTopics: =>
                 @getTopics (data)=>

@@ -2,14 +2,28 @@ angular.module('detective.service').service 'QueryFactory', [
     '$rootScope', '$stateParams', '$http',  '$location', 'TopicsFactory'
     ($rootScope, $stateParams,  $http, $location, TopicsFactory)->
         new class QueryFactory
+            EVENTS:
+                human_query_updated: 'human_query:updated'
+                query_updated: 'query:updated'
+
             constructor: ->
                 @query = {}
-                @human_query = undefined
+                @human_query = ''
+
+                $rootScope.$on '$stateChangeStart', (e, current, params)=>
+                    if current.name is "user-topic"
+                        @updateHumanQuery("")
+
+                $rootScope.$on @EVENTS.query_updated, (e, query)=>
+                    @updateHumanQuery @toHumanQuery query
 
             updateQuery: (query)=>
-                $rootScope.safeApply =>
-                    @query       = query
-                    @human_query = @toHumanQuery @query
+                @query = query
+                $rootScope.$broadcast @EVENTS.query_updated, @query
+
+            updateHumanQuery: (human_query)=>
+                @human_query = human_query
+                $rootScope.$broadcast @EVENTS.human_query_updated, @human_query
 
             humanSearch: (query, topic)=>
                 QUERY = encodeURIComponent query

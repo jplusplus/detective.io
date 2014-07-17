@@ -1,8 +1,8 @@
 class ExploreCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', 'Summary', '$location', '$timeout', '$filter', 'Page', 'topic']
+    @$inject: ['$scope', '$stateParams', 'Summary', '$location', '$timeout', '$filter', 'Page', 'QueryFactory', 'topic']
 
-    constructor: (@scope, @stateParams, @Summary, @location, @timeout, @filter, @Page, topic)->
+    constructor: (@scope, @stateParams, @Summary, @location, @timeout, @filter, @Page, @QueryFactory, topic)->
         @scope.getTypeCount = @getTypeCount
         @Page.loading no
         # ──────────────────────────────────────────────────────────────────────
@@ -11,6 +11,7 @@ class ExploreCtrl
         # Current individual scope
         @scope.topic    = @stateParams.topic
         @scope.username = @stateParams.username
+
         # Meta data about this topic
         @scope.meta = topic
         # Set page's title

@@ -1,8 +1,8 @@
 class IndividualSingleCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', '$filter', '$anchorScroll', '$location', 'Page', 'topic']
+    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', '$filter', '$anchorScroll', '$location', 'Page', 'topic', 'QueryFactory']
 
-    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @filter, @anchorScroll, @location, @Page, topic)->
+    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @filter, @anchorScroll, @location, @Page, topic, @QueryFactory)->
         # Global loading mode!
         Page.loading true
         @scope.get            = (n)=> @scope.individual[n] or false if @scope.individual?
@@ -44,8 +44,11 @@ class IndividualSingleCtrl
             unless @scope.$$destroyed
                 @scope.individual = data
                 do @computeGeolocation
+                title = @filter("individualPreview")(data)
                 # Set page's title
-                @Page.title @filter("individualPreview")(data)
+                @Page.title title
+                # Update human query 
+                @QueryFactory.updateHumanQuery title
                  # Global loading off
                 Page.loading false
         # Not found

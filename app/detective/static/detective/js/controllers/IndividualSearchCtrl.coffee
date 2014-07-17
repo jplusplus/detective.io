@@ -12,11 +12,9 @@ class IndividualSearchCtrl extends IndividualListCtrl
 
         unless @stateParams.q?
             return @state.go("user-topic", {username: @stateParams.username, topic: @stateParams.topic} )
+        
         # Parse the JSON query
         @scope.query  = @QueryFactory.query
-
-        @scope.$watch 'query', (val)=>
-            @QueryFactory.query = val
 
         # Load the search syntax
         @Individual.get {type: "summary", id: "syntax"}, (d)=>
@@ -35,7 +33,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
             query.predicate = predicate
 
         @QueryFactory.selectIndividual(query, @TopicsFactory.topic.link)
-        @query = query
+        @QueryFactory.updateQuery query
 
     currentSubject: (rel)=> rel.subject? and rel.subject == @scope.query.subject.name
 

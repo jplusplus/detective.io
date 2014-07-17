@@ -16,9 +16,8 @@ class SearchFormCtrl
         @scope.$on '$stateChangeStart', (e, current, params)=>
             @topic_slug = params.topic if params.topic?
 
-        @scope.$on 'human_query:updated', (e, human_query)=>
-            @human_query = human_query
-
+        @scope.$on 'human_query:updated', (e, query)=>
+            @human_query = query
 
         # Get every topics
         @TopicsFactory.getTopics (topics)=> 

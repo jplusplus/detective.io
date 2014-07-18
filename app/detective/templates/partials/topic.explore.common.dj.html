@@ -59,12 +59,13 @@
     <hr class="hr-primary" />
 
     <div class="container">
-        <div class="row">
-            <div class="col-md-4">
+        <div class="row" ng-init="display_map=shouldDisplayMap()">
+            <div class="about" 
+                 ng-class="{ 'col-md-4': display_map, 'col-md-8 col-md-push-2': !display_map}">
                 <h3>About the project</h3>
                 <div ng-bind-html="meta.about"></div>
             </div>
-            <div class="col-md-8 select-a-country">
+            <div ng-show="display_map" class="col-md-8 select-a-country">
                 <div country-map model="selectedCountry" values="countries" class="top60" />
             </div>
         </div>

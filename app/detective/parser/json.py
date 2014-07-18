@@ -15,6 +15,7 @@ JSONTYPES = {
     "date"         : "DateTimeProperty",
     "time"         : "DateTimeProperty",
     "boolean"      : "BooleanProperty",
+    "bool"         : "BooleanProperty",
     # Looking forward the neo4django float support!
     # See also: https://github.com/scholrly/neo4django/issues/197
     "float"        : "StringProperty"

@@ -293,6 +293,7 @@
 								ng-model="individual.fields[field.name]"
 								class="form-control" />
 					</div>
+					<div class="col-sm-6" ng-if="field.type == 'BooleanField'" ng-include="'/partial/topic.contribute.type-boolean.html'"></div>
 
 					<div class="add-source col-sm-3">
 						<div class="add-source-wrapper">

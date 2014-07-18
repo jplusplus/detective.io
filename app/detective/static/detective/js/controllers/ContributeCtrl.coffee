@@ -367,7 +367,8 @@ class ContributeCtrl
             "CharField",
             "DateTimeField",
             "URLField",
-            "IntegerField"
+            "IntegerField",
+            "BooleanField"
         ].indexOf(type) > -1
 
 

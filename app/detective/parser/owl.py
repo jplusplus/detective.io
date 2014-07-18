@@ -139,6 +139,8 @@ def parse(ontology, module='', app_label=None):
                 if field_type is None: continue
                 # Convert the type to a python readable format
                 field_type = OWLTYPES[attr(field_type, "rdf:resource").split("#")[-1]]
+            if field_type == 'BooleanProperty' and not 'default' in field_opts.keys():
+                field_opts['default'] = False
             # Record the field
             class_fields[field_name] = getattr(models, field_type)(**field_opts)
         # Record the class with this fields

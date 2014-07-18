@@ -93,6 +93,8 @@ def parse(ontology, module='', app_label=None):
             if not field_type in JSONTYPES: continue
             # Convert type to neo4django property type
             field_type = JSONTYPES[field_type]
+            if field_type == 'BooleanProperty' and not 'default' in field_opts.keys():
+                field_opts['default'] = False
             # Record the field
             class_fields[field_name] = getattr(models, field_type)(**field_opts)
         # Record the class with this fields

@@ -25,6 +25,7 @@
     "ngprogress-lite": "1.0.5",
     "raphael": "2.1.2",
     "typeahead.js": "0.10.2",
-    "underscore": "1.5.2"
+    "underscore": "1.5.2",
+    "bootstrap-checkbox": "~1.0.14"
   }
 }

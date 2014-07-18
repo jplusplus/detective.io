@@ -149,9 +149,14 @@ class IndividualResource(ModelResource):
     def get_model(self):
         return self.get_queryset().model
 
-    def get_model_fields(self):
-        # Find fields of the queryset's model
-        return self.get_model()._meta.fields
+    def get_model_fields(self, name=None):
+        if name is None:
+            # Find fields of the queryset's model
+            return self.get_model()._meta.fields
+        else:
+            fields = [f for f in self.get_model()._meta.fields if f.name == name]
+            return fields[0] if len(fields) else None
+
 
     def get_model_field(self, name):
         target = None
@@ -163,15 +168,7 @@ class IndividualResource(ModelResource):
     def need_to_many_field(self, field):
         # Limit the definition of the new fields
         # to the relationships
-        if isinstance(field, MultipleNodes) and not field.name.endswith("_set"):
-            # The resource already define a field for this one
-            # resource_field = self.fields[field.name]
-            # But it's probably still a charfield !
-            # And it's so bad.
-            # if isinstance(resource_field, fields.CharField):
-            return True
-        # Return false if not needed
-        return False
+        return isinstance(field, MultipleNodes) and not field.name.endswith("_set")
 
     # TODO: Find another way!
     def dummy_class_to_ressource(self, klass):
@@ -215,7 +212,6 @@ class IndividualResource(ModelResource):
         return reverse(namespaced, args=args, kwargs=kwargs)
 
     def use_in(self, bundle=None):
-        # Use in post/put
         if bundle.request.method in ['POST', 'PUT']:
             return bundle.request.path == self.get_resource_uri()
         # Use in detail
@@ -240,7 +236,6 @@ class IndividualResource(ModelResource):
             # Filter rules to keep only Neomatch
             if isinstance(rules[key], Neomatch):
                 bundle.data[key] = rules[key].query(bundle.obj.id)
-
         return bundle
 
     def dehydrate(self, bundle):
@@ -368,6 +363,9 @@ class IndividualResource(ModelResource):
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
             url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/graph%s$" % params, self.wrap_view('get_graph'), name="api_get_graph"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships/(?P<field>\w[\w-]*)%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships_field"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships/(?P<field>\w[\w-]*)/(?P<end>\w[\w-]*)%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships_field_end"),
         ]
 
 
@@ -532,6 +530,56 @@ class IndividualResource(ModelResource):
             # Save the node
             node.save()
         return self.create_response(request, data)
+
+
+    def get_relationships(self, request, **kwargs):
+        # Extract node id from given node uri
+        node_id = lambda uri: re.search(r'(\d+)$', uri).group(1)
+        # Get the end of the given relationship
+        rel_from  = lambda rel, side: node_id(rel.__dict__["_dic"]["end"])
+        connected = lambda rel, idx: rel_from(rel, "end") == idx or rel_from(rel, "start") == idx
+
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+        pk = kwargs['pk']
+
+        node = connection.nodes.get(pk)
+        # Only the relationships for a given field
+        if "field" in kwargs:
+            field = self.get_model_fields(kwargs["field"])
+            # Unkown type
+            if field is None: raise Http404("Unkown relationship field.")
+            reltype = getattr(field, "rel_type", None)
+            # Not a relationship
+            if reltype is None: raise Exception("The given field is not a relationship.")
+            rels = node.relationships.all(types=[reltype])
+            # We want to filter the relationships with an other node
+            if "end" in kwargs:
+                # Then filter the relations
+                ids = [ rel.id for rel in rels if connected(rel, kwargs["end"]) ]
+                if len(ids):
+                    # Show additional field following the model's rules
+                    rules  = register.topics_rules()
+                    # Model that manages properties
+                    though = rules.model( self.get_model() ).field(kwargs["field"]).get("through")
+                    # Get the properties for this relationship
+                    try:
+                        properties = though.objects.get(relationship=ids[0])
+                        bundle = self.build_bundle(obj=properties, request=request)
+                        bundle = self.full_dehydrate(bundle, for_list=True)
+                        # We ask for relationship properties
+                        return self.create_response(request, bundle)
+                    except though.DoesNotExist:
+                        # We ask for relationship properties
+                        return self.create_response(request, {})
+        # All relationship
+        else:
+            rels = node.relationships.all()
+        # Only returns IDS
+        ids = [ rel.id for rel in rels ]
+        return self.create_response(request, ids)
+
+
 
     def get_graph(self, request, **kwargs):
         self.method_check(request, allowed=['get'])

@@ -352,6 +352,7 @@ class ContributeCtrl
     isAllowedType: (type)=>
         [
             "Relationship",
+            "RelationshipProperties",
             "CharField",
             "DateTimeField",
             "URLField",

@@ -155,11 +155,13 @@
 						</p>
 					</div>
 
-					<div ng-include="'/partial/topic.contribute.type-relationship.html'" ng-if="field.type == 'Relationship'"></div>
-					<div ng-include="'/partial/topic.contribute.type-url.html'" ng-if="field.type == 'URLField'"></div>
-					<div ng-include="'/partial/topic.contribute.type-datetime.html'" ng-if="field.type == 'DateTimeField'"></div>
-					<div ng-include="'/partial/topic.contribute.type-text.html'" ng-if="field.type == 'CharField'"></div>
-					<div ng-include="'/partial/topic.contribute.type-integer.html'" ng-if="field.type == 'IntegerField'"></div>
+					<!-- Each type has its own input -->
+					<div ng-if="field.type == 'Relationship'" ng-include="'/partial/topic.contribute.type-relationship.html'"></div>
+					<div ng-if="field.type == 'RelationshipProperties'" ng-include="'/partial/topic.contribute.type-relationship-properties.html'"></div>
+					<div ng-if="field.type == 'URLField'" ng-include="'/partial/topic.contribute.type-url.html'"></div>
+					<div ng-if="field.type == 'DateTimeField'" ng-include="'/partial/topic.contribute.type-datetime.html'"></div>
+					<div ng-if="field.type == 'CharField'" ng-include="'/partial/topic.contribute.type-text.html'"></div>
+					<div ng-if="field.type == 'IntegerField'" ng-include="'/partial/topic.contribute.type-integer.html'"></div>
 
 					<div class="add-source col-sm-3">
 						<span class="add-source-wrapper">

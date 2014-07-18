@@ -11,6 +11,7 @@ class IndividualSingleCtrl
         @scope.isLiteral      = @isLiteral
         @scope.isString       = (t)=> ["CharField", "URLField"].indexOf(t) > -1
         @scope.isRelationship = (d)=> ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
+        @scope.isBoolean      = (t)=> ["BooleanField"].indexOf(t) > -1
         @scope.scrollTo       = @scrollTo
         @scope.singleUrl      = @singleUrl
         @scope.strToColor     = @filter("strToColor")
@@ -94,7 +95,8 @@ class IndividualSingleCtrl
             "CharField",
             "DateTimeField",
             "URLField",
-            "IntegerField"
+            "IntegerField",
+            "BooleanField"
         ].indexOf(field.type) > -1
 
     deleteNode: (msg='Are you sure you want to delete this node?')=>

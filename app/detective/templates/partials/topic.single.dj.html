@@ -71,8 +71,12 @@
 							 		</td>
 							 		<td ng-if="!isMono(field)">
 							 			<span ng-bind="get(field.name) | date:'longDate'" ng-if="field.type == 'DateTimeField'"></span>
-							 			<span ng-bind="get(field.name)" ng-if="!isString(field.type) && field.type != 'DateTimeField'"></span>
+							 			<span ng-bind="get(field.name)" ng-if="!isString(field.type) && field.type != 'DateTimeField'
+							 																	     && field.type != 'BooleanField'"></span>
 							 			<span ng-bind-html="get(field.name) | linky:'_blank'" ng-if="isString(field.type) && field.name != 'imageURL'"></span>
+							 			<span ng-if="isBoolean(field.type)">
+							 				<i class='fa' ng-class='{"fa-square-o":!get(field.name), "fa-check-square-o":get(field.name)}'></i>
+							 			</span>
 							 		</td>
 						 			<td ng-if="isMono(field) && get(field.name)" colspan="3">
 						 				<div ng-if="isAddr(field) || isGeoloc(field)">

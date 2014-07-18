@@ -5,7 +5,7 @@ class IndividualSingleCtrl
     constructor: (@scope, @stateParams, @state, @Individual, @Summary, @filter, @anchorScroll, @location, @Page, topic, @QueryFactory)->
         # Global loading mode!
         Page.loading true
-        @scope.get            = (n)=> @scope.individual[n] or false if @scope.individual?
+        @scope.get            = (n)=> @scope.individual[n] if @scope.individual?
         @scope.hasRels        = @hasRels
         @scope.hasNetwork     = => (_.keys (@scope.graphnodes.leafs or {})).length > 1
         @scope.isLiteral      = @isLiteral

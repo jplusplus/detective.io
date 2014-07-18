@@ -38,7 +38,7 @@ def attr(obj, name, default=None):
         return obj.get("{%s}%s" % ( NAMESPACES[tokens[0]], tokens[1]), default)
 
 def get_field_specials(root, field_name):
-    specials = ["verbose_name", "help_text", "related_name"]
+    specials = ["verbose_name", "help_text", "related_name", "default"]
     props = {}
     tags  = root.findall("owl:ObjectProperty",   namespaces=NAMESPACES)
     tags += root.findall("owl:DatatypeProperty", namespaces=NAMESPACES)

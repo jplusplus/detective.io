@@ -24,7 +24,7 @@ JSONTYPES = {
 def get_field_specials(field):
     props = {}
     # List all special propertie
-    for prop in ["verbose_name", "help_text", "related_name"]:
+    for prop in ["verbose_name", "help_text", "related_name", "default"]:
         if prop in field:
             props[prop] = field[prop]
     # Return an empty dict by default

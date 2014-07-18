@@ -14,6 +14,7 @@ class ExploreCtrl
 
         # Meta data about this topic
         @scope.meta = topic
+
         # Set page's title
         @Page.title @scope.meta.title
         # Build template url
@@ -27,6 +28,7 @@ class ExploreCtrl
         # Country where the user click
         @scope.selectedCountry = {}
         @scope.isSearchable = (f)-> f.rules? && f.rules.is_searchable
+        @scope.shouldDisplayMap = => _.findWhere(@scope.meta.models, name: 'Country')?
         # .csv export
         @scope.csvExport = @csvExport
         # ──────────────────────────────────────────────────────────────────────

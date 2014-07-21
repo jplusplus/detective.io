@@ -6,6 +6,7 @@ angular.module('detective.config').config ['$provide', ($provide) =>
             ['bold', 'italics', 'underline']
             ['ul', 'ol']
             ['insertLink']
+            ['clear']
         ]
         taOptions
     ]

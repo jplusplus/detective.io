@@ -44,11 +44,19 @@
 					(not saved yet)
 				</span>
 			</span>
-			<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
-				<i class="gray-darker fa fa-times"></i>
-			</span>
-			<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable ">
-				<i class="gray-darker fa fa-edit"></i>
+			<span class="input-group-btn">
+
+				<span class="btn btn-default" ng-click="removeRelated(individual, field.name, $index)">
+					<i class="gray-darker fa fa-times"></i>
+				</span>
+
+				<span class="btn btn-default" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable ">
+					<i class="gray-darker fa fa-edit"></i>
+				</span>
+
+				<button class="btn btn-default left10" ng-if="field.rules.has_properties" ng-click="addInfo(individual, field.name, f)">
+					Add info
+				</button>
 			</span>
 		</div>
 

@@ -149,12 +149,11 @@ class VirtualApp:
                 composite_fields = gn(desc, 'fields', [])
                 # Create a field to reference the relationship ID
                 composite_fields.append(dict(type="int", name="relationship", indexed=True))
+                # Name of the new model
+                composite_name = to_class_name("%s%sProperties" % (model_name,field_opts["target"]))
                 # Create a Model with the relation
                 composite_model = {
-                    "name": to_class_name("%s%sProperties" % (
-                        model_name,
-                        field_opts["target"]
-                    )),
+                    "name": composite_name,
                     "fields": composite_fields
                 }
                 # Create the new model!

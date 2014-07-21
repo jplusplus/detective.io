@@ -26,6 +26,7 @@ import logging
 import django_rq
 import zipfile
 import time
+import inspect
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -182,10 +183,18 @@ class SummaryResource(Resource):
                         "related_model": rules[key].target_model.__name__
                     })
 
+            for field in fields:
+                # Create a copy of the rule to avoid compromize the rules singleton
+                field["rules"] = field["rules"].copy()
+                for key, rule in field["rules"].items():
+                    # Convert class to model name
+                    if inspect.isclass(rule):
+                        field["rules"][key] = getattr(rule, "__name__", rule)
+
             available_resources[name] = {
                 'description'         : getattr(model, "_description", None),
                 'topic'               : getattr(model, "_topic", self.topic.slug) or self.topic.slug,
-                'model'               : getattr(model, "__name_", ""),
+                'model'               : getattr(model, "__name__", ""),
                 'verbose_name'        : verbose_name,
                 'verbose_name_plural' : verbose_name_plural,
                 'name'                : name,

@@ -1,9 +1,9 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
+    @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
 
 
-    constructor: (@scope, @stateParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
+    constructor: (@scope, @modal, @stateParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading true
@@ -12,6 +12,7 @@ class ContributeCtrl
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
         @scope.addIndividual       = @addIndividual
+        @scope.addInfo             = @addInfo
         @scope.addRelated          = @addRelated
         @scope.askForNew           = @askForNew
         @scope.editRelated         = @editRelated
@@ -409,6 +410,29 @@ class ContributeCtrl
     addRelated: (individual, key, type)=>
         individual.fields[key] = [] unless individual.fields[key]?
         individual.fields[key].push(name:"", type: type)
+
+    addInfo: (individual, field, target)=>
+        params =
+            type  : individual.type
+            id    : individual.fields.id
+            field : field
+            target: target.id
+
+        @relationshipProperties = @modal.open
+            templateUrl: '/partial/topic.contribute.relationship-properties.html'
+            size       : 'lg'
+            controller : RelationshipPropertiesCtrl
+            resolve    :
+                # Load the properties of this field
+                properties  : => @Individual.relationships(params).$promise
+                # An object describing the relationship
+                relationship: =>
+                    # The model that describes this relationship
+                    model : _.findWhere(individual.meta.fields, name: field).rules.through
+                    # Here source and target order are completely arbitrary
+                    source: individual.fields
+                    target: target
+
 
     removeRelated: (individual, key, index)=>
         if individual.fields[key][index]?

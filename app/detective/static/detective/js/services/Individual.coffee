@@ -7,9 +7,7 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
         query:
             method : 'GET'
             isArray: yes
-            transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
-                data.objects
-            ])
+            transformResponse: (data)-> data.objects
         save:
             url:'/api/:topic/v1/:type/?'
             method : 'POST'
@@ -36,6 +34,10 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
                 delete headers['Content-Type']
 
                 fd
+        relationships:
+            url:'/api/:topic/v1/:type/:id/relationships/:field/:target/?'
+            method: 'GET'
+            isArray: no
         delete:
             url:'/api/:topic/v1/:type/:id/?'
             method : 'DELETE'
@@ -48,7 +50,7 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
         graph:
             url:'/api/:topic/v1/:type/:id/graph'
             method: 'GET'
-            isArray: false
+            isArray: no
             paramDefaults:
                 topic: "common"
                 depth: "2"

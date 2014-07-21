@@ -65,13 +65,23 @@ class VirtualApp:
         # Return an empty dict by default
         return props
 
+    def add_rule(self, model, field, name, value):
+        # This model doesn't exist yet
+        if not model in self.pending_modelrules:
+            self.pending_modelrules[model] = dict()
+        # This field doesn't exist yet
+        if not field in self.pending_modelrules[model]:
+            self.pending_modelrules[model][field] = dict()
+        # Set the new rule to the field
+        self.pending_modelrules[model][field][name] = value
+
+
+
     def add_model(self, desc, name=None):
         # Extract the class name
         model_name = gn(desc, "name", name).lower()
         # Format the class name to be PEP compliant
         model_name = to_class_name(model_name)
-        # We may create pending rules to be set once the model is created
-        self.pending_modelrules[model_name] = dict()
         # Every class fields are recorded into an objects
         model_fields = {
             # Additional informations
@@ -119,9 +129,9 @@ class VirtualApp:
         # We didn't found a name
         # @TODO handle that with a custom exception
         if field_name is None: return None, None
-        # We may create pending rules to be set once
-        # the mode and the field are created
-        self.pending_modelrules[model_name][field_name] = dict()
+        # The field can contains rules
+        for name, value in gn(desc, 'rules', dict()).iteritems():
+            self.add_rule(model_name, field_name, name, value)
         # Get field's special properties
         field_opts = dict( field_opts.items() + self.get_field_specials(desc).items() )
         if field_name == "name":
@@ -129,6 +139,7 @@ class VirtualApp:
         # It's a relationship!
         if "related_model" in desc and desc["related_model"] is not None:
             field_opts["target"] = to_class_name(desc["related_model"].lower())
+            field_target = field_opts["target"]
             # Remove "has_" from the begining of the name
             if field_name.startswith("has_"): field_name = field_name[4:]
             # Build rel_type using the name and the class name
@@ -138,9 +149,11 @@ class VirtualApp:
             # Add a related name
             if "related_name" in field_opts and field_opts["related_name"] is not None:
                 # Convert related_name to the same format
-                field_opts["related_name"] = to_underscores(field_opts["related_name"])
+                related_name = field_opts["related_name"]
+                related_name = to_underscores(related_name)
+                field_opts["related_name"] = related_name
             else:
-                field_opts["related_name"] = None
+                related_name = field_opts["related_name"] = None
 
             # This relationship can embed properties.
             # Properties are directly bound to the relationship field.
@@ -148,9 +161,16 @@ class VirtualApp:
                 # Fields related to the new model
                 composite_fields = gn(desc, 'fields', [])
                 # Create a field to reference the relationship ID
-                composite_fields.append(dict(type="int", name="relationship", indexed=True))
+                composite_fields.append(
+                    dict(
+                        type="int",
+                        name="relationship",
+                        indexed=True,
+                        rules=dict(is_editable=False)
+                    )
+                )
                 # Name of the new model
-                composite_name = to_class_name("%s%sProperties" % (model_name,field_opts["target"]))
+                composite_name = to_class_name("%s%sProperties" % (model_name, field_target))
                 # Create a Model with the relation
                 composite_model = {
                     "name": composite_name,
@@ -160,12 +180,17 @@ class VirtualApp:
                 model = self.add_model(composite_model)
                 # We have to register (for later) a rule that says
                 # explicitely that this field has properties
-                self.pending_modelrules[model_name][field_name]["has_properties"] = True
-                self.pending_modelrules[model_name][field_name]["through"] = model
+                self.add_rule(model_name, field_name, "has_properties", True)
+                self.add_rule(model_name, field_name, "through", model)
+                # This relationship is visible in the target model
+                if related_name is not None:
+                    # Add another rule for the reverse relationship
+                    self.add_rule(field_target, related_name, "has_properties", True)
+                    self.add_rule(field_target, related_name, "through", model)
                 # Add a rules to make this "special" model
                 self.modelrules.model(model).add(is_relationship_properties=True,
                                                  relationship_source=model_name,
-                                                 relationship_target=field_opts["target"],
+                                                 relationship_target=field_target,
                                                  is_searchable=False)
         # It's a literal value
         else:

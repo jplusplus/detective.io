@@ -27,7 +27,7 @@
     "typeahead.js": "0.10.2",
     "underscore": "1.5.2",
     "bootstrap-checkbox": "~1.0.14",
-    "textAngular": "~1.2.1",
+    "textAngular": "1.2.0",
     "rangy": "~1.2.3"
   }
 }

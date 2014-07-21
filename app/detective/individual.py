@@ -541,7 +541,7 @@ class IndividualResource(ModelResource):
         # Extract node id from given node uri
         node_id = lambda uri: re.search(r'(\d+)$', uri).group(1)
         # Get the end of the given relationship
-        rel_from  = lambda rel, side: node_id(rel.__dict__["_dic"]["end"])
+        rel_from  = lambda rel, side: node_id(rel.__dict__["_dic"][side])
         connected = lambda rel, idx: rel_from(rel, "end") == idx or rel_from(rel, "start") == idx
 
         self.method_check(request, allowed=['get'])
@@ -582,6 +582,9 @@ class IndividualResource(ModelResource):
                     except though.DoesNotExist:
                         # We ask for relationship properties
                         return self.create_response(request, { "relationship": ids[0] })
+                else:
+                    # No relationship
+                    return self.create_response(request, { "relationship": None })
         # All relationship
         else:
             rels = node.relationships.all()

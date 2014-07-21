@@ -1,9 +1,9 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
+    @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic']
 
 
-    constructor: (@scope, @modal, @stateParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
+    constructor: (@scope, @modal, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading true
@@ -37,10 +37,7 @@ class ContributeCtrl
         # When we update scrollIdx, reset its value after
         # a short delay to allow scroll again
         @scope.$watch "scrollIdx", (v)=>
-            setTimeout =>
-                @scope.scrollIdx = -1
-                @scope.$apply()
-            , 1200
+            @timeout (=> @scope.scrollIdx = -1), 1200
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
@@ -418,17 +415,22 @@ class ContributeCtrl
             field : field
             target: target.id
 
+        # Model that describes the relationship
+        through = _.findWhere(individual.meta.fields, name: field).rules.through
+
         @relationshipProperties = @modal.open
             templateUrl: '/partial/topic.contribute.relationship-properties.html'
             size       : 'lg'
-            controller : RelationshipPropertiesCtrl
+            controller : 'RelationshipPropertiesCtrl as form'
             resolve    :
                 # Load the properties of this field
                 properties  : => @Individual.relationships(params).$promise
+                # Field of the model
+                meta        : => @scope.resources[do through.toLowerCase]
                 # An object describing the relationship
                 relationship: =>
                     # The model that describes this relationship
-                    model : _.findWhere(individual.meta.fields, name: field).rules.through
+                    through: through
                     # Here source and target order are completely arbitrary
                     source: individual.fields
                     target: target

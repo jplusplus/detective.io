@@ -1,10 +1,13 @@
 .form-control, .form-control:focus {
     .box-shadow(none);
-    border-width:0;
-    outline:1px solid fade(#000, 10);
+    outline:0;
     &.disabled {
         background-color:@input-bg-disabled;
     }
+}
+
+.form-control:focus {
+    border-color: fade(#000, 30);
 }
 
 .btn {

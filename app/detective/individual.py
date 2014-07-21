@@ -28,7 +28,7 @@ import json
 import re
 import copy
 
-# inspired from django.utils.formats.ISO_FORMATS['DATE_INPUT_FORMATS'][1]
+DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
@@ -509,12 +509,17 @@ class IndividualResource(ModelResource):
                                 del data[field][idx]
                                 # Too bad! Go to the next related object
                                 continue
-                # It's a literal value
-                else:
+                # It's a literal value and not the ID
+                elif field != 'id':
                     field_prop = self.get_model_field(field)._property
+
                     if isinstance(field_prop, DateProperty):
-                        # It's a date and therefor `value` should be converted as it
-                        value  = datetime.strptime(value, RFC_DATETIME_FORMAT)
+                        try:
+                            # It's a date and therefor `value` should be converted as it
+                            value  = datetime.strptime(value, RFC_DATETIME_FORMAT)
+                        except ValueError:
+                            # Try a second format
+                            value  = datetime.strptime(value, DATETIME_FORMAT)
                     # Set the new value
                     setattr(node, field, value)
                 # Continue to not deleted the field
@@ -565,13 +570,18 @@ class IndividualResource(ModelResource):
                     # Get the properties for this relationship
                     try:
                         properties = though.objects.get(relationship=ids[0])
-                        bundle = self.build_bundle(obj=properties, request=request)
-                        bundle = self.full_dehydrate(bundle, for_list=True)
+                        # Get the module for this model
+                        module = self.dummy_class_to_ressource(though)
+                        # Instanciate the resource
+                        resource = import_class(module)()
+                        # Create a bundle with this resource
+                        bundle = resource.build_bundle(obj=properties, request=request)
+                        bundle = resource.full_dehydrate(bundle, for_list=True)
                         # We ask for relationship properties
-                        return self.create_response(request, bundle)
+                        return resource.create_response(request, bundle)
                     except though.DoesNotExist:
                         # We ask for relationship properties
-                        return self.create_response(request, {})
+                        return self.create_response(request, { "relationship": ids[0] })
         # All relationship
         else:
             rels = node.relationships.all()

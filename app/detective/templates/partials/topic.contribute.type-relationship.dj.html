@@ -1,4 +1,4 @@
-<div class="col-sm-6" ng-if="!field.rules.is_searchable">
+<div ng-if="!field.rules.is_searchable">
 
 	<div ng-repeat="f in individual.fields[field.name]" class="bottom05 input-group">
 		<span class="form-control disabled">
@@ -32,7 +32,7 @@
 
 </div>
 
-<div class="col-sm-6" ng-if="field.rules.is_searchable">
+<div ng-if="field.rules.is_searchable">
 
 	<div ng-repeat="f in individual.fields[field.name]">
 		<div class="input-group multiple">

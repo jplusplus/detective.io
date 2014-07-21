@@ -1,17 +1,15 @@
-<div class="col-sm-6">
-	<div class="input-group">
-		<span class="input-group-addon">
-			<i class="gray-darker fa fa-calendar"></i>
-		</span>
-		<input type="text"
-			   id="id_[[field.name]]"
-			   change-on-blur
-			   ng-model="individual.fields[field.name]"
-			   ng-disabled="individual.loading"
-			   is-open="field.openDatepicked"
-			   ng-focus="field.openDatepicked = true"
-			   datepicker-popup="dd-MMMM-yyyy"
-			   show-weeks="false"
-			   class="form-control" />
-	</div>
+<div class="input-group">
+	<span class="input-group-addon">
+		<i class="gray-darker fa fa-calendar"></i>
+	</span>
+	<input type="text"
+		   id="id_[[field.name]]"
+		   change-on-blur
+		   ng-model="individual.fields[field.name]"
+		   ng-disabled="individual.loading"
+		   is-open="field.openDatepicked"
+		   ng-focus="field.openDatepicked = true"
+		   datepicker-popup="dd-MMMM-yyyy"
+		   show-weeks="false"
+		   class="form-control" />
 </div>

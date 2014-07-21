@@ -420,7 +420,7 @@ class ContributeCtrl
 
         @relationshipProperties = @modal.open
             templateUrl: '/partial/topic.contribute.relationship-properties.html'
-            size       : 'lg'
+            size       : 'xs'
             controller : 'RelationshipPropertiesCtrl as form'
             resolve    :
                 # Load the properties of this field

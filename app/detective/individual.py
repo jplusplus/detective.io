@@ -331,6 +331,8 @@ class IndividualResource(ModelResource):
             modelField = getattr(bundle.obj, field, False)
             # The field doesn't exist
             if not modelField: setattr(bundle.obj, field, None)
+            # Skip admmin field
+            elif field.startswith("_"): continue
             # Transform list field to be more flexible
             elif type(bundle.data[field]) is list:
                 rels = bundle.data[field]
@@ -510,9 +512,8 @@ class IndividualResource(ModelResource):
                                 # Too bad! Go to the next related object
                                 continue
                 # It's a literal value and not the ID
-                elif field != 'id':
+                elif field != 'id' and value is not None:
                     field_prop = self.get_model_field(field)._property
-
                     if isinstance(field_prop, DateProperty):
                         try:
                             # It's a date and therefor `value` should be converted as it
@@ -560,8 +561,9 @@ class IndividualResource(ModelResource):
             rels = node.relationships.all(types=[reltype])
             # We want to filter the relationships with an other node
             if "end" in kwargs:
+                end = kwargs["end"]
                 # Then filter the relations
-                ids = [ rel.id for rel in rels if connected(rel, kwargs["end"]) ]
+                ids = [ rel.id for rel in rels if connected(rel, end) ]
                 if len(ids):
                     # Show additional field following the model's rules
                     rules  = register.topics_rules()
@@ -569,7 +571,7 @@ class IndividualResource(ModelResource):
                     though = rules.model( self.get_model() ).field(kwargs["field"]).get("through")
                     # Get the properties for this relationship
                     try:
-                        properties = though.objects.get(relationship=ids[0])
+                        properties = though.objects.get(_relationship=ids[0])
                         # Get the module for this model
                         module = self.dummy_class_to_ressource(though)
                         # Instanciate the resource
@@ -580,11 +582,15 @@ class IndividualResource(ModelResource):
                         # We ask for relationship properties
                         return resource.create_response(request, bundle)
                     except though.DoesNotExist:
+                        endnodes = [ int(pk), int(end) ]
                         # We ask for relationship properties
-                        return self.create_response(request, { "relationship": ids[0] })
+                        return self.create_response(request, {
+                            "_relationship": ids[0],
+                            "_endnodes": endnodes
+                        })
                 else:
                     # No relationship
-                    return self.create_response(request, { "relationship": None })
+                    return self.create_response(request, { "_relationship": None })
         # All relationship
         else:
             rels = node.relationships.all()

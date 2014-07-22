@@ -16,6 +16,8 @@ class VirtualApp:
         "url"          : "URLProperty",
         "int"          : "IntegerProperty",
         "integer"      : "IntegerProperty",
+        "intarray"     : "IntArrayProperty",
+        "integerarray" : "IntArrayProperty",
         "datetimestamp": "DateTimeProperty",
         "datetime"     : "DateTimeProperty",
         "date"         : "DateTimeProperty",
@@ -161,14 +163,20 @@ class VirtualApp:
                 # Fields related to the new model
                 composite_fields = gn(desc, 'fields', [])
                 # Create a field to reference the relationship ID
-                composite_fields.append(
-                    dict(
-                        type="int",
-                        name="relationship",
-                        indexed=True,
-                        rules=dict(is_editable=False)
-                    )
-                )
+                composite_fields.append(dict(
+                    type="int",
+                    name="_relationship",
+                    help_text="The ID of the relationship to describe.",
+                    indexed=True,
+                    rules=dict(is_editable=False)
+                ))
+                composite_fields.append(dict(
+                    type="intarray",
+                    name="_endnodes",
+                    help_text="IDs of the relationship's extremities.",
+                    indexed=True,
+                    rules=dict(is_editable=False)
+                ))
                 # Name of the new model
                 composite_name = to_class_name("%s%sProperties" % (model_name, field_target))
                 # Create a Model with the relation

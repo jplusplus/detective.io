@@ -7,24 +7,22 @@
     </h3>
 </div>
 <div class="modal-body">
-	<div class="row form-group"
-		 ng-repeat="field in form.meta.fields | filter:form.isEditable track by $index">
+	<div class="form-group"
+	     ng-repeat="field in form.meta.fields | filter:form.isEditable track by $index">
 
-		<div class="col-sm-2 form-label top05 text-right">
-			<label for="id_[[field.name]]">
-				[[field.verbose_name|titlecase]]
-			</label>
-			<p ng-if="field.help_text" class="help-block">
-				[[field.help_text]]
-			</p>
-		</div>
-		<div class="col-sm-8">
-			<!-- Each type has its own input -->
-			<div ng-if="field.type == 'URLField'" ng-include="'/partial/topic.contribute.type-url.html'"></div>
-			<div ng-if="field.type == 'DateTimeField'" ng-include="'/partial/topic.contribute.type-datetime.html'"></div>
-			<div ng-if="field.type == 'CharField'" ng-include="'/partial/topic.contribute.type-text.html'"></div>
-			<div ng-if="field.type == 'IntegerField'" ng-include="'/partial/topic.contribute.type-integer.html'"></div>
-		</div>
+		<label for="id_[[field.name]]">
+			[[field.verbose_name|titlecase]]
+		</label>
+
+		<!-- Each type has its own input -->
+		<div ng-if="field.type == 'URLField'" ng-include="'/partial/topic.contribute.type-url.html'"></div>
+		<div ng-if="field.type == 'DateTimeField'" ng-include="'/partial/topic.contribute.type-datetime.html'"></div>
+		<div ng-if="field.type == 'CharField'" ng-include="'/partial/topic.contribute.type-text.html'"></div>
+		<div ng-if="field.type == 'IntegerField'" ng-include="'/partial/topic.contribute.type-integer.html'"></div>
+
+		<p ng-if="field.help_text" class="help-block">
+			[[field.help_text]]
+		</p>
 	</div>
 </div>
 <div class="modal-footer">

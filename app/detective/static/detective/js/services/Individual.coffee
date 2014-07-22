@@ -7,7 +7,9 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
         query:
             method : 'GET'
             isArray: yes
-            transformResponse: (data)-> data.objects
+            transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
+                data.objects
+            ])
         save:
             url:'/api/:topic/v1/:type/?'
             method : 'POST'

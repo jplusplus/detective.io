@@ -409,6 +409,9 @@ class ContributeCtrl
         individual.fields[key].push(name:"", type: type)
 
     addInfo: (individual, field, target)=>
+        # Do not open the modal twice
+        return if @relationshipProperties?
+
         params =
             type  : individual.type
             id    : individual.fields.id
@@ -418,9 +421,9 @@ class ContributeCtrl
         # Model that describes the relationship
         through = _.findWhere(individual.meta.fields, name: field).rules.through
 
+
         @relationshipProperties = @modal.open
             templateUrl: '/partial/topic.contribute.relationship-properties.html'
-            size       : 'xs'
             controller : 'RelationshipPropertiesCtrl as form'
             resolve    :
                 # Load the properties of this field
@@ -434,6 +437,11 @@ class ContributeCtrl
                     # Here source and target order are completely arbitrary
                     source: individual.fields
                     target: target
+
+        # Disabling function
+        disable = => delete @relationshipProperties
+        # Remove the instance when closing the modal
+        @relationshipProperties.result.then disable, disable
 
 
     removeRelated: (individual, key, index)=>

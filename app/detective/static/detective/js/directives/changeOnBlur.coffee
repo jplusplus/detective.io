@@ -12,13 +12,14 @@ angular.module('detective.directive').directive "changeOnBlur", ->
                     do input.val
             ) elm.find 'input[type="hidden"]'
             elm = elm.find '.ta-editor'
-            event = 'blur'
+            eventOff = ['input', 'keydown', 'keyup', 'change']
 
-        event = event || 'change'
+        eventOn = eventOn || 'change'
+        eventOff = eventOff || ['input', 'keydown', 'keyup', 'change', 'blur']
         getValue = getValue || =>
             do elm.val
 
-        elm.unbind("input").unbind("keydown").unbind("change")
-        elm.bind event, ->
+        elm.off e for e in eventOff
+        elm.on eventOn, ->
             scope.$apply ->
                 ngModelCtrl.$setViewValue do getValue

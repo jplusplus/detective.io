@@ -1,0 +1,104 @@
+<div ng-if="!field.rules.is_searchable">
+
+	<div ng-repeat="f in individual.fields[field.name]" class="bottom05 input-group">
+		<span class="form-control disabled">
+			[[f|individualPreview:"no preview available"]]
+			<span ng-hide="f.id">
+				(not saved yet)
+			</span>
+		</span>
+		<span class="input-group-btn">
+			<span class="btn btn-default" ng-click="removeRelated(individual, field.name, $index)">
+				<i class="gray-darker fa fa-times"></i>
+			</span>
+			<span class="btn btn-default" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id">
+				<i class="gray-darker fa fa-edit"></i>
+			</span>
+
+			<button class="btn btn-default left10"
+					ng-if="field.rules.has_properties && f.id"
+					ng-click="addInfo(individual, field.name, f)">
+				Add info
+			</button>
+		</span>
+	</div>
+
+	<button class="btn btn-default btn-sm"
+		type="button"
+	    ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
+	    <i class="fa fa-plus right05"></i>
+		Create a new [[field.verbose_name]]
+	</button>
+
+</div>
+
+<div ng-if="field.rules.is_searchable">
+
+	<div ng-repeat="f in individual.fields[field.name]">
+		<div class="input-group multiple">
+			<span ng-if="relatedState(f) == 'input'">
+				<input
+					type="search"
+					placeholder="Search..."
+					tt-typeahead
+					tt-individual="field.related_model"
+					tt-topic="modelTopic(field.related_model)"
+					tt-model="individual.fields[field.name][$index]"
+					ng-disabled="individual.loading" />
+			</span>
+			<span class="form-control disabled" ng-if="relatedState(f) != 'input'">
+				[[f|individualPreview:"no preview available"]]
+				<span ng-hide="f.id">
+					(not saved yet)
+				</span>
+			</span>
+			<span class="input-group-btn">
+
+				<span class="btn btn-default" ng-click="removeRelated(individual, field.name, $index)">
+					<i class="gray-darker fa fa-times"></i>
+				</span>
+
+				<span class="btn btn-default" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable ">
+					<i class="gray-darker fa fa-edit"></i>
+				</span>
+
+				<button class="btn btn-default left10"
+						ng-if="field.rules.has_properties && f.id"
+						ng-click="addInfo(individual, field.name, f)">
+					Add info
+				</button>
+			</span>
+		</div>
+
+		<div class="ask-for-new" ng-show="askForNew(f) && relatedState(f) == 'input'">
+			<div class="pan" ng-if="field.rules.is_editable">
+				<h4>Heads Up!</h4>
+				<p>The entity you just typed in is new in the base.</p>
+				<div class="tr">
+					<button class="btn btn-default btn-sm"
+	   				   type="button"
+					   ng-click="setNewIndividual({name: f.name}, field.related_model, individual, field.name, $index)">
+						Create <strong>[[f.name]]</strong>
+					</button>
+				</div>
+			</div>
+			<div class="pan" ng-if="!field.rules.is_editable">
+				Please choose an existing entity.
+			</div>
+		</div>
+
+	</div>
+
+	<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">
+		<button
+	   		type="button"
+			ng-click="addRelated(individual, field.name, field.related_model)"
+			class="btn btn-default btn-sm">
+			<i class="fa fa-search right05"></i>
+			Search
+			<span ng-if="individual.fields[field.name].length">another</span>
+			one
+		</button>
+	</div>
+
+</div>

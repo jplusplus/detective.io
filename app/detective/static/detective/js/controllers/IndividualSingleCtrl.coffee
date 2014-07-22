@@ -1,11 +1,9 @@
 class IndividualSingleCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', '$filter', '$anchorScroll', '$location', 'Page', 'topic', 'QueryFactory']
+    @$inject: ['$scope', '$stateParams', '$state', 'Individual',  'topic', 'individual', 'forms', '$filter', '$anchorScroll', '$location', 'Page', 'QueryFactory']
 
-    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @filter, @anchorScroll, @location, @Page, topic, @QueryFactory)->
-        # Global loading mode!
-        Page.loading true
-        @scope.get            = (n)=> @scope.individual[n] if @scope.individual?
+    constructor: (@scope, @stateParams, @state, @Individual, @topic, @individual, @forms, @filter, @anchorScroll, @location, @Page, @QueryFactory)->
+        @scope.get            = (n)=> @individual[n] or false if @individual?
         @scope.hasRels        = @hasRels
         @scope.hasNetwork     = => (_.keys (@scope.graphnodes.leafs or {})).length > 1
         @scope.isLiteral      = @isLiteral
@@ -30,64 +28,52 @@ class IndividualSingleCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         # Read route params
-        @scope.topic     = @stateParams.topic
-        @scope.username  = @stateParams.username
-        @scope.type      = @stateParams.type
-        @scope.id        = @stateParams.id
-        params =
-            topic: @scope.topic
-            type : @scope.type
-            id   : @scope.id
-        # Get individual from database
-        @Individual.get params, (data)=>
-            # Avoid set the wrong title
-            # (when the controller is destroyed)
-            unless @scope.$$destroyed
-                @scope.individual = data
-                do @computeGeolocation
-                title = @filter("individualPreview")(data)
-                # Set page's title
-                @Page.title title
-                # Update human query 
-                @QueryFactory.updateHumanQuery title
-                 # Global loading off
-                Page.loading false
-        # Not found
-        , => @state.go("404")
+        @scope.topic      = @topic.slug
+        @scope.username   = @topic.author.username
+        @scope.type       = @stateParams.type
+        @scope.id         = @stateParams.id
+        @scope.individual = @individual
         # Get meta information for this type
-        @Summary.get { id: "forms", topic: @scope.topic}, (data)=>
-            @scope.resource = data
-            @scope.meta     = data[@scope.type.toLowerCase()]
+        @scope.meta       = @forms[ @scope.type.toLowerCase() ]
+        @scope.topicmeta  = @topic
 
-        graph_params = angular.copy params
-        graph_params.depth = 2
+        # Load graph data
+        graph_params =
+            topic   : @scope.topic
+            username: @scope.username
+            type    : @stateParams.type
+            id      : @stateParams.id
+            depth   : 2
+        @Individual.graph graph_params, (data) => @scope.graphnodes = data
 
-        @Individual.graph graph_params, (data) =>
-            @scope.graphnodes = data
-
-        @scope.topicmeta = topic
+        do @computeGeolocation
+        @Page.loading no
+        # Set page's title
+        title = @filter("individualPreview")(@individual)
+        @Page.title title
+        # Update human query
+        @QueryFactory.updateHumanQuery title
 
     getSources: (field)=>
-        return unless @scope.individual
-        _.where @scope.individual.field_sources, field: field.name 
+        _.where @scope.individual.field_sources, field: field.name
 
     hasSources: (field)=>
         sources = @getSources field
         (not _.isEmpty sources) and _.some sources, (e)-> e? and e.reference?
 
     hasRels: ()=>
-        if @scope.meta? and @scope.individual?
+        if @scope.meta? and @individual?
             _.some @scope.meta.fields, (field)=>
                 @scope.isRelationship(field) and
-                @scope.individual[field.name]? and
-                @scope.individual[field.name].length
+                @individual[field.name]? and
+                @individual[field.name].length
 
     scrollTo: (id)=>
         @location.hash(id)
         @anchorScroll()
     singleUrl: (individual, type=false)=>
         type  = (type or @scope.type).toLowerCase()
-        topic = (@scope.resource[type] and @scope.resource[type].topic) or @scope.topic
+        topic = (@forms[type] and @forms[type].topic) or @scope.topic
         "/#{@scope.username}/#{topic}/#{type}/#{individual.id}/"
     # True if the given type is literal
     isLiteral: (field)=>
@@ -131,7 +117,7 @@ class IndividualSingleCtrl
                 break if geoloc.individual.longitude? and geoloc.individual.latitude?
             if geoloc.individual.longitude? and geoloc.individual.latitude?
                 @scope.meta.fields.push geoloc.meta
-                @scope.individual['geolocation'] = "#{geoloc.individual.latitude}, #{geoloc.individual.longitude}"
+                @individual['geolocation'] = "#{geoloc.individual.latitude}, #{geoloc.individual.longitude}"
 
 
 angular.module('detective.controller').controller 'individualSingleCtrl', IndividualSingleCtrl

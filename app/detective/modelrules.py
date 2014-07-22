@@ -18,7 +18,7 @@ class HasRules(object):
     # Get all registered rules
     def all(self): return self.registered_rules
     # Get one rule
-    def get(self, name): return self.all().get(name)
+    def get(self, name, default=None): return self.all().get(name, default)
     # Set a rule with key/value pair
     def set(self, name, value):
         self.registered_rules[name] = value

@@ -127,7 +127,6 @@
 				<div class="clearfix"></div>
 			</div>
 
-
 			<div class="form-horizontal panel-body">
 
 				<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">
@@ -156,150 +155,21 @@
 						</p>
 					</div>
 
-					<div class="col-sm-6" ng-if="field.type == 'Relationship' && !field.rules.is_searchable">
-
-						<div ng-repeat="f in individual.fields[field.name]" class="bottom05 input-group">
-							<span class="form-control disabled">
-								[[f|individualPreview:"no preview available"]]
-								<span ng-hide="f.id">
-									(not saved yet)
-								</span>
-							</span>
-							<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
-								<i class="gray-darker fa fa-times"></i>
-							</span>
-							<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id">
-								<i class="gray-darker fa fa-edit"></i>
-							</span>
-						</div>
-
-    					<button class="btn btn-default btn-sm"
-    						type="button"
-    					    ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
-    					    <i class="fa fa-plus right05"></i>
-    						Create a new [[field.verbose_name]]
-    					</button>
-
+					<div class="col-sm-6">
+						<!-- Each type has its own input -->
+						<div ng-if="field.type == 'Relationship'" ng-include="'/partial/topic.contribute.type-relationship.html'"></div>
+						<div ng-if="field.type == 'URLField'" ng-include="'/partial/topic.contribute.type-url.html'"></div>
+						<div ng-if="field.type == 'DateTimeField'" ng-include="'/partial/topic.contribute.type-datetime.html'"></div>
+						<div ng-if="field.type == 'CharField'" ng-include="'/partial/topic.contribute.type-text.html'"></div>
+						<div ng-if="field.type == 'IntegerField'" ng-include="'/partial/topic.contribute.type-integer.html'"></div>
+						<div ng-if="field.type == 'BooleanField'" ng-include="'/partial/topic.contribute.type-boolean.html'"></div>
 					</div>
-
-					<div class="col-sm-6" ng-if="field.type == 'Relationship' && field.rules.is_searchable">
-
-						<div ng-repeat="f in individual.fields[field.name]">
-							<div class="input-group multiple">
-								<span ng-if="relatedState(f) == 'input'">
-									<input
-										type="search"
-										placeholder="Search..."
-										tt-typeahead
-										tt-individual="field.related_model"
-										tt-topic="modelTopic(field.related_model)"
-										tt-model="individual.fields[field.name][$index]"
-										ng-disabled="individual.loading" />
-								</span>
-								<span class="form-control disabled" ng-if="relatedState(f) != 'input'">
-									[[f|individualPreview:"no preview available"]]
-									<span ng-hide="f.id">
-										(not saved yet)
-									</span>
-								</span>
-								<span class="input-group-addon" ng-click="removeRelated(individual, field.name, $index)">
-									<i class="gray-darker fa fa-times"></i>
-								</span>
-								<span class="input-group-addon" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable ">
-									<i class="gray-darker fa fa-edit"></i>
-								</span>
-							</div>
-
-			    			<div class="ask-for-new" ng-show="askForNew(f) && relatedState(f) == 'input'">
-			    				<div class="pan" ng-if="field.rules.is_editable">
-			    					<h4>Heads Up!</h4>
-			    					<p>The entity you just typed in is new in the base.</p>
-			    					<div class="tr">
-				    					<button class="btn btn-default btn-sm"
-    					   				   type="button"
-				    					   ng-click="setNewIndividual({name: f.name}, field.related_model, individual, field.name, $index)">
-				    						Create <strong>[[f.name]]</strong>
-				    					</button>
-				    				</div>
-			    				</div>
-			    				<div class="pan" ng-if="!field.rules.is_editable">
-			    					Please choose an existing entity.
-			    				</div>
-			    			</div>
-
-						</div>
-
-						<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">
-							<button
-    					   		type="button"
-								ng-click="addRelated(individual, field.name, field.related_model)"
-								class="btn btn-default btn-sm">
-								<i class="fa fa-search right05"></i>
-								Search
-								<span ng-if="individual.fields[field.name].length">another</span>
-								one
-							</button>
-						</div>
-
-					</div>
-
-
-					<div class="col-sm-6" ng-if="field.type == 'URLField'">
-
-						<input type="url"
-							   placeholder="http://"
-							   id="id_[[field.name]]"
-							   change-on-blur
-							   ng-model="individual.fields[field.name]"
-							   class="form-control" />
-					</div>
-
-					<div class="col-sm-6" ng-if="field.type == 'DateTimeField'">
-						<div class="input-group">
-							<span class="input-group-addon">
-								<i class="gray-darker fa fa-calendar"></i>
-							</span>
-							<input type="text"
-								   id="id_[[field.name]]"
-								   change-on-blur
-								   ng-model="individual.fields[field.name]"
-								   ng-disabled="individual.loading"
-								   datepicker-popup="dd-MMMM-yyyy"
-								   show-weeks="false"
-								   class="form-control" />
-						</div>
-					</div>
-
-					<div class="col-sm-6" ng-if="field.type == 'CharField' && field.name != 'comment'">
-						<input  type="text"
-								class="form-control"
-								ng-model="individual.fields[field.name]"
-								change-on-blur
-								id="id_[[field.name]]" />
-					</div>
-
-					<div class="col-sm-6" ng-if="field.type == 'CharField' && field.name == 'comment'">
-						<textarea rows="5"
-						          id="id_[[field.name]]"
-								  change-on-blur
-						          ng-model="individual.fields[field.name]"
-						          class="form-control"></textarea>
-					</div>
-
-					<div class="col-sm-6" ng-if="field.type == 'IntegerField'">
-						<input  type="number"
-								id="id_[[field.name]]"
-							    change-on-blur
-								ng-model="individual.fields[field.name]"
-								class="form-control" />
-					</div>
-					<div class="col-sm-6" ng-if="field.type == 'BooleanField'" ng-include="'/partial/topic.contribute.type-boolean.html'"></div>
 
 					<div class="add-source col-sm-3">
 						<div class="add-source-wrapper">
 							<button class="btn btn-primary add-source-toggle"
 								    ng-init="focusAdd=false"
-									ng-class="{active: field.showSourceForm}" 
+									ng-class="{active: field.showSourceForm}"
 							        ng-click="field.showSourceForm = !field.showSourceForm; field.focusAdd=!field.focusAdd">
 								<i class="fa-book fa right05"></i>
 								<span ng-if="individual.hasSources(field)">
@@ -316,16 +186,16 @@
 										<div class='input-group'>
 											<!-- source external link -->
 											<span class="input-group-btn" ng-if="individual.isSourceURLValid(source)">
-												<a target="_blank" 
+												<a target="_blank"
 												   ng-click="$event.stopPropagation()"
-												   ng-href="[[source.reference]]" 
+												   ng-href="[[source.reference]]"
 												   class="btn btn-default">
 													<i class="fa fa-external-link"></i>
 												</a>
 											</span>
 											<!-- source input -->
 											<input type="text"
-												   placeholder="http://exemple.com" 
+												   placeholder="http://exemple.com"
 												   ng-model="source.reference"
 												   change-on-blur
 												   class="form-control"/>
@@ -341,7 +211,7 @@
 									</li>
 									<!-- new source form -->
 									<li>
-										<form name="form" 
+										<form name="form"
 											   ng-submit="form.$valid && individual.addSource(field, newSource); newSource=form.$valid ? '' : newSource" novalidate>
 											<input type="text"
 											   name='newSource'
@@ -349,7 +219,7 @@
 											   ng-blur="field.focusAdd=false"
 											   ng-model="newSource"
 											   no-duplicates="individual.getSourcesRefs(field)"
-											   placeholder="http://exemple.com" 
+											   placeholder="http://exemple.com"
 											   class="form-control pull-left" />
 											<!-- duplicate error handling -->
 											<span class='text-danger' ng-if="form.newSource.$error.nodup">Source already exists, please enter another value</span>
@@ -403,5 +273,3 @@
 		</div>
 	</div>
 </div>
-
-

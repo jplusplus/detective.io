@@ -1,9 +1,8 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$filter', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic', 'UtilsFactory']
+    @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic', 'UtilsFactory']
 
-
-    constructor: (@scope, @stateParams, @filter, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic, @UtilsFactory)->
+    constructor: (@scope, @modal, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic, @UtilsFactory)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading true
@@ -12,6 +11,7 @@ class ContributeCtrl
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
         @scope.addIndividual       = @addIndividual
+        @scope.addInfo             = @addInfo
         @scope.addRelated          = @addRelated
         @scope.askForNew           = @askForNew
         @scope.editRelated         = @editRelated
@@ -36,10 +36,7 @@ class ContributeCtrl
         # When we update scrollIdx, reset its value after
         # a short delay to allow scroll again
         @scope.$watch "scrollIdx", (v)=>
-            setTimeout =>
-                @scope.scrollIdx = -1
-                @scope.$apply()
-            , 1200
+            @timeout (=> @scope.scrollIdx = -1), 1200
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
@@ -235,7 +232,7 @@ class ContributeCtrl
 
         getSourcesRefs: (field)=> _.map @getSources(field), (s)-> s.reference
 
-        addSource: (field, value)=> 
+        addSource: (field, value)=>
             @fields.field_sources.push
                 reference: value
                 field: field.name
@@ -312,9 +309,9 @@ class ContributeCtrl
             _.each(
                 _.filter(@meta.fields, @isFieldFocused)
                 , @unfocusField
-            )  
+            )
             # focus targeted field
-            field.isFocused = true 
+            field.isFocused = true
 
         unfocusField: (field)=>
             field.isFocused = false
@@ -364,6 +361,7 @@ class ContributeCtrl
     isAllowedType: (type)=>
         [
             "Relationship",
+            "RelationshipProperties",
             "CharField",
             "DateTimeField",
             "URLField",
@@ -421,6 +419,42 @@ class ContributeCtrl
     addRelated: (individual, key, type)=>
         individual.fields[key] = [] unless individual.fields[key]?
         individual.fields[key].push(name:"", type: type)
+
+    addInfo: (individual, field, target)=>
+        # Do not open the modal twice
+        return if @relationshipProperties?
+
+        params =
+            type  : individual.type
+            id    : individual.fields.id
+            field : field
+            target: target.id
+
+        # Model that describes the relationship
+        through = _.findWhere(individual.meta.fields, name: field).rules.through
+
+
+        @relationshipProperties = @modal.open
+            templateUrl: '/partial/topic.contribute.relationship-properties.html'
+            controller : 'RelationshipPropertiesCtrl as form'
+            resolve    :
+                # Load the properties of this field
+                properties  : => @Individual.relationships(params).$promise
+                # Field of the model
+                meta        : => @scope.resources[do through.toLowerCase]
+                # An object describing the relationship
+                relationship: =>
+                    # The model that describes this relationship
+                    through: through
+                    # Here source and target order are completely arbitrary
+                    source: individual.fields
+                    target: target
+
+        # Disabling function
+        disable = => delete @relationshipProperties
+        # Remove the instance when closing the modal
+        @relationshipProperties.result.then disable, disable
+
 
     removeRelated: (individual, key, index)=>
         if individual.fields[key][index]?

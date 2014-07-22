@@ -57,7 +57,7 @@ STATIC_ROOT                = here('staticfiles')
 STATICFILES_DIRS          += (here('static'),)
 INSTALLED_APPS            += ('storages',)
 DEFAULT_FILE_STORAGE       = 'storages.backends.s3boto.S3BotoStorage'
-THUMBNAIL_DEFAULT_STORAGE  = 'storages.backends.s3boto.S3BotoStorage'
+THUMBNAIL_DEFAULT_STORAGE  = DEFAULT_FILE_STORAGE
 # Static storage
 STATICFILES_STORAGE        = DEFAULT_FILE_STORAGE
 ADMIN_MEDIA_PREFIX         = STATIC_URL + 'admin/'
@@ -73,12 +73,10 @@ COMPRESS_OFFLINE           = True
 COMPRESS_CSS_FILTERS       = (
     "app.detective.compress_filter.CustomCssAbsoluteFilter",
     "compressor.filters.cssmin.CSSMinFilter",
-    "compressor.filters.template.TemplateFilter",
 )
 
 COMPRESS_JS_FILTERS = (
     "compressor.filters.jsmin.JSMinFilter",
-    "compressor.filters.template.TemplateFilter",
 )
 
 COMPRESS_OFFLINE_CONTEXT = {

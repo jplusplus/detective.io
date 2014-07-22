@@ -10,7 +10,7 @@
     "angular-route": "1.2.16",
     "angular-sanitize": "1.2.16",
     "angular-truncate": "*",
-    "angular-ui-bootstrap-bower": "0.6.0",
+    "angular-ui-bootstrap-bower": "0.11.0",
     "angular-ui-router": "~0.2.10",
     "bootstrap": "3.1.1",
     "chroma-js": "https://raw.github.com/gka/chroma.js/7b06f8df0e95450fa6ed9266c3cc3efbf3e53fc9/chroma.min.js",

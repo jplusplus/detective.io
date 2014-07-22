@@ -1,29 +1,53 @@
-<div class="individual-card panel panel-default">
-	<div ng-if="meta.rules.is_searchable">
-		<h5 class="panel-heading">
-			<a ui-sref="user-topic-detail(singleParams())">
-				[[individual|individualPreview]]
-			</a>
-		</h5>
-	</div>
-	<div ng-if="! meta.rules.is_searchable">
-		<h5 class="panel-heading">
-			<i class="fa fa-info-circle pull-right left05"></i>
-			[[individual|individualPreview]]
-		</h5>
-		<div class="details">
-			<table class="table table-striped table-condensed">
-				<tr ng-repeat="field in meta.fields|filter:isLiteral|filter:hasValue">
-					<td>
-						[[field.verbose_name]]
+<div class="individual-card panel panel-default" ng-mouseenter="loadRelProperties()">
+	<h5 class="panel-heading" ng-if="model.rules.is_searchable">
+		<a ui-sref="user-topic-detail(singleParams())">
+			[[individual|individualPreview:"No preview"]]
+			<i class="fa fa-info-circle left05" ng-if="field.rules.has_properties"></i>
+		</a>
+	</h5>
+	<h5 class="panel-heading" ng-if="!model.rules.is_searchable">
+		[[individual|individualPreview:"No preview"]]
+		<i class="fa fa-info-circle left05"></i>
+	</h5>
+	<div ng-if="mightHaveProperties()">
+		<div class="individual-card__details" ng-if="properties.length + relProperties.length">
+			<table class="table table-striped" ng-if="properties.length">
+				<tr ng-repeat="property in properties">
+					<td style="width: 30%">
+						<strong>[[property.verbose_name|titlecase]]</strong>
 					</td>
 					<td>
-						<span ng-bind="get(field.name) | date:'longDate'" ng-if="field.type == 'DateTimeField'"></span>
-						<span ng-bind="get(field.name)" ng-if="!isString(field.type) && field.type != 'DateTimeField'"></span>
-						<span ng-bind-html="get(field.name) | linky:'_blank'" ng-if="isString(field.type) && field.name != 'imageURL'"></span>
+						<span ng-bind="get(property.name) | date:'longDate'" ng-if="property.type == 'DateTimeField'"></span>
+						<span ng-bind="get(property.name)" ng-if="!isString(property) && property.type != 'DateTimeField'"></span>
+						<span ng-bind-html="get(property.name) | linky:'_blank'" ng-if="isString(property) && property.name != 'imageURL'"></span>
 					</td>
 				</tr>
 			</table>
+			<table class="table table-striped" ng-if="relProperties.length">
+				<tr>
+					<td class="text-center" colspan="2">
+						<h6>About this relationship</h6>
+					</td>
+				</tr>
+				<tr ng-repeat="property in relProperties">
+					<td style="width: 30%">
+						<strong>[[property.verbose_name|titlecase]]</strong>
+					</td>
+					<td>
+						<span ng-bind="get(property.name, true) | date:'longDate'" ng-if="property.type == 'DateTimeField'"></span>
+						<span ng-bind="get(property.name, true)" ng-if="!isString(property) && property.type != 'DateTimeField'"></span>
+						<span ng-bind-html="get(property.name, true) | linky:'_blank'" ng-if="isString(property) && property.name != 'imageURL'"></span>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="individual-card__details individual-card__details--empty" ng-if="!(properties.length + relProperties.length)">
+			<div class="alert alert-info" ng-if="!loadingProperties">
+				No additional information available.
+			</div>
+			<div class="alert alert-info" ng-if="loadingProperties">
+				Loading...
+			</div>
 		</div>
 	</div>
 </div>

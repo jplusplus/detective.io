@@ -127,5 +127,7 @@ angular.module('detective.config').config [
                 reloadOnSearch: true
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
+                    individual: UserTopicCtrl.resolve.individual
+                    forms: UserTopicCtrl.resolve.forms
             )
 ]

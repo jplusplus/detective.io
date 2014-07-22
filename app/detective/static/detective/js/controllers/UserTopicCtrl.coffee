@@ -30,6 +30,11 @@ class UserTopicCtrl
             else return notFound()
             # Return a deffered object
             deferred.promise
+        individual: (Individual, $stateParams)=>
+            Individual.get($stateParams).$promise
+        forms: (Summary, $stateParams)=>
+            Summary.cachedGet(topic: $stateParams.topic, id: "forms").$promise
+
 
 
 angular.module('detective.controller').controller 'userTopicCtrl', UserTopicCtrl

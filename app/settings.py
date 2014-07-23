@@ -175,7 +175,8 @@ COMPRESS_PARSER = 'compressor.parser.HtmlParser'
 COMPRESS_ENABLED = False
 #INTERNAL_IPS = ('127.0.0.1',)
 
-TASTYPIE_DEFAULT_FORMATS = ['json']
+TASTYPIE_DEFAULT_FORMATS = ['json', 'jsonp']
+
 
 INSTALLED_APPS = (
     # 'suit' must be added before 'django.contrib.admin'

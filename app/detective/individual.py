@@ -75,7 +75,7 @@ class IndividualMeta:
     authentication         = MultiAuthentication(Authentication(), BasicAuthentication(), SessionAuthentication())
     filtering              = {'name': ALL}
     ordering               = {'name': ALL}
-    serializer             = Serializer(formats=['json', 'jsonp', 'xml', 'yaml'])
+    serializer             = Serializer(formats=['json', 'jsonp'])
 
 class FieldSourceResource(ModelResource):
     class Meta:
@@ -119,12 +119,6 @@ class IndividualResource(ModelResource):
             options_copy.pop("order_by", None)
         return super(IndividualResource, self).apply_sorting(obj_list, options_copy)
 
-    def determine_format(self, request):
-        """
-        Force to render json. XML serializer fails.
-        ref https://github.com/jplusplus/detective.io/issues/238
-        """
-        return 'application/json'
 
     def build_schema(self):
         """

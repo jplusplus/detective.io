@@ -115,6 +115,7 @@ TEMPLATE_LOADERS = (
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
 
 MIDDLEWARE_CLASSES = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -186,6 +187,8 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
     'django.contrib.auth',
+    # Allow CORS
+    'corsheaders',
     # Thumbnails generator
     'easy_thumbnails',
     # Sign up activation

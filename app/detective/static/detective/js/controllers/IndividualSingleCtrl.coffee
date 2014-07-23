@@ -1,15 +1,17 @@
 class IndividualSingleCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$state', 'Individual',  'topic', 'individual', 'forms', '$filter', '$anchorScroll', '$location', 'Page', 'QueryFactory']
+    @$inject: ['$scope', '$stateParams', '$state', 'Individual',  'topic', 'individual', 'forms', '$filter', '$anchorScroll', '$location', 'Page', 'QueryFactory', '$sce']
 
-    constructor: (@scope, @stateParams, @state, @Individual, @topic, @individual, @forms, @filter, @anchorScroll, @location, @Page, @QueryFactory)->
+    constructor: (@scope, @stateParams, @state, @Individual, @topic, @individual, @forms, @filter, @anchorScroll, @location, @Page, @QueryFactory, $sce)->
         @scope.get            = (n)=> @individual[n] or false if @individual?
+        @scope.getTrusted     = (n)=> $sce.trustAsHtml @scope.get n
         @scope.hasRels        = @hasRels
         @scope.hasNetwork     = => (_.keys (@scope.graphnodes.leafs or {})).length > 1
         @scope.isLiteral      = @isLiteral
         @scope.isString       = (t)=> ["CharField", "URLField"].indexOf(t) > -1
         @scope.isRelationship = (d)=> ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
         @scope.isBoolean      = (t)=> ["BooleanField"].indexOf(t) > -1
+        @scope.isRich         = (field)=> field.rules.is_rich or no
         @scope.scrollTo       = @scrollTo
         @scope.singleUrl      = @singleUrl
         @scope.strToColor     = @filter("strToColor")

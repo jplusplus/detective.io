@@ -73,7 +73,10 @@
 							 			<span ng-bind="get(field.name) | date:'longDate'" ng-if="field.type == 'DateTimeField'"></span>
 							 			<span ng-bind="get(field.name)" ng-if="!isString(field.type) && field.type != 'DateTimeField'
 							 																	     && field.type != 'BooleanField'"></span>
-							 			<span ng-bind-html="get(field.name) | linky:'_blank'" ng-if="isString(field.type) && field.name != 'imageURL'"></span>
+							 			<span ng-if="isString(field.type) && field.name != 'imageURL'" ng-switch on="isRich(field)">
+								 			<span ng-switch-when="true" ng-bind-html="getTrusted(field.name)"></span>
+								 			<span ng-switch-default ng-bind-html="get(field.name) | linky:'_blank'"></span>
+							 			</span>
 							 			<span ng-if="isBoolean(field.type)">
 							 				<i class='fa' ng-class='{"fa-square-o":!get(field.name), "fa-check-square-o":get(field.name)}'></i>
 							 			</span>

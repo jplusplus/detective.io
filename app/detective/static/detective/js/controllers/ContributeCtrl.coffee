@@ -29,6 +29,7 @@ class ContributeCtrl
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
         @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic
+        @scope.isRich              = @isRich
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
@@ -511,5 +512,9 @@ class ContributeCtrl
         # True if the given field must be show into the inidividual
         (field)=>
             not individual.isVisible(field) and @isAllowedType(field.type)
+
+    isRich: (field) =>
+        field.rules.is_rich or no
+
 
 angular.module('detective.controller').controller 'contributeCtrl', ContributeCtrl

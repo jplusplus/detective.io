@@ -28,7 +28,7 @@
 		type="button"
 	    ng-click="setNewIndividual({}, field.related_model, individual, field.name)">
 	    <i class="fa fa-plus right05"></i>
-		Create a new [[field.verbose_name]]
+		Create a new [[field.verbose_name|lowercase]]
 	</button>
 
 </div>
@@ -102,7 +102,7 @@
 				<span ng-switch-when="0">a</span>
 				<span ng-switch-default>another</span>
 			</span>
-			[[field.related_model]]
+			[[field.related_model|lowercase]]
 		</button>
 	</div>
 

@@ -95,9 +95,12 @@
 			ng-click="addRelated(individual, field.name, field.related_model)"
 			class="btn btn-default btn-sm">
 			<i class="fa fa-search right05"></i>
-			Search
-			<span ng-if="individual.fields[field.name].length">another</span>
-			one
+			Search for
+			<span ng-switch on="individual.fields[field.name].length">
+				<span ng-switch-when="0">a</span>
+				<span ng-switch-default>another</span>
+			</span>
+			[[field.related_model]]
 		</button>
 	</div>
 

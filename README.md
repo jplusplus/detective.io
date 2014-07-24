@@ -41,6 +41,6 @@ This small application uses the following tools and opensource projects:
 * [AngularJS](https://angularjs.org/) - Javascript Framework
 * [UI Router](https://github.com/angular-ui/ui-router) - Application states manager
 * [Underscore](http://underscorejs.org/) - Utility library
-* [Bootwtrap](http://getbootstrap.com/) - HTML and CSS framework
+* [Bootstrap](http://getbootstrap.com/) - HTML and CSS framework
 * [Less](http://lesscss.org/) - CSS pre-processor
 * [CoffeeScript](http://coffeescript.org/)

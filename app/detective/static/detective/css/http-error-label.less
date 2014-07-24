@@ -1,16 +1,17 @@
 .http-error-displayer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+    position: fixed;
+    top: @header-height;
+    left: 50%;
+    .translate(-50%, 0);
+    z-index: 9000;
     height: 0;
     overflow: visible;
 }
 
 .label-http-error {
-    position: absolute;
-    top: @header-height;
-    left: 50%;
-    transform: translatex(-50%);
-    z-index: 9000;
+    margin-top:5px;
+    font-size: 90%;
+    padding: 5px 10px;
+    display: block;
+    border-radius: @border-radius-small;
 }

@@ -1,5 +1,5 @@
 class ContributeCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'Page', 'User', 'topic', 'forms', 'UtilsFactory']
 
     constructor: (@scope, @modal, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @Page, @User, topic, @forms, @UtilsFactory)->

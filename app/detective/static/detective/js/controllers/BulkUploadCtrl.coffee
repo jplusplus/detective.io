@@ -1,5 +1,5 @@
 class BulkUploadCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$http', '$stateParams', '$location', 'Page', 'Individual', '$timeout', 'Common', 'User']
 
     constructor: (@scope, @http, @stateParams, @location, @Page, @Individual, @timeout, @Common, @User)->

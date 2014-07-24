@@ -26,9 +26,6 @@
         {% cache 3600 fullpage %}
             {% block content %}{% endblock %}
             {% block extrajs %}{% endblock %}
-        <script type="text/javascript">
-            window.STATIC_URL = "{{ STATIC_URL }}";
-        </script>
         {% endcache %}
     </body>
 </html>

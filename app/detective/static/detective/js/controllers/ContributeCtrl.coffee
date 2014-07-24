@@ -90,6 +90,8 @@ class ContributeCtrl
             # Load similar individual to avoid duplicates
             # AFTER the individual is created.
             scope.$on("individual:created", @getSimilars) if fields.name?
+            # We may have to refresh this individual
+            scope.$on("individual:created", @shouldRefresh)
             # Class attributes from parameters
             # ──────────────────────────────────────────────────────────────────
             @Individual   = scope.Individual
@@ -117,7 +119,10 @@ class ContributeCtrl
             return unless current.id?
             # Propagation of the new individual
             if @isNew
-                @scope.$broadcast "individual:created", current
+                # Brodcast and object
+                @scope.$broadcast "individual:created",
+                    individual: current
+                    related_to: @related_to ? null
                 # It's not a new individual now
                 @isNew = no
             # Only if master is completed
@@ -126,7 +131,9 @@ class ContributeCtrl
                 # Looks for the differences and update the db if needed
                 @update(changes) unless _.isEmpty(changes)
 
-        getSimilars: =>
+        getSimilars: (event, args)=>
+            # Only load similar individual if the new one is the current instance
+            return unless args.individual.id is @fields.id
             params =
                 type:  @type
                 id:    "search"
@@ -137,6 +144,30 @@ class ContributeCtrl
                 d = _.filter d, (e)=> e.id isnt @fields.id
                 # Similar entries
                 @similars = d
+
+        shouldRefresh: (event, args)=>
+            # Refresh only related individual
+            if args.related_to? and args.individual.id is @fields.id
+                # Get relationships field
+                relationships = _.where @meta.fields, type: "Relationship"
+                relationships = _.pluck relationships, "name"
+                # Does this individual have relationships fields?
+                if relationships.length
+                    # Set loading state to the relationships fields
+                    @updating[rel] = yes for rel in relationships
+                    # Load the individual
+                    @Individual.get type: @type, id: @fields.id, (individual)=>
+                        # Reload the relationships fields
+                        for rel in relationships
+                            if individual[rel]?
+                                # Update the master too in order
+                                # to avoid new reloading
+                                angular.extend @master[rel], individual[rel]
+                                angular.extend @fields[rel], individual[rel]
+                            # Field no more loading
+                            delete @updating[rel]
+
+
 
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
@@ -181,7 +212,7 @@ class ContributeCtrl
 
         # Event when fields changed
         update: (data)=>
-            params = type: @type, topic: @getTopic(), id: @fields.id
+            params = type: @type, id: @fields.id
             # Notice that the field is loading
             @updating = _.extend @updating, data
             # Patch the current individual
@@ -199,16 +230,13 @@ class ContributeCtrl
                     @isClosed   = true
                     @isRemoved  = true
 
-        # Returns individual's topic
-        getTopic: => @scope.topic or @scope.stateParams.topic
-
         # Save the current individual form
         save: =>
             # Do not save a loading individual
             unless @loading
                 # Loading mode on
                 @loading = true
-                params   = type: @type, topic: @getTopic()
+                params   = type: @type
                 # Save the individual and
                 # take care to specify the type
                 @fields.$save(params, (master)=>
@@ -252,7 +280,7 @@ class ContributeCtrl
             @loading    = true
             @related_to = related_to
             # Params to retreive the individual
-            params = type: @type, id: id, topic: @getTopic()
+            params = type: @type, id: id
             # Load the given individual
             @fields = @Individual.get params, (master)=>
                     # Disable loading state

@@ -1,8 +1,8 @@
 class TopicBannerCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$routeParams', 'Summary']
+    @$inject: ['$scope', '$stateParams', 'Summary']
 
-    constructor: (@scope, @routeParams, @Summary)->
+    constructor: (@scope, @stateParams, @Summary)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
@@ -16,7 +16,7 @@ class TopicBannerCtrl
         @scope.filters_names          = []
         # ──────────────────────────────────────────────────────────────────────
         # Get the current topic as default topic
-        @scope.topic_selected = @routeParams.topic
+        @scope.topic_selected = @stateParams.topic
         # get forms classes
         @Summary.get({id: "forms"}, @retrieveTopicForms)
         # render the graph on filters change

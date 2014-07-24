@@ -12,7 +12,7 @@ class IndividualSearchCtrl extends IndividualListCtrl
 
         unless @stateParams.q?
             return @state.go("user-topic", {username: @stateParams.username, topic: @stateParams.topic} )
-        
+
         # Parse the JSON query
         @scope.query  = @QueryFactory.query
 

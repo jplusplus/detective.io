@@ -124,12 +124,15 @@ class IndividualListCtrl
 
     csvExport: =>
         if @scope.individuals.objects? and @scope.individuals.objects.length > 0
+            @scope.exporting_csv = yes
             @requestCsvExport (d) =>
+                @scope.exporting_csv = no
                 file = new Blob([d.data], { type : 'application/zip' })
                 saveAs(file, d.filename)
 
     requestCsvExport: (cb) =>
-        @Summary.export { type : @scope.type }, cb
+        @Summary.export { type : @scope.type }, cb, =>
+            @scope.exporting_csv = no
 
 
 angular.module('detective.controller').controller 'individualListCtrl', IndividualListCtrl

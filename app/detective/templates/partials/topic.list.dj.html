@@ -17,6 +17,9 @@
 			<button class='btn btn-default pull-right left10 top20' ng-click="csvExport()" ng-if="individuals.meta.total_count > 0">
 				<i class="fa fa-download"></i> Export as CSV
 			</button>
+			<div class='individual-list__export-overlay fade in out' ng-show='exporting_csv'>
+				<p class='lead bold'>Hang tight, we're preparing the latest data for you!</p>
+			</div>
 
 		    <h2 ng-if="!individuals || individuals.meta.total_count == 0" class="bottom20">
 				Sorry, no results for this query.
@@ -33,6 +36,7 @@
 	</div>
 
 	<div  class="container">
+
 		<div ng-class="{'row': query}">
 
 			<form class="top10 col-md-3" ng-if="query" ng-submit="search()">

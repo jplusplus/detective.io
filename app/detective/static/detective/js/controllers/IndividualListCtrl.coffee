@@ -124,7 +124,9 @@ class IndividualListCtrl
 
     csvExport: =>
         if @scope.individuals.objects? and @scope.individuals.objects.length > 0
+            @scope.exporting_csv = yes
             @requestCsvExport (d) =>
+                @scope.exporting_csv = no
                 file = new Blob([d.data], { type : 'application/zip' })
                 saveAs(file, d.filename)
 

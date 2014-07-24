@@ -101,6 +101,7 @@ angular.module('detective.config').config [
                 controller: ContributeCtrl
                 templateUrl: "/partial/topic.contribute.html"
                 resolve:
+                    forms: UserTopicCtrl.resolve.forms
                     topic: UserTopicCtrl.resolve.topic
                 auth: true
             )
@@ -127,7 +128,7 @@ angular.module('detective.config').config [
                 reloadOnSearch: true
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
-                    individual: UserTopicCtrl.resolve.individual
                     forms: UserTopicCtrl.resolve.forms
+                    individual: UserTopicCtrl.resolve.individual
             )
 ]

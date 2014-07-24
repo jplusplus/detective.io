@@ -1,12 +1,11 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic', 'UtilsFactory']
+    @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic', 'forms', 'UtilsFactory']
 
-    constructor: (@scope, @modal, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic, @UtilsFactory)->
+    constructor: (@scope, @modal, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic, @forms, @UtilsFactory)->
         @Page.title "Contribute"
         # Global loading mode
-        Page.loading true
-
+        Page.loading false
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
@@ -28,17 +27,7 @@ class ContributeCtrl
         @scope.showKickStart       = @showKickStart
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
-        @scope.modelTopic          = (m)=> if @scope.resources? and m isnt null then @scope.resources[m.toLowerCase()].topic
         @scope.isRich              = @isRich
-        # ──────────────────────────────────────────────────────────────────────
-        # Scope watchers
-        # ──────────────────────────────────────────────────────────────────────
-
-        # When we update scrollIdx, reset its value after
-        # a short delay to allow scroll again
-        @scope.$watch "scrollIdx", (v)=>
-            @timeout (=> @scope.scrollIdx = -1), 1200
-
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -46,15 +35,14 @@ class ContributeCtrl
         @scope.username = @stateParams.username
         @scope.type     = @stateParams.type
         @scope.id       = @stateParams.id
-        # By default, hide the kick-start form
-        showKickStart = false
-        # Shortcuts for child classes
-        @scope.Individual  = @Individual
-        @scope.stateParams = @stateParams
-        @scope.UtilsFactory = @UtilsFactory
-        @scope.resources   = {}
         # Get the list of available resources
-        @scope.resources = @Summary.get id: "forms", => @Page.loading(false)
+        @scope.forms    = @forms
+        # By default, hide the kick-start form
+        showKickStart   = false
+        # Shortcuts for child classes
+        @scope.Individual   = @Individual
+        @scope.stateParams  = @stateParams
+        @scope.UtilsFactory = @UtilsFactory
         # Prepare future individual
         @initNewIndividual()
         # Individual list
@@ -67,6 +55,15 @@ class ContributeCtrl
             # Index of the individual where to scroll
             @scope.scrollIdx  = -1
         @scope.meta = topic
+
+        # ──────────────────────────────────────────────────────────────────────
+        # Scope watchers
+        # ──────────────────────────────────────────────────────────────────────
+
+        # When we update scrollIdx, reset its value after
+        # a short delay to allow scroll again
+        @scope.$watch "scrollIdx", (v)=>
+            @timeout (=> @scope.scrollIdx = -1), 1200
 
 
     # ──────────────────────────────────────────────────────────────────────────
@@ -96,21 +93,17 @@ class ContributeCtrl
             # ──────────────────────────────────────────────────────────────────
             @Individual   = scope.Individual
             @UtilsFactory = scope.UtilsFactory
-            @meta         = scope.resources[type] or {}
+            @meta         = scope.forms[type] or {}
             @related_to   = related_to
             @scope        = scope
             @type         = type.toLowerCase()
             # All source fields
-            @sources    = {}
-            @isNew      = not fields.id?
+            @sources = {}
+            @isNew   = not fields.id?
             # Field param can be a number to load an individual
-            @fields     = if isNaN(fields) then new @Individual(fields) else @load(fields)
+            @fields  = if isNaN(fields) then new @Individual(fields) else @load(fields)
             # Class watchers
             # ──────────────────────────────────────────────────────────────────
-            # Update meta when resources change
-            @scope.$watch "resources", (value)=>
-                @meta = value[@type] if value[@type]?
-            , true
             # The data changed
             @scope.$watch (=>@fields), @onChange, true
 
@@ -380,9 +373,8 @@ class ContributeCtrl
 
     # Get resources list filtered by the current topic
     topicResources: =>
-        return [] unless @scope.resources.$resolved
         # Only show resources with a name
-        resources = _.filter @scope.resources, (r)->
+        resources = _.filter @forms, (r)->
             r.rules? and r.rules.is_searchable and r.rules.is_editable
         return resources
 
@@ -470,7 +462,7 @@ class ContributeCtrl
                 # Load the properties of this field
                 properties  : => @Individual.relationships(params).$promise
                 # Field of the model
-                meta        : => @scope.resources[do through.toLowerCase]
+                meta        : => @forms[do through.toLowerCase]
                 # An object describing the relationship
                 relationship: =>
                     # The model that describes this relationship

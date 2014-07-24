@@ -131,7 +131,8 @@ class IndividualListCtrl
                 saveAs(file, d.filename)
 
     requestCsvExport: (cb) =>
-        @Summary.export { type : @scope.type }, cb
+        @Summary.export { type : @scope.type }, cb, =>
+            @scope.exporting_csv = no
 
 
 angular.module('detective.controller').controller 'individualListCtrl', IndividualListCtrl

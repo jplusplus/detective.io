@@ -308,3 +308,63 @@ special attributes.
         given array will contain a list of fields following the
         same specification as any model field. However, relationship fields are
         not allowed.
+
+
+Field rules
+-----------
+
+Just like model, you can add some rules to your field.
+
+.. code-block:: json
+
+    [
+        {
+            "name": "Person",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "string",
+                    "rules": [
+                        {}
+                    ]
+                }
+            ]
+        }
+    ]
+
+This table gives a description of every fields's rules available.
+
+.. list-table::
+    :widths: 20 15 65
+    :header-rows: 1
+
+    * - Name
+      - Type
+      - Description
+
+    * - has_properties
+      - boolean
+      - This rule specifies if a relationship has an intermediary model to
+        describe it. This model is specified within the *through* attribute.
+
+    * - is_editable
+      - boolean
+      - Set to "false" if the user must not be able to edit this field.
+
+    * - is_rich
+      - boolean
+      - Set to "true" to unable rich text format for string field.
+
+    * - is_searchable
+      - boolean
+      - This rules specifies if a relationship is bound to a searchable model or
+        if every relationship is done with a brand new entity.
+
+    * - is_visible
+      - boolean
+      - Set to "false" if this field must not be visible by default in the
+        contribute form.
+
+    * - through
+      - string
+      - This rule specifies the model used to describe a relationship.

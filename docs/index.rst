@@ -11,15 +11,9 @@ Welcome to Detective.io's documentation!
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    installation
-   common
    start-your-investigation
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
-
+   common
+   glossary

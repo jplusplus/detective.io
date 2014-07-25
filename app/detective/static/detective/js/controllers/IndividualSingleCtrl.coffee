@@ -4,7 +4,9 @@ class IndividualSingleCtrl
 
     constructor: (@scope, @stateParams, @state, @Individual, @topic, @individual, @forms, @filter, @anchorScroll, @location, @Page, @QueryFactory, $sce)->
         @scope.get            = (n)=> @individual[n] or false if @individual?
-        @scope.getTrusted     = (n)=> $sce.trustAsHtml @scope.get n
+        @scope.getTrusted     = (n)=>
+            val = @scope.get n
+            if val.length > 0 then ($sce.trustAsHtml val) else val
         @scope.hasRels        = @hasRels
         @scope.hasNetwork     = => (_.keys (@scope.graphnodes.leafs or {})).length > 1
         @scope.isLiteral      = @isLiteral

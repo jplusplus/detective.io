@@ -1,8 +1,8 @@
 class ContributeCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'IndividualForm', 'Page', 'User', 'topic', 'forms', 'UtilsFactory']
+    @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'Page', 'User', 'topic', 'forms', 'UtilsFactory']
 
-    constructor: (@scope, @modal, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @IndividualForm, @Page, @User, topic, @forms, @UtilsFactory)->
+    constructor: (@scope, @modal, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @Page, @User, topic, @forms, @UtilsFactory)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading false
@@ -35,6 +35,7 @@ class ContributeCtrl
         @scope.username = @stateParams.username
         @scope.type     = @stateParams.type
         @scope.id       = @stateParams.id
+        @scope.meta     = topic
         # Get the list of available resources
         @scope.forms    = @forms
         # By default, hide the kick-start form
@@ -54,7 +55,6 @@ class ContributeCtrl
         else
             # Index of the individual where to scroll
             @scope.scrollIdx  = -1
-        @scope.meta = topic
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
@@ -78,8 +78,10 @@ class ContributeCtrl
             @loading    = false
             # List of field that are updating
             @updating   = {}
+            # Avoid object references
+            fields      = angular.copy fields
             # Copy of the database's fields
-            @master     = angular.copy fields,
+            @master     = angular.copy fields
             # List of additional visible fields
             @moreFields = []
             @similars   = []

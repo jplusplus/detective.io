@@ -1,6 +1,6 @@
 angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User)->
     lastDataset = []
-            
+
     template =
         compile: (template) ->
             compiled = $compile(template)
@@ -72,16 +72,16 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         bh.storage = null # Hack to disable localStorage caching
         do bh.initialize
 
-        options = 
+        options =
             # Create the typehead
             hint : yes
             highlight : yes
-            
-        element.typeahead options, 
+
+        element.typeahead options,
             displayKey : (scope.valueKey or "name")
             name : 'suggestions'
             source : do bh.ttAdapter
-            templates : {
+            templates :
                 suggestion : (template.compile [
                     '<div>',
                         '<div class="tt-suggestion__line" ng-class="{\'tt-suggestion__line--with-model\': getModel()}">',
@@ -95,7 +95,6 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                         '</div>',
                     '</div>'
                 ].join "").render
-            }
 
         # Watch keys
         element.on "keyup", (event)->

@@ -6,8 +6,7 @@
 			<div ng-repeat="resource in topicResources() track by $index">
 				<div class="row top30">
 					<div class="col-sm-3">
-						<label class="btn btn-block btn-default btn-large">
-							<input type="radio" value="[[resource.name]]" ng-model="new.type" class="hidden" />
+						<label class="btn btn-block btn-default btn-large" ng-click="new.type = resource.name">
 							<div class="pull-left left10" ng-style="{color: strToColor(resource.name)}">
 								<i class="fa fa-check-square" ng-show="new.type == resource.name"></i>
 								<i class="fa fa-square-o" ng-hide="new.type == resource.name"></i>
@@ -20,14 +19,15 @@
 					</div>
 				</div>
 				<form class="row kick-start form-inline"
-					  ng-if="new.type == resource.name"
-					  ng-submit="addIndividual().save()">
+				      novalidate
+				      name="form"
+					  ng-show="new.type == resource.name">
 					<label class="col-sm-3 control-label top10">
 						Name of the [[resource.verbose_name]]
 					</label>
 					<div class="col-sm-9 input-group">
-						<input type="text" class="form-control" ng-model="new.fields.name" />
-						<button class="btn btn-primary">Create</button>
+						<input type="text" class="form-control" name="name" ng-model="new.fields.name" />
+						<button type="submit" ng-click="addIndividual().save()" class="btn btn-primary">Create</button>
 					</div>
 				</form>
 			</div>

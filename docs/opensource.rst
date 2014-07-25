@@ -3,7 +3,7 @@ Open Source
 ===========
 
 Detective.io is a softwrare under `LGPLv3 <https://github.com/jplusplus/detective.io/blob/documentation/LICENSE>`_.
-We also use a lot of free software and librairies, here is a non-exhaustive list:
+We also use a lot of free softwares and librairies, here is a non-exhaustive list:
 
 Python modules
 --------------

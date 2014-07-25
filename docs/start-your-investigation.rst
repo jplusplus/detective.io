@@ -65,7 +65,7 @@ This table gives a description of every model's attribute available.
 
     * - verbose_name
       - string
-      - A human-readable name your model. It is particulary
+      - A human-readable name for your model. It is particulary
         accurate for name containing special characters or spaces.
 
     * - verbose_name_plural
@@ -113,10 +113,198 @@ This table gives a description of every model's rules available.
     * - is_searchable
       - boolean
       - Set to "false" if the user must not be able to search this element by
-        name. **If the model doesn't have a "name" field, this will be set to
+        name. **If the model doesn't have a *name* field, this will be set to
         false automaticly**.
 
     * - is_visible
       - boolean
       - Set to "false" if this model must not be visible in the contribute form.
 
+
+Model fields
+------------
+
+The model fields attribute is an array of fields.
+
+.. code-block:: json
+
+    [
+        {
+            "name": "Person",
+            "help_text": "A Person represents a physical man or woman that is involved in an Organization, a Project or a Commentary.",
+            "fields": [
+                {
+                    "name": "activity_in_organization",
+                    "related_model": "Organization",
+                    "type": "Relationship",
+                    "verbose_name": "Activity in Organizations"
+                },
+                {
+                    "name": "based_in",
+                    "related_model": "Country",
+                    "type": "Relationship",
+                    "verbose_name": "Based in"
+                },
+                {
+                    "name": "educated_in",
+                    "related_model": "Country",
+                    "type": "Relationship",
+                    "verbose_name": "Educated in"
+                },
+                {
+                    "help_text": "The URL (starting with http://) where the image is hosted.",
+                    "name": "image",
+                    "type": "URLField",
+                    "verbose_name": "Image URL"
+                },
+                {
+                    "name": "name",
+                    "type": "CharField",
+                    "verbose_name": "name"
+                },
+                {
+                    "help_text": "Current position within the Organization (e.g. CEO, CFO, spokesperson etc.)",
+                    "model": "Person",
+                    "name": "position",
+                    "type": "CharField",
+                    "verbose_name": "Position"
+                },
+                {
+                    "help_text": "Has the entity been active in a specific Organization previsously?",
+                    "name": "previous_activity_in_organization",
+                    "type": "Relationship",
+                    "verbose_name": "Previous activity in"
+                },
+                {
+                    "help_text": "The Twitter name of the entity (without the @)",
+                    "name": "twitter_handle",
+                    "type": "CharField",
+                    "verbose_name": "Twitter handle"
+                },
+                {
+                    "name": "website_url",
+                    "type": "CharField",
+                    "verbose_name": "Website URL"
+                }
+            ]
+        }
+    ]
+
+
+
+Fields
+======
+
+Each field is described using an object containing at least a *name* and a *type*.
+
+Field types
+-----------
+
+.. list-table::
+    :widths: 20 80
+    :header-rows: 1
+
+    * - Name
+      - Description
+
+    * - boolean
+      - Two possible values: true or false. The default value is always false.
+
+    * - datetime
+      - Date value. Time aren't supported yet.
+
+    * - float
+      - Number allowing deicmal values. This type is not natively supported by
+        our Object Graph Mapper yet. It is recorded as string and sanitize
+        accordingly by the API.
+
+    * - integer
+      - Integer value.
+
+    * - relationship
+      - A relationship establishes a connection between to entities. This type
+        has special attributes. See Relationship field attributes.
+
+    * - string
+      - A sequence of characters.
+
+    * - url
+      - A URL string..
+
+
+Field attributes
+----------------
+
+A field can receive the following attributes.
+
+.. list-table::
+    :widths: 20 15 65
+    :header-rows: 1
+
+    * - Name
+      - Type
+      - Description
+
+    * - default
+      - mixed
+      - Default value when no value is specified
+
+    * - help_text
+      - string
+      - The description of you field to help final user to understand what you
+        are describing with this field.
+
+    * - indexed
+      - boolean
+      - If true, the server will take care of create an index for this field. It
+        may help to improve performance. Default to true for name field.
+
+    * - name
+      - string
+      - The name of your field. This will be converted to a normalized
+        string, removing special characters and spaces. **This attribute is
+        mandatory**.
+
+    * - type
+      - string
+      - The type of your field. See Field types. **This attribute is
+        mandatory**.
+
+    * - verbose_name
+      - string
+      - A human-readable name for your field. It is particulary
+        accurate for name containing special characters or spaces.
+
+
+Relationship field attributes
+-----------------------------
+
+When the type of your field is "relationship", you have to specified some
+special attributes.
+
+
+.. list-table::
+    :widths: 20 15 65
+    :header-rows: 1
+
+    * - Name
+      - Type
+      - Description
+
+    * - related_model
+      - string
+      - The name of the mode to which the model is related. For relationship
+        field, **this attribute is mandatory**.
+
+    * - related_name
+      - string
+      - The name to use for the relation from the related object back to this
+        one. When specified, this will create a reverse field automaticly into
+        the *related_model*.
+
+    * - fields
+      - array
+      - If you want to add some special attributes to this relationship. The
+        given array will contain a list of fields following the
+        same specification as any model field. However, relationship fields are
+        not allowed.

@@ -136,6 +136,10 @@ def get_registered_models():
             pass
     return mdls
 
+def get_topic_from_model(model):
+    from app.detective.models import Topic
+    return Topic.objects.get(ontology_as_mod=get_model_topic(model))
+
 def get_model_fields(model, order_by='name'):
     from app.detective           import register
     from django.db.models.fields import FieldDoesNotExist
@@ -189,9 +193,12 @@ def get_model_fields(model, order_by='name'):
             }
             fields.append(field)
 
-    get_key=lambda el: el[order_by]
+    if hasattr(model, '__fields_order__'):
+        fields.sort(key=lambda x: model.__fields_order__.index(x['name']) if x['name'] in model.__fields_order__ else 0)
+    else:
+        get_key=lambda el: el[order_by]
+        fields = sorted(fields, key=get_key)
 
-    fields = sorted(fields, key=get_key)
     return fields
 
 def get_model_nodes():

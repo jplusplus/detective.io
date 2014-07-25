@@ -5,9 +5,28 @@ Glossary
 .. glossary::
 
     API
-    	An Application Programming Interface specifies how some software
-    	components should interact with each other.
+        An Application Programming Interface specifies how some software
+        components should interact with each other.
 
-    Investigation
+    Attribute
+        .. todo
+
+    Field
+        .. todo
+
+    Model
+        .. todo
+
+    Relationship field
+        .. todo
+
+    JSON
+        .. todo
+
+    Ontology
+        .. todo
+
     Topic
-    	A field of stuidy. See :doc:`start-your-investigation`.
+    Investigation
+        A field of study. See :doc:`start-your-investigation`.
+

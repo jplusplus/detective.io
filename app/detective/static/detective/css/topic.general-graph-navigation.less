@@ -1,11 +1,18 @@
 .general-graph-navigation {
     height:100%;
-    background-color: rgb(105, 99, 99);
+    background-color: @body-bg;
+    color: black;
     &__close-network-view {
         position : absolute;
         top      : 20px;
         right    : 20px;
-        color    : white;
+    }
+    &__loading {
+        transform  : translate(50%, 50%);
+        height     : 100%;
+        position   : absolute;
+        left       : 0;
+        right      : 0;
     }
     &__filters-box {
         position           : absolute;
@@ -19,6 +26,12 @@
     }
     &__graphviz {
         height : 100%;
+        text.name {
+            fill: black;
+        }
+        path.edge {
+            stroke: black;
+        }
     }
 }
 

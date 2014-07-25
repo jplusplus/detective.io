@@ -5,17 +5,18 @@
     <div class="banner banner-big" parallax=".bg" speed="0.7" ng-controller="TopicBannerCtrl">
         <img ng-src="[[meta.background]]" class="bg" ng-if="!graphNavigationEnabled" />
         <div class="general-graph-navigation" ng-if="graphNavigationEnabled">
-            <a class="general-graph-navigation__close-network-view" ng-click="toggleGraphNavigation()">Close network view</a>
+            <div class="general-graph-navigation__loading" ng-if="isLoading"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</div>
+            <a class="general-graph-navigation__close-network-view" ng-click="toggleGraphNavigation()"><i class="fa fa-arrow-left"> </i> Close network view</a>
             <div class="general-graph-navigation__filters-box">
                 <form>
                     <div class="checkbox">
                         <label>
-                            <input type="checkbox" ng-click="toggleSelectAll()" ng-checked="filters_selected.length == filters_names.length"/> all
+                            <input type="checkbox" ng-click="toggleSelectAll()" ng-checked="filtersSelected.length == filtersNames.length"/> all
                         </label>
                     </div>
                     <div class="checkbox" ng-repeat="form in forms">
                         <label ng-init="count = getTypeCount(form.name)">
-                            <input type="checkbox" name="filters_selected[]" value="[[form.name]]" ng-checked="filters_selected.indexOf(form.name) > -1" ng-click="toggleFiltersSelection(form.name)" />
+                            <input type="checkbox" name="filtersSelected[]" value="[[form.name]]" ng-checked="filtersSelected.indexOf(form.name) > -1" ng-click="toggleFiltersSelection(form.name)" />
                             <strong>[[count]]</strong>
                             <span ng-if="count <= 1">[[form.verbose_name|lowercase]]</span>
                             <span ng-if="count > 1">[[form.verbose_name_plural|lowercase]]</span>

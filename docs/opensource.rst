@@ -28,6 +28,10 @@ Python modules
       - RestAPI for Django
       - https://github.com/toastdriven/django-tastypie
 
+    * - Sphinx
+      - Documentation generator
+      - http://sphinx-doc.org/
+
 
 Front-end tools
 ---------------

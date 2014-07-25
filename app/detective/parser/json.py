@@ -41,9 +41,10 @@ class VirtualApp:
         # We accept list of ontologies OR dict of ontologies
         models = ontology.values() if type(ontology) is dict else ontology
         # List models from the ontology
-        for desc in models:
+        for idx, desc in enumerate(models):
             # Generate a model
             model = self.add_model(desc)
+            model.__idx__ = idx
         # Add pending rules to created models
         for model_name, model_rules in self.pending_modelrules.iteritems():
             # Rules are always related to a model **class**
@@ -100,13 +101,15 @@ class VirtualApp:
         for f in ["verbose_name", "verbose_name_plural"]:
             # Extract those option into a separate class
             if f in desc: model_options[f] = desc[f]
+        fields = []
         # List all fields
-        for field in gn(desc, 'fields', []):
+        for idx, field in enumerate(gn(desc, 'fields', [])):
             # Get a field instance and its name
             field_name, field_instance = self.get_model_field(field, model_name)
             # No error
             if None not in [field_name, field_instance]:
                 # Record the field
+                fields.append(field_name)
                 model_fields[field_name] = field_instance
 
         # Creates a module with the extracted options
@@ -114,6 +117,9 @@ class VirtualApp:
                                                     app_label=self.app_label,
                                                     options=model_options,
                                                     module=self.module)
+
+        self.models[model_name].__fields_order__ = fields
+
         # Prevent a bug with select_related when using neo4django and virtual models
         if not hasattr(self.models[model_name]._meta, '_relationships'):
             self.models[model_name]._meta._relationships = {}

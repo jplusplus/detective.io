@@ -115,3 +115,50 @@ exemple to explore and manage open topics, users login, quote request, etc
     :reqheader Authorization: optional OAuth token to authenticate
     :resheader Content-Type: this depends on `Accept` header of request
     :statuscode 200: no error
+
+.. http:get:: /api/common/v1/user
+
+  The users signed up.
+
+  **Example request**:
+
+  .. sourcecode:: http
+
+    GET /api/common/v1/user/ HTTP/1.1
+    Host: detective.io
+    Accept: application/json, text/javascript
+
+  **Example response**:
+
+  .. sourcecode:: http
+
+    HTTP/1.1 200 OK
+    Vary: Accept
+    Content-Type: text/javascript
+
+    { "meta": {
+        "limit": 20,
+        "next": null,
+        "offset": 0,
+        "previous": null,
+        "total_count": 1
+      },
+      "objects": [
+        { "email": "☘",
+          "first_name": "",
+          "id": 1,
+          "is_staff": false,
+          "last_name": "",
+          "password": "☘",
+          "resource_uri": "",
+          "username": "detective"
+        }
+      ]
+    }
+
+  :query offset: offset number. default is 0
+  :query limit: limit number. default is 30
+  :reqheader Accept: the response content type depends on `Accept` header
+  :reqheader Authorization: optional OAuth token to authenticate
+  :resheader Content-Type: this depends on `Accept` header of request
+  :statuscode 200: no error

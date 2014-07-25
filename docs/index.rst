@@ -17,3 +17,7 @@ Welcome to Detective.io's documentation!
    start-your-investigation
    common
    glossary
+   faq
+   about-us
+   opensource
+   how-to-contribute

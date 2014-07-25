@@ -38,10 +38,10 @@ class VirtualApp:
         self.module    = module
         self.app_label = app_label if app_label is not None else module.split(".")[-1]
         self.ontology  = ontology
+        # We accept list of ontologies OR dict of ontologies
+        models = ontology.values() if type(ontology) is dict else ontology
         # List models from the ontology
-        for model_name in ontology:
-            # Each model has its own descriptor
-            desc = ontology[model_name]
+        for desc in models:
             # Generate a model
             model = self.add_model(desc)
         # Add pending rules to created models

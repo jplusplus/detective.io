@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Detective.io'
-copyright = u'2014, Journalism++ SAS'
+copyright = u'2014, Journalism++ SAS • Software under LGPLv3'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -126,6 +126,18 @@ html_theme_options = {
     # Render the current pages TOC in the navbar. (Default: true)
     'navbar_pagenav': False,
 
+    # A list of tuples containing pages or urls to link to.
+    # Valid tuples should be in the following forms:
+    #    (name, page)                 # a link to a page
+    #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
+    #    (name, "http://example.com", True) # arbitrary absolute url
+    # Note the "1" or "True" value above as the third argument to indicate
+    # an arbitrary url.
+    'navbar_links': [
+        ("Source", "http://github.com/jplusplus/detective.io", True),
+    ],
+
+
     # Location of link to source.
     # Options are "nav" (default), "footer" or anything else to exclude.
     'source_link_position': False,
@@ -152,7 +164,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#$tml_logo = None
+#html_logo = None
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -200,7 +212,7 @@ html_static_path = ['_static']
 #html_show_sphinx = True
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
-#html_show_copyright = True
+html_show_copyright = True
 
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
@@ -276,7 +288,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'Detectiveio', u'Detective.io Documentation',
-   u'Journalism++ SAS', 'Detectiveio', 'One line description of project.',
+   u'Journalism++ SAS', 'Detectiveio', 'Detective.io is a platform that hosts your investigation and lets you make powerful queries to mine it. Simply describe your field of study and detective.io builds the input interface as well as a state-of-the-art front-end.',
    'Miscellaneous'),
 ]
 

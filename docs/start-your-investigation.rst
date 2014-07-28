@@ -284,13 +284,13 @@ A field can hold the following attributes.
 
 .. _special-properties:
 
-Special properties for specific name-type combinations
-------------------------------------------------------
+Special properties for specific name-type value combinations
+------------------------------------------------------------
 
 There is a number of special properties that will be applied to fields if they are given a specific combination of "name"-value and "type"-value. This is specified as follows:
 
 .. list-table::
-    :widths: 20 20 60
+    :widths: 20 15 65
     :header-rows: 1
     
     * - Name-Value

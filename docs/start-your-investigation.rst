@@ -129,7 +129,7 @@ This table gives a description of available model rules.
 Model fields
 ------------
 
-The model fields attribute is an array of fields.
+The model fields attribute is an array of fields. The order of elements within this array also defines the order of fields in the front-end.
 
 .. code-block:: json
 

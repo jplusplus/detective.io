@@ -576,7 +576,12 @@ class SummaryResource(Resource):
     def get_relationship_search_output(self):
         output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
         terms  = self.get_relationship_search()
-        return [ output(rs) for rs in terms ]
+        _out = []
+        for model in self.topic.get_models():
+            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() == 'relationship']:
+                if "search_terms" in field["rules"]:
+                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
+        return _out + [ output(rs) for rs in terms ]
 
     def get_literal_search(self):
         # For an unkown reason I can't filter by "is_literal"
@@ -585,7 +590,12 @@ class SummaryResource(Resource):
     def get_literal_search_output(self):
         output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
         terms  = self.get_literal_search()
-        return [ output(rs) for rs in terms ]
+        _out = []
+        for model in self.topic.get_models():
+            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() != 'relationship']:
+                if "search_terms" in field["rules"]:
+                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
+        return _out + [ output(rs) for rs in terms ]
 
     def ngrams(self, input):
         input = input.split(' ')

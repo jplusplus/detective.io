@@ -1,7 +1,10 @@
 <aside class="main-aside" ng-controller="MainAsideCtrl">
     <h1 class="main-aside__title">
-        <a ui-sref="tour" class="main-aside__title__caption">
+        <a ui-sref="home.tour" class="main-aside__title__caption" ng-if="!user.is_logged">
             Home
+        </a>
+        <a ui-sref="home.dashboard" class="main-aside__title__caption" ng-if="user.is_logged">
+            Dashboard
         </a>
         <a class="main-aside__title__toggle-aside visible-xs" ng-click="Page.showAside = !Page.showAside">
             <i class="fa fa-bars"></i>

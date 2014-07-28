@@ -7,11 +7,24 @@ angular.module('detective.config').config [
         $urlRouterProvider.otherwise("/404");
         # ui-router configuration
         $stateProvider
-            # Core
-            .state('tour',
+            .state('home',
                 url : "/"
-                controller : HomeCtrl
-                templateUrl : '/partial/home.html'
+                template: '<ui-view/>'
+                controller: ["Auth", "$state", (Auth, $state)->
+                    unless $state.includes("home.*")
+                        if Auth.isAuthenticated()
+                            $state.go "home.dashboard"
+                        else
+                            $state.go "home.tour"
+                ]
+            )
+            .state('home.tour',
+                controller : TourCtrl
+                templateUrl : '/partial/home.tour.html'
+            )
+            .state('home.dashboard',
+                controller : DashboardCtrl
+                templateUrl : '/partial/home.dashboard.html'
             )
             .state('404-page',
                 url : "/404/"

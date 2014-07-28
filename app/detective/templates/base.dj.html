@@ -20,7 +20,7 @@
             window.STATIC_URL = "{% static '' %}";
         </script>
     </head>
-    <body ng-cloak  ng-class="{ 'is-home': $state.is('tour'), 'show-aside': Page.showAside  }">
+    <body ng-cloak  ng-class="{ 'is-home': $state.is('home.tour'), 'show-aside': Page.showAside  }">
         <div http-error-displayer></div>
         {% load cache %}
         {% cache 3600 fullpage %}

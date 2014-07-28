@@ -54,5 +54,5 @@ angular.module("detective.service").factory "Auth", [
           return response
         )
 
-      isAuthenticated: -> User.is_logged?
+      isAuthenticated: -> User.username isnt null and User.username isnt ""
 ]

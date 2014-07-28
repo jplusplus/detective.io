@@ -235,7 +235,7 @@ Field types
       - A sequence of characters.
 
     * - url
-      - A URL string..
+      - A URL string.
 
 
 .. _field-rules:

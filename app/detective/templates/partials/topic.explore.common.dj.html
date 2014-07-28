@@ -12,13 +12,13 @@
                     <div class="checkbox">
                         <input type="checkbox" id="general-graph-navigation__filters-box__all" ng-click="toggleSelectAll()" ng-checked="filtersSelected.length == filtersNames.length"/>
                         <label for="general-graph-navigation__filters-box__all">
-                            <div>all</div>
+                            <div class="general-graph-navigation__filters-box__label">all</div>
                         </label>
                     </div>
                     <div class="checkbox" ng-repeat="form in forms">
                         <input type="checkbox" id="general-graph-navigation__filters-box__[[$index]]" name="filtersSelected[]" value="[[form.name]]" ng-checked="filtersSelected.indexOf(form.name) > -1" ng-click="toggleFiltersSelection(form.name)" />
                         <label class="filter-names" for="general-graph-navigation__filters-box__[[$index]]" ng-init="count = getTypeCount(form.name)" >
-                            <div ng-style="{'border-bottom-color': strToColor(form.name) }">
+                            <div class="general-graph-navigation__filters-box__label" ng-style="{'border-bottom-color': strToColor(form.name) }">
                             [[count]]
                             <span ng-if="count <= 1">[[form.verbose_name|lowercase]]</span>
                             <span ng-if="count > 1">[[form.verbose_name_plural|lowercase]]</span>

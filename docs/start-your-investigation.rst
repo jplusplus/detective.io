@@ -282,6 +282,41 @@ A field can hold the following attributes.
       - string
       - A human-readable name for your field. It is useful for names containing special characters or spaces.
 
+.. _special-properties:
+
+Special properties for specific name-type combinations
+------------------------------------------------------
+
+There is a number of special properties that will be applied to fields if they are given a specific combination of "name"-value and "type"-value. This is specified as follows:
+
+.. list-table::
+    :widths: 20 20 60
+    :header-rows: 1
+    
+    * - Name-Value
+      - Type-Value
+      - Behaviour
+      
+    * - image
+    * - url
+    * - If a field's name is image and its type 'url' the photo at the given url will be shown as an illustration of the respective entities in the front-end.
+    
+    * - comment
+    * - string
+    * - If a field's name is 'comment' and its type 'string' a text box (5 lines) will be created instead of a single-line text field.
+
+    * - latitude
+    * - string
+    * - If a field's name is 'latitude' and its type 'string', a map with this location will be shown in the front-end of the respective entity. Only use in combination with 'name'-value 'longitude'. 
+    
+    * - longitude
+    * - string
+    * - If a field's name is 'longitude' and its type 'string', a map with this location will be shown in the front-end of the respective entity. Use in combination with 'name'-value 'latitude'.
+    
+    * - address
+    * - string
+    * - If a field's name is 'address' and its type 'string', detective connects to a geolocalization API and shows a map with the geolocalized location in the front-end of the respective entity. This functionality is only enabled when 'longitude' and 'latitude' are *not* filled out.
+
 
 .. _relationship-attributes:
 

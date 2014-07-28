@@ -4,7 +4,7 @@
 [Fork](https://github.com/jplusplus/detective.io) •
 [License](https://github.com/jplusplus/detective.io/blob/master/LICENSE) •
 [Test coverage](https://coveralls.io/r/jplusplus/detective.io) •
-[Documentation](http://detectiveio.readthedocs.org/en/latest/)
+[Documentation](http://docs.detective.io/en/latest/)
 
 ## Installation
 

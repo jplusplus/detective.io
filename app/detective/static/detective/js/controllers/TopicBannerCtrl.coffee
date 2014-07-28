@@ -1,21 +1,21 @@
 class TopicBannerCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$stateParams', 'Summary']
+    @$inject: ['$scope', '$stateParams', 'Summary', '$filter']
 
-    constructor: (@scope, @stateParams, @Summary)->
+    constructor: (@scope, @stateParams, @Summary, @filter)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
         @scope.toggleGraphNavigation  = @toggleGraphNavigation
         @scope.toggleFiltersSelection = @toggleFiltersSelection
         @scope.toggleSelectAll        = @toggleSelectAll
+        @scope.strToColor             = @filter("strToColor")
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         @scope.graphNavigationEnabled = false
         @scope.filtersSelected        = []
         @scope.filtersNames           = []
         @scope.isLoading              = yes
-
         # ──────────────────────────────────────────────────────────────────────
         # Get the current topic as default topic
         @scope.topic_selected = @stateParams.topic
@@ -31,7 +31,6 @@ class TopicBannerCtrl
         @scope.forms            = _.filter(_.values(forms), ((f)-> f.rules? && f.rules.is_searchable))
         @scope.filtersNames     = _.map(@scope.forms, ((form) -> form.name))
         @scope.filtersSelected  = angular.copy(@scope.filtersNames)
-        # FIXME: a lot of methods depend of these data
 
     # on the "Show all" checkbox click
     toggleSelectAll: =>

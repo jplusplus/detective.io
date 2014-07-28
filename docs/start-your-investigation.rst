@@ -159,19 +159,19 @@ The model fields attribute is an array of fields. The order of elements within t
                 {
                     "help_text": "The URL (starting with http://) where the image is hosted.",
                     "name": "image",
-                    "type": "URLField",
+                    "type": "url",
                     "verbose_name": "Image URL"
                 },
                 {
                     "name": "name",
-                    "type": "CharField",
+                    "type": "string",
                     "verbose_name": "name"
                 },
                 {
                     "help_text": "Current position within the Organization (e.g. CEO, CFO, spokesperson etc.)",
                     "model": "Person",
                     "name": "position",
-                    "type": "CharField",
+                    "type": "string",
                     "verbose_name": "Position"
                 },
                 {
@@ -183,12 +183,12 @@ The model fields attribute is an array of fields. The order of elements within t
                 {
                     "help_text": "The Twitter name of the entity (without the @)",
                     "name": "twitter_handle",
-                    "type": "CharField",
+                    "type": "string",
                     "verbose_name": "Twitter handle"
                 },
                 {
                     "name": "website_url",
-                    "type": "CharField",
+                    "type": "string",
                     "verbose_name": "Website URL"
                 }
             ]

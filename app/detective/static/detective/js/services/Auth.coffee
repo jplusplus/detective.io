@@ -7,11 +7,12 @@ angular.module("detective.service").factory "Auth", [
     new class Auth
       constructor: ->
         # Watch current token
-        $rootScope.$on "user:login", @loadUser
+        $rootScope.$on "user:login", @load
         # User already logged in
         $rootScope.$broadcast "user:login" if @isAuthenticated()
 
-      loadUser: ->
+      load: ->
+        deferred = $q.defer()
         # User just log in
         if User.is_logged
           # Load its user permission
@@ -21,6 +22,12 @@ angular.module("detective.service").factory "Auth", [
               User.set response.data
               # User is now fully loaded
               $rootScope.$broadcast "user:loaded", User
+              deferred.resolve User
+              User
+            else
+              deferred.reject("User not authenticated.")
+        else
+          deferred.reject("User not authenticated.")
 
       login: (credentials)->
         # succefull login

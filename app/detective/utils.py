@@ -140,6 +140,9 @@ def get_topic_from_model(model):
     from app.detective.models import Topic
     return Topic.objects.get(ontology_as_mod=get_model_topic(model))
 
+def get_topics_from_request(request):
+    return getattr(request, 'topic_list', None)
+
 def get_model_fields(model, order_by='name'):
     from app.detective           import register
     from django.db.models.fields import FieldDoesNotExist

@@ -10,8 +10,8 @@ class DashboardCtrl
     	userTopics: ["Common", "User", (Common, User)->
     		Common.query(type: "topic", author__username: User.username).$promise
     	],
-    	userContributions: ["Common", "User", (Common, User)->
-    		Common.query(type: "topic", author__username: User.username).$promise
+    	userContributions: ["$http", "User", ($http, User)->
+    		$http.get("/api/common/v1/user/#{User.id}/groups/")
     	]
 
 angular.module('detective.controller').controller 'dashboardCtrl', DashboardCtrl

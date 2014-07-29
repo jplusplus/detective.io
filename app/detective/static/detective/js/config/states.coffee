@@ -81,12 +81,10 @@ angular.module('detective.config').config [
                 template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
             )
             .state('global-graph-navigation',
-                url : "/:username/:topic/graph"
+                url : "/:username/:topic/graph/"
                 controller : ExploreCtrl
                 resolve :
                     topic: UserTopicCtrl.resolve.topic
-                data :
-                    graph : true
                 # Allow a dynamic loading by setting the templateUrl within controller
                 template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
             )

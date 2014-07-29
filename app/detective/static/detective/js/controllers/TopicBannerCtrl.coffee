@@ -26,7 +26,7 @@ class TopicBannerCtrl
         # true means that inequality of the watchExpression is determined according to the angular.equals function. 
         # To save the value of the object for later comparison, the angular.copy function is used.
         # This therefore means that watching complex objects will have adverse memory and performance implications.
-        if @state.current.data? and @state.current.data.graph
+        if @state.is("global-graph-navigation")
             @scope.graphNavigationEnabled = true
             @renderGraph()
 

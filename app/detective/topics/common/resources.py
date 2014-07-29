@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
 from app.detective.models             import QuoteRequest, Topic, Article
-from app.detective.utils              import get_registered_models
+from app.detective.utils              import get_registered_models, get_topics_from_request
 from app.detective.topics.common.user import UserResource, AuthorResource
 from tastypie                         import fields
 from tastypie.authorization           import ReadOnlyAuthorization
@@ -77,7 +77,6 @@ class TopicResource(ModelResource):
     def get_object_list(self, request):
         # Check if the user is staff
         is_staff    = request.user and request.user.is_staff
-
         # Retrieve all groups in which the user is in
         can_read    = []
         if request.user:
@@ -86,10 +85,11 @@ class TopicResource(ModelResource):
                 if matches:
                     can_read.append(matches.group(1))
 
-        object_list = super(TopicResource, self).get_object_list(request)
+        object_list = get_topics_from_request(request)
+        if object_list is None:
+            object_list = super(TopicResource, self).get_object_list(request)
         # Return only topics the user can see
         object_list = object_list if is_staff else object_list.filter(Q(ontology_as_mod__in=can_read)|Q(public=True))
-
         return object_list
 
 

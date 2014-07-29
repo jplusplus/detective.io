@@ -7,6 +7,7 @@ from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User, Group
 from django.contrib.sites.models  import RequestSite
+from django.core.paginator        import Paginator, InvalidPage
 from django.core                  import signing
 from django.db                    import IntegrityError
 from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
@@ -54,29 +55,28 @@ class GroupResource(ModelResource):
 
 class UserResource(ModelResource):
 
-    groups = fields.ManyToManyField(GroupResource, 'groups', null=True, full=True, use_in='detail')
-
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
         allowed_methods    = ['get', 'post']
         always_return_data = True
-        fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password', 'groups']
-        filtering          = {'id': ALL, 'username': ALL, 'email': ALL, 'groups': ALL_WITH_RELATIONS}
+        fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
+        filtering          = {'id': ALL, 'username': ALL, 'email': ALL}
         queryset           = User.objects.all()
         resource_name      = 'user'
 
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
         return [
-            url(r"^(?P<resource_name>%s)/login%s$"                  % params, self.wrap_view('login'),                  name="api_login"),
-            url(r'^(?P<resource_name>%s)/logout%s$'                 % params, self.wrap_view('logout'),                 name='api_logout'),
-            url(r'^(?P<resource_name>%s)/status%s$'                 % params, self.wrap_view('status'),                 name='api_status'),
-            url(r'^(?P<resource_name>%s)/permissions%s$'            % params, self.wrap_view('permissions'),            name='api_user_permissions'),
-            url(r'^(?P<resource_name>%s)/signup%s$'                 % params, self.wrap_view('signup'),                 name='api_signup'),
-            url(r'^(?P<resource_name>%s)/activate%s$'               % params, self.wrap_view('activate'),               name='api_activate'),
-            url(r'^(?P<resource_name>%s)/reset_password%s$'         % params, self.wrap_view('reset_password'),         name='api_reset_password'),
-            url(r'^(?P<resource_name>%s)/reset_password_confirm%s$' % params, self.wrap_view('reset_password_confirm'), name='api_reset_password_confirm'),
+            url(r"^(?P<resource_name>%s)/login%s$"                    % params, self.wrap_view('login'),                  name="api_login"),
+            url(r'^(?P<resource_name>%s)/logout%s$'                   % params, self.wrap_view('logout'),                 name='api_logout'),
+            url(r'^(?P<resource_name>%s)/status%s$'                   % params, self.wrap_view('status'),                 name='api_status'),
+            url(r'^(?P<resource_name>%s)/permissions%s$'              % params, self.wrap_view('permissions'),            name='api_user_permissions'),
+            url(r'^(?P<resource_name>%s)/signup%s$'                   % params, self.wrap_view('signup'),                 name='api_signup'),
+            url(r'^(?P<resource_name>%s)/activate%s$'                 % params, self.wrap_view('activate'),               name='api_activate'),
+            url(r'^(?P<resource_name>%s)/reset_password%s$'           % params, self.wrap_view('reset_password'),         name='api_reset_password'),
+            url(r'^(?P<resource_name>%s)/reset_password_confirm%s$'   % params, self.wrap_view('reset_password_confirm'), name='api_reset_password_confirm'),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/groups%s$" % params, self.wrap_view('get_groups'),             name="api_get_groups"),
         ]
 
     def login(self, request, **kwargs):
@@ -282,6 +282,48 @@ class UserResource(ModelResource):
         if len(missing_fields) > 0:
             message = "Malformed request. The following fields are required: %s" % ', '.join(missing_fields)
             raise MalformedRequestError(message)
+
+    def get_groups(self, request, **kwargs):
+        from app.detective.topics.common.resources import TopicResource
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        try:
+            bundle = self.build_bundle(data={'pk': kwargs['pk']}, request=request)
+            obj = self.cached_obj_get(bundle=bundle, **self.remove_api_resource_names(kwargs))
+        except User.DoesNotExist:
+            return http.HttpNotFound("User not found")
+
+        group_resource = GroupResource()
+
+        groups    = obj.groups.all()
+        limit     = int(request.GET.get('limit', 20))
+        paginator = Paginator(groups, limit)
+
+        try:
+            p    = int(request.GET.get('page', 1))
+            page = paginator.page(p)
+        except InvalidPage:
+            return http.HttpNotFound("Sorry, no results on that page.")
+
+        objects = []
+
+        for group in page.object_list:
+            bundle = group_resource.build_bundle(obj=group, request=request)
+            bundle = group_resource.full_dehydrate(bundle)
+            objects.append(bundle)
+
+        object_list = {
+            'objects': objects,
+            'meta': {
+                'page': p,
+                'limit': limit,
+                'total_count': paginator.count
+            }
+        }
+
+        return group_resource.create_response(request, object_list)
 
 class AuthorResource(UserResource):
     class Meta(UserResource.Meta):

@@ -20,9 +20,9 @@ class SearchFormCtrl
             @human_query = query
 
         # Get every topics
-        @TopicsFactory.getTopics (topics)=> 
-            @topics = @topics.concat topics
-            @TopicsFactory.topics = @topics
+        # @TopicsFactory.getTopics (topics)=> 
+        #     @topics = @topics.concat topics
+        #     @TopicsFactory.topics = @topics
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────

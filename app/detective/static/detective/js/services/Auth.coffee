@@ -7,18 +7,18 @@ angular.module("detective.service").factory "Auth", [
     new class Auth
       constructor: ->
         # Watch current token
-        $rootScope.$on "user:login", @loadPermissions
+        $rootScope.$on "user:login", @loadUser
         # User already logged in
         $rootScope.$broadcast "user:login" if @isAuthenticated()
 
-      loadPermissions: ->
+      loadUser: ->
         # User just log in
         if User.is_logged
-          # Load its user profile
-          $http.get("/api/common/v1/user/permissions/").then (response)=>
+          # Load its user permission
+          $http.get("/api/common/v1/user/me/").then (response)=>
             if response.data?
               # Save profile
-              User.set permissions: response.data.permissions
+              User.set response.data
               # User is now fully loaded
               $rootScope.$broadcast "user:loaded", User
 

@@ -9,6 +9,9 @@ class DashboardCtrl
     @resolve:
     	userTopics: ["Common", "User", (Common, User)->
     		Common.query(type: "topic", author__username: User.username).$promise
+    	],
+    	userContributions: ["Common", "User", (Common, User)->
+    		Common.query(type: "topic", author__username: User.username).$promise
     	]
 
 angular.module('detective.controller').controller 'dashboardCtrl', DashboardCtrl

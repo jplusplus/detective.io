@@ -72,6 +72,7 @@ class UserResource(ModelResource):
             url(r'^(?P<resource_name>%s)/logout%s$'                   % params, self.wrap_view('logout'),                 name='api_logout'),
             url(r'^(?P<resource_name>%s)/status%s$'                   % params, self.wrap_view('status'),                 name='api_status'),
             url(r'^(?P<resource_name>%s)/permissions%s$'              % params, self.wrap_view('permissions'),            name='api_user_permissions'),
+            url(r'^(?P<resource_name>%s)/me%s$'                       % params, self.wrap_view('me'),                     name='api_user_me'),
             url(r'^(?P<resource_name>%s)/signup%s$'                   % params, self.wrap_view('signup'),                 name='api_signup'),
             url(r'^(?P<resource_name>%s)/activate%s$'                 % params, self.wrap_view('activate'),               name='api_activate'),
             url(r'^(?P<resource_name>%s)/reset_password%s$'           % params, self.wrap_view('reset_password'),         name='api_reset_password'),
@@ -218,6 +219,21 @@ class UserResource(ModelResource):
             return self.create_response(request, {
                 'permissions': permissions
             })
+        else:
+            return http.HttpUnauthorized('You need to be logged to list your permissions')
+
+    def me(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        if request.user.is_authenticated():
+            bundle = self.build_bundle(obj=request.user, request=request)
+            bundle = self.full_dehydrate(bundle)
+            # Get the list of permission and sorts it alphabeticly
+            permissions = list(request.user.get_all_permissions())
+            permissions.sort()
+            # Add user's permissions
+            bundle.data["permissions"] = permissions
+            return self.create_response(request, bundle)
         else:
             return http.HttpUnauthorized('You need to be logged to list your permissions')
 

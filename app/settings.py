@@ -183,6 +183,7 @@ TASTYPIE_DEFAULT_FORMATS = ['json', 'jsonp']
 INSTALLED_APPS = (
     # 'suit' must be added before 'django.contrib.admin'
     'suit',
+    'debug_toolbar',
     'neo4j_panel',
     'neo4django.contenttypes',
     'django.contrib.sessions',
@@ -212,7 +213,6 @@ INSTALLED_APPS = (
     # Internal
     'app.detective',
     'app.detective.permissions',
-    'debug_toolbar',
 )
 
 SOUTH_MIGRATION_MODULES = {
@@ -308,14 +308,11 @@ if DEBUG:
     INTERNAL_IPS = ('127.0.0.1', '10.0.0.1')
     DEBUG_TOOLBAR_PATCH_SETTINGS = False 
     DEBUG_TOOLBAR_PANELS = (
-        'debug_toolbar.panels.version.VersionDebugPanel',
-        'debug_toolbar.panels.timer.TimerDebugPanel',
-        'debug_toolbar.panels.headers.HeaderDebugPanel',
-        #'debug_toolbar.panels.profiling.ProfilingDebugPanel',
-        'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
-        'debug_toolbar.panels.sql.SQLDebugPanel',
-        'debug_toolbar.panels.template.TemplateDebugPanel',
-        'debug_toolbar.panels.cache.CacheDebugPanel',
-        'debug_toolbar.panels.signals.SignalDebugPanel',
-        'neo4j_panel.Neo4jPanel'
+        'debug_toolbar.panels.timer.TimerPanel',
+        'debug_toolbar.panels.headers.HeadersPanel',
+        'debug_toolbar.panels.request.RequestPanel',
+        'debug_toolbar.panels.sql.SQLPanel',
+        'neo4j_panel.Neo4jPanel',
+        'debug_toolbar.panels.cache.CachePanel',
+        'debug_toolbar.panels.signals.SignalsPanel',
     )

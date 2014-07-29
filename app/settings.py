@@ -109,7 +109,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', '#_o0^tt=lv1k8k-h=n%^=e&amp;vnvcxpnl=6+%&am
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
+    'django.template.loaders.eggs.Loader',
 )
 
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
@@ -123,12 +123,14 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.cache.UpdateCacheMiddleware',
     'app.middleware.cache.FetchFromCacheMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'app.middleware.debug_toolbar.JsonAsHTML',
     'app.middleware.crossdomainxhr.XsSharing',
     # add urlmiddleware after all other middleware.
     'urlmiddleware.URLMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 
@@ -181,6 +183,7 @@ TASTYPIE_DEFAULT_FORMATS = ['json', 'jsonp']
 INSTALLED_APPS = (
     # 'suit' must be added before 'django.contrib.admin'
     'suit',
+    'neo4j_panel',
     'neo4django.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -209,6 +212,7 @@ INSTALLED_APPS = (
     # Internal
     'app.detective',
     'app.detective.permissions',
+    'debug_toolbar',
 )
 
 SOUTH_MIGRATION_MODULES = {
@@ -226,8 +230,8 @@ ACCOUNT_ACTIVATION_DAYS = 7
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/tmp/django_cache',
     }
 }
@@ -298,3 +302,20 @@ LOGGING = {
         },
     }
 }
+
+
+if DEBUG:
+    INTERNAL_IPS = ('127.0.0.1', '10.0.0.1')
+    DEBUG_TOOLBAR_PATCH_SETTINGS = False 
+    DEBUG_TOOLBAR_PANELS = (
+        'debug_toolbar.panels.version.VersionDebugPanel',
+        'debug_toolbar.panels.timer.TimerDebugPanel',
+        'debug_toolbar.panels.headers.HeaderDebugPanel',
+        #'debug_toolbar.panels.profiling.ProfilingDebugPanel',
+        'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
+        'debug_toolbar.panels.sql.SQLDebugPanel',
+        'debug_toolbar.panels.template.TemplateDebugPanel',
+        'debug_toolbar.panels.cache.CacheDebugPanel',
+        'debug_toolbar.panels.signals.SignalDebugPanel',
+        'neo4j_panel.Neo4jPanel'
+    )

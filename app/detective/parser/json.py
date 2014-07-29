@@ -147,7 +147,7 @@ class VirtualApp:
         # It's a relationship!
         if "related_model" in desc and desc["related_model"] is not None:
             field_opts["target"] = to_class_name(desc["related_model"].lower())
-            field_target = field_opts["target"]
+            field_target = to_class_name(field_opts["target"])
             # Remove "has_" from the begining of the name
             if field_name.startswith("has_"): field_name = field_name[4:]
             # Build rel_type using the name and the class name
@@ -184,7 +184,11 @@ class VirtualApp:
                     rules=dict(is_editable=False)
                 ))
                 # Name of the new model
-                composite_name = to_class_name("%s%sProperties" % (model_name, field_target))
+                composite_name = "%s %s %s Properties" % (
+                    model_name,
+                    field_name,
+                    field_target
+                )
                 # Create a Model with the relation
                 composite_model = {
                     "name": composite_name,

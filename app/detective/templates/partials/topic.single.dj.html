@@ -64,7 +64,7 @@
 					<div class="panel-body">
 						<table class="table table-striped">
 							<tbody>
-							 	<tr ng-repeat="field in meta.fields|filter:isLiteral" ng-show="get(field.name) != null && field.name != 'name'"
+							 	<tr ng-repeat="field in meta.fields|filter:isLiteral|filter:hasValue"
 					 		  		ng-init='fieldSources=getSources(field)'>
 							 		<td class="nowrap field-name" ng-if="!isMono(field)">
 							 			<strong>[[field.verbose_name]]</strong>
@@ -78,7 +78,7 @@
 								 			<span ng-switch-default ng-bind-html="get(field.name) | linky:'_blank'"></span>
 							 			</span>
 							 			<span ng-if="isBoolean(field.type)">
-							 				<i class='fa' ng-class='{"fa-square-o":!get(field.name), "fa-check-square-o":get(field.name)}'></i>
+							 				<i class='fa' ng-class='{"fa-square-o":!get(field.name, false), "fa-check-square-o":get(field.name, false)}'></i>
 							 			</span>
 							 		</td>
 						 			<td ng-if="isMono(field) && get(field.name)" colspan="3">
@@ -103,8 +103,7 @@
 						</table>
 
 					 	<div class="relationship"
-					 		  ng-repeat="field in meta.fields|filter:isRelationship"
-					 		  ng-show="get(field.name)"
+					 		  ng-repeat="field in meta.fields|filter:isRelationship|filter:hasValues"
 					 		  ng-init='fieldSources = getSources(field)'
 					 		  id="rels-[[field.name]]">
 					 		<h3>
@@ -112,7 +111,7 @@
 					 			[[field.verbose_name]]
 					 			<div sources-popover sources-list='fieldSources'></div>
 					 		</h3>
-					 		
+
 					 		<ul class="list-inline">
 					 			<li ng-repeat="rel in get(field.name)">
 					 				<card ng-model="rel" parent="individual" field="field" topic="topic" username="username" type="field.related_model"></card>

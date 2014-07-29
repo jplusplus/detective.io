@@ -242,14 +242,8 @@ def to_class_name(value=""):
         - begin by an uppercase
         - use camelcase
     """
-    if type(value) is unicode:
-        value = unidecode(value)
-    value = to_camelcase(value)
-    value = list(value)
-    if len(value) > 0:
-        value[0] = value[0].capitalize()
-
-    return "".join(value)
+    value = value.replace("_", " ")
+    return ''.join(x for x in str(value).title() if not x.isspace())
 
 
 def to_camelcase(value=""):

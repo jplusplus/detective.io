@@ -100,7 +100,7 @@ class UserCtrl
             # Interpret the respose
             if data? and data.success
                 # Redirect to the next URL
-                @state.go @scope.nextState, @scope.nextParams
+                @state.go @scope.nextState or "tour", @scope.nextParams
                 # Delete error
                 delete @scope.error
             else

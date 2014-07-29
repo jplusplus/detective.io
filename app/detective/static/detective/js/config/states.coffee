@@ -28,6 +28,12 @@ angular.module('detective.config').config [
                 resolve: DashboardCtrl.resolve
                 auth: true
             )
+            .state('home.dashboard.add-collaborators',
+                params: ['topic']
+                controller: AddCollaboratorsCtrl
+                resolve: AddCollaboratorsCtrl.resolve
+                templateUrl : '/partial/home.dashboard.add-collaborators.html'
+            )
             .state('404-page',
                 url : "/404/"
                 controller : NotFoundCtrl

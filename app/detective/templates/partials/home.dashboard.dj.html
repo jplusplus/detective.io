@@ -1,8 +1,14 @@
 <div class="dashboard container">
 	<h2>Dashboard</h2>
-	<ul class="list-unstyled">
-		<li ng-repeat="ut in userTopics">
-			[[ut.title]]
+	<ul class="list-unstyled dashboard__topics">
+		<li ng-repeat="topic in topics" class="dashboard__topics__item">
+			<h4>[[topic.title]]</h4>
+			<p ng-if="topic.author.id == user.id">
+				Owned by you
+			</p>
+			<p ng-if="topic.author.id != user.id">
+				by <a ui-sref="user({username: topic.author.username})">[[topic.author.username]]</a>
+			</p>
 		</li>
 	</ul>
 </div>

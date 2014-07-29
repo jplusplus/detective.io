@@ -316,19 +316,20 @@ class UserResource(ModelResource):
         groups    = obj.groups.all()
         limit     = int(request.GET.get('limit', 20))
         paginator = Paginator(groups, limit)
+        objects   = []
 
         try:
             p    = int(request.GET.get('page', 1))
             page = paginator.page(p)
+
+            for group in page.object_list:
+                bundle = group_resource.build_bundle(obj=group, request=request)
+                bundle = group_resource.full_dehydrate(bundle)
+                objects.append(bundle)
+
         except InvalidPage:
-            return http.HttpNotFound("Sorry, no results on that page.")
-
-        objects = []
-
-        for group in page.object_list:
-            bundle = group_resource.build_bundle(obj=group, request=request)
-            bundle = group_resource.full_dehydrate(bundle)
-            objects.append(bundle)
+            # Allow empty page
+            pass
 
         object_list = {
             'objects': objects,

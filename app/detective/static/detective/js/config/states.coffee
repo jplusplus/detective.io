@@ -64,7 +64,7 @@ angular.module('detective.config').config [
                 templateUrl : '/partial/account.reset-password.html'
             )
             .state('reset-password-confirm',
-                url : "/account/reset-password-confirm/"
+                url : "/account/reset-password-confirm/?token"
                 controller : UserCtrl
                 templateUrl : '/partial/account.reset-password.confirm.html'
             )

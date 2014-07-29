@@ -26,6 +26,7 @@ angular.module('detective.config').config [
                 controller : DashboardCtrl
                 templateUrl : '/partial/home.dashboard.html'
                 resolve: DashboardCtrl.resolve
+                auth: true
             )
             .state('404-page',
                 url : "/404/"

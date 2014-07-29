@@ -47,7 +47,7 @@ def default_rules(topic):
     # Store topic object in a temporary attribute
     # to avoid SQL lazyness
     cache_key = "prefetched_topic_%s" % topic
-    if cache.get(cache_key, None) is None:
+    if cache.get(cache_key, None) == None:
         # Get all registered models for this topic
         topic  = Topic.objects.get(ontology_as_mod=topic)
         models = topic.get_models()

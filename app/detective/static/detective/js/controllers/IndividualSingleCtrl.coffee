@@ -3,13 +3,15 @@ class IndividualSingleCtrl
     @$inject: ['$scope', '$stateParams', '$state', 'Individual',  'topic', 'individual', 'forms', '$filter', '$anchorScroll', '$location', 'Page', 'QueryFactory', '$sce']
 
     constructor: (@scope, @stateParams, @state, @Individual, @topic, @individual, @forms, @filter, @anchorScroll, @location, @Page, @QueryFactory, $sce)->
-        @scope.get            = (n)=> @individual[n] or false if @individual?
-        @scope.getTrusted     = (n)=>
-            val = @scope.get n
-            if val.length > 0 then ($sce.trustAsHtml val) else val
+        @scope.get            = (n, def=null)=> @individual[n] or def if @individual?
+        @scope.getTrusted     = (n)=> if val.length > 0 then ($sce.trustAsHtml val) else val
         @scope.hasRels        = @hasRels
         @scope.hasNetwork     = => (_.keys (@scope.graphnodes.leafs or {})).length > 1
         @scope.isLiteral      = @isLiteral
+        @scope.hasValue       = (f)=>
+            def = if f.type == "BooleanField" then false else null
+            @scope.get(f.name, def) != null and f.name != 'name'
+        @scope.hasValues      = (f)=> @scope.get(f.name, []).length > 0
         @scope.isString       = (t)=> ["CharField", "URLField"].indexOf(t) > -1
         @scope.isRelationship = (d)=> ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
         @scope.isBoolean      = (t)=> ["BooleanField"].indexOf(t) > -1

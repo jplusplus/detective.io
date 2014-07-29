@@ -58,7 +58,7 @@ This table provides an overview over model attributes available.
     * - help_text
       - string
       - A short description of your model to help the end user understand what the model is about.
-      
+
     * - name
       - string
       - The name of your model. This will be used to generate a slug to access the
@@ -293,30 +293,30 @@ There is a number of special properties that will be applied to fields if they a
 .. list-table::
     :widths: 20 15 65
     :header-rows: 1
-    
+
     * - Name-Value
       - Type-Value
       - Behaviour
-      
+
     * - image
-    * - url
-    * - If a field's name is image and its type 'url' the photo at the given url will be shown as an illustration of the respective entities in the front-end.
-    
+      - url
+      - If a field's name is image and its type 'url' the photo at the given url will be shown as an illustration of the respective entities in the front-end.
+
     * - comment
-    * - string
-    * - If a field's name is 'comment' and its type 'string' a text box (5 lines) will be created instead of a single-line text field.
+      - string
+      - If a field's name is 'comment' and its type 'string' a text box (5 lines) will be created instead of a single-line text field.
 
     * - latitude
-    * - string
-    * - If a field's name is 'latitude' and its type 'string', a map with this location will be shown in the front-end of the respective entity. Only use in combination with 'name'-value 'longitude'. 
-    
+      - string
+      - If a field's name is 'latitude' and its type 'string', a map with this location will be shown in the front-end of the respective entity. Only use in combination with 'name'-value 'longitude'.
+
     * - longitude
-    * - string
-    * - If a field's name is 'longitude' and its type 'string', a map with this location will be shown in the front-end of the respective entity. Use in combination with 'name'-value 'latitude'.
-    
+      - string
+      - If a field's name is 'longitude' and its type 'string', a map with this location will be shown in the front-end of the respective entity. Use in combination with 'name'-value 'latitude'.
+
     * - address
-    * - string
-    * - If a field's name is 'address' and its type 'string', detective connects to a geolocalization API and shows a map with the geolocalized location in the front-end of the respective entity. This functionality is only enabled when 'longitude' and 'latitude' are *not* filled out.
+      - string
+      - If a field's name is 'address' and its type 'string', detective connects to a geolocalization API and shows a map with the geolocalized location in the front-end of the respective entity. This functionality is only enabled when 'longitude' and 'latitude' are *not* filled out.
 
 
 .. _relationship-attributes:
@@ -326,7 +326,6 @@ Relationship field attributes
 
 When the type of your field is "relationship", you have to specify a number of
 special attributes.
-
 
 .. list-table::
     :widths: 20 15 65

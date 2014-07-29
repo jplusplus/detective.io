@@ -126,7 +126,7 @@
         <div class="main-aside-pushed">
             {% include "partials/header.dj.html" %}
             {% include "partials/main-aside.dj.html" %}
-            <div ui-view autoscroll class="content" ng-class="{ freeze: Page.loading() }"></div>
+            <div ui-view class="content" ng-class="{ freeze: Page.loading() }"></div>
             {% include "partials/footer.dj.html" %}
         </div>
     </div>

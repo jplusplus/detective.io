@@ -6,20 +6,18 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 current_topic_updated: "topic:updated"
 
             constructor: ->
-                # Topics list
-                @topics = []
-                # Active topic
-                @topic  = {}
-                # We get all topics here
-                # and we update factory's topics
-                # @getTopics (topics)=> @topics = @topics.concat topics
+                do @reset
+
                 # Update topic list when the user object changes
-                $rootScope.$on "user:updated", =>
-                    console.debug 'must update topics'
-                , true
+                $rootScope.$on "user:updated", @reset, true
 
                 $rootScope.$on '$stateChangeStart', @onStateChanged
 
+            reset: =>
+                # Topics list
+                @topics = []
+                # Active topic
+                @topic = {}
 
             onStateChanged: (e, current, params)=>
                 if params.topic and @topics

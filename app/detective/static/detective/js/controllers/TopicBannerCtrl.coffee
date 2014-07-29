@@ -6,7 +6,6 @@ class TopicBannerCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
-        @scope.toggleGraphNavigation  = @toggleGraphNavigation
         @scope.toggleFiltersSelection = @toggleFiltersSelection
         @scope.toggleSelectAll        = @toggleSelectAll
         @scope.strToColor             = @filter("strToColor")
@@ -53,12 +52,6 @@ class TopicBannerCtrl
         # is newly selected
         else
             @scope.filtersSelected.push(filter_name)
-
-    # show/hide the graph navigation
-    toggleGraphNavigation: =>
-        @scope.graphNavigationEnabled = not @scope.graphNavigationEnabled
-        if @scope.graphNavigationEnabled and not @scope.graphnodes?
-            @renderGraph()
 
     # filter the data and render the graph via @scope.graphnodes
     # shared with detective/js/directives/topic.single.graph.coffee

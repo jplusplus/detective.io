@@ -14,14 +14,10 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
             url:'/api/:topic/v1/:type/?'
             method : 'POST'
             isArray: no
-            paramDefaults:
-                topic: "common"
         bulk:
             url:'/api/:topic/v1/:type/summary/bulk_upload/?'
             method : 'POST'
             isArray: no
-            paramDefaults:
-                topic: "common"
             transformRequest: (data, headersGetter)->
                 fd = new FormData()
                 # We receive an object of array
@@ -36,6 +32,10 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
                 delete headers['Content-Type']
 
                 fd
+        relationships:
+            url:'/api/:topic/v1/:type/:id/relationships/:field/:target/?'
+            method: 'GET'
+            isArray: no
         delete:
             url:'/api/:topic/v1/:type/:id/?'
             method : 'DELETE'
@@ -43,13 +43,10 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
             url:'/api/:topic/v1/:type/:id/patch/?'
             method : 'POST'
             isArray: no
-            paramDefaults:
-                topic: "common"
         graph:
             url:'/api/:topic/v1/:type/:id/graph'
             method: 'GET'
-            isArray: false
+            isArray: no
             paramDefaults:
-                topic: "common"
                 depth: "2"
 ])

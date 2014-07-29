@@ -26,13 +26,14 @@ import logging
 import django_rq
 import zipfile
 import time
+import inspect
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 class SummaryResource(Resource):
     # Local serializer
-    serializer = Serializer(formats=["json"]).serialize
+    serializer = Serializer(formats=["json", "jsonp"]).serialize
 
     class Meta:
         allowed_methods = ['get', 'post']
@@ -52,25 +53,23 @@ class SummaryResource(Resource):
 
     def obj_get(self, request=None, **kwargs):
         content = {}
+        if request is None and "bundle" in kwargs:
+            request = kwargs["bundle"].request
         # Refresh syntax cache at each request
         if hasattr(self, "syntax"): delattr(self, "syntax")
         # Get the current topic
         self.topic = self.get_topic_or_404(request=request)
         # Check for an optional method to do further dehydration.
         method = getattr(self, "summary_%s" % kwargs["pk"], None)
-
         if method:
             try:
-                self.throttle_check(kwargs["bundle"].request)
-                content = method(kwargs["bundle"], kwargs["bundle"].request)
+                self.throttle_check(request)
+                content = method(kwargs["bundle"], request)
                 if isinstance(content, HttpResponse):
                     response = content
                 else:
-                    # Serialize content in json
-                    # @TODO implement a better format support
-                    content  = self.serializer(content, "application/json")
                     # Create an HTTP response
-                    response = HttpResponse(content=content, content_type="application/json")
+                    response = self.create_response(data=content, request=request)
             except ForbiddenError as e:
                 response = http.HttpForbidden(e)
             except UnauthorizedError as e:
@@ -84,6 +83,8 @@ class SummaryResource(Resource):
     # TODO : factorize obj_get and post_detail methods
     def post_detail(self, request=None, **kwargs):
         content = {}
+        if request is None and "bundle" in kwargs:
+            request = kwargs["bundle"].request
         # Get the current topic
         self.topic = self.get_topic_or_404(request=request)
         # Check for an optional method to do further dehydration.
@@ -92,11 +93,8 @@ class SummaryResource(Resource):
             try:
                 self.throttle_check(request)
                 content = method(request, **kwargs)
-                # Serialize content in json
-                # @TODO implement a better format support
-                content  = self.serializer(content, "application/json")
                 # Create an HTTP response
-                response = HttpResponse(content=content, content_type="application/json")
+                response = self.create_response(data=content, request=request)
             except ForbiddenError as e:
                 response = http.HttpForbidden(e)
             except UnauthorizedError as e:
@@ -182,10 +180,18 @@ class SummaryResource(Resource):
                         "related_model": rules[key].target_model.__name__
                     })
 
+            for field in fields:
+                # Create a copy of the rule to avoid compromize the rules singleton
+                field["rules"] = field["rules"].copy()
+                for key, rule in field["rules"].items():
+                    # Convert class to model name
+                    if inspect.isclass(rule):
+                        field["rules"][key] = getattr(rule, "__name__", rule)
+
             available_resources[name] = {
                 'description'         : getattr(model, "_description", None),
                 'topic'               : getattr(model, "_topic", self.topic.slug) or self.topic.slug,
-                'model'               : getattr(model, "__name_", ""),
+                'model'               : getattr(model, "__name__", ""),
                 'verbose_name'        : verbose_name,
                 'verbose_name_plural' : verbose_name_plural,
                 'name'                : name,
@@ -570,7 +576,12 @@ class SummaryResource(Resource):
     def get_relationship_search_output(self):
         output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
         terms  = self.get_relationship_search()
-        return [ output(rs) for rs in terms ]
+        _out = []
+        for model in self.topic.get_models():
+            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() == 'relationship']:
+                if "search_terms" in field["rules"]:
+                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
+        return _out + [ output(rs) for rs in terms ]
 
     def get_literal_search(self):
         # For an unkown reason I can't filter by "is_literal"
@@ -579,7 +590,12 @@ class SummaryResource(Resource):
     def get_literal_search_output(self):
         output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
         terms  = self.get_literal_search()
-        return [ output(rs) for rs in terms ]
+        _out = []
+        for model in self.topic.get_models():
+            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() != 'relationship']:
+                if "search_terms" in field["rules"]:
+                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
+        return _out + [ output(rs) for rs in terms ]
 
     def ngrams(self, input):
         input = input.split(' ')

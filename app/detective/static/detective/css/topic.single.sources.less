@@ -1,0 +1,108 @@
+.field-sources {
+    @border-color: rgba(0, 0, 0, 0.15); 
+    @arrow-width: 15px;
+    @padding: 10px;
+    @background-color: #FFF;
+    @z-index-sources-popover: 4;
+    
+    h4 &,h5 &,h3 &,h2 &,h1 & {
+        font-size : @font-size-base;
+        font-weight: 200;
+        font-family: @font-family-sans-serif;
+        float: right;
+        margin-right: 8px;
+        margin-top: 8px;
+        display: inline-block;
+
+        &__popover {
+            // mystery to be solved.
+            margin-top: 14px;
+        }
+    }
+
+
+    &__popover {
+        // positions & sizes 
+        position: absolute;
+        z-index: @z-index-sources-popover;
+        padding: @padding;
+        min-width: 250px;
+        // other styles (font+colors)
+        background: @background-color;
+        border: 1px solid @border-color;
+
+        text-align: left;
+
+        &--up {
+            right: 0;
+            left: auto;
+            margin-right: 30px;
+            margin-top: 12px;
+            & > div.arrow {
+                right: @padding + 5px;
+                top: 100%;
+                border-top: 0;
+                top: -@arrow-width;  
+                border-bottom-color: @border-color;
+                &:after {
+                    top: 1px;
+                    left: -( @arrow-width - 1px);
+                    border-top: 0;
+                    border-bottom-color: @background-color;
+
+                }
+            }
+        }
+
+        &--right {
+            
+
+            & > div.arrow {
+                border-left: 0;
+                border-right-color: @border-color;
+                &:after {
+                    border-left: 0;
+                    border-right-color: @background-color;
+                }
+            }
+        }
+
+
+        &--down {
+            border-bottom: 0;
+            border-top-color: @border-color;
+            & > div.arrow {
+                border-bottom: 0;
+                border-top-color: @background-color;
+            }
+        }
+
+
+        .arrow {
+            border-width: @arrow-width;
+            &:after {
+                content: " ";
+                border-width: @arrow-width - 1px;
+                display: block;
+            }
+        }
+
+        .arrow, .arrow:after {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-color: transparent;
+        }
+
+        &__list {
+            .list-unstyled();
+            margin-bottom: 0;
+            &__item { 
+                display: block;
+                margin-bottom: 5px;
+            }
+        }
+    }
+}
+

@@ -1,8 +1,8 @@
 class ProfileCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', 'Common', 'Page', 'user']
+    @$inject: ['$scope', '$stateParams', 'Common', 'Page', 'user', 'User']
 
-    constructor: (@scope,  @stateParams, @Common, @Page, user)->
+    constructor: (@scope,  @stateParams, @Common, @Page, user, UserService)->
         @Page.title user.username
         @Page.loading yes
         # ──────────────────────────────────────────────────────────────────────
@@ -12,7 +12,8 @@ class ProfileCtrl
         @scope.userTopics = @Common.query type: "topic", author__id: user.id
         # Get the user
         @scope.user = @Common.get type: "user", id: user.id, =>
-            @scope.user.contribution_groups = _.filter @scope.user.groups, (x) => x.topic.author.id isnt @scope.user.id
+            @scope.user.contribution_groups = _.filter @scope.user.groups, (x) =>
+                (x.topic.author.id isnt @scope.user.id) and (x.topic.public or UserService.hasReadPermission x.topic.ontology_as_mod)
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers

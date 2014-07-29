@@ -2,8 +2,10 @@ angular.module('detective.service').factory 'TopicsFactory', [
     '$q', '$rootScope', '$state', 'Common', 'User', 'UtilsFactory'
     ($q, $rootScope, $state, Common, User, UtilsFactory)->
         new class TopicsFactory
+            EVENTS:
+                current_topic_updated: "topic:updated"
+                
             constructor: ->
-                @logger = UtilsFactory.loggerDecorator('TopicsFactory')
                 # Topics list
                 @topics = []
                 # Active topic
@@ -14,11 +16,26 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 # Update topic list when the user object changes
                 $rootScope.$on "user:updated", @updateTopics, true
 
+                $rootScope.$on '$stateChangeStart', @onStateChanged
+
+
+            onStateChanged: (e, current, params)=>
+                if params.topic and @topics 
+                    @setCurrent @getTopic params.topic
+
             updateTopics: =>
                 @getTopics (data)=>
                     @topics = data
                     if @topic_slug
-                        @topic = @getTopic @topic_slug
+                        @topic = @setTopic @topic_slug
+
+            setCurrent: (topic)=>
+                if typeof topic is typeof {}
+                    @topic = topic
+                else
+                    @topic = @getTopic topic 
+
+                $rootScope.$broadcast @EVENTS.current_topic_updated
 
             updateCurrentLocation: (topic)=>
                 #console.log topic

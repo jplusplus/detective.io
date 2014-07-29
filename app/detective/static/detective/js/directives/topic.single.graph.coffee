@@ -6,7 +6,7 @@
         data : '='
     link: (scope, element, attr) ->
         src = (angular.element '.topic__single__graph__worker script')[0].src
-        src = src.slice ((src.indexOf "{{STATIC_URL}}") + "{{STATIC_URL}}".length)
+        src = src.slice ((src.indexOf window.STATIC_URL) + window.STATIC_URL.length)
         worker = new Worker "/proxy/" + src
 
         absUrl = do $location.absUrl

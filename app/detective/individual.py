@@ -28,7 +28,7 @@ import json
 import re
 import copy
 
-# inspired from django.utils.formats.ISO_FORMATS['DATE_INPUT_FORMATS'][1]
+DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
@@ -75,7 +75,7 @@ class IndividualMeta:
     authentication         = MultiAuthentication(Authentication(), BasicAuthentication(), SessionAuthentication())
     filtering              = {'name': ALL}
     ordering               = {'name': ALL}
-    serializer             = Serializer(formats=['json', 'jsonp', 'xml', 'yaml'])
+    serializer             = Serializer(formats=['json', 'jsonp'])
 
 class FieldSourceResource(ModelResource):
     class Meta:
@@ -119,12 +119,6 @@ class IndividualResource(ModelResource):
             options_copy.pop("order_by", None)
         return super(IndividualResource, self).apply_sorting(obj_list, options_copy)
 
-    def determine_format(self, request):
-        """
-        Force to render json. XML serializer fails.
-        ref https://github.com/jplusplus/detective.io/issues/238
-        """
-        return 'application/json'
 
     def build_schema(self):
         """
@@ -149,9 +143,14 @@ class IndividualResource(ModelResource):
     def get_model(self):
         return self.get_queryset().model
 
-    def get_model_fields(self):
-        # Find fields of the queryset's model
-        return self.get_model()._meta.fields
+    def get_model_fields(self, name=None):
+        if name is None:
+            # Find fields of the queryset's model
+            return self.get_model()._meta.fields
+        else:
+            fields = [f for f in self.get_model()._meta.fields if f.name == name]
+            return fields[0] if len(fields) else None
+
 
     def get_model_field(self, name):
         target = None
@@ -163,15 +162,7 @@ class IndividualResource(ModelResource):
     def need_to_many_field(self, field):
         # Limit the definition of the new fields
         # to the relationships
-        if isinstance(field, MultipleNodes) and not field.name.endswith("_set"):
-            # The resource already define a field for this one
-            # resource_field = self.fields[field.name]
-            # But it's probably still a charfield !
-            # And it's so bad.
-            # if isinstance(resource_field, fields.CharField):
-            return True
-        # Return false if not needed
-        return False
+        return isinstance(field, MultipleNodes) and not field.name.endswith("_set")
 
     # TODO: Find another way!
     def dummy_class_to_ressource(self, klass):
@@ -215,7 +206,6 @@ class IndividualResource(ModelResource):
         return reverse(namespaced, args=args, kwargs=kwargs)
 
     def use_in(self, bundle=None):
-        # Use in post/put
         if bundle.request.method in ['POST', 'PUT']:
             return bundle.request.path == self.get_resource_uri()
         # Use in detail
@@ -240,7 +230,6 @@ class IndividualResource(ModelResource):
             # Filter rules to keep only Neomatch
             if isinstance(rules[key], Neomatch):
                 bundle.data[key] = rules[key].query(bundle.obj.id)
-
         return bundle
 
     def dehydrate(self, bundle):
@@ -336,6 +325,8 @@ class IndividualResource(ModelResource):
             modelField = getattr(bundle.obj, field, False)
             # The field doesn't exist
             if not modelField: setattr(bundle.obj, field, None)
+            # Skip admmin field
+            elif field.startswith("_"): continue
             # Transform list field to be more flexible
             elif type(bundle.data[field]) is list:
                 rels = bundle.data[field]
@@ -368,6 +359,9 @@ class IndividualResource(ModelResource):
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
             url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/graph%s$" % params, self.wrap_view('get_graph'), name="api_get_graph"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships/(?P<field>\w[\w-]*)%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships_field"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships/(?P<field>\w[\w-]*)/(?P<end>\w[\w-]*)%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships_field_end"),
         ]
 
 
@@ -455,6 +449,30 @@ class IndividualResource(ModelResource):
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
 
+    def patch_sources(self, sources, node):
+        def arr_no_dict_dup(in_arr):
+            out_arr = []
+            for el in in_arr:
+                existing = len(
+                        filter(
+                            lambda t: t['field'] == el['field'] and el['reference'] == t['reference'],
+                            out_arr
+                        )
+                    ) > 0
+                if not existing:
+                    out_arr.append(el)
+            return out_arr
+
+        # remove source duplicates
+        all_filtered_sources_data = arr_no_dict_dup(sources)
+        # remove empty references
+        all_filtered_sources_data = filter(lambda el: el['reference'] not in [None, ''], sources)
+
+        # dump patching: remove all old field_sources and put the new ones
+        [ source.delete() for source in  FieldSource.objects.filter(individual=node.id)]
+        for source_data in all_filtered_sources_data:
+            FieldSource.objects.create(individual=node.id, **source_data)
+
     def get_patch(self, request, **kwargs):
         self.method_check(request, allowed=['post'])
         #self.is_authenticated(request)
@@ -473,16 +491,7 @@ class IndividualResource(ModelResource):
         data = body.copy()
         for field in body:
             if field == "field_sources":
-                for source in  data[field]:
-                    fs, created = FieldSource.objects.get_or_create(individual=node.id,
-                                                                    field=source["field"])
-                    # Update the value
-                    if source["url"] != "" and source["url"] is not None:
-                        fs.url = source["url"]
-                        fs.save()
-                    # Remove source field
-                    else:
-                        fs.delete()
+                self.patch_sources( data[field], node )
                 # Continue to not deleted the field
                 continue
             # If the field exists into our model
@@ -511,12 +520,16 @@ class IndividualResource(ModelResource):
                                 del data[field][idx]
                                 # Too bad! Go to the next related object
                                 continue
-                # It's a literal value
-                else:
+                # It's a literal value and not the ID
+                elif field != 'id' and value is not None:
                     field_prop = self.get_model_field(field)._property
                     if isinstance(field_prop, DateProperty):
-                        # It's a date and therefor `value` should be converted as it
-                        value  = datetime.strptime(value, RFC_DATETIME_FORMAT)
+                        try:
+                            # It's a date and therefor `value` should be converted as it
+                            value  = datetime.strptime(value, RFC_DATETIME_FORMAT)
+                        except ValueError:
+                            # Try a second format
+                            value  = datetime.strptime(value, DATETIME_FORMAT)
                     # Set the new value
                     setattr(node, field, value)
                 # Continue to not deleted the field
@@ -532,6 +545,69 @@ class IndividualResource(ModelResource):
             # Save the node
             node.save()
         return self.create_response(request, data)
+
+
+    def get_relationships(self, request, **kwargs):
+        # Extract node id from given node uri
+        node_id = lambda uri: re.search(r'(\d+)$', uri).group(1)
+        # Get the end of the given relationship
+        rel_from  = lambda rel, side: node_id(rel.__dict__["_dic"][side])
+        connected = lambda rel, idx: rel_from(rel, "end") == idx or rel_from(rel, "start") == idx
+
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+        pk = kwargs['pk']
+
+        node = connection.nodes.get(pk)
+        # Only the relationships for a given field
+        if "field" in kwargs:
+            field = self.get_model_fields(kwargs["field"])
+            # Unkown type
+            if field is None: raise Http404("Unkown relationship field.")
+            reltype = getattr(field, "rel_type", None)
+            # Not a relationship
+            if reltype is None: raise Exception("The given field is not a relationship.")
+            rels = node.relationships.all(types=[reltype])
+            # We want to filter the relationships with an other node
+            if "end" in kwargs:
+                end = kwargs["end"]
+                # Then filter the relations
+                ids = [ rel.id for rel in rels if connected(rel, end) ]
+                if len(ids):
+                    # Show additional field following the model's rules
+                    rules  = register.topics_rules()
+                    # Model that manages properties
+                    though = rules.model( self.get_model() ).field(kwargs["field"]).get("through")
+                    # Get the properties for this relationship
+                    try:
+                        properties = though.objects.get(_relationship=ids[0])
+                        # Get the module for this model
+                        module = self.dummy_class_to_ressource(though)
+                        # Instanciate the resource
+                        resource = import_class(module)()
+                        # Create a bundle with this resource
+                        bundle = resource.build_bundle(obj=properties, request=request)
+                        bundle = resource.full_dehydrate(bundle, for_list=True)
+                        # We ask for relationship properties
+                        return resource.create_response(request, bundle)
+                    except though.DoesNotExist:
+                        endnodes = [ int(pk), int(end) ]
+                        # We ask for relationship properties
+                        return self.create_response(request, {
+                            "_relationship": ids[0],
+                            "_endnodes": endnodes
+                        })
+                else:
+                    # No relationship
+                    return self.create_response(request, { "_relationship": None })
+        # All relationship
+        else:
+            rels = node.relationships.all()
+        # Only returns IDS
+        ids = [ rel.id for rel in rels ]
+        return self.create_response(request, ids)
+
+
 
     def get_graph(self, request, **kwargs):
         self.method_check(request, allowed=['get'])

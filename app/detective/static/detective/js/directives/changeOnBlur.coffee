@@ -4,8 +4,22 @@ angular.module('detective.directive').directive "changeOnBlur", ->
     restrict: "A"
     require: "ngModel"
     link: (scope, elm, attr, ngModelCtrl) ->
-        return  if attr.type is "radio" or attr.type is "checkbox"
-        elm.unbind("input").unbind("keydown").unbind("change")
-        elm.bind "change", ->
+        return if attr.type is "radio" or attr.type is "checkbox"
+
+        if attr.textAngular?
+            getValue = ((input) =>
+                =>
+                    do input.val
+            ) elm.find 'input[type="hidden"]'
+            elm = elm.find '.ta-editor'
+            eventOff = ['input', 'keydown', 'keyup', 'change']
+
+        eventOn = eventOn || 'change'
+        eventOff = eventOff || ['input', 'keydown', 'keyup', 'change', 'blur']
+        getValue = getValue || =>
+            do elm.val
+
+        elm.off e for e in eventOff
+        elm.on eventOn, ->
             scope.$apply ->
-                ngModelCtrl.$setViewValue elm.val()
+                ngModelCtrl.$setViewValue do getValue

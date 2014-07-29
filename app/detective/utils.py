@@ -136,6 +136,10 @@ def get_registered_models():
             pass
     return mdls
 
+def get_topic_from_model(model):
+    from app.detective.models import Topic
+    return Topic.objects.get(ontology_as_mod=get_model_topic(model))
+
 def get_model_fields(model, order_by='name'):
     from app.detective           import register
     from django.db.models.fields import FieldDoesNotExist
@@ -145,8 +149,17 @@ def get_model_fields(model, order_by='name'):
     for f in model._meta.fields:
         # Ignores field terminating by + or begining by _
         if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):
+
+            try:
+                # Get the rules related to this model
+                field_rules = models_rules.field(f.name).all()
+            except FieldDoesNotExist:
+                # No rules
+                field_rules = []
+
+            field_type = f.get_internal_type()
             # Find related model for relation
-            if f.get_internal_type().lower() == "relationship":
+            if field_type.lower() == "relationship":
                 # We received a model as a string
                 if type(f.target_model) is str:
                     # Extract parts of the module path
@@ -161,13 +174,6 @@ def get_model_fields(model, order_by='name'):
             else:
                 related_model = None
 
-            try:
-                # Get the rules related to this model
-                field_rules = models_rules.field(f.name).all()
-            except FieldDoesNotExist:
-                # No rules
-                field_rules = []
-
             verbose_name = getattr(f, "verbose_name", None)
 
             if verbose_name is None:
@@ -176,7 +182,7 @@ def get_model_fields(model, order_by='name'):
 
             field = {
                 'name'         : f.name,
-                'type'         : f.get_internal_type(),
+                'type'         : field_type,
                 'direction'    : getattr(f, "direction", ""),
                 'rel_type'     : getattr(f, "rel_type", ""),
                 'help_text'    : getattr(f, "help_text", ""),
@@ -187,9 +193,12 @@ def get_model_fields(model, order_by='name'):
             }
             fields.append(field)
 
-    get_key=lambda el: el[order_by]
+    if hasattr(model, '__fields_order__'):
+        fields.sort(key=lambda x: model.__fields_order__.index(x['name']) if x['name'] in model.__fields_order__ else 0)
+    else:
+        get_key=lambda el: el[order_by]
+        fields = sorted(fields, key=get_key)
 
-    fields = sorted(fields, key=get_key)
     return fields
 
 def get_model_nodes():

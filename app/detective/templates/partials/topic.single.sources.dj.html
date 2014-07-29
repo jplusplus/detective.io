@@ -1,0 +1,22 @@
+<div class='field-sources' click-outside="fieldSourcesOpened=false" ng-show="fieldSources.length">
+    <a  class='open-field-sources-link' ng-click="fieldSourcesOpened=!fieldSourcesOpened">
+        Sources
+    </a>
+    <div class='field-sources__popover'
+         ng-show='fieldSourcesOpened'
+         ng-class='"field-sources__popover--[[orientation || "up"]]"'>
+        <div class='arrow'></div>
+        <ul class="field-sources__popover__list">
+            <li class="field-sources___popover__list__item"
+                 ng-repeat="source in fieldSources track by source.reference">
+
+                <a ng-if="isSourceURLValid(source)"
+                   target="_blank"
+                   ng-href="[[ source.reference ]]">
+                   [[ source.reference ]]
+                </a>
+                <span ng-if="!isSourceURLValid(source)">[[ source.reference ]]</span>
+            </li>
+        </ul>
+    </div>
+</div>

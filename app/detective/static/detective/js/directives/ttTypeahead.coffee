@@ -37,7 +37,12 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         value     : '=?'
         limit     : "@"
         change    : "&"
+
     link: (scope, element, attrs) ->
+        # Helper to save the search response
+        saveResponse = (response) ->
+            lastDataset = response.objects
+
         # Select the individual to look for
         individual = (scope.individual() or "").toLowerCase()
         itopic     = (scope.topic() or $stateParams.topic or "common").toLowerCase()
@@ -45,18 +50,13 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         element.val scope.model.name if scope.model?
         element.val scope.value if scope.value?
 
-        scope.$watch 'value', (val)->
-            element.val val
+        scope.$watch 'value', (val, old)->
+            element.typeahead('val', val)
+        , yes
 
-        scope.$parent.$watch (-> element.val()), (val)->
-            scope.value = val
-
-        # Helper to save the search response
-        saveResponse = (response) ->
-            lastDataset = response.objects
 
         bh = new Bloodhound
-            datumTokenizer : Bloodhound.tokenizers.obj.whitespace (scope.valueKey or "name")
+            datumTokenizer : Bloodhound.tokenizers.obj.whitespace
             queryTokenizer : Bloodhound.tokenizers.whitespace
             dupDetector : (a, b) ->
                 a_id = a.id || a.subject.name
@@ -68,18 +68,20 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             remote :
                 url : scope.remote or "/api/#{itopic}/v1/#{individual}/search/?q=%QUERY"
                 filter : saveResponse
+
         bh.storage = null # Hack to disable localStorage caching
         do bh.initialize
 
-        # Create the typehead
         options =
+            # Create the typehead
             hint : yes
             highlight : yes
+
         element.typeahead options,
             displayKey : (scope.valueKey or "name")
             name : 'suggestions'
             source : do bh.ttAdapter
-            templates : {
+            templates :
                 suggestion : (template.compile [
                     '<div>',
                         '<div class="tt-suggestion__line" ng-class="{\'tt-suggestion__line--with-model\': getModel()}">',
@@ -93,7 +95,6 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                         '</div>',
                     '</div>'
                 ].join "").render
-            }
 
         # Watch keys
         element.on "keyup", (event)->

@@ -115,6 +115,7 @@ TEMPLATE_LOADERS = (
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
 
 MIDDLEWARE_CLASSES = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -161,12 +162,9 @@ COMPRESS_PRECOMPILERS = (
 # Activate CSS minifier
 COMPRESS_CSS_FILTERS = (
     "app.detective.compress_filter.CustomCssAbsoluteFilter",
-    "compressor.filters.template.TemplateFilter",
 )
 
-COMPRESS_JS_FILTERS = (
-    "compressor.filters.template.TemplateFilter",
-)
+COMPRESS_JS_FILTERS = ()
 
 COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
@@ -177,7 +175,8 @@ COMPRESS_PARSER = 'compressor.parser.HtmlParser'
 COMPRESS_ENABLED = False
 #INTERNAL_IPS = ('127.0.0.1',)
 
-TASTYPIE_DEFAULT_FORMATS = ['json']
+TASTYPIE_DEFAULT_FORMATS = ['json', 'jsonp']
+
 
 INSTALLED_APPS = (
     # 'suit' must be added before 'django.contrib.admin'
@@ -189,6 +188,8 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
     'django.contrib.auth',
+    # Allow CORS
+    'corsheaders',
     # Thumbnails generator
     'easy_thumbnails',
     # Sign up activation

@@ -16,7 +16,7 @@ import imp
 def topics_rules():
     """
         Auto-discover topic-related rules by looking into
-        evry topics' directories for forms.py files.
+        every topics' directories for forms.py files.
     """
     # Avoid bi-directional dependancy
     from app.detective.utils import get_topics

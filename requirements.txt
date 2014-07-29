@@ -11,6 +11,7 @@ django-debug-toolbar==1.2.1
 django-filter==0.6
 django-password-reset==0.5.1
 django-registration==1.0
+django-redis==3.7.0
 django-rq==0.6.0
 django-sslify==0.2.3
 django-storages==1.1.8
@@ -21,8 +22,8 @@ django-urlmiddleware==0.2.1
 Django==1.5.4
 djrill==0.7.0
 easy-thumbnails==2.0.1
-git+git://github.com/scholrly/neo4django.git#egg=neo4django
 git+git://github.com/jplusplus/django-debug-toolbar-neo4j-panel.git@HEAD#egg=neo4j_panel-dev
+git+git://github.com/scholrly/neo4django.git#egg=neo4django
 gunicorn==0.17.4
 httplib2==0.8
 jsonfield==0.9.20

@@ -12,8 +12,12 @@ from tastypie.resources               import ModelResource
 from tastypie.utils                   import trailing_slash
 from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
+from django.core.mail                 import EmailMultiAlternatives
 from django.db.models                 import Q
 from django.http                      import Http404, HttpResponse
+from django.template.loader           import get_template
+from django.template                  import Context
+
 import json
 import re
 
@@ -81,6 +85,18 @@ class TopicResource(ModelResource):
                 # Nothing yet here!
                 raise Http404("Sorry, unkown user.")
 
+        # Creates link to the topic
+        link = request.build_absolute_uri(topic.get_absolute_url())
+        # Load email template
+        template = get_template("email.topic-invitation.existing-user.txt")
+        context = Context({ 'topic': topic, 'user': request.user, 'link': link })
+        # Render template
+        text_content = template.render(context)
+        # Prepare and send email
+        subject = '[Detective.io] You’ve just been added to an investigation'
+        from_email, to_email = 'contact@detective.io', user.email
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
+        msg.send()
         # Add user to the collaborator group
         topic.get_contributor_group().user_set.add(user)
 

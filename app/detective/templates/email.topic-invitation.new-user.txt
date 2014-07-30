@@ -1,0 +1,13 @@
+Hi there,
+
+Someone needs your help on an investigation! User [name of the inviter] is working on an investigation called [name of the Topic].
+
+The user [user] has added you to the investigation [topic_name].
+
+To explore the data already collected and start contributing to the investigation you need to register an account. It’s pretty easy, head to this link and follow the instructions:
+https://detective.io/register
+
+You will find the investigation here: [topic_link]
+
+Cheers,
+The Detective.io team

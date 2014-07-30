@@ -1,0 +1,12 @@
+Hi there,
+
+We’re writing from detective.io, the tool for easy data collection and analysis.
+
+The user {{user.username}} has added you to the investigation "{{topic.title}}".
+
+To explore the data already collected and start contributing to the investigation go to:
+{{link}}
+
+
+Cheers,
+The Detective.io team

@@ -25,6 +25,7 @@ angular.module('detective.service').factory 'TopicsFactory', [
                         @setCurrent topic
 
             setCurrent: (topic)=>
+                return unless topic?
                 if typeof topic is typeof {}
                     (@topics.push topic) unless (_.findWhere @topics, slug: topic.slug)
                     @topic = topic

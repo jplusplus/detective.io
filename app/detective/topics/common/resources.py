@@ -47,7 +47,6 @@ class TopicResource(ModelResource):
         queryset  = Topic.objects.all().prefetch_related('author')
         filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
 
-
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
         return [
@@ -59,6 +58,8 @@ class TopicResource(ModelResource):
         self.method_check(request, allowed=['post'])
         self.is_authenticated(request)
         self.throttle_check(request)
+
+        topic = Topic.objects.get(id=kwargs["pk"])
 
         body = json.loads(request.body)
         collaborator = body.get("collaborator", None)
@@ -79,6 +80,9 @@ class TopicResource(ModelResource):
             except User.DoesNotExist:
                 # Nothing yet here!
                 raise Http404("Sorry, unkown user.")
+
+        # Add user to the collaborator group
+        topic.get_contributor_group().user_set.add(user)
 
         return HttpResponse("Invitation send!")
 

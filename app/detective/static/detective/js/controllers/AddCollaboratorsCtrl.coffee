@@ -17,7 +17,6 @@ class AddCollaboratorsCtrl
         @scope.invite = (collaborator)=>
         	@Topic.invite {id: @topic.id}, {collaborator: collaborator}
 
-
     @resolve:
         topic: ["Common", "$stateParams", (Common, $stateParams)->
             Common.cachedGet(type: "topic", id: $stateParams.topic).$promise

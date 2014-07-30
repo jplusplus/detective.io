@@ -1,8 +1,10 @@
-from django.forms.forms import pretty_name
-from random             import randint
-from os.path            import isdir, join
-from os                 import listdir
-from unidecode          import unidecode
+from django.forms.forms     import pretty_name
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from random    import randint
+from os.path   import isdir, join
+from os        import listdir
+from unidecode import unidecode
 import importlib
 import inspect
 import os
@@ -301,10 +303,8 @@ def open_csv(csv_file):
 
 # @src: http://stackoverflow.com/a/3218128/797941
 def is_valid_email(email):
-    from django.core.validators import validate_email
-    from django.core.exceptions import ValidationError
     try:
-        validate_email( email )
+        validate_email(email)
         return True
     except ValidationError:
         return False

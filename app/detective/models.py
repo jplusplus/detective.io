@@ -7,6 +7,7 @@ from django.db                  import models
 from django.db.models.fields    import FieldDoesNotExist
 from jsonfield                  import JSONField
 from tinymce.models             import HTMLField
+from django.contrib.auth.models import Group
 
 import inspect
 import os
@@ -66,6 +67,13 @@ class Topic(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def get_contributor_group(self):
+        try:
+            return Group.objects.get(name="%s_contributor" % self.app_label())
+        except Group.DoesNotExist:
+            create_permissions(self.get_module(), app_label=self.ontology_as_mod)
+            return Group.objects.get(name="%s_contributor" % self.app_label())
 
     def app_label(self):
         if self.slug in ["common", "energy"]:

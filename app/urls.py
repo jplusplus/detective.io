@@ -1,4 +1,5 @@
 from app.middleware.virtualapi import VirtualApi
+from app.middleware.storage    import StoreTopic
 from app.middleware.storage    import StoreTopicList
 from django.conf               import settings
 from django.conf.urls          import patterns, include, url
@@ -10,6 +11,7 @@ admin.autodiscover()
 # If needed, this middleware will create the API endpoints and resources
 # that match to the given slug.
 middlewarepatterns = mpatterns('',
+    middleware(r'^api/([a-zA-Z0-9_\-]+)/', StoreTopic),
     middleware(r'^api/([a-zA-Z0-9_\-]+)/', StoreTopicList),
     middleware(r'^api/([a-zA-Z0-9_\-]+)/', VirtualApi),
 )
@@ -43,7 +45,7 @@ urlpatterns = patterns('',
 )
 
 if settings.DEBUG:
-    import debug_toolbar 
+    import debug_toolbar
     urlpatterns += patterns('',
         url(r'^__debug__/', include(debug_toolbar.urls)),
     )

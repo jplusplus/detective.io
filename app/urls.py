@@ -33,11 +33,11 @@ urlpatterns = patterns('',
     url(r'^contact-us/$',                                             'app.detective.views.home', name='contact-us'),
     url(r'^job-runner/',                                              include('django_rq.urls')),
     url(r'^proxy/(?P<name>([a-zA-Z0-9_\-/.]+))',                      'app.detective.views.proxy', name='proxy'),
-    url(r'^[^_][a-zA-Z0-9_\-/.]+/$',                                  'app.detective.views.home', name='user'),
-    url(r'^[^_][a-zA-Z0-9_\-/.]+/[a-zA-Z0-9_\-/]+/$',                 'app.detective.views.home', name='explore'),
-    url(r'^[^_][a-zA-Z0-9_\-/.]+/[a-zA-Z0-9_\-/]+/\w+/$',             'app.detective.views.home', name='list'),
-    url(r'^[^_][a-zA-Z0-9_\-/.]+/[a-zA-Z0-9_\-/]+/\w+/\d+/$',         'app.detective.views.home', name='single'),
-    url(r'^[^_][a-zA-Z0-9_\-/.]+/[a-zA-Z0-9_\-/]+/contribute/$',      'app.detective.views.home', name='contribute'),
+    url(r'^[a-zA-Z0-9_\-/.]+/$',                                      'app.detective.views.home', name='user'),
+    url(r'^[a-zA-Z0-9_\-/.]+/[a-zA-Z0-9_\-/]+/$',                     'app.detective.views.home', name='explore'),
+    url(r'^[a-zA-Z0-9_\-/.]+/[a-zA-Z0-9_\-/]+/\w+/$',                 'app.detective.views.home', name='list'),
+    url(r'^[a-zA-Z0-9_\-/.]+/[a-zA-Z0-9_\-/]+/\w+/\d+/$',             'app.detective.views.home', name='single'),
+    url(r'^[a-zA-Z0-9_\-/.]+/[a-zA-Z0-9_\-/]+/contribute/$',          'app.detective.views.home', name='contribute'),
     url(r'^partial/topic.explore.(?P<topic>([a-zA-Z0-9_\-/]+))\.html$', 'app.detective.views.partial_explore', name='partial_explore'),
     url(r'^partial/(?P<partial_name>([a-zA-Z0-9_\-/.]+))\.html$',  'app.detective.views.partial', name='partial'),
     url(r'^tinymce/', include('tinymce.urls')),
@@ -46,9 +46,9 @@ urlpatterns = patterns('',
 
 if settings.DEBUG:
     import debug_toolbar
-    urlpatterns += patterns('',
+    urlpatterns = patterns('',
         url(r'^__debug__/', include(debug_toolbar.urls)),
-    )
+    ) + urlpatterns
 
 
 # Handle 404 with the homepage

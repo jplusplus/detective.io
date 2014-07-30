@@ -17,15 +17,13 @@ from tastypie.resources         import Resource
 from tastypie.serializers       import Serializer
 from .jobs                      import process_parsing
 from psycopg2.extensions        import adapt
-from StringIO                   import StringIO
 from .errors                    import ForbiddenError, UnauthorizedError
-from .jobs                      import process_bulk_parsing_and_save_as_model
+from .jobs                      import process_bulk_parsing_and_save_as_model, render_csv_zip_file
 import app.detective.utils      as utils
 import json
 import re
 import logging
 import django_rq
-import zipfile
 import inspect
 
 # Get an instance of a logger
@@ -40,8 +38,8 @@ class SummaryResource(Resource):
         resource_name   = 'summary'
         object_class    = object
 
-
-    def get_page_number(self, offset=0, limit=20):
+    @staticmethod
+    def get_page_number(offset=0, limit=20):
         if offset < 0:
             return -1
         else:
@@ -304,30 +302,21 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
-    def summary_rdf_search(self, bundle, request):
-        self.method_check(request, allowed=['get'])
 
-        limit     = int(request.GET.get('limit', 20))
-        offset    = int(request.GET.get('offset', 0))
-        query     = json.loads(request.GET.get('q', 'null'))
+    def _rdf_search(self, query, limit=20, offset=0):
         subject   = query.get("subject", None)
         predicate = query.get("predicate", None)
         obj       = query.get("object", None)
-        results   = self.rdf_search(subject, predicate, obj)
+        results   = self.rdf_search_query(subject, predicate, obj)
         # Stop now in case of error
         if "errors" in results: return results
         paginator = Paginator(results, limit)
-        try:
-            p     = self.get_page_number(offset, limit )
-            page  = paginator.page(p)
-        except InvalidPage:
-            raise Http404("Sorry, no results on that page.")
-
-        objects = []
+        p         = SummaryResource.get_page_number(offset, limit )
+        page      = paginator.page(p)
+        objects   = []
         for result in page.object_list:
             objects.append(result)
-
-        object_list = {
+        return {
             'objects': objects,
             'meta': {
                 'q': query,
@@ -337,6 +326,15 @@ class SummaryResource(Resource):
             }
         }
 
+    def summary_rdf_search(self, bundle, request):
+        self.method_check(request, allowed=['get'])
+        limit     = int(request.GET.get('limit', 20))
+        offset    = int(request.GET.get('offset', 0))
+        query     = json.loads(request.GET.get('q', 'null'))
+        try:
+            object_list = self._rdf_search(query, limit, offset)
+        except InvalidPage:
+            raise Http404("Sorry, no results on that page.")
         self.log_throttled_access(request)
         return object_list
 
@@ -416,98 +414,9 @@ class SummaryResource(Resource):
 
     def summary_export(self, bundle, request):
         self.method_check(request, allowed=['get'])
-
-        def writeAllInZip(objects, columns, zip, model_name=None):
-            if isinstance(objects[0], dict):
-                def _getattr(o, prop):
-                    try:
-                        return o[prop]
-                    except KeyError:
-                        return ''
-            else:
-                def _getattr(o, prop):
-                    return getattr(o, prop)
-
-            all_ids = []
-            model_name = model_name or objects[0].__class__.__name__
-            content = "{model_name}_id,{columns}\n".format(model_name=model_name, columns=','.join(columns))
-            for obj in objects:
-                all_ids.append(_getattr(obj, 'id'))
-                objColumns = []
-                for column in columns:
-                    val = unicode(_getattr(obj, column)).encode('utf-8', 'ignore').replace(',', '').replace("\n", '')
-                    if val == 'None':
-                        val = ''
-                    objColumns.append(val)
-                content += "{id},{columns}\n".format(id=_getattr(obj, 'id'), columns=','.join(objColumns))
-            zip.writestr("{0}.csv".format(model_name), content)
-            return all_ids
-
-        def getColumns(model):
-            edges = dict()
-            columns = []
-            fields = utils.get_model_fields(model)
-            for field in fields:
-                if field['type'] != 'Relationship':
-                    if field['name'] not in ['id']:
-                        columns.append(field['name'])
-                else:
-                    edges[field['rel_type']] = [field['model'], field['name'], field['related_model']]
-            return (columns, edges)
-
-        buffer = StringIO()
-        zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
-
-        models = self.topic.get_models()
-        if 'q' not in request.GET:
-            exportEdges = not ('type' in request.GET)
-            for model in models:
-                if 'type' in request.GET and model.__name__.lower() != request.GET['type']:
-                    continue
-
-                (columns, edges) = getColumns(model)
-                objects = model.objects.all()
-
-                if len(objects) > 0:
-                    all_ids = writeAllInZip(objects, columns, zip)
-                    if exportEdges:
-                        for key in edges.keys():
-                            rows = connection.cypher("""
-                                START root=node({nodes})
-                                MATCH (root)-[r:`{rel}`]->(leaf)
-                                RETURN id(root) as id_from, id(leaf) as id_to
-                            """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)).to_dicts()
-                            content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
-                            for row in rows:
-                                content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
-                            zip.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
-        else:
-            request.GET = dict(q=request.GET['q'])
-            page        = 1
-            limit       = 1
-            objects     = []
-            total       = -1
-            while len(objects) != total:
-                try:
-                    request.GET['offset'] = (page - 1) * limit
-                    result                = self.summary_rdf_search(bundle, request)
-                    objects              += result['objects']
-                    total                 = result['meta']['total_count']
-                    page                 += 1
-                except KeyError:
-                    break
-            for model in models:
-                if model.__name__ == objects[0]['model']:
-                    break
-            (columns, _) = getColumns(model)
-            writeAllInZip(objects, columns, zip, model.__name__)
-
-        zip.close()
-        buffer.flush()
-        ret_zip = buffer.getvalue()
-        buffer.close()
-
-        response = HttpResponse(ret_zip, mimetype='application/zip')
+        # FIXME: NEED A JOB
+        zip_file = render_csv_zip_file(self, model_type=request.GET.get("type"), query=request.GET.get("q"))
+        response = HttpResponse(zip_file, mimetype='application/zip')
         response['Content-Disposition'] = "attachement; filename=export-{0}.zip".format(self.topic.slug)
         return response
 
@@ -527,7 +436,7 @@ class SummaryResource(Resource):
         """ % (match, self.topic.app_label() )
         return connection.cypher(query).to_dicts()
 
-    def rdf_search(self, subject, predicate, obj):
+    def rdf_search_query(self, subject, predicate, obj):
         identifier = obj["id"] if "id" in obj else obj
         # retrieve all models in current topic
         all_models = dict((model.__name__, model) for model in self.topic.get_models())
@@ -575,7 +484,6 @@ class SummaryResource(Resource):
             )
         else:
             return {'errors': 'Unkown predicate type: %s' % predicate["name"]}
-
         return connection.cypher(query).to_dicts()
 
 

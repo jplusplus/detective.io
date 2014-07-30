@@ -14,17 +14,17 @@ class JsonAsHTML(object):
     '''
 
     def process_response(self, request, response):
-
+        in_debug = request.GET.get('debug', None)
         #not for production or production like environment 
-        if not settings.DEBUG:
+        if not settings.DEBUG or not in_debug:
             return response
 
         #do nothing for actual ajax requests
-        if request.is_ajax():
+        elif request.is_ajax():
             return response
 
         #only do something if this is a json response
-        if "application/json" in response['Content-Type'].lower():
+        elif "application/json" in response['Content-Type'].lower():
             title = "JSON as HTML Middleware for: %s" % request.get_full_path()
             response.content = u"<html><head><title>%s</title></head><body>%s</body></html>" % (title, response.content.decode('utf-8'))
             response['Content-Type'] = 'text/html'

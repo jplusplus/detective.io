@@ -248,7 +248,7 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                             # map the object with the ID defined in the .csv
                             id_mapping[(entity, id)] = item
                             file_reading_progression += 1
-                            # FIXME: job can be accessed somewhere else (i.e detective/topics/common/job.py)
+                            # FIXME: job can be accessed somewhere else (i.e detective/topics/common/jobs.py:JobResource)
                             # Concurrent access are not secure here.
                             # For now we refresh the job just before saving it.
                             job.refresh()

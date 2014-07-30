@@ -302,7 +302,6 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
-
     def _rdf_search(self, query, limit=20, offset=0):
         subject   = query.get("subject", None)
         predicate = query.get("predicate", None)
@@ -485,7 +484,6 @@ class SummaryResource(Resource):
         else:
             return {'errors': 'Unkown predicate type: %s' % predicate["name"]}
         return connection.cypher(query).to_dicts()
-
 
     def get_models_output(self):
         # Select only some atribute

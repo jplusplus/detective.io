@@ -4,60 +4,58 @@ angular.module('detective.service').factory 'TopicsFactory', [
         new class TopicsFactory
             EVENTS:
                 current_topic_updated: "topic:updated"
-                
+
             constructor: ->
-                # Topics list
-                @topics = []
-                # Active topic
-                @topic  = {}
-                # We get all topics here
-                # and we update factory's topics
-                @getTopics (topics)=> @topics = @topics.concat topics
+                do @reset
+
                 # Update topic list when the user object changes
-                $rootScope.$on "user:updated", @updateTopics, true
+                $rootScope.$on "user:updated", @reset, true
 
                 $rootScope.$on '$stateChangeStart', @onStateChanged
 
+            reset: =>
+                # Topics list
+                @topics = []
+                # Active topic
+                @topic = {}
 
             onStateChanged: (e, current, params)=>
-                if params.topic and @topics 
-                    @setCurrent @getTopic params.topic
-
-            updateTopics: =>
-                @getTopics (data)=>
-                    @topics = data
-                    if @topic_slug
-                        @topic = @setTopic @topic_slug
+                if params.topic and @topics
+                    (@getTopic params.topic).then (topic) =>
+                        @setCurrent topic
 
             setCurrent: (topic)=>
+                return unless topic?
                 if typeof topic is typeof {}
+                    (@topics.push topic) unless (_.findWhere @topics, slug: topic.slug)
                     @topic = topic
                 else
-                    @topic = @getTopic topic 
+                    (@getTopic topic).then (topic) =>
+                        @topic = topic
 
                 $rootScope.$broadcast @EVENTS.current_topic_updated
 
-            updateCurrentLocation: (topic)=>
-                #console.log topic
-
-            getTopics: (cb)=>
-                Common.query type: 'topic', cb
 
             getTopic: (slug)=>
-                return unless slug and @topics
-                _.findWhere @topics, slug: slug
+                return unless slug
+                deferred = do $q.defer
+                topic = _.findWhere @topics, slug: slug
+                if not topic?
+                    Common.query
+                        type : 'topic'
+                        slug : slug
+                    .$promise.then (_topics) =>
+                        if _topics.length > 0
+                            @topics.push _topics[0]
+                            deferred.resolve _topics[0]
+                        else
+                            do deferred.reject
+                else
+                    deferred.resolve topic
+                deferred.promise
 
             isTopic: (slug)=>
-                if @topic_slug and !@topics
-                    return @topic_slug is slug
-                else
-                    return false unless @topic?
-                    @topic.slug is slug
-
-            setTopic: (slug)=>
-                topic = @getTopic slug
-                @topic = topic if topic?
-
-
-
+                if @topic? and @topic.slug?
+                    return @topic.slug is slug
+                no
 ]

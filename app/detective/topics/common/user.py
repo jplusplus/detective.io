@@ -235,7 +235,7 @@ class UserResource(ModelResource):
             bundle.data["permissions"] = permissions
             return self.create_response(request, bundle)
         else:
-            return http.HttpUnauthorized('You need to be logged to list your permissions')
+            return http.HttpUnauthorized('You need to be logged.')
 
     def reset_password(self, request, **kwargs):
         """

@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
-from app.detective.models             import QuoteRequest, Topic, Article
-from app.detective.utils              import get_registered_models
+from app.detective.models             import QuoteRequest, Topic, Article, User
+from app.detective.utils              import get_registered_models, is_valid_email
 from app.detective.topics.common.user import UserResource, AuthorResource
+from django.conf.urls                 import url
 from tastypie                         import fields
 from tastypie.authorization           import ReadOnlyAuthorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
+from tastypie.utils                   import trailing_slash
 from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
+from django.http                      import Http404, HttpResponse
+import json
 import re
 
 # Only staff can consult QuoteRequests
@@ -42,6 +46,41 @@ class TopicResource(ModelResource):
     class Meta:
         queryset  = Topic.objects.all().prefetch_related('author')
         filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
+
+
+    def prepend_urls(self):
+        params = (self._meta.resource_name, trailing_slash())
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/invite%s$" % params, self.wrap_view('invite'), name="api_invite"),
+        ]
+
+    def invite(self, request, **kwargs):
+        # only allow POST requests
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        body = json.loads(request.body)
+        collaborator = body.get("collaborator", None)
+        if collaborator is None:
+            raise Exception("Missing 'collaborator' parameter")
+
+        if is_valid_email(collaborator):
+            try:
+                user = User.objects.get(email=collaborator)
+            # Send an invitation to register
+            except User.DoesNotExist:
+                pass
+        else:
+            try:
+                # Add existing user
+                user = User.objects.get(username=collaborator)
+            # Unkown username
+            except User.DoesNotExist:
+                # Nothing yet here!
+                raise Http404("Sorry, unkown user.")
+
+        return HttpResponse("Invitation send!")
 
     def dehydrate(self, bundle):
         from app.detective import register

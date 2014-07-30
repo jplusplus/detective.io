@@ -189,6 +189,28 @@ class Topic(models.Model):
     def module(self):
         return self.ontology_as_mod
 
+class TopicToken(models.Model):
+    topic      = models.ForeignKey(Topic, help_text="The topic this token is related to.")
+    token      = models.CharField(editable=True, max_length=32, help_text="Title of your article.")
+    created_at = models.DateTimeField(auto_now_add=True, default=None, null=True)
+
+    @staticmethod
+    def get_random_token(size=32, chars=string.ascii_letters + string.digits):
+        return ''.join(random.choice(chars) for x in range(size))
+
+    def save(self):
+        if not self.id:
+            self.token = self.get_random_token()
+            try:
+                TopicToken.objects.get(topic=self.topic, token=self.token)
+                # Recurcive call to regenerate a random token
+                return self.save()
+            except TopicToken.DoesNotExist:
+                # The topic token MUST not exist yet
+                pass
+        super(TopicToken, self).save()
+
+
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
     title      = models.CharField(max_length=250, help_text="Title of your article.")

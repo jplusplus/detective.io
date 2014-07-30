@@ -382,6 +382,7 @@ class Document(object):
             self.meta = json.dumps(self.meta)
         if hasattr(self,'_result') and self._result:
             self._result = json.dumps(self._result)
+
 class JobResource(Resource):
     id         = fields.CharField(attribute="_id")
     result     = fields.CharField(attribute="_result"    , null=True)

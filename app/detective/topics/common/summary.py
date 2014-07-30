@@ -401,8 +401,8 @@ class SummaryResource(Resource):
         # enqueue the parsing job
         queue = django_rq.get_queue('default', default_timeout=7200)
         job   = queue.enqueue(process_bulk_parsing_and_save_as_model, self.topic, files)
-        job.meta["topic_app_label"] = self.topic.app_label()
-        job.meta["topic_slug"]      = self.topic.slug
+        # job.meta["topic_app_label"] = self.topic.app_label()
+        # job.meta["topic_slug"]      = self.topic.slug
         # job.save()
         # return a quick response
         self.log_throttled_access(request)
@@ -413,11 +413,20 @@ class SummaryResource(Resource):
 
     def summary_export(self, bundle, request):
         self.method_check(request, allowed=['get'])
-        # FIXME: NEED A JOB
-        zip_file = render_csv_zip_file(self, model_type=request.GET.get("type"), query=request.GET.get("q"))
-        response = HttpResponse(zip_file, mimetype='application/zip')
-        response['Content-Disposition'] = "attachement; filename=export-{0}.zip".format(self.topic.slug)
-        return response
+        # enqueue the job
+        queue = django_rq.get_queue('default', default_timeout=7200)
+        job   = queue.enqueue(render_csv_zip_file, self, model_type=request.GET.get("type"), query=request.GET.get("q"))
+        # return a quick response
+        self.log_throttled_access(request)
+        return {
+            "status" : "enqueued",
+            "token"  : job.get_id()
+        }
+        # NOTE: legacy, without job
+        # zip_file = render_csv_zip_file(self, model_type=request.GET.get("type"), query=request.GET.get("q"))
+        # response = HttpResponse(zip_file, mimetype='application/zip')
+        # response['Content-Disposition'] = "attachement; filename=export-{0}.zip".format(self.topic.slug)
+        # return response
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 

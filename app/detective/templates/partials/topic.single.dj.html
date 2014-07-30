@@ -77,8 +77,7 @@
 								 			<span ng-switch-when="true" ng-bind-html="getTrusted(field.name)"></span>
 								 			<span ng-switch-default ng-bind-html="get(field.name) | linky:'_blank'"></span>
 							 			</span>
-							 			<span ng-if="isBoolean(field.type)">
-							 				<i class='fa' ng-class='{"fa-square-o":!get(field.name, false), "fa-check-square-o":get(field.name, false)}'></i>
+							 			<span ng-if="isBoolean(field.type)" ng-bind-html="get(field.name, false) | yesorno | titlecase">
 							 			</span>
 							 		</td>
 						 			<td ng-if="isMono(field) && get(field.name)" colspan="3">

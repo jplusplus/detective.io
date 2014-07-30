@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_topic_from_request
 from app.detective.topics.common.models import FieldSource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
@@ -32,6 +32,12 @@ DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
+    def get_topic_from_bundle(self, bundle):
+        topic = get_topic_from_request(bundle.request)
+        if topic == None:
+            topic = Topic.objects.get(ontology_as_mod=get_model_topic(bundle.obj)).public
+        return topic         
+
 
     def check_contribution_permission(self, object_list, bundle, operation):
         authorized = False
@@ -42,7 +48,8 @@ class IndividualAuthorization(Authorization):
         return authorized
 
     def read_detail(self, object_list, bundle):
-        if not Topic.objects.get(ontology_as_mod=get_model_topic(bundle.obj)).public and not self.check_contribution_permission(object_list, bundle, 'read'):
+        topic = self.get_topic_from_bundle(bundle)
+        if not topic.public and not self.check_contribution_permission(object_list, bundle, 'read'):
             raise Unauthorized("Sorry, only staff or contributors can read resource.")
         return True
 

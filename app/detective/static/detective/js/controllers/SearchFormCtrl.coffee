@@ -9,16 +9,12 @@ class SearchFormCtrl
         @selectedIndividual = {}
         @topics = @TopicsFactory.topics
         @topic  = @TopicsFactory.topic
-        @topic_slug =  @TopicsFactory.topic.slug if @TopicsFactory.topic?
         @human_query = @QueryFactory.human_query 
         @bindHumanQuery()
 
         # ------------
         # Scope events
         # ------------
-        @scope.$on '$stateChangeStart', (e, current, params)=>
-            @topic_slug = params.topic if params.topic?
-
         @scope.$on 'human_query:updated', (e, query)=>
             @human_query = query
 
@@ -27,7 +23,6 @@ class SearchFormCtrl
         # ----------------
         @rootScope.$on 'topic:updated', =>
             @topic = @TopicsFactory.topic
-            @topic_slug = @topic.slug
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers

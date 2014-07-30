@@ -183,8 +183,6 @@ TASTYPIE_DEFAULT_FORMATS = ['json', 'jsonp']
 INSTALLED_APPS = (
     # 'suit' must be added before 'django.contrib.admin'
     'suit',
-    'debug_toolbar',
-    'neo4j_panel',
     'neo4django.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -210,6 +208,8 @@ INSTALLED_APPS = (
     'tinymce',
     # Redis queue backend
     "django_rq",
+    # Debug utilities
+    "debug_toolbar",
     # Internal
     'app.detective',
     'app.detective.permissions',
@@ -305,7 +305,7 @@ LOGGING = {
 
 
 if DEBUG:
-    INTERNAL_IPS = ('127.0.0.1', '10.0.0.1')
+    # INTERNAL_IPS = ('127.0.0.1', '0.0.0.0', '::1')
     DEBUG_TOOLBAR_PATCH_SETTINGS = False 
     DEBUG_TOOLBAR_PANELS = (
         'debug_toolbar.panels.timer.TimerPanel',
@@ -316,3 +316,6 @@ if DEBUG:
         'debug_toolbar.panels.cache.CachePanel',
         'debug_toolbar.panels.signals.SignalsPanel',
     )
+    DEBUG_TOOLBAR_CONFIG = { 
+        'SHOW_TOOLBAR_CALLBACK': 'app.detective.utils.should_show_debug_toolbar'
+    }

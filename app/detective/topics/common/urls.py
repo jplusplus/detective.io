@@ -4,7 +4,7 @@ from .user            import UserResource
 from .cypher          import CypherResource
 from django.conf.urls import patterns, include, url
 from tastypie.api     import NamespacedApi
-from .job             import JobResource
+from .jobs            import JobResource
 
 api = NamespacedApi(api_name='v1', urlconf_namespace='common')
 api.register(QuoteRequestResource())

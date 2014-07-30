@@ -25,21 +25,30 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 html
 
     scope:
-        model     : "=ttModel"
-        individual: "&ttIndividual"
-        topic     : "&ttTopic"
-        create    : "&ttCreate"
-        submit    : "&ttSubmit"
-        endpoint  : "&ttEndpoint"
-        valueKey  : "@"
-        value     : '=?'
-        limit     : "@"
-        change    : "&"
+        model      : "=ttModel"
+        individual : "&ttIndividual"
+        topic      : "&ttTopic"
+        create     : "&ttCreate"
+        submit     : "&ttSubmit"
+        endpoint   : "&ttEndpoint"
+        remoteUrl  : "&ttRemoteUrl"
+        prefetchUrl: "&ttPrefetchUrl"
+        transform  : "&ttTransform"
+        valueKey   : "@"
+        value      : '=?'
+        limit      : "@"
+        change     : "&"
 
     link: (scope, element, attrs) ->
         # Helper to save the search response
-        saveResponse = (response) ->
-            lastDataset = response.objects
+        responseFilter = (response) ->
+            if scope.transform()?
+                objects = scope.transform(objects: response.objects)
+            else
+                objects = response.objects
+            # Save latest dataset to detect unselected value
+            lastDataset = objects
+            objects
 
         # Set a default value
         element.val scope.model.name if scope.model?
@@ -53,7 +62,10 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             # Select the individual to look for
             individual = (scope.individual() or "").toLowerCase()
             itopic     = (scope.topic() or $stateParams.topic or "common").toLowerCase()
-            iendpoint  = (do scope.endpoint) or 'search'
+            iendpoint  = scope.endpoint() or 'search'
+            # Generate URLs
+            prefetchUrl = scope.prefetchUrl() or  "/api/#{itopic}/v1/#{individual}/mine/"
+            remoteUrl   = scope.remoteUrl() or "/api/#{itopic}/v1/#{individual}/#{iendpoint}/?q=%QUERY"
 
             lastDataset = []
             element.typeahead 'destroy'
@@ -62,15 +74,15 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 datumTokenizer : Bloodhound.tokenizers.obj.whitespace
                 queryTokenizer : Bloodhound.tokenizers.whitespace
                 dupDetector : (a, b) ->
-                    a_id = a.id || a.subject.name
-                    b_id = b.id || b.subject.name
+                    a_id = a.id or a.subject.name
+                    b_id = b.id or b.subject.name
                     a_id is b_id
                 prefetch :
-                    url : "/api/#{itopic}/v1/#{individual}/mine/"
-                    filter : saveResponse
+                    url : prefetchUrl
+                    filter : responseFilter
                 remote :
-                    url : "/api/#{itopic}/v1/#{individual}/#{iendpoint}/?q=%QUERY"
-                    filter : saveResponse
+                    url : remoteUrl
+                    filter : responseFilter
 
             bh.storage = null # Hack to disable localStorage caching
             do bh.initialize

@@ -16,6 +16,10 @@ from tastypie.exceptions        import ImmediateHttpResponse
 from tastypie.resources         import Resource
 from tastypie.serializers       import Serializer
 from .jobs                      import process_parsing
+from psycopg2.extensions        import adapt
+from StringIO                   import StringIO
+from .errors                    import ForbiddenError, UnauthorizedError
+from .jobs                      import process_bulk_parsing_and_save_as_model
 import app.detective.utils      as utils
 import json
 import re
@@ -399,7 +403,7 @@ class SummaryResource(Resource):
         files = [(f.name, f.readlines()) for f in files]
         # enqueue the parsing job
         queue = django_rq.get_queue('default', default_timeout=7200)
-        job   = queue.enqueue(process_parsing, self.topic, files)
+        job   = queue.enqueue(process_bulk_parsing_and_save_as_model, self.topic, files)
         job.meta["topic_app_label"] = self.topic.app_label()
         job.meta["topic_slug"]      = self.topic.slug
         # job.save()

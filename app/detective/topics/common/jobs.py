@@ -27,14 +27,15 @@ import re
 
 logger = logging.getLogger(__name__)
 
+
 # -----------------------------------------------------------------------------
 #
-#    JOBS
+#    JOBS - BULK UPLOAD
 #
 # -----------------------------------------------------------------------------
-def process_parsing(topic, files):
+def process_bulk_parsing_and_save_as_model(topic, files):
     """
-    Job which reads the uploaded files, validate and saves them as model
+    Job which parses uploaded content, validates and saves them as model
     """
 
     start_time               = time.time()

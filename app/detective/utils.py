@@ -315,4 +315,7 @@ def open_csv(csv_file):
     reader = csv.reader(csv_file, dialect)
     return reader
 
+
+def should_show_debug_toolbar(request):
+    return re.match(r'^/api/', request.path) != None
 # EOF

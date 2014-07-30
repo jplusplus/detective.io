@@ -18,6 +18,8 @@ from rq                         import get_current_job
 from django.utils.timezone      import utc
 from neo4django.db              import connection
 from django.conf                import settings
+from django.core.files.storage  import default_storage
+from django.core.files.base     import ContentFile
 from StringIO                   import StringIO
 import app.detective.utils      as utils
 import django_rq
@@ -35,7 +37,8 @@ logger = logging.getLogger(__name__)
 #    JOB - EXPORT AS CSV
 #
 # -----------------------------------------------------------------------------
-def render_csv_zip_file(summary_resource, model_type=None, query=None):
+def render_csv_zip_file(topic, model_type=None, query=None):
+
     def write_all_in_zip(objects, columns, zip_file, model_name=None):
         """
         Write the csv file from `objects` and `columns` and add it into the `zip_file` file.
@@ -74,7 +77,7 @@ def render_csv_zip_file(summary_resource, model_type=None, query=None):
         return (columns, edges)
     buffer   = StringIO()
     zip_file = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
-    models   = summary_resource.topic.get_models()
+    models   = topic.get_models()
     if not query:
         export_edges = not model_type
         for model in models:
@@ -95,29 +98,34 @@ def render_csv_zip_file(summary_resource, model_type=None, query=None):
                         for row in rows:
                             content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
                         zip_file.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
-    else:
-        page        = 1
-        limit       = 1
-        objects     = []
-        total       = -1
-        while len(objects) != total:
-            try:
-                result   = summary_resource._rdf_search(query=query, offset=(page - 1) * limit)
-                objects += result['objects']
-                total    = result['meta']['total_count']
-                page    += 1
-            except KeyError:
-                break
-        for model in models:
-            if model.__name__ == objects[0]['model']:
-                break
-        (columns, _) = get_columns(model)
-        write_all_in_zip(objects, columns, zip_file, model.__name__)
+    # NOTE: disable because of summary_resource._rdf_search which is not available in this context
+    # else:
+    #     page        = 1
+    #     limit       = 1
+    #     objects     = []
+    #     total       = -1
+    #     while len(objects) != total:
+    #         try:
+    #             result   = summary_resource._rdf_search(query=query, offset=(page - 1) * limit)
+    #             objects += result['objects']
+    #             total    = result['meta']['total_count']
+    #             page    += 1
+    #         except KeyError:
+    #             break
+    #     for model in models:
+    #         if model.__name__ == objects[0]['model']:
+    #             break
+    #     (columns, _) = get_columns(model)
+    #     write_all_in_zip(objects, columns, zip_file, model.__name__)
     zip_file.close()
     buffer.flush()
-    ret_zip = buffer.getvalue()
+    # save the zip in `base_dir`
+    base_dir  = "csv-exports"
+    file_name = "%s/d.io-export-%s.zip" % (base_dir, topic.slug)
+    # name can be changed by default storage if previous exists
+    file_name = default_storage.save(file_name, ContentFile(buffer.getvalue()))
     buffer.close()
-    return ret_zip
+    return file_name
 
 # -----------------------------------------------------------------------------
 #

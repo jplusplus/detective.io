@@ -415,7 +415,7 @@ class SummaryResource(Resource):
         self.method_check(request, allowed=['get'])
         # enqueue the job
         queue = django_rq.get_queue('default', default_timeout=7200)
-        job   = queue.enqueue(render_csv_zip_file, self, model_type=request.GET.get("type"), query=request.GET.get("q"))
+        job   = queue.enqueue(render_csv_zip_file, self.topic, model_type=request.GET.get("type"), query=request.GET.get("q"))
         # return a quick response
         self.log_throttled_access(request)
         return {

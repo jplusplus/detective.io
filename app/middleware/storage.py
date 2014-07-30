@@ -8,7 +8,7 @@
 # License: GNU General Public License
 # -----------------------------------------------------------------------------
 # Creation time:      2014-07-29 11:11:42
-# Last Modified time: 2014-07-29 11:27:35
+# Last Modified time: 2014-07-29 18:50:16
 # -----------------------------------------------------------------------------
 # This file is part of IDF-Quiz
 # 
@@ -28,8 +28,20 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 from app.detective.models import Topic
+import re
 
 class StoreTopicList(object):
     def process_request(self, request):
         request.topic_list = Topic.objects.all()
+        return None
+
+class StoreTopic(object):
+    def process_request(self, request):
+        regex = re.compile(r'api/([a-zA-Z0-9_\-]+)/')
+        urlparts = regex.findall(request.path)
+        if urlparts:
+            try:
+                request.current_topic = Topic.objects.get(slug=urlparts[0])
+            except Topic.DoesNotExist:
+                pass
         return None

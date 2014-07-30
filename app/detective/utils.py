@@ -140,8 +140,15 @@ def get_topic_from_model(model):
     from app.detective.models import Topic
     return Topic.objects.get(ontology_as_mod=get_model_topic(model))
 
+
+# storage middleware utilities
 def get_topics_from_request(request):
+    # see app.middleware.storage.StoreTopicList
     return getattr(request, 'topic_list', None)
+
+def get_topic_from_request(request):
+    # see app.middleware.storage.StoreTopic
+    return getattr(request, 'current_topic', None)
 
 def get_model_fields(model, order_by='name'):
     from app.detective           import register

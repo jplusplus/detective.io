@@ -54,9 +54,7 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 deferred.promise
 
             isTopic: (slug)=>
-                if @topic_slug and !@topics
-                    return @topic_slug is slug
-                else
-                    return false unless @topic?
-                    @topic.slug is slug
+                if @topic? and @topic.slug?
+                    return @topic.slug is slug
+                no
 ]

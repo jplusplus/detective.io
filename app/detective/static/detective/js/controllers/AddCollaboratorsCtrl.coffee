@@ -3,6 +3,7 @@ class AddCollaboratorsCtrl
     @$inject: ['$scope', '$stateParams', '$state', 'Common', 'Page', 'topic']
     constructor: (@scope,  @stateParams, @state, @Common, @Page, topic)->
         @scope.topic = topic
+        @Page.loading no
 
 
     @resolve:

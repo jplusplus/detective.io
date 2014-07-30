@@ -28,13 +28,6 @@ angular.module('detective.config').config [
                 resolve: DashboardCtrl.resolve
                 auth: true
             )
-            .state('add-collaborators',
-                url: "/add-collaborators/:topic/"
-                controller: AddCollaboratorsCtrl
-                templateUrl : '/partial/home.dashboard.add-collaborators.html'
-                resolve: AddCollaboratorsCtrl.resolve
-                auth: true
-            )
             .state('404-page',
                 url : "/404/"
                 controller : NotFoundCtrl
@@ -101,6 +94,14 @@ angular.module('detective.config').config [
                     topic: UserTopicCtrl.resolve.topic
                 # Allow a dynamic loading by setting the templateUrl within controller
                 template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+            )
+            .state('user-topic-invite',
+                url: "/:username/:topic/invite/"
+                controller: AddCollaboratorsCtrl
+                templateUrl: '/partial/topic.invite.html'
+                resolve:
+                    topic: UserTopicCtrl.resolve.topic
+                auth: true
             )
             .state('user-topic-search',
                 url: '/:username/:topic/search/?q&page'

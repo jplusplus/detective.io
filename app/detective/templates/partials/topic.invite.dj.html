@@ -1,0 +1,31 @@
+<div class="container">
+	<form class="topic__invite" name="addcollaborator">
+		<a></a>
+		<h2><i class="fa fa-users"></i> Add new collaborators</h2>
+		<p class="lead text-muted">Lorem ipsum dolor sit invite.</p>
+
+		<div class="panel panel-default topic__invite__panel">
+			<img ng-src="[[topic.thumbnail.small]]" class="topic__invite__panel__bg" />
+			<div class="topic__invite__panel__preview">
+				<h4 class="topic__invite__panel__preview__title">[[topic.title]]</h4>
+				<p ng-if="topic.author.id == user.id"  class="topic__invite__panel__preview__author">
+					<i class="fa fa-star"></i>&nbsp;Owned by you
+				</p>
+				<p ng-if="topic.author.id != user.id" class="topic__invite__panel__preview__author">
+					by <a ui-sref="user(topic.author)">[[topic.author.username]]</a>
+				</p>
+			</div>
+			<div class="topic__invite__panel__user-picker">
+				<input required ng-model="collaborator" type="text" class="form-control" placeholder="Add new collaborator with their username or email address" />
+			</div>
+		</div>
+		<div class="topic__invite__panel text-right">
+			<a class="btn btn-link pull-left" ui-sref="home.dashboard">
+				<i class="fa fa-arrow-left"></i>&nbsp;Go back to the dashboard
+			</a>
+			<button class="btn btn-primary" ng-disabled="!addcollaborator.$valid">
+				Add collaborator
+			</button>
+		</div>
+	</form>
+</div>

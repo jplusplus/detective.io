@@ -14,7 +14,7 @@
 		</li>
 	</ul>
 	<div ui-view>
-		<h2>Dashboard</h2>
+		<h2><i class="fa fa-dashboard"></i> Dashboard</h2>
 		<div class="clearfix">
 			<ul class="list-unstyled dashboard__topics row">
 				<li ng-repeat="topic in topics" class="col-sm-4">
@@ -32,7 +32,7 @@
 							by <a ui-sref="user(topic.author)">[[topic.author.username]]</a>
 						</p>
 						<p class="dashboard__topics__item__btns">
-							<a class="btn btn-default btn-sm" ui-sref="add-collaborators({topic: topic.id})">
+							<a class="btn btn-default btn-sm" ui-sref="user-topic-invite({topic: topic.slug, username: topic.author.username})">
 								<i class="fa fa-users"></i>
 								Add collaborators
 							</a>

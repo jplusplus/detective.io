@@ -1,8 +1,7 @@
 <div class="container">
-	<form class="topic__invite" name="addcollaborator">
-		<a></a>
+	<form novalidate class="topic__invite" name="addcollaborator">
 		<h2><i class="fa fa-users"></i> Add new collaborators</h2>
-		<p class="lead text-muted">Lorem ipsum dolor sit invite.</p>
+		<p class="lead text-muted">Invite people to contribute to your investigation.</p>
 
 		<div class="panel panel-default topic__invite__panel">
 			<img ng-src="[[topic.thumbnail.small]]" class="topic__invite__panel__bg" />
@@ -16,14 +15,21 @@
 				</p>
 			</div>
 			<div class="topic__invite__panel__user-picker">
-				<input required ng-model="collaborator" type="text" class="form-control" placeholder="Add new collaborator with their username or email address" />
+				<input required
+					   type="text"
+					   class="form-control"
+					   ng-model="collaborator"
+					   tt-typeahead
+					   tt-transform="prepareSearch(objects)"
+					   tt-remote-url="'/api/common/v1/user/?username__icontains=%QUERY'"
+					   placeholder="Add new collaborator with their username or email address" />
 			</div>
 		</div>
 		<div class="topic__invite__panel text-right">
 			<a class="btn btn-link pull-left" ui-sref="home.dashboard">
-				<i class="fa fa-arrow-left"></i>&nbsp;Go back to the dashboard
+				<i class="fa fa-arrow-left"></i>&nbsp;Go back to your dashboard
 			</a>
-			<button class="btn btn-primary" ng-disabled="!addcollaborator.$valid">
+			<button type="submit" ng-click="invite(collaborator)" class="btn btn-primary" ng-disabled="!addcollaborator.$valid">
 				Add collaborator
 			</button>
 		</div>

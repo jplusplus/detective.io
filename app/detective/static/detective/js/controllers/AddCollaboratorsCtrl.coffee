@@ -2,8 +2,20 @@ class AddCollaboratorsCtrl
     # Injects dependancies
     @$inject: ['$scope', '$stateParams', '$state', 'Common', 'Page', 'topic']
     constructor: (@scope,  @stateParams, @state, @Common, @Page, topic)->
-        @scope.topic = topic
         @Page.loading no
+        @Page.title "Add new collaborators"
+        @scope.topic = topic
+        # Transform search result
+        @scope.prepareSearch = (objects=[])->
+        	# Fetchs and returns the objects list
+        	for object in objects
+        		# Create a new field "name" using the "username"
+        		object["name"] = object["username"]
+        		# Return the updated object
+        		object
+        # Send an invitation to the given person
+        @scope.invite = (collaborator)=>
+        	@Common.post {type: "user", id: "invite"}, {collaborator: collaborator}
 
 
     @resolve:

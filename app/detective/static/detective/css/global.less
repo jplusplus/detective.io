@@ -126,11 +126,8 @@ body {
         }
     }
 
-    // input styling 
-    input {
-        &.ng-invalid {
-            .has-error > .form-control();
-        }
+    // input styling
+    input.display-validation.ng-invalid.ng-dirty {
+        .has-error > .form-control();
     }
-
 }

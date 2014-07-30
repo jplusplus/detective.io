@@ -57,4 +57,37 @@
 		}
 
 	}
+
+	&__add-collaborators {
+
+		&__panel {
+
+			max-width: 500px;
+
+			&__bg {
+				float:left;
+				border-right:1px @panel-default-border solid;
+			}
+
+			&__preview {
+				padding-left:10px;
+				margin-left:60px;
+				height:60px;
+				overflow: hidden;
+
+				&__title {
+					margin-bottom:5px;
+				}
+			}
+
+			&__user-picker {
+				border-top:1px @panel-default-border solid;
+				clear:both;
+
+				.form-control, input {
+					border:0;
+				}
+			}
+		}
+	}
 }

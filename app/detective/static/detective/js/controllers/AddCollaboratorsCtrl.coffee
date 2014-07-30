@@ -2,7 +2,8 @@ class AddCollaboratorsCtrl
     # Injects dependancies
     @$inject: ['$scope', '$stateParams', '$state', 'Common', 'Page', 'topic']
     constructor: (@scope,  @stateParams, @state, @Common, @Page, topic)->
-        console.log topic
+        @scope.topic = topic
+
 
     @resolve:
         topic: ["Common", "$stateParams", (Common, $stateParams)->

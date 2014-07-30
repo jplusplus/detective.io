@@ -66,7 +66,7 @@
 							<tbody>
 							 	<tr ng-repeat="field in meta.fields|filter:isLiteral|filter:hasValue"
 					 		  		ng-init='fieldSources=getSources(field)'>
-							 		<td class="nowrap field-name" ng-if="!isMono(field)">
+							 		<td class="field-name" ng-if="!isMono(field)">
 							 			<strong>[[field.verbose_name]]</strong>
 							 		</td>
 							 		<td ng-if="!isMono(field)">

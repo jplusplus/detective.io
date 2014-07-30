@@ -35,22 +35,21 @@
             <a class="btn btn-default topic-search__home" href="[[search.topic.link]]" title="[[search.topic.title]]">
                 [[search.topic.title | characters:25]]
             </a>
-            <span class="topic-search__input" ng-repeat="t in search.topics">
-                <span ng-if="search.isTopic(t.slug)">
-                    <input type="search"
-                            placeholder="[[t.search_placeholder]]"
-                            tt-submit="search.goToTopic()"
-                            tt-typeahead
-                            tt-model="search.selectedIndividual"
-                            remote="/api/[[t.slug]]/v1/summary/human/?q=%QUERY"
-                            prefetch="/api/[[t.slug]]/v1/summary/mine/"
-                            value-key="label"
-                            value="search.human_query"
-                            limit="10"
-                            class="form-control"
-                            id="input-search" />
-                    <span ng-click="search.showResults()" class="fa fa-search topic-search__input__submit-btn"></span>
-                </span>
+            <span class="topic-search__input">
+                <input type="search"
+                       placeholder="[[search.topic.search_placeholder]]"
+                       tt-submit="search.goToTopic()"
+                       tt-typeahead
+                       tt-model="search.selectedIndividual"
+                       tt-individual="'summary'"
+                       tt-topic="search.topic.slug"
+                       tt-endpoint="'human'"
+                       value-key="label"
+                       value="search.human_query"
+                       limit="10"
+                       class="form-control"
+                       id="input-search" />
+                <span ng-click="search.showResults()" class="fa fa-search topic-search__input__submit-btn"></span>
             </span>
         </div>
 

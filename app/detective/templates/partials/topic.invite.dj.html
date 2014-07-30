@@ -7,7 +7,7 @@
 		<div class="panel panel-default topic__invite__panel">
 			<img ng-src="[[topic.thumbnail.small]]" class="topic__invite__panel__bg" />
 			<div class="topic__invite__panel__preview">
-				<h4 class="topic__invite__panel__preview__title">[[topic.title]]</h4>
+				<h4 class="topic__invite__panel__preview__title">[[topic.title|characters:40]]</h4>
 				<p ng-if="topic.author.id == user.id"  class="topic__invite__panel__preview__author">
 					<i class="fa fa-star"></i>&nbsp;Owned by you
 				</p>

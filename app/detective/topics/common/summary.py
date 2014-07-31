@@ -188,6 +188,10 @@ class SummaryResource(Resource):
                     if inspect.isclass(rule):
                         field["rules"][key] = getattr(rule, "__name__", rule)
 
+            try:
+                idx = model.__idx__
+            except AttributeError:
+                idx = 0
             available_resources[name] = {
                 'description'         : getattr(model, "_description", None),
                 'topic'               : getattr(model, "_topic", self.topic.slug) or self.topic.slug,
@@ -197,7 +201,7 @@ class SummaryResource(Resource):
                 'name'                : name,
                 'fields'              : fields,
                 'rules'               : rules,
-                'index'               : model.__idx__
+                'index'               : idx
             }
 
         return available_resources

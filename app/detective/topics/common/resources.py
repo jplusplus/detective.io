@@ -14,6 +14,7 @@ from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.core.mail                 import EmailMultiAlternatives
 from django.core.urlresolvers         import reverse
+from django.db                        import IntegrityError
 from django.db.models                 import Q
 from django.http                      import Http404, HttpResponse
 from django.template                  import Context
@@ -96,7 +97,7 @@ class TopicResource(ModelResource):
                 user = User.objects.get(username=collaborator)
             # You can't invite the author of the topic
             if user == topic.author:
-                raise Exception("You can't invite the author of the topic!")
+                raise Exception("You can't invite the author of the topic.")
             # Email options for kown user
             template = get_template("email.topic-invitation.existing-user.txt")
             from_email, to_email = 'contact@detective.io', user.email
@@ -111,10 +112,14 @@ class TopicResource(ModelResource):
             # Send an invitation to create an account
             template = get_template("email.topic-invitation.new-user.txt")
             from_email, to_email = 'contact@detective.io', collaborator
-            subject = '[Detective.io] Someone needs your help on an investigation!'
-            # Creates a topictoken
-            topicToken = TopicToken(topic=topic)
-            topicToken.save()
+            subject = '[Detective.io] Someone needs your help on an investigation'
+            try:
+                # Creates a topictoken
+                topicToken = TopicToken(topic=topic, email=collaborator)
+                topicToken.save()
+            except IntegrityError:
+                # Can't invite the same user once!
+                raise Exception("You can't invite someone twice to the same topic.")
             signup = request.build_absolute_uri( reverse("signup", args=[topicToken.token]) )
 
         # Creates link to the topic

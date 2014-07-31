@@ -143,8 +143,8 @@
 					 ng-class="{loading: individual.updating[field.name] && !individual.loading, 'is-active': individual.isFieldFocused(field) }"
 				     ng-show="isAllowedType(field.type) && individual.isVisible(field) && individual.isEditable(field)"
 					 ng-repeat="field in individual.meta.fields track by $index"
-					 ng-click='individual.focusField(field)'
-					 click-outside='individual.unfocusField(field)'>
+					 ng-click='focusField(individual, field)'
+					 click-outside='unfocusField()'>
 
 					<div class="col-sm-3 form-label top05">
 						<label for="id_[[field.name]]">
@@ -169,8 +169,8 @@
 						<div class="add-source-wrapper">
 							<button class="btn btn-primary add-source-toggle"
 								    ng-init="focusAdd=false"
-									ng-class="{active: field.showSourceForm}"
-							        ng-click="field.showSourceForm = !field.showSourceForm; field.focusAdd=!field.focusAdd">
+									ng-class="{active: individual.isSourceFormOpened(field)}"
+							        ng-click="individual.toggleSourceForm(field); field.focusAdd=!field.focusAdd">
 								<i class="fa-book fa right05"></i>
 								<span ng-if="individual.hasSources(field)">
 									Edit sources
@@ -179,7 +179,7 @@
 									Add sources
 								</span>
 							</button>
-							<div class="add-source-form" ng-show="field.showSourceForm">
+							<div class="add-source-form" ng-show="individual.isSourceFormOpened(field)">
 								<ul class="field-sources">
 									<!-- previously created sources -->
 									<li ng-repeat="source in individual.fields.field_sources | filter:{field:field.name}">
@@ -228,7 +228,7 @@
 								</ul>
 							</div>
 						</div>
-						<div class="add-source-overlay" ng-show="field.showSourceForm"></div>
+						<div class="add-source-overlay" ng-show="individual.isSourceFormOpened(field)"></div>
 					</div>
 
 

@@ -28,6 +28,8 @@ class ContributeCtrl
         @scope.isVisibleAdditional = @isVisibleAdditional
         @scope.strToColor          = @filter("strToColor")
         @scope.isRich              = @isRich
+        @scope.focusField          = @focusField
+        @scope.unfocusField        = @unfocusField
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -108,6 +110,8 @@ class ContributeCtrl
             # ──────────────────────────────────────────────────────────────────
             # The data changed
             @scope.$watch (=>@fields), @onChange, true
+
+            do @unfocusField
 
         onChange: (current)=>
             # Individual not created yet
@@ -328,19 +332,20 @@ class ContributeCtrl
         showField: (field)=> @moreFields.push field
         isSaved: => @fields.id? and _.isEmpty( @getChanges() )
 
-        focusField: (field)=>
-            # unfocus all previously focused field
-            _.each(
-                _.filter(@meta.fields, @isFieldFocused)
-                , @unfocusField
-            )
-            # focus targeted field
-            field.isFocused = true
+        unfocusField: =>
+            @focusedField =
+                field : undefined
+                source : no
 
-        unfocusField: (field)=>
-            field.isFocused = false
+        isFieldFocused: (field) =>
+            field? and field.name? and @focusedField.field is field.name
 
-        isFieldFocused: (field)=> field? and field.isFocused is true
+        isSourceFormOpened: (field) =>
+            (@isFieldFocused field) and @focusedField.source
+
+        toggleSourceForm: (field) =>
+            if @isFieldFocused field
+                @focusedField.source = !@focusedField.source
 
         isSaved: => @fields.id? and _.isEmpty( @getChanges() )
 
@@ -351,6 +356,17 @@ class ContributeCtrl
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
+
+    focusField: (individual, field) =>
+        for loop_individual in @scope.individuals
+            if individual is loop_individual
+                loop_individual.focusedField.field = field.name
+            else
+                do loop_individual.unfocusField
+
+    unfocusField: =>
+        for loop_individual in @scope.individuals
+            do loop_individual.unfocusField
 
     # A new individual for kick-star forms
     initNewIndividual: (type, fields, related_to)=>

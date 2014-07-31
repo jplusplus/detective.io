@@ -72,6 +72,11 @@ angular.module('detective.config').config [
                 controller : UserCtrl
                 templateUrl : '/partial/account.signup.html'
             )
+            .state('signup-invitation'
+                url : "/signup/:token/"
+                controller : UserCtrl
+                templateUrl : '/partial/account.signup.html'
+            )
             # Pages
             .state('page',
                 url : "/page/:slug/"

@@ -52,7 +52,7 @@ class UserCtrl
         @scope.resetPassword = @resetPassword
         @scope.resetPasswordConfirm = @resetPasswordConfirm
         # Set page title with no title-case
-        if @state.is("signup")
+        if @state.is("signup") or @state.is("signup-invitation")
             @Page.title "Request an account", false
         else if @state.is("login")
             @Page.title "Log in", false

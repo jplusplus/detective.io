@@ -7,23 +7,25 @@ class AddCollaboratorsCtrl
         @scope.topic = @topic
         # Transform search result
         @scope.prepareSearch = (objects=[])->
-        	# Fetchs and returns the objects list
-        	for object in objects
-        		# Create a new field "name" using the "username"
-        		object["name"] = object["username"]
-        		# Return the updated object
-        		object
+            # Fetchs and returns the objects list
+            for object in objects
+                # Create a new field "name" using the "username"
+                object["name"] = object["username"]
+                # Return the updated object
+                object
         # Send an invitation to the given person
         @scope.invite = (collaborator)=>
             @scope.loading = yes
-            @Topic.invite({id: @topic.id}, {collaborator: collaborator}).$promise.then( =>
-                # Success
-                @scope.collaborator = ""
+            @scope.invited = null
+
+            @Topic.invite({id: @topic.id}, {collaborator: collaborator}, =>
                 @scope.loading = no
-            , =>
-                # Failled
-                @scope.loading = no
-            )
+                # Success notification
+                @scope.invited = collaborator
+            # Error
+            , => @scope.loading = no)
+
+
 
     @resolve:
         topic: ["Common", "$stateParams", (Common, $stateParams)->

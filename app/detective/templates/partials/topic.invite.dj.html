@@ -33,6 +33,10 @@
 			<button type="submit" ng-click="invite(collaborator)" class="btn btn-primary" ng-disabled="!addcollaborator.$valid || loading">
 				Add collaborator
 			</button>
+
+			<div class="alert alert-success top20 text-left" ng-if="invited">
+				Invitation sent to <strong>[[invited]]</strong>.
+			</div>
 		</div>
 	</form>
 </div>

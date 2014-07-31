@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from .errors                      import *
 from .message                     import Recover
-from app.detective.models         import Topic
+from app.detective.models         import Topic, TopicToken
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User, Group
@@ -153,6 +153,17 @@ class UserResource(ModelResource):
             # Create an inactive user
             setattr(user, "is_active", False)
             user.save()
+            # User used a invitation token
+            if data.get("token", None) is not None:
+                try:
+                    topicToken = TopicToken.objects.get(token=data.get("token"))
+                    # Add the user to the topic contributor group
+                    topicToken.topic.get_contributor_group().user_set.add(user)
+                    # Remove the token
+                    topicToken.delete()
+                except TopicToken.DoesNotExist:
+                    # Failed silently if the token is unkown
+                    pass
             # Send activation key by email
             activation_key = self.get_activation_key(user.username)
             rp = RegistrationProfile.objects.create(user=user, activation_key=activation_key)

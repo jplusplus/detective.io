@@ -14,7 +14,7 @@
 			<table class="table table-striped" ng-if="properties.length">
 				<tr ng-repeat="property in properties">
 					<td style="width: 30%">
-						<strong>[[property.verbose_name|titlecase]]</strong>
+						<strong>[[property.verbose_name]]</strong>
 					</td>
 					<td>
 						<span ng-bind="get(property.name) | date:'longDate'" ng-if="property.type == 'DateTimeField'"></span>
@@ -36,7 +36,7 @@
 				</tr>
 				<tr ng-repeat="property in relProperties">
 					<td style="width: 30%">
-						<strong>[[property.verbose_name|titlecase]]</strong>
+						<strong>[[property.verbose_name]]</strong>
 					</td>
 					<td>
 						<span ng-bind="get(property.name, true) | date:'longDate'" ng-if="property.type == 'DateTimeField'"></span>

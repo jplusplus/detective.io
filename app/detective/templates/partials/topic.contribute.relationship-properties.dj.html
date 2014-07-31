@@ -11,7 +11,7 @@
 	     ng-repeat="field in form.meta.fields | filter:form.isEditable track by $index">
 
 		<label for="id_[[field.name]]">
-			[[field.verbose_name|titlecase]]
+			[[field.verbose_name]]
 		</label>
 
 		<!-- Each type has its own input -->

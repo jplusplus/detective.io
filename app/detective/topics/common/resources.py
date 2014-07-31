@@ -103,8 +103,14 @@ class TopicResource(ModelResource):
             from_email, to_email = 'contact@detective.io', user.email
             subject = '[Detective.io] You’ve just been added to an investigation'
             signup = request.build_absolute_uri( reverse("signup") )
-            # Add user to the collaborator group
-            topic.get_contributor_group().user_set.add(user)
+            # Get the contributor group for this topic
+            contributor_group = topic.get_contributor_group()
+            # Check that the user isn't already in this group
+            if user.groups.filter(name=contributor_group.name):
+                return http.HttpBadRequest("You can't invite someone twice to the same topic.")
+            else:
+                # Add user to the collaborator group
+                contributor_group.user_set.add(user)
         # Unkown username
         except User.DoesNotExist:
             # User doesn't exist and we don't have any email address

@@ -19,6 +19,7 @@ from .jobs                      import process_parsing
 from psycopg2.extensions        import adapt
 from .errors                    import ForbiddenError, UnauthorizedError
 from .jobs                      import process_bulk_parsing_and_save_as_model, render_csv_zip_file
+from django.core.cache          import cache
 import app.detective.utils      as utils
 import json
 import re
@@ -413,15 +414,29 @@ class SummaryResource(Resource):
 
     def summary_export(self, bundle, request):
         self.method_check(request, allowed=['get'])
-        # enqueue the job
-        queue = django_rq.get_queue('default', default_timeout=7200)
-        job   = queue.enqueue(render_csv_zip_file, self.topic, model_type=request.GET.get("type"), query=request.GET.get("q"))
-        # return a quick response
-        self.log_throttled_access(request)
-        return {
-            "status" : "enqueued",
-            "token"  : job.get_id()
-        }
+        # check from cache
+        cache_key = "{topic}_{type}_{query}_summary_export".format( topic = self.topic.slug,
+                                                                    type  = request.GET.get("type", "all"),
+                                                                    query = request.GET.get("q", "null"))
+        file_name = cache.get(cache_key)
+        if file_name:
+            response = dict(
+                status    = "ok",
+                file_name = file_name)
+        else:
+            # enqueue the job
+            queue = django_rq.get_queue('default', default_timeout=7200)
+            job   = queue.enqueue(render_csv_zip_file, 
+                                  topic      = self.topic, 
+                                  model_type = request.GET.get("type"),
+                                  query      = request.GET.get("q"),
+                                  cache_key  = cache_key)
+            # return a quick response
+            self.log_throttled_access(request)
+            response = dict(
+                status = "enqueued",
+                token  = job.get_id())
+        return response
         # NOTE: legacy, without job
         # zip_file = render_csv_zip_file(self, model_type=request.GET.get("type"), query=request.GET.get("q"))
         # response = HttpResponse(zip_file, mimetype='application/zip')

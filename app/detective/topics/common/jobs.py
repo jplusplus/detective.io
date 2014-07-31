@@ -21,6 +21,7 @@ from django.conf                import settings
 from django.core.files.storage  import default_storage
 from django.core.files.base     import ContentFile
 from StringIO                   import StringIO
+from django.core.cache          import cache
 import app.detective.utils      as utils
 import django_rq
 import json
@@ -37,12 +38,13 @@ logger = logging.getLogger(__name__)
 #    JOB - EXPORT AS CSV
 #
 # -----------------------------------------------------------------------------
-def render_csv_zip_file(topic, model_type=None, query=None):
+def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
 
     def write_all_in_zip(objects, columns, zip_file, model_name=None):
         """
         Write the csv file from `objects` and `columns` and add it into the `zip_file` file.
-        If given, `model_name` will be the name of the csv file
+        If given, `model_name` will be the name of the csv file.
+        If `cache_key` is defined, will put the generated file name in the default cache with the given key.
         """
         # set a getattr function depending of the type of `objects`
         if isinstance(objects[0], dict):
@@ -125,6 +127,8 @@ def render_csv_zip_file(topic, model_type=None, query=None):
     # name can be changed by default storage if previous exists
     file_name = default_storage.save(file_name, ContentFile(buffer.getvalue()))
     buffer.close()
+    # save in cache if cache_key is defined
+    if cache_key: cache.set(cache_key, file_name, 60*60*24)
     return file_name
 
 # -----------------------------------------------------------------------------

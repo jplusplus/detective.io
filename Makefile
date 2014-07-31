@@ -75,6 +75,8 @@ livedoc:
 clean:
 	$(RM) $(PYC)
 	$(RM) $(CACHE)
+	python -c "from django.core.cache import cache; cache.clear()"
+	@echo "cache cleaned"
 
 fclean: clean
 	rm $(CUSTOM_D3)

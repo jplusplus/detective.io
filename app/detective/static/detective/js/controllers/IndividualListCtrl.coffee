@@ -1,8 +1,8 @@
 class IndividualListCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', 'Common', '$location',  'Page']
+    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', 'Common', '$location',  'Page', '$timeout']
 
-    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @Common, @location, @Page)->
+    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @Common, @location, @Page, @timeout)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
@@ -126,14 +126,19 @@ class IndividualListCtrl
     csvExport: =>
         if @scope.individuals.objects? and @scope.individuals.objects.length > 0
             @scope.exporting_csv = yes
-            @requestCsvExport (d) =>
-                @scope.exporting_csv = no
-                file = new Blob([d.data], { type : 'application/zip' })
-                saveAs(file, d.filename)
+            that = this
+            check_if_performed = (d) ->
+                    if d.status == "enqueued"
+                        # retry
+                        that.timeout((=> that.requestCsvExport(check_if_performed)), 2000)
+                    else
+                        # ask to download
+                        that.scope.exporting_csv = no
+                        window.location.replace(d.file_name)
+            @requestCsvExport(check_if_performed)
 
     requestCsvExport: (cb) =>
-        @Summary.export { type : @scope.type }, cb, =>
+        @Summary.export { type : @scope.type }, cb, (d) =>
             @scope.exporting_csv = no
-
 
 angular.module('detective.controller').controller 'individualListCtrl', IndividualListCtrl

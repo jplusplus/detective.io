@@ -127,8 +127,10 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
     # name can be changed by default storage if previous exists
     file_name = default_storage.save(file_name, ContentFile(buffer.getvalue()))
     buffer.close()
+    file_name = settings.MEDIA_URL + file_name
     # save in cache if cache_key is defined
-    if cache_key: cache.set(cache_key, file_name, 60*60*24)
+    if cache_key:
+        cache.set(cache_key, file_name, 60*60*24)
     return file_name
 
 # -----------------------------------------------------------------------------

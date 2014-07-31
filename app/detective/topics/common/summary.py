@@ -418,24 +418,23 @@ class SummaryResource(Resource):
         cache_key = "{topic}_{type}_{query}_summary_export".format( topic = self.topic.slug,
                                                                     type  = request.GET.get("type", "all"),
                                                                     query = request.GET.get("q", "null"))
-        file_name = cache.get(cache_key)
-        if file_name:
-            response = dict(
-                status    = "ok",
-                file_name = file_name)
+        response_in_cache = cache.get(cache_key)
+        if response_in_cache: # could be empty, dict(status = "enqueued"), or str("<filename>")
+            response = response_in_cache
+            if type(response) in (str, unicode): # if it's the file name from the job
+                response = dict(status="ok", file_name=response)
         else:
-            # enqueue the job
-            queue = django_rq.get_queue('default', default_timeout=7200)
-            job   = queue.enqueue(render_csv_zip_file, 
-                                  topic      = self.topic, 
-                                  model_type = request.GET.get("type"),
-                                  query      = request.GET.get("q"),
-                                  cache_key  = cache_key)
             # return a quick response
-            self.log_throttled_access(request)
             response = dict(
-                status = "enqueued",
-                token  = job.get_id())
+                status = "enqueued")
+            cache.set(cache_key, response)
+            # enqueue the job
+            django_rq.enqueue(render_csv_zip_file,
+                              topic      = self.topic,
+                              model_type = request.GET.get("type"),
+                              query      = request.GET.get("q"),
+                              cache_key  = cache_key)
+        self.log_throttled_access(request)
         return response
         # NOTE: legacy, without job
         # zip_file = render_csv_zip_file(self, model_type=request.GET.get("type"), query=request.GET.get("q"))

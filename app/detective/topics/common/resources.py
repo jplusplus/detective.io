@@ -4,7 +4,7 @@ from app.detective.models             import QuoteRequest, Topic, TopicToken, Ar
 from app.detective.utils              import get_registered_models, is_valid_email
 from app.detective.topics.common.user import UserResource, AuthorResource
 from django.conf.urls                 import url
-from tastypie                         import fields
+from tastypie                         import fields, http
 from tastypie.authorization           import ReadOnlyAuthorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
@@ -49,7 +49,7 @@ class TopicAuthorization(ReadOnlyAuthorization):
         contributor_group = bundle.obj.get_contributor_group().name
         isAuthor = bundle.obj.author == bundle.request.user
         # Only authenticated user can update there own topic or people from the contributor group
-        return isAuthor or bundle.request.user.groups.filter(name=contributor_group)
+        return isAuthor or not not bundle.request.user.groups.filter(name=contributor_group)
     # Only authenticated user can create topics
     def create_detail(self, object_list, bundle):
         return bundle.request.user.is_authenticated()
@@ -85,7 +85,7 @@ class TopicResource(ModelResource):
         body = json.loads(request.body)
         collaborator = body.get("collaborator", None)
         if collaborator is None:
-            raise Exception("Missing 'collaborator' parameter")
+            return http.HttpBadRequest("Missing 'collaborator' parameter")
 
         try:
             # Try to get the user by its email
@@ -97,7 +97,7 @@ class TopicResource(ModelResource):
                 user = User.objects.get(username=collaborator)
             # You can't invite the author of the topic
             if user == topic.author:
-                raise Exception("You can't invite the author of the topic.")
+                return http.HttpBadRequest("You can't invite the author of the topic.")
             # Email options for kown user
             template = get_template("email.topic-invitation.existing-user.txt")
             from_email, to_email = 'contact@detective.io', user.email
@@ -108,7 +108,7 @@ class TopicResource(ModelResource):
         # Unkown username
         except User.DoesNotExist:
             # User doesn't exist and we don't have any email address
-            if not is_valid_email(collaborator): raise Http404("Sorry, unkown user.")
+            if not is_valid_email(collaborator): return http.HttpNotFound("User unkown.")
             # Send an invitation to create an account
             template = get_template("email.topic-invitation.new-user.txt")
             from_email, to_email = 'contact@detective.io', collaborator
@@ -119,7 +119,7 @@ class TopicResource(ModelResource):
                 topicToken.save()
             except IntegrityError:
                 # Can't invite the same user once!
-                raise Exception("You can't invite someone twice to the same topic.")
+                return http.HttpBadRequest("You can't invite someone twice to the same topic.")
             signup = request.build_absolute_uri( reverse("signup", args=[topicToken.token]) )
 
         # Creates link to the topic

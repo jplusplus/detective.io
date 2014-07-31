@@ -15,7 +15,15 @@ class AddCollaboratorsCtrl
         		object
         # Send an invitation to the given person
         @scope.invite = (collaborator)=>
-        	@Topic.invite {id: @topic.id}, {collaborator: collaborator}
+            @scope.loading = yes
+            @Topic.invite({id: @topic.id}, {collaborator: collaborator}).$promise.then( =>
+                # Success
+                @scope.collaborator = ""
+                @scope.loading = no
+            , =>
+                # Failled
+                @scope.loading = no
+            )
 
     @resolve:
         topic: ["Common", "$stateParams", (Common, $stateParams)->

@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
+from .errors                    import ForbiddenError, UnauthorizedError
 from app.detective.models       import Topic, SearchTerm
 from app.detective.neomatch     import Neomatch
 from app.detective.register     import topics_rules
 from difflib                    import SequenceMatcher
+from django.conf                import settings
 from django.core.paginator      import Paginator, InvalidPage
 from django.core.urlresolvers   import resolve
 from django.http                import Http404, HttpResponse
+from django.utils.timezone      import utc
 from neo4django.db              import connection
+from psycopg2.extensions        import adapt
+from rq                         import get_current_job
+from StringIO                   import StringIO
 from tastypie                   import http
 from tastypie.exceptions        import ImmediateHttpResponse
 from tastypie.resources         import Resource
 from tastypie.serializers       import Serializer
-from django.conf                import settings
-from django.utils.timezone      import utc
-from psycopg2.extensions        import adapt
-from StringIO                   import StringIO
-from rq                         import get_current_job
-from .errors                    import ForbiddenError, UnauthorizedError
 import app.detective.utils      as utils
 from django.contrib.auth.models import User
 import json

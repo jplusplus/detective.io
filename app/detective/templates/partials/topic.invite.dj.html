@@ -18,6 +18,7 @@
 				<input required
 					   type="text"
 					   class="form-control"
+					   ng-disabled="loading"
 					   ng-model="collaborator"
 					   tt-typeahead
 					   tt-transform="prepareSearch(objects)"
@@ -29,7 +30,7 @@
 			<a class="btn btn-link pull-left" ui-sref="home.dashboard">
 				<i class="fa fa-arrow-left"></i>&nbsp;Go back to your dashboard
 			</a>
-			<button type="submit" ng-click="invite(collaborator)" class="btn btn-primary" ng-disabled="!addcollaborator.$valid">
+			<button type="submit" ng-click="invite(collaborator)" class="btn btn-primary" ng-disabled="!addcollaborator.$valid || loading">
 				Add collaborator
 			</button>
 		</div>

@@ -114,6 +114,9 @@ class UserCtrl
             username: @scope.username
             email   : @scope.email
             password: @scope.password
+        # Add token during invitation
+        if @state.is("signup-invitation")
+            data["token"] = @stateParams.token
         # Turn on loading mode
         @scope.loading = true
         # succefull login

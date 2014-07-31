@@ -126,7 +126,7 @@ class TopicResource(ModelResource):
             except IntegrityError:
                 # Can't invite the same user once!
                 return http.HttpBadRequest("You can't invite someone twice to the same topic.")
-            signup = request.build_absolute_uri( reverse("signup-token", args=[topicToken.token]) )
+            signup = request.build_absolute_uri( reverse("signup-invitation", args=[topicToken.token]) )
 
         # Creates link to the topic
         link = request.build_absolute_uri(topic.get_absolute_path())

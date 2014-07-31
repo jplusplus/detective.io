@@ -1,4 +1,6 @@
 from django.forms.forms import pretty_name
+from django.core.cache import cache
+
 from random             import randint
 from os.path            import isdir, join
 from os                 import listdir
@@ -315,7 +317,80 @@ def open_csv(csv_file):
     reader = csv.reader(csv_file, dialect)
     return reader
 
-
 def should_show_debug_toolbar(request):
     return re.match(r'^/api/', request.path) != None
+
+
+
+class TopicCachier(object):
+    _instance = None
+    # dict of cache key definitions / formats
+    _keys = {
+        # general prefix for every key
+        'topic_prefix'    : 'topic_{module}',
+        # specific version cache key
+        'version_number' : '{topic_prefix}_version',
+        # topic's related cache key prefix
+        'cache_prefix'   : '{topic_prefix}_{suffix}',
+    }
+
+    _timeouts = {
+        'default': 60 * 60 # 3600 secondes = 1h
+    }
+
+    def keys(self):
+        return self._keys
+
+    def timeout(self, key='default'):
+        return self._timeouts[key]
+
+    def version_key(self, topic):
+        return self.keys()['version_number'].format(
+            topic_prefix=self.topic_prefix(topic))
+
+    def topic_prefix(self, topic):
+        topic_module = topic.module
+        return self.keys()['topic_prefix'].format(module=topic_module)
+
+    def cache_prefix(self, topic, suffix):
+        return self.keys()['cache_prefix'].format(
+            topic_prefix=self.prefix_key(topic),
+            suffix=suffix
+        )
+
+    def version(self, topic):
+        cache_key = self.version_key(topic)
+        rev = cache.get(cache_key)
+        if rev == None:
+            rev = 0
+            cache.set(cache_key, rev, self.timeout())
+        return rev
+
+    def incr_version(self, topic):
+        cache_key = self.version_key(topic)
+        if cache.get(cache_key) == None:
+            cache.set(cache_key, 0, self.timeout())
+        else:
+            cache.incr(cache_key)
+
+    def delete_version(self, topic):
+        cache_key = self.version_key(topic)
+        cache.delete(cache_key)
+
+    def get(self, topic, suffix_key):
+        cache_key = self.versioned_key(topic, suffix_key)
+        return cache.get(cache_key )
+
+    def set(self, topic, suffix_key, value, timeout=None):
+        if timeout == None:
+            timeout = self._timeouts['defaults']
+        cache.set(cache_key, value, timeout)
+
+    def __new__(self):
+        # singleton instanciation
+        if self._instance == None:
+            self._instance = super(TopicCachier, self).__new__(self)
+        return self._instance
+
+topic_cache = TopicCachier()
 # EOF

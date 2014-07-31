@@ -3,7 +3,7 @@
 		<div class="container">
 			<h2>Add a new entity to the database</h2>
 
-			<div ng-repeat="resource in topicResources() track by $index">
+			<div ng-repeat="resource in (topicResources() | orderBy:'index') track by $index">
 				<div class="row top30">
 					<div class="col-sm-3">
 						<label class="btn btn-block btn-default btn-large" ng-click="new.type = resource.name">

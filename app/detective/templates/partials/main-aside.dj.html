@@ -23,7 +23,7 @@
                 </div>
             </h3>
             <ul class="main-aside__current-topic__taxonomy list-unstyled">
-                <li ng-repeat="model in topicsFactory.topic.models | filter:{is_searchable: true}">
+                <li ng-repeat="model in topicsFactory.topic.models | filter:{is_searchable: true} | orderBy:'index'">
                     <a href="[[topicsFactory.topic.link]]/[[model.name|lowercase]]">
                         <div class="small" color-tag ref="model.name|lowercase"></div>
                         [[model.verbose_name|titlecase]]

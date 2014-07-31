@@ -42,6 +42,17 @@ class QuoteRequestResource(ModelResource):
         authorization = QuoteRequestAuthorization()
         queryset      = QuoteRequest.objects.all()
 
+
+class TopicAuthorization(ReadOnlyAuthorization):
+    def update_detail(self, object_list, bundle):
+        contributor_group = bundle.obj.get_contributor_group().name
+        isAuthor = bundle.obj.author == bundle.request.user
+        # Only authenticated user can update there own topic or people from the contributor group
+        return isAuthor or bundle.request.user.groups.filter(name=contributor_group)
+    # Only authenticated user can create topics
+    def create_detail(self, object_list, bundle):
+        return bundle.request.user.is_authenticated()
+
 class TopicResource(ModelResource):
 
     author             = fields.ToOneField(AuthorResource, 'author', full=True, null=True)
@@ -49,6 +60,7 @@ class TopicResource(ModelResource):
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
 
     class Meta:
+        authorization = TopicAuthorization()
         queryset  = Topic.objects.all().prefetch_related('author')
         filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
 
@@ -63,8 +75,11 @@ class TopicResource(ModelResource):
         self.method_check(request, allowed=['post'])
         self.is_authenticated(request)
         self.throttle_check(request)
-
+        # Get current topic
         topic = Topic.objects.get(id=kwargs["pk"])
+        # Check authorization
+        bundle = self.build_bundle(obj=topic, request=request)
+        self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
 
         body = json.loads(request.body)
         collaborator = body.get("collaborator", None)

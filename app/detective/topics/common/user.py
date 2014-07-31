@@ -250,8 +250,8 @@ class UserResource(ModelResource):
             recover = Recover()
             recover.user = user
             recover.request = request
-            recover.email_template_name = 'reset_password_email.txt'
-            recover.email_subject_template_name = 'reset_password_email_subject.txt'
+            recover.email_template_name = 'email.reset-password.txt'
+            recover.email_subject_template_name = 'email.reset-password.subject.txt'
             recover.send_notification()
             return self.create_response(request, { 'success': True })
         except User.DoesNotExist:

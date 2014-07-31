@@ -199,8 +199,12 @@ class Topic(models.Model):
 
 class TopicToken(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this token is related to.")
-    token      = models.CharField(editable=True, max_length=32, help_text="Title of your article.")
+    token      = models.CharField(editable=False, max_length=32, help_text="Title of your article.")
+    email      = models.CharField(max_length=255, default=None, null=True, help_text="Email to invite.")
     created_at = models.DateTimeField(auto_now_add=True, default=None, null=True)
+
+    class Meta:
+        unique_together = ('topic', 'email',)
 
     @staticmethod
     def get_random_token(size=32, chars=string.ascii_letters + string.digits):

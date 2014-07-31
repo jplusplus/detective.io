@@ -94,6 +94,9 @@ class TopicResource(ModelResource):
             else:
                 # Add existing user
                 user = User.objects.get(username=collaborator)
+            # You can't invite the author of the topic
+            if user == topic.author:
+                raise Exception("You can't invite the author of the topic!")
             # Email options for kown user
             template = get_template("email.topic-invitation.existing-user.txt")
             from_email, to_email = 'contact@detective.io', user.email

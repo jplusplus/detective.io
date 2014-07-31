@@ -274,21 +274,4 @@ class SearchTerm(models.Model):
             return self.field["related_model"]
         else:
             return None
-
-# -----------------------------------------------------------------------------
-#
-#    SIGNALS
-#
-# -----------------------------------------------------------------------------
-from django.db.models import signals
-
-def update_permissions(*args, **kwargs):
-    """ create the permissions related to the label module """
-    assert kwargs.get('instance')
-    # @TODO check that the slug changed or not to avoid permissions hijacking
-    if kwargs.get('created', False):
-        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').ontology_as_mod)
-
-signals.post_delete.connect(remove_permissions, sender=Topic)
-signals.post_save.connect(update_permissions, sender=Topic)
 # EOF

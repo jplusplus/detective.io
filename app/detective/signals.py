@@ -2,6 +2,7 @@ from django.db.models           import signals
 from app.detective              import utils
 from app.detective.models       import Topic
 from app.detective.permissions  import create_permissions, remove_permissions
+
 def update_permissions(*args, **kwargs):
     """ create the permissions related to the label module """
     assert kwargs.get('instance')

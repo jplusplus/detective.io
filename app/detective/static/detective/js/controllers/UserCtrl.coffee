@@ -100,7 +100,7 @@ class UserCtrl
             # Interpret the respose
             if data? and data.success
                 # Redirect to the next URL
-                @state.go @scope.nextState or "tour", @scope.nextParams
+                @state.go "home.dashboard"
                 # Delete error
                 delete @scope.error
             else
@@ -176,8 +176,8 @@ class UserCtrl
     logout: =>
         next_url = @location.url()
         @Auth.logout().then =>
-            login_params = 
-                nextState: @state.current.name 
+            login_params =
+                nextState: @state.current.name
                 nextParams: angular.toJson @state.params
 
             @state.go 'login', login_params

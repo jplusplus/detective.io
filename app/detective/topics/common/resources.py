@@ -65,11 +65,16 @@ class TopicResource(ModelResource):
             bundle.data['thumbnail'] = None
 
         for m in bundle.obj.get_models():
+            try:
+                idx = m.__idx__
+            except AttributeError:
+                idx = 0
             model = {
                 'name': m.__name__,
                 'verbose_name': m._meta.verbose_name,
                 'verbose_name_plural': m._meta.verbose_name_plural,
-                'is_searchable': rulesManager.model(m).all().get("is_searchable", False)
+                'is_searchable': rulesManager.model(m).all().get("is_searchable", False),
+                'index': idx
             }
             bundle.data["models"].append(model)
         return bundle

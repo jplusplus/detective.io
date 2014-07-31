@@ -196,7 +196,8 @@ class SummaryResource(Resource):
                 'verbose_name_plural' : verbose_name_plural,
                 'name'                : name,
                 'fields'              : fields,
-                'rules'               : rules
+                'rules'               : rules,
+                'index'               : model.__idx__
             }
 
         return available_resources

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
-from app.detective.models             import QuoteRequest, Topic, Article, User
+from app.detective.models             import QuoteRequest, Topic, TopicToken, Article, User
 from app.detective.utils              import get_registered_models, is_valid_email
 from app.detective.topics.common.user import UserResource, AuthorResource
 from django.conf.urls                 import url
@@ -13,10 +13,11 @@ from tastypie.utils                   import trailing_slash
 from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.core.mail                 import EmailMultiAlternatives
+from django.core.urlresolvers         import reverse
 from django.db.models                 import Q
 from django.http                      import Http404, HttpResponse
-from django.template.loader           import get_template
 from django.template                  import Context
+from django.template.loader           import get_template
 
 import json
 import re
@@ -70,35 +71,47 @@ class TopicResource(ModelResource):
         if collaborator is None:
             raise Exception("Missing 'collaborator' parameter")
 
-        if is_valid_email(collaborator):
-            try:
+        try:
+            # Try to get the user by its email
+            if is_valid_email(collaborator):
                 user = User.objects.get(email=collaborator)
-            # Send an invitation to register
-            except User.DoesNotExist:
-                pass
-        else:
-            try:
+            # Try to get the user by its username
+            else:
                 # Add existing user
                 user = User.objects.get(username=collaborator)
-            # Unkown username
-            except User.DoesNotExist:
-                # Nothing yet here!
-                raise Http404("Sorry, unkown user.")
+            # Email options for kown user
+            template = get_template("email.topic-invitation.existing-user.txt")
+            from_email, to_email = 'contact@detective.io', user.email
+            subject = '[Detective.io] You’ve just been added to an investigation'
+            signup = request.build_absolute_uri( reverse("signup") )
+            # Add user to the collaborator group
+            topic.get_contributor_group().user_set.add(user)
+        # Unkown username
+        except User.DoesNotExist:
+            # User doesn't exist and we don't have any email address
+            if not is_valid_email(collaborator): raise Http404("Sorry, unkown user.")
+            # Send an invitation to create an account
+            template = get_template("email.topic-invitation.new-user.txt")
+            from_email, to_email = 'contact@detective.io', collaborator
+            subject = '[Detective.io] Someone needs your help on an investigation!'
+            # Creates a topictoken
+            topicToken = TopicToken(topic=topic)
+            topicToken.save()
+            signup = request.build_absolute_uri( reverse("signup", args=[topicToken.token]) )
 
         # Creates link to the topic
-        link = request.build_absolute_uri(topic.get_absolute_url())
-        # Load email template
-        template = get_template("email.topic-invitation.existing-user.txt")
-        context = Context({ 'topic': topic, 'user': request.user, 'link': link })
+        link = request.build_absolute_uri(topic.get_absolute_path())
+        context = Context({
+            'topic' : topic,
+            'user'  : request.user,
+            'link'  : link,
+            'signup': signup
+        })
         # Render template
         text_content = template.render(context)
         # Prepare and send email
-        subject = '[Detective.io] You’ve just been added to an investigation'
-        from_email, to_email = 'contact@detective.io', user.email
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
         msg.send()
-        # Add user to the collaborator group
-        topic.get_contributor_group().user_set.add(user)
 
         return HttpResponse("Invitation send!")
 

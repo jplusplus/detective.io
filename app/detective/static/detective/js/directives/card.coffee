@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "card", ['Summary', 'Individual', (Summary, Individual)->
+angular.module('detective.directive').directive "card", ['Summary', 'Individual', '$sce', (Summary, Individual, $sce)->
     restrict: 'E'
     require: "ngModel"
     scope:
@@ -30,8 +30,12 @@ angular.module('detective.directive').directive "card", ['Summary', 'Individual'
                 scope.individual[name] or false
             else
                 scope.relIndividual[name] or false
+        scope.getTrusted = (n) ->
+            val = scope.get n
+            if val? and val.length > 0 then ($sce.trustAsHtml val) else ""
         # True if the given property is a string
         scope.isString = (f)-> ["CharField", "URLField"].indexOf(f.type) > -1
+        scope.isRich = (field) -> field.rules.is_rich or no
         # This individual might have visible properties
         scope.mightHaveProperties = -> scope.field.rules.has_properties or not scope.model.rules.is_searchable
         # True if the given type is literal

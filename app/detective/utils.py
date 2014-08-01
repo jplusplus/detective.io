@@ -5,6 +5,7 @@ from random             import randint
 from os.path            import isdir, join
 from os                 import listdir
 from unidecode          import unidecode
+
 import importlib
 import inspect
 import os
@@ -120,7 +121,7 @@ def get_topic_models(topic):
 
 def get_registered_models():
     from django.db import models
-    import app.settings as settings
+    from django.conf import settings
     mdls = []
     for app in settings.INSTALLED_APPS:
         models_name = app + ".models"
@@ -358,18 +359,18 @@ class TopicCachier(object):
             suffix=suffix
         )
 
+    def init_version(self, topic):
+        cache_key = self.version_key(topic)
+        cache.set(cache_key, 0, self.timeout())
+
     def version(self, topic):
         cache_key = self.version_key(topic)
-        rev = cache.get(cache_key)
-        if rev == None:
-            rev = 0
-            cache.set(cache_key, rev, self.timeout())
-        return rev
+        return cache.get(cache_key)
 
     def incr_version(self, topic):
         cache_key = self.version_key(topic)
         if cache.get(cache_key) == None:
-            cache.set(cache_key, 0, self.timeout())
+            self.init_version(topic)
         else:
             cache.incr(cache_key)
 

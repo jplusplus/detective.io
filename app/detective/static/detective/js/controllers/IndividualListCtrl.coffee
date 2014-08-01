@@ -112,8 +112,9 @@ class IndividualListCtrl
     # True if there is a next page
     hasNextPage: =>
         return false unless @scope.individuals.meta?
-        meta  = @scope.individuals.meta
-        (meta.limit * @scope.page + meta.limit / meta.total_count) > 1
+        meta     = @scope.individuals.meta
+        nb_pages = Math.ceil(meta.total_count / meta.limit)
+        @scope.page < nb_pages
 
     # Go to the previous page
     previousPage: => @goToPage(1*@scope.page-1) if @hasPreviousPage()

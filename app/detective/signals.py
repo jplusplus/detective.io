@@ -1,5 +1,5 @@
 from django.db.models           import signals
-from app.detective              import utils
+from app.detective.utils        import topic_cache
 from app.detective.models       import Topic
 from app.detective.permissions  import create_permissions, remove_permissions
 
@@ -11,10 +11,13 @@ def update_permissions(*args, **kwargs):
         create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').ontology_as_mod)
 
 def update_topic_cache(*args, **kwargs):
-    utils.topic_cache.incr_version(kwargs.get('instance'))
+    topic_cache.incr_version(kwargs.get('instance'))
 
+def remove_topic_cache(*args, **kwargs):
+    topic_cache.delete_version(kwargs.get('instance'))
 
 def bind():
     signals.post_save.connect(update_topic_cache,   sender=Topic)
+    signals.pre_delete.connect(remove_topic_cache, sender=Topic)
     signals.post_delete.connect(remove_permissions, sender=Topic)
     signals.post_save.connect(update_permissions,   sender=Topic)

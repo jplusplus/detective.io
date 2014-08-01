@@ -360,7 +360,9 @@ class ContributeCtrl
     focusField: (individual, field) =>
         for loop_individual in @scope.individuals
             if individual is loop_individual
-                loop_individual.focusedField.field = field.name
+                if loop_individual.focusedField.field isnt field.name
+                    loop_individual.focusedField.field = field.name
+                    loop_individual.focusedField.source = no
             else
                 do loop_individual.unfocusField
 

@@ -63,12 +63,13 @@ class TopicCachierTestCase(TestCase):
         except:
             self.topic = Topic.objects.get(slug='test-investigation-fake')
 
-    def tearDown(self):
-        self.topic.delete()
-
     def test_topic_update(self):
         # if we update a topic, its revision number should be incremented
         rev = topic_cache.version(self.topic)
         self.topic.title = "New title"
         self.topic.save()
         self.assertEqual(topic_cache.version(self.topic), rev+1)
+
+    def test_topic_delete(self):
+        self.topic.delete()
+        self.assertIsNone(topic_cache.version(self.topic))

@@ -175,7 +175,7 @@ class Topic(models.Model):
         for model in self.get_models():
             if rulesManager.model(model).all().get("is_searchable", False):
                 searchableModels.append(model)
-        names = [ sm._meta.verbose_name_plural.lower() for sm in searchableModels ]
+        names = [ unicode(sm._meta.verbose_name_plural) for sm in searchableModels ]
         random.shuffle(names)
         # No more than X names
         if len(names) > max_suggestion:

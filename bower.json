@@ -1,6 +1,6 @@
 {
   "name": "detective",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "dependencies": {
     "angular": "1.2.16",
     "angular-cookies": "1.2.16",
@@ -26,7 +26,6 @@
     "raphael": "2.1.2",
     "typeahead.js": "0.10.2",
     "underscore": "1.5.2",
-    "bootstrap-checkbox": "~1.0.14",
     "textAngular": "1.2.0",
     "rangy": "~1.2.3"
   }

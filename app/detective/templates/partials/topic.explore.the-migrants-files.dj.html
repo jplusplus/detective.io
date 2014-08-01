@@ -36,10 +36,9 @@
                                 placeholder="[[ search.topic.search_placeholder]]"
                                 tt-typeahead
                                 tt-individual="'summary'"
-                                tt-topic="search.topic_slug"
+                                tt-topic="search.topic.slug"
                                 tt-model="search.selectedIndividual"
-                                remote="/api/[[search.topic_slug]]/v1/summary/human/?q=%QUERY"
-                                prefetch="/api/[[search.topic_slug]]/v1/summary/mine/"
+                                tt-endpoint="'human'"
                                 value-key="label"
                                 limit="10"
                                 class="form-control"

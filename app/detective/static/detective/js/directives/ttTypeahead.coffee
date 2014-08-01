@@ -1,6 +1,5 @@
 angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User)->
     lastDataset = []
-
     template =
         compile: (template) ->
             compiled = $compile(template)
@@ -31,8 +30,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         topic     : "&ttTopic"
         create    : "&ttCreate"
         submit    : "&ttSubmit"
-        remote    : "@"
-        prefetch  : "@"
+        endpoint  : "&ttEndpoint"
         valueKey  : "@"
         value     : '=?'
         limit     : "@"
@@ -43,9 +41,6 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         saveResponse = (response) ->
             lastDataset = response.objects
 
-        # Select the individual to look for
-        individual = (scope.individual() or "").toLowerCase()
-        itopic     = (scope.topic() or $stateParams.topic or "common").toLowerCase()
         # Set a default value
         element.val scope.model.name if scope.model?
         element.val scope.value if scope.value?
@@ -54,83 +49,100 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             element.typeahead('val', val)
         , yes
 
+        start = =>
+            # Select the individual to look for
+            individual = (scope.individual() or "").toLowerCase()
+            itopic     = (scope.topic() or $stateParams.topic or "common").toLowerCase()
+            iendpoint  = (do scope.endpoint) or 'search'
 
-        bh = new Bloodhound
-            datumTokenizer : Bloodhound.tokenizers.obj.whitespace
-            queryTokenizer : Bloodhound.tokenizers.whitespace
-            dupDetector : (a, b) ->
-                a_id = a.id || a.subject.name
-                b_id = b.id || b.subject.name
-                a_id is b_id
-            prefetch :
-                url : scope.prefetch or "/api/#{itopic}/v1/#{individual}/mine/"
-                filter : saveResponse
-            remote :
-                url : scope.remote or "/api/#{itopic}/v1/#{individual}/search/?q=%QUERY"
-                filter : saveResponse
+            lastDataset = []
+            element.typeahead 'destroy'
 
-        bh.storage = null # Hack to disable localStorage caching
-        do bh.initialize
+            bh = new Bloodhound
+                datumTokenizer : Bloodhound.tokenizers.obj.whitespace
+                queryTokenizer : Bloodhound.tokenizers.whitespace
+                dupDetector : (a, b) ->
+                    a_id = a.id || a.subject.name
+                    b_id = b.id || b.subject.name
+                    a_id is b_id
+                prefetch :
+                    url : "/api/#{itopic}/v1/#{individual}/mine/"
+                    filter : saveResponse
+                remote :
+                    url : "/api/#{itopic}/v1/#{individual}/#{iendpoint}/?q=%QUERY"
+                    filter : saveResponse
 
-        options =
-            # Create the typehead
-            hint : yes
-            highlight : yes
+            bh.storage = null # Hack to disable localStorage caching
+            do bh.initialize
 
-        element.typeahead options,
-            displayKey : (scope.valueKey or "name")
-            name : 'suggestions'
-            source : do bh.ttAdapter
-            templates :
-                suggestion : (template.compile [
-                    '<div>',
-                        '<div class="tt-suggestion__line" ng-class="{\'tt-suggestion__line--with-model\': getModel()}">',
-                            '[[name||label]]',
-                            '<div class="tt-suggestion__line__model" ng-show="getModel()">',
-                                '<div class="tt-suggestion__line__model__figure" ng-style="{ background: getFigureBg()}">',
-                                    '<i ng-show="isList()" class="fa fa-list"></i>',
+            options =
+                # Create the typehead
+                hint : yes
+                highlight : yes
+
+            element.typeahead options,
+                displayKey : (scope.valueKey or "name")
+                name : 'suggestions-' + do scope.topic
+                source : do bh.ttAdapter
+                templates :
+                    suggestion : (template.compile [
+                        '<div>',
+                            '<div class="tt-suggestion__line" ng-class="{\'tt-suggestion__line--with-model\': getModel()}">',
+                                '[[name||label]]',
+                                '<div class="tt-suggestion__line__model" ng-show="getModel()">',
+                                    '<div class="tt-suggestion__line__model__figure" ng-style="{ background: getFigureBg()}">',
+                                        '<i ng-show="isList()" class="fa fa-list"></i>',
+                                    '</div>',
+                                    '[[getModel()]]',
                                 '</div>',
-                                '[[getModel()]]',
                             '</div>',
-                        '</div>',
-                    '</div>'
-                ].join "").render
+                        '</div>'
+                    ].join "").render
 
-        # Watch keys
-        element.on "keyup", (event)->
-            # Enter is pressed
-            if event.keyCode is 13 and scope.submit?
+            # Unbind all events
+            (((element.off "keyup").off "change").off "typeahead:selected").off "typeahead:uservalue"
+
+            # Watch keys
+            element.on "keyup", (event)->
+                # Enter is pressed
+                if event.keyCode is 13 and scope.submit?
+                    # Apply the scope change
+                    scope.$apply =>
+                        do scope.submit
+
+            # Watch select event
+            element.on "typeahead:selected", (input, individual)->
+                if scope.model?
+                    scope.$apply =>
+                        angular.copy(individual, scope.model);
+                do scope.change if scope.change?
+
+            # Watch user value event
+            element.on "typeahead:uservalue", ()->
+                return unless scope.model?
+                # Empty selected model
+                delete scope.model.id
+                # Record the value
+                scope.model.name = $(this).val()
+                # Evaluate the 'create' expression
+                do scope.create if typeof(scope.create) is "function"
                 # Apply the scope change
-                scope.$apply =>
-                    do scope.submit
+                do scope.$apply
 
+            # Watch change event
+            element.on "change", (input)->
+                # Filter using the current value
+                datum = _.findWhere lastDataset, "name": element.val()
+                # If datum exist, use the selected event
+                ev = "typeahead:" + (if datum then "selected" else "uservalue")
+                # Trigger this even
+                element.trigger ev, datum
 
-        # Watch select event
-        element.on "typeahead:selected", (input, individual)->
-            if scope.model?
-                scope.$apply =>
-                    angular.copy(individual, scope.model);
-            do scope.change if scope.change?
+        scope.$watch =>
+            do scope.topic
+        , (newValue, oldValue) =>
+            if newValue? and newValue isnt oldValue
+                do start
+        , yes
 
-        # Watch user value event
-        element.on "typeahead:uservalue", ()->
-            return unless scope.model?
-            # Empty selected model
-            delete scope.model.id
-            # Record the value
-            scope.model.name = $(this).val()
-            # Evaluate the 'create' expression
-            do scope.create if typeof(scope.create) is "function"
-            # Apply the scope change
-            do scope.$apply
-
-        # Watch change event
-        element.on "change", (input)->
-            # Filter using the current value
-            datum = _.findWhere lastDataset, "name": element.val()
-            # If datum exist, use the selected event
-            ev = "typeahead:" + (if datum then "selected" else "uservalue")
-            # Trigger this even
-            element.trigger ev, datum
-
-
+        do start

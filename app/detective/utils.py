@@ -194,7 +194,8 @@ def get_model_fields(model, order_by='name'):
             fields.append(field)
 
     if hasattr(model, '__fields_order__'):
-        fields.sort(key=lambda x: model.__fields_order__.index(x['name']) if x['name'] in model.__fields_order__ else 0)
+        _len = len(fields)
+        fields = sorted(fields, key=lambda x: model.__fields_order__.index(x['name']) if x['name'] in model.__fields_order__ else _len)
     else:
         get_key=lambda el: el[order_by]
         fields = sorted(fields, key=get_key)

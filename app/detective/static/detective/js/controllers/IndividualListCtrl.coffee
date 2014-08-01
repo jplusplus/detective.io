@@ -127,18 +127,31 @@ class IndividualListCtrl
         if @scope.individuals.objects? and @scope.individuals.objects.length > 0
             @scope.exporting_csv = yes
             that = this
-            check_if_performed = (d) ->
-                    if d.status == "enqueued"
-                        # retry
-                        that.timeout((=> that.requestCsvExport(check_if_performed)), 2000)
-                    else
-                        # ask to download
-                        that.scope.exporting_csv = no
-                        window.location.replace(d.file_name)
-            @requestCsvExport(check_if_performed)
+            @requestCsvExport (d) ->
+                if d.status == "enqueued"
+                    # ask if the job is finished
+                    refresh_timeout = that.timeout refresh_status = =>
+                        that.Common.get {type:"jobs", id:d.token}, (data) =>
+                            if data.status == "finished"
+                                that.askToDownload(JSON.parse(data.result).file_name)
+                            else
+                                # retart the function
+                                refresh_timeout = that.timeout(refresh_status, 2000)
+                    # cancel the timeout if the view is destroyed
+                    that.scope.$on '$destroy', =>
+                        that.timeout.cancel(refresh_timeout)
+                else
+                    # ask to download
+                    that.askToDownload(d.file_name)
+
+    askToDownload: (file_name) =>
+        @scope.exporting_csv = no
+        window.location.replace(file_name)
 
     requestCsvExport: (cb) =>
         @Summary.export { type : @scope.type }, cb, (d) =>
             @scope.exporting_csv = no
 
 angular.module('detective.controller').controller 'individualListCtrl', IndividualListCtrl
+
+# EOF

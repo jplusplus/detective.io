@@ -415,25 +415,37 @@ class SummaryResource(Resource):
     def summary_export(self, bundle, request):
         self.method_check(request, allowed=['get'])
         # check from cache
-        cache_key = "{topic}_{type}_{query}_summary_export".format( topic = self.topic.slug,
-                                                                    type  = request.GET.get("type", "all"),
-                                                                    query = request.GET.get("q", "null"))
+        cache_key = "{topic}_{type}_{query}_summary_export" \
+            .format( topic = self.topic.slug,
+                     type  = request.GET.get("type", "all"),
+                     query = request.GET.get("q", "null"))
         response_in_cache = cache.get(cache_key)
-        if response_in_cache: # could be empty, dict(status = "enqueued"), or str("<filename>")
-            response = response_in_cache
-            if type(response) in (str, unicode): # if it's the file name from the job
-                response = dict(status="ok", file_name=response)
+        if response_in_cache: # could be empty or str("<filename>")
+            logger.debug("export already exist from cache")
+            response = dict(status="ok", file_name=response_in_cache)
         else:
             # return a quick response
             response = dict(
                 status = "enqueued")
-            cache.set(cache_key, response)
-            # enqueue the job
-            django_rq.enqueue(render_csv_zip_file,
-                              topic      = self.topic,
-                              model_type = request.GET.get("type"),
-                              query      = request.GET.get("q"),
-                              cache_key  = cache_key)
+            # check if a job already exist
+            job_already_exist = False
+            for job in django_rq.get_queue().jobs:
+                if job.meta["cache_key"] == cache_key:
+                    job_already_exist = True
+                    response["token"] = job.id
+                    logger.debug("job_already_exist")
+                    break
+            if not job_already_exist:
+                # enqueue the job
+                job = django_rq.enqueue(render_csv_zip_file,
+                                  topic      = self.topic,
+                                  model_type = request.GET.get("type"),
+                                  query      = request.GET.get("q"),
+                                  cache_key  = cache_key)
+                # save the cache_key in the meta data in order to check if a job already exist for this key later
+                job.meta["cache_key"] = cache_key
+                job.save()
+                response['token'] = job.id
         self.log_throttled_access(request)
         return response
         # NOTE: legacy, without job

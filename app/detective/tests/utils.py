@@ -73,3 +73,7 @@ class TopicCachierTestCase(TestCase):
     def test_topic_delete(self):
         self.topic.delete()
         self.assertIsNone(topic_cache.version(self.topic))
+
+    def test_topic_model_update(self):
+        import pdb; pdb.set_trace()
+        models = self.topic.models()

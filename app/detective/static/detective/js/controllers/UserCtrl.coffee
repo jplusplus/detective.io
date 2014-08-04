@@ -52,7 +52,7 @@ class UserCtrl
         @scope.resetPassword = @resetPassword
         @scope.resetPasswordConfirm = @resetPasswordConfirm
         # Set page title with no title-case
-        if @state.is("signup")
+        if @state.is("signup") or @state.is("signup-invitation")
             @Page.title "Request an account", false
         else if @state.is("login")
             @Page.title "Log in", false
@@ -100,7 +100,7 @@ class UserCtrl
             # Interpret the respose
             if data? and data.success
                 # Redirect to the next URL
-                @state.go @scope.nextState or "tour", @scope.nextParams
+                @state.go "home.dashboard"
                 # Delete error
                 delete @scope.error
             else
@@ -114,6 +114,9 @@ class UserCtrl
             username: @scope.username
             email   : @scope.email
             password: @scope.password
+        # Add token during invitation
+        if @state.is("signup-invitation")
+            data["token"] = @stateParams.token
         # Turn on loading mode
         @scope.loading = true
         # succefull login
@@ -176,8 +179,8 @@ class UserCtrl
     logout: =>
         next_url = @location.url()
         @Auth.logout().then =>
-            login_params = 
-                nextState: @state.current.name 
+            login_params =
+                nextState: @state.current.name
                 nextParams: angular.toJson @state.params
 
             @state.go 'login', login_params

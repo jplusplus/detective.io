@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 from .errors                      import *
 from .message                     import Recover
-from app.detective.models         import Topic
+from app.detective.models         import Topic, TopicToken
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User, Group
 from django.contrib.sites.models  import RequestSite
+from django.core.paginator        import Paginator, InvalidPage
 from django.core                  import signing
 from django.db                    import IntegrityError
 from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
@@ -54,29 +55,29 @@ class GroupResource(ModelResource):
 
 class UserResource(ModelResource):
 
-    groups = fields.ManyToManyField(GroupResource, 'groups', null=True, full=True, use_in='detail')
-
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
         allowed_methods    = ['get', 'post']
         always_return_data = True
-        fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password', 'groups']
-        filtering          = {'id': ALL, 'username': ALL, 'email': ALL, 'groups': ALL_WITH_RELATIONS}
+        fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
+        filtering          = {'id': ALL, 'username': ALL, 'email': ALL}
         queryset           = User.objects.all()
         resource_name      = 'user'
 
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
         return [
-            url(r"^(?P<resource_name>%s)/login%s$"                  % params, self.wrap_view('login'),                  name="api_login"),
-            url(r'^(?P<resource_name>%s)/logout%s$'                 % params, self.wrap_view('logout'),                 name='api_logout'),
-            url(r'^(?P<resource_name>%s)/status%s$'                 % params, self.wrap_view('status'),                 name='api_status'),
-            url(r'^(?P<resource_name>%s)/permissions%s$'            % params, self.wrap_view('permissions'),            name='api_user_permissions'),
-            url(r'^(?P<resource_name>%s)/signup%s$'                 % params, self.wrap_view('signup'),                 name='api_signup'),
-            url(r'^(?P<resource_name>%s)/activate%s$'               % params, self.wrap_view('activate'),               name='api_activate'),
-            url(r'^(?P<resource_name>%s)/reset_password%s$'         % params, self.wrap_view('reset_password'),         name='api_reset_password'),
-            url(r'^(?P<resource_name>%s)/reset_password_confirm%s$' % params, self.wrap_view('reset_password_confirm'), name='api_reset_password_confirm'),
+            url(r"^(?P<resource_name>%s)/login%s$"                    % params, self.wrap_view('login'),                  name="api_login"),
+            url(r'^(?P<resource_name>%s)/logout%s$'                   % params, self.wrap_view('logout'),                 name='api_logout'),
+            url(r'^(?P<resource_name>%s)/status%s$'                   % params, self.wrap_view('status'),                 name='api_status'),
+            url(r'^(?P<resource_name>%s)/permissions%s$'              % params, self.wrap_view('permissions'),            name='api_user_permissions'),
+            url(r'^(?P<resource_name>%s)/me%s$'                       % params, self.wrap_view('me'),                     name='api_user_me'),
+            url(r'^(?P<resource_name>%s)/signup%s$'                   % params, self.wrap_view('signup'),                 name='api_signup'),
+            url(r'^(?P<resource_name>%s)/activate%s$'                 % params, self.wrap_view('activate'),               name='api_activate'),
+            url(r'^(?P<resource_name>%s)/reset_password%s$'           % params, self.wrap_view('reset_password'),         name='api_reset_password'),
+            url(r'^(?P<resource_name>%s)/reset_password_confirm%s$'   % params, self.wrap_view('reset_password_confirm'), name='api_reset_password_confirm'),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/groups%s$" % params, self.wrap_view('get_groups'),             name="api_get_groups"),
         ]
 
     def login(self, request, **kwargs):
@@ -152,6 +153,17 @@ class UserResource(ModelResource):
             # Create an inactive user
             setattr(user, "is_active", False)
             user.save()
+            # User used a invitation token
+            if data.get("token", None) is not None:
+                try:
+                    topicToken = TopicToken.objects.get(token=data.get("token"))
+                    # Add the user to the topic contributor group
+                    topicToken.topic.get_contributor_group().user_set.add(user)
+                    # Remove the token
+                    topicToken.delete()
+                except TopicToken.DoesNotExist:
+                    # Failed silently if the token is unkown
+                    pass
             # Send activation key by email
             activation_key = self.get_activation_key(user.username)
             rp = RegistrationProfile.objects.create(user=user, activation_key=activation_key)
@@ -221,6 +233,21 @@ class UserResource(ModelResource):
         else:
             return http.HttpUnauthorized('You need to be logged to list your permissions')
 
+    def me(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        if request.user.is_authenticated():
+            bundle = self.build_bundle(obj=request.user, request=request)
+            bundle = self.full_dehydrate(bundle)
+            # Get the list of permission and sorts it alphabeticly
+            permissions = list(request.user.get_all_permissions())
+            permissions.sort()
+            # Add user's permissions
+            bundle.data["permissions"] = permissions
+            return self.create_response(request, bundle)
+        else:
+            return http.HttpUnauthorized('You need to be logged.')
+
     def reset_password(self, request, **kwargs):
         """
         Send the reset password email to user with the proper URL.
@@ -234,8 +261,8 @@ class UserResource(ModelResource):
             recover = Recover()
             recover.user = user
             recover.request = request
-            recover.email_template_name = 'reset_password_email.txt'
-            recover.email_subject_template_name = 'reset_password_email_subject.txt'
+            recover.email_template_name = 'email.reset-password.txt'
+            recover.email_subject_template_name = 'email.reset-password.subject.txt'
             recover.send_notification()
             return self.create_response(request, { 'success': True })
         except User.DoesNotExist:
@@ -282,6 +309,49 @@ class UserResource(ModelResource):
         if len(missing_fields) > 0:
             message = "Malformed request. The following fields are required: %s" % ', '.join(missing_fields)
             raise MalformedRequestError(message)
+
+    def get_groups(self, request, **kwargs):
+        from app.detective.topics.common.resources import TopicResource
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        try:
+            bundle = self.build_bundle(data={'pk': kwargs['pk']}, request=request)
+            obj = self.cached_obj_get(bundle=bundle, **self.remove_api_resource_names(kwargs))
+        except User.DoesNotExist:
+            return http.HttpNotFound("User not found")
+
+        group_resource = GroupResource()
+
+        groups    = obj.groups.all()
+        limit     = int(request.GET.get('limit', 20))
+        paginator = Paginator(groups, limit)
+        objects   = []
+
+        try:
+            p    = int(request.GET.get('page', 1))
+            page = paginator.page(p)
+
+            for group in page.object_list:
+                bundle = group_resource.build_bundle(obj=group, request=request)
+                bundle = group_resource.full_dehydrate(bundle)
+                objects.append(bundle)
+
+        except InvalidPage:
+            # Allow empty page
+            pass
+
+        object_list = {
+            'objects': objects,
+            'meta': {
+                'page': p,
+                'limit': limit,
+                'total_count': paginator.count
+            }
+        }
+
+        return group_resource.create_response(request, object_list)
 
 class AuthorResource(UserResource):
     class Meta(UserResource.Meta):

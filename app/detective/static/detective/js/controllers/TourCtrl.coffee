@@ -1,4 +1,4 @@
-class HomeCtrl
+class TourCtrl
     # Injects dependancies
     @$inject: ['$scope', 'Page', "Common"]
     constructor: (@scope, @Page, @Common)->
@@ -7,4 +7,4 @@ class HomeCtrl
     	# Get all featured topics
     	@Common.cachedQuery {type: 'topic', featured: 1}, (d)=> @scope.featured = d
 
-angular.module('detective.controller').controller 'homeCtrl', HomeCtrl
+angular.module('detective.controller').controller 'hourCtrl', TourCtrl

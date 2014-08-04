@@ -1,5 +1,5 @@
 from app.detective        import utils
-from app.detective.models import QuoteRequest, Topic, SearchTerm, Article
+from app.detective.models import QuoteRequest, Topic, TopicToken, SearchTerm, Article
 from django.conf          import settings
 from django.contrib       import admin
 from django.db.models     import CharField
@@ -73,6 +73,12 @@ class SearchTermInline(admin.TabularInline):
                 # Add the choice subset only if it contains elements
                 if len(subset): kwargs["choices"].append( (model_name, subset,) )
         return super(SearchTermInline, self).formfield_for_choice_field(db_field, request,**kwargs)
+
+
+class TopicTokenAdmin(admin.ModelAdmin):
+    list_display  = ("topic","token","email","created_at",)
+
+admin.site.register(TopicToken, TopicTokenAdmin)
 
 class TopicAdmin(admin.ModelAdmin):
     save_on_top         = True

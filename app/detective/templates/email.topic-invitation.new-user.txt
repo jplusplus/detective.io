@@ -1,0 +1,11 @@
+Hi there,
+
+Someone needs your help on an investigation! User {{user.username}} is working on an investigation called "{{topic.title}}".
+
+To explore the data already collected and start contributing to the investigation you need to register an account. It’s pretty easy, head to this link and follow the instructions:
+{{signup}}
+
+You will find the investigation here: {{link}}
+
+Cheers,
+The Detective.io team

@@ -7,11 +7,26 @@ angular.module('detective.config').config [
         $urlRouterProvider.otherwise("/404");
         # ui-router configuration
         $stateProvider
-            # Core
-            .state('tour',
+            .state('home',
                 url : "/"
-                controller : HomeCtrl
-                templateUrl : '/partial/home.html'
+                template: '<ui-view/>'
+                controller: ["Auth", "$state", (Auth, $state)->
+                    unless $state.includes("home.*")
+                        if Auth.isAuthenticated()
+                            $state.go "home.dashboard"
+                        else
+                            $state.go "home.tour"
+                ]
+            )
+            .state('home.tour',
+                controller : TourCtrl
+                templateUrl : '/partial/home.tour.html'
+            )
+            .state('home.dashboard',
+                controller : DashboardCtrl
+                templateUrl : '/partial/home.dashboard.html'
+                resolve: DashboardCtrl.resolve
+                auth: true
             )
             .state('404-page',
                 url : "/404/"
@@ -57,6 +72,11 @@ angular.module('detective.config').config [
                 controller : UserCtrl
                 templateUrl : '/partial/account.signup.html'
             )
+            .state('signup-invitation'
+                url : "/signup/:token/"
+                controller : UserCtrl
+                templateUrl : '/partial/account.signup.html'
+            )
             # Pages
             .state('page',
                 url : "/page/:slug/"
@@ -79,6 +99,14 @@ angular.module('detective.config').config [
                     topic: UserTopicCtrl.resolve.topic
                 # Allow a dynamic loading by setting the templateUrl within controller
                 template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+            )
+            .state('user-topic-invite',
+                url: "/:username/:topic/invite/"
+                controller: AddCollaboratorsCtrl
+                templateUrl: '/partial/topic.invite.html'
+                resolve:
+                    topic: UserTopicCtrl.resolve.topic
+                auth: true
             )
             .state('user-topic-search',
                 url: '/:username/:topic/search/?q&page'

@@ -9,15 +9,10 @@ from django.core.paginator      import Paginator, InvalidPage
 from django.core.urlresolvers   import resolve
 from django.http                import Http404, HttpResponse
 from neo4django.db              import connection
-from psycopg2.extensions        import adapt
-from StringIO                   import StringIO
 from tastypie                   import http
 from tastypie.exceptions        import ImmediateHttpResponse
 from tastypie.resources         import Resource
 from tastypie.serializers       import Serializer
-from .jobs                      import process_parsing
-from psycopg2.extensions        import adapt
-from .errors                    import ForbiddenError, UnauthorizedError
 from .jobs                      import process_bulk_parsing_and_save_as_model, render_csv_zip_file
 from django.core.cache          import cache
 import app.detective.utils      as utils
@@ -303,36 +298,13 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
-    def _rdf_search(self, query, limit=20, offset=0):
-        subject   = query.get("subject", None)
-        predicate = query.get("predicate", None)
-        obj       = query.get("object", None)
-        results   = self.rdf_search_query(subject, predicate, obj)
-        # Stop now in case of error
-        if "errors" in results: return results
-        paginator = Paginator(results, limit)
-        p         = SummaryResource.get_page_number(offset, limit )
-        page      = paginator.page(p)
-        objects   = []
-        for result in page.object_list:
-            objects.append(result)
-        return {
-            'objects': objects,
-            'meta': {
-                'q': query,
-                'offset': p,
-                'limit': limit,
-                'total_count': paginator.count
-            }
-        }
-
     def summary_rdf_search(self, bundle, request):
         self.method_check(request, allowed=['get'])
         limit     = int(request.GET.get('limit', 20))
         offset    = int(request.GET.get('offset', 0))
         query     = json.loads(request.GET.get('q', 'null'))
         try:
-            object_list = self._rdf_search(query, limit, offset)
+            object_list = self.topic.rdf_search(query, limit, offset)
         except InvalidPage:
             raise Http404("Sorry, no results on that page.")
         self.log_throttled_access(request)
@@ -440,7 +412,7 @@ class SummaryResource(Resource):
                 job = django_rq.enqueue(render_csv_zip_file,
                                   topic      = self.topic,
                                   model_type = request.GET.get("type"),
-                                  query      = request.GET.get("q"),
+                                  query      = json.loads(request.GET.get('q', 'null')),
                                   cache_key  = cache_key)
                 # save the cache_key in the meta data in order to check if a job already exist for this key later
                 job.meta["cache_key"] = cache_key
@@ -457,7 +429,7 @@ class SummaryResource(Resource):
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 
     def search(self, query):
-        match = str(query).lower()
+        match = unicode(query).lower()
         match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()
         # Query to get every result
         query = """
@@ -469,90 +441,6 @@ class SummaryResource(Resource):
             RETURN ID(root) as id, root.name as name, type.model_name as model
         """ % (match, self.topic.app_label() )
         return connection.cypher(query).to_dicts()
-
-    def rdf_search_query(self, subject, predicate, obj):
-        identifier = obj["id"] if "id" in obj else obj
-        # retrieve all models in current topic
-        all_models = dict((model.__name__, model) for model in self.topic.get_models())
-        # If the received identifier describe a literal value
-        if self.is_registered_literal(predicate["name"]):
-            # Get the field name into the database
-            field_name = predicate["name"]
-            # Build the request
-            query = """
-                START root=node(*)
-                MATCH (root)<-[:`<<INSTANCE>>`]-(type)
-                WHERE HAS(root.name)
-                AND HAS(root.{field})
-                AND root.{field} = {value}
-                AND type.model_name = {model}
-                AND type.app_label = {app}
-                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
-            """.format(
-                field=field_name,
-                value=adapt(identifier),
-                model=adapt(subject["name"]),
-                app=adapt(self.topic.app_label())
-            )
-        # If the received identifier describe a literal value
-        elif self.is_registered_relationship(predicate["name"]):
-            fields        = utils.get_model_fields( all_models[predicate["subject"]] )
-            # Get the field name into the database
-            relationships = [ field for field in fields if field["name"] == predicate["name"] ]
-            # We didn't find the predicate
-            if not len(relationships): return {'errors': 'Unkown predicate type'}
-            relationship  = relationships[0]["rel_type"]
-            # Query to get every result
-            query = u"""
-                START st=node(*)
-                MATCH (st)<-[:`{relationship}`]-(root)<-[:`<<INSTANCE>>`]-(type)
-                WHERE HAS(root.name)
-                AND HAS(st.name)
-                AND ID(st) = {id}
-                AND type.app_label = {app}
-                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
-            """.format(
-                relationship=relationship,
-                id=adapt(identifier),
-                app=adapt(self.topic.app_label())
-            )
-        else:
-            return {'errors': 'Unkown predicate type: %s' % predicate["name"]}
-        return connection.cypher(query).to_dicts()
-
-    def get_models_output(self):
-        # Select only some atribute
-        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
-        return [ output(m) for m in self.topic.get_models() ]
-
-    def get_relationship_search(self):
-        # For an unkown reason I can't filter by "is_literal"
-        # @TODO find why!
-        return [ st for st in SearchTerm.objects.filter(topic=self.topic).prefetch_related('topic') if not st.is_literal ]
-
-    def get_relationship_search_output(self):
-        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
-        terms  = self.get_relationship_search()
-        _out = []
-        for model in self.topic.get_models():
-            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() == 'relationship']:
-                if "search_terms" in field["rules"]:
-                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
-        return _out + [ output(rs) for rs in terms ]
-
-    def get_literal_search(self):
-        # For an unkown reason I can't filter by "is_literal"
-        return [ st for st in SearchTerm.objects.filter(topic=self.topic).prefetch_related('topic') if st.is_literal ]
-
-    def get_literal_search_output(self):
-        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
-        terms  = self.get_literal_search()
-        _out = []
-        for model in self.topic.get_models():
-            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() != 'relationship']:
-                if "search_terms" in field["rules"]:
-                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
-        return _out + [ output(rs) for rs in terms ]
 
     def ngrams(self, input):
         input = input.split(' ')
@@ -618,7 +506,7 @@ class SummaryResource(Resource):
             return new_list
 
         def is_preposition(token=""):
-            return str(token).lower() in ["aboard", "about", "above", "across", "after", "against",
+            return unicode(token).lower() in ["aboard", "about", "above", "across", "after", "against",
             "along", "amid", "among", "anti", "around", "as", "at", "before", "behind", "below",
             "beneath", "beside", "besides", "between", "beyond", "but", "by", "concerning",
             "considering",  "despite", "down", "during", "except", "excepting", "excluding",
@@ -733,27 +621,9 @@ class SummaryResource(Resource):
         # Remove duplicates proposition dicts
         return propositions
 
-    def is_registered_literal(self, name):
-        literals = self.get_syntax().get("predicate").get("literal")
-        matches  = [ literal for literal in literals if name == literal["name"] ]
-        return len(matches)
-
-    def is_registered_relationship(self, name):
-        literals = self.get_syntax().get("predicate").get("relationship")
-        matches  = [ literal for literal in literals if name == literal["name"] ]
-        return len(matches)
-
     def get_syntax(self, bundle=None, request=None):
         if not hasattr(self, "syntax"):
-            syntax = {
-                'subject': {
-                    'model':  self.get_models_output()
-                },
-                'predicate': {
-                    'relationship': self.get_relationship_search_output(),
-                    'literal':      self.get_literal_search_output()
-                }
-            }
+            syntax = self.topic.get_syntax()
             self.syntax = syntax
         return self.syntax
 

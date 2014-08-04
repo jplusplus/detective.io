@@ -18,6 +18,7 @@ from rq                         import get_current_job
 from django.utils.timezone      import utc
 from neo4django.db              import connection
 from django.conf                import settings
+from django.core.paginator      import InvalidPage
 from django.core.files.storage  import default_storage
 from django.core.files.base     import ContentFile
 from StringIO                   import StringIO
@@ -100,25 +101,26 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
                         for row in rows:
                             content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
                         zip_file.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
-    # NOTE: disable because of summary_resource._rdf_search which is not available in this context
-    # else:
-    #     page        = 1
-    #     limit       = 1
-    #     objects     = []
-    #     total       = -1
-    #     while len(objects) != total:
-    #         try:
-    #             result   = summary_resource._rdf_search(query=query, offset=(page - 1) * limit)
-    #             objects += result['objects']
-    #             total    = result['meta']['total_count']
-    #             page    += 1
-    #         except KeyError:
-    #             break
-    #     for model in models:
-    #         if model.__name__ == objects[0]['model']:
-    #             break
-    #     (columns, _) = get_columns(model)
-    #     write_all_in_zip(objects, columns, zip_file, model.__name__)
+    else:
+        page        = 1
+        limit       = 1
+        objects     = []
+        total       = -1
+        while len(objects) != total:
+            try:
+                result   = topic.rdf_search(query=query, offset=(page - 1) * limit)
+                objects += result['objects']
+                total    = result['meta']['total_count']
+                page    += 1
+            except KeyError:
+                break
+            except InvalidPage:
+                break
+        for model in models:
+            if model.__name__ == objects[0]['model']:
+                break
+        (columns, _) = get_columns(model)
+        write_all_in_zip(objects, columns, zip_file, model.__name__)
     zip_file.close()
     buffer.flush()
     # save the zip in `base_dir`
@@ -193,8 +195,8 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                 raise Exception()
             csv_reader = utils.open_csv(file)
             header     = csv_reader.next()
-            assert len(header) > 1, "header should have at least 2 columns"
-            assert header[0].endswith("_id"), "First column should begin with a header like <model_name>_id"
+            assert len(header) > 1, "{file_name} header should have at least 2 columns"
+            assert header[0].endswith("_id"), "{file_name} : First column should begin with a header like <model_name>_id".format(file_name=file_name)
             if len(header) >=3 and header[0].endswith("_id") and header[2].endswith("_id"):
                 # this is a relationship file
                 relations.append((file_name, file))

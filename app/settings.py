@@ -219,10 +219,6 @@ SOUTH_MIGRATION_MODULES = {
     'easy_thumbnails': 'easy_thumbnails.south_migrations',
 }
 
-# Add customs app to INSTALLED_APPS
-from app.detective.utils import get_topics_modules
-INSTALLED_APPS = INSTALLED_APPS + get_topics_modules()
-
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # One-week activation window
@@ -306,7 +302,7 @@ LOGGING = {
 
 if DEBUG:
     # INTERNAL_IPS = ('127.0.0.1', '0.0.0.0', '::1')
-    DEBUG_TOOLBAR_PATCH_SETTINGS = False 
+    DEBUG_TOOLBAR_PATCH_SETTINGS = False
     DEBUG_TOOLBAR_PANELS = (
         'debug_toolbar.panels.timer.TimerPanel',
         'debug_toolbar.panels.headers.HeadersPanel',
@@ -316,6 +312,6 @@ if DEBUG:
         'debug_toolbar.panels.cache.CachePanel',
         'debug_toolbar.panels.signals.SignalsPanel',
     )
-    DEBUG_TOOLBAR_CONFIG = { 
+    DEBUG_TOOLBAR_CONFIG = {
         'SHOW_TOOLBAR_CALLBACK': 'app.detective.utils.should_show_debug_toolbar'
     }

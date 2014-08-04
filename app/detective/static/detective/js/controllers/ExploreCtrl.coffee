@@ -29,8 +29,6 @@ class ExploreCtrl
         @scope.selectedCountry = {}
         @scope.isSearchable = (f)-> f.rules? && f.rules.is_searchable
         @scope.shouldDisplayMap = => _.findWhere(@scope.meta.models, name: 'Country')?
-        # .csv export
-        @scope.csvExport = @csvExport
         # ──────────────────────────────────────────────────────────────────────
         # Scope watchers
         # ──────────────────────────────────────────────────────────────────────
@@ -49,10 +47,5 @@ class ExploreCtrl
             t   = @scope.types[type]
             tt += if t? and t.count? then t.count else 0
         tt
-
-    csvExport: =>
-        @Summary.export {}, (d) ->
-            file = new Blob([d.data], { type : 'application/zip' })
-            saveAs(file, d.filename)
 
 angular.module('detective.controller').controller 'exploreCtrl', ExploreCtrl

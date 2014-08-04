@@ -34,7 +34,7 @@ import json
 
 class TopicCachierTestCase(TestCase):
     def setUp(self):
-        ontology = """
+        ontology_str = """
         [
             {
                 "name": "Person",
@@ -53,27 +53,51 @@ class TopicCachierTestCase(TestCase):
             }
         ]
         """
-        try:
-            self.topic = Topic.objects.create(
-                title='Test investigation',
-                ontology_as_json=json.loads(ontology),
-                slug='test-investigation-fake'
-            )
+        self.ontology = json.loads(ontology_str)
 
+
+    def create_topic(self, args=None):
+        default_kwargs = {
+            'title': 'Test investigation',
+            'ontology_as_json':  self.ontology,
+            'slug': 'test-investigation-fake'
+        }
+        if args == None:
+            kwargs = default_kwargs
+        else:
+            kwargs = args
+        try:
+            return Topic.objects.create(**kwargs)
         except:
-            self.topic = Topic.objects.get(slug='test-investigation-fake')
+            return Topic.objects.get(
+                slug=kwargs.get('slug', default_kwargs.get('slug'))
+            )
+    def test_topic_creation(self):
+        topic = self.create_topic()
+        rev = topic_cache.version(topic)
+        self.assertEqual(rev, 0)
+
 
     def test_topic_update(self):
         # if we update a topic, its revision number should be incremented
-        rev = topic_cache.version(self.topic)
-        self.topic.title = "New title"
-        self.topic.save()
-        self.assertEqual(topic_cache.version(self.topic), rev+1)
+        topic = self.create_topic()
+        rev = topic_cache.version(topic)
+        topic.title = "New title"
+        topic.save()
+        self.assertEqual(topic_cache.version(topic), rev+1)
+
 
     def test_topic_delete(self):
-        self.topic.delete()
-        self.assertIsNone(topic_cache.version(self.topic))
+        topic = self.create_topic()
+        self.assertIsNone(topic_cache.version(topic))
 
     def test_topic_model_update(self):
-        import pdb; pdb.set_trace()
-        models = self.topic.models()
+        topic = self.create_topic()
+        rev_origin = topic_cache.version(topic)
+        Person = topic.get_models_module().Person
+        p = Person.objects.create(first_name='Pierre', last_name='Bellon')
+        rev_target = topic_cache.version(topic)
+        self.assertEqual(rev_target, rev_origin + 1)
+
+    def test_default_cache_timeout(self):
+        self.assertEqual(topic_cache.timeout(), 60 * 60)

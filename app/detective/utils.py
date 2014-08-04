@@ -54,7 +54,7 @@ def create_model_resource(model, path=None, Resource=None, Meta=None):
     if Meta is None: Meta = IndividualMeta
     class Meta(IndividualMeta):
         queryset = model.objects.all().select_related(depth=1)
-     # Set up a dictionary to simulate declarations within a class
+    # Set up a dictionary to simulate declarations within a class
     attrs = {'Meta': Meta}
     name  = "%sResource" % model.__name__
     mr = type(name, (IndividualResource,), attrs)
@@ -215,7 +215,7 @@ def get_model_fields(model, order_by='name'):
     return fields
 
 def get_model_nodes():
-    from neo4django.db import connection
+    # from neo4django.db import connection
     # Return buffer values
     if hasattr(get_model_nodes, "buffer"):
         results = get_model_nodes.buffer
@@ -345,47 +345,56 @@ class TopicCachier(object):
     def timeout(self, key='default'):
         return self._timeouts[key]
 
-    def version_key(self, topic):
+    def _version_key(self, topic):
         return self.keys()['version_number'].format(
-            topic_prefix=self.topic_prefix(topic))
+            topic_prefix=self._topic_prefix(topic))
 
-    def topic_prefix(self, topic):
+    def _topic_prefix(self, topic):
         topic_module = topic.module
         return self.keys()['topic_prefix'].format(module=topic_module)
 
-    def cache_prefix(self, topic, suffix):
+    def _get_key(self, topic, suffix):
         return self.keys()['cache_prefix'].format(
             topic_prefix=self.prefix_key(topic),
             suffix=suffix
         )
 
     def init_version(self, topic):
-        cache_key = self.version_key(topic)
+        cache_key = self._version_key(topic)
         cache.set(cache_key, 0, self.timeout())
+        self.debug("Set {k} to 0 - get({k}) = {v}".format(k=cache_key, v=self.version(topic)))
 
     def version(self, topic):
-        cache_key = self.version_key(topic)
+        cache_key = self._version_key(topic)
         return cache.get(cache_key)
 
     def incr_version(self, topic):
-        cache_key = self.version_key(topic)
+        cache_key = self._version_key(topic)
         if cache.get(cache_key) == None:
+            self.debug("incr_version - %s has not been created yet" % cache_key)
             self.init_version(topic)
         else:
+            self.debug("incr_version - version key already created, gonna incr ver")
             cache.incr(cache_key)
 
     def delete_version(self, topic):
-        cache_key = self.version_key(topic)
+        cache_key = self._version_key(topic)
         cache.delete(cache_key)
 
     def get(self, topic, suffix_key):
-        cache_key = self.versioned_key(topic, suffix_key)
-        return cache.get(cache_key )
+        rev = self.version(topic) or 0
+        cache_key = self._version_key(topic)
+        return cache.get(self._get_key(topic, suffix_key), version=rev)
 
     def set(self, topic, suffix_key, value, timeout=None):
+        rev = self.version(topic)
         if timeout == None:
             timeout = self._timeouts['defaults']
-        cache.set(cache_key, value, timeout)
+        cache_key = self._get_key(topic, suffix_key)
+        cache.set(cache_key, value, timeout, version=rev)
+
+    def debug(self, msg):
+        print "DEBUG - TopicCachier %s" % msg
 
     def __new__(self):
         # singleton instanciation

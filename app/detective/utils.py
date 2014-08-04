@@ -223,6 +223,41 @@ def get_model_nodes():
     return get_model_nodes.buffer
 
 
+def get_leafts_and_edges(app_label, depth, root_node="*"):
+    from neo4django.db import connection
+    leafs = {}
+    edges = []
+    ###
+    # First we retrieve every leaf in the graph
+    query = """
+        START root=node({root})
+        MATCH p = (root)-[*1..{depth}]-(leaf)<-[:`<<INSTANCE>>`]-(type)
+        WHERE HAS(leaf.name)
+        AND type.app_label = '{app_label}'
+        AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
+        RETURN leaf, ID(leaf) as id_leaf, type
+    """.format(root=root_node, depth=depth, app_label=app_label)
+    rows = connection.cypher(query).to_dicts()
+    for row in rows:
+        row['leaf']['data']['_id'] = row['id_leaf']
+        row['leaf']['data']['_type'] = row['type']['data']['model_name']
+        leafs[row['id_leaf']] = row['leaf']['data']
+    # Then we retrieve all edges
+    query = """
+        START A=node({leafs})
+        MATCH (A)-[rel]->(B)
+        WHERE type(rel) <> "<<INSTANCE>>"
+        RETURN ID(A) as head, type(rel) as relation, id(B) as tail
+    """.format(leafs=','.join([str(id) for id in leafs.keys()]))
+    rows = connection.cypher(query).to_dicts()
+    for row in rows:
+        try:
+            if (leafs[row['head']] and leafs[row['tail']]):
+                edges.append([row['head'], row['relation'], row['tail']])
+        except KeyError:
+            pass
+    return (leafs, edges)
+
 def get_model_node_id(model):
     # All node from neo4j that are have ascending <<TYPE>> relationship
     nodes = get_model_nodes()

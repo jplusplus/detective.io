@@ -1,5 +1,5 @@
 class RelationshipPropertiesCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$modalInstance', 'Individual', "properties", "relationship", "meta"]
     constructor: (@scope, @modalInstance, @Individual, @properties, @relationship, @meta)->
         # Cancel button just closes the modal

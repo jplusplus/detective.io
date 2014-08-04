@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafts_and_edges
 from app.detective.topics.common.models import FieldSource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
@@ -607,65 +607,15 @@ class IndividualResource(ModelResource):
         ids = [ rel.id for rel in rels ]
         return self.create_response(request, ids)
 
-
-
     def get_graph(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
-
         depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
-        aggregation_threshold = 10
-
-        ###
-        # First we retrieve every leaf in the graph
-        query = """
-            START root=node({root})
-            MATCH p = (root)-[*1..{depth}]-(leaf)<-[:`<<INSTANCE>>`]-(type)
-            WHERE HAS(leaf.name)
-            AND type.app_label = '{app_label}'
-            AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
-            RETURN leaf, ID(leaf) as id_leaf, type
-        """.format(root=kwargs['pk'], depth=depth, app_label=get_model_topic(self.get_model()))
-        rows = connection.cypher(query).to_dicts()
-
-        leafs = {}
-
-        # We need to retrieve the root in another request
-        # TODO : enhance that
-        query = """
-            START root=node({root})
-            MATCH (root)<-[:`<<INSTANCE>>`]-(type)
-            RETURN root as leaf, ID(root) as id_leaf, type
-        """.format(root=kwargs['pk'])
-        for row in connection.cypher(query).to_dicts():
-            rows.append(row)
-
-        for row in rows:
-            row['leaf']['data']['_id'] = row['id_leaf']
-            row['leaf']['data']['_type'] = row['type']['data']['model_name']
-            leafs[row['id_leaf']] = row['leaf']['data']
-        #
-        ###
-
-        ###
-        # Then we retrieve all edges
-        query = """
-            START A=node({leafs})
-            MATCH (A)-[rel]->(B)
-            WHERE type(rel) <> "<<INSTANCE>>"
-            RETURN ID(A) as head, type(rel) as relation, id(B) as tail
-        """.format(leafs=','.join([str(id) for id in leafs.keys()]))
-        rows = connection.cypher(query).to_dicts()
-
-        edges = []
-        for row in rows:
-            try:
-                if (leafs[row['head']] and leafs[row['tail']]):
-                    edges.append([row['head'], row['relation'], row['tail']])
-            except KeyError:
-                pass
-        #
-        ###
-
+        leafs, edges  = get_leafts_and_edges(
+            app_label = get_model_topic(self.get_model()),
+            depth     = depth,
+            root_node = kwargs['pk'])
         self.log_throttled_access(request)
         return self.create_response(request, {'leafs': leafs, 'edges' : edges})
+
+# EOF

@@ -1,5 +1,5 @@
 class IndividualSingleCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$stateParams', '$state', 'Individual',  'topic', 'individual', 'forms', '$filter', '$anchorScroll', '$location', 'Page', 'QueryFactory', '$sce']
 
     constructor: (@scope, @stateParams, @state, @Individual, @topic, @individual, @forms, @filter, @anchorScroll, @location, @Page, @QueryFactory, $sce)->

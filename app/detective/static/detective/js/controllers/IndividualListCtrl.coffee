@@ -1,5 +1,5 @@
 class IndividualListCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', 'Common', '$location',  'Page']
 
     constructor: (@scope, @stateParams, @state, @Individual, @Summary, @Common, @location, @Page)->

@@ -1,13 +1,11 @@
 class GraphWorker
     constructor : (@_) ->
         @_.addEventListener 'message', @on_message
-
-        @d3_layout = d3.layout.force();
-
-        @aggregation_type = '__aggregation_bubble'
+        @d3_layout             = d3.layout.force()
+        @aggregation_type      = '__aggregation_bubble'
         @aggregation_threshold = 3
-        @aggregated_edges = []
-        @aggregation_index = 0
+        @aggregated_edges      = []
+        @aggregation_index     = 0
 
     is_current : (id) =>
         @current_id is parseInt id

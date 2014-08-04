@@ -2,26 +2,27 @@
     restrict: "AE"
     template: "<div></div>"
     replace : yes
-    scope :
+    scope   :
         data : '='
     link: (scope, element, attr) ->
-        src = (angular.element '.topic__single__graph__worker script')[0].src
-        src = src.slice ((src.indexOf window.STATIC_URL) + window.STATIC_URL.length)
-        worker = new Worker "/proxy/" + src
-
-        absUrl = do $location.absUrl
-
-        leafSize = 6
-
-        svgSize = [ element.width(), element.height() ]
-        d3Svg = ((d3.select element[0]).append 'svg').attr
-            width : svgSize[0]
-            height : svgSize[1]
-        d3Defs = d3Svg.insert 'svg:defs', 'path'
-
-        d3Graph = (((do d3.layout.force).size svgSize).linkDistance 90).charge -300
-
+        src             = (angular.element '.topic__single__graph__worker script')[0].src
+        src             = src.slice ((src.indexOf window.STATIC_URL) + window.STATIC_URL.length)
+        worker          = new Worker "/proxy/" + src
+        absUrl          = do $location.absUrl
+        leafSize        = 6
+        svgSize         = [ element.width(), element.height() ]
+        d3Svg           = ((d3.select element[0]).append 'svg')
+            .attr
+                width  : svgSize[0]
+                height : svgSize[1]
+        d3Defs          = d3Svg.insert 'svg:defs', 'path'
+        d3Graph         = (((do d3.layout.force).size svgSize).linkDistance 90).charge -300
         aggregationType = '__aggregation_bubble'
+        d3Edges         = null
+        d3Leafs         = null
+        d3Labels        = null
+        leafs           = []
+        edges           = []
 
         isCurrent = (id) =>
             (parseInt $stateParams.id) is parseInt id
@@ -39,22 +40,21 @@
             datumR = Math.sqrt (datumX * datumX + datumY * datumY)
             "M#{datum.source.x},#{datum.source.y}A#{datumR},#{datumR} 0 0,1 #{datum.target.x},#{datum.target.y}"
 
-        leafUpdate = (datum) ->
-            "translate(#{datum.x}, #{datum.y})"
+        leafUpdate = (datum) -> "translate(#{datum.x}, #{datum.y})"
 
         createPattern = (datum, d3Defs) ->
             _leafSize = if (isCurrent datum._id) then (leafSize * 2) else leafSize
-            pattern = d3Defs.append 'svg:pattern'
+            pattern   = d3Defs.append 'svg:pattern'
             pattern.attr
-                id : "pattern#{datum._id}"
-                x : 0
-                y : 0
+                id           : "pattern#{datum._id}"
+                x            : 0
+                y            : 0
                 patternUnits : 'objectBoundingBox'
-                width : 1
-                height : 1
+                width        : 1
+                height       : 1
             (pattern.append 'svg:rect').attr
-                x : 0
-                y : 0
+                x      : 0
+                y      : 0
                 width  : _leafSize * 2
                 height : _leafSize * 2
             null
@@ -68,7 +68,6 @@
         update = =>
             # It's useless to process if we do not have any leaf
             return if not scope.data.leafs?
-
             # Extract leafs and edges from data
             leafs = []
             for id, leaf of scope.data.leafs
@@ -81,7 +80,6 @@
                         source : scope.data.leafs[edge[0]]
                         target : scope.data.leafs[edge[2]]
                         _type : edge[1]
-
             worker.postMessage
                 type : 'init'
                 data :
@@ -180,7 +178,8 @@
             null
 
         scope.$watch 'data', =>
-            do update
+            if scope.data
+                do update
             null
 
         null

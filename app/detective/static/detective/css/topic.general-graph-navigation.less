@@ -1,0 +1,64 @@
+.general-graph-navigation {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: .5s;
+    position: relative;
+    z-index: 5;
+    &__show {
+        opacity: 1;
+    }
+    height:100%;
+    background-color: @body-bg;
+    color: black;
+    &__close-network-view {
+        position : absolute;
+        top      : 20px;
+        right    : 20px;
+    }
+    &__loading {
+        transform  : translate(50%, 50%);
+        height     : 100%;
+        position   : absolute;
+        left       : 0;
+        right      : 0;
+    }
+    &__filters-box {
+        position           : absolute;
+        background-color   : white;
+        display            : inline-block;
+        opacity            : .9em;
+        padding            : 0 10px;
+        margin             : 10px;
+        label &__label {
+            margin-left: 20px;
+        }
+        label.filter-names &__label {
+            display: inline-block;
+            border-bottom-style: solid;
+            border-bottom-width : 4px;
+        }
+        input[type=checkbox] { display:none; } /* to hide the checkbox itself */
+        input[type=checkbox] + label:before {
+            font-family: FontAwesome;
+            display: inline-block;
+            position: absolute;
+
+        }
+        input[type=checkbox] + label:before { content: "\f096"; } /* unchecked icon */
+        input[type=checkbox] + label:before { letter-spacing: 10px; } /* space between checkbox and label */
+        input[type=checkbox]:checked + label:before { content: "\f046"; } /* checked icon */
+        input[type=checkbox]:checked + label:before { letter-spacing: 5px; } /* allow space for check mark */
+        .box-shadow(4px 4px 0px rgb(68, 62, 62));
+    }
+    &__graphviz {
+        height : 100%;
+        text.name {
+            fill: black;
+        }
+        path.edge {
+            stroke: black;
+        }
+    }
+}
+
+// EOF

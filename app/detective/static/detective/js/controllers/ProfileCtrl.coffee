@@ -1,5 +1,5 @@
 class ProfileCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$stateParams', 'Common', 'Page', 'user', 'User']
 
     constructor: (@scope,  @stateParams, @Common, @Page, user, UserService)->

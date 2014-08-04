@@ -1,5 +1,5 @@
 class ExploreCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$stateParams', 'Summary', '$location', '$timeout', '$filter', 'Page', 'QueryFactory', 'topic']
 
     constructor: (@scope, @stateParams, @Summary, @location, @timeout, @filter, @Page, @QueryFactory, topic)->

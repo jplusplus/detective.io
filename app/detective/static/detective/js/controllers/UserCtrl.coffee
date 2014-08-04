@@ -1,7 +1,7 @@
 # See also :
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
 class UserCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject : ["$scope", "$http", "$location", "$stateParams", "$state", "Auth", "User", "Page", "$rootElement"]
     # Public method to resolve
     @resolve:

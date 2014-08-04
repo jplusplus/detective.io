@@ -100,6 +100,14 @@ angular.module('detective.config').config [
                 # Allow a dynamic loading by setting the templateUrl within controller
                 template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
             )
+            .state('global-graph-navigation',
+                url : "/:username/:topic/graph/"
+                controller : ExploreCtrl
+                resolve :
+                    topic: UserTopicCtrl.resolve.topic
+                # Allow a dynamic loading by setting the templateUrl within controller
+                template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+            )
             .state('user-topic-invite',
                 url: "/:username/:topic/invite/"
                 controller: AddCollaboratorsCtrl

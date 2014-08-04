@@ -1,6 +1,6 @@
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 # -*- coding: utf-8 -*-
-import os, re
+import os
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
 
@@ -14,7 +14,8 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 DATA_ROOT = here('data')
 
 ADMINS = (
-    ('Pierre Romera', 'hello@pirhoo.com')
+    ('Pierre Romera', 'hello@pirhoo.com'),
+    ('Edouard Richard', 'edouard@jplusplus.org')
 )
 
 DEFAULT_FROM_EMAIL = 'Detective.io <contact@detective.io>'
@@ -158,17 +159,6 @@ COMPRESS_PRECOMPILERS = (
     ('text/coffeescript', 'coffee --compile --stdio --bare'),
     ('text/less', 'lessc --include-path="%s" {infile} {outfile}' % here('static') ),
 )
-
-# Activate CSS minifier
-COMPRESS_CSS_FILTERS = (
-    "app.detective.compress_filter.CustomCssAbsoluteFilter",
-)
-
-COMPRESS_JS_FILTERS = ()
-
-COMPRESS_TEMPLATE_FILTER_CONTEXT = {
-    'STATIC_URL': STATIC_URL
-}
 
 # Remove BeautifulSoup requirement
 COMPRESS_PARSER = 'compressor.parser.HtmlParser'

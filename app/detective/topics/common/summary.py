@@ -3,6 +3,7 @@ from .errors                    import ForbiddenError, UnauthorizedError
 from app.detective.models       import Topic, SearchTerm
 from app.detective.neomatch     import Neomatch
 from app.detective.register     import topics_rules
+from app.detective.utils        import get_leafts_and_edges
 from difflib                    import SequenceMatcher
 from django.conf                import settings
 from django.core.paginator      import Paginator, InvalidPage
@@ -166,8 +167,8 @@ class SummaryResource(Resource):
             name                = model.__name__.lower()
             rules               = rulesManager.model(model).all()
             fields              = utils.get_model_fields(model)
-            verbose_name        = getattr(model._meta, "verbose_name", name)
-            verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s")
+            verbose_name        = getattr(model._meta, "verbose_name", name).title()
+            verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()
 
             for key in rules:
                 # Filter rules to keep only Neomatch
@@ -379,6 +380,17 @@ class SummaryResource(Resource):
 
         self.log_throttled_access(request)
         return object_list
+
+    def summary_graph(self, bundle, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+        depth     = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
+        leafs, edges  = get_leafts_and_edges(
+            app_label = self.topic.app_label(),
+            depth     = depth,
+            root_node = "*")
+        self.log_throttled_access(request)
+        return self.create_response(request, {'leafs': leafs, 'edges' : edges})
 
     def summary_bulk_upload(self, request, **kwargs):
         # only allow POST requests

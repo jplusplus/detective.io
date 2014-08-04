@@ -89,6 +89,7 @@ class TopicCachierTestCase(TestCase):
 
     def test_topic_delete(self):
         topic = self.create_topic()
+        topic.delete()
         self.assertIsNone(topic_cache.version(topic))
 
     def test_topic_model_update(self):
@@ -98,6 +99,3 @@ class TopicCachierTestCase(TestCase):
         p = Person.objects.create(first_name='Pierre', last_name='Bellon')
         rev_target = topic_cache.version(topic)
         self.assertEqual(rev_target, rev_origin + 1)
-
-    def test_default_cache_timeout(self):
-        self.assertEqual(topic_cache.timeout(), 60 * 60)

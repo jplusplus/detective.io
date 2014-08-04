@@ -22,4 +22,13 @@ INSTALLED_APPS.remove('compressor')
 NEO4DJANGO_PROFILE_REQUESTS = False
 NEO4DJANGO_DEBUG_GREMLIN = False
 
+
+CACHES = {
+    'default': {
+        # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache',
+    }
+}
+
 # EOF

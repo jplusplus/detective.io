@@ -324,83 +324,81 @@ def should_show_debug_toolbar(request):
 
 
 class TopicCachier(object):
-    _instance = None
+    __instance = None
     # dict of cache key definitions / formats
-    _keys = {
+    __KEYS = {
         # general prefix for every key
-        'topic_prefix'    : 'topic_{module}',
+        'topic_prefix'   : 'topic_{module}',
         # specific version cache key
         'version_number' : '{topic_prefix}_version',
         # topic's related cache key prefix
         'cache_prefix'   : '{topic_prefix}_{suffix}',
     }
 
-    _timeouts = {
+    __TIMEOUTS = {
         'default': 60 * 60 # 3600 secondes = 1h
     }
 
-    def keys(self):
-        return self._keys
+    def __keys(self):
+        return self.__KEYS
 
-    def timeout(self, key='default'):
-        return self._timeouts[key]
+    def __timeout(self, key='default'):
+        return self.__TIMEOUTS[key]
 
-    def _version_key(self, topic):
-        return self.keys()['version_number'].format(
-            topic_prefix=self._topic_prefix(topic))
+    def __version_key(self, topic):
+        return self.__keys()['version_number'].format(
+            topic_prefix=self.__topic_prefix(topic))
 
-    def _topic_prefix(self, topic):
-        topic_module = topic.module
-        return self.keys()['topic_prefix'].format(module=topic_module)
+    def __topic_prefix(self, topic):
+        return self.__keys()['topic_prefix'].format(
+            module=topic.module)
 
-    def _get_key(self, topic, suffix):
-        return self.keys()['cache_prefix'].format(
+    def __get_key(self, topic, suffix):
+        return self.__keys()['cache_prefix'].format(
             topic_prefix=self.prefix_key(topic),
             suffix=suffix
         )
 
     def init_version(self, topic):
-        cache_key = self._version_key(topic)
-        cache.set(cache_key, 0, self.timeout())
-        self.debug("Set {k} to 0 - get({k}) = {v}".format(k=cache_key, v=self.version(topic)))
+        cache.set(
+            self.__version_key(topic), 0, self.__timeout()
+        )
 
     def version(self, topic):
-        cache_key = self._version_key(topic)
+        cache_key = self.__version_key(topic)
         return cache.get(cache_key)
 
     def incr_version(self, topic):
-        cache_key = self._version_key(topic)
+        cache_key = self.__version_key(topic)
         if cache.get(cache_key) == None:
-            self.debug("incr_version - %s has not been created yet" % cache_key)
             self.init_version(topic)
         else:
-            self.debug("incr_version - version key already created, gonna incr ver")
             cache.incr(cache_key)
 
     def delete_version(self, topic):
-        cache_key = self._version_key(topic)
+        cache_key = self.__version_key(topic)
         cache.delete(cache_key)
 
     def get(self, topic, suffix_key):
         rev = self.version(topic) or 0
-        cache_key = self._version_key(topic)
-        return cache.get(self._get_key(topic, suffix_key), version=rev)
+        cache_key = self.__version_key(topic)
+        return cache.get(self.__get_key(topic, suffix_key), version=rev)
 
     def set(self, topic, suffix_key, value, timeout=None):
         rev = self.version(topic)
         if timeout == None:
-            timeout = self._timeouts['defaults']
-        cache_key = self._get_key(topic, suffix_key)
+            timeout = self.__timeout()
+        cache_key = self.__get_key(topic, suffix_key)
         cache.set(cache_key, value, timeout, version=rev)
 
     def debug(self, msg):
-        print "DEBUG - TopicCachier %s" % msg
+        print "\nDEBUG - TopicCachier %s\n" % msg
 
     def __new__(self):
         # singleton instanciation
-        if self._instance == None:
-            self._instance = super(TopicCachier, self).__new__(self)
-        return self._instance
+        if self.__instance == None:
+            self.__instance = super(TopicCachier, self).__new__(self)
+        return self.__instance
 
 topic_cache = TopicCachier()
 # EOF

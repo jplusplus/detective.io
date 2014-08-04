@@ -2,7 +2,6 @@
 # Encoding: utf-8
 
 import os
-import dj_database_url
 from settings import *
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -11,10 +10,6 @@ NEO4J_DATABASES['default']['OPTIONS'] = {
 }
 
 NEO4J_TEST_DATABASES = NEO4J_DATABASES
-
-DATABASES = {
-    'default' : dj_database_url.config()
-}
 
 DEBUG = False
 

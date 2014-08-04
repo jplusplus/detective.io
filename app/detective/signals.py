@@ -3,15 +3,6 @@ from app.detective.utils        import topic_cache, get_topic_from_model
 from app.detective.models       import Topic
 from app.detective.permissions  import create_permissions, remove_permissions
 
-
-def _extra_args(topic, *args, **kwargs):
-    def inner1(f, *args, **kwargs):
-        def inner2(sender, instance, **kwargs):
-            f(sender, instance, topic=topic, **kwargs)
-        return inner2
-    return inner1
-
-
 def update_permissions(*args, **kwargs):
     """ create the permissions related to the label module """
     assert kwargs.get('instance')
@@ -19,12 +10,15 @@ def update_permissions(*args, **kwargs):
     if kwargs.get('created', False):
         create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').ontology_as_mod)
 
-def update_topic_cache(topic=None, *args, **kwargs):
+def update_topic_cache(*args, **kwargs):
+    """ update the topic cache version on topic update or sub-model update """
     instance = kwargs.get('instance')
     if not isinstance(instance, Topic):
         topic = get_topic_from_model(instance)
     else:
         topic = instance
+    # we increment the cache version of this topic, this will "invalidate" every
+    # previously stored information related to this topic
     topic_cache.incr_version(topic)
 
     # if topic just been created we gonna bind its sub models signals

@@ -17,16 +17,23 @@ class HeaderCtrl
             return @scope.user.hasAddPermission(@TopicsFactory.topic.ontology_as_mod)
 
         @scope.shouldShowTopicSearch = =>
-            return false unless @isInTopic()
-            return false if @isInInvite()
-            true
+            in_topic = @isInTopic()
+            in_wrong_state = @isInEmptyState() or @isInInvite() or @isInHome()
+            in_topic and not in_wrong_state
 
     isInTopic: =>
         topic = @TopicsFactory.topic
         topic? and not _.isEmpty(topic)
 
+    isInEmptyState: =>
+        state = @state.current
+        not state? or _.isEmpty(state) or _.isEmpty(state.name)
+
     isInInvite: =>
-        @state.current.name == 'user-topic-invite'
+        @state.current.name is 'user-topic-invite'
+
+    isInHome: =>
+        ((@state.current.name or '').match(/^home/) or []).length > 0
 
 
 angular.module('detective.controller').controller 'headerCtrl', HeaderCtrl

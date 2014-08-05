@@ -380,9 +380,9 @@ class TopicCachier(object):
         cache.delete(cache_key)
 
     def get(self, topic, suffix_key):
-        rev = self.version(topic) or 0
-        cache_key = self.__version_key(topic)
-        return cache.get(self.__get_key(topic, suffix_key), version=rev)
+        rev       = self.version(topic)
+        cache_key = self.__get_key(topic, suffix_key)
+        return cache.get(cache_key, version=rev)
 
     def set(self, topic, suffix_key, value, timeout=None):
         rev = self.version(topic)
@@ -390,6 +390,11 @@ class TopicCachier(object):
             timeout = self.__timeout()
         cache_key = self.__get_key(topic, suffix_key)
         cache.set(cache_key, value, timeout, version=rev)
+
+    def delete(self, topic, suffix_key):
+        cache_key = self.__get_key(topic, suffix_key)
+        rev = self.version(topic)
+        cache.delete(cache_key, version=rev)
 
     def debug(self, msg):
         print "\nDEBUG - TopicCachier %s\n" % msg

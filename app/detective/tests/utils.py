@@ -109,3 +109,14 @@ class TopicCachierTestCase(TestCase):
 
         stored_data = topic_cache.get(topic, 'random_key')
         self.assertEqual(stored_data, random_data)
+
+    def test_cache_delete(self):
+        topic = self.create_topic()
+        random_data = {
+            'such': 'data'
+        }
+        topic_cache.set(topic, 'such_random', random_data, 3000)
+        topic_cache.delete(topic, 'such_random')
+        self.assertIsNone(topic_cache.get(topic, 'such_random'))
+
+

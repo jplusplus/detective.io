@@ -100,7 +100,7 @@ class TopicResource(ModelResource):
                 return http.HttpBadRequest("You can't invite the author of the topic.")
             # Email options for kown user
             template = get_template("email.topic-invitation.existing-user.txt")
-            from_email, to_email = 'contact@detective.io', user.email
+            from_email, to_email = 'Detective.io <contact@detective.io>', user.email
             subject = '[Detective.io] You’ve just been added to an investigation'
             signup = request.build_absolute_uri( reverse("signup") )
             # Get the contributor group for this topic

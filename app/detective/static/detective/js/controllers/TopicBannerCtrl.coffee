@@ -64,7 +64,7 @@ class TopicBannerCtrl
             data.leafs = _.object(_.filter(_.pairs(@data.leafs), (leaf) =>
                 @scope.filtersSelected.indexOf(leaf[1]._type.toLowerCase()) > -1
             ))
-            @scope.graphnodes = data if _.size(data.leafs) > 0
+            @scope.graphnodes = data
         else
             return if @downloading # download only once
             @downloading = true

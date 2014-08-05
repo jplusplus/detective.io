@@ -15,7 +15,7 @@
                             <div class="general-graph-navigation__filters-box__label">all</div>
                         </label>
                     </div>
-                    <div class="checkbox" ng-repeat="form in forms">
+                    <div class="checkbox" ng-repeat="form in filtered = ( forms | filter:isSearchable | orderBy:'index' )">
                         <input type="checkbox" id="general-graph-navigation__filters-box__[[$index]]" name="filtersSelected[]" value="[[form.name]]" ng-checked="filtersSelected.indexOf(form.name) > -1" ng-click="toggleFiltersSelection(form.name)" />
                         <label class="filter-names" for="general-graph-navigation__filters-box__[[$index]]" ng-init="count = getTypeCount(form.name)" >
                             <div class="general-graph-navigation__filters-box__label" ng-style="{'border-bottom-color': strToColor(form.name) }">

@@ -409,7 +409,8 @@ class SummaryResource(Resource):
                     break
             if not job_already_exist:
                 # enqueue the job
-                job = django_rq.enqueue(render_csv_zip_file,
+                queue = django_rq.get_queue('high', default_timeout=360)
+                job = queue.enqueue(render_csv_zip_file,
                                   topic      = self.topic,
                                   model_type = request.GET.get("type"),
                                   query      = json.loads(request.GET.get('q', 'null')),

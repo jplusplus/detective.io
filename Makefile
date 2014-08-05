@@ -11,7 +11,7 @@ PWD           = `pwd`
 CUSTOM_D3	  = ./app/static/custom_d3/d3.js
 
 PYC           = $(wildcard *.pyc */*.pyc app/*/*.pyc app/*/*/*.pyc app/*/*/*/*.pyc app/*/*/*/*/*.pyc)
-CACHE         = $(wildcard app/staticfiles/CACHE)
+CACHE         = $(wildcard app/staticfiles/CACHE app/media/csv-exports/)
 
 ifndef PORT
 	PORT = 8000
@@ -75,6 +75,8 @@ livedoc:
 clean:
 	$(RM) $(PYC)
 	$(RM) $(CACHE)
+	. $(ENV) ; python -c "from django.core.cache import cache; cache.clear()"
+	@echo "cache cleaned"
 
 fclean: clean
 	rm $(CUSTOM_D3)

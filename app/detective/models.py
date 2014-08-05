@@ -1,13 +1,13 @@
-from .utils                     import get_topics
 from app.detective              import utils
 from app.detective.permissions  import create_permissions, remove_permissions
 from django.contrib.auth.models import User
-from django.core.exceptions     import ValidationError
 from django.db                  import models
-from django.db.models.fields    import FieldDoesNotExist
 from jsonfield                  import JSONField
 from tinymce.models             import HTMLField
 from django.contrib.auth.models import Group
+from psycopg2.extensions        import adapt
+from neo4django.db              import connection
+from django.core.paginator      import Paginator
 
 import inspect
 import os
@@ -197,6 +197,138 @@ class Topic(models.Model):
     def module(self):
         return self.ontology_as_mod
 
+    def get_models_output(self):
+        # Select only some atribute
+        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
+        return [ output(m) for m in self.get_models() ]
+
+    def get_relationship_search(self):
+        # For an unkown reason I can't filter by "is_literal"
+        # @TODO find why!
+        return [ st for st in SearchTerm.objects.filter(topic=self).prefetch_related('topic') if not st.is_literal ]
+
+    def get_relationship_search_output(self):
+        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
+        terms  = self.get_relationship_search()
+        _out = []
+        for model in self.get_models():
+            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() == 'relationship']:
+                if "search_terms" in field["rules"]:
+                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
+        return _out + [ output(rs) for rs in terms ]
+
+    def get_literal_search(self):
+        # For an unkown reason I can't filter by "is_literal"
+        return [ st for st in SearchTerm.objects.filter(topic=self).prefetch_related('topic') if st.is_literal ]
+
+    def get_literal_search_output(self):
+        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
+        terms  = self.get_literal_search()
+        _out = []
+        for model in self.get_models():
+            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() != 'relationship']:
+                if "search_terms" in field["rules"]:
+                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
+        return _out + [ output(rs) for rs in terms ]
+
+    def get_syntax(self):
+        syntax = {
+            'subject': {
+                'model':  self.get_models_output()
+            },
+            'predicate': {
+                'relationship': self.get_relationship_search_output(),
+                'literal'     : self.get_literal_search_output()
+            }
+        }
+        return syntax
+
+    def is_registered_literal(self, name):
+        literals = self.get_syntax().get("predicate").get("literal")
+        matches  = [ literal for literal in literals if name == literal["name"] ]
+        return len(matches)
+
+    def is_registered_relationship(self, name):
+        literals = self.get_syntax().get("predicate").get("relationship")
+        matches  = [ literal for literal in literals if name == literal["name"] ]
+        return len(matches)
+
+    def rdf_search_query(self, subject, predicate, obj):
+        identifier = obj["id"] if "id" in obj else obj
+        # retrieve all models in current topic
+        all_models = dict((model.__name__, model) for model in self.get_models())
+        # If the received identifier describe a literal value
+        if self.is_registered_literal(predicate["name"]):
+            # Get the field name into the database
+            field_name = predicate["name"]
+            # Build the request
+            query = """
+                START root=node(*)
+                MATCH (root)<-[:`<<INSTANCE>>`]-(type)
+                WHERE HAS(root.name)
+                AND HAS(root.{field})
+                AND root.{field} = {value}
+                AND type.model_name = {model}
+                AND type.app_label = {app}
+                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+            """.format(
+                field=field_name,
+                value=adapt(identifier),
+                model=adapt(subject["name"]),
+                app=adapt(self.app_label())
+            )
+        # If the received identifier describe a literal value
+        elif self.is_registered_relationship(predicate["name"]):
+            fields        = utils.get_model_fields( all_models[predicate["subject"]] )
+            # Get the field name into the database
+            relationships = [ field for field in fields if field["name"] == predicate["name"] ]
+            # We didn't find the predicate
+            if not len(relationships): return {'errors': 'Unkown predicate type'}
+            relationship  = relationships[0]["rel_type"]
+            # Query to get every result
+            query = u"""
+                START st=node(*)
+                MATCH (st)<-[:`{relationship}`]-(root)<-[:`<<INSTANCE>>`]-(type)
+                WHERE HAS(root.name)
+                AND HAS(st.name)
+                AND ID(st) = {id}
+                AND type.app_label = {app}
+                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+            """.format(
+                relationship=relationship,
+                id=adapt(identifier),
+                app=adapt(self.app_label())
+            )
+        else:
+            return {'errors': 'Unkown predicate type: %s' % predicate["name"]}
+        return connection.cypher(query).to_dicts()
+
+    def rdf_search(self, query, limit=20, offset=0):
+        subject   = query.get("subject", None)
+        predicate = query.get("predicate", None)
+        obj       = query.get("object", None)
+        results   = self.rdf_search_query(subject, predicate, obj)
+        # Stop now in case of error
+        if "errors" in results: return results
+        paginator = Paginator(results, limit)
+        if offset < 0:
+            p = -1
+        else:
+            p = int(round(offset / limit)) +  1
+        page      = paginator.page(p)
+        objects   = []
+        for result in page.object_list:
+            objects.append(result)
+        return {
+            'objects': objects,
+            'meta': {
+                'q': query,
+                'offset': p,
+                'limit': limit,
+                'total_count': paginator.count
+            }
+        }
+
 class TopicToken(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this token is related to.")
     token      = models.CharField(editable=False, max_length=32, help_text="Title of your article.")
@@ -221,7 +353,6 @@ class TopicToken(models.Model):
                 # The topic token MUST not exist yet
                 pass
         super(TopicToken, self).save()
-
 
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")

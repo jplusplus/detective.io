@@ -14,7 +14,10 @@ def update_topic_cache(*args, **kwargs):
     """ update the topic cache version on topic update or sub-model update """
     instance = kwargs.get('instance')
     if not isinstance(instance, Topic):
-        topic = get_topic_from_model(instance)
+        try:
+            topic = get_topic_from_model(instance)
+        except Topic.DoesNotExist:
+            topic = None
     else:
         topic = instance
     # we increment the cache version of this topic, this will "invalidate" every
@@ -22,7 +25,7 @@ def update_topic_cache(*args, **kwargs):
     topic_cache.incr_version(topic)
 
     # if topic just been created we gonna bind its sub models signals
-    if kwargs.get('created'):
+    if kwargs.get('created') and topic:
         for Model in topic.get_models():
             signals.post_save.connect(update_topic_cache, sender=Model, weak=False )
 

@@ -15,6 +15,7 @@ class TopicBannerCtrl
         @scope.filtersSelected        = []
         @scope.filtersNames           = []
         @scope.isLoading              = yes
+        @scope.downloading            = no
         # ──────────────────────────────────────────────────────────────────────
         # Get the current topic as default topic
         @scope.topic_selected = @stateParams.topic
@@ -56,14 +57,17 @@ class TopicBannerCtrl
     # filter the data and render the graph via @scope.graphnodes
     # shared with detective/js/directives/topic.single.graph.coffee
     renderGraph: =>
+        return unless @state.is("global-graph-navigation")
         if @data?
             data = angular.copy(@data)
             # filter by filtersSelected
             data.leafs = _.object(_.filter(_.pairs(@data.leafs), (leaf) =>
                 @scope.filtersSelected.indexOf(leaf[1]._type.toLowerCase()) > -1
             ))
-            @scope.graphnodes = data
+            @scope.graphnodes = data if _.size(data.leafs) > 0
         else
+            return if @downloading # download only once
+            @downloading = true
             @Summary.get {id: "graph", topic: @scope.topic_selected}, (data) =>
                 # save graph data used by @renderGraph
                 @data = data

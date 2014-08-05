@@ -3,15 +3,8 @@ from .models                          import *
 from app.detective.models             import QuoteRequest, Topic, TopicToken, Article, User
 from app.detective.utils              import get_registered_models, is_valid_email
 from app.detective.topics.common.user import UserResource, AuthorResource
+from django.conf                      import settings
 from django.conf.urls                 import url
-from tastypie                         import fields, http
-from tastypie.authorization           import ReadOnlyAuthorization
-from tastypie.constants               import ALL, ALL_WITH_RELATIONS
-from tastypie.exceptions              import Unauthorized
-from tastypie.resources               import ModelResource
-from tastypie.utils                   import trailing_slash
-from easy_thumbnails.files            import get_thumbnailer
-from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.core.mail                 import EmailMultiAlternatives
 from django.core.urlresolvers         import reverse
 from django.db                        import IntegrityError
@@ -19,6 +12,14 @@ from django.db.models                 import Q
 from django.http                      import Http404, HttpResponse
 from django.template                  import Context
 from django.template.loader           import get_template
+from easy_thumbnails.exceptions       import InvalidImageFormatError
+from easy_thumbnails.files            import get_thumbnailer
+from tastypie                         import fields, http
+from tastypie.authorization           import ReadOnlyAuthorization
+from tastypie.constants               import ALL, ALL_WITH_RELATIONS
+from tastypie.exceptions              import Unauthorized
+from tastypie.resources               import ModelResource
+from tastypie.utils                   import trailing_slash
 
 import json
 import re
@@ -84,6 +85,7 @@ class TopicResource(ModelResource):
 
         body = json.loads(request.body)
         collaborator = body.get("collaborator", None)
+        from_email = settings.DEFAULT_FROM_EMAIL
         if collaborator is None:
             return http.HttpBadRequest("Missing 'collaborator' parameter")
 
@@ -100,7 +102,7 @@ class TopicResource(ModelResource):
                 return http.HttpBadRequest("You can't invite the author of the topic.")
             # Email options for kown user
             template = get_template("email.topic-invitation.existing-user.txt")
-            from_email, to_email = 'Detective.io <contact@detective.io>', user.email
+            to_email = user.email
             subject = '[Detective.io] You’ve just been added to an investigation'
             signup = request.build_absolute_uri( reverse("signup") )
             # Get the contributor group for this topic
@@ -117,7 +119,7 @@ class TopicResource(ModelResource):
             if not is_valid_email(collaborator): return http.HttpNotFound("User unkown.")
             # Send an invitation to create an account
             template = get_template("email.topic-invitation.new-user.txt")
-            from_email, to_email = 'contact@detective.io', collaborator
+            to_email = collaborator
             subject = '[Detective.io] Someone needs your help on an investigation'
             try:
                 # Creates a topictoken

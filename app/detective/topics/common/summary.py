@@ -421,11 +421,6 @@ class SummaryResource(Resource):
                 response['token'] = job.id
         self.log_throttled_access(request)
         return response
-        # NOTE: legacy, without job
-        # zip_file = render_csv_zip_file(self, model_type=request.GET.get("type"), query=request.GET.get("q"))
-        # response = HttpResponse(zip_file, mimetype='application/zip')
-        # response['Content-Disposition'] = "attachement; filename=export-{0}.zip".format(self.topic.slug)
-        # return response
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 

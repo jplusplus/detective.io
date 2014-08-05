@@ -199,6 +199,13 @@ class Topic(models.Model):
 
     @property
     def entities_count(self):
+        """
+
+        Return the number of entities in the current topic.
+        Used to inform administrator.
+        Expensive request. Can be cached a long time.
+
+        """
         cache_key = "topic_{topic_slug}_entities_count".format(topic_slug=self.app_label())
         response = cache.get(cache_key)
         if response is None:

@@ -12,13 +12,21 @@ class HeaderCtrl
             nextState: @state.current.name
             nextParams: angular.toJson(@state.params)
 
-        @scope.showAddEntity = =>
-            topic = @TopicsFactory.topic
-            in_topic = topic? and not _.isEmpty(topic)
-            if not in_topic
-                return false
-            else
-                return @scope.user.hasAddPermission(topic.ontology_as_mod)
+        @scope.shouldShowAddEntity = =>
+            return false unless @isInTopic()
+            return @scope.user.hasAddPermission(@TopicsFactory.topic.ontology_as_mod)
+
+        @scope.shouldShowTopicSearch = =>
+            return false unless @isInTopic()
+            return false if @isInInvite()
+            true
+
+    isInTopic: =>
+        topic = @TopicsFactory.topic
+        topic? and not _.isEmpty(topic)
+
+    isInInvite: =>
+        @state.current.name == 'user-topic-invite'
 
 
 angular.module('detective.controller').controller 'headerCtrl', HeaderCtrl

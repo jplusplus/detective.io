@@ -8,7 +8,7 @@
     <div ng-controller="UserCtrl" class="header__user">
 		<div ng-show="user.is_logged" class="header__user__signed-in">
             <a class="header__user__signed-in__add"
-               ng-show="showAddEntity()"
+               ng-show="shouldShowAddEntity()"
                title="Add an entity to this topic"
                href="[[topic.link]]/contribute">
                 <i class="fa fa-plus right05"></i>Add an entity
@@ -31,7 +31,7 @@
 	</div>
 
     <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl as search">
-        <div class="btn-group" ng-if="search.topic.slug">
+        <div class="btn-group" ng-show="shouldShowTopicSearch()">
             <a class="btn btn-default topic-search__home" href="[[search.topic.link]]" title="[[search.topic.title]]">
                 [[search.topic.title | characters:25]]
             </a>

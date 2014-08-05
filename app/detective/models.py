@@ -8,7 +8,7 @@ from django.contrib.auth.models import Group
 from psycopg2.extensions        import adapt
 from neo4django.db              import connection
 from django.core.paginator      import Paginator
-
+from django.core.cache          import cache
 import inspect
 import os
 import random
@@ -199,16 +199,20 @@ class Topic(models.Model):
 
     @property
     def entities_count(self):
-        # FIXME: set cache
-        query = """
-            START root=node(*)
-            MATCH p = (root)--(leaf)<-[:`<<INSTANCE>>`]-(type)
-            WHERE HAS(leaf.name)
-            AND type.app_label = '{app_label}'
-            AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
-            RETURN count(leaf) AS count
-        """.format(app_label=self.app_label())
-        return connection.cypher(query).to_dicts()[0].get("count")
+        cache_key = "topic_{topic_slug}_entities_count".format(topic_slug=self.app_label())
+        response = cache.get(cache_key)
+        if response is None:
+            query = """
+                START root=node(*)
+                MATCH p = (root)--(leaf)<-[:`<<INSTANCE>>`]-(type)
+                WHERE HAS(leaf.name)
+                AND type.app_label = '{app_label}'
+                AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
+                RETURN count(leaf) AS count
+            """.format(app_label=self.app_label())
+            response = connection.cypher(query).to_dicts()[0].get("count")
+            cache.set(cache_key, response)
+        return response
 
     def get_models_output(self):
         # Select only some atribute

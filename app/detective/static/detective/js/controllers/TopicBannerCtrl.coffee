@@ -66,8 +66,8 @@ class TopicBannerCtrl
             ))
             @scope.graphnodes = data
         else
-            return if @downloading # download only once
-            @downloading = true
+            return if @scope.downloading # download only once
+            @scope.downloading = true
             @Summary.get {id: "graph", topic: @scope.topic_selected}, (data) =>
                 # save graph data used by @renderGraph
                 @data = data

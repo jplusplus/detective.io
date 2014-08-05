@@ -3,7 +3,7 @@ from .errors                    import ForbiddenError, UnauthorizedError
 from app.detective.models       import Topic, SearchTerm
 from app.detective.neomatch     import Neomatch
 from app.detective.register     import topics_rules
-from app.detective.utils        import get_leafts_and_edges
+from app.detective.utils        import get_leafs_and_edges
 from difflib                    import SequenceMatcher
 from django.conf                import settings
 from django.core.paginator      import Paginator, InvalidPage
@@ -385,7 +385,7 @@ class SummaryResource(Resource):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
         depth     = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
-        leafs, edges  = get_leafts_and_edges(
+        leafs, edges  = get_leafs_and_edges(
             app_label = self.topic.app_label(),
             depth     = depth,
             root_node = "*")

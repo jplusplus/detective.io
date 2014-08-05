@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafts_and_edges
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges
 from app.detective.topics.common.models import FieldSource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
@@ -611,7 +611,7 @@ class IndividualResource(ModelResource):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
         depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
-        leafs, edges  = get_leafts_and_edges(
+        leafs, edges  = get_leafs_and_edges(
             app_label = get_model_topic(self.get_model()),
             depth     = depth,
             root_node = kwargs['pk'])

@@ -223,7 +223,7 @@ def get_model_nodes():
     return get_model_nodes.buffer
 
 
-def get_leafts_and_edges(app_label, depth, root_node="*"):
+def get_leafs_and_edges(app_label, depth, root_node="*"):
     from neo4django.db import connection
     leafs = {}
     edges = []

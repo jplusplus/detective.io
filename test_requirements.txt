@@ -1,10 +1,10 @@
 dj-database-url==0.2.1
+django-cors-headers==0.12
 django-password-reset==0.5.1
 django-registration==1.0
 django-rq==0.6.0
 django-suit==0.2.9
 django-tastypie==0.10.0
-django-cors-headers==0.12
 django-tinymce==1.5.2
 django-urlmiddleware==0.2.1
 Django==1.5.4

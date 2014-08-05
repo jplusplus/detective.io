@@ -130,6 +130,7 @@ class IndividualListCtrl
             @requestCsvExport (d) ->
                 if d.status == "enqueued"
                     # ask if the job is finished
+                    @retry = 0
                     refresh_timeout = that.timeout refresh_status = =>
                         that.Common.get {type:"jobs", id:d.token}, (data) =>
                             if data.status == "finished"
@@ -137,6 +138,10 @@ class IndividualListCtrl
                             else
                                 # retart the function
                                 refresh_timeout = that.timeout(refresh_status, 2000)
+                        , (error) =>
+                            if @retry < 5
+                                refresh_timeout = that.timeout(refresh_status, 2000)
+                                @retry += 1
                     # cancel the timeout if the view is destroyed
                     that.scope.$on '$destroy', =>
                         that.timeout.cancel(refresh_timeout)

@@ -355,7 +355,7 @@ class TopicCachier(object):
 
     def __get_key(self, topic, suffix):
         return self.__keys()['cache_prefix'].format(
-            topic_prefix=self.prefix_key(topic),
+            topic_prefix=self.__topic_prefix(topic),
             suffix=suffix
         )
 

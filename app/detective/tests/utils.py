@@ -99,3 +99,13 @@ class TopicCachierTestCase(TestCase):
         p = Person.objects.create(first_name='Pierre', last_name='Bellon')
         rev_target = topic_cache.version(topic)
         self.assertEqual(rev_target, rev_origin + 1)
+
+    def test_cache_get(self):
+        topic = self.create_topic()
+        random_data = {
+            'such': 'data'
+        }
+        topic_cache.set(topic, 'random_key', random_data, 3000)
+
+        stored_data = topic_cache.get(topic, 'random_key')
+        self.assertEqual(stored_data, random_data)

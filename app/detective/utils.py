@@ -242,6 +242,8 @@ def get_leafts_and_edges(app_label, depth, root_node="*"):
         row['leaf']['data']['_id'] = row['id_leaf']
         row['leaf']['data']['_type'] = row['type']['data']['model_name']
         leafs[row['id_leaf']] = row['leaf']['data']
+    if len(leafs) == 0:
+        return ([], [])
     # Then we retrieve all edges
     query = """
         START A=node({leafs})

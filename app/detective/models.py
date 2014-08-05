@@ -197,6 +197,19 @@ class Topic(models.Model):
     def module(self):
         return self.ontology_as_mod
 
+    @property
+    def entities_count(self):
+        # FIXME: set cache
+        query = """
+            START root=node(*)
+            MATCH p = (root)--(leaf)<-[:`<<INSTANCE>>`]-(type)
+            WHERE HAS(leaf.name)
+            AND type.app_label = '{app_label}'
+            AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
+            RETURN count(leaf) AS count
+        """.format(app_label=self.app_label())
+        return connection.cypher(query).to_dicts()[0].get("count")
+
     def get_models_output(self):
         # Select only some atribute
         output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}

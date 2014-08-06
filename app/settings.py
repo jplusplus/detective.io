@@ -39,7 +39,7 @@ NEO4J_DATABASES = {
 
 DATABASE_ROUTERS        = ['neo4django.utils.Neo4djangoIntegrationRouter']
 SESSION_ENGINE          = "django.contrib.sessions.backends.db"
-AUTHENTICATION_BACKENDS = ('app.detective.auth.CaseInsentiveModelBackend',)
+AUTHENTICATION_BACKENDS = ('app.detective.auth.CaseInsensitiveModelBackend',)
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

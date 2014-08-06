@@ -9,6 +9,8 @@
 	<span ng-switch-default>
 		<div ng-if="field.name != 'comment'">
 			<input  type="text"
+			        autocorrect="off"
+                    autocapitalize="off"
 					class="form-control"
 					ng-model="individual.fields[field.name]"
 					change-on-blur

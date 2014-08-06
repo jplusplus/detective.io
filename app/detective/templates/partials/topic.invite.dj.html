@@ -20,6 +20,8 @@
 					   class="form-control"
 					   ng-disabled="loading"
 					   ng-model="collaborator"
+					   autocorrect="off"
+					   autocapitalize="off"
 					   tt-typeahead
 					   tt-transform="prepareSearch(objects)"
 					   tt-prefetch-url="'/api/common/v1/user/?username__icontains=%QUERY'"

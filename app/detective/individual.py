@@ -609,8 +609,9 @@ class IndividualResource(ModelResource):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
         depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
-        leafs, edges  = get_leafs_and_edges(
-            app_label = get_model_topic(self.get_model()),
+        topic = Topic.objects.get(ontology_as_mod=get_model_topic(self.get_model()))
+        leafs, edges = get_leafs_and_edges(
+            topic     = topic,
             depth     = depth,
             root_node = kwargs['pk'])
         self.log_throttled_access(request)

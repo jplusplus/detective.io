@@ -4,12 +4,14 @@ from django.core.exceptions import ValidationError
 from random    import randint
 from os.path   import isdir, join
 from os        import listdir
-from unidecode import unidecode
 import importlib
 import inspect
 import os
 import re
 import tempfile
+import logging
+
+logger = logging.getLogger(__name__)
 
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
@@ -223,7 +225,7 @@ def get_model_nodes():
     return get_model_nodes.buffer
 
 
-def get_leafs_and_edges(app_label, depth, root_node="*"):
+def get_leafs_and_edges(topic, depth, root_node="*"):
     from neo4django.db import connection
     leafs = {}
     edges = []
@@ -236,7 +238,7 @@ def get_leafs_and_edges(app_label, depth, root_node="*"):
         AND type.app_label = '{app_label}'
         AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
         RETURN leaf, ID(leaf) as id_leaf, type
-    """.format(root=root_node, depth=depth, app_label=app_label)
+    """.format(root=root_node, depth=depth, app_label=topic.app_label())
     rows = connection.cypher(query).to_dicts()
     if root_node != "*":
         # We need to retrieve the root in another request
@@ -248,6 +250,9 @@ def get_leafs_and_edges(app_label, depth, root_node="*"):
         """.format(root=root_node)
         for row in connection.cypher(query).to_dicts():
             rows.append(row)
+    # filter rows using the models in onthology
+    models_in_onthology = map(lambda m: m.__name__.lower(), topic.get_models())
+    rows = filter(lambda r: r['type']['data']['model_name'].lower() in models_in_onthology, rows)
     for row in rows:
         row['leaf']['data']['_id'] = row['id_leaf']
         row['leaf']['data']['_type'] = row['type']['data']['model_name']

@@ -355,7 +355,7 @@ class SummaryResource(Resource):
         self.throttle_check(request)
         depth     = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
         leafs, edges  = get_leafs_and_edges(
-            app_label = self.topic.app_label(),
+            topic     = self.topic,
             depth     = depth,
             root_node = "*")
         self.log_throttled_access(request)

@@ -4,7 +4,7 @@
       ng-hide="signupSucceed"
       ng-submit="signup()">
   <div class="panel-body">
- 	  <h2>Request an account</h2>
+ 	  <h2>Register an account</h2>
     <fieldset ng-disabled="loading">
       <div class="form-group">
         <label for="inputUsername">Username</label>
@@ -16,7 +16,7 @@
                  ng-model="username"
                  class="form-control"
                  id="inputUsername"
-                 placeholder="Choose an username" />
+                 placeholder="Choose a username" />
           <span class="input-group-addon">
             <i class="fa fa-check-square-o text-success" ng-show="form.username.$valid"></i>
             <i class="fa fa-square-o"             ng-hide="form.username.$valid"></i>

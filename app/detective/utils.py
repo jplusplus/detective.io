@@ -229,6 +229,7 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
     from neo4django.db import connection
     leafs = {}
     edges = []
+    leafs_related = []
     ###
     # First we retrieve every leaf in the graph
     query = """
@@ -251,6 +252,7 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
         for row in connection.cypher(query).to_dicts():
             rows.append(row)
     # filter rows using the models in onthology
+    # FIXME: should be in the cypher query
     models_in_onthology = map(lambda m: m.__name__.lower(), topic.get_models())
     rows = filter(lambda r: r['type']['data']['model_name'].lower() in models_in_onthology, rows)
     for row in rows:
@@ -270,9 +272,14 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
     for row in rows:
         try:
             if (leafs[row['head']] and leafs[row['tail']]):
+                leafs_related.extend([row['head'], row['tail']])
                 edges.append([row['head'], row['relation'], row['tail']])
         except KeyError:
             pass
+    # filter leafts without relations
+    # FIXME: should be in the cypher query
+    leafs_related = set(leafs_related)
+    leafs = dict((k, v) for k, v in leafs.iteritems() if k in leafs_related)
     return (leafs, edges)
 
 def get_model_node_id(model):

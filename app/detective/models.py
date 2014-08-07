@@ -9,6 +9,7 @@ from psycopg2.extensions        import adapt
 from neo4django.db              import connection
 from django.core.paginator      import Paginator
 from django.core.cache          import cache
+from django.conf                import settings
 import inspect
 import os
 import random
@@ -466,6 +467,17 @@ class SearchTerm(models.Model):
 
 # -----------------------------------------------------------------------------
 #
+#    CUSTOM USER
+#
+# -----------------------------------------------------------------------------
+PLANS_CHOICES = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
+
+class DetectiveProfileUser(models.Model):
+    user = models.OneToOneField(User)
+    plan = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])
+
+# -----------------------------------------------------------------------------
+#
 #    SIGNALS
 #
 # -----------------------------------------------------------------------------
@@ -480,4 +492,15 @@ def update_permissions(*args, **kwargs):
 
 signals.post_delete.connect(remove_permissions, sender=Topic)
 signals.post_save.connect(update_permissions, sender=Topic)
+
+def user_created(*args, **kwargs):
+    """
+
+    create a DetectiveProfileUser when a user is created
+
+    """
+    DetectiveProfileUser.objects.get_or_create(user=kwargs.get('instance'))
+
+signals.post_save.connect(user_created, sender=User)
+
 # EOF

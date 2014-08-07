@@ -1,8 +1,10 @@
-from app.detective        import utils
-from app.detective.models import QuoteRequest, Topic, TopicToken, SearchTerm, Article
-from django.conf          import settings
-from django.contrib       import admin
-from django.db.models     import CharField
+from app.detective              import utils
+from app.detective.models       import QuoteRequest, Topic, TopicToken, SearchTerm, Article, DetectiveProfileUser
+from django.conf                import settings
+from django.contrib             import admin
+from django.db.models           import CharField
+from django.contrib.auth.admin  import UserAdmin
+from django.contrib.auth.models import User
 
 class QuoteRequestAdmin(admin.ModelAdmin):
     save_on_top   = True
@@ -134,3 +136,18 @@ class ArticleAdmin(admin.ModelAdmin):
     list_display        = ("title", "link", "created_at", "public", )
 
 admin.site.register(Article, ArticleAdmin)
+
+class DetectiveProfileUserInline(admin.StackedInline):
+    model               = DetectiveProfileUser
+    can_delete          = False
+    verbose_name_plural = 'detective settings'
+
+# Define a new User admin
+class UserAdmin(UserAdmin):
+    inlines = (DetectiveProfileUserInline, )
+
+# Re-register UserAdmin
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+
+# EOF

@@ -1,8 +1,10 @@
 class ProfileCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$stateParams', 'Common', 'Page', 'user', 'User']
+    @$inject: ['$scope', '$stateParams', 'Common', 'Page', 'user', 'User', 'Auth', '$state']
 
-    constructor: (@scope,  @stateParams, @Common, @Page, user, UserService)->
+    constructor: (@scope, @stateParams, @Common, @Page, user, UserService, Auth, $state)->
+        @scope.isMe = $state.is 'user.me'
+
         @Page.title user.username
         @Page.loading yes
         # ──────────────────────────────────────────────────────────────────────

@@ -1,39 +1,40 @@
 class ProfileCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$stateParams', 'Common', 'Page', 'user', 'User', 'Auth', '$state']
+    @$inject: ['$scope', 'Common', 'Page', 'user', '$state', '$q', 'User', '$http']
 
-    constructor: (@scope, @stateParams, @Common, @Page, user, UserService, Auth, $state)->
-        @scope.isMe = $state.is 'user.me'
-
+    constructor: (@scope, @Common, @Page, user, $state, $q, @User, @http)->
         @Page.title user.username
         @Page.loading yes
+
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────        
+        # Is this our profile page?
+        @scope.isMe = $state.is 'user.me'
+        #
+        @scope.shouldShowTopics = no
+        # All topics the user can access
+        @scope.userTopics = []
         # Get the user's topics
-        @scope.userTopics = @Common.query type: "topic", author__id: user.id
-        # Get the user
-        @scope.user = @Common.get type: "user", id: user.id, =>
-            @scope.user.contribution_groups = _.filter @scope.user.groups, (x) =>
-                (x.topic.author.id isnt @scope.user.id) and (x.topic.public or UserService.hasReadPermission x.topic.ontology_as_mod)
+        ($q.all [
+            (@Common.query type: "topic", author__id: user.id).$promise
+            (@http.get "/api/common/v1/user/#{@User.id}/groups")
+            (@Common.get type: "user", id: user.id).$promise
+        ]).then (results) =>
+            # First we handle the topics owned by this user
+            for topic in results[0]
+                (@scope.userTopics.push topic) if @canShowTopic topic
 
-        # ──────────────────────────────────────────────────────────────────────
-        # Scope watchers
-        # ──────────────────────────────────────────────────────────────────────
-        @scope.$watchCollection "[userTopics.$resolved, user.$resolved]", (resolved)=>      
-            @Page.loading( angular.equals(resolved, [yes, yes]) ) if @Page.loading()
-        , yes
+            console.debug results[1].data.objects
+            # Then we handle the topics this user can contribute to
+            for group in results[1].data.objects
+                (@scope.userTopics.push group.topic) if @canShowTopic group.topic
 
-        # ──────────────────────────────────────────────────────────────────────
-        # Scope functions
-        # ──────────────────────────────────────────────────────────────────────
-        @scope.shouldShowTopics = @shouldShowTopics
-        @scope.shouldShowContributions = @shouldShowContributions
+            # Finally we can stop page loading and display the topics
+            @scope.shouldShowTopics = true
+            (@Page.loading no) if do @Page.loading
 
-    shouldShowTopics: =>
-        @scope.userTopics.$resolved and @scope.userTopics.length
-
-    shouldShowContributions: =>
-        @scope.user.$resolved and @scope.user.contribution_groups.length
+    canShowTopic: (topic) =>
+        topic.public or @User.hasReadPermission topic.ontology_as_mod
 
 angular.module('detective.controller').controller 'profileCtrl', ProfileCtrl

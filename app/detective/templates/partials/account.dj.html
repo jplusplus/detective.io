@@ -1,5 +1,16 @@
 <div class="container">
-    <h2><strong>[[user.username|titlecase]]</strong>'s open topics</h2>
+    <div ng-if="shouldShowTopics">
+        <h2>Investigations</h2>
+        <div>
+            <ul>
+                <li ng-repeat="topic in userTopics">
+                    <a ng-href="[[topic.link]]" class="fg">[[topic.title]]</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!--     <h2><strong>[[user.username|titlecase]]</strong>'s open topics</h2>
     <div class="boxes" ng-if="shouldShowTopics()">
         <div ng-repeat-start="topic in userTopics"></div>
 
@@ -55,4 +66,4 @@
 
         <div ng-repeat-end></div>
     </div>
-</div>
+</div> -->

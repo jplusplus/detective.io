@@ -280,7 +280,6 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
     # filter edges with relations in ontology
     models_fields         = itertools.chain(*map(get_model_fields, topic.get_models()))
     relations_in_ontology = set(map(lambda _: _.get("rel_type"), models_fields))
-    print relations_in_ontology
     edges                 = [e for e in edges if e[1] in relations_in_ontology]
     # filter leafts without relations
     # FIXME: should be in the cypher query

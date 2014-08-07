@@ -124,9 +124,14 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
 
             # Watch select event
             element.on "typeahead:selected", (input, individual)->
-                if scope.model?
+                unless _.isEmpty attrs.ttModel
                     scope.$apply =>
-                        angular.copy(individual, scope.model);
+                        # workaround to have same types between individual and
+                        # scope.model (source, destionation), if destination
+                        # is undefined, the angularJS deep copy will not work.
+                        unless scope.model?
+                            scope.model = {}
+                        angular.copy individual, scope.model
                 do scope.change if scope.change?
 
             # Watch user value event

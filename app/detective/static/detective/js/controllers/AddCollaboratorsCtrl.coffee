@@ -13,8 +13,14 @@ class AddCollaboratorsCtrl
                 object["name"] = object["username"]
                 # Return the updated object
                 object
+
+        @scope.$watch "collaborator", (newVal, oldVal)=>
+            if typeof newVal is typeof {}
+                @scope.collaborator_name = newVal.username
+
         # Send an invitation to the given person
-        @scope.invite = (collaborator)=>
+        @scope.invite = ()=>
+            collaborator = @scope.collaborator_name
             @scope.loading = yes
             @scope.invited = null
 

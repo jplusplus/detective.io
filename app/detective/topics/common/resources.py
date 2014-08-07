@@ -144,7 +144,7 @@ class TopicResource(ModelResource):
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
         msg.send()
 
-        return HttpResponse("Invitation send!")
+        return HttpResponse("Invitation sent!")
 
     def dehydrate(self, bundle):
         from app.detective import register

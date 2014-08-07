@@ -336,7 +336,9 @@ class UserResource(ModelResource):
             for group in page.object_list:
                 bundle = group_resource.build_bundle(obj=group, request=request)
                 bundle = group_resource.full_dehydrate(bundle)
-                objects.append(bundle)
+                # make sure we're not adding a not existing topic to objects
+                if bundle.data['topic']:
+                    objects.append(bundle)
 
         except InvalidPage:
             # Allow empty page

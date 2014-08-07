@@ -9,6 +9,7 @@ import inspect
 import os
 import re
 import tempfile
+import itertools
 import logging
 
 logger = logging.getLogger(__name__)
@@ -251,10 +252,10 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
         """.format(root=root_node)
         for row in connection.cypher(query).to_dicts():
             rows.append(row)
-    # filter rows using the models in onthology
+    # filter rows using the models in ontology
     # FIXME: should be in the cypher query
-    models_in_onthology = map(lambda m: m.__name__.lower(), topic.get_models())
-    rows = filter(lambda r: r['type']['data']['model_name'].lower() in models_in_onthology, rows)
+    models_in_ontology = map(lambda m: m.__name__.lower(), topic.get_models())
+    rows = filter(lambda r: r['type']['data']['model_name'].lower() in models_in_ontology, rows)
     for row in rows:
         row['leaf']['data']['_id'] = row['id_leaf']
         row['leaf']['data']['_type'] = row['type']['data']['model_name']
@@ -276,6 +277,11 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
                 edges.append([row['head'], row['relation'], row['tail']])
         except KeyError:
             pass
+    # filter edges with relations in ontology
+    models_fields         = itertools.chain(*map(get_model_fields, topic.get_models()))
+    relations_in_ontology = set(map(lambda _: _.get("rel_type"), models_fields))
+    print relations_in_ontology
+    edges                 = [e for e in edges if e[1] in relations_in_ontology]
     # filter leafts without relations
     # FIXME: should be in the cypher query
     leafs_related = set(leafs_related)

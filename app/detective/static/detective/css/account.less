@@ -2,10 +2,26 @@
 
     &__user-info {
         max-width: 200px;
+        overflow-x: visible;
         .center-block();
 
         h2 {
             margin-bottom: 0 !important;
+        }
+
+        &__wrapper {
+            width: 400px;
+        }
+
+        @dt-width: 100px;
+
+        dt {
+            width: @dt-width;
+            text-align: left;
+        }
+
+        dd {
+            margin-left: @dt-width;
         }
     }
 

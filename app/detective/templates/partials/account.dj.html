@@ -1,8 +1,14 @@
 <div class="container account" style="padding-top:20px;">
     <div class="account__user-info">
         <img ng-src="[[ user.gravatar ]]" />
-        <h2>[[ user.name ]]</h2>
-        <p class='lead text-muted'>[[ user.username ]]</p>
+        <div class="account__user-info__wrapper">
+            <h2>[[ user.name ]]</h2>
+            <p class='lead text-muted'>[[ user.username ]]</p>
+            <dl class="dl-horizontal">
+                <dt ng-repeat-start="field in ['location', 'organization', 'url']" class='text-muted'>[[ field | titlecase ]]</dt>
+                <dd ng-repeat-end ng-bind-html="user[field] | linky:'_blank'"></dd>
+            </dl>
+        </div>
     </div>
     <div ng-if="shouldShowTopics" class="account__topics">
         <h3>Investigations</h3>

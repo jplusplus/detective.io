@@ -8,7 +8,7 @@ class ProfileCtrl
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
-        # ──────────────────────────────────────────────────────────────────────        
+        # ──────────────────────────────────────────────────────────────────────
         # Is this our profile page?
         @scope.isMe = $state.is 'user.me'
         #
@@ -18,6 +18,9 @@ class ProfileCtrl
             name : "#{user.first_name} #{user.last_name}"
             username : user.username
             gravatar : "http://www.gravatar.com/avatar/#{user.email}?s=200&d=mm"
+            location : 'Paris'
+            organization : 'Pony riders anonymous'
+            url : 'http://detective.io'
         # All topics the user can access
         @scope.userTopics = []
 

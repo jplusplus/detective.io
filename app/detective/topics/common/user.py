@@ -129,7 +129,7 @@ class UserResource(ModelResource):
             })
 
     def dehydrate(self, bundle):
-        bundle.data["email"]    = u"☘"
+        bundle.data["email"]    = hashlib.md5(bundle.data["email"].strip().lower()).hexdigest()
         bundle.data["password"] = u"☘"
         return bundle
 

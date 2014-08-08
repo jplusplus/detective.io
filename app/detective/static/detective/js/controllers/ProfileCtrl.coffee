@@ -25,7 +25,6 @@ class ProfileCtrl
             for topic in results[0]
                 (@scope.userTopics.push topic) if @canShowTopic topic
 
-            console.debug results[1].data.objects
             # Then we handle the topics this user can contribute to
             for group in results[1].data.objects
                 (@scope.userTopics.push group.topic) if @canShowTopic group.topic

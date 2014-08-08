@@ -85,7 +85,7 @@ admin.site.register(TopicToken, TopicTokenAdmin)
 class TopicAdmin(admin.ModelAdmin):
     save_on_top         = True
     prepopulated_fields = {'slug': ('title',)}
-    list_display        = ("title", "link", "public","app_label", "entities_count")
+    list_display        = ("title", "link", "public","app_label")
     list_filter         = ("public","featured","author")
     readonly_fields     = ('entities_count',)
     suit_form_tabs      = (

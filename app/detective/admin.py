@@ -145,6 +145,10 @@ class DetectiveProfileUserInline(admin.StackedInline):
 # Define a new User admin
 class UserAdmin(UserAdmin):
     inlines = (DetectiveProfileUserInline, )
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', "get_plan")
+    def get_plan(self, obj): return obj.detectiveprofileuser.plan
+    get_plan.short_description = "Plan"
+    get_plan.admin_order_field = 'detectiveprofileuser__plan'
 
 # Re-register UserAdmin
 admin.site.unregister(User)

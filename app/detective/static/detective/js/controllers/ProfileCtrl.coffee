@@ -13,13 +13,18 @@ class ProfileCtrl
         @scope.isMe = $state.is 'user.me'
         #
         @scope.shouldShowTopics = no
+        # User info
+        @scope.user =
+            name : "#{user.first_name} #{user.last_name}"
+            username : user.username
+            gravatar : "http://www.gravatar.com/avatar/#{user.email}?s=200&d=mm"
         # All topics the user can access
         @scope.userTopics = []
+
         # Get the user's topics
         ($q.all [
             (@Common.query type: "topic", author__id: user.id).$promise
             (@http.get "/api/common/v1/user/#{@User.id}/groups")
-            (@Common.get type: "user", id: user.id).$promise
         ]).then (results) =>
             # First we handle the topics owned by this user
             for topic in results[0]

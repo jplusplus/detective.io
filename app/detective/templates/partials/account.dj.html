@@ -1,69 +1,19 @@
-<div class="container">
-    <div ng-if="shouldShowTopics">
-        <h2>Investigations</h2>
+<div class="container account" style="padding-top:20px;">
+    <div class="account__user-info">
+        <img ng-src="[[ user.gravatar ]]" />
+        <h2>[[ user.name ]]</h2>
+        <p class='lead text-muted'>[[ user.username ]]</p>
+    </div>
+    <div ng-if="shouldShowTopics" class="account__topics">
+        <h3>Investigations</h3>
         <div>
-            <ul>
-                <li ng-repeat="topic in userTopics">
-                    <a ng-href="[[topic.link]]" class="fg">[[topic.title]]</a>
+            <ul class="list-unstyled">
+                <li ng-repeat="topic in userTopics" class="account__topics__topic">
+                    <img ng-if="topic.thumbnail" ng-src="[[ topic.thumbnail.small ]]" />
+                    <span ng-if="!topic.thumbnail" class="account__topics__topic__no-img"></span>
+                    <a ng-href="[[topic.link]]" class="lead text-muted">[[topic.title]]</a>
                 </li>
             </ul>
         </div>
     </div>
 </div>
-<!--     <h2><strong>[[user.username|titlecase]]</strong>'s open topics</h2>
-    <div class="boxes" ng-if="shouldShowTopics()">
-        <div ng-repeat-start="topic in userTopics"></div>
-
-            <div class="clearfix visible-md visible-lg" ng-if="$index > 0 && $index%3 == 0"></div>
-            <div class="clearfix visible-sm" ng-if="$index > 0 && $index%2 == 0"></div>
-
-            <div class="col-md-4 col-sm-6">
-                <div class="box">
-                    <a ng-href="[[topic.link]]" class="fg"></a>
-                    <img ng-src="[[topic.thumbnail.medium]]" width="100%" class="bg" />
-                </div>
-                <h4>
-                    <a ng-href="[[topic.link]]">[[topic.title]]</a><br />
-                    <span class="text-muted">
-                        by
-                        <a ui-sref="user({username: topic.author.username})">
-                            [[topic.author.username]]
-                        </a>
-                    </span>
-                </h4>
-            </div>
-
-        <div ng-repeat-end></div>
-    </div>
-    <div ng-if="!shouldShowTopics()" class="alert alert-info">
-        This user has no open investigations
-    </div>
-</div>
-
-<div class="container" ng-if="shouldShowContributions()">
-    <h2>Topics <strong>[[user.username|titlecase]]</strong> contributes to</h2>
-    <div class="boxes">
-        <div ng-repeat-start="group in user.contribution_groups" ng-init="topic = group.topic"></div>
-
-            <div class="clearfix visible-md visible-lg" ng-if="$index > 0 && $index%3 == 0"></div>
-            <div class="clearfix visible-sm" ng-if="$index > 0 && $index%2 == 0"></div>
-
-            <div class="col-md-4 col-sm-6">
-                <div class="box">
-                    <a ng-href="[[topic.link]]" class="fg"></a>
-                    <img ng-src="[[topic.thumbnail.medium]]" width="100%" class="bg" />
-                </div>
-                <h4>
-                    <a ng-href="[[topic.link]]">[[topic.title]]</a><br />
-                    <span class="text-muted">
-                        by
-                        <a ui-sref="user({username: topic.author.username})">
-                            [[topic.author.username]]
-                        </a>
-                    </span>
-                </h4>
-            </div>
-
-        <div ng-repeat-end></div>
-    </div>
-</div> -->

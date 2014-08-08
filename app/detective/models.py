@@ -8,7 +8,8 @@ from django.contrib.auth.models import Group
 from psycopg2.extensions        import adapt
 from neo4django.db              import connection
 from django.core.paginator      import Paginator
-
+from django.core.cache          import cache
+from django.conf                import settings
 import inspect
 import os
 import random
@@ -196,6 +197,30 @@ class Topic(models.Model):
     @property
     def module(self):
         return self.ontology_as_mod
+
+    @property
+    def entities_count(self):
+        """
+
+        Return the number of entities in the current topic.
+        Used to inform administrator.
+        Expensive request. Can be cached a long time.
+
+        """
+        cache_key = "topic_{topic_slug}_entities_count".format(topic_slug=self.app_label())
+        response = cache.get(cache_key)
+        if response is None:
+            query = """
+                START root=node(*)
+                MATCH p = (root)--(leaf)<-[:`<<INSTANCE>>`]-(type)
+                WHERE HAS(leaf.name)
+                AND type.app_label = '{app_label}'
+                AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
+                RETURN count(leaf) AS count
+            """.format(app_label=self.app_label())
+            response = connection.cypher(query).to_dicts()[0].get("count")
+            cache.set(cache_key, response)
+        return response
 
     def get_models_output(self):
         # Select only some atribute
@@ -442,6 +467,17 @@ class SearchTerm(models.Model):
 
 # -----------------------------------------------------------------------------
 #
+#    CUSTOM USER
+#
+# -----------------------------------------------------------------------------
+PLANS_CHOICES = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
+
+class DetectiveProfileUser(models.Model):
+    user = models.OneToOneField(User)
+    plan = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])
+
+# -----------------------------------------------------------------------------
+#
 #    SIGNALS
 #
 # -----------------------------------------------------------------------------
@@ -456,4 +492,15 @@ def update_permissions(*args, **kwargs):
 
 signals.post_delete.connect(remove_permissions, sender=Topic)
 signals.post_save.connect(update_permissions, sender=Topic)
+
+def user_created(*args, **kwargs):
+    """
+
+    create a DetectiveProfileUser when a user is created
+
+    """
+    DetectiveProfileUser.objects.get_or_create(user=kwargs.get('instance'))
+
+signals.post_save.connect(user_created, sender=User)
+
 # EOF

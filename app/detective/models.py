@@ -475,6 +475,10 @@ class DetectiveProfileUser(models.Model):
     user = models.OneToOneField(User)
     plan = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])
 
+    location = models.CharField(max_length=100, null=True, blank=True)
+    organization = models.CharField(max_length=100, null=True, blank=True)
+    url = models.CharField(max_length=100, null=True, blank=True)
+
 # -----------------------------------------------------------------------------
 #
 #    SIGNALS

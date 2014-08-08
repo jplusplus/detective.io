@@ -24,6 +24,13 @@ class ProfileCtrl
         # All topics the user can access
         @scope.userTopics = []
 
+        # ──────────────────────────────────────────────────────────────────────
+        # Scope methods
+        # ──────────────────────────────────────────────────────────────────────
+        @scope.shoulShowValueFor = @shoulShowValueFor
+        @scope.shouldShowFormFor = @shouldShowFormFor
+        @scope.openFormFor = @openFormFor
+
         # Get the user's topics
         ($q.all [
             (@Common.query type: "topic", author__id: user.id).$promise
@@ -41,7 +48,25 @@ class ProfileCtrl
             @scope.shouldShowTopics = true
             (@Page.loading no) if do @Page.loading
 
+        @edit =
+            location : no
+            organization : no
+            url : no
+
+        console.debug @edit
+
     canShowTopic: (topic) =>
         topic.public or @User.hasReadPermission topic.ontology_as_mod
+
+    shoulShowValueFor: (fieldName) =>
+        return yes unless @scope.isMe
+        not @edit[fieldName]
+
+    shouldShowFormFor: (fieldName) =>
+        return no unless @scope.isMe
+        @edit[fieldName]
+
+    openFormFor: (fieldName) =>
+        @edit[fieldName] = yes
 
 angular.module('detective.controller').controller 'profileCtrl', ProfileCtrl

@@ -101,8 +101,9 @@ class Topic(models.Model):
                 if not Topic.objects.filter(ontology_as_mod=token).exists(): break
             # Save the new token
             self.ontology_as_mod = token
-            # Save a first time if no idea given
-            models.Model.save(self)
+            if self.id:
+                # Save a first time if no idea given
+                models.Model.save(self)
         return self.ontology_as_mod
 
     @staticmethod

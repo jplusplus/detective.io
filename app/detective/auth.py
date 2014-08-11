@@ -3,12 +3,13 @@
 # @Author: Pierre Bellon
 # @Date:   2014-08-06 12:21:55
 # @Last Modified by:   toutenrab
-# @Last Modified time: 2014-08-06 12:22:10
+# @Last Modified time: 2014-08-11 12:26:41
 # took from https://djangosnippets.org/snippets/1368/
 
 from django.contrib.auth.models import User
+from django.contrib.auth.backends import ModelBackend
 
-class CaseInsensitiveModelBackend(object):
+class CaseInsensitiveModelBackend(ModelBackend):
     def authenticate(self, username=None, password=None):
         try:
             user = User.objects.get(username__iexact=username)

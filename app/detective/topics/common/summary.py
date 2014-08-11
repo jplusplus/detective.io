@@ -3,7 +3,7 @@ from .errors                    import ForbiddenError, UnauthorizedError
 from app.detective.models       import Topic, SearchTerm
 from app.detective.neomatch     import Neomatch
 from app.detective.register     import topics_rules
-from app.detective.utils        import get_leafs_and_edges
+from app.detective.utils        import get_leafs_and_edges, get_topic_from_request
 from difflib                    import SequenceMatcher
 from django.core.paginator      import Paginator, InvalidPage
 from django.core.urlresolvers   import resolve
@@ -16,10 +16,14 @@ from tastypie.serializers       import Serializer
 from .jobs                      import process_bulk_parsing_and_save_as_model, render_csv_zip_file
 from django.core.cache          import cache
 import app.detective.utils      as utils
+from django.contrib.auth.models import User
 import json
 import re
+import datetime
 import logging
 import django_rq
+import zipfile
+import time
 import inspect
 
 # Get an instance of a logger
@@ -101,7 +105,10 @@ class SummaryResource(Resource):
     def get_topic_or_404(self, request=None):
         try:
             if request is not None:
-                return Topic.objects.get(ontology_as_mod=resolve(request.path).namespace)
+                topic = get_topic_from_request(request)
+                if topic == None:
+                    raise Topic.DoesNotExist()
+                return topic 
             else:
                 return Topic.objects.get(ontology_as_mod=self._meta.urlconf_namespace)
         except Topic.DoesNotExist:

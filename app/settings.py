@@ -110,7 +110,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', '#_o0^tt=lv1k8k-h=n%^=e&amp;vnvcxpnl=6+%&am
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
+    'django.template.loaders.eggs.Loader',
 )
 
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
@@ -124,12 +124,14 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.cache.UpdateCacheMiddleware',
     'app.middleware.cache.FetchFromCacheMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'app.middleware.debug_toolbar.JsonAsHTML',
     'app.middleware.crossdomainxhr.XsSharing',
     # add urlmiddleware after all other middleware.
     'urlmiddleware.URLMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 
@@ -196,6 +198,8 @@ INSTALLED_APPS = (
     'tinymce',
     # Redis queue backend
     "django_rq",
+    # Debug utilities
+    "debug_toolbar",
     # Internal
     'app.detective',
     'app.detective.permissions',
@@ -205,10 +209,6 @@ SOUTH_MIGRATION_MODULES = {
     'easy_thumbnails': 'easy_thumbnails.south_migrations',
 }
 
-# Add customs app to INSTALLED_APPS
-from app.detective.utils import get_topics_modules
-INSTALLED_APPS = INSTALLED_APPS + get_topics_modules()
-
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # One-week activation window
@@ -217,7 +217,7 @@ ACCOUNT_ACTIVATION_DAYS = 7
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        # 'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/tmp/django_cache',
     }
 }
@@ -298,3 +298,20 @@ LOGGING = {
         },
     }
 }
+
+
+if DEBUG:
+    INTERNAL_IPS = ('127.0.0.1', '0.0.0.0', '::1')
+    DEBUG_TOOLBAR_PATCH_SETTINGS = False
+    DEBUG_TOOLBAR_PANELS = (
+        'debug_toolbar.panels.timer.TimerPanel',
+        'debug_toolbar.panels.headers.HeadersPanel',
+        'debug_toolbar.panels.request.RequestPanel',
+        'debug_toolbar.panels.sql.SQLPanel',
+        'neo4j_panel.Neo4jPanel',
+        'debug_toolbar.panels.cache.CachePanel',
+        'debug_toolbar.panels.signals.SignalsPanel',
+    )
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': 'app.detective.utils.should_show_debug_toolbar'
+    }

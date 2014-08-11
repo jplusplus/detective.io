@@ -88,12 +88,27 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
 }
 
+
+# Redis cloud config
+REDISCLOUD_URL = urlparse( os.getenv('REDISCLOUD_URL'))
+
+REDISCLOUD_LOCATION = "{host}:{port}:0".format(
+    host=REDISCLOUD_URL.hostname,
+    port=REDISCLOUD_URL.port
+)
+
 # Activate the cache, for true
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
-    }
+        'BACKEND': 'redis_cache.cache.RedisCache',
+        'LOCATION': REDISCLOUD_LOCATION,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'redis_cache.client.DefaultClient',
+            'PASSWORD': REDISCLOUD_URL.password,
+        }
+    },
 }
+
 
 EMAIL_BACKEND    = "djrill.mail.backends.djrill.DjrillBackend"
 MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
 from app.detective.models             import QuoteRequest, Topic, TopicToken, Article, User
-from app.detective.utils              import get_registered_models, is_valid_email
+from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
 from app.detective.topics.common.user import UserResource, AuthorResource
 from django.conf                      import settings
 from django.conf.urls                 import url
@@ -20,6 +20,9 @@ from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
 from tastypie.utils                   import trailing_slash
+from easy_thumbnails.files            import get_thumbnailer
+from easy_thumbnails.exceptions       import InvalidImageFormatError
+from django.db.models                 import Q
 
 import json
 import re
@@ -194,10 +197,11 @@ class TopicResource(ModelResource):
                 if matches:
                     can_read.append(matches.group(1))
 
-        object_list = super(TopicResource, self).get_object_list(request)
+        object_list = get_topics_from_request(request)
+        if object_list is None:
+            object_list = super(TopicResource, self).get_object_list(request)
         # Return only topics the user can see
         object_list = object_list if is_staff else object_list.filter(Q(ontology_as_mod__in=can_read)|Q(public=True))
-
         return object_list
 
 

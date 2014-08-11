@@ -12,21 +12,51 @@ import os
 import sys
 import imp
 
+class TopicRegistor(object): 
+    __instance = None
+    def __new__(self, *args, **kwargs):
+        if not self.__instance:
+            self.__instance = super(TopicRegistor, self).__new__(self, *args, **kwargs)
+            self.registered_topics = {}
+        return self.__instance
+
+    def register_topic(self, topic):
+        if not self.registered_topics.get(topic):
+            self.registered_topics[topic] = self.topic_models(topic)
+            default_rules(topic)
+        return self.registered_topics.get(topic)
+
+
+    def topic_models(self, topic):
+        models = self.registered_topics.get(topic)
+        if not models:
+            # Store topic object in a temporary attribute
+            # to avoid SQL lazyness
+            cache_key = "prefetched_topic_%s" % topic
+            if cache.get(cache_key, None) == None:
+                # Get all registered models for this topic
+                topic  = Topic.objects.get(ontology_as_mod=topic)
+                models = topic.get_models()
+                cache.set(cache_key, topic, 10)
+            else:
+                # Get all registered models
+                models = cache.get(cache_key).get_models()
+        return models
 
 def topics_rules():
     """
         Auto-discover topic-related rules by looking into
-        evry topics' directories for forms.py files.
+        every topics' directories for forms.py files.
     """
     # Avoid bi-directional dependancy
     from app.detective.utils import get_topics
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
+    registor = TopicRegistor()
     # Each app can defined a forms.py file that describe the model rules
     topics = get_topics(offline=False)
     for topic in topics:
-        # Add default rules
-        default_rules(topic)
+        registor.register_topic(topic)
         # Does this app contain a forms.py file?
         path = "app.detective.topics.%s.forms" % topic
         try:
@@ -42,19 +72,10 @@ def topics_rules():
 def default_rules(topic):
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
+    registor = TopicRegistor()
     # We cant import this early to avoid bi-directional dependancies
     from app.detective.utils import import_class
-    # Store topic object in a temporary attribute
-    # to avoid SQL lazyness
-    cache_key = "prefetched_topic_%s" % topic
-    if cache.get(cache_key, None) is None:
-        # Get all registered models for this topic
-        topic  = Topic.objects.get(ontology_as_mod=topic)
-        models = topic.get_models()
-        cache.set(cache_key, topic, 10)
-    else:
-        # Get all registered models
-        models = cache.get(cache_key).get_models()
+    models = registor.topic_models(topic)
 
     # Set "is_searchable" to true on every model with a name
     for model in models:

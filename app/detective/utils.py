@@ -1,4 +1,5 @@
 from django.forms.forms     import pretty_name
+from django.core.cache import cache
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from random    import randint
@@ -123,7 +124,7 @@ def get_topic_models(topic):
 
 def get_registered_models():
     from django.db import models
-    import app.settings as settings
+    from django.conf import settings
     mdls = []
     for app in settings.INSTALLED_APPS:
         models_name = app + ".models"
@@ -144,6 +145,16 @@ def get_registered_models():
 def get_topic_from_model(model):
     from app.detective.models import Topic
     return Topic.objects.get(ontology_as_mod=get_model_topic(model))
+
+
+# storage middleware utilities
+def get_topics_from_request(request):
+    # see app.middleware.storage.StoreTopicList
+    return getattr(request, 'topic_list', None)
+
+def get_topic_from_request(request):
+    # see app.middleware.storage.StoreTopic
+    return getattr(request, 'current_topic', None)
 
 def get_model_fields(model, order_by='name'):
     from app.detective           import register
@@ -374,4 +385,90 @@ def is_valid_email(email):
     except ValidationError:
         return False
 
+def should_show_debug_toolbar(request):
+    return re.match(r'^/api/', request.path) != None
+
+class TopicCachier(object):
+    __instance = None
+    # dict of cache key definitions / formats
+    __KEYS = {
+        # general prefix for every key
+        'topic_prefix'   : 'topic_{module}',
+        # specific version cache key
+        'version_number' : '{topic_prefix}_version',
+        # topic's related cache key prefix
+        'cache_prefix'   : '{topic_prefix}_{suffix}',
+    }
+
+    __TIMEOUTS = {
+        'default': 60 * 60 # 3600 secondes = 1h
+    }
+
+    def __keys(self):
+        return self.__KEYS
+
+    def __timeout(self, key='default'):
+        return self.__TIMEOUTS[key]
+
+    def __version_key(self, topic):
+        return self.__keys()['version_number'].format(
+            topic_prefix=self.__topic_prefix(topic))
+
+    def __topic_prefix(self, topic):
+        return self.__keys()['topic_prefix'].format(
+            module=topic.module)
+
+    def __get_key(self, topic, suffix):
+        return self.__keys()['cache_prefix'].format(
+            topic_prefix=self.__topic_prefix(topic),
+            suffix=suffix
+        )
+
+    def init_version(self, topic):
+        cache.set(
+            self.__version_key(topic), 0, self.__timeout()
+        )
+
+    def version(self, topic):
+        cache_key = self.__version_key(topic)
+        return cache.get(cache_key)
+
+    def incr_version(self, topic):
+        cache_key = self.__version_key(topic)
+        if cache.get(cache_key) == None:
+            self.init_version(topic)
+        else:
+            cache.incr(cache_key)
+
+    def delete_version(self, topic):
+        cache_key = self.__version_key(topic)
+        cache.delete(cache_key)
+
+    def get(self, topic, suffix_key):
+        rev       = self.version(topic)
+        cache_key = self.__get_key(topic, suffix_key)
+        return cache.get(cache_key, version=rev)
+
+    def set(self, topic, suffix_key, value, timeout=None):
+        rev = self.version(topic)
+        if timeout == None:
+            timeout = self.__timeout()
+        cache_key = self.__get_key(topic, suffix_key)
+        cache.set(cache_key, value, timeout, version=rev)
+
+    def delete(self, topic, suffix_key):
+        cache_key = self.__get_key(topic, suffix_key)
+        rev = self.version(topic)
+        cache.delete(cache_key, version=rev)
+
+    def debug(self, msg):
+        print "\nDEBUG - TopicCachier %s\n" % msg
+
+    def __new__(self):
+        # singleton instanciation
+        if self.__instance == None:
+            self.__instance = super(TopicCachier, self).__new__(self)
+        return self.__instance
+
+topic_cache = TopicCachier()
 # EOF

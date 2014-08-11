@@ -101,8 +101,9 @@ class Topic(models.Model):
                 if not Topic.objects.filter(ontology_as_mod=token).exists(): break
             # Save the new token
             self.ontology_as_mod = token
-            # Save a first time if no idea given
-            models.Model.save(self)
+            if self.id:
+                # Save a first time if no idea given
+                models.Model.save(self)
         return self.ontology_as_mod
 
     @staticmethod
@@ -207,6 +208,7 @@ class Topic(models.Model):
         Expensive request. Can be cached a long time.
 
         """
+        if not self.id: return 0
         cache_key = "topic_{topic_slug}_entities_count".format(topic_slug=self.app_label())
         response = cache.get(cache_key)
         if response is None:

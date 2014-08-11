@@ -21,7 +21,7 @@ from django.conf                import settings
 from django.core.paginator      import InvalidPage
 from django.core.files.storage  import default_storage
 from django.core.files.base     import ContentFile
-from StringIO                   import StringIO
+from cStringIO                  import StringIO
 from django.core.cache          import cache
 import app.detective.utils      as utils
 import django_rq
@@ -31,6 +31,7 @@ import datetime
 import logging
 import re
 import zipfile
+import csv
 
 logger = logging.getLogger(__name__)
 
@@ -53,18 +54,21 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
         else:
             def _getattr(o, prop): return getattr(o, prop)
         all_ids    = []
+        csv_file   = StringIO()
         model_name = model_name or objects[0].__class__.__name__
-        content    = "{model_name}_id,{columns}\n".format(model_name=model_name, columns=','.join(columns))
+        spamwriter = csv.writer(csv_file)
+        spamwriter.writerow(["%s_id" % (model_name)] + columns) # header
         for obj in objects:
             all_ids.append(_getattr(obj, 'id'))
             obj_columns = []
             for column in columns:
-                val = unicode(_getattr(obj, column)).encode('utf-8', 'ignore').replace(',', '').replace("\n", '')
-                if val == 'None':
-                    val = ''
+                val = _getattr(obj, column)
+                if val:
+                    val = unicode(val).encode('utf-8')
                 obj_columns.append(val)
-            content += "{id},{columns}\n".format(id=_getattr(obj, 'id'), columns=','.join(obj_columns))
-        zip_file.writestr("{0}.csv".format(model_name), content)
+            spamwriter.writerow([_getattr(obj, 'id')] + obj_columns)
+        zip_file.writestr("{0}.csv".format(model_name), csv_file.getvalue())
+        csv_file.close()
         return all_ids
 
     def get_columns(model):
@@ -98,10 +102,13 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
                             MATCH (root)-[r:`{rel}`]->(leaf)
                             RETURN id(root) as id_from, id(leaf) as id_to
                         """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)).to_dicts()
-                        content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
+                        csv_file = StringIO()
+                        spamwriter = csv.writer(csv_file)
+                        spamwriter.writerow(["%s_id" % (edges[key][0]), edges[key][1], "%s_id" % (edges[key][2])]) # header
                         for row in rows:
-                            content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
-                        zip_file.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
+                            spamwriter.writerow([row['id_from'], None, row['id_to']])
+                        zip_file.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), csv_file.getvalue())
+                        csv_file.close()
     else:
         page        = 1
         limit       = 1

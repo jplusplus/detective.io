@@ -238,65 +238,77 @@ def get_model_nodes():
 
 
 def get_leafs_and_edges(topic, depth, root_node="*"):
-    from neo4django.db import connection
-    leafs = {}
-    edges = []
-    leafs_related = []
-    ###
-    # First we retrieve every leaf in the graph
-    query = """
-        START root=node({root})
-        MATCH p = (root)-[*1..{depth}]-(leaf)<-[:`<<INSTANCE>>`]-(type)
-        WHERE HAS(leaf.name)
-        AND type.app_label = '{app_label}'
-        AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
-        RETURN leaf, ID(leaf) as id_leaf, type
-    """.format(root=root_node, depth=depth, app_label=topic.app_label())
-    rows = connection.cypher(query).to_dicts()
-    if root_node != "*":
-        # We need to retrieve the root in another request
-        # TODO : enhance that
+    def _get_leafs_and_edges(topic=topic, depth=depth, root_node=root_node):
+        from neo4django.db import connection
+
+        leafs = {}
+        edges = []
+        leafs_related = []
+        ###
+        # First we retrieve every leaf in the graph
         query = """
             START root=node({root})
-            MATCH (root)<-[:`<<INSTANCE>>`]-(type)
-            RETURN root as leaf, ID(root) as id_leaf, type
-        """.format(root=root_node)
-        for row in connection.cypher(query).to_dicts():
-            rows.append(row)
-    # filter rows using the models in ontology
-    # FIXME: should be in the cypher query
-    models_in_ontology = map(lambda m: m.__name__.lower(), topic.get_models())
-    rows = filter(lambda r: r['type']['data']['model_name'].lower() in models_in_ontology, rows)
-    for row in rows:
-        row['leaf']['data']['_id'] = row['id_leaf']
-        row['leaf']['data']['_type'] = row['type']['data']['model_name']
-        leafs[row['id_leaf']] = row['leaf']['data']
-    if len(leafs) == 0:
-        return ([], [])
-    # Then we retrieve all edges
-    query = """
-        START A=node({leafs})
-        MATCH (A)-[rel]->(B)
-        WHERE type(rel) <> "<<INSTANCE>>"
-        RETURN ID(A) as head, type(rel) as relation, id(B) as tail
-    """.format(leafs=','.join([str(id) for id in leafs.keys()]))
-    rows = connection.cypher(query).to_dicts()
-    for row in rows:
-        try:
-            if (leafs[row['head']] and leafs[row['tail']]):
-                leafs_related.extend([row['head'], row['tail']])
-                edges.append([row['head'], row['relation'], row['tail']])
-        except KeyError:
-            pass
-    # filter edges with relations in ontology
-    models_fields         = itertools.chain(*map(get_model_fields, topic.get_models()))
-    relations_in_ontology = set(map(lambda _: _.get("rel_type"), models_fields))
-    edges                 = [e for e in edges if e[1] in relations_in_ontology]
-    # filter leafts without relations
-    # FIXME: should be in the cypher query
-    leafs_related = set(leafs_related)
-    leafs = dict((k, v) for k, v in leafs.iteritems() if k in leafs_related)
-    return (leafs, edges)
+            MATCH p = (root)-[*1..{depth}]-(leaf)<-[:`<<INSTANCE>>`]-(type)
+            WHERE HAS(leaf.name)
+            AND type.app_label = '{app_label}'
+            AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
+            RETURN leaf, ID(leaf) as id_leaf, type
+        """.format(root=root_node, depth=depth, app_label=topic.app_label())
+        rows = connection.cypher(query).to_dicts()
+        if root_node != "*":
+            # We need to retrieve the root in another request
+            # TODO : enhance that
+            query = """
+                START root=node({root})
+                MATCH (root)<-[:`<<INSTANCE>>`]-(type)
+                RETURN root as leaf, ID(root) as id_leaf, type
+            """.format(root=root_node)
+            for row in connection.cypher(query).to_dicts():
+                rows.append(row)
+        # filter rows using the models in ontology
+        # FIXME: should be in the cypher query
+        models_in_ontology = map(lambda m: m.__name__.lower(), topic.get_models())
+        rows = filter(lambda r: r['type']['data']['model_name'].lower() in models_in_ontology, rows)
+        for row in rows:
+            row['leaf']['data']['_id'] = row['id_leaf']
+            row['leaf']['data']['_type'] = row['type']['data']['model_name']
+            leafs[row['id_leaf']] = row['leaf']['data']
+        if len(leafs) == 0:
+            return ([], [])
+        # Then we retrieve all edges
+        query = """
+            START A=node({leafs})
+            MATCH (A)-[rel]->(B)
+            WHERE type(rel) <> "<<INSTANCE>>"
+            RETURN ID(A) as head, type(rel) as relation, id(B) as tail
+        """.format(leafs=','.join([str(id) for id in leafs.keys()]))
+        rows = connection.cypher(query).to_dicts()
+        for row in rows:
+            try:
+                if (leafs[row['head']] and leafs[row['tail']]):
+                    leafs_related.extend([row['head'], row['tail']])
+                    edges.append([row['head'], row['relation'], row['tail']])
+            except KeyError:
+                pass
+        # filter edges with relations in ontology
+        models_fields         = itertools.chain(*map(get_model_fields, topic.get_models()))
+        relations_in_ontology = set(map(lambda _: _.get("rel_type"), models_fields))
+        edges                 = [e for e in edges if e[1] in relations_in_ontology]
+        # filter leafts without relations
+        # FIXME: should be in the cypher query
+        leafs_related = set(leafs_related)
+        leafs = dict((k, v) for k, v in leafs.iteritems() if k in leafs_related)
+        return (leafs, edges)
+
+    cache_key = "leafs_and_nodes"
+    cache = TopicCachier()
+    leafs_and_edges = cache.get(topic, cache_key)
+    if leafs_and_edges != None:
+        return leafs_and_edges
+    else:
+        leafs_and_edges = _get_leafs_and_edges()
+        cache.set(topic, cache_key, leafs_and_edges)
+        return leafs_and_edges
 
 def get_model_node_id(model):
     # All node from neo4j that are have ascending <<TYPE>> relationship

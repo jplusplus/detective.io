@@ -78,6 +78,7 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
             else:
                 edges[field['rel_type']] = [field['model'], field['name'], field['related_model']]
         return (columns, edges)
+
     buffer   = StringIO()
     zip_file = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
     models   = topic.get_models()
@@ -88,7 +89,7 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
                 continue
             (columns, edges) = get_columns(model)
             objects = model.objects.all()
-            if len(objects) > 0:
+            if objects.count() > 0:
                 all_ids = write_all_in_zip(objects, columns, zip_file)
                 if export_edges:
                     for key in edges.keys():

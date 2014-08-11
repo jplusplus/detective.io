@@ -70,7 +70,7 @@ class UserResource(ModelResource):
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
-        allowed_methods    = ['get', 'post', 'patch']
+        allowed_methods    = ['get', 'post']
         always_return_data = True
         fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password', 'profile']
         filtering          = {'id': ALL, 'username': ALL, 'email': ALL}

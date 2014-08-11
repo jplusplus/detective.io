@@ -27,7 +27,8 @@ class UserAuthorization(ReadOnlyAuthorization):
     def update_detail(self, object_list, bundle):
         authorized = False
         if bundle.request:
-            authorized = ((bundle.obj.user == bundle.request.user) or bundle.request.user.is_staff)
+            __user = bundle.obj.user if hasattr(bundle.obj, 'user') else bundle.obj
+            authorized = ((__user == bundle.request.user) or bundle.request.user.is_staff)
         return authorized
 
     def delete_detail(self, object_list, bundle):
@@ -55,10 +56,13 @@ class GroupResource(ModelResource):
 
 class ProfileResource(ModelResource):
     class Meta:
-        queryset = DetectiveProfileUser.objects.all()
-        resource_name = 'profile'
-        allowed_methods = ['get']
-        fields = ['id', 'location', 'organization', 'url']
+        authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
+        authorization      = UserAuthorization()
+        always_return_data = True
+        queryset           = DetectiveProfileUser.objects.all()
+        resource_name      = 'profile'
+        allowed_methods    = ['get', 'patch']
+        fields             = ['id', 'location', 'organization', 'url']
 
 class UserResource(ModelResource):
     profile = fields.ToOneField(ProfileResource, 'detectiveprofileuser', full=True, null=True)
@@ -139,6 +143,12 @@ class UserResource(ModelResource):
     def dehydrate(self, bundle):
         bundle.data["email"]    = hashlib.md5(bundle.data["email"].strip().lower()).hexdigest()
         bundle.data["password"] = u"☘"
+        return bundle
+
+    def hydrate(self, bundle):
+        # Make sure we do not send "☘" in the database
+        bundle.data["email"] = None
+        bundle.data["password"] = None
         return bundle
 
     def get_activation_key(self, username=""):

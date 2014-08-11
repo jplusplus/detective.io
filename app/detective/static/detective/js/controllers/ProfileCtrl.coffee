@@ -30,6 +30,7 @@ class ProfileCtrl
         @scope.shoulShowValueFor = @shoulShowValueFor
         @scope.shouldShowFormFor = @shouldShowFormFor
         @scope.openFormFor = @openFormFor
+        @scope.validateFormFor = @validateFormFor
 
         # Get the user's topics
         ($q.all [
@@ -66,5 +67,15 @@ class ProfileCtrl
 
     openFormFor: (fieldName) =>
         @edit[fieldName] = yes
+
+    validateFormFor: (fieldName) =>
+        data = {}
+        data[fieldName] = @scope.user[fieldName]
+        (@http
+            method : 'patch'
+            url : "/api/common/v1/profile/#{@User.profile.id}/"
+            data : data
+        ).then =>
+            @edit[fieldName] = no
 
 angular.module('detective.controller').controller 'profileCtrl', ProfileCtrl

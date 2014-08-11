@@ -12,8 +12,10 @@
                         <a ng-click="openFormFor(field)" ng-if="isMe"><i class="fa fa-pencil"></i></a>
                     </span>
                     <span ng-show="shouldShowFormFor(field)">
-                        <input ng-model="user[field]" class="form-control" />
-                        <a ng-if="isMe"><i class="fa fa-check-circle"></i></a>
+                        <form ng-submit="validateFormFor(field)">
+                            <input ng-model="user[field]" class="form-control" />
+                            <button type="submit"><i class="fa fa-check-circle"></i></button>
+                        </form>
                     </span>
                 </dd>
             </dl>

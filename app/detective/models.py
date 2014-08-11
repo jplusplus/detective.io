@@ -208,6 +208,7 @@ class Topic(models.Model):
         Expensive request. Can be cached a long time.
 
         """
+        if not self.id: return 0
         cache_key = "topic_{topic_slug}_entities_count".format(topic_slug=self.app_label())
         response = cache.get(cache_key)
         if response is None:

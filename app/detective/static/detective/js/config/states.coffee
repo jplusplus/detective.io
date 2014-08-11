@@ -65,7 +65,7 @@ angular.module('detective.config').config [
             )
             .state('login',
                 url : "/login/?nextState&nextParams"
-                controller : UserCtrl
+                controller : LoginCtrl
                 templateUrl : '/partial/account.login.html'
             )
             .state('signup',

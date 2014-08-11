@@ -1,8 +1,6 @@
 # See also :
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
 class UserCtrl
-    # Injects dependencies
-    @$inject : ["$scope", "$http", "$location", "$stateParams", "$state", "Auth", "User", "Page", "$rootElement"]
     # Public method to resolve
     @resolve:
         user: [
@@ -34,6 +32,9 @@ class UserCtrl
                 deferred.promise
         ]
 
+    # Injects dependencies
+    @$inject : ["$scope", "$http", "$location", "$stateParams", "$state", "Auth", "User", "Page", "$rootElement"]
+
     constructor: (@scope, @http, @location, @stateParams, @state, @Auth, @User, @Page, @rootElement)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
@@ -41,12 +42,10 @@ class UserCtrl
         @scope.user    = @User
         @scope.nextState  = @stateParams.nextState
         @scope.nextParams = angular.fromJson(@stateParams.nextParams or {})
-
         # ──────────────────────────────────────────────────────────────────────
         # Scope method
         # ──────────────────────────────────────────────────────────────────────
         @scope.loading = false
-        @scope.login   = @login
         @scope.logout  = @logout
         @scope.signup  = @signup
         @scope.resetPassword = @resetPassword
@@ -54,8 +53,6 @@ class UserCtrl
         # Set page title with no title-case
         if @state.is("signup") or @state.is("signup-invitation")
             @Page.title "Request an account", false
-        else if @state.is("login")
-            @Page.title "Log in", false
         else if @state.is("activate")
             @Page.title "Activate your account", false
             @readToken()
@@ -69,45 +66,6 @@ class UserCtrl
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
-    loginError: (error)=>
-        @User.set
-            is_logged: false
-            is_staff : false
-            username : ''
-        # Record the error
-        @scope.error = error if error?
-
-    login: (el)=>
-        # Trigger the event waited in the autofill directive
-        @scope.$broadcast 'autofill:update'
-        # Catch a bug with angular and browser autofill
-        # Open issue https://github.com/angular/angular.js/issues/1460
-        unless @scope.username? or @scope.password?
-            @scope.username = @rootElement.find("[ng-model=username]").val()
-            @scope.password = @rootElement.find("[ng-model=password]").val()
-        # Credidentials
-        credidentials =
-            username   : @scope.username
-            password   : @scope.password
-            remember_me: @scope.remember_me or false
-        # Turn on loading mode
-        @scope.loading = true
-        # succefull login
-        @Auth.login(credidentials).then( (response) =>
-            # Turn off loading mode
-            @scope.loading = false
-            data = response.data
-            # Interpret the respose
-            if data? and data.success
-                # Redirect to the next URL
-                @state.go "home.dashboard"
-                # Delete error
-                delete @scope.error
-            else
-                # Error status
-                @loginError(response.data.error_message)
-        # Error status
-        , (response)=> @loginError(response.data.error_message) )
 
     signup: =>
         data =

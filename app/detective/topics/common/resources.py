@@ -2,7 +2,7 @@
 from .models                          import *
 from app.detective.models             import QuoteRequest, Topic, TopicToken, Article, User
 from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
-from app.detective.topics.common.user import UserResource, AuthorResource
+from app.detective.topics.common.user import UserResource
 from django.conf                      import settings
 from django.conf.urls                 import url
 from django.core.mail                 import EmailMultiAlternatives
@@ -60,7 +60,7 @@ class TopicAuthorization(ReadOnlyAuthorization):
 
 class TopicResource(ModelResource):
 
-    author             = fields.ToOneField(AuthorResource, 'author', full=True, null=True)
+    author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path', readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
 

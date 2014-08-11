@@ -354,8 +354,3 @@ class UserResource(ModelResource):
         }
 
         return group_resource.create_response(request, object_list)
-
-class AuthorResource(UserResource):
-    class Meta(UserResource.Meta):
-        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
-

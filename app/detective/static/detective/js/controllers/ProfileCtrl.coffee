@@ -53,8 +53,6 @@ class ProfileCtrl
             organization : no
             url : no
 
-        console.debug @edit
-
     canShowTopic: (topic) =>
         topic.public or @User.hasReadPermission topic.ontology_as_mod
 

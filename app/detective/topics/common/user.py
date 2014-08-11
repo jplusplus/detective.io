@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from .errors                      import *
 from .message                     import Recover
-from app.detective.models         import Topic, TopicToken
+from app.detective.models         import Topic, TopicToken, DetectiveProfileUser
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User, Group
@@ -53,14 +53,22 @@ class GroupResource(ModelResource):
         excludes = ['topic']
         queryset = Group.objects.all()
 
+class ProfileResource(ModelResource):
+    class Meta:
+        queryset = DetectiveProfileUser.objects.all()
+        resource_name = 'profile'
+        allowed_methods = ['get']
+        fields = ['id', 'location', 'organization', 'url']
+
 class UserResource(ModelResource):
+    profile = fields.ToOneField(ProfileResource, 'detectiveprofileuser', full=True, null=True)
 
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
-        allowed_methods    = ['get', 'post']
+        allowed_methods    = ['get', 'post', 'patch']
         always_return_data = True
-        fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password']
+        fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password', 'profile']
         filtering          = {'id': ALL, 'username': ALL, 'email': ALL}
         queryset           = User.objects.all()
         resource_name      = 'user'

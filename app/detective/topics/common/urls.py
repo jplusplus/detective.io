@@ -1,6 +1,6 @@
 from .resources       import QuoteRequestResource, TopicResource, ArticleResource
 from .summary         import SummaryResource
-from .user            import UserResource
+from .user            import UserResource, ProfileResource
 from .cypher          import CypherResource
 from django.conf.urls import patterns, include, url
 from tastypie.api     import NamespacedApi
@@ -11,6 +11,7 @@ api.register(QuoteRequestResource())
 api.register(TopicResource())
 api.register(SummaryResource())
 api.register(CypherResource())
+api.register(ProfileResource())
 api.register(UserResource())
 api.register(ArticleResource())
 api.register(JobResource())

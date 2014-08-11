@@ -48,7 +48,7 @@ class LoginCtrl
             # Interpret the respose
             if data? and data.success
                 # Redirect to the next URL
-                @state.go "home.dashboard"
+                @state.go @scope.nextState or "home.dashboard", @scope.nextParams
                 # Delete error
                 delete @scope.error
             else

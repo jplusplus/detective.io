@@ -49,6 +49,8 @@
                 <div class="row">
                     <form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl as search">
                         <input type="search"
+                                autocorrect="off"
+                                autocapitalize="off"
                                 placeholder="[[ search.topic.search_placeholder ]]"
                                 tt-typeahead
                                 tt-individual="'summary'"
@@ -81,7 +83,7 @@
 
     <div class="container">
         <div class="row" ng-init="display_map=shouldDisplayMap()">
-            <div class="about" 
+            <div class="about"
                  ng-class="{ 'col-md-4': display_map, 'col-md-8 col-md-push-2': !display_map}">
                 <h3>About the project</h3>
                 <div ng-bind-html="meta.about"></div>

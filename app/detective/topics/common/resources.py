@@ -57,6 +57,16 @@ class TopicAuthorization(ReadOnlyAuthorization):
     # Only authenticated user can create topics
     def create_detail(self, object_list, bundle):
         return bundle.request.user.is_authenticated()
+    def read_list(self, object_list, bundle):
+        if bundle.request.user and bundle.request.user.is_staff:
+            return object_list
+        else:
+            if bundle.request.user:
+                read_perms = [perm.split('.')[0] for perm in bundle.request.user.get_all_permissions() if perm.endswith(".contribute_read")]
+                q_filter = Q(public=True) | Q(ontology_as_mod__in=read_perms)
+            else:
+                q_filter = Q(public=True)
+            return object_list.filter(q_filter)
 
 class TopicResource(ModelResource):
 

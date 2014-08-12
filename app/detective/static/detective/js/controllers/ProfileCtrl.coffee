@@ -1,12 +1,17 @@
 class ProfileCtrl
     # Injects dependencies
-    @$inject: ['$scope', 'Common', 'Page', 'user', '$state', '$q', '$http', 'userTopics', 'userGroups']
+    @$inject: ['$scope', 'Common', 'Page', 'user', '$state', '$q', '$http']
 
-    constructor: (@scope, @Common, @Page, @user, $state, @q, @http, @userTopics, @userGroups)->
+    constructor: (@scope, @Common, @Page, @user, $state, @q, @http)->
         @Page.title @user.username
-        @Page.loading no
+        @Page.loading yes
 
         @topics_page = 1
+        @userTopics = @userGroups =
+            objects : []
+            meta :
+                limit : 0
+                total_count : 0
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
@@ -25,6 +30,10 @@ class ProfileCtrl
             url : @user.profile.url
         # All topics the user has access to
         @scope.topics = do @getTopics
+
+        (do @loadPage).then (topics) =>
+            @scope.topics = topics
+            @Page.loading no
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
@@ -47,18 +56,18 @@ class ProfileCtrl
     getTopics: =>
         @userTopics.objects.concat (_.pluck @userGroups.objects, 'topic')
 
-    hasNextTopics: (p=@page)=> @userTopics.meta.total_count > (@userTopics.meta.limit * p)
-    hasNextGroups: (p=@page)=> @userGroups.meta.total_count > (@userGroups.meta.limit * p)
-    hasNext: (p=@page)=> @hasNextTopics(p) or @hasNextGroups(p)
-    hasPrevious: (p=@page)=> p > 1
+    hasNextTopics: (p=@topics_page)=> @userTopics.meta.total_count > (@userTopics.meta.limit * p)
+    hasNextGroups: (p=@topics_page)=> @userGroups.meta.total_count > (@userGroups.meta.limit * p)
+    hasNext: (p=@topics_page)=> @hasNextTopics(p) or @hasNextGroups(p)
+    hasPrevious: (p=@topics_page)=> p > 1
 
     # Load next page
-    nextPage: => @loadPage(@page+1).then (topics)=> @scope.topics = topics
+    nextPage: => @loadPage(@topics_page+1).then (topics)=> @scope.topics = topics
     # Load previous page
-    previousPage: => @loadPage(@page-1).then (topics)=> @scope.topics = topics
+    previousPage: => @loadPage(@topics_page-1).then (topics)=> @scope.topics = topics
 
-    loadPage: (page=@page) =>
-        @page = page
+    loadPage: (page=@topics_page) =>
+        @topics_page = page
         deferred = do @q.defer
         (@q.all [
             @loadUserTopics(page)
@@ -66,7 +75,7 @@ class ProfileCtrl
         ]).then (results) =>
             @userTopics = results[0]
             @userGroups = results[1]
-            do deferred.resolve
+            deferred.resolve do @getTopics
         deferred.promise
 
     loadUserTopics: (page) =>
@@ -103,45 +112,5 @@ class ProfileCtrl
             data : data
         ).then =>
             @edit[fieldName] = no
-
-    @resolve:
-        userTopics: ["Common", "User", (Common, user)->
-            Common.get(type: "topic", author__id: user.id).$promise
-        ],
-        userGroups: ["$http", "$q", "Auth", ($http, $q, Auth)->
-            deferred = $q.defer()
-            Auth.load().then (user)=>
-                $http.get("/api/common/v1/user/#{user.id}/groups/").then (response)->
-                    deferred.resolve response.data
-            deferred.promise
-        ]
-        user: [
-            "$rootScope",
-            "$stateParams",
-            "$state",
-            "$q",
-            "Common",
-            ($rootScope, $stateParams, $state, $q, Common)->
-                notFound    = ->
-                    deferred.reject()
-                    $state.go "404"
-                    deferred
-                deferred    = $q.defer()
-                # Checks that the current topic and user exists together
-                if $stateParams.username?
-                    # Retreive the topic for this user
-                    params =
-                        type    : "user"
-                        username: $stateParams.username
-                    Common.get params, (data)=>
-                        # Stop if it's an unkown topic
-                        return notFound() unless data.objects and data.objects.length
-                        # Resolve the deffered result
-                        deferred.resolve data.objects[0]
-                # Reject now
-                else return notFound()
-                # Return a deffered object
-                deferred.promise
-        ]
 
 angular.module('detective.controller').controller 'profileCtrl', ProfileCtrl

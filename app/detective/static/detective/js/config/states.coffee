@@ -100,13 +100,13 @@ angular.module('detective.config').config [
             .state('user.notme',
                 controller : ProfileCtrl
                 templateUrl : "/partial/account.html"
-                resolve : ProfileCtrl.resolve
+                resolve : UserCtrl.resolve
             )
             .state('user.me',
                 auth : true
                 controller : ProfileCtrl
                 templateUrl : "/partial/account.html"
-                resolve : ProfileCtrl.resolve
+                resolve : UserCtrl.resolve
             )
             # Topic-related url
             .state('user-topic',

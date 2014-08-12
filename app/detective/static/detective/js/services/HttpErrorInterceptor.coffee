@@ -1,5 +1,15 @@
 (angular.module 'detective.service').factory 'HttpErrorInterceptor', ['$q', '$rootScope', ($q, $rootScope) =>
+
+    EXCEPTED_ENDPOINTS = [
+        new RegExp("^/api/common/v1/jobs/", "i")
+    ]
+
     responseError : (rejection) =>
+        # check for exceptions
+        for excpetion in EXCEPTED_ENDPOINTS
+            if excpetion.test(rejection.config.url)
+                return $q.reject rejection
+        # handle ≠ status errors
         if rejection.status >= 400
             if typeof(rejection.data) is 'string' and rejection.data.length
                 message = rejection.data

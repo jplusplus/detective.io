@@ -1,8 +1,8 @@
 class IndividualListCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', 'Common', '$location',  'Page', '$timeout']
+    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', 'Common', '$location',  'Page', '$timeout', '$rootScope']
 
-    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @Common, @location, @Page, @timeout)->
+    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @Common, @location, @Page, @timeout, @rootScope)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
@@ -133,15 +133,19 @@ class IndividualListCtrl
                     @retry = 0
                     refresh_timeout = that.timeout refresh_status = =>
                         that.Common.get {type:"jobs", id:d.token}, (data) =>
-                            if data.status == "finished"
+                            if data? and data.status == "finished"
                                 that.askToDownload(JSON.parse(data.result).file_name)
                             else
+                                @retry = 0
                                 # retart the function
                                 refresh_timeout = that.timeout(refresh_status, 2000)
                         , (error) =>
                             if @retry < 5
                                 refresh_timeout = that.timeout(refresh_status, 2000)
                                 @retry += 1
+                            else
+                                that.rootScope.$broadcast 'http:error', "Sorry, the export has failed. Please try again in a fiew moment"
+                                that.scope.exporting_csv = no
                     # cancel the timeout if the view is destroyed
                     that.scope.$on '$destroy', =>
                         that.timeout.cancel(refresh_timeout)

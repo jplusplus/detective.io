@@ -13,8 +13,11 @@
                     </span>
                     <span ng-show="shouldShowFormFor(field)">
                         <form ng-submit="validateFormFor(field)">
-                            <input ng-model="user[field]" class="form-control" />
-                            <button type="submit"><i class="fa fa-check-circle"></i></button>
+                            <div class="input-group">
+                                <input ng-model="user[field]" class="form-control" />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="submit"><i class="fa fa-check-circle"></i></button>
+                                </span>
                         </form>
                     </span>
                 </dd>

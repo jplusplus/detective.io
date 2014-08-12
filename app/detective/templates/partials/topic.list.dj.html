@@ -20,10 +20,12 @@
 				<i class="fa fa-download"></i> Export as CSV
 			</button>
 			<div class='individual-list__export-overlay fade in out' ng-show='exporting_csv'>
-				<p class='text-center lead bold'>
-					Hang tight, we're preparing the latest data for you!
+				<p class='text-center lead'>
+					<span class="bold">Hang tight, we're preparing the latest data for you!</span>
 					<br />
 					<img src="{% static 'detective/img/spinner.svg' %}" />
+					<br />
+					<a ng-click="exporting_csv=false">If this is taking too long, close it and come back later. Your files will be ready.</a>
 				</p>
 			</div>
 

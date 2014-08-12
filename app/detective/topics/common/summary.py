@@ -407,14 +407,12 @@ class SummaryResource(Resource):
             response = dict(
                 status = "enqueued")
             # check if a job already exist
-            job_already_exist = False
             for job in django_rq.get_queue().jobs:
                 if job.meta["cache_key"] == cache_key:
-                    job_already_exist = True
                     response["token"] = job.id
                     logger.debug("job_already_exist")
                     break
-            if not job_already_exist:
+            else:
                 # enqueue the job
                 queue = django_rq.get_queue('high', default_timeout=360)
                 job = queue.enqueue(render_csv_zip_file,

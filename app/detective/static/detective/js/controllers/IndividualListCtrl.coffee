@@ -138,10 +138,10 @@ class IndividualListCtrl
                             else
                                 @retry = 0
                                 # retart the function
-                                refresh_timeout = that.timeout(refresh_status, 2000)
+                                refresh_timeout = that.timeout(refresh_status, 2000) if that.scope.exporting_csv
                         , (error) =>
                             if @retry < 5
-                                refresh_timeout = that.timeout(refresh_status, 2000)
+                                refresh_timeout = that.timeout(refresh_status, 2000) if that.scope.exporting_csv
                                 @retry += 1
                             else
                                 that.rootScope.$broadcast 'http:error', "Sorry, the export has failed. Please try again in a fiew moment"

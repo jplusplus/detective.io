@@ -135,6 +135,9 @@ class IndividualListCtrl
                         that.Common.get {type:"jobs", id:d.token}, (data) =>
                             if data? and data.status == "finished"
                                 that.askToDownload(JSON.parse(data.result).file_name)
+                            else if data? and data.status == "failed"
+                                that.rootScope.$broadcast 'http:error', "Sorry, the export has failed."
+                                that.scope.exporting_csv = no
                             else
                                 @retry = 0
                                 # retart the function

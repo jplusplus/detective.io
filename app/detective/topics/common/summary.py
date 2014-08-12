@@ -167,8 +167,8 @@ class SummaryResource(Resource):
             name                = model.__name__.lower()
             rules               = rulesManager.model(model).all()
             fields              = utils.get_model_fields(model)
-            verbose_name        = getattr(model._meta, "verbose_name", name).title()
-            verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()
+            verbose_name        = getattr(model._meta, "verbose_name", name)
+            verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s")
 
             for key in rules:
                 # Filter rules to keep only Neomatch

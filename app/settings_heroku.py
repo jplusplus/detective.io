@@ -89,24 +89,25 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
 }
 
 
-# Redis cloud config
-REDISCLOUD_URL = urlparse( os.getenv('REDISCLOUD_URL'))
+# MemCachier configuration took from https://devcenter.heroku.com/articles/memcachier#django
+os.environ['MEMCACHE_SERVERS']  = os.environ.get('MEMCACHIER_SERVERS', '').replace(',', ';')
+os.environ['MEMCACHE_USERNAME'] = os.environ.get('MEMCACHIER_USERNAME', '')
+os.environ['MEMCACHE_PASSWORD'] = os.environ.get('MEMCACHIER_PASSWORD', '')
 
-REDISCLOUD_LOCATION = "{host}:{port}:0".format(
-    host=REDISCLOUD_URL.hostname,
-    port=REDISCLOUD_URL.port
-)
-
-# Activate the cache, for true
 CACHES = {
     'default': {
-        'BACKEND': 'redis_cache.cache.RedisCache',
-        'LOCATION': REDISCLOUD_LOCATION,
+        'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+        'BINARY': True,
         'OPTIONS': {
-            'CLIENT_CLASS': 'redis_cache.client.DefaultClient',
-            'PASSWORD': REDISCLOUD_URL.password,
+            'no_block': True,
+            'tcp_nodelay': True,
+            'tcp_keepalive': True,
+            'remove_failed': 4,
+            'retry_timeout': 2,
+            'dead_timeout': 10,
+            '_poll_timeout': 2000
         }
-    },
+    }
 }
 
 

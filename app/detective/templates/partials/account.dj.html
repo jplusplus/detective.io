@@ -26,29 +26,32 @@
         </div>
     </div>
     <div ng-if="shouldShowTopics" class="account__topics">
-        <h3>Investigations</h3>
-        <div>
-            <ul class="list-unstyled">
-                <li ng-repeat="topic in topics" class="account__topics__topic">
-                    <img ng-if="topic.thumbnail" ng-src="[[ topic.thumbnail.small ]]" />
-                    <span ng-if="!topic.thumbnail" class="account__topics__topic__no-img"></span>
-                    <a ng-href="[[topic.link]]" class="lead text-muted">[[topic.title]]</a>
-                </li>
-            </ul>
-            <ul class="dashboard__paginator pagination pull-right">
-                <li ng-if="hasPrevious()">
-                    <a ng-click="previousPage()">
-                        <i class="fa fa-caret-left"></i>
-                        &nbsp;Previous
-                    </a>
-                </li>
-                <li ng-if="hasNext()">
-                    <a ng-click="nextPage()">
-                        Next&nbsp;
-                        <i class="fa fa-caret-right"></i>
-                    </a>
-                </li>
-            </ul>
-        </div>
+        <span ng-if="topics.length">
+            <h3>Investigations</h3>
+            <div>
+                <ul class="list-unstyled">
+                    <li ng-repeat="topic in topics" class="account__topics__topic">
+                        <img ng-if="topic.thumbnail" ng-src="[[ topic.thumbnail.small ]]" />
+                        <span ng-if="!topic.thumbnail" class="account__topics__topic__no-img"></span>
+                        <a ng-href="[[topic.link]]" class="lead text-muted">[[topic.title]]</a>
+                    </li>
+                </ul>
+                <ul class="dashboard__paginator pagination pull-right">
+                    <li ng-if="hasPrevious()">
+                        <a ng-click="previousPage()">
+                            <i class="fa fa-caret-left"></i>
+                            &nbsp;Previous
+                        </a>
+                    </li>
+                    <li ng-if="hasNext()">
+                        <a ng-click="nextPage()">
+                            Next&nbsp;
+                            <i class="fa fa-caret-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </span>
+        <h3 ng-if="!topics.length">No open investigations</h3>
     </div>
 </div>

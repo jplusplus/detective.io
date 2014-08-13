@@ -4,6 +4,7 @@ from app.detective.models       import Topic, SearchTerm
 from app.detective.neomatch     import Neomatch
 from app.detective.register     import topics_rules
 from app.detective.utils        import get_leafs_and_edges, get_topic_from_request
+from app.detective.utils        import get_model_fields, topic_cache
 from difflib                    import SequenceMatcher
 from django.core.paginator      import Paginator, InvalidPage
 from django.core.urlresolvers   import resolve
@@ -13,9 +14,8 @@ from tastypie                   import http
 from tastypie.exceptions        import ImmediateHttpResponse
 from tastypie.resources         import Resource
 from tastypie.serializers       import Serializer
-from .jobs                      import process_bulk_parsing_and_save_as_model, render_csv_zip_file
 from django.core.cache          import cache
-import app.detective.utils      as utils
+from .jobs                      import process_bulk_parsing_and_save_as_model, render_csv_zip_file
 from django.contrib.auth.models import User
 import json
 import re
@@ -108,7 +108,7 @@ class SummaryResource(Resource):
                 topic = get_topic_from_request(request)
                 if topic == None:
                     raise Topic.DoesNotExist()
-                return topic 
+                return topic
             else:
                 return Topic.objects.get(ontology_as_mod=self._meta.urlconf_namespace)
         except Topic.DoesNotExist:
@@ -166,7 +166,7 @@ class SummaryResource(Resource):
         for model in self.topic.get_models():
             name                = model.__name__.lower()
             rules               = rulesManager.model(model).all()
-            fields              = utils.get_model_fields(model)
+            fields              = get_model_fields(model)
             verbose_name        = getattr(model._meta, "verbose_name", name)
             verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s")
 
@@ -397,7 +397,7 @@ class SummaryResource(Resource):
         cache_key = "summary_export_{type}_{query}" \
             .format( type  = request.GET.get("type", "all"),
                      query = request.GET.get("q", "null"))
-        response_in_cache = utils.topic_cache.get(self.topic, cache_key)
+        response_in_cache = topic_cache.get(self.topic, cache_key)
         if response_in_cache: # could be empty or str("<filename>")
             logger.debug("export already exist from cache")
             response = dict(status="ok", file_name=response_in_cache)

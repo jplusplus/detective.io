@@ -23,7 +23,7 @@ from django.core.files.storage  import default_storage
 from django.core.files.base     import ContentFile
 from cStringIO                  import StringIO
 from django.core.cache          import cache
-import app.detective.utils      as utils
+from app.detective              import utils
 import django_rq
 import json
 import time

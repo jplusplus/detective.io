@@ -125,10 +125,10 @@ class IndividualListCtrl
 
     csvExport: =>
         if @scope.individuals.objects? and @scope.individuals.objects.length > 0
-            @scope.exporting_csv = yes
             that = this
             @requestCsvExport (d) ->
                 if d.status == "enqueued"
+                    that.scope.exporting_csv = yes
                     # ask if the job is finished
                     @retry = 0
                     refresh_timeout = that.timeout refresh_status = =>

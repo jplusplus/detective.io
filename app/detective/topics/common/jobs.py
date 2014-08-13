@@ -140,7 +140,7 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
     file_name = "%s%s" % (settings.MEDIA_URL, file_name)
     # save in cache if cache_key is defined
     if cache_key:
-        cache.set(cache_key, file_name, 60*60*24)
+        utils.topic_cache.set(topic, cache_key, file_name, 60*60*24)
     return dict(file_name=file_name)
 
 # -----------------------------------------------------------------------------

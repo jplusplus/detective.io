@@ -394,11 +394,10 @@ class SummaryResource(Resource):
     def summary_export(self, bundle, request):
         self.method_check(request, allowed=['get'])
         # check from cache
-        cache_key = "{topic}_{type}_{query}_summary_export" \
-            .format( topic = self.topic.slug,
-                     type  = request.GET.get("type", "all"),
+        cache_key = "summary_export_{type}_{query}" \
+            .format( type  = request.GET.get("type", "all"),
                      query = request.GET.get("q", "null"))
-        response_in_cache = cache.get(cache_key)
+        response_in_cache = utils.topic_cache.get(self.topic, cache_key)
         if response_in_cache: # could be empty or str("<filename>")
             logger.debug("export already exist from cache")
             response = dict(status="ok", file_name=response_in_cache)
@@ -416,10 +415,10 @@ class SummaryResource(Resource):
                 # enqueue the job
                 queue = django_rq.get_queue('high', default_timeout=360)
                 job = queue.enqueue(render_csv_zip_file,
-                                  topic      = self.topic,
-                                  model_type = request.GET.get("type"),
-                                  query      = json.loads(request.GET.get('q', 'null')),
-                                  cache_key  = cache_key)
+                                    topic      = self.topic,
+                                    model_type = request.GET.get("type"),
+                                    query      = json.loads(request.GET.get('q', 'null')),
+                                    cache_key  = cache_key)
                 # save the cache_key in the meta data in order to check if a job already exist for this key later
                 job.meta["cache_key"] = cache_key
                 job.save()

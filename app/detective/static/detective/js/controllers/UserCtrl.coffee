@@ -67,7 +67,9 @@ class UserCtrl
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────
 
-    signup: =>
+    signup: (form) =>
+        @scope.submitted = yes
+        return if form.$invalid
         data =
             username: @scope.username
             email   : @scope.email

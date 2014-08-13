@@ -2,7 +2,8 @@
       name="form"
       ng-class="{loading:loading}"
       ng-hide="signupSucceed"
-      ng-submit="signup()">
+      ng-submit="signup(form)"
+      novalidate>
   <div class="panel-body">
  	  <h2>Request an account</h2>
     <fieldset ng-disabled="loading">
@@ -27,6 +28,9 @@
         <p class="text-danger top05" ng-show="form.username.$error.unique">
           This username is already taken.
         </p>
+        <p class="text-danger" ng-show="submitted && form.username.$error.required">
+          You have to enter a username.
+        </p>
       </div>
 
       <div class="form-group">
@@ -50,6 +54,9 @@
         <p class="text-danger top05" ng-show="form.email.$error.unique">
           This email is already in use.
         </p>
+        <p class="text-danger" ng-show="submitted && form.email.$error.required">
+          You have to enter an email.
+        </p>
       </div>
 
       <div class="form-group">
@@ -67,11 +74,14 @@
                  placeholder="Create a password">
           <span class="input-group-addon">
             <i class="fa fa-check-square-o text-success" ng-show="form.password.$valid"></i>
-            <i class="fa fa-square-o"             ng-hide="form.password.$valid"></i>
+            <i class="fa fa-square-o" ng-hide="form.password.$valid"></i>
           </span>
         </div>
         <p class="text-muted top05">
           At least 6 characters.
+        </p>
+        <p class="text-danger" ng-show="submitted && form.password.$error.required">
+          You have to enter a password.
         </p>
       </div>
 
@@ -90,21 +100,38 @@
                  placeholder="Enter this password again">
           <span class="input-group-addon">
             <i class="fa fa-check-square-o text-success" ng-show="form.password2.$valid"></i>
-            <i class="fa fa-square-o"             ng-hide="form.password2.$valid"></i>
+            <i class="fa fa-square-o" ng-hide="form.password2.$valid"></i>
           </span>
         </div>
         <p class="text-danger top05" ng-show="form.password2.$error.pwmatch">
           Passwords don't match.
         </p>
+        <p class="text-danger" ng-show="submitted && form.password2.$error.required">
+          You have to repeat your password.
+        </p>
       </div>
-
+      <div class="form-group">
+        <label for="inputTermsCheck">I have read and agree to the <a ui-sref="page({slug:'terms'})" target="_blank"
+            nofollow title="Terms">Terms of Use</a>
+          <input required
+                 class="left05"
+                 type="checkbox"
+                 name="terms"
+                 ng-model="terms"
+                 id="inputTermsCheck">
+        </label>
+        <p class="text-danger" ng-show="submitted && form.terms.$error.required">
+            You have to agree to the <a ui-sref="page({slug:'terms'})" target="_blank"
+              nofollow title="Terms">Terms</a> to use Detective.io
+        </p>
+      </div>
       <div class="alert alert-danger" ng-if="error">
         [[error]]
       </div>
     </fieldset>
   </div>
 	<div class="tr panel-footer">
-  	<button type="submit" class="btn btn-primary" ng-disabled="!form.$valid">Sign up</button>
+  	<button type="submit" class="btn btn-primary">Sign up</button>
   </div>
 </form>
 

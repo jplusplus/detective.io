@@ -3,7 +3,7 @@ class ProfileCtrl
     @$inject: ['$scope', 'Common', 'Page', 'user', '$state', '$q', '$http']
 
     constructor: (@scope, @Common, @Page, @user, $state, @q, @http)->
-        @Page.title @user.username
+        @Page.title @user.username, no
         @Page.loading yes
 
         @topics_page = 1

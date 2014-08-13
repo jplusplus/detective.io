@@ -175,6 +175,8 @@ class ContributeCtrl
                 # copy the current value
                 val = angular.copy val
                 if val instanceof Date
+                    # remove timezone offset
+                    val.setHours(val.getHours() - val.getTimezoneOffset() / 60)
                     # Convert date object to string
                     val = val.toJSON()
                 else if typeof(val) is "object" and name isnt "field_sources"

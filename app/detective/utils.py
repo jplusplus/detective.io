@@ -79,7 +79,6 @@ def get_topics(offline=True):
         return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
     else:
         from app.detective.models import Topic
-        from django.core.cache    import cache
         # Store topic object in a temporary attribute
         # to avoid SQL lazyness
         cache_key = "prefetched_topics"
@@ -300,7 +299,7 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
         leafs = dict((k, v) for k, v in leafs.iteritems() if k in leafs_related)
         return (leafs, edges)
 
-    cache_key = "leafs_and_nodes"
+    cache_key = "leafs_and_nodes_%s_%s" % (depth, root_node)
     cache = TopicCachier()
     leafs_and_edges = cache.get(topic, cache_key)
     if leafs_and_edges != None:

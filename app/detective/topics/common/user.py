@@ -19,23 +19,9 @@ from tastypie.authorization       import ReadOnlyAuthorization
 from tastypie.constants           import ALL, ALL_WITH_RELATIONS
 from tastypie.resources           import ModelResource
 from tastypie.utils               import trailing_slash
+from django.db.models             import Q
 import hashlib
 import random
-
-
-class UserAuthorization(ReadOnlyAuthorization):
-    def update_detail(self, object_list, bundle):
-        authorized = False
-        if bundle.request:
-            __user = bundle.obj.user if hasattr(bundle.obj, 'user') else bundle.obj
-            authorized = ((__user == bundle.request.user) or bundle.request.user.is_staff)
-        return authorized
-
-    def delete_detail(self, object_list, bundle):
-        authorized = False
-        if bundle.request:
-            authorized = ((bundle.obj.user == bundle.request.user) or bundle.request.user.is_staff)
-        return authorized
 
 class GroupResource(ModelResource):
     def getTopic(bundle):
@@ -53,6 +39,20 @@ class GroupResource(ModelResource):
     class Meta:
         excludes = ['topic']
         queryset = Group.objects.all()
+
+class UserAuthorization(ReadOnlyAuthorization):
+    def update_detail(self, object_list, bundle):
+        authorized = False
+        if bundle.request:
+            __user = bundle.obj.user if hasattr(bundle.obj, 'user') else bundle.obj
+            authorized = ((__user == bundle.request.user) or bundle.request.user.is_staff)
+        return authorized
+
+    def delete_detail(self, object_list, bundle):
+        authorized = False
+        if bundle.request:
+            authorized = ((bundle.obj.user == bundle.request.user) or bundle.request.user.is_staff)
+        return authorized
 
 class ProfileResource(ModelResource):
     class Meta:
@@ -342,7 +342,17 @@ class UserResource(ModelResource):
 
         group_resource = GroupResource()
 
-        groups    = obj.groups.all()
+        groups = obj.groups.all()
+        groups = group_resource.obj_get_list(bundle).filter(Q(user__id=obj.id))
+        print groups
+        if not bundle.request.user or not bundle.request.user.is_staff:
+            if bundle.request.user:
+                read_perms = [perm.split('.')[0] for perm in bundle.request.user.get_all_permissions() if perm.endswith(".contribute_read")]
+                q_filter = Q(topic__public=True) | Q(topic__ontology_as_mod__in=read_perms)
+            else:
+                q_filter = Q(topic__public=True)
+            groups = groups.filter(q_filter)
+
         limit     = int(request.GET.get('limit', 20))
         paginator = Paginator(groups, limit)
         objects   = []

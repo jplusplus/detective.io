@@ -1,10 +1,9 @@
 from app.detective              import utils
 from app.detective.permissions  import create_permissions, remove_permissions
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.db                  import models
 from jsonfield                  import JSONField
 from tinymce.models             import HTMLField
-from django.contrib.auth.models import Group
 from psycopg2.extensions        import adapt
 from neo4django.db              import connection
 from django.core.paginator      import Paginator
@@ -62,6 +61,7 @@ class Topic(models.Model):
     featured         = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
     background       = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
     author           = models.ForeignKey(User, help_text="Author of this topic.", null=True)
+    contributor_group = models.ForeignKey(Group, help_text="", null=True, blank=True)
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
     ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
     ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)

@@ -33,6 +33,8 @@ GROUPS = (dict(
 )
 
 def _create_groups(app_label):
+    from app.detective.models import Topic
+    topic = Topic.objects.get(ontology_as_mod=app_label)
     groups = []
     for group_dict in GROUPS:
         group_name = group_dict['name'].format(app_name=app_label)
@@ -46,6 +48,8 @@ def _create_groups(app_label):
             if perm:
                 group.permissions.add(perm[0])
         group.save()
+        topic.contributor_group = group
+        topic.save()
         groups.append(group)
     return groups
 

@@ -514,16 +514,9 @@ def update_topic_cache(*args, **kwargs):
     else:
         topic = instance
     if topic:
-        # if topic just been created we gonna bind its sub models signals
-        if kwargs.get('created'):
-            utils.topic_cache.init_version(topic)
-
-            for Model in topic.get_models():
-                signals.post_save.connect(update_topic_cache, sender=Model, weak=False )
-        else:
-            # we increment the cache version of this topic, this will "invalidate" every
-            # previously stored information related to this topic
-            utils.topic_cache.incr_version(topic)
+        # we increment the cache version of this topic, this will "invalidate" every
+        # previously stored information related to this topic
+        utils.topic_cache.incr_version(topic)
 
 def remove_topic_cache(*args, **kwargs):
     utils.topic_cache.delete_version(kwargs.get('instance'))

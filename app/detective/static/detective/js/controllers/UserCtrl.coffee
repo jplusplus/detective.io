@@ -140,7 +140,7 @@ class UserCtrl
         next_url = @location.url()
         @Auth.logout().then =>
             login_params =
-                nextState: @state.current.name
+                nextState: @state.current.default or @state.current.name
                 nextParams: angular.toJson @state.params
 
             @state.go 'login', login_params

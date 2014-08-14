@@ -9,7 +9,7 @@ class HeaderCtrl
             @scope.nextLogin = url if url isnt "/login"
 
         @scope.loginParams = =>
-            nextState: @state.current.name
+            nextState: @state.current.default or @state.current.name
             nextParams: angular.toJson(@state.params)
 
         @scope.shouldShowAddEntity = =>

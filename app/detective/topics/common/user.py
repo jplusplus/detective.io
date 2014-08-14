@@ -344,7 +344,6 @@ class UserResource(ModelResource):
 
         groups = obj.groups.all()
         groups = group_resource.obj_get_list(bundle).filter(Q(user__id=obj.id))
-        print groups
         if not bundle.request.user or not bundle.request.user.is_staff:
             if bundle.request.user:
                 read_perms = [perm.split('.')[0] for perm in bundle.request.user.get_all_permissions() if perm.endswith(".contribute_read")]

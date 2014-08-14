@@ -281,7 +281,7 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
         # Then we retrieve all edges
         query = """
             START A=node({leafs})
-            MATCH (A)-[rel]-(B)
+            MATCH (A)-[rel]->(B)
             WHERE type(rel) <> "<<INSTANCE>>"
             RETURN ID(A) as head, type(rel) as relation, id(B) as tail
         """.format(leafs=','.join([str(id) for id in leafs.keys()]))

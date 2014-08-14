@@ -133,7 +133,7 @@ class IndividualListCtrl
                     @retry = 0
                     refresh_timeout = that.timeout refresh_status = =>
                         that.Common.get {type:"jobs", id:d.token}, (data) =>
-                            if data? and data.status == "finished"
+                            if data? and data.result? and data.result != ""
                                 that.askToDownload(JSON.parse(data.result).file_name)
                             else if data? and data.status == "failed"
                                 that.rootScope.$broadcast 'http:error', "Sorry, the export has failed."

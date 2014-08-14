@@ -25,5 +25,5 @@ angular.module('detective.service').factory 'UtilsFactory', [
                 new WrappedLogger(loggerName)
 
 
-                
+
 ]

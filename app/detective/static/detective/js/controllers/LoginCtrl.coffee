@@ -7,9 +7,14 @@ class LoginCtrl
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
         @scope.user       = @User
-        @scope.nextState  = @stateParams.nextState
-        @scope.nextParams = angular.fromJson(@stateParams.nextParams or {})
         @scope.loading    = false
+        # Form value
+        @scope.username    = ""
+        @scope.password    = ""
+        @scope.remember_me = false
+        # Next page
+        @nextState  = @stateParams.nextState
+        @nextParams = angular.fromJson(@stateParams.nextParams or {})
         # ──────────────────────────────────────────────────────────────────────
         # Scope method
         # ──────────────────────────────────────────────────────────────────────
@@ -48,7 +53,7 @@ class LoginCtrl
             # Interpret the respose
             if data? and data.success
                 # Redirect to the next URL
-                @state.go @scope.nextState or "home.dashboard", @scope.nextParams
+                @state.go @nextState or "home.dashboard", @nextParams
                 # Delete error
                 delete @scope.error
             else

@@ -104,13 +104,12 @@ class ProfileCtrl
         @edit[fieldName] = yes
 
     validateFormFor: (fieldName) =>
+        @edit[fieldName] = no
         data = {}
         data[fieldName] = @scope.user[fieldName]
-        (@http
+        @http
             method : 'patch'
             url : "/api/common/v1/profile/#{@user.profile.id}/"
             data : data
-        ).then =>
-            @edit[fieldName] = no
 
 angular.module('detective.controller').controller 'profileCtrl', ProfileCtrl

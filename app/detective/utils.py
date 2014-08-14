@@ -238,11 +238,9 @@ def get_model_nodes():
     get_model_nodes.buffer = connection.cypher(query).to_dicts()
     return get_model_nodes.buffer
 
-
 def get_leafs_and_edges(topic, depth, root_node="*"):
-    def _get_leafs_and_edges(topic=topic, depth=depth, root_node=root_node):
+    def _get_leafs_and_edges(topic, depth, root_node):
         from neo4django.db import connection
-
         leafs = {}
         edges = []
         leafs_related = []
@@ -257,6 +255,7 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
             RETURN leaf, ID(leaf) as id_leaf, type
         """.format(root=root_node, depth=depth, app_label=topic.app_label())
         rows = connection.cypher(query).to_dicts()
+
         if root_node != "*":
             # We need to retrieve the root in another request
             # TODO : enhance that
@@ -271,16 +270,18 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
         # FIXME: should be in the cypher query
         models_in_ontology = map(lambda m: m.__name__.lower(), topic.get_models())
         rows = filter(lambda r: r['type']['data']['model_name'].lower() in models_in_ontology, rows)
+
         for row in rows:
             row['leaf']['data']['_id'] = row['id_leaf']
             row['leaf']['data']['_type'] = row['type']['data']['model_name']
             leafs[row['id_leaf']] = row['leaf']['data']
         if len(leafs) == 0:
             return ([], [])
+
         # Then we retrieve all edges
         query = """
             START A=node({leafs})
-            MATCH (A)-[rel]->(B)
+            MATCH (A)-[rel]-(B)
             WHERE type(rel) <> "<<INSTANCE>>"
             RETURN ID(A) as head, type(rel) as relation, id(B) as tail
         """.format(leafs=','.join([str(id) for id in leafs.keys()]))
@@ -303,13 +304,13 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
         return (leafs, edges)
 
     cache_key = "leafs_and_nodes_%s_%s" % (depth, root_node)
-    cache = TopicCachier()
-    leafs_and_edges = cache.get(topic, cache_key)
+    topic_cache = TopicCachier()
+    leafs_and_edges = topic_cache.get(topic, cache_key)
     if leafs_and_edges != None:
         return leafs_and_edges
     else:
-        leafs_and_edges = _get_leafs_and_edges()
-        cache.set(topic, cache_key, leafs_and_edges)
+        leafs_and_edges = _get_leafs_and_edges(topic=topic, depth=depth, root_node=root_node)
+        topic_cache.set(topic, cache_key, leafs_and_edges)
         return leafs_and_edges
 
 def get_model_node_id(model):

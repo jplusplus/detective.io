@@ -57,10 +57,10 @@
                         <li ng-repeat="topic in topics" class="account__topics__topic">
                             <a ng-href="[[topic.link]]">
                                 <div class="lead account__topics__topic__title">
-                                    <i class="fa fa-cube"
+                                    <i class="fa fa-cube account__topics__topic__title__icon"
                                        title="Own by [[topic.author.username]]"
                                        ng-if="topic.author.username == user.username"></i>
-                                    <i class="fa fa-cubes"
+                                    <i class="fa fa-cubes account__topics__topic__title__icon"
                                        title="Own by [[topic.author.username]]"
                                        ng-if="topic.author.username != user.username"></i>
                                     [[topic.title]]<br />

@@ -479,4 +479,31 @@ class DetectiveProfileUser(models.Model):
     organization = models.CharField(max_length=100, null=True, blank=True)
     url = models.CharField(max_length=100, null=True, blank=True)
 
+# -----------------------------------------------------------------------------
+#
+#    SIGNALS
+#
+# -----------------------------------------------------------------------------
+from django.db.models import signals
+
+def update_permissions(*args, **kwargs):
+    """ create the permissions related to the label module """
+    assert kwargs.get('instance')
+    # @TODO check that the slug changed or not to avoid permissions hijacking
+    if kwargs.get('created', False):
+        create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').ontology_as_mod)
+
+signals.post_delete.connect(remove_permissions, sender=Topic)
+signals.post_save.connect(update_permissions, sender=Topic)
+
+def user_created(*args, **kwargs):
+    """
+
+    create a DetectiveProfileUser when a user is created
+
+    """
+    DetectiveProfileUser.objects.get_or_create(user=kwargs.get('instance'))
+
+signals.post_save.connect(user_created, sender=User)
+
 # EOF

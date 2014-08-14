@@ -1,27 +1,30 @@
 .account {
 
     &__user-info {
-        max-width: 200px;
-        overflow-x: visible;
-        .center-block();
-
-        h2 {
-            margin-bottom: 0 !important;
-        }
-
-        &__wrapper {
-            width: 400px;
-        }
 
         @dt-width: 100px;
+        text-align: center;
+        margin-top:40px;
 
-        dt {
-            width: @dt-width;
-            text-align: left;
+        &__avatar {
+            .border-radius(50%);
+            border:4px solid white;
         }
 
         dd {
-            margin-left: @dt-width;
+            margin-left: 0;
+        }
+
+        &__wrapper {
+            &__input {
+                .center-block();
+                max-width: 200px;
+            }
+
+            &__edit-label, &__edit-label:hover {
+                color:@text-color;
+                text-decoration: none;
+            }
         }
     }
 
@@ -29,16 +32,24 @@
 
         &__topic {
 
-            &__no-img {
-                display: inline-block;
-                .square(60px);
-            }
+            padding:20px 0;
+            border-bottom:1px solid @gray-lighter;
 
             a {
                 vertical-align: bottom;
                 text-decoration: none;
             }
 
+            &__title {
+                margin-bottom: 0;
+            }
+
+            &__description {
+                margin-left:30px;
+                p, & {
+                    margin-bottom:0;
+                }
+            }
         }
 
     }

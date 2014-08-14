@@ -505,7 +505,6 @@ def user_created(*args, **kwargs):
 def update_topic_cache(*args, **kwargs):
     """ update the topic cache version on topic update or sub-model update """
     instance = kwargs.get('instance')
-    print "update_topic_cache", instance
     if not isinstance(instance, Topic):
         try:
             topic = utils.get_topic_from_model(instance)

@@ -484,7 +484,8 @@ class DetectiveProfileUser(models.Model):
 #    SIGNALS
 #
 # -----------------------------------------------------------------------------
-from django.db.models import signals
+from django.db.models     import signals
+from app.detective.models import Topic
 
 def update_permissions(*args, **kwargs):
     """ create the permissions related to the label module """
@@ -492,9 +493,6 @@ def update_permissions(*args, **kwargs):
     # @TODO check that the slug changed or not to avoid permissions hijacking
     if kwargs.get('created', False):
         create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').ontology_as_mod)
-
-signals.post_delete.connect(remove_permissions, sender=Topic)
-signals.post_save.connect(update_permissions, sender=Topic)
 
 def user_created(*args, **kwargs):
     """
@@ -504,6 +502,38 @@ def user_created(*args, **kwargs):
     """
     DetectiveProfileUser.objects.get_or_create(user=kwargs.get('instance'))
 
-signals.post_save.connect(user_created, sender=User)
+def update_topic_cache(*args, **kwargs):
+    """ update the topic cache version on topic update or sub-model update """
+    instance = kwargs.get('instance')
+    print "update_topic_cache", instance
+    if not isinstance(instance, Topic):
+        try:
+            topic = utils.get_topic_from_model(instance)
+        except Topic.DoesNotExist:
+            topic = None
+    else:
+        topic = instance
+    if topic:
+        # we increment the cache version of this topic, this will "invalidate" every
+        # previously stored information related to this topic
+        utils.topic_cache.incr_version(topic)
+
+        # if topic just been created we gonna bind its sub models signals
+        if kwargs.get('created'):
+            for Model in topic.get_models():
+                signals.post_save.connect(update_topic_cache, sender=Model, weak=False )
+
+def remove_topic_cache(*args, **kwargs):
+    utils.topic_cache.delete_version(kwargs.get('instance'))
+
+signals.post_delete.connect(remove_permissions , sender=Topic)
+signals.post_save.connect(update_permissions   , sender=Topic)
+signals.post_save.connect(user_created         , sender=User)
+signals.post_save.connect(update_topic_cache   , sender=Topic)
+signals.post_save.connect(update_permissions   , sender=Topic)
+signals.pre_delete.connect(remove_topic_cache  , sender=Topic)
+signals.post_delete.connect(remove_permissions , sender=Topic)
+
+
 
 # EOF

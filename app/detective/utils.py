@@ -12,7 +12,7 @@ import re
 import tempfile
 import itertools
 import logging
-
+from django.db.models import signals
 logger = logging.getLogger(__name__)
 
 # for relative paths
@@ -22,6 +22,7 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     """
     Create specified model
     """
+    from app.detective.models import update_topic_cache
     from neo4django.db            import models
     from django.db.models.loading import AppCache
     # Django use a cache by model
@@ -46,6 +47,8 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     if fields: attrs.update(fields)
     # Create the class, which automatically triggers ModelBase processing
     cls = type(name, (models.NodeModel,), attrs)
+    # for Model in topic.get_models():
+    signals.post_save.connect(update_topic_cache, sender=cls)
     return cls
 
 def create_model_resource(model, path=None, Resource=None, Meta=None):

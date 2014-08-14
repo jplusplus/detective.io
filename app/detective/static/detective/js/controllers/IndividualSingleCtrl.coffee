@@ -44,6 +44,7 @@ class IndividualSingleCtrl
         # Get meta information for this type
         @scope.meta       = @forms[ @scope.type.toLowerCase() ]
         @scope.topicmeta  = @topic
+        @scope.mailReportLink = @getMailReportLink
 
         # Load graph data
         graph_params =
@@ -127,5 +128,18 @@ class IndividualSingleCtrl
                 @scope.meta.fields.push geoloc.meta
                 @individual['geolocation'] = "#{geoloc.individual.latitude}, #{geoloc.individual.longitude}"
 
+    getMailReportLink: =>
+        subject = encodeURIComponent "[Detective.io] Error on page #{@individual.name} in #{@topic.title}"
+        body    = encodeURIComponent """
+            Dear Detective.io team,
+
+            I spotted a mistake on this page #{@location.url()}.
+
+            What stands there should be corrected because … (add links that show the information on the site is erroneous).
+
+            Yours,
+
+            """
+        "mailto:contact@detective.io?subject=#{subject}&body=#{body}"
 
 angular.module('detective.controller').controller 'individualSingleCtrl', IndividualSingleCtrl

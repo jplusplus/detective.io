@@ -202,6 +202,8 @@ INSTALLED_APPS = (
     "debug_toolbar",
     # Internal
     'app.detective',
+    'app.detective.topics.common',
+    'app.detective.topics.energy',
     'app.detective.permissions',
 )
 

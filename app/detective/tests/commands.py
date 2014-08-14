@@ -1,4 +1,5 @@
 from app.detective.topics.energy.models import Country
+
 from django.core.management             import call_command
 from django.core.management.base        import CommandError
 from django.test                        import TestCase
@@ -52,7 +53,7 @@ class CommandsTestCase(TestCase):
         args = "./app/detective/topics/energy/fixtures/countries.json"
         call_command('loadnodes', args)
         # Does France exists?
-        self.assertGreater(len( Country.objects.filter(isoa3="FRA") ), 0)
+        self.assertGreater(Country.objects.filter(isoa3="FRA").count(), 0)
 
     def test_importusers(self):
         # Catch output

@@ -12,7 +12,7 @@ import os
 import sys
 import imp
 
-class TopicRegistor(object): 
+class TopicRegistor(object):
     __instance = None
     def __new__(self, *args, **kwargs):
         if not self.__instance:
@@ -35,7 +35,8 @@ class TopicRegistor(object):
             cache_key = "prefetched_topic_%s" % topic
             if cache.get(cache_key, None) == None:
                 # Get all registered models for this topic
-                topic  = Topic.objects.get(ontology_as_mod=topic)
+                if not isinstance(topic, Topic):
+                    topic  = Topic.objects.get(ontology_as_mod=topic)
                 models = topic.get_models()
                 cache.set(cache_key, topic, 10)
             else:

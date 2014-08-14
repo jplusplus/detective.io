@@ -29,7 +29,7 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 from django.test          import TestCase
 from app.detective.models import Topic
-from app.detective.utils  import topic_cache
+from app.detective.utils  import topic_cache, get_leafs_and_edges
 import json
 
 class TopicCachierTestCase(TestCase):
@@ -40,7 +40,7 @@ class TopicCachierTestCase(TestCase):
                 "name": "Person",
                 "fields": [
                     { "name": "first_name","type": "string","verbose_name":"First Name" },
-                    { "name": "last_name","type": "string","verbose_name":"Last Name" },
+                    { "name": "name","type": "string","verbose_name":"Last Name" },
                     { "name": "employed_by", "type": "Relationship", "related_model": "Company" }
                 ]
             },
@@ -92,11 +92,22 @@ class TopicCachierTestCase(TestCase):
         topic.delete()
         self.assertIsNone(topic_cache.version(topic))
 
-    def test_topic_model_update(self):
+    def test_topic_model_create(self):
         topic = self.create_topic()
         rev_origin = topic_cache.version(topic)
         Person = topic.get_models_module().Person
-        p = Person.objects.create(first_name='Pierre', last_name='Bellon')
+        p = Person.objects.create(first_name='Pierre', name='Bellon')
+        rev_target = topic_cache.version(topic)
+        self.assertEqual(rev_target, rev_origin + 1)
+
+    def test_topic_model_create(self):
+        topic = self.create_topic()
+        Person = topic.get_models_module().Person
+        p = Person.objects.create(first_name='Pierre', name='Bellon')
+        rev_origin = topic_cache.version(topic)
+        p = Person.objects.get(first_name='Pierre', name='Bellon')
+        p.first_name = 'Matthieu'
+        p.save()
         rev_target = topic_cache.version(topic)
         self.assertEqual(rev_target, rev_origin + 1)
 
@@ -118,5 +129,34 @@ class TopicCachierTestCase(TestCase):
         topic_cache.set(topic, 'such_random', random_data, 3000)
         topic_cache.delete(topic, 'such_random')
         self.assertIsNone(topic_cache.get(topic, 'such_random'))
+
+
+    def test_get_leafs_and_edges(self):
+        topic = self.create_topic()
+        models = topic.get_models_module()
+        Person = models.Person
+        Company = models.Company
+        # be sure we dont have anybody
+        [ p.delete() for p in Person.objects.all() ]
+
+        c1 = Company.objects.create(name='random', status='random')
+
+        p1 = Person.objects.create(first_name='test', name='test')
+        p1.employed_by.add(c1)
+        p1.save()
+        p2 = Person.objects.create(first_name='test', name='test')
+        p2.employed_by.add(c1)
+        p2.save()
+
+        leafs = get_leafs_and_edges(topic=topic, depth=3)
+
+        p3 = Person.objects.create(first_name='test', name='test', employed_by=c1)
+
+        new_leafs = get_leafs_and_edges(topic=topic, depth=3)
+        cached_leafs = topic_cache.get(topic, 'leafs_and_nodes_%s_%s' % (3, '*'))
+        self.assertEqual(new_leafs, cached_leafs)
+        self.assertGreater(len(new_leafs[1]), len(leafs[1]))
+
+
 
 

@@ -1,9 +1,8 @@
+from app.detective import topics # will init virtual modules
+from app.detective import signals, utils
+
 from django.conf   import settings
-from .signals import bind
-from .utils   import get_topics_modules
+settings.INSTALLED_APPS += utils.get_topics_modules()
 
-settings.INSTALLED_APPS += get_topics_modules()
-
-import app.detective.topics # will init virtual modules
-bind()
+signals.bind()
 

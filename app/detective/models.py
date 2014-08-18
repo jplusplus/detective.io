@@ -494,6 +494,18 @@ def update_permissions(*args, **kwargs):
     # @TODO check that the slug changed or not to avoid permissions hijacking
     if kwargs.get('created', False):
         create_permissions(kwargs.get('instance').get_module(), app_label=kwargs.get('instance').ontology_as_mod)
+    else:
+        topic = kwargs.get('instance')
+        group_name = '%s_contributor' % topic.ontology_as_mod
+        try:
+            topic.author.groups.get(name=group_name)
+        except Group.DoesNotExist:
+            try:
+                topic.author.groups.add(Group.objects.get(name=group_name))
+                topic.author.save()
+            except Group.DoesNotExist:
+                pass
+                # Should never get there.
 
 def user_created(*args, **kwargs):
     """

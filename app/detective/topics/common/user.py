@@ -342,7 +342,6 @@ class UserResource(ModelResource):
 
         group_resource = GroupResource()
 
-        groups = obj.groups.all()
         groups = group_resource.obj_get_list(bundle).filter(Q(user__id=obj.id))
         if not bundle.request.user or not bundle.request.user.is_staff:
             if bundle.request.user:

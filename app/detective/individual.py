@@ -34,8 +34,7 @@ class IndividualAuthorization(Authorization):
         topic = get_topic_from_request(bundle.request)
         if topic == None:
             topic = Topic.objects.get(ontology_as_mod=get_model_topic(bundle.obj)).public
-        return topic         
-
+        return topic
 
     def check_contribution_permission(self, object_list, bundle, operation):
         authorized = False
@@ -50,6 +49,12 @@ class IndividualAuthorization(Authorization):
         if not topic.public and not self.check_contribution_permission(object_list, bundle, 'read'):
             raise Unauthorized("Sorry, only staff or contributors can read resource.")
         return True
+
+    def read_list(self, object_list, bundle):
+        topic = self.get_topic_from_bundle(bundle)
+        if not topic.public and not self.check_contribution_permission(object_list, bundle, 'read'):
+            raise Unauthorized("Sorry, only staff or contributors can read resource.")
+        return object_list
 
     def create_detail(self, object_list, bundle):
         if not self.check_contribution_permission(object_list, bundle, 'add'):

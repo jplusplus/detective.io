@@ -129,11 +129,15 @@ class IndividualSingleCtrl
                 @individual['geolocation'] = "#{geoloc.individual.latitude}, #{geoloc.individual.longitude}"
 
     getMailReportLink: =>
-        subject = encodeURIComponent "[Detective.io] Error on page #{@individual.name} in #{@topic.title}"
+        topic_title = @topic.title
+        indiv_name  = @individual.name
+        error_url   = @location.absUrl()
+
+        subject = encodeURIComponent "[Detective.io] Error on page #{indiv_name} in #{topic_title}"
         body    = encodeURIComponent """
             Dear Detective.io team,
 
-            I spotted a mistake on this page #{@location.url()}.
+            I spotted a mistake on this page #{error_url}.
 
             What stands there should be corrected because … (add links that show the information on the site is erroneous).
 

@@ -1,7 +1,7 @@
 class DashboardCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$q', '$http', 'Common', 'Page', 'User', 'userTopics', 'userGroups']
-    constructor: (@scope, @q, @http, @Common, @Page, @User, @userTopics, @userGroups)->
+    @$inject: ['$scope', '$q', '$http', 'Common', 'Page', 'User', 'userGroups']
+    constructor: (@scope, @q, @http, @Common, @Page, @User, @userGroups)->
         @Page.title "Dashboard"
         # Start to page 1, obviously
         @page = 1
@@ -15,11 +15,10 @@ class DashboardCtrl
 
     # Concatenates @userTopics's objects with @userGroups's topics
     getTopics: =>
-        @userTopics.objects.concat _.pluck(@userGroups.objects, 'topic')
+        _.pluck(@userGroups.objects, 'topic')
 
-    hasNextTopics: (p=@page)=> @userTopics.meta.total_count > (@userTopics.meta.limit * p)
     hasNextGroups: (p=@page)=> @userGroups.meta.total_count > (@userGroups.meta.limit * p)
-    hasNext: (p=@page)=> @hasNextTopics(p) or @hasNextGroups(p)
+    hasNext: (p=@page)=> @hasNextGroups(p)
     hasPrevious: (p=@page)=> p > 1
 
     # Load next page
@@ -53,9 +52,6 @@ class DashboardCtrl
             response.data
 
     @resolve:
-        userTopics: ["Common", "User", (Common, User)->
-            Common.get(type: "topic", author__username: User.username).$promise
-        ],
         userGroups: ["$http", "$q", "Auth", ($http, $q, Auth)->
             deferred = $q.defer()
             Auth.load().then (user)=>

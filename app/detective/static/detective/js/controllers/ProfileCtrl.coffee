@@ -7,7 +7,7 @@ class ProfileCtrl
         @Page.loading yes
 
         @topics_page = 1
-        @userTopics = @userGroups =
+        @userGroups =
             objects : []
             meta :
                 limit : 0
@@ -54,11 +54,10 @@ class ProfileCtrl
 
     # Concatenates @userTopics's objects with @userGroups's topics
     getTopics: =>
-        @userTopics.objects.concat (_.pluck @userGroups.objects, 'topic')
+        _.pluck @userGroups.objects, 'topic'
 
-    hasNextTopics: (p=@topics_page)=> @userTopics.meta.total_count > (@userTopics.meta.limit * p)
     hasNextGroups: (p=@topics_page)=> @userGroups.meta.total_count > (@userGroups.meta.limit * p)
-    hasNext: (p=@topics_page)=> @hasNextTopics(p) or @hasNextGroups(p)
+    hasNext: (p=@topics_page)=> @hasNextGroups(p)
     hasPrevious: (p=@topics_page)=> p > 1
 
     # Load next page

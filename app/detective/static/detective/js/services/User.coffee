@@ -10,6 +10,9 @@ angular.module('detective.service').factory('User', ['$cookies', '$rootScope', (
         # Return sdo explicitely
         return sdo
 
+    sdo.isStaff = ->
+        sdo.is_staff
+
     sdo.hasPermission = (topic, operation)->
         permission_name = "#{topic}.contribute_#{operation}"
         sdo.is_staff or _.contains(sdo.permissions, permission_name)

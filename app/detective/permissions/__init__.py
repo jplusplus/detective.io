@@ -49,9 +49,15 @@ def _create_groups(app_label):
                 if perm:
                     group.permissions.add(perm[0])
             group.save()
-            topic.contributor_group = group
-            topic.save()
             groups.append(group)
+
+            ###
+            # Must not be in the loop... Why is there a loop anyway?
+            topic.contributor_group = group
+            topic.author.groups.add(group)
+            topic.save()
+            ###
+
     except Topic.DoesNotExist:
         # do nothing, if topic doesnt exists we do not create its permissions.
         pass

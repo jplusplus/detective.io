@@ -32,12 +32,10 @@ class DashboardCtrl
         deferred = @q.defer()
         # Load the value at the same time
         @q.all([
-            @loadUserTopics(page),
             @loadUserGroups(page),
         # Get the 3 resolve promises
         ]).then (results)=>
-            @userTopics = results[0]
-            @userGroups = results[1]
+            @userGroups = results[0]
             deferred.resolve @getTopics()
         # Returns a promises
         deferred.promise

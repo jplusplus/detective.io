@@ -70,11 +70,9 @@ class ProfileCtrl
         @topics_page = page
         deferred = do @q.defer
         (@q.all [
-            @loadUserTopics(page)
             @loadUserGroups(page)
         ]).then (results) =>
-            @userTopics = results[0]
-            @userGroups = results[1]
+            @userGroups = results[0]
             deferred.resolve do @getTopics
         deferred.promise
 

@@ -541,7 +541,6 @@ def remove_topic_cache(*args, **kwargs):
     utils.topic_cache.delete_version(kwargs.get('instance'))
 
 signals.post_delete.connect(remove_permissions , sender=Topic)
-signals.post_save.connect(update_permissions   , sender=Topic)
 signals.post_save.connect(user_created         , sender=User)
 signals.post_save.connect(update_topic_cache   , sender=Topic)
 signals.post_save.connect(update_permissions   , sender=Topic)

@@ -6,7 +6,6 @@ angular.module('detective.directive').directive "clickOutside", ($document) ->
             # this part keeps it from firing the click on the document.
             e.stopPropagation()
         $document.bind "click.clickoutside", (e)->
-            console.log e
             # magic here.
             scope.$apply attr.clickOutside
             true

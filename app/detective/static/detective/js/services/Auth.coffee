@@ -16,7 +16,7 @@ angular.module("detective.service").factory "Auth", [
         # User just log in
         if User.is_logged
           # Load its user permission
-          $http.get("/api/common/v1/user/me/").then (response)=>
+          $http.get("/api/detective/common/v1/user/me/").then (response)=>
             if response.data?
               # Save profile
               User.set response.data
@@ -31,7 +31,7 @@ angular.module("detective.service").factory "Auth", [
 
       login: (credentials)->
         # succefull login
-        return $http.post("/api/common/v1/user/login/", credentials).then( (response)=>
+        return $http.post("/api/detective/common/v1/user/login/", credentials).then( (response)=>
           data = response.data
           # Interpret the respose
           if data? and data.success

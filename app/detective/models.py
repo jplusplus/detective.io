@@ -2,6 +2,8 @@ from app.detective              import utils
 from app.detective.permissions  import create_permissions, remove_permissions
 from django.contrib.auth.models import User, Group
 from django.db                  import models
+from django.db.models           import signals
+
 from jsonfield                  import JSONField
 from tinymce.models             import HTMLField
 from psycopg2.extensions        import adapt
@@ -485,9 +487,6 @@ class DetectiveProfileUser(models.Model):
 #    SIGNALS
 #
 # -----------------------------------------------------------------------------
-from django.db.models     import signals
-from app.detective.models import Topic
-
 def update_permissions(*args, **kwargs):
     """ create the permissions related to the label module """
     assert kwargs.get('instance')

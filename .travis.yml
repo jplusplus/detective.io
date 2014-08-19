@@ -14,6 +14,6 @@ install:
 	- pip install --use-mirrors -qr test_requirements.txt
 	- pip install --use-mirrors coveralls
 script:
- 	- coverage run --source=app.detective ./manage.py test detective --pythonpath=. --settings=app.settings_tests --traceback
+ 	- coverage run --source=app.detective ./manage.py test detective --pythonpath=. --traceback
 after_success:
 	- coveralls

@@ -114,7 +114,8 @@ def entity_list(request, **kwargs):
                 list_title=list_title,
                 title=default_meta['title']
             )
-            meta_description = __entity_type_description(entity_klass) or default_meta['description']
+            meta_description = __entity_type_description(entity_klass) or \
+                               topic.description or default_meta['description']
             meta_dict = {
                 'title'       : meta_title,
                 'description' : meta_description,

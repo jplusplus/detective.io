@@ -111,7 +111,7 @@ def get_topic_models(topic):
     models_path   = "app.detective.topics.%s.models" % topic
     try:
         if isinstance(topic, Topic):
-            models_module = topic.get_models()
+            models_module = topic.get_models_module()
         elif hasattr(topic, '__str__'):
             # Models to collect
             models_path   = "app.detective.topics.%s.models" % topic

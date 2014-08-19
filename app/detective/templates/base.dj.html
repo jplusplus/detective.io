@@ -14,7 +14,7 @@
         <meta property="og:title" content="{{ meta.title }}">
         <meta property="og:description" content="{{ meta.description | striptags }}">
         {% for picture in meta.pictures %}
-            <meta property="og:image" content="{% static picture.url %}">
+            <meta property="og:image" content="{{ picture.url }}">
         {% endfor %}
         <meta name="viewport" content="width=device-width">
         <link rel="icon" type="image/png" href="{% static 'detective/img/favicon.ico' %}">

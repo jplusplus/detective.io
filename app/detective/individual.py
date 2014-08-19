@@ -234,7 +234,7 @@ class IndividualResource(ModelResource):
 
     def alter_detail_data_to_serialize(self, request, bundle):
         # Show additional field following the model's rules
-        rules = register.topics_rules().model(self.get_model()).all()
+        rules = request.current_topic.get_rules().model(self.get_model()).all()
         # All additional relationships
         for key in rules:
             # Filter rules to keep only Neomatch
@@ -244,7 +244,7 @@ class IndividualResource(ModelResource):
 
     def dehydrate(self, bundle):
         # Show additional field following the model's rules
-        rules = register.topics_rules().model( self.get_model() )
+        rules = bundle.request.current_topic.get_rules().model( self.get_model() )
         # Get the output transformation for this model
         transform = rules.get("transform")
         # This is just a string
@@ -585,7 +585,7 @@ class IndividualResource(ModelResource):
                 ids = [ rel.id for rel in rels if connected(rel, end) ]
                 if len(ids):
                     # Show additional field following the model's rules
-                    rules  = register.topics_rules()
+                    rules  = request.current_topic.get_rules()
                     # Model that manages properties
                     though = rules.model( self.get_model() ).field(kwargs["field"]).get("through")
                     # Get the properties for this relationship

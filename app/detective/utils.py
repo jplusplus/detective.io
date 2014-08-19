@@ -81,6 +81,9 @@ def get_topics(offline=True):
         appsdir = here("topics")
         return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
     else:
+        # Turning offline mode to false is now deprecated
+        from warnings import warn
+        warn("Turning offline mode to false is now deprecated with 'utils.get_topics'.")
         from app.detective.models import Topic
         # Store topic object in a temporary attribute
         # to avoid SQL lazyness

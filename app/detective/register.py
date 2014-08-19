@@ -54,8 +54,8 @@ def topics_rules():
     # ModelRules is a singleton that record every model rules
     rules = ModelRules()
     registor = TopicRegistor()
-    # Each app can defined a forms.py file that describe the model rules
-    topics = get_topics(offline=False)
+    # Each app module can defined a forms.py file that describe the model rules
+    topics = get_topics()
     for topic in topics:
         registor.register_topic(topic)
         # Does this app contain a forms.py file?

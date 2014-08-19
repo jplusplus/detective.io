@@ -95,7 +95,7 @@ startdb:
 # Test rules
 ###
 
-test:
+test: clean
 	# Install coveralls
 	pip install --use-mirrors -q coveralls
 	# Stop current database to create some backups
@@ -104,9 +104,9 @@ test:
 	mv lib/neo4j/data/graph.db lib/neo4j/data/graph.db.backup || true
 	# Start a brand new database
 	make startdb
-	./manage.py syncdb -v 0 --noinput --pythonpath=. --settings=app.settings_tests
+	./manage.py syncdb -v 0 --noinput  --traceback --pythonpath=. --settings=app.settings_tests
 	# Launch test with coverage
-	python -W ignore::DeprecationWarning $(COVERAGE) run --source=app.detective ./manage.py test detective --pythonpath=. --settings=app.settings_tests
+	python -W ignore::DeprecationWarning $(COVERAGE) run --source=app.detective ./manage.py test detective --pythonpath=. --settings=app.settings_tests --traceback
 	# Send report to coveralls
 	coveralls
 	# Stop database in order to restore it

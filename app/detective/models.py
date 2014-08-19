@@ -497,15 +497,17 @@ def update_permissions(*args, **kwargs):
     else:
         topic = kwargs.get('instance')
         group_name = '%s_contributor' % topic.ontology_as_mod
-        try:
-            topic.author.groups.get(name=group_name)
-        except Group.DoesNotExist:
+        # Update permission only if a author is given
+        if topic.author is not None:
             try:
-                topic.author.groups.add(Group.objects.get(name=group_name))
-                topic.author.save()
+                topic.author.groups.get(name=group_name)
             except Group.DoesNotExist:
-                pass
-                # Should never get there.
+                try:
+                    topic.author.groups.add(Group.objects.get(name=group_name))
+                    topic.author.save()
+                except Group.DoesNotExist:
+                    pass
+                    # Should never get there.
 
 def user_created(*args, **kwargs):
     """

@@ -7,7 +7,6 @@ django-suit==0.2.9
 django-tastypie==0.10.0
 django-tinymce==1.5.2
 django-urlmiddleware==0.2.1
-django-cors-headers==0.12
 Django==1.5.4
 easy-thumbnails==2.0.1
 git+git://github.com/scholrly/neo4django.git#egg=neo4django

@@ -11,6 +11,8 @@ from neo4django.db              import connection
 from django.core.paginator      import Paginator
 from django.core.cache          import cache
 from django.conf                import settings
+
+import importlib
 import inspect
 import os
 import random
@@ -178,7 +180,7 @@ class Topic(models.Model):
     def search_placeholder(self, max_suggestion=5):
         from app.detective import register
         # Get the model's rules manager
-        rulesManager = register.topics_rules()
+        rulesManager = self.get_rules()
         # List of searchable models
         searchableModels = []
         # Filter searchable models
@@ -355,6 +357,25 @@ class Topic(models.Model):
                 'total_count': paginator.count
             }
         }
+
+    def get_rules(self):
+        from app.detective.modelrules import ModelRules
+        from app.detective.register   import TopicRegistor
+        # ModelRules is a singleton that record every model rules
+        rules = ModelRules()
+        registor = TopicRegistor()
+        registor.register_topic(self)
+        # Does this app contain a forms.py file?
+        path = "app.detective.topics.%s.forms" % self.ontology_as_mod
+        try:
+            mod  = importlib.import_module(path)
+        except ImportError:
+            # Ignore absent forms.py
+            return rules
+        func = getattr(mod, "topics_rules", None)
+        # Simply call the function to register app's rules
+        if func: rules = func()
+        return rules
 
 class TopicToken(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this token is related to.")

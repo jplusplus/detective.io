@@ -160,9 +160,8 @@ class TopicResource(ModelResource):
         return HttpResponse("Invitation sent!")
 
     def dehydrate(self, bundle):
-        from app.detective import register
         # Get the model's rules manager
-        rulesManager = register.topics_rules()
+        rulesManager = bundle.request.current_topic.get_rules()
         # Get all registered models
         models = get_registered_models()
         # Filter model to the one under app.detective.topics

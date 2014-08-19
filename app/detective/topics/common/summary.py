@@ -108,7 +108,7 @@ class SummaryResource(Resource):
                 topic = get_topic_from_request(request)
                 if topic == None:
                     raise Topic.DoesNotExist()
-                return topic 
+                return topic
             else:
                 return Topic.objects.get(ontology_as_mod=self._meta.urlconf_namespace)
         except Topic.DoesNotExist:
@@ -160,7 +160,7 @@ class SummaryResource(Resource):
     def summary_forms(self, bundle, request):
         available_resources = {}
         # Get the model's rules manager
-        rulesManager = topics_rules()
+        rulesManager = request.current_topic.get_rules()
         # Fetch every registered model
         # to print out its rules
         for model in self.topic.get_models():

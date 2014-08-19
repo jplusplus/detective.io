@@ -157,7 +157,27 @@ def entity(request, **kwargs):
     return home(request, meta_dict, **kwargs)
 
 def topic(request, **kwargs):
-    return home(request, None, **kwargs)
+    meta_dict = None
+    topic     = __get_topic(request, **kwargs)
+    if topic and topic.public:
+        default_meta = default_social_meta()
+        meta_description = topic.description or default_meta['description']
+        meta_pictures    = []
+        if topic.background:
+            meta_pictures.append(topic.background)
+
+        meta_title = "{topic_title} - {title}".format(
+            topic_title=topic.title,
+            title=default_meta['title']
+        )
+        meta_dict = {
+            'title': meta_title,
+            'description': meta_description,
+            'pictures': meta_pictures
+        }
+
+
+    return home(request, meta_dict, **kwargs)
 
 
 def partial(request, partial_name=None):

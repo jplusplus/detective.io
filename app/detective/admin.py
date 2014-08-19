@@ -1,8 +1,10 @@
-from app.detective        import utils
-from app.detective.models import QuoteRequest, Topic, SearchTerm, Article
-from django.conf          import settings
-from django.contrib       import admin
-from django.db.models     import CharField
+from app.detective              import utils
+from app.detective.models       import QuoteRequest, Topic, TopicToken, SearchTerm, Article, DetectiveProfileUser
+from django.conf                import settings
+from django.contrib             import admin
+from django.db.models           import CharField
+from django.contrib.auth.admin  import UserAdmin
+from django.contrib.auth.models import User
 
 class QuoteRequestAdmin(admin.ModelAdmin):
     save_on_top   = True
@@ -74,11 +76,18 @@ class SearchTermInline(admin.TabularInline):
                 if len(subset): kwargs["choices"].append( (model_name, subset,) )
         return super(SearchTermInline, self).formfield_for_choice_field(db_field, request,**kwargs)
 
+
+class TopicTokenAdmin(admin.ModelAdmin):
+    list_display  = ("topic","token","email","created_at",)
+
+admin.site.register(TopicToken, TopicTokenAdmin)
+
 class TopicAdmin(admin.ModelAdmin):
     save_on_top         = True
     prepopulated_fields = {'slug': ('title',)}
-    list_display        = ("title", "link", "public","app_label",)
+    list_display        = ("title", "link", "public","app_label")
     list_filter         = ("public","featured","author")
+    readonly_fields     = ('entities_count',)
     suit_form_tabs      = (
         ('general', 'General'),
         ('advanced', 'Advanced Settings'),
@@ -103,6 +112,9 @@ class TopicAdmin(admin.ModelAdmin):
             'classes': ('wide', 'suit-tab suit-tab-advanced'),
             'fields': ( 'description', 'about', 'background', )
         }),
+        (None, {
+            'fields': ( 'entities_count',)
+        }),
     )
 
     def get_form(self, request, obj=None, **kwargs):
@@ -124,3 +136,22 @@ class ArticleAdmin(admin.ModelAdmin):
     list_display        = ("title", "link", "created_at", "public", )
 
 admin.site.register(Article, ArticleAdmin)
+
+class DetectiveProfileUserInline(admin.StackedInline):
+    model               = DetectiveProfileUser
+    can_delete          = False
+    verbose_name_plural = 'detective settings'
+
+# Define a new User admin
+class UserAdmin(UserAdmin):
+    inlines = (DetectiveProfileUserInline, )
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', "get_plan")
+    def get_plan(self, obj): return obj.detectiveprofileuser.plan
+    get_plan.short_description = "Plan"
+    get_plan.admin_order_field = 'detectiveprofileuser__plan'
+
+# Re-register UserAdmin
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+
+# EOF

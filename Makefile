@@ -11,7 +11,7 @@ PWD           = `pwd`
 CUSTOM_D3	  = ./app/static/custom_d3/d3.js
 
 PYC           = $(wildcard *.pyc */*.pyc app/*/*.pyc app/*/*/*.pyc app/*/*/*/*.pyc app/*/*/*/*/*.pyc)
-CACHE         = $(wildcard app/staticfiles/CACHE)
+CACHE         = $(wildcard app/staticfiles/CACHE app/media/csv-exports/)
 
 ifndef PORT
 	PORT = 8000
@@ -75,6 +75,8 @@ livedoc:
 clean:
 	$(RM) $(PYC)
 	$(RM) $(CACHE)
+	. $(ENV) ; python -c "from django.core.cache import cache; cache.clear()"
+	@echo "cache cleaned"
 
 fclean: clean
 	rm $(CUSTOM_D3)
@@ -100,7 +102,6 @@ test:
 	make stopdb
 	# Do db backups
 	mv lib/neo4j/data/graph.db lib/neo4j/data/graph.db.backup || true
-	mv dev.db dev.db.backup || true
 	# Start a brand new database
 	make startdb
 	./manage.py syncdb -v 0 --noinput --pythonpath=. --settings=app.settings_tests
@@ -112,7 +113,5 @@ test:
 	make stopdb
 	# Remove temporary databases
 	rm -Rf lib/neo4j/data/graph.db
-	rm -f dev.db
 	# Restore backups
 	mv lib/neo4j/data/graph.db.backup lib/neo4j/data/graph.db|| true
-	mv dev.db.backup dev.db || true

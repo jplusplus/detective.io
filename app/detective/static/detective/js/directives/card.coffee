@@ -48,6 +48,7 @@ angular.module('detective.directive').directive "card", ['Summary', 'Individual'
         Summary.cachedGet id:'forms', (forms)->
             # Save only the type of the current individual
             scope.model = forms[type]
+            return if not scope.model?
             # A model might be use to describe this relationship
             if scope.field.rules.through?
                 scope.relModel = forms[scope.field.rules.through.toLowerCase()]

@@ -6,8 +6,8 @@ angular.module('detective.config').run [
             $root.$on "$stateChangeStart", (e, current, params)=>
                 if current.auth and not User.is_logged
                     e.preventDefault()
-                    login_params = 
-                        nextState:  current.name
+                    login_params =
+                        nextState:  current.default or current.name
                         nextParams: angular.toJson params
                     $state.go("login", login_params)
     ]

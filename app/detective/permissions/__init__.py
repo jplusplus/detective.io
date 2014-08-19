@@ -33,20 +33,34 @@ GROUPS = (dict(
 )
 
 def _create_groups(app_label):
+    from app.detective.models import Topic
     groups = []
-    for group_dict in GROUPS:
-        group_name = group_dict['name'].format(app_name=app_label)
-        try:
-            group = Group.objects.create(name=group_name)
-        except IntegrityError:
-            group = Group.objects.get(name=group_name)
-            group.permissions.clear()
-        for permission in group_dict['permissions']:
-            perm = Permission.objects.filter(content_type__app_label=app_label, codename="contribute_%s" % permission)
-            if perm:
-                group.permissions.add(perm[0])
-        group.save()
-        groups.append(group)
+    try:
+        topic = Topic.objects.get(ontology_as_mod=app_label)
+        for group_dict in GROUPS:
+            group_name = group_dict['name'].format(app_name=app_label)
+            try:
+                group = Group.objects.create(name=group_name)
+            except IntegrityError:
+                group = Group.objects.get(name=group_name)
+                group.permissions.clear()
+            for permission in group_dict['permissions']:
+                perm = Permission.objects.filter(content_type__app_label=app_label, codename="contribute_%s" % permission)
+                if perm:
+                    group.permissions.add(perm[0])
+            group.save()
+            groups.append(group)
+
+            ###
+            # Must not be in the loop... Why is there a loop anyway?
+            topic.contributor_group = group
+            topic.author.groups.add(group)
+            topic.save()
+            ###
+
+    except Topic.DoesNotExist:
+        # do nothing, if topic doesnt exists we do not create its permissions.
+        pass
     return groups
 
 def _remove_groups(app_label):

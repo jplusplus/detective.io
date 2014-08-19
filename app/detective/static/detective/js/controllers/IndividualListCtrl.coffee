@@ -1,8 +1,8 @@
 class IndividualListCtrl
-    # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', 'Common', '$location',  'Page']
+    # Injects dependencies
+    @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', 'Common', '$location',  'Page', '$timeout', '$rootScope']
 
-    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @Common, @location, @Page)->
+    constructor: (@scope, @stateParams, @state, @Individual, @Summary, @Common, @location, @Page, @timeout, @rootScope)->
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────
@@ -125,15 +125,45 @@ class IndividualListCtrl
 
     csvExport: =>
         if @scope.individuals.objects? and @scope.individuals.objects.length > 0
-            @scope.exporting_csv = yes
-            @requestCsvExport (d) =>
-                @scope.exporting_csv = no
-                file = new Blob([d.data], { type : 'application/zip' })
-                saveAs(file, d.filename)
+            that = this
+            @requestCsvExport (d) ->
+                if d.status == "enqueued"
+                    that.scope.exporting_csv = yes
+                    # ask if the job is finished
+                    @retry = 0
+                    refresh_timeout = that.timeout refresh_status = =>
+                        that.Common.get {type:"jobs", id:d.token}, (data) =>
+                            if data? and data.result? and data.result != ""
+                                that.askToDownload(JSON.parse(data.result).file_name)
+                            else if data? and data.status == "failed"
+                                that.rootScope.$broadcast 'http:error', "Sorry, the export has failed."
+                                that.scope.exporting_csv = no
+                            else
+                                @retry = 0
+                                # retart the function
+                                refresh_timeout = that.timeout(refresh_status, 2000) if that.scope.exporting_csv
+                        , (error) =>
+                            if @retry < 5
+                                refresh_timeout = that.timeout(refresh_status, 2000) if that.scope.exporting_csv
+                                @retry += 1
+                            else
+                                that.rootScope.$broadcast 'http:error', "Sorry, the export has failed. Please try again in a fiew moment"
+                                that.scope.exporting_csv = no
+                    # cancel the timeout if the view is destroyed
+                    that.scope.$on '$destroy', =>
+                        that.timeout.cancel(refresh_timeout)
+                else
+                    # ask to download
+                    that.askToDownload(d.file_name)
+
+    askToDownload: (file_name) =>
+        @scope.exporting_csv = no
+        window.location.replace(file_name)
 
     requestCsvExport: (cb) =>
-        @Summary.export { type : @scope.type }, cb, =>
+        @Summary.export { type : @scope.type }, cb, (d) =>
             @scope.exporting_csv = no
 
-
 angular.module('detective.controller').controller 'individualListCtrl', IndividualListCtrl
+
+# EOF

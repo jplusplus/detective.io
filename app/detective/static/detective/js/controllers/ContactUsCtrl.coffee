@@ -1,5 +1,5 @@
 class ContactUsCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$stateParams', 'Page', 'Individual']
 
     constructor: (@scope,  @stateParams, @Page, @Individual)->

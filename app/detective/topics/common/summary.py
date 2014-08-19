@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from .errors                    import ForbiddenError, UnauthorizedError
 from app.detective.models       import Topic, SearchTerm
 from app.detective.neomatch     import Neomatch
 from app.detective.register     import topics_rules
+from app.detective.utils        import get_leafs_and_edges, get_topic_from_request
 from difflib                    import SequenceMatcher
 from django.core.paginator      import Paginator, InvalidPage
 from django.core.urlresolvers   import resolve
@@ -11,12 +13,8 @@ from tastypie                   import http
 from tastypie.exceptions        import ImmediateHttpResponse
 from tastypie.resources         import Resource
 from tastypie.serializers       import Serializer
-from django.conf                import settings
-from django.utils.timezone      import utc
-from psycopg2.extensions        import adapt
-from StringIO                   import StringIO
-from rq                         import get_current_job
-from .errors                    import ForbiddenError, UnauthorizedError
+from .jobs                      import process_bulk_parsing_and_save_as_model, render_csv_zip_file
+from django.core.cache          import cache
 import app.detective.utils      as utils
 from django.contrib.auth.models import User
 import json
@@ -40,8 +38,8 @@ class SummaryResource(Resource):
         resource_name   = 'summary'
         object_class    = object
 
-
-    def get_page_number(self, offset=0, limit=20):
+    @staticmethod
+    def get_page_number(offset=0, limit=20):
         if offset < 0:
             return -1
         else:
@@ -107,7 +105,10 @@ class SummaryResource(Resource):
     def get_topic_or_404(self, request=None):
         try:
             if request is not None:
-                return Topic.objects.get(ontology_as_mod=resolve(request.path).namespace)
+                topic = get_topic_from_request(request)
+                if topic == None:
+                    raise Topic.DoesNotExist()
+                return topic 
             else:
                 return Topic.objects.get(ontology_as_mod=self._meta.urlconf_namespace)
         except Topic.DoesNotExist:
@@ -166,8 +167,8 @@ class SummaryResource(Resource):
             name                = model.__name__.lower()
             rules               = rulesManager.model(model).all()
             fields              = utils.get_model_fields(model)
-            verbose_name        = getattr(model._meta, "verbose_name", name).title()
-            verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s").title()
+            verbose_name        = getattr(model._meta, "verbose_name", name)
+            verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s")
 
             for key in rules:
                 # Filter rules to keep only Neomatch
@@ -306,37 +307,13 @@ class SummaryResource(Resource):
 
     def summary_rdf_search(self, bundle, request):
         self.method_check(request, allowed=['get'])
-
         limit     = int(request.GET.get('limit', 20))
         offset    = int(request.GET.get('offset', 0))
         query     = json.loads(request.GET.get('q', 'null'))
-        subject   = query.get("subject", None)
-        predicate = query.get("predicate", None)
-        obj       = query.get("object", None)
-        results   = self.rdf_search(subject, predicate, obj)
-        # Stop now in case of error
-        if "errors" in results: return results
-        paginator = Paginator(results, limit)
         try:
-            p     = self.get_page_number(offset, limit )
-            page  = paginator.page(p)
+            object_list = self.topic.rdf_search(query, limit, offset)
         except InvalidPage:
             raise Http404("Sorry, no results on that page.")
-
-        objects = []
-        for result in page.object_list:
-            objects.append(result)
-
-        object_list = {
-            'objects': objects,
-            'meta': {
-                'q': query,
-                'offset': p,
-                'limit': limit,
-                'total_count': paginator.count
-            }
-        }
-
         self.log_throttled_access(request)
         return object_list
 
@@ -380,6 +357,17 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return object_list
 
+    def summary_graph(self, bundle, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+        depth     = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
+        leafs, edges  = get_leafs_and_edges(
+            topic     = self.topic,
+            depth     = depth,
+            root_node = "*")
+        self.log_throttled_access(request)
+        return self.create_response(request, {'leafs': leafs, 'edges' : edges})
+
     def summary_bulk_upload(self, request, **kwargs):
         # only allow POST requests
         self.method_check(request, allowed=['post'])
@@ -392,9 +380,9 @@ class SummaryResource(Resource):
         files = [(f.name, f.readlines()) for f in files]
         # enqueue the parsing job
         queue = django_rq.get_queue('default', default_timeout=7200)
-        job   = queue.enqueue(process_parsing, self.topic, files)
-        job.meta["topic_app_label"] = self.topic.app_label()
-        job.meta["topic_slug"]      = self.topic.slug
+        job   = queue.enqueue(process_bulk_parsing_and_save_as_model, self.topic, files)
+        # job.meta["topic_app_label"] = self.topic.app_label()
+        # job.meta["topic_slug"]      = self.topic.slug
         # job.save()
         # return a quick response
         self.log_throttled_access(request)
@@ -405,105 +393,43 @@ class SummaryResource(Resource):
 
     def summary_export(self, bundle, request):
         self.method_check(request, allowed=['get'])
-
-        def writeAllInZip(objects, columns, zip, model_name=None):
-            if isinstance(objects[0], dict):
-                def _getattr(o, prop):
-                    try:
-                        return o[prop]
-                    except KeyError:
-                        return ''
-            else:
-                def _getattr(o, prop):
-                    return getattr(o, prop)
-
-            all_ids = []
-            model_name = model_name or objects[0].__class__.__name__
-            content = "{model_name}_id,{columns}\n".format(model_name=model_name, columns=','.join(columns))
-            for obj in objects:
-                all_ids.append(_getattr(obj, 'id'))
-                objColumns = []
-                for column in columns:
-                    val = unicode(_getattr(obj, column)).encode('utf-8', 'ignore').replace(',', '').replace("\n", '')
-                    if val == 'None':
-                        val = ''
-                    objColumns.append(val)
-                content += "{id},{columns}\n".format(id=_getattr(obj, 'id'), columns=','.join(objColumns))
-            zip.writestr("{0}.csv".format(model_name), content)
-            return all_ids
-
-        def getColumns(model):
-            edges = dict()
-            columns = []
-            fields = utils.get_model_fields(model)
-            for field in fields:
-                if field['type'] != 'Relationship':
-                    if field['name'] not in ['id']:
-                        columns.append(field['name'])
-                else:
-                    edges[field['rel_type']] = [field['model'], field['name'], field['related_model']]
-            return (columns, edges)
-
-        buffer = StringIO()
-        zip = zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED)
-
-        models = self.topic.get_models()
-        if 'q' not in request.GET:
-            exportEdges = not ('type' in request.GET)
-            for model in models:
-                if 'type' in request.GET and model.__name__.lower() != request.GET['type']:
-                    continue
-
-                (columns, edges) = getColumns(model)
-                objects = model.objects.all()
-
-                if len(objects) > 0:
-                    all_ids = writeAllInZip(objects, columns, zip)
-                    if exportEdges:
-                        for key in edges.keys():
-                            rows = connection.cypher("""
-                                START root=node({nodes})
-                                MATCH (root)-[r:`{rel}`]->(leaf)
-                                RETURN id(root) as id_from, id(leaf) as id_to
-                            """.format(nodes=','.join([str(id) for id in all_ids]), rel=key)).to_dicts()
-                            content = "{0}_id,{1},{2}_id\n".format(edges[key][0], edges[key][1], edges[key][2])
-                            for row in rows:
-                                content += "{0},,{1}\n".format(row['id_from'], row['id_to'])
-                            zip.writestr("{0}_{1}.csv".format(edges[key][0], edges[key][1]), content)
+        # check from cache
+        cache_key = "summary_export_{type}_{query}" \
+            .format( type  = request.GET.get("type", "all"),
+                     query = request.GET.get("q", "null"))
+        response_in_cache = utils.topic_cache.get(self.topic, cache_key)
+        if response_in_cache: # could be empty or str("<filename>")
+            logger.debug("export already exist from cache")
+            response = dict(status="ok", file_name=response_in_cache)
         else:
-            request.GET = dict(q=request.GET['q'])
-            page = 1
-            limit = 1
-            objects = []
-            total = -1
-            while len(objects) != total:
-                try:
-                    request.GET['offset'] = (page - 1) * limit
-                    result = self.summary_rdf_search(bundle, request)
-                    objects += result['objects']
-                    total = result['meta']['total_count']
-                    page += 1
-                except KeyError:
+            # return a quick response
+            response = dict(
+                status = "enqueued")
+            # check if a job already exist
+            for job in django_rq.get_queue().jobs:
+                if job.meta["cache_key"] == cache_key:
+                    response["token"] = job.id
+                    logger.debug("job_already_exist")
                     break
-            for model in models:
-                if model.__name__ == objects[0]['model']:
-                    break
-            (columns, _) = getColumns(model)
-            writeAllInZip(objects, columns, zip, model.__name__)
-
-        zip.close()
-        buffer.flush()
-        ret_zip = buffer.getvalue()
-        buffer.close()
-
-        response = HttpResponse(ret_zip, mimetype='application/zip')
-        response['Content-Disposition'] = "attachement; filename=export-{0}.zip".format(self.topic.slug)
+            else:
+                # enqueue the job
+                queue = django_rq.get_queue('high', default_timeout=360)
+                job = queue.enqueue(render_csv_zip_file,
+                                    topic      = self.topic,
+                                    model_type = request.GET.get("type"),
+                                    query      = json.loads(request.GET.get('q', 'null')),
+                                    cache_key  = cache_key)
+                # save the cache_key in the meta data in order to check if a job already exist for this key later
+                job.meta["cache_key"] = cache_key
+                job.save()
+                response['token'] = job.id
+        self.log_throttled_access(request)
         return response
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 
     def search(self, query):
-        match = str(query).lower()
+        match = unicode(query).lower()
         match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()
         # Query to get every result
         query = """
@@ -515,92 +441,6 @@ class SummaryResource(Resource):
             RETURN ID(root) as id, root.name as name, type.model_name as model
         """ % (match, self.topic.app_label() )
         return connection.cypher(query).to_dicts()
-
-    def rdf_search(self, subject, predicate, obj):
-        identifier = obj["id"] if "id" in obj else obj
-        # retrieve all models in current topic
-        all_models = dict((model.__name__, model) for model in self.topic.get_models())
-        # If the received identifier describe a literal value
-        if self.is_registered_literal(predicate["name"]):
-            # Get the field name into the database
-            field_name = predicate["name"]
-            # Build the request
-            query = """
-                START root=node(*)
-                MATCH (root)<-[:`<<INSTANCE>>`]-(type)
-                WHERE HAS(root.name)
-                AND HAS(root.{field})
-                AND root.{field} = {value}
-                AND type.model_name = {model}
-                AND type.app_label = {app}
-                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
-            """.format(
-                field=field_name,
-                value=adapt(identifier),
-                model=adapt(subject["name"]),
-                app=adapt(self.topic.app_label())
-            )
-        # If the received identifier describe a literal value
-        elif self.is_registered_relationship(predicate["name"]):
-            fields        = utils.get_model_fields( all_models[predicate["subject"]] )
-            # Get the field name into the database
-            relationships = [ field for field in fields if field["name"] == predicate["name"] ]
-            # We didn't find the predicate
-            if not len(relationships): return {'errors': 'Unkown predicate type'}
-            relationship  = relationships[0]["rel_type"]
-            # Query to get every result
-            query = u"""
-                START st=node(*)
-                MATCH (st)<-[:`{relationship}`]-(root)<-[:`<<INSTANCE>>`]-(type)
-                WHERE HAS(root.name)
-                AND HAS(st.name)
-                AND ID(st) = {id}
-                AND type.app_label = {app}
-                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
-            """.format(
-                relationship=relationship,
-                id=adapt(identifier),
-                app=adapt(self.topic.app_label())
-            )
-        else:
-            return {'errors': 'Unkown predicate type: %s' % predicate["name"]}
-
-        return connection.cypher(query).to_dicts()
-
-
-    def get_models_output(self):
-        # Select only some atribute
-        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
-        return [ output(m) for m in self.topic.get_models() ]
-
-    def get_relationship_search(self):
-        # For an unkown reason I can't filter by "is_literal"
-        # @TODO find why!
-        return [ st for st in SearchTerm.objects.filter(topic=self.topic).prefetch_related('topic') if not st.is_literal ]
-
-    def get_relationship_search_output(self):
-        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
-        terms  = self.get_relationship_search()
-        _out = []
-        for model in self.topic.get_models():
-            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() == 'relationship']:
-                if "search_terms" in field["rules"]:
-                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
-        return _out + [ output(rs) for rs in terms ]
-
-    def get_literal_search(self):
-        # For an unkown reason I can't filter by "is_literal"
-        return [ st for st in SearchTerm.objects.filter(topic=self.topic).prefetch_related('topic') if st.is_literal ]
-
-    def get_literal_search_output(self):
-        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
-        terms  = self.get_literal_search()
-        _out = []
-        for model in self.topic.get_models():
-            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() != 'relationship']:
-                if "search_terms" in field["rules"]:
-                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
-        return _out + [ output(rs) for rs in terms ]
 
     def ngrams(self, input):
         input = input.split(' ')
@@ -666,7 +506,7 @@ class SummaryResource(Resource):
             return new_list
 
         def is_preposition(token=""):
-            return str(token).lower() in ["aboard", "about", "above", "across", "after", "against",
+            return unicode(token).lower() in ["aboard", "about", "above", "across", "after", "against",
             "along", "amid", "among", "anti", "around", "as", "at", "before", "behind", "below",
             "beneath", "beside", "besides", "between", "beyond", "but", "by", "concerning",
             "considering",  "despite", "down", "during", "except", "excepting", "excluding",
@@ -781,270 +621,10 @@ class SummaryResource(Resource):
         # Remove duplicates proposition dicts
         return propositions
 
-    def is_registered_literal(self, name):
-        literals = self.get_syntax().get("predicate").get("literal")
-        matches  = [ literal for literal in literals if name == literal["name"] ]
-        return len(matches)
-
-    def is_registered_relationship(self, name):
-        literals = self.get_syntax().get("predicate").get("relationship")
-        matches  = [ literal for literal in literals if name == literal["name"] ]
-        return len(matches)
-
     def get_syntax(self, bundle=None, request=None):
         if not hasattr(self, "syntax"):
-            syntax = {
-                'subject': {
-                    'model':  self.get_models_output()
-                },
-                'predicate': {
-                    'relationship': self.get_relationship_search_output(),
-                    'literal':      self.get_literal_search_output()
-                }
-            }
+            syntax = self.topic.get_syntax()
             self.syntax = syntax
         return self.syntax
 
-def process_parsing(topic, files):
-    """
-    Job which reads the uploaded files, validate and saves them as model
-    """
-
-    start_time               = time.time()
-    entities                 = {}
-    relations                = []
-    errors                   = []
-    id_mapping               = {}
-    nb_lines                 = 0
-    file_reading_progression = 0
-    job                      = get_current_job()
-
-    # Define Exceptions
-    class Error (Exception):
-        """
-        Generic Custom Exception for this endpoint.
-        Include the topic.
-        """
-        def __init__(self, **kwargs):
-            """ set the topic and add all the parameters as attributes """
-            self.topic = topic.title
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-        def __str__(self):
-            return self.__dict__
-
-    class WarningCastingValueFail     (Error): pass
-    class WarningValidationError      (Error): pass
-    class WarningKeyUnknown           (Error): pass
-    class WarningInformationIsMissing (Error): pass
-    class AttributeDoesntExist        (Error): pass
-    class WrongCSVSyntax              (Error): pass
-    class ColumnUnknow                (Error): pass
-    class ModelDoesntExist            (Error): pass
-    class RelationDoesntExist         (Error): pass
-
-    try:
-        assert type(files) in (tuple, list)
-        assert len(files) > 0, "You need to upload at least one file."
-        assert type(files[0]) in (tuple, list)
-        assert len(files[0]) == 2
-
-        # retrieve all models in current topic
-        all_models = dict((model.__name__, model) for model in topic.get_models())
-        # iterate over all files and dissociate entities .csv from relations .csv
-        for file in files:
-            if type(file) is tuple:
-                file_name = file[0]
-                file      = file[1]
-            else:
-                raise Exception()
-            csv_reader = utils.open_csv(file)
-            header     = csv_reader.next()
-            assert len(header) > 1, "header should have at least 2 columns"
-            assert header[0].endswith("_id"), "First column should begin with a header like <model_name>_id"
-            if len(header) >=3 and header[0].endswith("_id") and header[2].endswith("_id"):
-                # this is a relationship file
-                relations.append((file_name, file))
-            else:
-                # this is an entities file
-                model_name = utils.to_class_name(header[0].replace("_id", ""))
-                if model_name in all_models.keys():
-                    entities[model_name] = (file_name, file)
-                else:
-                    raise ModelDoesntExist(model=model_name, file=file_name, models_availables=all_models.keys())
-            nb_lines += len(file) - 1 # -1 removes headers
-
-        # first iterate over entities
-        logger.debug("BulkUpload: creating entities")
-        for entity, (file_name, file) in entities.items():
-            csv_reader = utils.open_csv(file)
-            header     = csv_reader.next()
-            # must check that all columns map to an existing model field
-            fields       = utils.get_model_fields(all_models[entity])
-            fields_types = {}
-            for field in fields:
-                fields_types[field['name']] = field['type']
-            field_names = [field['name'] for field in fields]
-            columns = []
-            for column in header[1:]:
-                column = utils.to_underscores(column)
-                if column is not '':
-                    if not column in field_names:
-                        raise ColumnUnknow(file=file_name, column=column, model=entity, attributes_available=field_names)
-                        break
-                    column_type = fields_types[column]
-                    columns.append((column, column_type))
-            else:
-                # here, we know that all columns are valid
-                for row in csv_reader:
-                    data = {}
-                    id   = row[0]
-                    for i, (column, column_type) in enumerate(columns):
-                        value = str(row[i+1]).decode('utf-8')
-                        # cast value if needed
-                        if value:
-                            try:
-                                if "Integer" in column_type:
-                                    value = int(value)
-                                # TODO: cast float
-                                if "Date" in column_type:
-                                    value = datetime.datetime(*map(int, re.split('[^\d]', value)[:-1])).replace(tzinfo=utc)
-                            except Exception as e:
-                                e = WarningCastingValueFail(
-                                    column_name = column,
-                                    value       = value,
-                                    type        = column_type,
-                                    data        = data, model=entity,
-                                    file        = file_name,
-                                    line        = csv_reader.line_num,
-                                    error       = str(e)
-                                )
-                                errors.append(e)
-                                break
-                            data[column] = value
-                    else:
-                        # instanciate a model
-                        try:
-                            item = all_models[entity].objects.create(**data)
-                            # map the object with the ID defined in the .csv
-                            id_mapping[(entity, id)] = item
-                            file_reading_progression += 1
-                            # FIXME: job can be accessed somewhere else (i.e detective/topics/common/job.py)
-                            # Concurrent access are not secure here.
-                            # For now we refresh the job just before saving it.
-                            job.refresh()
-                            job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
-                            job.meta["file_reading"] = file_name
-                            job.save()
-                        except Exception as e:
-                            errors.append(
-                                WarningValidationError(
-                                    data  = data,
-                                    model = entity,
-                                    file  = file_name,
-                                    line  = csv_reader.line_num,
-                                    error = str(e)
-                                )
-                            )
-
-        inserted_relations = 0
-        # then iterate over relations
-        logger.debug("BulkUpload: creating relations")
-        for file_name, file in relations:
-            # create a csv reader
-            csv_reader    = utils.open_csv(file)
-            csv_header    = csv_reader.next()
-            relation_name = utils.to_underscores(csv_header[1])
-            model_from    = utils.to_class_name(csv_header[0].replace("_id", ""))
-            model_to      = utils.to_class_name(csv_header[2].replace("_id", ""))
-            # check that the relation actually exists between the two objects
-            try:
-                getattr(all_models[model_from], relation_name)
-            except Exception as e:
-                raise RelationDoesntExist(
-                    file             = file_name,
-                    model_from       = model_from,
-                    model_to         = model_to,
-                    relation_name    = relation_name,
-                    fields_available = [field['name'] for field in utils.get_model_fields(all_models[model_from])],
-                    error            = str(e))
-            for row in csv_reader:
-                id_from = row[0]
-                id_to   = row[2]
-                if id_to and id_from:
-                    try:
-                        getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
-                        inserted_relations += 1
-                        file_reading_progression += 1
-                        job.refresh()
-                        job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
-                        job.meta["file_reading"] = file_name
-                        job.save()
-                    except KeyError as e:
-                        errors.append(
-                            WarningKeyUnknown(
-                                file             = file_name,
-                                line             = csv_reader.line_num,
-                                model_from       = model_from,
-                                id_from          = id_from,
-                                model_to         = model_to,
-                                id_to            = id_to,
-                                relation_name    = relation_name,
-                                error            = str(e)
-                            )
-                        )
-                    except Exception as e:
-                        # Error unknown, we break the process to alert the user
-                        raise Error(
-                            file             = file_name,
-                            line             = csv_reader.line_num,
-                            model_from       = model_from,
-                            id_from          = id_from,
-                            model_to         = model_to,
-                            id_to            = id_to,
-                            relation_name    = relation_name,
-                            error            = str(e))
-                else:
-                    # A key is missing (id_from or id_to) but we don't want to stop the parsing.
-                    # Then we store the wrong line to return it to the user.
-                    errors.append(
-                        WarningInformationIsMissing(
-                            file=file_name, row=row, line=csv_reader.line_num, id_to=id_to, id_from=id_from
-                        )
-                    )
-
-        # Save everything
-        saved = 0
-        logger.debug("BulkUpload: saving %d objects" % (len(id_mapping)))
-        job.refresh()
-        job.meta["objects_to_save"] = len(id_mapping)
-        for item in id_mapping.values():
-            item.save()
-            saved += 1
-            job.refresh()
-            job.meta["saving_progression"] = saved
-            job.save()
-        job.refresh()
-        if "track" in job.meta:
-            from django.core.mail import send_mail
-            user = User.objects.get(pk=job.meta["user"])
-            send_mail("upload finished", "your upload just finished", settings.DEFAULT_FROM_EMAIL, (user.email,))
-        return {
-            'duration' : (time.time() - start_time),
-            'inserted' : {
-                'objects' : saved,
-                'links'   : inserted_relations
-            },
-            "errors" : sorted([dict([(e.__class__.__name__, str(e.__dict__))]) for e in errors])
-        }
-
-    except Exception as e:
-        import traceback
-        logger.error(traceback.format_exc())
-        if e.__dict__:
-            message = str(e.__dict__)
-        else:
-            message = e.message
-        return {
-            "errors" : [{e.__class__.__name__ : message}]
-        }
+# EOF

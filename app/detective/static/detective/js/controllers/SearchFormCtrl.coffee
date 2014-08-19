@@ -1,5 +1,5 @@
 class SearchFormCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$rootScope', '$location', '$state', 'Page', 'QueryFactory', 'TopicsFactory', 'UtilsFactory']
 
     constructor: (@scope, @rootScope, @location, @state, @Page,  @QueryFactory, @TopicsFactory, @UtilsFactory)->

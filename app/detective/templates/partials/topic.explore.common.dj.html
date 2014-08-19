@@ -2,18 +2,41 @@
 
 <div class="explore">
 
-    <div class="banner banner-big" parallax=".bg" speed="0.7">
+    <div class="banner banner-big" parallax=".bg" speed="0.7" ng-controller="TopicBannerCtrl">
         <img ng-src="[[meta.background]]" class="bg" />
+        <div class="general-graph-navigation" ng-if="graphNavigationEnabled" ng-class="{'general-graph-navigation__show' : graphNavigationEnabled}">
+            <div class="general-graph-navigation__loading" ng-if="isLoading"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</div>
+            <a class="general-graph-navigation__close-network-view" ui-sref="user-topic({username:username, topic:topic})"><i class="fa fa-arrow-left"> </i> Close network view</a>
+            <div class="general-graph-navigation__filters-box">
+                <form>
+                    <div class="checkbox">
+                        <input type="checkbox" id="general-graph-navigation__filters-box__all" ng-click="toggleSelectAll()" ng-checked="filtersSelected.length == filtersNames.length"/>
+                        <label for="general-graph-navigation__filters-box__all">
+                            <div class="general-graph-navigation__filters-box__label">all</div>
+                        </label>
+                    </div>
+                    <div class="checkbox" ng-repeat="form in filtered = ( forms | filter:isSearchable | orderBy:'index' )">
+                        <input type="checkbox" id="general-graph-navigation__filters-box__[[$index]]" name="filtersSelected[]" value="[[form.name]]" ng-checked="filtersSelected.indexOf(form.name) > -1" ng-click="toggleFiltersSelection(form.name)" />
+                        <label class="filter-names" for="general-graph-navigation__filters-box__[[$index]]" ng-init="count = getTypeCount(form.name)" >
+                            <div class="general-graph-navigation__filters-box__label" ng-style="{'border-bottom-color': strToColor(form.name) }">
+                            <span>[[form.verbose_name_plural|lowercase]]</span>
+                            </div>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <graphviz class="general-graph-navigation__graphviz" data="graphnodes" topic="topic"></graphviz>
+        </div>
         <div class="fg top90 container">
-            <div class="intro">
+            <div class="intro" ng-if="!graphNavigationEnabled">
                 <h2>[[meta.title]]</h2>
                 <p class="lead" ng-if="meta.description" ng-bind-html="meta.description"></p>
                 <p class="top40">
                     <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.ontology_as_mod)" ng-href="/[[username]]/[[topic]]/contribute">
-                        Contribute
+                        Add data
                     </a>
-                    <a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">
-                        Start to explore
+                    <a class="btn btn-primary btn-lg" ui-sref="global-graph-navigation({username:username, topic:topic})">
+                        Explore
                     </a>
                 </p>
             </div>
@@ -22,11 +45,12 @@
 
     <div class="bg-primary">
         <div class="container">
-            <a scroll-to="600" ng-if="scrollToExplore == true" reset="scrollToExplore"></a>
             <div class="top50 bottom40">
                 <div class="row">
                     <form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl as search">
                         <input type="search"
+                                autocorrect="off"
+                                autocapitalize="off"
                                 placeholder="[[ search.topic.search_placeholder ]]"
                                 tt-typeahead
                                 tt-individual="'summary'"
@@ -59,7 +83,7 @@
 
     <div class="container">
         <div class="row" ng-init="display_map=shouldDisplayMap()">
-            <div class="about" 
+            <div class="about"
                  ng-class="{ 'col-md-4': display_map, 'col-md-8 col-md-push-2': !display_map}">
                 <h3>About the project</h3>
                 <div ng-bind-html="meta.about"></div>

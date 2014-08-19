@@ -1,16 +1,30 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
-from app.detective.models             import QuoteRequest, Topic, Article
-from app.detective.utils              import get_registered_models
-from app.detective.topics.common.user import UserResource, AuthorResource
-from tastypie                         import fields
+from app.detective.models             import QuoteRequest, Topic, TopicToken, Article, User
+from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
+from app.detective.topics.common.user import UserResource
+from django.conf                      import settings
+from django.conf.urls                 import url
+from django.core.mail                 import EmailMultiAlternatives
+from django.core.urlresolvers         import reverse
+from django.db                        import IntegrityError
+from django.db.models                 import Q
+from django.http                      import Http404, HttpResponse
+from django.template                  import Context
+from django.template.loader           import get_template
+from easy_thumbnails.exceptions       import InvalidImageFormatError
+from easy_thumbnails.files            import get_thumbnailer
+from tastypie                         import fields, http
 from tastypie.authorization           import ReadOnlyAuthorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
+from tastypie.utils                   import trailing_slash
 from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
+
+import json
 import re
 
 # Only staff can consult QuoteRequests
@@ -33,15 +47,117 @@ class QuoteRequestResource(ModelResource):
         authorization = QuoteRequestAuthorization()
         queryset      = QuoteRequest.objects.all()
 
+
+class TopicAuthorization(ReadOnlyAuthorization):
+    def update_detail(self, object_list, bundle):
+        contributor_group = bundle.obj.get_contributor_group().name
+        isAuthor = bundle.obj.author == bundle.request.user
+        # Only authenticated user can update there own topic or people from the contributor group
+        return isAuthor or not not bundle.request.user.groups.filter(name=contributor_group)
+    # Only authenticated user can create topics
+    def create_detail(self, object_list, bundle):
+        return bundle.request.user.is_authenticated()
+    def read_list(self, object_list, bundle):
+        if bundle.request.user and bundle.request.user.is_staff:
+            return object_list
+        else:
+            if bundle.request.user:
+                read_perms = [perm.split('.')[0] for perm in bundle.request.user.get_all_permissions() if perm.endswith(".contribute_read")]
+                q_filter = Q(public=True) | Q(author__id=bundle.request.user.id) | Q(ontology_as_mod__in=read_perms)
+            else:
+                q_filter = Q(public=True)
+            return object_list.filter(q_filter)
+
 class TopicResource(ModelResource):
 
-    author             = fields.ToOneField(AuthorResource, 'author', full=True, null=True)
+    author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path', readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
 
     class Meta:
+        authorization = TopicAuthorization()
         queryset  = Topic.objects.all().prefetch_related('author')
         filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
+
+    def prepend_urls(self):
+        params = (self._meta.resource_name, trailing_slash())
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/invite%s$" % params, self.wrap_view('invite'), name="api_invite"),
+        ]
+
+    def invite(self, request, **kwargs):
+        # only allow POST requests
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+        # Get current topic
+        topic = Topic.objects.get(id=kwargs["pk"])
+        # Check authorization
+        bundle = self.build_bundle(obj=topic, request=request)
+        self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
+
+        body = json.loads(request.body)
+        collaborator = body.get("collaborator", None)
+        from_email = settings.DEFAULT_FROM_EMAIL
+        if collaborator is None:
+            return http.HttpBadRequest("Missing 'collaborator' parameter")
+
+        try:
+            # Try to get the user by its email
+            if is_valid_email(collaborator):
+                user = User.objects.get(email=collaborator)
+            # Try to get the user by its username
+            else:
+                # Add existing user
+                user = User.objects.get(username=collaborator)
+            # You can't invite the author of the topic
+            if user == topic.author:
+                return http.HttpBadRequest("You can't invite the author of the topic.")
+            # Email options for kown user
+            template = get_template("email.topic-invitation.existing-user.txt")
+            to_email = user.email
+            subject = '[Detective.io] You’ve just been added to an investigation'
+            signup = request.build_absolute_uri( reverse("signup") )
+            # Get the contributor group for this topic
+            contributor_group = topic.get_contributor_group()
+            # Check that the user isn't already in this group
+            if user.groups.filter(name=contributor_group.name):
+                return http.HttpBadRequest("You can't invite someone twice to the same topic.")
+            else:
+                # Add user to the collaborator group
+                contributor_group.user_set.add(user)
+        # Unkown username
+        except User.DoesNotExist:
+            # User doesn't exist and we don't have any email address
+            if not is_valid_email(collaborator): return http.HttpNotFound("User unkown.")
+            # Send an invitation to create an account
+            template = get_template("email.topic-invitation.new-user.txt")
+            to_email = collaborator
+            subject = '[Detective.io] Someone needs your help on an investigation'
+            try:
+                # Creates a topictoken
+                topicToken = TopicToken(topic=topic, email=collaborator)
+                topicToken.save()
+            except IntegrityError:
+                # Can't invite the same user once!
+                return http.HttpBadRequest("You can't invite someone twice to the same topic.")
+            signup = request.build_absolute_uri( reverse("signup-invitation", args=[topicToken.token]) )
+
+        # Creates link to the topic
+        link = request.build_absolute_uri(topic.get_absolute_path())
+        context = Context({
+            'topic' : topic,
+            'user'  : request.user,
+            'link'  : link,
+            'signup': signup
+        })
+        # Render template
+        text_content = template.render(context)
+        # Prepare and send email
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
+        msg.send()
+
+        return HttpResponse("Invitation sent!")
 
     def dehydrate(self, bundle):
         from app.detective import register
@@ -78,25 +194,6 @@ class TopicResource(ModelResource):
             }
             bundle.data["models"].append(model)
         return bundle
-
-    def get_object_list(self, request):
-        # Check if the user is staff
-        is_staff    = request.user and request.user.is_staff
-
-        # Retrieve all groups in which the user is in
-        can_read    = []
-        if request.user:
-            for permission in request.user.get_all_permissions():
-                matches = re.match('^(\w+)\.contribute_read$', permission)
-                if matches:
-                    can_read.append(matches.group(1))
-
-        object_list = super(TopicResource, self).get_object_list(request)
-        # Return only topics the user can see
-        object_list = object_list if is_staff else object_list.filter(Q(ontology_as_mod__in=can_read)|Q(public=True))
-
-        return object_list
-
 
 class ArticleResource(ModelResource):
     topic = fields.ToOneField(TopicResource, 'topic', full=True)

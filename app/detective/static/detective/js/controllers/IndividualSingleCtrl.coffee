@@ -1,5 +1,5 @@
 class IndividualSingleCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$stateParams', '$state', 'Individual',  'topic', 'individual', 'forms', '$filter', '$anchorScroll', '$location', 'Page', 'QueryFactory', '$sce']
 
     constructor: (@scope, @stateParams, @state, @Individual, @topic, @individual, @forms, @filter, @anchorScroll, @location, @Page, @QueryFactory, $sce)->
@@ -44,6 +44,7 @@ class IndividualSingleCtrl
         # Get meta information for this type
         @scope.meta       = @forms[ @scope.type.toLowerCase() ]
         @scope.topicmeta  = @topic
+        @scope.mailReportLink = @getMailReportLink
 
         # Load graph data
         graph_params =
@@ -127,5 +128,22 @@ class IndividualSingleCtrl
                 @scope.meta.fields.push geoloc.meta
                 @individual['geolocation'] = "#{geoloc.individual.latitude}, #{geoloc.individual.longitude}"
 
+    getMailReportLink: =>
+        topic_title = @topic.title
+        indiv_name  = @individual.name
+        error_url   = @location.absUrl()
+
+        subject = encodeURIComponent "[Detective.io] Error on page #{indiv_name} in #{topic_title}"
+        body    = encodeURIComponent """
+            Dear Detective.io team,
+
+            I spotted a mistake on this page #{error_url}.
+
+            What stands there should be corrected because … (add links that show the information on the site is erroneous).
+
+            Yours,
+
+            """
+        "mailto:contact@detective.io?subject=#{subject}&body=#{body}"
 
 angular.module('detective.controller').controller 'individualSingleCtrl', IndividualSingleCtrl

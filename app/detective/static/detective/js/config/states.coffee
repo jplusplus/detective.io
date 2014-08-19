@@ -7,11 +7,27 @@ angular.module('detective.config').config [
         $urlRouterProvider.otherwise("/404");
         # ui-router configuration
         $stateProvider
-            # Core
-            .state('tour',
+            .state('home',
                 url : "/"
-                controller : HomeCtrl
-                templateUrl : '/partial/home.html'
+                template: '<ui-view/>'
+                controller: ["Auth", "$state", (Auth, $state)->
+                    unless $state.includes("home.*")
+                        if Auth.isAuthenticated()
+                            $state.go "home.dashboard"
+                        else
+                            $state.go "home.tour"
+                ]
+            )
+            .state('home.tour',
+                url: 'tour/'
+                controller : TourCtrl
+                templateUrl : '/partial/home.tour.html'
+            )
+            .state('home.dashboard',
+                controller : DashboardCtrl
+                templateUrl : '/partial/home.dashboard.html'
+                resolve: DashboardCtrl.resolve
+                auth: true
             )
             .state('404-page',
                 url : "/404/"
@@ -49,11 +65,16 @@ angular.module('detective.config').config [
             )
             .state('login',
                 url : "/login/?nextState&nextParams"
-                controller : UserCtrl
+                controller : LoginCtrl
                 templateUrl : '/partial/account.login.html'
             )
             .state('signup',
                 url : "/signup/"
+                controller : UserCtrl
+                templateUrl : '/partial/account.signup.html'
+            )
+            .state('signup-invitation'
+                url : "/signup/:token/"
                 controller : UserCtrl
                 templateUrl : '/partial/account.signup.html'
             )
@@ -67,9 +88,27 @@ angular.module('detective.config').config [
             # User-related url
             .state('user',
                 url : "/:username/"
+                template: '<ui-view/>'
+                controller: ['Auth', 'User', '$state', '$stateParams', (Auth, User, $state, $stateParams) =>
+                    unless $state.includes("user.*")
+                        if (do Auth.isAuthenticated) and User.username is $stateParams.username
+                            $state.go 'user.me', { username : $stateParams.username }
+                        else
+                            $state.go 'user.notme', { username : $stateParams.username }
+                ]
+            )
+            .state('user.notme',
                 controller : ProfileCtrl
                 templateUrl : "/partial/account.html"
                 resolve : UserCtrl.resolve
+                default : 'user'
+            )
+            .state('user.me',
+                auth : true
+                controller : ProfileCtrl
+                templateUrl : "/partial/account.html"
+                resolve : UserCtrl.resolve
+                default : 'user'
             )
             # Topic-related url
             .state('user-topic',
@@ -79,6 +118,22 @@ angular.module('detective.config').config [
                     topic: UserTopicCtrl.resolve.topic
                 # Allow a dynamic loading by setting the templateUrl within controller
                 template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+            )
+            .state('global-graph-navigation',
+                url : "/:username/:topic/graph/"
+                controller : ExploreCtrl
+                resolve :
+                    topic: UserTopicCtrl.resolve.topic
+                # Allow a dynamic loading by setting the templateUrl within controller
+                template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+            )
+            .state('user-topic-invite',
+                url: "/:username/:topic/invite/"
+                controller: AddCollaboratorsCtrl
+                templateUrl: '/partial/topic.invite.html'
+                resolve:
+                    topic: UserTopicCtrl.resolve.topic
+                auth: true
             )
             .state('user-topic-search',
                 url: '/:username/:topic/search/?q&page'

@@ -1,5 +1,5 @@
 class ArticleCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$stateParams', '$state', 'Common', 'Page']
 
     constructor: (@scope,  @stateParams, @state, @Common, @Page)->

@@ -16,10 +16,10 @@
                 </p>
                 <p class="top40">
                     <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.ontology_as_mod)" ng-href="/[[username]]/[[topic]]/contribute">
-                        Contribute
+                        Add data
                     </a>
                     <a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">
-                        Start to explore
+                        Explore
                     </a>
                 </p>
             </div>
@@ -33,6 +33,8 @@
                 <div class="row">
                     <form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl as search">
                         <input type="search"
+                                autocorrect="off"
+                                autocapitalize="off"
                                 placeholder="[[ search.topic.search_placeholder]]"
                                 tt-typeahead
                                 tt-individual="'summary'"

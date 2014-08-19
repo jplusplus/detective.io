@@ -1,5 +1,5 @@
-class HomeCtrl
-    # Injects dependancies
+class TourCtrl
+    # Injects dependencies
     @$inject: ['$scope', 'Page', "Common"]
     constructor: (@scope, @Page, @Common)->
     	# Set page title with no title-case
@@ -7,4 +7,4 @@ class HomeCtrl
     	# Get all featured topics
     	@Common.cachedQuery {type: 'topic', featured: 1}, (d)=> @scope.featured = d
 
-angular.module('detective.controller').controller 'homeCtrl', HomeCtrl
+angular.module('detective.controller').controller 'tourCtrl', TourCtrl

@@ -31,6 +31,15 @@
 							Edit
 						</a>
 						<a class="btn btn-default"
+						   ng-if="!user.hasChangePermission(topicmeta.ontology_as_mod)"
+						   ng-href="[[ mailReportLink() ]]"
+						   rel="external"
+						   target="_blank">
+							<i class="fa fa-flag"></i>
+							Report an error
+						</a>
+
+						<a class="btn btn-default"
 						   ng-if="user.hasDeletePermission(topicmeta.ontology_as_mod)"
 						   ng-click="deleteNode()">
 							<i class="fa fa-trash-o"></i>

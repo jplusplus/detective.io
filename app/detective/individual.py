@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request
 from app.detective.topics.common.models import FieldSource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
@@ -23,15 +23,18 @@ from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
 from datetime                           import datetime
-from collections                        import defaultdict
 import json
 import re
-import copy
 
 DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
+    def get_topic_from_bundle(self, bundle):
+        topic = get_topic_from_request(bundle.request)
+        if topic == None:
+            topic = Topic.objects.get(ontology_as_mod=get_model_topic(bundle.obj)).public
+        return topic
 
     def check_contribution_permission(self, object_list, bundle, operation):
         authorized = False
@@ -42,9 +45,16 @@ class IndividualAuthorization(Authorization):
         return authorized
 
     def read_detail(self, object_list, bundle):
-        if not Topic.objects.get(ontology_as_mod=get_model_topic(bundle.obj)).public and not self.check_contribution_permission(object_list, bundle, 'read'):
+        topic = self.get_topic_from_bundle(bundle)
+        if not topic.public and not self.check_contribution_permission(object_list, bundle, 'read'):
             raise Unauthorized("Sorry, only staff or contributors can read resource.")
         return True
+
+    def read_list(self, object_list, bundle):
+        topic = self.get_topic_from_bundle(bundle)
+        if not topic.public and not self.check_contribution_permission(object_list, bundle, 'read'):
+            raise Unauthorized("Sorry, only staff or contributors can read resource.")
+        return object_list
 
     def create_detail(self, object_list, bundle):
         if not self.check_contribution_permission(object_list, bundle, 'add'):
@@ -607,65 +617,16 @@ class IndividualResource(ModelResource):
         ids = [ rel.id for rel in rels ]
         return self.create_response(request, ids)
 
-
-
     def get_graph(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
-
         depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
-        aggregation_threshold = 10
-
-        ###
-        # First we retrieve every leaf in the graph
-        query = """
-            START root=node({root})
-            MATCH p = (root)-[*1..{depth}]-(leaf)<-[:`<<INSTANCE>>`]-(type)
-            WHERE HAS(leaf.name)
-            AND type.app_label = '{app_label}'
-            AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
-            RETURN leaf, ID(leaf) as id_leaf, type
-        """.format(root=kwargs['pk'], depth=depth, app_label=get_model_topic(self.get_model()))
-        rows = connection.cypher(query).to_dicts()
-
-        leafs = {}
-
-        # We need to retrieve the root in another request
-        # TODO : enhance that
-        query = """
-            START root=node({root})
-            MATCH (root)<-[:`<<INSTANCE>>`]-(type)
-            RETURN root as leaf, ID(root) as id_leaf, type
-        """.format(root=kwargs['pk'])
-        for row in connection.cypher(query).to_dicts():
-            rows.append(row)
-
-        for row in rows:
-            row['leaf']['data']['_id'] = row['id_leaf']
-            row['leaf']['data']['_type'] = row['type']['data']['model_name']
-            leafs[row['id_leaf']] = row['leaf']['data']
-        #
-        ###
-
-        ###
-        # Then we retrieve all edges
-        query = """
-            START A=node({leafs})
-            MATCH (A)-[rel]->(B)
-            WHERE type(rel) <> "<<INSTANCE>>"
-            RETURN ID(A) as head, type(rel) as relation, id(B) as tail
-        """.format(leafs=','.join([str(id) for id in leafs.keys()]))
-        rows = connection.cypher(query).to_dicts()
-
-        edges = []
-        for row in rows:
-            try:
-                if (leafs[row['head']] and leafs[row['tail']]):
-                    edges.append([row['head'], row['relation'], row['tail']])
-            except KeyError:
-                pass
-        #
-        ###
-
+        topic = Topic.objects.get(ontology_as_mod=get_model_topic(self.get_model()))
+        leafs, edges = get_leafs_and_edges(
+            topic     = topic,
+            depth     = depth,
+            root_node = kwargs['pk'])
         self.log_throttled_access(request)
         return self.create_response(request, {'leafs': leafs, 'edges' : edges})
+
+# EOF

@@ -1,13 +1,19 @@
-from django.forms.forms import pretty_name
-from random             import randint
-from os.path            import isdir, join
-from os                 import listdir
-from unidecode          import unidecode
+from django.forms.forms     import pretty_name
+from django.core.cache import cache
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from random    import randint
+from os.path   import isdir, join
+from os        import listdir
 import importlib
 import inspect
 import os
 import re
 import tempfile
+import itertools
+import logging
+from django.db.models import signals
+logger = logging.getLogger(__name__)
 
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
@@ -16,6 +22,7 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     """
     Create specified model
     """
+    from app.detective.models import update_topic_cache
     from neo4django.db            import models
     from django.db.models.loading import AppCache
     # Django use a cache by model
@@ -40,6 +47,8 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     if fields: attrs.update(fields)
     # Create the class, which automatically triggers ModelBase processing
     cls = type(name, (models.NodeModel,), attrs)
+    # for Model in topic.get_models():
+    signals.post_save.connect(update_topic_cache, sender=cls)
     return cls
 
 def create_model_resource(model, path=None, Resource=None, Meta=None):
@@ -73,7 +82,6 @@ def get_topics(offline=True):
         return [ name for name in listdir(appsdir) if isdir(join(appsdir, name)) ]
     else:
         from app.detective.models import Topic
-        from django.core.cache    import cache
         # Store topic object in a temporary attribute
         # to avoid SQL lazyness
         cache_key = "prefetched_topics"
@@ -118,7 +126,7 @@ def get_topic_models(topic):
 
 def get_registered_models():
     from django.db import models
-    import app.settings as settings
+    from django.conf import settings
     mdls = []
     for app in settings.INSTALLED_APPS:
         models_name = app + ".models"
@@ -139,6 +147,16 @@ def get_registered_models():
 def get_topic_from_model(model):
     from app.detective.models import Topic
     return Topic.objects.get(ontology_as_mod=get_model_topic(model))
+
+
+# storage middleware utilities
+def get_topics_from_request(request):
+    # see app.middleware.storage.StoreTopicList
+    return getattr(request, 'topic_list', None)
+
+def get_topic_from_request(request):
+    # see app.middleware.storage.StoreTopic
+    return getattr(request, 'current_topic', None)
 
 def get_model_fields(model, order_by='name'):
     from app.detective           import register
@@ -220,6 +238,80 @@ def get_model_nodes():
     get_model_nodes.buffer = connection.cypher(query).to_dicts()
     return get_model_nodes.buffer
 
+def get_leafs_and_edges(topic, depth, root_node="*"):
+    def _get_leafs_and_edges(topic, depth, root_node):
+        from neo4django.db import connection
+        leafs = {}
+        edges = []
+        leafs_related = []
+        ###
+        # First we retrieve every leaf in the graph
+        query = """
+            START root=node({root})
+            MATCH p = (root)-[*1..{depth}]-(leaf)<-[:`<<INSTANCE>>`]-(type)
+            WHERE HAS(leaf.name)
+            AND type.app_label = '{app_label}'
+            AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
+            RETURN leaf, ID(leaf) as id_leaf, type
+        """.format(root=root_node, depth=depth, app_label=topic.app_label())
+        rows = connection.cypher(query).to_dicts()
+
+        if root_node != "*":
+            # We need to retrieve the root in another request
+            # TODO : enhance that
+            query = """
+                START root=node({root})
+                MATCH (root)<-[:`<<INSTANCE>>`]-(type)
+                RETURN root as leaf, ID(root) as id_leaf, type
+            """.format(root=root_node)
+            for row in connection.cypher(query).to_dicts():
+                rows.append(row)
+        # filter rows using the models in ontology
+        # FIXME: should be in the cypher query
+        models_in_ontology = map(lambda m: m.__name__.lower(), topic.get_models())
+        rows = filter(lambda r: r['type']['data']['model_name'].lower() in models_in_ontology, rows)
+
+        for row in rows:
+            row['leaf']['data']['_id'] = row['id_leaf']
+            row['leaf']['data']['_type'] = row['type']['data']['model_name']
+            leafs[row['id_leaf']] = row['leaf']['data']
+        if len(leafs) == 0:
+            return ([], [])
+
+        # Then we retrieve all edges
+        query = """
+            START A=node({leafs})
+            MATCH (A)-[rel]->(B)
+            WHERE type(rel) <> "<<INSTANCE>>"
+            RETURN ID(A) as head, type(rel) as relation, id(B) as tail
+        """.format(leafs=','.join([str(id) for id in leafs.keys()]))
+        rows = connection.cypher(query).to_dicts()
+        for row in rows:
+            try:
+                if (leafs[row['head']] and leafs[row['tail']]):
+                    leafs_related.extend([row['head'], row['tail']])
+                    edges.append([row['head'], row['relation'], row['tail']])
+            except KeyError:
+                pass
+        # filter edges with relations in ontology
+        models_fields         = itertools.chain(*map(get_model_fields, topic.get_models()))
+        relations_in_ontology = set(map(lambda _: _.get("rel_type"), models_fields))
+        edges                 = [e for e in edges if e[1] in relations_in_ontology]
+        # filter leafts without relations
+        # FIXME: should be in the cypher query
+        leafs_related = set(leafs_related)
+        leafs = dict((k, v) for k, v in leafs.iteritems() if k in leafs_related)
+        return (leafs, edges)
+
+    cache_key = "leafs_and_nodes_%s_%s" % (depth, root_node)
+    topic_cache = TopicCachier()
+    leafs_and_edges = topic_cache.get(topic, cache_key)
+    if leafs_and_edges != None:
+        return leafs_and_edges
+    else:
+        leafs_and_edges = _get_leafs_and_edges(topic=topic, depth=depth, root_node=root_node)
+        topic_cache.set(topic, cache_key, leafs_and_edges)
+        return leafs_and_edges
 
 def get_model_node_id(model):
     # All node from neo4j that are have ascending <<TYPE>> relationship
@@ -300,4 +392,98 @@ def open_csv(csv_file):
     reader = csv.reader(csv_file, dialect)
     return reader
 
+# @src: http://stackoverflow.com/a/3218128/797941
+def is_valid_email(email):
+    try:
+        validate_email(email)
+        return True
+    except ValidationError:
+        return False
+
+def should_show_debug_toolbar(request):
+    return re.match(r'^/api/', request.path) != None
+
+class TopicCachier(object):
+    __instance = None
+    # dict of cache key definitions / formats
+    __KEYS = {
+        # general prefix for every key
+        'topic_prefix'   : 'topic_{module}',
+        # specific version cache key
+        'version_number' : '{topic_prefix}_version',
+        # topic's related cache key prefix
+        'cache_prefix'   : '{topic_prefix}_{suffix}',
+    }
+
+    __TIMEOUTS = {
+        'default': 60 * 60 # 3600 secondes = 1h
+    }
+
+    def __keys(self):
+        return self.__KEYS
+
+    def __timeout(self, key='default'):
+        return self.__TIMEOUTS[key]
+
+    def __version_key(self, topic):
+        return self.__keys()['version_number'].format(
+            topic_prefix=self.__topic_prefix(topic))
+
+    def __topic_prefix(self, topic):
+        return self.__keys()['topic_prefix'].format(
+            module=topic.module)
+
+    def __get_key(self, topic, suffix):
+        return self.__keys()['cache_prefix'].format(
+            topic_prefix=self.__topic_prefix(topic),
+            suffix=suffix
+        )
+
+    def init_version(self, topic):
+        cache.set(
+            self.__version_key(topic), 0, self.__timeout()
+        )
+
+    def version(self, topic):
+        cache_key = self.__version_key(topic)
+        return cache.get(cache_key)
+
+    def incr_version(self, topic):
+        cache_key = self.__version_key(topic)
+        if cache.get(cache_key) == None:
+            self.init_version(topic)
+        else:
+            cache.incr(cache_key)
+
+    def delete_version(self, topic):
+        cache_key = self.__version_key(topic)
+        cache.delete(cache_key)
+
+    def get(self, topic, suffix_key):
+        rev       = self.version(topic)
+        cache_key = self.__get_key(topic, suffix_key)
+        return cache.get(cache_key, version=rev)
+
+    def set(self, topic, suffix_key, value, timeout=None):
+        rev = self.version(topic)
+        if timeout == None:
+            timeout = self.__timeout()
+        cache_key = self.__get_key(topic, suffix_key)
+        cache.set(cache_key, value, timeout, version=rev)
+
+    def delete(self, topic, suffix_key):
+        cache_key = self.__get_key(topic, suffix_key)
+        rev = self.version(topic)
+        cache.delete(cache_key, version=rev)
+
+    def debug(self, msg):
+        print "\nDEBUG - TopicCachier %s\n" % msg
+
+    def __new__(self):
+        # singleton instanciation
+        if self.__instance == None:
+            self.__instance = super(TopicCachier, self).__new__(self)
+        return self.__instance
+
+topic_cache = TopicCachier()
 # EOF

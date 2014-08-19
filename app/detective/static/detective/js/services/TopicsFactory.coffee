@@ -23,6 +23,10 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 if params.topic and @topics
                     (@getTopic params.topic).then (topic) =>
                         @setCurrent topic
+                else
+                    @topic = {}
+                    $rootScope.$broadcast @EVENTS.current_topic_updated
+
 
             setCurrent: (topic)=>
                 return unless topic?

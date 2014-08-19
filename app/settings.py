@@ -1,6 +1,6 @@
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 # -*- coding: utf-8 -*-
-import os, re
+import os
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
 
@@ -14,7 +14,8 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 DATA_ROOT = here('data')
 
 ADMINS = (
-    ('Pierre Romera', 'hello@pirhoo.com')
+    ('Pierre Romera', 'hello@pirhoo.com'),
+    ('Edouard Richard', 'edouard@jplusplus.org')
 )
 
 DEFAULT_FROM_EMAIL = 'Detective.io <contact@detective.io>'
@@ -38,7 +39,7 @@ NEO4J_DATABASES = {
 
 DATABASE_ROUTERS        = ['neo4django.utils.Neo4djangoIntegrationRouter']
 SESSION_ENGINE          = "django.contrib.sessions.backends.db"
-AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
+AUTHENTICATION_BACKENDS = ('app.detective.auth.CaseInsensitiveModelBackend',)
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -61,7 +62,7 @@ USE_I18N = True
 USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = True
+USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -109,7 +110,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', '#_o0^tt=lv1k8k-h=n%^=e&amp;vnvcxpnl=6+%&am
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
+    'django.template.loaders.eggs.Loader',
 )
 
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
@@ -123,12 +124,14 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.cache.UpdateCacheMiddleware',
     'app.middleware.cache.FetchFromCacheMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'app.middleware.debug_toolbar.JsonAsHTML',
     'app.middleware.crossdomainxhr.XsSharing',
     # add urlmiddleware after all other middleware.
     'urlmiddleware.URLMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 
@@ -158,17 +161,6 @@ COMPRESS_PRECOMPILERS = (
     ('text/coffeescript', 'coffee --compile --stdio --bare'),
     ('text/less', 'lessc --include-path="%s" {infile} {outfile}' % here('static') ),
 )
-
-# Activate CSS minifier
-COMPRESS_CSS_FILTERS = (
-    "app.detective.compress_filter.CustomCssAbsoluteFilter",
-)
-
-COMPRESS_JS_FILTERS = ()
-
-COMPRESS_TEMPLATE_FILTER_CONTEXT = {
-    'STATIC_URL': STATIC_URL
-}
 
 # Remove BeautifulSoup requirement
 COMPRESS_PARSER = 'compressor.parser.HtmlParser'
@@ -206,8 +198,12 @@ INSTALLED_APPS = (
     'tinymce',
     # Redis queue backend
     "django_rq",
+    # Debug utilities
+    "debug_toolbar",
     # Internal
     'app.detective',
+    'app.detective.topics.common',
+    'app.detective.topics.energy',
     'app.detective.permissions',
 )
 
@@ -215,22 +211,41 @@ SOUTH_MIGRATION_MODULES = {
     'easy_thumbnails': 'easy_thumbnails.south_migrations',
 }
 
-# Add customs app to INSTALLED_APPS
-from app.detective.utils import get_topics_modules
-INSTALLED_APPS = INSTALLED_APPS + get_topics_modules()
-
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # One-week activation window
 ACCOUNT_ACTIVATION_DAYS = 7
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache',
+# MemCachier configuration took from https://devcenter.heroku.com/articles/memcachier#django
+def get_cache():
+  # We do this complicated cache defenition so that on a local machine (where
+  # MEMCACHIER_SERVERS won't be defined), the try fails and so we use the
+  # inbuilt local memory cache of django.
+  try:
+    os.environ['MEMCACHE_SERVERS'] = os.environ['MEMCACHIER_SERVERS'].replace(',', ';')
+    os.environ['MEMCACHE_USERNAME'] = os.environ['MEMCACHIER_USERNAME']
+    os.environ['MEMCACHE_PASSWORD'] = os.environ['MEMCACHIER_PASSWORD']
+    return {
+        'default': {
+            'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+            'TIMEOUT': 500,
+            'BINARY': True,
+            'OPTIONS': {
+                'tcp_nodelay': True,
+            }
+        }
     }
-}
+  except:
+    # Use django local development cache (for local development).
+    return {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+            # 'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': '/tmp/django_cache',
+        }
+    }
+
+CACHES = get_cache()
 
 # Redis Queues
 # RQ_SHOW_ADMIN_LINK will override the default admin template so it may interfere
@@ -246,6 +261,16 @@ RQ_QUEUES = {
     'high'   : RQ_CONFIG,
     'low'    : RQ_CONFIG
 }
+
+# GROUPS of user / Plans
+# NOTE: keys limited to 10 characters
+PLANS = [
+    {"Free"       : {"max_investigation" :  3, "max_entities"  :  100 }},
+    {"Low"        : {"max_investigation" :  5, "max_entities"  :  500 }},
+    {"Medium"     : {"max_investigation" : -1, "max_entities"  :  1000}},
+    {"High"       : {"max_investigation" : -1, "max_entities"  : -1   }},
+    {"Enterprise" : {"max_investigation" : -1, "max_entities"  : -1   }}
+]
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -296,5 +321,27 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'rq.worker': {
+            'handlers': ['mail_admins', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     }
 }
+
+
+if DEBUG:
+    INTERNAL_IPS = ('127.0.0.1', '0.0.0.0', '::1')
+    DEBUG_TOOLBAR_PATCH_SETTINGS = False
+    DEBUG_TOOLBAR_PANELS = (
+        'debug_toolbar.panels.timer.TimerPanel',
+        'debug_toolbar.panels.headers.HeadersPanel',
+        'debug_toolbar.panels.request.RequestPanel',
+        'debug_toolbar.panels.sql.SQLPanel',
+        'neo4j_panel.Neo4jPanel',
+        'debug_toolbar.panels.cache.CachePanel',
+        'debug_toolbar.panels.signals.SignalsPanel',
+    )
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': 'app.detective.utils.should_show_debug_toolbar'
+    }

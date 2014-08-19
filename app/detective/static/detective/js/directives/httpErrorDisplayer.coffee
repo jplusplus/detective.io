@@ -16,6 +16,6 @@
 
             $timeout =>
                 do errorLabel.remove
-                howManyLabels = _.max 0, howManyLabels - 1
+                howManyLabels = Math.max 0, howManyLabels - 1
             , 6500
 ]

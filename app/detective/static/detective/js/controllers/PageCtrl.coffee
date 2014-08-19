@@ -1,5 +1,5 @@
 class PageCtrl
-    # Injects dependancies
+    # Injects dependencies
     @$inject: ['$scope', '$stateParams', 'Page']
 
     constructor: (@scope,  @stateParams, @Page)->

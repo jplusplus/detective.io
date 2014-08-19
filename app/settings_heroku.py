@@ -53,6 +53,7 @@ AWS_S3_FILE_OVERWRITE      = os.getenv('AWS_S3_FILE_OVERWRITE') == "True" and Tr
 DEBUG                      = bool(os.getenv('DEBUG', False))
 # Configure static files for S3
 STATIC_URL                 = os.getenv('STATIC_URL')
+MEDIA_URL                  = STATIC_URL
 STATIC_ROOT                = here('staticfiles')
 STATICFILES_DIRS          += (here('static'),)
 INSTALLED_APPS            += ('storages',)
@@ -87,12 +88,6 @@ COMPRESS_TEMPLATE_FILTER_CONTEXT = {
     'STATIC_URL': STATIC_URL
 }
 
-# Activate the cache, for true
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
-    }
-}
 
 EMAIL_BACKEND    = "djrill.mail.backends.djrill.DjrillBackend"
 MANDRILL_API_KEY = os.getenv("MANDRILL_APIKEY")

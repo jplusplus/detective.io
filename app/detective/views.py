@@ -7,7 +7,7 @@ from django.conf      import settings
 import urllib2
 import mimetypes
 
-def home(request):
+def home(request, **kwargs):
     # Render template without any argument
     response = render_to_response('home.dj.html')
 

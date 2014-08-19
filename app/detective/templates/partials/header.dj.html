@@ -8,14 +8,14 @@
     <div ng-controller="UserCtrl" class="header__user">
 		<div ng-show="user.is_logged" class="header__user__signed-in">
             <a class="header__user__signed-in__add"
-               ng-if="user.hasAddPermission(topic.ontology_as_mod)"
-               title="Add an entity to this topic"
+               ng-show="shouldShowAddEntity()"
+               title="Add data to this topic"
                href="[[topic.link]]/contribute">
-                <i class="fa fa-plus right05"></i>Add an entity
+                <i class="fa fa-plus right05"></i>Add data
             </a>
-			<a href="/[[user.username]]" class="header__user__signed-in__profil" title="Your profil">
+			<a href="/[[user.username]]" class="header__user__signed-in__profil" title="Your profile">
                 <i class="fa fa-user"></i>
-                <span class="sr-only">Your profil</span>
+                <span class="sr-only">Your profile</span>
             </a>
 			<a ng-click="logout()" class="header__user__signed-in__sign-out" title="Sign out">
                 <i class="fa fa-sign-out"></i>
@@ -31,12 +31,14 @@
 	</div>
 
     <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl as search">
-        <div class="btn-group" ng-if="search.topic.slug">
+        <div class="btn-group ng-hide" ng-show="shouldShowTopicSearch() || false">
             <a class="btn btn-default topic-search__home" href="[[search.topic.link]]" title="[[search.topic.title]]">
                 [[search.topic.title | characters:25]]
             </a>
             <span class="topic-search__input">
                 <input type="search"
+                       autocorrect="off"
+                       autocapitalize="off"
                        placeholder="[[search.topic.search_placeholder]]"
                        tt-submit="search.goToTopic()"
                        tt-typeahead

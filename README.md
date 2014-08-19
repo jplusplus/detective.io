@@ -1,4 +1,4 @@
-# Detective.io [![Build Status](https://drone.io/github.com/jplusplus/detective.io/status.png)](https://drone.io/github.com/jplusplus/detective.io/latest)
+# Detective.io [![Build Status](https://travis-ci.org/jplusplus/detective.io.svg?branch=master)](https://travis-ci.org/jplusplus/detective.io)
 
 [Download](https://github.com/jplusplus/detective.io/archive/master.zip) •
 [Fork](https://github.com/jplusplus/detective.io) •

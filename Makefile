@@ -95,7 +95,7 @@ startdb:
 # Test rules
 ###
 
-test: clean
+test:
 	# Install coveralls
 	pip install --use-mirrors -q coveralls
 	# Stop current database to create some backups

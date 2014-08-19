@@ -135,7 +135,9 @@ def get_topic_model(topic, model_type):
             lambda klass: (klass.__name__.lower(), klass),
             models
         )
-        model = filter(lambda el: el[0] == model_type, models)[0][1]
+        results = filter(lambda el: el[0] == model_type, models)
+        if len(results) > 0:
+            model = results[0][1]
     return model
 
 def get_registered_models():

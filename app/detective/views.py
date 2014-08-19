@@ -18,11 +18,12 @@ def __get_user(request, **kwargs):
     except: pass
     return author
 
-def __get_topic(request, **kwargs):
+def __get_topic(request=None, author=None, **kwargs):
     # fail-proof topic retrieval function
     topic = None
     try:
-        author = __get_user(request, **kwargs)
+        if not author:
+            author = __get_user(request, **kwargs)
         topic  = Topic.objects.get(
             author=author,
             slug=kwargs.get('topic')
@@ -30,28 +31,34 @@ def __get_topic(request, **kwargs):
     except: pass
     return topic
 
-def __get_entity(request, **kwargs):
+def __get_entity(topic_obj, **kwargs):
     # fail-proof entity retrieval function
     entity = None
-    topic  = __get_topic(request, **kwargs)
-    if topic:
-        Model = get_topic_model(topic, kwargs.get('type'))
-        if Model:
-            try:
-                entity = Model.objects.get(pk=kwargs.get('pk'))
-            except: pass
+    Model = get_topic_model(topic_obj, kwargs.get('type'))
+    if Model:
+        try:
+            entity = Model.objects.get(pk=kwargs.get('pk'))
+        except: pass
     return entity
 
 
-def default_social_meta():
+def default_social_meta(request):
     return {
         "title": "Detective.io",
-        "description": "Throw away your Moleskine! Detective.io is a platform that hosts your investigation and lets you make powerful queries to mine it."
+        "description": (
+            'Throw away your Moleskine! Detective.io is a platform that hosts'
+            ' your investigation and lets you make powerful queries to mine '
+            'it.'
+        ),
+        "url": request.build_absolute_uri()
     }
+
+def build_meta(request, meta):
+    meta.update()
 
 def home(request, social_meta_dict=None,**kwargs):
     if social_meta_dict == None:
-        social_meta_dict = default_social_meta()
+        social_meta_dict = default_social_meta(request)
     # Render template without any argument
     response = render_to_response('home.dj.html', { 'meta': social_meta_dict } )
 
@@ -72,17 +79,17 @@ def home(request, social_meta_dict=None,**kwargs):
 
 def entity_list(request, **kwargs):
     meta_dict = None
-    topic     = __get_topic(request, **kwargs)
     user      = __get_user(request, **kwargs)
+    topic     = __get_topic(request, user, **kwargs)
     if topic and topic.public and user:
-        Model = get_topic_model(topic, kwargs.get('type'))
+        default_meta = default_social_meta(request)
+        Model        = get_topic_model(topic, kwargs.get('type'))
         if Model:
             pictures = []
             if topic.background:
                 pictures.append(topic.background)
 
             name = Model.verbose_name_plural or Model.verbose_name + 's'
-            default_title = default_social_meta()['title']
             list_title = "{name} of {topic} owned by {owner}".format(
                 name=plural_name,
                 topic=topic.title,
@@ -90,13 +97,14 @@ def entity_list(request, **kwargs):
             )
             meta_title = "{list_title} - {title}".format(
                 list_title=list_title,
-                title=default_title
+                title=default_meta['title']
             )
-            meta_description = Model.help_text
+            meta_description = Model.help_text or default_meta['description']
             meta_dict = {
-                'title': meta_title,
-                'description': meta_description,
-                'pictures': pictures
+                'title'       : meta_title,
+                'description' : meta_description,
+                'pictures'    : pictures,
+                'url'         : default_meta['url']
             }
     return home(request, meta_dict, **kwargs)
 
@@ -123,11 +131,12 @@ def entity(request, **kwargs):
         return getattr(entity, 'image', None)
 
     meta_dict = None
-    topic     = __get_topic(request, **kwargs)
     user      = __get_user(request, **kwargs)
+    topic     = __get_topic(request, user, **kwargs)
     if topic and topic.public and user:
-        meta_pictures  = []
-        entity         = __get_entity(topic, **kwargs)
+        meta_pictures = []
+        default_meta  = default_social_meta(request)
+        entity        = __get_entity(topic, **kwargs)
         if entity:
             entity_title        = __entity_title(entity)
             entity_picture      = __entity_picture(entity)
@@ -138,9 +147,9 @@ def entity(request, **kwargs):
                 owner=user.username
             )
 
-            meta_title     = "{entity_title} - {title}".format(
+            meta_title = "{entity_title} - {title}".format(
                 entity_title=entity_title,
-                title=default_social_meta()['title']
+                title=default_meta['title']
             )
             meta_description = entity_description or generic_description
             if topic.background:
@@ -152,15 +161,17 @@ def entity(request, **kwargs):
             meta_dict = {
                 'title'      : meta_title,
                 'description': meta_description,
-                'pictures'   : meta_pictures
+                'pictures'   : meta_pictures,
+                'url'        : default_meta['url']
             }
+
     return home(request, meta_dict, **kwargs)
 
 def topic(request, **kwargs):
     meta_dict = None
     topic     = __get_topic(request, **kwargs)
     if topic and topic.public:
-        default_meta = default_social_meta()
+        default_meta = default_social_meta(request)
         meta_description = topic.description or default_meta['description']
         meta_pictures    = []
         if topic.background:
@@ -171,9 +182,10 @@ def topic(request, **kwargs):
             title=default_meta['title']
         )
         meta_dict = {
-            'title': meta_title,
-            'description': meta_description,
-            'pictures': meta_pictures
+            'title'       : meta_title,
+            'description' : meta_description,
+            'pictures'    : meta_pictures,
+            'url'         : default_meta['url']
         }
 
 

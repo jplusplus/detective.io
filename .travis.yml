@@ -1,0 +1,19 @@
+language: python
+python:
+ 	- "2.7"
+before_install:
+	- export COVERALLS_REPO_TOKEN=6opRu71NU2ODTYXULbiEUS1EPTcDNcZqI
+	- export COVERALLS_SERVICE_NAME=travis-ci
+	- export DATABASE_URL=sqlite:///test.db
+	- export DJANGO_SETTINGS_MODULE=app.settings_tests
+	- export NEO4J_PORT=7474
+	- export NEO4J_VERSION=1.9.1
+install:
+	- ./install_local_neo4j.bash $NEO4J_VERSION
+	- ./lib/neo4j/bin/neo4j start
+	- pip install --use-mirrors -qr test_requirements.txt
+	- pip install --use-mirrors coveralls
+script:
+ 	- coverage run --source=app.detective ./manage.py test detective --pythonpath=. --settings=app.settings_tests --traceback
+after_success:
+	- coveralls

@@ -1,6 +1,6 @@
 {
   "name": "detective",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "dependencies": {
     "angular": "1.2.16",
     "angular-cookies": "1.2.16",

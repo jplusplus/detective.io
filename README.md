@@ -5,7 +5,7 @@
 [License](https://github.com/jplusplus/detective.io/blob/master/LICENSE) •
 [Test coverage](https://coveralls.io/r/jplusplus/detective.io) •
 [Documentation](http://docs.detective.io/en/latest/) •
-*Version 1.6.0 Seelöwe*
+*Version 1.6.1 Seelöwe*
 
 ## Installation
 

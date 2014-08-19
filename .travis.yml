@@ -1,6 +1,12 @@
 language: python
 python:
   - "2.7"
+notifications:
+  irc:
+    channels:
+      - "anchor.foonetic.net#jplusplus"
+    on_success: always
+    on_failure: always
 before_install:
   - export COVERALLS_REPO_TOKEN=6opRu71NU2ODTYXULbiEUS1EPTcDNcZqI
   - export COVERALLS_SERVICE_NAME=travis-ci

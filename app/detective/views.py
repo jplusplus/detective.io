@@ -35,7 +35,7 @@ def __get_entity(request, **kwargs):
     entity = None
     topic  = __get_topic(request, **kwargs)
     if topic:
-        Model = get_topic_model()
+        Model = get_topic_model(topic, kwargs.get('type'))
         if Model:
             try:
                 entity = Model.objects.get(pk=kwargs.get('pk'))

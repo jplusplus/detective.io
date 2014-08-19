@@ -54,7 +54,8 @@ def _create_groups(app_label):
             ###
             # Must not be in the loop... Why is there a loop anyway?
             topic.contributor_group = group
-            topic.author.groups.add(group)
+            if topic.author is not None:
+                topic.author.groups.add(group)
             topic.save()
             ###
 

@@ -72,10 +72,11 @@ class TopicCachierTestCase(TestCase):
             return Topic.objects.get(
                 slug=kwargs.get('slug', default_kwargs.get('slug'))
             )
+
     def test_topic_creation(self):
         topic = self.create_topic()
         rev = topic_cache.version(topic)
-        self.assertEqual(rev, 0)
+        self.assertIsNotNone(rev, 0)
 
 
     def test_topic_update(self):

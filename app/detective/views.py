@@ -78,20 +78,35 @@ def home(request, social_meta_dict=None,**kwargs):
     return response
 
 def entity_list(request, **kwargs):
+    def __entity_type_name(entity_klass):
+        type_name           = None
+        verbose_name        = getattr(entity_klass, 'verbose_name', None)
+        verbose_name_plural = getattr(entity_klass, 'verbose_name_plural', None)
+        if verbose_name_plural:
+            type_name = verbose_name_plural
+        elif verbose_name:
+            type_name = verbose_name + 's'
+        else:
+            type_name = entity_klass.__name__ + 's'
+        return type_name
+
+    def __entity_type_description(entity_klass):
+        return getattr(entity_klass, 'help_text', None)
+
     meta_dict = None
     user      = __get_user(request, **kwargs)
     topic     = __get_topic(request, user, **kwargs)
     if topic and topic.public and user:
         default_meta = default_social_meta(request)
-        Model        = get_topic_model(topic, kwargs.get('type'))
-        if Model:
+        entity_klass = get_topic_model(topic, kwargs.get('type'))
+        if entity_klass:
             pictures = []
             if topic.background:
                 pictures.append(topic.background)
 
-            name = Model.verbose_name_plural or Model.verbose_name + 's'
+
             list_title = "{name} of {topic} owned by {owner}".format(
-                name=plural_name,
+                name=__entity_type_name(entity_klass),
                 topic=topic.title,
                 owner=user.username
             )
@@ -99,7 +114,7 @@ def entity_list(request, **kwargs):
                 list_title=list_title,
                 title=default_meta['title']
             )
-            meta_description = Model.help_text or default_meta['description']
+            meta_description = __entity_type_description(entity_klass) or default_meta['description']
             meta_dict = {
                 'title'       : meta_title,
                 'description' : meta_description,

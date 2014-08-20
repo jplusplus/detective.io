@@ -83,7 +83,7 @@ class ProfileCtrl
         (@Common.get params).$promise
 
     loadUserGroups: (page) =>
-        (@http.get "/api/common/v1/user/#{@user.id}/groups/?page=#{page}").then (response) ->
+        (@http.get "/api/detective/common/v1/user/#{@user.id}/groups/?page=#{page}").then (response) ->
             response.data
 
     canShowTopic: (topic) =>
@@ -106,7 +106,7 @@ class ProfileCtrl
         data[fieldName] = @scope.user[fieldName]
         @http
             method : 'patch'
-            url : "/api/common/v1/profile/#{@user.profile.id}/"
+            url : "/api/detective/common/v1/profile/#{@user.profile.id}/"
             data : data
 
 angular.module('detective.controller').controller 'profileCtrl', ProfileCtrl

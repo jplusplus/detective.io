@@ -47,7 +47,7 @@ angular.module("detective.service").factory "Auth", [
 
       logout: ->
         # succefull logout
-        return $http.get("/api/common/v1/user/logout/").then( (response)=>
+        return $http.get("/api/detective/common/v1/user/logout/").then( (response)=>
           # Interpret the respose
           if response.data? and response.data.success
             # Update user data

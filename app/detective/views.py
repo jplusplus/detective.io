@@ -5,40 +5,29 @@ from django.shortcuts     import render_to_response, redirect
 from django.template      import TemplateDoesNotExist
 from django.conf          import settings
 from django.contrib.auth  import get_user_model
-from app.detective.models import Topic
+from app.detective.models import Topic, DetectiveProfileUser
 from app.detective.utils  import get_topic_model
 import urllib2
 import mimetypes
 
 def __get_user(request, **kwargs):
-    # fail-proof user retrieval function
-    author = None
-    try:
-        author = get_user_model().objects.get(username=kwargs.get('user'))
-    except: pass
-    return author
+    return get_user_model().objects.get(username=kwargs.get('user'))
 
 def __get_topic(request=None, author=None, **kwargs):
     # fail-proof topic retrieval function
-    topic = None
-    try:
-        if not author:
-            author = __get_user(request, **kwargs)
-        topic  = Topic.objects.get(
-            author=author,
-            slug=kwargs.get('topic')
-        )
-    except: pass
-    return topic
+    if not author:
+        author = __get_user(request, **kwargs)
+    return Topic.objects.get(
+        author=author,
+        slug=kwargs.get('topic')
+    )
 
 def __get_entity(topic_obj, **kwargs):
     # fail-proof entity retrieval function
     entity = None
     Model = get_topic_model(topic_obj, kwargs.get('type'))
     if Model:
-        try:
-            entity = Model.objects.get(pk=kwargs.get('pk'))
-        except: pass
+        entity = Model.objects.get(pk=kwargs.get('pk'))
     return entity
 
 
@@ -125,8 +114,7 @@ def entity_list(request, **kwargs):
     return home(request, meta_dict, **kwargs)
 
 
-
-def entity(request, **kwargs):
+def entity_details(request, **kwargs):
     def __entity_title(entity):
         title = getattr(entity, '_transform', None) or \
                 getattr(entity, 'name'      , None) or \
@@ -143,70 +131,101 @@ def entity(request, **kwargs):
                       getattr(entity, 'commentary' , None)
         return description
 
-    def __entity_picture(entity):
-        return getattr(entity, 'image', None)
+    def __entity_picture(entity): return getattr(entity, 'image', None)
 
-    meta_dict = None
-    user      = __get_user(request, **kwargs)
-    topic     = __get_topic(request, user, **kwargs)
-    if topic and topic.public and user:
-        meta_pictures = []
-        default_meta  = default_social_meta(request)
-        entity        = __get_entity(topic, **kwargs)
-        if entity:
-            entity_title        = __entity_title(entity)
-            entity_picture      = __entity_picture(entity)
-            entity_description  = __entity_description(entity)
-            generic_description = u"{title} is part of {topic} owned by {owner}".format(
-                title=entity_title,
-                topic=topic.title,
-                owner=user.username
-            )
+    user  = __get_user(request, **kwargs)
+    topic = __get_topic(request, user, **kwargs)
 
-            meta_title = u"{entity_title} - {title}".format(
-                entity_title=entity_title,
-                title=default_meta['title']
-            )
-            meta_description = entity_description or generic_description
-            if topic.background:
-                meta_pictures.append(topic.background)
+    if not topic.public:
+        return home(request, None, **kwargs)
 
-            if entity_picture:
-                meta_pictures.append(entity_picture)
+    meta_pictures = []
+    default_meta  = default_social_meta(request)
+    entity        = __get_entity(topic, **kwargs)
+    entity_title        = __entity_title(entity)
+    entity_picture      = __entity_picture(entity)
+    entity_description  = __entity_description(entity)
+    generic_description = u"{title} is part of investigation {topic} owned by {owner}".format(
+        title=entity_title,
+        topic=topic.title,
+        owner=user.username
+    )
 
-            meta_dict = {
-                'title'      : meta_title,
-                'description': meta_description,
-                'pictures'   : meta_pictures,
-                'url'        : default_meta['url']
-            }
+    meta_title = u"{entity_title} - {title}".format(
+        entity_title=entity_title,
+        title=default_meta['title']
+    )
+    meta_description = entity_description or generic_description
+    if topic.background:
+        meta_pictures.append(topic.background.url)
+
+    if entity_picture:
+        meta_pictures.append(entity_picture.url)
+
+    meta_dict = {
+        'title'      : meta_title,
+        'description': meta_description,
+        'pictures'   : meta_pictures,
+        'url'        : default_meta['url']
+    }
 
     return home(request, meta_dict, **kwargs)
 
 def topic(request, **kwargs):
-    meta_dict = None
-    topic     = __get_topic(request, **kwargs)
-    if topic and topic.public:
-        default_meta = default_social_meta(request)
-        meta_description = topic.description or default_meta['description']
-        meta_pictures    = []
-        if topic.background:
-            meta_pictures.append(topic.background)
+    user  = __get_user(request, **kwargs)
+    topic = __get_topic(request, user, **kwargs)
 
-        meta_title = u"{topic_title} - {title}".format(
-            topic_title=topic.title,
-            title=default_meta['title']
-        )
-        meta_dict = {
-            'title'       : meta_title,
-            'description' : meta_description,
-            'pictures'    : meta_pictures,
-            'url'         : default_meta['url']
-        }
+    if not topic.public:
+        return home(request, None, **kwargs)
 
+    default_meta  = default_social_meta(request)
+    default_title = default_meta['title']
+    generic_description = (
+        "Part of investigation {topic_title} by "
+        "{owner} on {default_title}"
+    ).format(
+        topic_title=topic.title,
+        owner=user.username,
+        default_title=default_title
+    )
+
+    meta_description = topic.description or generic_description
+    meta_pictures    = []
+    if topic.background:
+        meta_pictures.append(topic.background.url)
+
+    meta_title = u"{topic_title} - {title}".format(
+        topic_title=topic.title,
+        title=default_meta['title']
+    )
+    meta_dict = {
+        'title'       : meta_title,
+        'description' : meta_description,
+        'pictures'    : meta_pictures,
+        'url'         : default_meta['url']
+    }
 
     return home(request, meta_dict, **kwargs)
 
+def profile(request, **kwargs):
+    default_meta  = default_social_meta(request)
+    default_title = default_meta['title']
+    user          = __get_user(request, **kwargs)
+    profile       = DetectiveProfileUser.objects.get(user=user)
+    meta_title = "{user} - {title}".format(
+        user=user.username, title=default_title
+    )
+    meta_description = "{user}'s profile on {title}".format(
+        user=user.username, title=default_title
+    )
+
+    meta_dict = {
+        'title': meta_title,
+        'description': meta_description,
+        'pictures': [ profile.avatar ],
+        'url': default_meta['url']
+    }
+    return home(request, meta_dict, **kwargs)
 
 def partial(request, partial_name=None):
     template_name = 'partials/' + partial_name + '.dj.html'

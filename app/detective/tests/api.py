@@ -762,6 +762,5 @@ class ApiTestCase(ResourceTestCase):
             '/api/common/v1/user/{pk}/groups/'.format(pk=self.contrib_user.pk),
             format='json'
         )
-
         self.assertHttpOK(resp)
 

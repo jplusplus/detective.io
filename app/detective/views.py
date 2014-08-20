@@ -105,12 +105,12 @@ def entity_list(request, **kwargs):
                 pictures.append(topic.background)
 
 
-            list_title = "{name} of {topic} owned by {owner}".format(
+            list_title = u"{name} of {topic} owned by {owner}".format(
                 name=__entity_type_name(entity_klass),
                 topic=topic.title,
                 owner=user.username
             )
-            meta_title = "{list_title} - {title}".format(
+            meta_title = u"{list_title} - {title}".format(
                 list_title=list_title,
                 title=default_meta['title']
             )
@@ -157,13 +157,13 @@ def entity(request, **kwargs):
             entity_title        = __entity_title(entity)
             entity_picture      = __entity_picture(entity)
             entity_description  = __entity_description(entity)
-            generic_description = "{title} is part of {topic} owned by {owner}".format(
+            generic_description = u"{title} is part of {topic} owned by {owner}".format(
                 title=entity_title,
                 topic=topic.title,
                 owner=user.username
             )
 
-            meta_title = "{entity_title} - {title}".format(
+            meta_title = u"{entity_title} - {title}".format(
                 entity_title=entity_title,
                 title=default_meta['title']
             )
@@ -193,7 +193,7 @@ def topic(request, **kwargs):
         if topic.background:
             meta_pictures.append(topic.background)
 
-        meta_title = "{topic_title} - {title}".format(
+        meta_title = u"{topic_title} - {title}".format(
             topic_title=topic.title,
             title=default_meta['title']
         )

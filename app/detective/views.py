@@ -5,10 +5,14 @@ from django.shortcuts     import render_to_response, redirect
 from django.template      import TemplateDoesNotExist
 from django.conf          import settings
 from django.contrib.auth  import get_user_model
+from django.db.models     import Model as DjangoModel
 from app.detective.models import Topic, DetectiveProfileUser
 from app.detective.utils  import get_topic_model
+import logging
 import urllib2
 import mimetypes
+
+logger = logging.getLogger(__name__)
 
 def __get_user(request, **kwargs):
     return get_user_model().objects.get(username=kwargs.get('user'))
@@ -83,35 +87,45 @@ def entity_list(request, **kwargs):
         return getattr(entity_klass, 'help_text', None)
 
     meta_dict = None
-    user      = __get_user(request, **kwargs)
-    topic     = __get_topic(request, user, **kwargs)
-    if topic and topic.public and user:
-        default_meta = default_social_meta(request)
-        entity_klass = get_topic_model(topic, kwargs.get('type'))
-        if entity_klass:
-            pictures = []
-            if topic.background:
-                pictures.append(topic.background)
+    try:
+        user      = __get_user(request, **kwargs)
+        topic     = __get_topic(request, user, **kwargs)
+
+        if not topic.public:
+            return home(request, None, **kwargs)
+
+        if topic.public and user:
+            default_meta = default_social_meta(request)
+            entity_klass = get_topic_model(topic, kwargs.get('type'))
+            if entity_klass:
+                pictures = []
+                if topic.background:
+                    pictures.append(topic.background)
 
 
-            list_title = u"{name} of {topic} owned by {owner}".format(
-                name=__entity_type_name(entity_klass),
-                topic=topic.title,
-                owner=user.username
-            )
-            meta_title = u"{list_title} - {title}".format(
-                list_title=list_title,
-                title=default_meta['title']
-            )
-            meta_description = __entity_type_description(entity_klass) or \
-                               topic.description or default_meta['description']
-            meta_dict = {
-                'title'       : meta_title,
-                'description' : meta_description,
-                'pictures'    : pictures,
-                'url'         : default_meta['url']
-            }
-    return home(request, meta_dict, **kwargs)
+                list_title = u"{name} of {topic} owned by {owner}".format(
+                    name=__entity_type_name(entity_klass),
+                    topic=topic.title,
+                    owner=user.username
+                )
+                meta_title = u"{list_title} - {title}".format(
+                    list_title=list_title,
+                    title=default_meta['title']
+                )
+                meta_description = __entity_type_description(entity_klass) or \
+                                   topic.description or default_meta['description']
+                meta_dict = {
+                    'title'       : meta_title,
+                    'description' : meta_description,
+                    'pictures'    : pictures,
+                    'url'         : default_meta['url']
+        }
+        return home(request, meta_dict, **kwargs)
+
+    except DjangoModel.DoesNotExist as e:
+        logger.debug("Tried to access a non-existing model %s" % e)
+        return home(request, None, **kwargs)
+
 
 
 def entity_details(request, **kwargs):
@@ -133,99 +147,109 @@ def entity_details(request, **kwargs):
 
     def __entity_picture(entity): return getattr(entity, 'image', None)
 
-    user  = __get_user(request, **kwargs)
-    topic = __get_topic(request, user, **kwargs)
+    try:
+        user  = __get_user(request, **kwargs)
+        topic = __get_topic(request, user, **kwargs)
+        if not topic.public:
+            return home(request, None, **kwargs)
 
-    if not topic.public:
+        meta_pictures = []
+        default_meta  = default_social_meta(request)
+        entity        = __get_entity(topic, **kwargs)
+        entity_title        = __entity_title(entity)
+        entity_picture      = __entity_picture(entity)
+        entity_description  = __entity_description(entity)
+        generic_description = u"{title} is part of investigation {topic} owned by {owner}".format(
+            title=entity_title,
+            topic=topic.title,
+            owner=user.username
+        )
+
+        meta_title = u"{entity_title} - {title}".format(
+            entity_title=entity_title,
+            title=default_meta['title']
+        )
+        meta_description = entity_description or generic_description
+        if topic.background:
+            meta_pictures.append(topic.background.url)
+
+        if entity_picture:
+            meta_pictures.append(entity_picture.url)
+
+        meta_dict = {
+            'title'      : meta_title,
+            'description': meta_description,
+            'pictures'   : meta_pictures,
+            'url'        : default_meta['url']
+        }
+        return home(request, meta_dict, **kwargs)
+
+    except DjangoModel.DoesNotExist as e:
+        logger.debug("Tried to access a non-existing model %s" % e)
         return home(request, None, **kwargs)
-
-    meta_pictures = []
-    default_meta  = default_social_meta(request)
-    entity        = __get_entity(topic, **kwargs)
-    entity_title        = __entity_title(entity)
-    entity_picture      = __entity_picture(entity)
-    entity_description  = __entity_description(entity)
-    generic_description = u"{title} is part of investigation {topic} owned by {owner}".format(
-        title=entity_title,
-        topic=topic.title,
-        owner=user.username
-    )
-
-    meta_title = u"{entity_title} - {title}".format(
-        entity_title=entity_title,
-        title=default_meta['title']
-    )
-    meta_description = entity_description or generic_description
-    if topic.background:
-        meta_pictures.append(topic.background.url)
-
-    if entity_picture:
-        meta_pictures.append(entity_picture.url)
-
-    meta_dict = {
-        'title'      : meta_title,
-        'description': meta_description,
-        'pictures'   : meta_pictures,
-        'url'        : default_meta['url']
-    }
-
-    return home(request, meta_dict, **kwargs)
 
 def topic(request, **kwargs):
-    user  = __get_user(request, **kwargs)
-    topic = __get_topic(request, user, **kwargs)
+    try:
+        user  = __get_user(request, **kwargs)
+        topic = __get_topic(request, user, **kwargs)
 
-    if not topic.public:
+        if not topic.public:
+            return home(request, None, **kwargs)
+
+        default_meta  = default_social_meta(request)
+        default_title = default_meta['title']
+        generic_description = (
+            "Part of investigation {topic_title} by "
+            "{owner} on {default_title}"
+        ).format(
+            topic_title=topic.title,
+            owner=user.username,
+            default_title=default_title
+        )
+
+        meta_description = topic.description or generic_description
+        meta_pictures    = []
+        if topic.background:
+            meta_pictures.append(topic.background.url)
+
+        meta_title = u"{topic_title} - {title}".format(
+            topic_title=topic.title,
+            title=default_meta['title']
+        )
+        meta_dict = {
+            'title'       : meta_title,
+            'description' : meta_description,
+            'pictures'    : meta_pictures,
+            'url'         : default_meta['url']
+        }
+        return home(request, meta_dict, **kwargs)
+    except DjangoModel.DoesNotExist as e:
+        logger.debug("Tried to access a non-existing model %s" % e)
         return home(request, None, **kwargs)
 
-    default_meta  = default_social_meta(request)
-    default_title = default_meta['title']
-    generic_description = (
-        "Part of investigation {topic_title} by "
-        "{owner} on {default_title}"
-    ).format(
-        topic_title=topic.title,
-        owner=user.username,
-        default_title=default_title
-    )
-
-    meta_description = topic.description or generic_description
-    meta_pictures    = []
-    if topic.background:
-        meta_pictures.append(topic.background.url)
-
-    meta_title = u"{topic_title} - {title}".format(
-        topic_title=topic.title,
-        title=default_meta['title']
-    )
-    meta_dict = {
-        'title'       : meta_title,
-        'description' : meta_description,
-        'pictures'    : meta_pictures,
-        'url'         : default_meta['url']
-    }
-
-    return home(request, meta_dict, **kwargs)
-
 def profile(request, **kwargs):
-    default_meta  = default_social_meta(request)
-    default_title = default_meta['title']
-    user          = __get_user(request, **kwargs)
-    profile       = DetectiveProfileUser.objects.get(user=user)
-    meta_title = "{user} - {title}".format(
-        user=user.username, title=default_title
-    )
-    meta_description = "{user}'s profile on {title}".format(
-        user=user.username, title=default_title
-    )
+    try:
+        user          = __get_user(request, **kwargs)
+        profile       = DetectiveProfileUser.objects.get(user=user)
+        default_meta  = default_social_meta(request)
+        default_title = default_meta['title']
+        meta_title = "{user} - {title}".format(
+            user=user.username, title=default_title
+        )
+        meta_description = "{user}'s profile on {title}".format(
+            user=user.username, title=default_title
+        )
 
-    meta_dict = {
-        'title': meta_title,
-        'description': meta_description,
-        'pictures': [ profile.avatar ],
-        'url': default_meta['url']
-    }
-    return home(request, meta_dict, **kwargs)
+        meta_dict = {
+            'title': meta_title,
+            'description': meta_description,
+            'pictures': [ profile.avatar ],
+            'url': default_meta['url']
+        }
+        return home(request, meta_dict, **kwargs)
+    except DjangoModel.DoesNotExist as e:
+        logger.debug("Tried to access a non-existing model %s" % e)
+        return home(request, None, **kwargs)
 
 def partial(request, partial_name=None):
     template_name = 'partials/' + partial_name + '.dj.html'

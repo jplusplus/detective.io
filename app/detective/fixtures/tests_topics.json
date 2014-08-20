@@ -1,0 +1,17 @@
+[
+{
+    "model": "detective.topic",
+    "pk": 3,
+    "fields": {
+        "description": "Test topic.",
+        "title": "Test me",
+        "slug": "test-topic",
+        "ontology_as_json": "[]",
+        "ontology_as_owl": null,
+        "ontology_as_mod": "testtopic",
+        "about": "",
+        "background": "",
+        "public": true
+    }
+}
+]

@@ -55,6 +55,7 @@ class UserAuthorization(ReadOnlyAuthorization):
         return authorized
 
 class ProfileResource(ModelResource):
+    avatar = fields.CharField(attribute='avatar', readonly=True)
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
@@ -62,7 +63,7 @@ class ProfileResource(ModelResource):
         queryset           = DetectiveProfileUser.objects.all()
         resource_name      = 'profile'
         allowed_methods    = ['get', 'patch']
-        fields             = ['id', 'location', 'organization', 'url']
+        fields             = ['id', 'location', 'organization', 'url', 'avatar']
 
 class UserResource(ModelResource):
     profile = fields.ToOneField(ProfileResource, 'detectiveprofileuser', full=True, null=True)
@@ -141,7 +142,7 @@ class UserResource(ModelResource):
             })
 
     def dehydrate(self, bundle):
-        bundle.data["email"]    = hashlib.md5(bundle.data["email"].strip().lower()).hexdigest()
+        bundle.data["email"]    = u"☘"
         bundle.data["password"] = u"☘"
         return bundle
 

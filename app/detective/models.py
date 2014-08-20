@@ -12,6 +12,7 @@ from django.core.paginator      import Paginator
 from django.core.cache          import cache
 from django.conf                import settings
 
+import hashlib
 import importlib
 import inspect
 import os
@@ -502,6 +503,12 @@ class DetectiveProfileUser(models.Model):
     location = models.CharField(max_length=100, null=True, blank=True)
     organization = models.CharField(max_length=100, null=True, blank=True)
     url = models.CharField(max_length=100, null=True, blank=True)
+
+    @property
+    def avatar(self):
+        hash_email = hashlib.md5(self.user.email.strip().lower()).hexdigest()
+        return "http://www.gravatar.com/avatar/{hash}?s=200&d=mm".format(
+            hash=hash_email)
 
 # -----------------------------------------------------------------------------
 #

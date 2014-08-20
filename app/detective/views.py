@@ -103,7 +103,7 @@ def entity_list(request, **kwargs):
                     pictures.append(topic.background)
 
 
-                list_title = u"{name} of {topic} owned by {owner}".format(
+                list_title = u"{name} of {topic} by {owner}".format(
                     name=__entity_type_name(entity_klass),
                     topic=topic.title,
                     owner=user.username
@@ -159,7 +159,7 @@ def entity_details(request, **kwargs):
         entity_title        = __entity_title(entity)
         entity_picture      = __entity_picture(entity)
         entity_description  = __entity_description(entity)
-        generic_description = u"{title} is part of investigation {topic} owned by {owner}".format(
+        generic_description = u"{title} is part of investigation {topic} by {owner}".format(
             title=entity_title,
             topic=topic.title,
             owner=user.username

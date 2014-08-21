@@ -416,11 +416,33 @@ class TopicToken(models.Model):
         super(TopicToken, self).save()
 
 class TopicSkeleton(models.Model):
-    title        = models.CharField(max_length=250, help_text="Title of the skeleton")
-    picture      = models.ImageField(upload_to="topics-skeletons", null=True, blank=True)
+    title           = models.CharField(max_length=250, help_text="Title of the skeleton")
+    picture         = models.ImageField(upload_to="topics-skeletons", null=True, blank=True, help_text='The default picture for this skeleton')
     picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
-    ontology     = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
-    target_plans = models.CharField(max_length=50)
+    schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
+    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
+    target_plans    = models.CharField(max_length=50)
+
+    def selected_plans(self):
+        import pdb; pdb.set_trace()
+
+# utility class to create a topic thanks to a skeleton
+class TopicFactory(object):
+    def create_topic(topic_skeleton, **kwargs):
+        if not isinstance(topic_skeleton, TopicSkeleton):
+            topic_skeleton = TopicSkeleton.object.get(pk=topic_skeleton)
+
+        if not kwargs.get('background', None):
+            kwargs.set('background', topic_skeleton.picture)
+            about = "{about}<br/>{credit}".format(
+                about=kwargs.get('about', '') ,
+                credit=topic_skeleton.picture_credits
+            )
+            kwargs.set('about', about)
+
+
+
+
 
 
 class Article(models.Model):

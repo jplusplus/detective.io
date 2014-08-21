@@ -57,7 +57,7 @@ class QuoteRequest(models.Model):
         return "%s - %s" % (self.name, self.email,)
 
 class Topic(models.Model):
-    title            = models.CharField(max_length=250, help_text="Title of your topic.")
+    title             = models.CharField(max_length=250, help_text="Title of your topic.")
     # Value will be set for this field if it's blank
     slug             = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
     description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
@@ -67,9 +67,9 @@ class Topic(models.Model):
     background       = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
     author           = models.ForeignKey(User, help_text="Author of this topic.", null=True)
     contributor_group = models.ForeignKey(Group, help_text="", null=True, blank=True)
-    ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
-    ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
-    ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
+    ontology_as_owl   = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
+    ontology_as_mod   = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
+    ontology_as_json  = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
 
     class Meta:
         unique_together = ('author', 'slug')
@@ -542,7 +542,11 @@ def user_created(*args, **kwargs):
     DetectiveProfileUser.objects.get_or_create(user=kwargs.get('instance'))
 
 def update_topic_cache(*args, **kwargs):
-    """ update the topic cache version on topic update or sub-model update """
+    """
+
+    update the topic cache version on topic update or sub-model update
+
+    """
     instance = kwargs.get('instance')
     if not isinstance(instance, Topic):
         try:
@@ -555,9 +559,8 @@ def update_topic_cache(*args, **kwargs):
         # if topic just been created we gonna bind its sub models signals
         if isinstance(instance, Topic) and kwargs.get('created'):
             utils.topic_cache.init_version(topic)
-
             for Model in topic.get_models():
-                signals.post_save.connect(update_topic_cache, sender=Model, weak=False )
+                signals.post_save.connect(update_topic_cache, sender=Model, weak=False)
         else:
             # we increment the cache version of this topic, this will "invalidate" every
             # previously stored information related to this topic
@@ -572,7 +575,5 @@ signals.post_save.connect(update_topic_cache   , sender=Topic)
 signals.post_save.connect(update_permissions   , sender=Topic)
 signals.pre_delete.connect(remove_topic_cache  , sender=Topic)
 signals.post_delete.connect(remove_permissions , sender=Topic)
-
-
 
 # EOF

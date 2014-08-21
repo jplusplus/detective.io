@@ -19,6 +19,11 @@ import os
 import random
 import string
 
+# -----------------------------------------------------------------------------
+#
+#    CHOICES & ENUMERATIONS
+#
+# -----------------------------------------------------------------------------
 PUBLIC = (
     (True, "Yes, public"),
     (False, "No, just for a small group of users"),
@@ -29,6 +34,13 @@ FEATURED = (
     (False, "No, stay out of the ligth"),
 )
 
+PLANS_CHOICES = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
+
+# -----------------------------------------------------------------------------
+#
+#    MODELS
+#
+# -----------------------------------------------------------------------------
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (
         (0, "Less than 200"),
@@ -403,6 +415,14 @@ class TopicToken(models.Model):
                 pass
         super(TopicToken, self).save()
 
+class TopicSkeleton(models.Model):
+    title        = models.CharField(max_length=250, help_text="Title of the skeleton")
+    picture      = models.ImageField(upload_to="topics-skeletons", null=True, blank=True)
+    picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
+    ontology     = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
+    target_plans = models.CharField(max_length=50)
+
+
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
     title      = models.CharField(max_length=250, help_text="Title of your article.")
@@ -494,8 +514,6 @@ class SearchTerm(models.Model):
 #    CUSTOM USER
 #
 # -----------------------------------------------------------------------------
-PLANS_CHOICES = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
-
 class DetectiveProfileUser(models.Model):
     user = models.OneToOneField(User)
     plan = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])

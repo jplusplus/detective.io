@@ -6,12 +6,13 @@
         "description": "Test topic.",
         "title": "Test me",
         "slug": "test-topic",
-        "ontology_as_json": "[]",
+        "ontology_as_json": "[{ \"name\": \"Person\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }, {\"name\": \"birthday\", \"type\": \"date\"}] }]",
         "ontology_as_owl": null,
         "ontology_as_mod": "testtopic",
         "about": "",
         "background": "",
-        "public": true
+        "public": true,
+        "featured": true
     }
 }
 ]

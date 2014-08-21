@@ -762,5 +762,19 @@ class ApiTestCase(ResourceTestCase):
             '/api/common/v1/user/{pk}/groups/'.format(pk=self.contrib_user.pk),
             format='json'
         )
+        resp
         self.assertHttpOK(resp)
+
+
+    def test_featured_success_after_topic_delete(self):
+        topic = Topic.objects.get(slug='test-topic')
+        topic.delete()
+
+        resp = self.api_client.get(
+            '/api/common/v1/topic/?featured=1',
+            format='json'
+        )
+        self.assertHttpOK(resp)
+
+
 

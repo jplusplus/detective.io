@@ -2,6 +2,8 @@ from app.detective              import utils
 from app.detective.permissions  import create_permissions, remove_permissions
 from django.contrib.auth.models import User, Group
 from django.db                  import models
+from django.db.models           import signals
+
 from jsonfield                  import JSONField
 from tinymce.models             import HTMLField
 from psycopg2.extensions        import adapt
@@ -10,6 +12,7 @@ from django.core.paginator      import Paginator
 from django.core.cache          import cache
 from django.conf                import settings
 
+import hashlib
 import importlib
 import inspect
 import os
@@ -501,14 +504,17 @@ class DetectiveProfileUser(models.Model):
     organization = models.CharField(max_length=100, null=True, blank=True)
     url = models.CharField(max_length=100, null=True, blank=True)
 
+    @property
+    def avatar(self):
+        hash_email = hashlib.md5(self.user.email.strip().lower()).hexdigest()
+        return "http://www.gravatar.com/avatar/{hash}?s=200&d=mm".format(
+            hash=hash_email)
+
 # -----------------------------------------------------------------------------
 #
 #    SIGNALS
 #
 # -----------------------------------------------------------------------------
-from django.db.models     import signals
-from app.detective.models import Topic
-
 def update_permissions(*args, **kwargs):
     """ create the permissions related to the label module """
     assert kwargs.get('instance')

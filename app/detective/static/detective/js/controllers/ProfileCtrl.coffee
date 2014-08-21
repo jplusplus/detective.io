@@ -24,7 +24,7 @@ class ProfileCtrl
         @scope.user =
             name : "#{@user.first_name} #{@user.last_name}"
             username : @user.username
-            gravatar : "http://www.gravatar.com/avatar/#{@user.email}?s=200&d=mm"
+            gravatar : @user.profile.avatar
             location : @user.profile.location
             organization : @user.profile.organization
             url : @user.profile.url

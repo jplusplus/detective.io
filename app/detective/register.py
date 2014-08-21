@@ -14,29 +14,81 @@ import imp
 
 class TopicRegistor(object):
     __instance = None
+
+    def __is_topic(self, topic):
+        return isinstance(topic, Topic)
+
+    def __get_topic_key(self, topic):
+        key = topic
+        if self.__is_topic(topic):
+            key = topic.ontology_as_mod
+        return key
+
+    def __topic_models(self, topic):
+        key = self.__get_topic_key(topic)
+        return self.__registered_topics.get(key)
+
     def __new__(self, *args, **kwargs):
         if not self.__instance:
             self.__instance = super(TopicRegistor, self).__new__(self, *args, **kwargs)
-            self.registered_topics = {}
+            self.__registered_topics = {}
         return self.__instance
 
     def register_topic(self, topic):
-        if not self.registered_topics.get(topic):
-            self.registered_topics[topic] = self.topic_models(topic)
-            default_rules(topic)
-        return self.registered_topics.get(topic)
+        topic_key = self.__get_topic_key(topic)
+        if not self.__topic_models(topic_key):
+            self.__registered_topics[topic_key] = self.topic_models(topic_key)
+            self.default_rules(topic) # register default rules for a topic
+        return self.__topic_models(topic_key)
 
+    def default_rules(self, topic):
+        # ModelRules is a singleton that record every model rules
+        rules = ModelRules()
+        # We cant import this early to avoid bi-directional dependancies
+        from app.detective.utils import import_class
+        models = self.topic_models(topic)
+
+        # Set "is_searchable" to true on every model with a name
+        for model in models:
+            # If the current model has a name
+            if "name" in rules.model(model).field_names:
+                field_names = rules.model(model).field_names
+                # Count the fields len
+                fields_len = len(field_names)
+                # Put the highest priority to that name
+                rules.model(model).field('name').add(priority=fields_len)
+            # This model isn't searchable
+            else: rules.model(model).add(is_searchable=False)
+        # Check now that each "Relationship"
+        # match with a searchable model
+        for model in models:
+            for field in model._meta.fields:
+                # Find related model for relation
+                if hasattr(field, "target_model"):
+                    target_model  = field.target_model
+                    # Load class path
+                    if type(target_model) is str: target_model = import_class(target_model)
+                    # It's a searchable field !
+                    modelRules = rules.model(target_model).all()
+                    # Set it into the rules
+                    rules.model(model).field(field.name).add(is_searchable=modelRules["is_searchable"])
+                    # Entering relationship are not editable yet
+                    is_editable = (False if hasattr(target_model, field.name) else False) \
+                                  if field.direction == 'in' and target_model is model else modelRules["is_editable"]
+                    rules.model(model).field(field.name).add(is_editable=is_editable)
+        return rules
 
     def topic_models(self, topic):
-        models = self.registered_topics.get(topic)
+        topic_key = self.__get_topic_key(topic)
+        models    = self.__topic_models(topic_key)
         if not models:
             # Store topic object in a temporary attribute
             # to avoid SQL lazyness
-            cache_key = "prefetched_topic_%s" % topic
+            cache_key = "prefetched_topic_%s" % topic_key
             if cache.get(cache_key, None) == None:
                 # Get all registered models for this topic
-                if not isinstance(topic, Topic):
-                    topic  = Topic.objects.get(ontology_as_mod=topic)
+                if not self.__is_topic(topic):
+                    topic = Topic.objects.get(ontology_as_mod=topic_key)
                 models = topic.get_models()
                 cache.set(cache_key, topic, 10)
             else:
@@ -70,43 +122,6 @@ def topics_rules():
         if func: rules = func()
     return rules
 
-def default_rules(topic):
-    # ModelRules is a singleton that record every model rules
-    rules = ModelRules()
-    registor = TopicRegistor()
-    # We cant import this early to avoid bi-directional dependancies
-    from app.detective.utils import import_class
-    models = registor.topic_models(topic)
-
-    # Set "is_searchable" to true on every model with a name
-    for model in models:
-        # If the current model has a name
-        if "name" in rules.model(model).field_names:
-            field_names = rules.model(model).field_names
-            # Count the fields len
-            fields_len = len(field_names)
-            # Put the highest priority to that name
-            rules.model(model).field('name').add(priority=fields_len)
-        # This model isn't searchable
-        else: rules.model(model).add(is_searchable=False)
-    # Check now that each "Relationship"
-    # match with a searchable model
-    for model in models:
-        for field in model._meta.fields:
-            # Find related model for relation
-            if hasattr(field, "target_model"):
-                target_model  = field.target_model
-                # Load class path
-                if type(target_model) is str: target_model = import_class(target_model)
-                # It's a searchable field !
-                modelRules = rules.model(target_model).all()
-                # Set it into the rules
-                rules.model(model).field(field.name).add(is_searchable=modelRules["is_searchable"])
-                # Entering relationship are not editable yet
-                is_editable = (False if hasattr(target_model, field.name) else False) \
-                              if field.direction == 'in' and target_model is model else modelRules["is_editable"]
-                rules.model(model).field(field.name).add(is_editable=is_editable)
-    return rules
 
 def import_or_create(path, register=True, force=False):
     try:

@@ -24,6 +24,7 @@ def find(function, iterable):
 class ApiTestCase(ResourceTestCase):
 
     fixtures = ['app/detective/fixtures/default_topics.json',
+                'app/detective/fixtures/tests_topics.json',
                 'app/detective/fixtures/search_terms.json',]
 
     def setUp(self):
@@ -46,6 +47,8 @@ class ApiTestCase(ResourceTestCase):
 
         contributors = Group.objects.get(name='energy_contributor')
 
+        test_contributors = Topic.objects.get(slug='test-topic').get_contributor_group()
+
         # Create the new user users
         super_user = User.objects.create(
             username=self.super_username,
@@ -65,6 +68,7 @@ class ApiTestCase(ResourceTestCase):
         )
 
         contrib_user.groups.add(contributors)
+        contrib_user.groups.add(test_contributors)
         contrib_user.set_password(self.contrib_password)
         contrib_user.save()
         self.contrib_user = contrib_user
@@ -748,3 +752,29 @@ class ApiTestCase(ResourceTestCase):
     def test_topic_has_summary_syntax_from_file(self):
         resp = self.api_client.get('/api/energy/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
+
+
+    def test_my_topics_success_after_topic_delete(self):
+        topic = Topic.objects.get(slug='test-topic')
+        topic.delete()
+
+        resp = self.api_client.get(
+            '/api/common/v1/user/{pk}/groups/'.format(pk=self.contrib_user.pk),
+            format='json'
+        )
+        resp
+        self.assertHttpOK(resp)
+
+
+    def test_featured_success_after_topic_delete(self):
+        topic = Topic.objects.get(slug='test-topic')
+        topic.delete()
+
+        resp = self.api_client.get(
+            '/api/common/v1/topic/?featured=1',
+            format='json'
+        )
+        self.assertHttpOK(resp)
+
+
+

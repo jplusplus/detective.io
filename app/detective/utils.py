@@ -111,7 +111,7 @@ def get_topic_models(topic):
     models_path   = "app.detective.topics.%s.models" % topic
     try:
         if isinstance(topic, Topic):
-            models_module = topic.get_models()
+            models_module = topic.get_models_module()
         elif hasattr(topic, '__str__'):
             # Models to collect
             models_path   = "app.detective.topics.%s.models" % topic
@@ -126,6 +126,19 @@ def get_topic_models(topic):
         # Fail silently if the topic doesn't exist
         pass
     return models
+
+def get_topic_model(topic, model_type):
+    model  = None
+    models = get_topic_models(topic)
+    if len(models) > 0:
+        models = map(
+            lambda klass: (klass.__name__.lower(), klass),
+            models
+        )
+        results = filter(lambda el: el[0] == model_type, models)
+        if len(results) > 0:
+            model = results[0][1]
+    return model
 
 def get_registered_models():
     from django.db import models
@@ -341,7 +354,6 @@ def to_class_name(value=""):
     value = value.replace("_", " ")
     return ''.join(x for x in str(value).title() if not x.isspace())
 
-
 def to_camelcase(value=""):
 
     def camelcase():
@@ -405,6 +417,13 @@ def is_valid_email(email):
 
 def should_show_debug_toolbar(request):
     return re.match(r'^/api/', request.path) != None
+
+
+def is_member_of(user, group):
+    if not user or not group:
+        membership = False
+    membership = user.groups.filter(name=group.name).count() > 0
+    return membership
 
 class TopicCachier(object):
     __instance = None

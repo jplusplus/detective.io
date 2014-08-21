@@ -1,11 +1,11 @@
-# Detective.io [![Build Status](https://drone.io/github.com/jplusplus/detective.io/status.png)](https://drone.io/github.com/jplusplus/detective.io/latest)
+# Detective.io [![Build Status](https://travis-ci.org/jplusplus/detective.io.svg?branch=master)](https://travis-ci.org/jplusplus/detective.io)
 
 [Download](https://github.com/jplusplus/detective.io/archive/master.zip) •
 [Fork](https://github.com/jplusplus/detective.io) •
 [License](https://github.com/jplusplus/detective.io/blob/master/LICENSE) •
 [Test coverage](https://coveralls.io/r/jplusplus/detective.io) •
 [Documentation](http://docs.detective.io/en/latest/) •
-*Version 1.6.1 Seelöwe*
+*Version 1.6.2 Seelöwe*
 
 ## Installation
 

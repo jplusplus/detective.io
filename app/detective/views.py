@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from django.http          import Http404, HttpResponse
-from django.shortcuts     import render_to_response, redirect
-from django.template      import TemplateDoesNotExist
-from django.conf          import settings
-from django.contrib.auth  import get_user_model
-from django.db.models     import Model as DjangoModel
-from app.detective.models import Topic, DetectiveProfileUser
-from app.detective.utils  import get_topic_model
+from django.http            import Http404, HttpResponse
+from django.shortcuts       import render_to_response, redirect
+from django.template        import TemplateDoesNotExist
+from django.conf            import settings
+from django.contrib.auth    import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
+from app.detective.models   import Topic, DetectiveProfileUser
+from app.detective.utils    import get_topic_model
 import logging
 import urllib2
 import mimetypes
@@ -122,7 +122,7 @@ def entity_list(request, **kwargs):
         }
         return home(request, meta_dict, **kwargs)
 
-    except DjangoModel.DoesNotExist as e:
+    except ObjectDoesNotExist as e:
         logger.debug("Tried to access a non-existing model %s" % e)
         return home(request, None, **kwargs)
 
@@ -184,7 +184,7 @@ def entity_details(request, **kwargs):
         }
         return home(request, meta_dict, **kwargs)
 
-    except DjangoModel.DoesNotExist as e:
+    except ObjectDoesNotExist as e:
         logger.debug("Tried to access a non-existing model %s" % e)
         return home(request, None, **kwargs)
 
@@ -223,7 +223,7 @@ def topic(request, **kwargs):
             'url'         : default_meta['url']
         }
         return home(request, meta_dict, **kwargs)
-    except DjangoModel.DoesNotExist as e:
+    except ObjectDoesNotExist as e:
         logger.debug("Tried to access a non-existing model %s" % e)
         return home(request, None, **kwargs)
 
@@ -247,7 +247,7 @@ def profile(request, **kwargs):
             'url': default_meta['url']
         }
         return home(request, meta_dict, **kwargs)
-    except DjangoModel.DoesNotExist as e:
+    except ObjectDoesNotExist as e:
         logger.debug("Tried to access a non-existing model %s" % e)
         return home(request, None, **kwargs)
 

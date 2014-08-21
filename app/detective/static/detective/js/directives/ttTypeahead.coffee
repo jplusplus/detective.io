@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User)->
+angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User, TopicsFactory)->
     lastDataset = []
     template =
         compile: (template) ->
@@ -15,6 +15,13 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                         context.subject.label
                     else
                         no
+                $scope.getModelVerbose = ->
+                    model = do $scope.getModel
+                    if model
+                        for _model in TopicsFactory.topic.models
+                            if _model.name is model
+                                return _model.verbose_name
+                    return model
                 $scope.getFigureBg = -> $filter("strToColor") $scope.getModel()
                 $scope.isList = -> !context.predicate or context.predicate.name isnt '<<INSTANCE>>'
 
@@ -105,7 +112,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                                     '<div class="tt-suggestion__line__model__figure" ng-style="{ background: getFigureBg()}">',
                                         '<i ng-show="isList()" class="fa fa-list"></i>',
                                     '</div>',
-                                    '[[getModel()]]',
+                                    '[[getModelVerbose()]]',
                                 '</div>',
                             '</div>',
                         '</div>'

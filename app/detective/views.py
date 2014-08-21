@@ -174,7 +174,7 @@ def entity_details(request, **kwargs):
             meta_pictures.append(topic.background.url)
 
         if entity_picture:
-            meta_pictures.append(entity_picture.url)
+            meta_pictures.append(entity_picture)
 
         meta_dict = {
             'title'      : meta_title,

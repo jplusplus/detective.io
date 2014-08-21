@@ -746,5 +746,5 @@ class ApiTestCase(ResourceTestCase):
         self.assertValidJSONResponse(resp)
 
     def test_topic_has_summary_syntax_from_file(self):
-        resp = self.api_client.get('/api/detective/detective/energy/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)

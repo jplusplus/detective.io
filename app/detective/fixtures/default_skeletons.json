@@ -1,0 +1,50 @@
+[
+    {
+        "pk": 2,
+        "model": "detective.TopicSkeleton",
+        "fields": {
+            "title": "Body Count",
+            "picture": "data/topics-images/body-count.jpg",
+            "schema_picture": null,
+            "target_plans": "['low', 'medium', 'high','enterprise']",
+            "ontology": null,
+            "picture_credits": "Two destroyed tanks in front of a mosque in Azaz, Syria, in 2012. CC-by Christiaan Triebert"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "detective.TopicSkeleton",
+        "fields": {
+            "title": "Family Affairs",
+            "target_plans": "['low', 'medium', 'high','enterprise']",
+            "picture": "data/topics-images/family-affairs.jpg",
+            "schema_picture": "data/topics-images/family-affairs-schema.jpg",
+            "ontology": null,
+            "picture_credits": "A family tree in Biarritz, France. Photo by Shakko on Wikimedia Commons, in the public domain."
+        }
+    },
+    {
+        "pk": 4,
+        "model": "detective.TopicSkeleton",
+        "fields": {
+            "title": "Political influence",
+            "picture": "data/topics-images/political-influence.jpg",
+            "schema_picture": null,
+            "ontology": null,
+            "target_plans": "['low', 'medium', 'high','enterprise']",
+            "picture_credits": "Capitol Hill in 2007. CC-by-sa Elliott P."
+        }
+    },
+    {
+        "pk": 5,
+        "model": "detective.TopicSkeleton",
+        "fields": {
+            "title": "Supply Chain mapping",
+            "picture": "data/topics-images/supply-chain.jpg",
+            "schema_picture": null,
+            "ontology": null,
+            "target_plans": "['low', 'medium', 'high', 'enterprise' ]",
+            "picture_credits": "The Hanjin Helsinki in 2007. CC-by Ana Ulin."
+        }
+    }
+]

@@ -491,15 +491,15 @@ class SearchTerm(models.Model):
 #    CUSTOM USER
 #
 # -----------------------------------------------------------------------------
-PLANS_CHOICES = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
+PLANS_CHOICES  = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
+PLANS_BY_NAMES = dict([d for p in settings.PLANS for d in p.items()])
 
 class DetectiveProfileUser(models.Model):
-    user = models.OneToOneField(User)
-    plan = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])
-
-    location = models.CharField(max_length=100, null=True, blank=True)
+    user         = models.OneToOneField(User)
+    plan         = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])
+    location     = models.CharField(max_length=100, null=True, blank=True)
     organization = models.CharField(max_length=100, null=True, blank=True)
-    url = models.CharField(max_length=100, null=True, blank=True)
+    url          = models.CharField(max_length=100, null=True, blank=True)
 
     @property
     def avatar(self):
@@ -507,9 +507,11 @@ class DetectiveProfileUser(models.Model):
         return "http://www.gravatar.com/avatar/{hash}?s=200&d=mm".format(
             hash=hash_email)
 
-    @property
-    def topics_count(self):
-        return Topic.objects.filter(author=self).count()
+    def topics_count    (self): return Topic.objects.filter(author=self).count()
+    def topics_max      (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_investigation"]
+    def nodes_max       (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_entities"]
+    # NOTE: Very expensive if cache is disabled
+    def max_nodes_count (self): return max([topic.entities_count for topic in self.user.topic_set.all()])
 
 # -----------------------------------------------------------------------------
 #

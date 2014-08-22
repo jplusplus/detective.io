@@ -55,7 +55,8 @@ class UserAuthorization(ReadOnlyAuthorization):
         return authorized
 
 class ProfileResource(ModelResource):
-    avatar = fields.CharField(attribute='avatar', readonly=True)
+    avatar       = fields.CharField(attribute='avatar', readonly=True)
+    topics_count = fields.IntegerField(attribute='topics_count', readonly=True)
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
@@ -63,7 +64,7 @@ class ProfileResource(ModelResource):
         queryset           = DetectiveProfileUser.objects.all()
         resource_name      = 'profile'
         allowed_methods    = ['get', 'patch']
-        fields             = ['id', 'location', 'organization', 'url', 'avatar']
+        fields             = ['id', 'location', 'organization', 'url', 'avatar', 'topics_count']
 
 class UserResource(ModelResource):
     profile = fields.ToOneField(ProfileResource, 'detectiveprofileuser', full=True, null=True)

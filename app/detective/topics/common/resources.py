@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
-from app.detective.models             import QuoteRequest, Topic, TopicToken, Article, User
+from app.detective.models             import QuoteRequest, Topic, TopicToken, \
+                                             TopicSkeleton, Article, User, \
+                                             TopicFactory
 from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
 from app.detective.topics.common.user import UserResource
 from django.conf                      import settings
@@ -50,13 +52,17 @@ class QuoteRequestResource(ModelResource):
 
 class TopicAuthorization(ReadOnlyAuthorization):
     def update_detail(self, object_list, bundle):
-        contributor_group = bundle.obj.get_contributor_group().name
-        isAuthor = bundle.obj.author == bundle.request.user
-        # Only authenticated user can update there own topic or people from the contributor group
-        return isAuthor or not not bundle.request.user.groups.filter(name=contributor_group)
+        user         = bundle.request.user
+        contributors = bundle.obj.get_contributor_group().name
+        is_author    = user.is_authenticated() and bundle.obj.author == user
+        # Only authenticated user can update there own topic or people from the
+        # contributor group
+        return is_author or user.groups.filter(name=contributors).exists()
+
     # Only authenticated user can create topics
     def create_detail(self, object_list, bundle):
         return bundle.request.user.is_authenticated()
+
     def read_list(self, object_list, bundle):
         if bundle.request.user and bundle.request.user.is_staff:
             return object_list
@@ -68,16 +74,23 @@ class TopicAuthorization(ReadOnlyAuthorization):
                 q_filter = Q(public=True)
             return object_list.filter(q_filter)
 
-class TopicResource(ModelResource):
+class TopicSkeletonAuthorization(ReadOnlyAuthorization):
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.is_authenticated():
+            return object_list
+        else:
+            raise Unauthorized("Only logged user can retrieve skeletons")
 
+class TopicResource(ModelResource):
     author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path', readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
 
     class Meta:
-        authorization = TopicAuthorization()
-        queryset  = Topic.objects.all().prefetch_related('author')
-        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
+        always_return_data = True
+        authorization      = TopicAuthorization()
+        queryset           = Topic.objects.all().prefetch_related('author')
+        filtering          = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
 
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
@@ -193,6 +206,17 @@ class TopicResource(ModelResource):
             }
             bundle.data["models"].append(model)
         return bundle
+
+    def hydrate(self, bundle):
+        bundle.data['author'] = bundle.request.user
+        bundle.data = TopicFactory.get_topic_bundle(**bundle.data)
+        return bundle
+
+
+class TopicSkeletonResource(ModelResource):
+    class Meta:
+        authorization = TopicSkeletonAuthorization()
+        queryset = TopicSkeleton.objects.all()
 
 class ArticleResource(ModelResource):
     topic = fields.ToOneField(TopicResource, 'topic', full=True)

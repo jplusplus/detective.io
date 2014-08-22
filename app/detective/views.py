@@ -199,8 +199,8 @@ def topic(request, **kwargs):
         default_meta  = default_social_meta(request)
         default_title = default_meta['title']
         generic_description = (
-            "Part of investigation {topic_title} by "
-            "{owner} on {default_title}"
+            u"Part of investigation {topic_title} by "
+            u"{owner} on {default_title}"
         ).format(
             topic_title=topic.title,
             owner=user.username,

@@ -13,6 +13,7 @@ from django.core.cache          import cache
 from django.conf                import settings
 
 import hashlib
+import re
 import importlib
 import inspect
 import os
@@ -424,21 +425,34 @@ class TopicSkeleton(models.Model):
     target_plans    = models.CharField(max_length=50)
 
     def selected_plans(self):
-        import pdb; pdb.set_trace()
+        plans = re.sub('[\[\]]', '', self.target_plans)
+        return plans.split(',')
 
 # utility class to create a topic thanks to a skeleton
-class TopicFactory(object):
+class TopicFactory:
+
+    @staticmethod
     def create_topic(topic_skeleton, **kwargs):
         if not isinstance(topic_skeleton, TopicSkeleton):
             topic_skeleton = TopicSkeleton.object.get(pk=topic_skeleton)
 
         if not kwargs.get('background', None):
-            kwargs.set('background', topic_skeleton.picture)
-            about = "{about}<br/>{credit}".format(
-                about=kwargs.get('about', '') ,
+            kwargs['background'] =  topic_skeleton.picture
+            about = kwargs.get('about', '')
+            if about != '':
+                about = "%(about)s<br/>".format(about=about)
+            about = "{about}{credit}".format(
+                about=about,
                 credit=topic_skeleton.picture_credits
             )
-            kwargs.set('about', about)
+            kwargs['about'] =  about
+
+        if not kwargs.get('title'):
+            kwargs['title'] = topic_skeleton.title
+
+        kwargs['ontology_as_json'] = topic_skeleton.ontology
+
+        return Topic.objects.create(**kwargs)
 
 
 

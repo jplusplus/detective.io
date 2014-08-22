@@ -211,7 +211,7 @@ class Topic(models.Model):
 
         Return the number of entities in the current topic.
         Used to inform administrator.
-        Expensive request. Can be cached a long time.
+        Expensive request. Cached a long time.
 
         """
         if not self.id: return 0
@@ -227,7 +227,7 @@ class Topic(models.Model):
                 RETURN count(leaf) AS count
             """.format(app_label=self.app_label())
             response = connection.cypher(query).to_dicts()[0].get("count")
-            cache.set(cache_key, response)
+            cache.set(cache_key, response, 60*60*12) # cached 12 hours
         return response
 
     def get_models_output(self):

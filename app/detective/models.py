@@ -430,7 +430,6 @@ class TopicSkeleton(models.Model):
 
 # utility class to create a topic thanks to a skeleton
 class TopicFactory:
-
     @staticmethod
     def get_topic_bundle(**kwargs):
         topic_skeleton = kwargs.get('topic_skeleton')
@@ -459,11 +458,6 @@ class TopicFactory:
     def create_topic(**kwargs):
         kwargs = TopicFactory.get_topic_bundle(**kwargs)
         return Topic.objects.create(**kwargs)
-
-
-
-
-
 
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")

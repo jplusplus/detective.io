@@ -17,6 +17,15 @@
 		<h2><i class="fa fa-dashboard"></i> Dashboard</h2>
 		<div class="clearfix">
 			<ul class="list-unstyled dashboard__topics row">
+				<li class="col-sm-4">
+					<div class="dashboard__topics__item dashboard__topics__item--new-item">
+						<a ui-sref="create-topic">
+							<h3>
+								<i class="fa fa-plus"></i>
+								Create a new investigation
+							</h3>
+						</a>
+					</div>
 				<li ng-repeat="topic in topics" class="col-sm-4">
 					<div class="dashboard__topics__item">
 						<img ng-src="[[topic.thumbnail.medium]]" class="dashboard__topics__item__bg" />

@@ -54,6 +54,28 @@
 				clip: rect(0, 200px, 200px, 0);
 				left:-140px;
 			}
+
+			&&--new-item {
+				&, & > *, & a {
+					color: @brand-secondary;
+				}
+				background: none;
+				padding: 0;
+				border: 3px @brand-secondary dashed;
+				text-align: center;
+				&:before {
+					.box-shadow(none);
+				}
+				a {
+					text-decoration: none;
+					h3 {
+						font-size: 22px;
+						line-height: 200px;
+						padding: 0;
+						margin: 0;
+					}
+				}
+			}
 		}
 
 	}

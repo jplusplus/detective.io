@@ -1,6 +1,6 @@
 [
     {
-        "pk": 2,
+        "pk": 1,
         "model": "detective.TopicSkeleton",
         "fields": {
             "title": "Body Count",
@@ -12,7 +12,7 @@
         }
     },
     {
-        "pk": 3,
+        "pk": 2,
         "model": "detective.TopicSkeleton",
         "fields": {
             "title": "Family Affairs",
@@ -24,7 +24,7 @@
         }
     },
     {
-        "pk": 4,
+        "pk": 3,
         "model": "detective.TopicSkeleton",
         "fields": {
             "title": "Political influence",
@@ -36,11 +36,23 @@
         }
     },
     {
-        "pk": 5,
+        "pk": 4,
         "model": "detective.TopicSkeleton",
         "fields": {
             "title": "Supply Chain mapping",
             "picture": "data/topics-images/supply-chain.jpg",
+            "schema_picture": null,
+            "ontology": null,
+            "target_plans": "['low', 'medium', 'high', 'enterprise' ]",
+            "picture_credits": "The Hanjin Helsinki in 2007. CC-by Ana Ulin."
+        }
+    },
+    {
+        "pk": 5,
+        "model": "detective.TopicSkeleton",
+        "fields": {
+            "title": "Corporate Networks",
+            "picture": "data/topics-images/corporate-nets.jpg",
             "schema_picture": null,
             "ontology": null,
             "target_plans": "['low', 'medium', 'high', 'enterprise' ]",

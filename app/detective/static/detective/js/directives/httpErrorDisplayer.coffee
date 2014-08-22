@@ -26,7 +26,6 @@
             , 6500
 
             $document.on "click.http-error-#{now}", (e) ->
-                console.debug 'HERE'
                 $timeout.cancel _timeout
                 do cleanError
 ]

@@ -20,8 +20,8 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 @topic = {}
 
             onStateChanged: (e, current, params)=>
-                if params.topic and @topics
-                    (@getTopic params.topic).then (topic) =>
+                if params.topic and params.username and @topics
+                    (@getTopic params.topic, params.username).then (topic) =>
                         @setCurrent topic
                 else
                     @topic = {}
@@ -40,14 +40,15 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 $rootScope.$broadcast @EVENTS.current_topic_updated
 
 
-            getTopic: (slug)=>
-                return unless slug
+            getTopic: (slug, username) =>
+                return unless (slug and username)
                 deferred = do $q.defer
                 topic = _.findWhere @topics, slug: slug
                 if not topic?
                     Common.query
                         type : 'topic'
                         slug : slug
+                        author__username : username
                     .$promise.then (_topics) =>
                         if _topics.length > 0
                             @topics.push _topics[0]

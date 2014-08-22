@@ -432,9 +432,10 @@ class TopicSkeleton(models.Model):
 class TopicFactory:
 
     @staticmethod
-    def create_topic(topic_skeleton, **kwargs):
+    def get_topic_bundle(**kwargs):
+        topic_skeleton = kwargs.get('topic_skeleton')
         if not isinstance(topic_skeleton, TopicSkeleton):
-            topic_skeleton = TopicSkeleton.object.get(pk=topic_skeleton)
+            topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton)
 
         if not kwargs.get('background', None):
             kwargs['background'] =  topic_skeleton.picture
@@ -451,7 +452,12 @@ class TopicFactory:
             kwargs['title'] = topic_skeleton.title
 
         kwargs['ontology_as_json'] = topic_skeleton.ontology
+        del kwargs['topic_skeleton']
+        return kwargs
 
+    @staticmethod
+    def create_topic(**kwargs):
+        kwargs = TopicFactory.get_topic_bundle(**kwargs)
         return Topic.objects.create(**kwargs)
 
 

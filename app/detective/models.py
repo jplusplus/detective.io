@@ -383,7 +383,7 @@ class Topic(models.Model):
 
 class TopicToken(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this token is related to.")
-    token      = models.CharField(editable=False, max_length=32, help_text="Title of your article.")
+    token      = models.CharField(editable=False, max_length=32, help_text="Title of your article.", db_index=True)
     email      = models.CharField(max_length=255, default=None, null=True, help_text="Email to invite.")
     created_at = models.DateTimeField(auto_now_add=True, default=None, null=True)
 
@@ -506,6 +506,10 @@ class DetectiveProfileUser(models.Model):
         hash_email = hashlib.md5(self.user.email.strip().lower()).hexdigest()
         return "http://www.gravatar.com/avatar/{hash}?s=200&d=mm".format(
             hash=hash_email)
+
+    @property
+    def topics_count(self):
+        return Topic.objects.filter(author=self).count()
 
 # -----------------------------------------------------------------------------
 #

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective.models                import Topic
+from app.detective.models                import Topic, TopicSkeleton
 from app.detective.topics.common.message import SaltMixin
 from app.detective.topics.energy.models  import Organization, EnergyProject, Person, Country
 from datetime                            import datetime
@@ -21,9 +21,10 @@ def find(function, iterable):
             return el
     return None
 
-class ApiTestCase(ResourceTestCase):
 
+class ApiTestCase(ResourceTestCase):
     fixtures = ['app/detective/fixtures/default_topics.json',
+                'app/detective/fixtures/default_skeletons.json',
                 'app/detective/fixtures/tests_topics.json',
                 'app/detective/fixtures/search_terms.json',]
 
@@ -167,6 +168,9 @@ class ApiTestCase(ResourceTestCase):
     def login(self, username, password):
         return self.api_client.client.login(username=username, password=password)
 
+    def logout(self):
+        return self.api_client.client.logout()
+
     def get_super_credentials(self):
         return self.login(self.super_username, self.super_password)
 
@@ -192,6 +196,15 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual(len(user_permissions), len(permissions))
         for perm in user_permissions:
             self.assertTrue(perm in permissions)
+
+
+class TopicApiTestCase(ApiTestCase):
+
+    def setUp(self):
+        super(TopicApiTestCase, self).setUp()
+
+    def tearDown(self):
+        super(TopicApiTestCase, self).tearDown()
 
     # All test functions
     def test_user_signup_succeed(self):
@@ -765,7 +778,6 @@ class ApiTestCase(ResourceTestCase):
         resp
         self.assertHttpOK(resp)
 
-
     def test_featured_success_after_topic_delete(self):
         topic = Topic.objects.get(slug='test-topic')
         topic.delete()
@@ -777,4 +789,38 @@ class ApiTestCase(ResourceTestCase):
         self.assertHttpOK(resp)
 
 
+class TopicSkeletonApiTestCase(ApiTestCase):
+    def setUp(self):
+        super(TopicSkeletonApiTestCase, self).setUp()
 
+    def tearDown(self):
+        super(TopicSkeletonApiTestCase, self).tearDown()
+
+    def test_topic_skeleton_list_unauthorized(self):
+        client = self.api_client
+        client.client.logout()
+        # skeletons must be accessible only for logged users
+        resp = client.get('/api/common/v1/topicskeleton/',
+            format='json'
+        )
+        self.assertHttpUnauthorized(resp)
+
+    def test_topic_skeleton_list_lambda(self):
+        resp = self.api_client.get('/api/common/v1/topicskeleton/',
+            format='json',
+            authentication=self.get_lambda_credentials()
+        )
+        self.assertValidJSONResponse(resp)
+
+
+    def test_topic_create_with_skeleton(self):
+        skeleton = TopicSkeleton.objects.get(title='Body Count')
+        resp = self.api_client.post(
+            '/api/common/v1/topic/',
+            data={'topic_skeleton': skeleton.pk},
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        self.assertHttpCreated(resp)
+        created_topic = json.loads(resp.content)
+        self.assertEqual(created_topic['title'], skeleton.title)

@@ -3,7 +3,7 @@
 # @Author: Pierre Bellon
 # @Date:   2014-08-21 17:04:11
 # @Last Modified by:   toutenrab
-# @Last Modified time: 2014-08-22 11:52:36
+# @Last Modified time: 2014-08-22 18:20:30
 from django.test                import TestCase
 from django.contrib.auth.models import User
 from app.detective.models       import TopicSkeleton, TopicFactory
@@ -34,9 +34,10 @@ class CommonTestCase(TestCase):
     def test_topic_factory_with_skeleton(self):
         skeleton = self.body_skeleton
         data = {
-            'author': self.contrib_user
+            'author': self.contrib_user,
+            'topic_skeleton': skeleton
         }
-        topic = TopicFactory.create_topic(skeleton, **data)
+        topic = TopicFactory.create_topic(**data)
         self.assertEqual(topic.title,            skeleton.title)
         self.assertEqual(topic.about,            skeleton.picture_credits)
         self.assertEqual(topic.background,       skeleton.picture)

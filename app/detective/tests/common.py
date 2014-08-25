@@ -3,7 +3,7 @@
 # @Author: Pierre Bellon
 # @Date:   2014-08-21 17:04:11
 # @Last Modified by:   toutenrab
-# @Last Modified time: 2014-08-22 18:20:30
+# @Last Modified time: 2014-08-25 17:53:54
 from django.test                import TestCase
 from django.contrib.auth.models import User
 from app.detective.models       import TopicSkeleton, TopicFactory
@@ -38,7 +38,5 @@ class CommonTestCase(TestCase):
             'topic_skeleton': skeleton
         }
         topic = TopicFactory.create_topic(**data)
-        self.assertEqual(topic.title,            skeleton.title)
-        self.assertEqual(topic.about,            skeleton.picture_credits)
         self.assertEqual(topic.background,       skeleton.picture)
         self.assertEqual(topic.ontology_as_json, skeleton.ontology)

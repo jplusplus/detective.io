@@ -823,4 +823,4 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         )
         self.assertHttpCreated(resp)
         created_topic = json.loads(resp.content)
-        self.assertEqual(created_topic['title'], skeleton.title)
+        self.assertEqual(created_topic['background'], skeleton.background)

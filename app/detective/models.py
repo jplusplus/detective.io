@@ -447,9 +447,6 @@ class TopicFactory:
             )
             kwargs['about'] =  about
 
-        if not kwargs.get('title'):
-            kwargs['title'] = topic_skeleton.title
-
         kwargs['ontology_as_json'] = topic_skeleton.ontology
         del kwargs['topic_skeleton']
         return kwargs

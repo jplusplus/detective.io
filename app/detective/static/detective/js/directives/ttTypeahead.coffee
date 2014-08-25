@@ -68,7 +68,11 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         start = =>
             # Select the individual to look for
             individual = (scope.individual() or "").toLowerCase()
-            itopic     = (scope.topic() or $stateParams.topic or "common").toLowerCase()
+            itopic     = "detective/common"
+            if scope.topic? and (do scope.topic)? and (do scope.topic) isnt '/'
+                itopic = do (do scope.topic).toLowerCase
+            else if $stateParams.username? and $stateParams.topic?
+                itopic = do "#{$stateParams.username}/#{$stateParams.topic}".toLowerCase
             iendpoint  = scope.endpoint() or 'search'
             # Generate URLs
             prefetchUrl = scope.prefetchUrl() or  "/api/#{itopic}/v1/#{individual}/mine/"
@@ -101,7 +105,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
 
             element.typeahead options,
                 displayKey : (scope.valueKey or "name")
-                name : 'suggestions-' + do scope.topic
+                name : 'suggestions-' + itopic.replace '/', '-'
                 source : do bh.ttAdapter
                 templates :
                     suggestion : (template.compile [

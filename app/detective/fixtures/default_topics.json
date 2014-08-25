@@ -1,5 +1,15 @@
 [
 {
+    "pk": 100000,
+    "model": "auth.user",
+    "fields": {
+        "first_name": "detective",
+        "last_name": "detective",
+        "username": "detective",
+        "password": ""
+    }
+},
+{
     "pk": 1,
     "model": "detective.topic",
     "fields": {
@@ -11,7 +21,8 @@
         "ontology_as_mod": "common",
         "about": "",
         "background": "",
-        "public": true
+        "public": true,
+        "author": 100000
     }
 },
 {
@@ -26,7 +37,8 @@
         "ontology_as_mod": "energy",
         "about": "",
         "background": "",
-        "public": true
+        "public": true,
+        "author": 100000
     }
 }
 ]

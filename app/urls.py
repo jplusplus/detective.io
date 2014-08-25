@@ -12,9 +12,9 @@ admin.autodiscover()
 # If needed, this middleware will create the API endpoints and resources
 # that match to the given slug.
 middlewarepatterns = mpatterns('',
-    middleware(r'^api/([a-zA-Z0-9_\-]+)/', StoreTopic),
-    middleware(r'^api/([a-zA-Z0-9_\-]+)/', StoreTopicList),
-    middleware(r'^api/([a-zA-Z0-9_\-]+)/', VirtualApi),
+    middleware(r'^api/([a-zA-Z0-9_\-.]+)/([a-zA-Z0-9_\-]+)/', StoreTopic),
+    middleware(r'^api/([a-zA-Z0-9_\-.]+)/([a-zA-Z0-9_\-]+)/', StoreTopicList),
+    middleware(r'^api/([a-zA-Z0-9_\-.]+)/([a-zA-Z0-9_\-]+)/', VirtualApi),
 )
 
 urlpatterns = patterns('',

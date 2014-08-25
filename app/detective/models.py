@@ -59,7 +59,7 @@ class QuoteRequest(models.Model):
 class Topic(models.Model):
     title            = models.CharField(max_length=250, help_text="Title of your topic.")
     # Value will be set for this field if it's blank
-    slug             = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
+    slug             = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
     description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
     about            = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public           = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
@@ -70,6 +70,9 @@ class Topic(models.Model):
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
     ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
     ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
+
+    class Meta:
+        unique_together = ('author', 'slug')
 
     def __unicode__(self):
         return self.title

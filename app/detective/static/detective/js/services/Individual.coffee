@@ -2,8 +2,9 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
     defaultsParams =
         # Use the current topic parameter as default topic
         topic: -> $stateParams.topic or "common"
+        username: -> $stateParams.username or "detective"
 
-    $resource '/api/:topic/v1/:type/:id/', defaultsParams,
+    $resource '/api/:username/:topic/v1/:type/:id/', defaultsParams,
         query:
             method : 'GET'
             isArray: yes
@@ -11,11 +12,11 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
                 data.objects
             ])
         save:
-            url:'/api/:topic/v1/:type/?'
+            url:'/api/:username/:topic/v1/:type/?'
             method : 'POST'
             isArray: no
         bulk:
-            url:'/api/:topic/v1/:type/summary/bulk_upload/?'
+            url:'/api/:username/:topic/v1/:type/summary/bulk_upload/?'
             method : 'POST'
             isArray: no
             transformRequest: (data, headersGetter)->
@@ -33,18 +34,18 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
 
                 fd
         relationships:
-            url:'/api/:topic/v1/:type/:id/relationships/:field/:target/?'
+            url:'/api/:username/:topic/v1/:type/:id/relationships/:field/:target/?'
             method: 'GET'
             isArray: no
         delete:
-            url:'/api/:topic/v1/:type/:id/?'
+            url:'/api/:username/:topic/v1/:type/:id/?'
             method : 'DELETE'
         update:
-            url:'/api/:topic/v1/:type/:id/patch/?'
+            url:'/api/:username/:topic/v1/:type/:id/patch/?'
             method : 'POST'
             isArray: no
         graph:
-            url:'/api/:topic/v1/:type/:id/graph'
+            url:'/api/:username/:topic/v1/:type/:id/graph'
             method: 'GET'
             isArray: no
             paramDefaults:

@@ -7,21 +7,15 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        try:
-            common = orm.Topic.objects.get(slug="common")
-            detective = orm['auth.User'].objects.get(username='detective')
-            common.author = detective
-            common.save()
-        except orm['auth.User'].DoesNotExist:
-            pass
+        common = orm.Topic.objects.get(slug="common")
+        detective, created = orm['auth.User'].objects.get_or_create(username='detective')
+        common.author = detective
+        common.save()
 
     def backwards(self, orm):
-        try:
-            common = orm.Topic.objects.get(slug="common")
-            common.author = None
-            common.save()
-        except orm['auth.User'].DoesNotExist:
-            pass
+        common = orm.Topic.objects.get(slug="common")
+        common.author = None
+        common.save()
 
     models = {
         u'auth.group': {

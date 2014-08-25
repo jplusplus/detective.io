@@ -35,8 +35,10 @@ class NewTopicCtrl
     onSkeletonSelected: =>
         # if we are currently editing a new_topic
         if @scope.new_topic? and @scope.new_topic.id?
+            topic = @scope.new_topic
+            data = _.extends topic, topic_skeleton: @scope.selected_skeleton.i
             # update on API
-
+            @TopicsFactory.put id:topic.id, data
         # else we create it with the new skeleton and get the API result
         else
             data = topic_skeleton: @scope.selected_skeleton.id

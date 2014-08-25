@@ -14,6 +14,7 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 $rootScope.$on '$stateChangeStart', @onStateChanged
 
             post: Topic.post
+            put:  Topic.put
 
             reset: =>
                 # Topics list

@@ -30,10 +30,52 @@
                 </p>
             </div>
             <div class="col-sm-6">
-                <input id="id_topic_title" ng-model="newTopic.title">
+                <input id="id_topic_title" ng-model="new_topic.title">
             </div>
         </div>
 
+         <div class="row form-group">
+            <div class="col-sm-3 form-label top05">
+                <label for="id_topic_description">Subtitle</label>
+                <p class="help-block">
+                    max. 200 char.
+                </p>
+            </div>
+            <div class="col-sm-6">
+                <input id="id_topic_description" ng-model="new_topic.description" ng-maxlenght="200">
+            </div>
+
+
+        </div>
+        <div class="row form-group">
+            <div class="col-sm-3 form-label top05">
+                <label for="id_topic_about">Cover picture</label>
+                <p class="help-block">
+                    max 1Mo.
+                </p>
+            </div>
+            <div class="col-sm-6">
+                <input type="file" ng-file-select="onFileSelect($file)" class="form-control">
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-sm-3 form-label top05">
+                <label for="id_topic_about">About your investigation</label>
+                <p class="help-block">
+                    max. 1500 char.
+                </p>
+            </div>
+            <div class="col-sm-6">
+                <div text-angular
+                     ng-model="new_topic.about"
+                     id="id_topic_description"></div>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-sm-push-3 btn btn-default">
+                I'm done, create the investigation
+            </div>
+        </div>
     </div>
 
     <a ui-sref="home.dashboard"><i class='fa fa-arrow-left'></i>&nbsp;Go back to your dashboard</a>

@@ -110,7 +110,19 @@ angular.module('detective.config').config [
                 resolve : UserCtrl.resolve
                 default : 'user'
             )
-            # Topic-related url
+            # ------------------
+            # Topic-related URLs
+            # ------------------
+            # Note:
+            #   URL order matters. Like in django if we declare a pattern like
+            #   `/user/:type/` before another pattern `/user/stuff/` the second
+            #   pattern wont be accessible by its URL and we will never trigger
+            #   the proper state.
+            .state('user-topic-create',
+                url: '/:username/new-topic/'
+                controller: NewTopicCtrl
+                templateUrl: '/partial/topic.create.html'
+            )
             .state('user-topic',
                 url : "/:username/:topic/"
                 controller : ExploreCtrl

@@ -47,7 +47,6 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     if fields: attrs.update(fields)
     # Create the class, which automatically triggers ModelBase processing
     cls = type(name, (models.NodeModel,), attrs)
-    # for Model in topic.get_models():
     signals.post_save.connect(update_topic_cache, sender=cls)
     return cls
 

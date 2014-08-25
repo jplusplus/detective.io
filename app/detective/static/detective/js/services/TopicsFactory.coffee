@@ -1,6 +1,6 @@
 angular.module('detective.service').factory 'TopicsFactory', [
-    '$q', '$rootScope', '$state', 'Common', 'User', 'UtilsFactory'
-    ($q, $rootScope, $state, Common, User, UtilsFactory)->
+    '$q', '$rootScope', '$state', 'Common', 'TopicSkeleton', 'User', 'UtilsFactory'
+    ($q, $rootScope, $state, Common, TopicSkeleton, User, UtilsFactory)->
         new class TopicsFactory
             EVENTS:
                 current_topic_updated: "topic:updated"
@@ -16,6 +16,7 @@ angular.module('detective.service').factory 'TopicsFactory', [
             reset: =>
                 # Topics list
                 @topics = []
+                @skeletons = TopicSkeleton.get()
                 # Active topic
                 @topic = {}
 
@@ -25,7 +26,7 @@ angular.module('detective.service').factory 'TopicsFactory', [
                         @setCurrent topic
                 else
                     @topic = {}
-                    $rootScope.$broadcast @EVENTS.current_topic_updated
+                $rootScope.$broadcast @EVENTS.current_topic_updated
 
 
             setCurrent: (topic)=>

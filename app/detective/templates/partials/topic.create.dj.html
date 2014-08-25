@@ -1,7 +1,42 @@
 <div id="create-topic" class="container">
-    <ul class="list-unstyled">
+    <h1><i class="fa fa-plus">&nbsp;Create a new investigation</i></h1>
+    <p>What are you investigating on? Pick on one scheme from the list</p>
+    <ul class="list-unstyled row skeletons">
         <li class="col-sm-4" ng-repeat="skeleton in skeletons">
-            <img ng-src="[[ skeleton.thumbnail.medium ]]" class="skeleton-item"/>
+            <div class="skeletons__item" ng-class="{ 'skeletons__item--selected': isSelected(skeleton) }">
+                <img ng-click="selectSkeleton(skeleton)" ng-src="[[ skeleton.thumbnail.medium ]]"/>
+                <h4>[[ skeleton.title ]]</h4>
+                <p>Data scheme used in [[ skeleton.title ]]</p>
+            </div>
+        </li>
+        <li class="col-sm-4">
+            <div class="skeletons__item skeletons__item--new-skeleton"
+                 ng-click="goToPlans()">
+                <p>
+                    Need another data scheme?<br/>
+                    Check out our premium plans!
+                </p>
+            </div>
         </li>
     </ul>
+
+    <div ng-if="hasSelectedSkeleton()" class="form-horizontal">
+        <div class="row form-group">
+            <div class="col-sm-3 form-label top05">
+                <label for="id_topic_title">Title</label>
+                <p class="help-block">
+                    Mandatory.<br/>
+                    You <b>cannot</b> change it later.
+                </p>
+            </div>
+            <div class="col-sm-6">
+                <input id="id_topic_title" ng-model="newTopic.title">
+            </div>
+        </div>
+
+    </div>
+
+    <a ui-sref="home.dashboard"><i class='fa fa-arrow-left'></i>&nbsp;Go back to your dashboard</a>
+
+
 </div>

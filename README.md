@@ -9,6 +9,8 @@
 
 ## Installation
 
+See also the [full installation guide](http://docs.detective.io/en/latest/installation.html).
+
 **1. Prerequisite**
 ```bash
 sudo apt-get install build-essential git-core python python-pip python-dev libmemcached-dev

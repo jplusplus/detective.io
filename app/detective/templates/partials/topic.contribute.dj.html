@@ -1,4 +1,11 @@
-<div id="contribute">
+<div ng-if="isOverfillingThePlan">
+	<div class="container">
+		<p>This investigation has reached the limit of its owner’s plan.</p>
+		<p>If you are the owner, you can upgrade now!</p>
+	</div>
+</div>
+<div ng-if="!isOverfillingThePlan" id="contribute">
+
 	<div class="contribute-start panel" ng-class="{ open: showKickStart || !individuals.length }">
 		<div class="container">
 			<h2>Add a new entity to the database</h2>

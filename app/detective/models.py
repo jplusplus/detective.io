@@ -507,11 +507,11 @@ class DetectiveProfileUser(models.Model):
         return "http://www.gravatar.com/avatar/{hash}?s=200&d=mm".format(
             hash=hash_email)
 
-    def topics_count    (self): return Topic.objects.filter(author=self).count()
-    def topics_max      (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_investigation"]
-    def nodes_max       (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_entities"]
+    def topics_count (self): return Topic.objects.filter(author=self).count()
+    def topics_max   (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_investigation"]
+    def nodes_max    (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_entities"]
     # NOTE: Very expensive if cache is disabled
-    def max_nodes_count (self): return max([topic.entities_count for topic in self.user.topic_set.all()])
+    def nodes_count  (self): return dict([(topic.slug, topic.entities_count) for topic in self.user.topic_set.all()])
 
 # -----------------------------------------------------------------------------
 #

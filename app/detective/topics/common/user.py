@@ -55,12 +55,12 @@ class UserAuthorization(ReadOnlyAuthorization):
         return authorized
 
 class ProfileResource(ModelResource):
-    avatar          = fields.CharField(attribute='avatar'            , readonly=True)
-    topics_max      = fields.IntegerField(attribute='topics_max'     , readonly=True)
-    topics_count    = fields.IntegerField(attribute='topics_count'   , readonly=True)
-    nodes_max       = fields.IntegerField(attribute='nodes_max'      , readonly=True)
+    avatar       = fields.CharField(   attribute='avatar'      , readonly=True)
+    topics_max   = fields.IntegerField(attribute='topics_max'  , readonly=True)
+    topics_count = fields.IntegerField(attribute='topics_count', readonly=True)
+    nodes_max    = fields.IntegerField(attribute='nodes_max'   , readonly=True)
     # NOTE: Very expensive if cache is disabled
-    max_nodes_count = fields.IntegerField(attribute='max_nodes_count', readonly=True)
+    nodes_count  = fields.DictField(   attribute='nodes_count' , readonly=True)
 
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
@@ -69,7 +69,7 @@ class ProfileResource(ModelResource):
         queryset           = DetectiveProfileUser.objects.all()
         resource_name      = 'profile'
         allowed_methods    = ['get', 'patch']
-        fields             = ['id', 'location', 'organization', 'url', 'avatar', 'plan', 'topics_count', 'topics_max', 'nodes_max', 'max_nodes_count']
+        fields             = ['id', 'location', 'organization', 'url', 'avatar', 'plan', 'topics_count', 'topics_max', 'nodes_max', 'nodes_count']
 
 class UserResource(ModelResource):
     profile = fields.ToOneField(ProfileResource, 'detectiveprofileuser', full=True, null=True)

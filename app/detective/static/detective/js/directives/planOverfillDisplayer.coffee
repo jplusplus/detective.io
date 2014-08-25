@@ -8,7 +8,7 @@
             scope.topics_max      = User.profile.topics_max
             scope.topics_count    = User.profile.topics_count
             scope.nodes_max       = User.profile.nodes_max
-            scope.max_nodes_count = User.profile.max_nodes_count
+            scope.max_nodes_count = Math.max.apply(null, _.values(User.profile.nodes_count))
 
             should_show = true
             element.removeClass("attention")

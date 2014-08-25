@@ -4,7 +4,7 @@
         "model": "detective.TopicSkeleton",
         "fields": {
             "title": "Body Count",
-            "picture": "data/topics-images/body-count.jpg",
+            "picture": "topics-skeletons/body-count.jpg",
             "schema_picture": null,
             "target_plans": "['low', 'medium', 'high','enterprise']",
             "ontology": null,
@@ -17,8 +17,8 @@
         "fields": {
             "title": "Family Affairs",
             "target_plans": "['low', 'medium', 'high','enterprise']",
-            "picture": "data/topics-images/family-affairs.jpg",
-            "schema_picture": "data/topics-images/family-affairs-schema.jpg",
+            "picture": "topics-skeletons/family-affairs.jpg",
+            "schema_picture": "topics-skeletons/family-affairs-schema.jpg",
             "ontology": null,
             "picture_credits": "A family tree in Biarritz, France. Photo by Shakko on Wikimedia Commons, in the public domain."
         }
@@ -28,7 +28,7 @@
         "model": "detective.TopicSkeleton",
         "fields": {
             "title": "Political influence",
-            "picture": "data/topics-images/political-influence.jpg",
+            "picture": "topics-skeletons/political-influence.jpg",
             "schema_picture": null,
             "ontology": null,
             "target_plans": "['low', 'medium', 'high','enterprise']",
@@ -40,7 +40,7 @@
         "model": "detective.TopicSkeleton",
         "fields": {
             "title": "Supply Chain mapping",
-            "picture": "data/topics-images/supply-chain.jpg",
+            "picture": "topics-skeletons/supply-chain.jpg",
             "schema_picture": null,
             "ontology": null,
             "target_plans": "['low', 'medium', 'high', 'enterprise' ]",
@@ -52,7 +52,7 @@
         "model": "detective.TopicSkeleton",
         "fields": {
             "title": "Corporate Networks",
-            "picture": "data/topics-images/corporate-nets.jpg",
+            "picture": "topics-skeletons/corporate-nets.jpg",
             "schema_picture": null,
             "ontology": null,
             "target_plans": "['low', 'medium', 'high', 'enterprise' ]",

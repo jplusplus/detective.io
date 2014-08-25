@@ -16,7 +16,13 @@ Thumbs.db
 fabfile.py
 # Users media
 app/media/*
-
+# Topic Skeleton images exception rules
+!app/media/topics-skeletons/body-count.jpg
+!app/media/topics-skeletons/corporate-nets.jpg
+!app/media/topics-skeletons/family-affairs-schema.jpg
+!app/media/topics-skeletons/family-affairs.jpg
+!app/media/topics-skeletons/political-influence.jpg
+!app/media/topics-skeletons/supply-chain.jpg
 # Binary files and database
 *.db
 

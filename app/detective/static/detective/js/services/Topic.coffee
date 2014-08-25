@@ -10,6 +10,10 @@ angular.module('detective.service').factory("Topic", [ '$resource', '$http', ($r
             url :'/api/common/v1/topic/:id/invite/?'
             method : 'POST'
             isArray: no
+        post:
+            url: '/api/common/v1/topic/?'
+            method: 'POST'
+            isArray: no
         query:
             method : 'GET'
             isArray: yes

@@ -19,7 +19,7 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 # Active topic
                 @topic = {}
 
-            onStateChanged: (e, current, params)=>
+            onStateChanged: (e, current, params) =>
                 if params.topic and params.username and @topics
                     (@getTopic params.topic, params.username).then (topic) =>
                         @setCurrent topic
@@ -43,7 +43,9 @@ angular.module('detective.service').factory 'TopicsFactory', [
             getTopic: (slug, username) =>
                 return unless (slug and username)
                 deferred = do $q.defer
-                topic = _.findWhere @topics, slug: slug
+                topic = _.filter (_.where @topics, slug: slug), (_topic) =>
+                    _topic.author.username is username
+                topic = if topic.length then topic[0] else undefined
                 if not topic?
                     Common.query
                         type : 'topic'

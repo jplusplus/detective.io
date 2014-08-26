@@ -19,7 +19,7 @@ angular.module('detective.config').config [
                 ]
             )
             .state('home.tour',
-                url: 'tour/'
+                url: 'tour/?scrollTo'
                 controller : TourCtrl
                 templateUrl : '/partial/home.tour.html'
             )

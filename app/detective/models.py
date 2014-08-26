@@ -1,16 +1,17 @@
 from app.detective              import utils
 from app.detective.permissions  import create_permissions, remove_permissions
+from django.conf                import settings
 from django.contrib.auth.models import User, Group
+from django.core.cache          import cache
+from django.core.paginator      import Paginator
 from django.db                  import models
 from django.db.models           import signals
+from django.utils.text          import slugify
 
 from jsonfield                  import JSONField
 from tinymce.models             import HTMLField
 from psycopg2.extensions        import adapt
 from neo4django.db              import connection
-from django.core.paginator      import Paginator
-from django.core.cache          import cache
-from django.conf                import settings
 
 import hashlib
 import re
@@ -70,9 +71,13 @@ class QuoteRequest(models.Model):
         return "%s - %s" % (self.name, self.email,)
 
 class Topic(models.Model):
+    class Meta:
+        unique_together = (
+            ('slug','author')
+        )
     title            = models.CharField(max_length=250, help_text="Title of your topic.")
     # Value will be set for this field if it's blank
-    slug             = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
+    slug             = models.SlugField(max_length=250, help_text="Token to use into the url.")
     description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
     about            = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public           = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
@@ -152,6 +157,11 @@ class Topic(models.Model):
     def save(self, *args, **kwargs):
         # Ensure that the module field is populated with app_label()
         self.ontology_as_mod = self.app_label()
+
+        # For automatic slug generation.
+        if not self.slug:
+            self.slug = slugify(self.title)[:50]
+
         # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
         # Refresh the API

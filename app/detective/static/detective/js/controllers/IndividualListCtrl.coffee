@@ -61,7 +61,7 @@ class IndividualListCtrl
     # (loaded contexualy)
     getVerbose: =>
         # Get meta information for this type
-        @Summary.get {id: "forms", topic: @scope.topic}, (data)=>
+        @Summary.get {id: "forms", topic: @scope.topic, username: @scope.username}, (data)=>
             # Avoid set the wrong title
             # (when the controller is destroyed)
             unless @scope.$$destroyed

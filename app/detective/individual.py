@@ -25,6 +25,9 @@ from tastypie.utils                     import trailing_slash
 from datetime                           import datetime
 import json
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -531,7 +534,7 @@ class IndividualResource(ModelResource):
                                 # Too bad! Go to the next related object
                                 continue
                 # It's a literal value and not the ID
-                elif field != 'id' and value is not None:
+                elif field != 'id' and value is not None and value != "":
                     field_prop = self.get_model_field(field)._property
                     if isinstance(field_prop, DateProperty):
                         try:
@@ -539,7 +542,10 @@ class IndividualResource(ModelResource):
                             value  = datetime.strptime(value, RFC_DATETIME_FORMAT)
                         except ValueError:
                             # Try a second format
-                            value  = datetime.strptime(value, DATETIME_FORMAT)
+                            try:
+                                value  = datetime.strptime(value, DATETIME_FORMAT)
+                            except ValueError as e:
+                                logger.error("the date `%s` has an unknown format (%s)." % (value, e))
                     # Set the new value
                     setattr(node, field, value)
                 # Continue to not deleted the field

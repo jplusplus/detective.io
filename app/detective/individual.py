@@ -29,7 +29,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
+DATETIME_FORMAT     = '%Y-%m-%dT%H:%M:%S'
+DATETIME_FORMAT2    = '%Y-%m-%dT%H:%M:%S+00:00'
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
@@ -534,18 +535,22 @@ class IndividualResource(ModelResource):
                                 # Too bad! Go to the next related object
                                 continue
                 # It's a literal value and not the ID
-                elif field != 'id' and value is not None and value != "":
+                elif field != 'id' and value is not None:
                     field_prop = self.get_model_field(field)._property
                     if isinstance(field_prop, DateProperty):
                         try:
                             # It's a date and therefor `value` should be converted as it
-                            value  = datetime.strptime(value, RFC_DATETIME_FORMAT)
+                            value = datetime.strptime(value, RFC_DATETIME_FORMAT)
                         except ValueError:
                             # Try a second format
                             try:
-                                value  = datetime.strptime(value, DATETIME_FORMAT)
-                            except ValueError as e:
-                                logger.error("the date `%s` has an unknown format (%s)." % (value, e))
+                                value = datetime.strptime(value, DATETIME_FORMAT)
+                            except ValueError:
+                                # Try a third format
+                                try:
+                                    value = datetime.strptime(value, DATETIME_FORMAT2)
+                                except ValueError as e:
+                                    raise Exception("the date `%s` has an unknown format (%s)." % (value, e))
                     # Set the new value
                     setattr(node, field, value)
                 # Continue to not deleted the field

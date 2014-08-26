@@ -466,7 +466,7 @@ class SearchTerm(models.Model):
                 for f in utils.get_model_fields(model):
                     if f["name"] == self.name:
                         field = f
-            utils.topic_cache.set(self.topic, cache_key)
+            utils.topic_cache.set(self.topic, cache_key, field)
         return field
 
     @property

@@ -19,6 +19,7 @@ ADMINS = (
 )
 
 DEFAULT_FROM_EMAIL = 'Detective.io <contact@detective.io>'
+SERVER_EMAIL       = DEFAULT_FROM_EMAIL
 
 MANAGERS = ADMINS
 
@@ -222,7 +223,7 @@ def get_cache():
   # MEMCACHIER_SERVERS won't be defined), the try fails and so we use the
   # inbuilt local memory cache of django.
   try:
-    os.environ['MEMCACHE_SERVERS'] = os.environ['MEMCACHIER_SERVERS'].replace(',', ';')
+    os.environ['MEMCACHE_SERVERS']  = os.environ['MEMCACHIER_SERVERS'].replace(',', ';')
     os.environ['MEMCACHE_USERNAME'] = os.environ['MEMCACHIER_USERNAME']
     os.environ['MEMCACHE_PASSWORD'] = os.environ['MEMCACHIER_PASSWORD']
     return {
@@ -280,55 +281,53 @@ PLANS = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'simple': {
-            'format': '[%(levelname)s] %(asctime)s | %(filename)s:%(lineno)d | %(message)s'
-        },
-    },
     'filters': {
         'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
+            '()': 'django.utils.log.RequireDebugFalse',
         },
-         'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue'
-        }
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
     },
     'handlers': {
-        'null': {
+        'console':{
             'level': 'DEBUG',
-            'class': 'logging.NullHandler',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        },
+        'null': {
+            'class': 'django.utils.log.NullHandler',
         },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        },
-        'console':{
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'filters' : ['require_debug_true'],
-            'formatter': 'simple'
         }
     },
     'loggers': {
+        'django': {
+            'handlers': ['console'],
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
-            'propagate': True,
+            'propagate': False,
+        },
+        'py.warnings': {
+            'handlers': ['console'],
         },
         'app.detective': {
             'handlers': ['mail_admins', 'console'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,
         },
         'rq.worker': {
             'handlers': ['mail_admins', 'console'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,
         },
     }
 }
-
 
 if DEBUG:
     INTERNAL_IPS = ('127.0.0.1', '0.0.0.0', '::1')

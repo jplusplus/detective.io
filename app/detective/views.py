@@ -126,8 +126,6 @@ def entity_list(request, **kwargs):
         logger.debug("Tried to access a non-existing model %s" % e)
         return home(request, None, **kwargs)
 
-
-
 def entity_details(request, **kwargs):
     def __entity_title(entity):
         title = getattr(entity, '_transform', None) or \

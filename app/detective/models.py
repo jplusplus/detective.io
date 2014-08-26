@@ -457,22 +457,16 @@ class SearchTerm(models.Model):
 
     @property
     def field(self):
-        field = None
-        if self.name:
-            # Build a cache key with the topic token
-            cache_key = "%s__%s__field" % ( self.topic.ontology_as_mod, self.name )
-            # Try to use the cache value
-            if getattr(self, cache_key, None) is not None:
-                field = getattr(self, cache_key)
-            else:
-                topic_models = self.topic.get_models()
-                for model in topic_models:
-                    # Retreive every relationship field for this model
-                    for f in utils.get_model_fields(model):
-                        if f["name"] == self.name:
-                            field = f
-            # Very small cache to optimize recording
-            setattr(self, cache_key, field)
+        cache_key = "%s__field" % (self.name)
+        field     = utils.topic_cache.get(self.topic, cache_key)
+        if field is None and self.name:
+            topic_models = self.topic.get_models()
+            for model in topic_models:
+                # Retreive every relationship field for this model
+                for f in utils.get_model_fields(model):
+                    if f["name"] == self.name:
+                        field = f
+            utils.topic_cache.set(self.topic, cache_key)
         return field
 
     @property

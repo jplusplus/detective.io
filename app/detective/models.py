@@ -7,7 +7,10 @@ from django.core.paginator      import Paginator
 from django.db                  import models
 from django.db.models           import signals
 from django.utils.text          import slugify
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
 
+import urllib2
 from jsonfield                  import JSONField
 from tinymce.models             import HTMLField
 from psycopg2.extensions        import adapt
@@ -71,6 +74,7 @@ class QuoteRequest(models.Model):
         return "%s - %s" % (self.name, self.email,)
 
 class Topic(models.Model):
+    background_upload_to='topics'
     class Meta:
         unique_together = (
             ('slug','author')
@@ -82,7 +86,7 @@ class Topic(models.Model):
     about            = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public           = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
     featured         = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
-    background       = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
+    background       = models.ImageField(null=True, blank=True, upload_to=background_upload_to, help_text="Background image displayed on the topic's landing page.")
     author           = models.ForeignKey(User, help_text="Author of this topic.", null=True)
     contributor_group = models.ForeignKey(Group, help_text="", null=True, blank=True)
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
@@ -162,8 +166,9 @@ class Topic(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)[:50]
 
-        # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
+
+
         # Refresh the API
         #self.reload()
 
@@ -443,19 +448,31 @@ class TopicFactory:
     @staticmethod
     def get_topic_bundle(**kwargs):
         topic_skeleton = kwargs.get('topic_skeleton')
+        background_url = kwargs.get('background_url', None)
         if not isinstance(topic_skeleton, TopicSkeleton):
             topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton)
 
-        if not kwargs.get('background', None):
-            kwargs['background'] =  topic_skeleton.picture
+        if not kwargs.get('background', None) and not background_url:
+            kwargs['background'] = topic_skeleton.picture
             about = kwargs.get('about', '')
             if about != '':
-                about = "%(about)s<br/>".format(about=about)
+                about = about + "<br/>"
             about = "{about}{credit}".format(
                 about=about,
                 credit=topic_skeleton.picture_credits
             )
-            kwargs['about'] =  about
+            kwargs['about'] = about
+
+        if background_url:
+            import urllib2, os
+            from urlparse import urlparse
+            name = urlparse(background_url).path.split('/')[-1]
+            img_temp = NamedTemporaryFile(delete=True)
+            img_temp.write(urllib2.urlopen(background_url).read())
+            img_temp.flush()
+
+            kwargs['background'] = File(img_temp, name)
+            del kwargs['background_url']
 
         kwargs['ontology_as_json'] = topic_skeleton.ontology
         del kwargs['topic_skeleton']

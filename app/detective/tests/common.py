@@ -3,7 +3,7 @@
 # @Author: Pierre Bellon
 # @Date:   2014-08-21 17:04:11
 # @Last Modified by:   toutenrab
-# @Last Modified time: 2014-08-25 17:53:54
+# @Last Modified time: 2014-08-26 17:17:43
 from django.test                import TestCase
 from django.contrib.auth.models import User
 from app.detective.models       import TopicSkeleton, TopicFactory
@@ -34,9 +34,22 @@ class CommonTestCase(TestCase):
     def test_topic_factory_with_skeleton(self):
         skeleton = self.body_skeleton
         data = {
+            'title': u'random',
             'author': self.contrib_user,
             'topic_skeleton': skeleton
         }
         topic = TopicFactory.create_topic(**data)
         self.assertEqual(topic.background,       skeleton.picture)
         self.assertEqual(topic.ontology_as_json, skeleton.ontology)
+
+    def test_topic_create_with_bacground_url(self):
+        skeleton = self.body_skeleton
+        data = {
+            'title':          u'random',
+            'author':         self.contrib_user,
+            'topic_skeleton': skeleton,
+            'background_url': "http://i.imgur.com/cK1QyLU.jpg"
+        }
+        topic = TopicFactory.create_topic(**data)
+        self.assertIsNotNone(topic.background)
+        self.assertNotEqual(topic.background.url, skeleton.picture.url)

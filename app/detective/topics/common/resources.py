@@ -85,7 +85,6 @@ class TopicResource(ModelResource):
     author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path', readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
-
     class Meta:
         always_return_data = True
         authorization      = TopicAuthorization()
@@ -222,7 +221,7 @@ class TopicSkeletonResource(ModelResource):
         try:
             thumbnailer     = get_thumbnailer(bundle.obj.picture)
             thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
-            thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
+            thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
             bundle.data['thumbnail'] = {
                 'small' : thumbnailSmall.url,
                 'medium': thumbnailMedium.url

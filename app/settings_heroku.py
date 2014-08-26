@@ -10,6 +10,12 @@ from urlparse import urlparse
 import os
 import dj_database_url
 
+ADMINS = (
+    ('Pierre Romera', 'hello@pirhoo.com'),
+    ('Edouard Richard', 'edouard@jplusplus.org'),
+    ('Pierre Bellon', 'bellon.pierre@gmail.com'),
+)
+
 ALLOWED_HOSTS = [".detective.io"]
 
 DATABASES = {

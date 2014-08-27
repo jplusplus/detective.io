@@ -74,6 +74,9 @@ class TopicAuthorization(ReadOnlyAuthorization):
                 q_filter = Q(public=True)
             return object_list.filter(q_filter)
 
+    def delete_detail(self, obj_list, bundle):
+        return bundle.request.user == bundle.obj.author
+
 class TopicSkeletonAuthorization(ReadOnlyAuthorization):
     def read_list(self, object_list, bundle):
         if bundle.request.user.is_authenticated():
@@ -208,9 +211,8 @@ class TopicResource(ModelResource):
         return bundle
 
     def hydrate(self, bundle):
-        if bundle.request.method == 'POST':
-            bundle.data['author'] = bundle.request.user
-            bundle.data = TopicFactory.get_topic_bundle(**bundle.data)
+        bundle.data['author'] = bundle.request.user
+        bundle.data = TopicFactory.get_topic_bundle(**bundle.data)
         return bundle
 
 

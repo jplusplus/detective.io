@@ -140,6 +140,14 @@ angular.module('detective.config').config [
                     topic: UserTopicCtrl.resolve.topic
                 auth: true
             )
+            .state('user-topic-delete',
+                url: "/:username/:topic/delete/"
+                controller: DeleteTopicCtrl
+                templateUrl: '/partial/topic.delete.html'
+                resolve:
+                    topic: UserTopicCtrl.resolve.topic
+                auth: true
+            )
             .state('global-graph-navigation',
                 url : "/:username/:topic/graph/"
                 controller : ExploreCtrl

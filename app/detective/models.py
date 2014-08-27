@@ -448,13 +448,13 @@ class TopicSkeleton(models.Model):
 class TopicFactory:
     @staticmethod
     def get_topic_bundle(**kwargs):
-        topic_skeleton = kwargs.get('topic_skeleton')
+        topic_skeleton = kwargs.get('topic_skeleton', None)
         background_url = kwargs.get('background_url', None)
-        if not isinstance(topic_skeleton, TopicSkeleton):
+        if topic_skeleton and not isinstance(topic_skeleton, TopicSkeleton):
             topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton)
 
-        # if no background is provided we inject skeleton's
-        if not kwargs.get('background', None) and not background_url:
+        # if no background is provided we inject skeleton's (if skeleton is passed)
+        if not kwargs.get('background', None) and not background_url and topic_skeleton:
             kwargs['background'] = topic_skeleton.picture
             about = kwargs.get('about', '')
             if about != '':
@@ -476,10 +476,11 @@ class TopicFactory:
             kwargs['background'] = File(img_temp, name)
             del kwargs['background_url']
 
-        # injecting parameters took from skeleton
-        kwargs['ontology_as_json'] = topic_skeleton.ontology
-        kwargs['skeleton_tilte'] = topic_skeleton.title
-        del kwargs['topic_skeleton']
+        if topic_skeleton:
+            # injecting parameters took from skeleton
+            kwargs['ontology_as_json'] = topic_skeleton.ontology
+            kwargs['skeleton_title'] = topic_skeleton.title
+            del kwargs['topic_skeleton']
         return kwargs
 
     @staticmethod

@@ -79,7 +79,8 @@ class Topic(models.Model):
         unique_together = (
             ('slug','author')
         )
-    title            = models.CharField(max_length=250, help_text="Title of your topic.")
+    title            = models.CharField(max_length=250, editable=False, help_text="Title of your topic.")
+    skeleton_title   = models.CharField(max_length=250, editable=False, default='No skeleton')
     # Value will be set for this field if it's blank
     slug             = models.SlugField(max_length=250, help_text="Token to use into the url.")
     description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
@@ -452,6 +453,7 @@ class TopicFactory:
         if not isinstance(topic_skeleton, TopicSkeleton):
             topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton)
 
+        # if no background is provided we inject skeleton's
         if not kwargs.get('background', None) and not background_url:
             kwargs['background'] = topic_skeleton.picture
             about = kwargs.get('about', '')
@@ -474,7 +476,9 @@ class TopicFactory:
             kwargs['background'] = File(img_temp, name)
             del kwargs['background_url']
 
+        # injecting parameters took from skeleton
         kwargs['ontology_as_json'] = topic_skeleton.ontology
+        kwargs['skeleton_tilte'] = topic_skeleton.title
         del kwargs['topic_skeleton']
         return kwargs
 

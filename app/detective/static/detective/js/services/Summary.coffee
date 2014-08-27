@@ -2,8 +2,9 @@ angular.module('detective.service').factory("Summary", [ '$resource', '$http', '
     defaultsParams =
         # Use the current topic parameter as default topic
         topic: -> $stateParams.topic or "common"
+        username: -> $stateParams.username or "detective"
 
-    $resource '/api/:topic/v1/summary/:id/', defaultsParams, {
+    $resource '/api/:username/:topic/v1/summary/:id/', defaultsParams, {
         get:
             method : 'GET'
             isArray: false
@@ -15,6 +16,6 @@ angular.module('detective.service').factory("Summary", [ '$resource', '$http', '
             isArray : false
             cache  : no
             method : 'GET'
-            url :'/api/:topic/v1/summary/export/'
+            url :'/api/:username/:topic/v1/summary/export/'
     }
 ])

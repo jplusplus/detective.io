@@ -19,6 +19,7 @@ class TopicBannerCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Get the current topic as default topic
         @scope.topic_selected = @stateParams.topic
+        @scope.user_selected = @stateParams.username
         # get forms classes
         @Summary.get({id: "forms"}, @retrieveTopicForms)
         # render the graph on filters change
@@ -68,7 +69,7 @@ class TopicBannerCtrl
         else
             return if @scope.downloading # download only once
             @scope.downloading = true
-            @Summary.get {id: "graph", topic: @scope.topic_selected}, (data) =>
+            @Summary.get {id: "graph", topic: @scope.topic_selected, username: @scope.user_selected}, (data) =>
                 # save graph data used by @renderGraph
                 @data = data
                 # hide loading indicator

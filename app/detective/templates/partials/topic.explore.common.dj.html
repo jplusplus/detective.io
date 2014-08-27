@@ -19,7 +19,7 @@
                         <input type="checkbox" id="general-graph-navigation__filters-box__[[$index]]" name="filtersSelected[]" value="[[form.name]]" ng-checked="filtersSelected.indexOf(form.name) > -1" ng-click="toggleFiltersSelection(form.name)" />
                         <label class="filter-names" for="general-graph-navigation__filters-box__[[$index]]" ng-init="count = getTypeCount(form.name)" >
                             <div class="general-graph-navigation__filters-box__label" ng-style="{'border-bottom-color': strToColor(form.name) }">
-                            <span>[[form.verbose_name_plural|lowercase]]</span>
+                            <span>[[form.verbose_name_plural]]</span>
                             </div>
                         </label>
                     </div>
@@ -54,7 +54,7 @@
                                 placeholder="[[ search.topic.search_placeholder ]]"
                                 tt-typeahead
                                 tt-individual="'summary'"
-                                tt-topic="search.topic.slug"
+                                tt-topic="search.topic.author.username + '/' + search.topic.slug"
                                 tt-model="search.selectedIndividual"
                                 tt-endpoint="'human'"
                                 value-key="label"

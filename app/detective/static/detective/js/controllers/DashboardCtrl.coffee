@@ -47,7 +47,7 @@ class DashboardCtrl
         @Common.get(params).$promise
 
     loadUserGroups: (page)=>
-        @http.get("/api/common/v1/user/#{@User.id}/groups/?page=#{page}").then (response)->
+        @http.get("/api/detective/common/v1/user/#{@User.id}/groups/?page=#{page}").then (response)->
             # Only keep data object
             response.data
 
@@ -55,7 +55,7 @@ class DashboardCtrl
         userGroups: ["$http", "$q", "Auth", ($http, $q, Auth)->
             deferred = $q.defer()
             Auth.load().then (user)=>
-                $http.get("/api/common/v1/user/#{user.id}/groups/").then (response)->
+                $http.get("/api/detective/common/v1/user/#{user.id}/groups/").then (response)->
                     deferred.resolve response.data
             deferred.promise
         ]

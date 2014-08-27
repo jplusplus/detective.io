@@ -25,8 +25,12 @@ from tastypie.utils                     import trailing_slash
 from datetime                           import datetime
 import json
 import re
+import logging
 
-DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
+logger = logging.getLogger(__name__)
+
+DATETIME_FORMAT     = '%Y-%m-%dT%H:%M:%S'
+DATETIME_FORMAT2    = '%Y-%m-%dT%H:%M:%S+00:00'
 RFC_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 class IndividualAuthorization(Authorization):
@@ -536,10 +540,17 @@ class IndividualResource(ModelResource):
                     if isinstance(field_prop, DateProperty):
                         try:
                             # It's a date and therefor `value` should be converted as it
-                            value  = datetime.strptime(value, RFC_DATETIME_FORMAT)
+                            value = datetime.strptime(value, RFC_DATETIME_FORMAT)
                         except ValueError:
                             # Try a second format
-                            value  = datetime.strptime(value, DATETIME_FORMAT)
+                            try:
+                                value = datetime.strptime(value, DATETIME_FORMAT)
+                            except ValueError:
+                                # Try a third format
+                                try:
+                                    value = datetime.strptime(value, DATETIME_FORMAT2)
+                                except ValueError as e:
+                                    raise Exception("the date `%s` has an unknown format (%s)." % (value, e))
                     # Set the new value
                     setattr(node, field, value)
                 # Continue to not deleted the field

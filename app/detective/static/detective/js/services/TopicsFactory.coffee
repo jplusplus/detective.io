@@ -19,9 +19,9 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 # Active topic
                 @topic = {}
 
-            onStateChanged: (e, current, params)=>
-                if params.topic and @topics
-                    (@getTopic params.topic).then (topic) =>
+            onStateChanged: (e, current, params) =>
+                if params.topic and params.username and @topics
+                    (@getTopic params.topic, params.username).then (topic) =>
                         @setCurrent topic
                 else
                     @topic = {}
@@ -40,14 +40,17 @@ angular.module('detective.service').factory 'TopicsFactory', [
                 $rootScope.$broadcast @EVENTS.current_topic_updated
 
 
-            getTopic: (slug)=>
-                return unless slug
+            getTopic: (slug, username) =>
+                return unless (slug and username)
                 deferred = do $q.defer
-                topic = _.findWhere @topics, slug: slug
+                topic = _.filter (_.where @topics, slug: slug), (_topic) =>
+                    _topic.author.username is username
+                topic = if topic.length then topic[0] else undefined
                 if not topic?
                     Common.query
                         type : 'topic'
                         slug : slug
+                        author__username : username
                     .$promise.then (_topics) =>
                         if _topics.length > 0
                             @topics.push _topics[0]
@@ -58,8 +61,8 @@ angular.module('detective.service').factory 'TopicsFactory', [
                     deferred.resolve topic
                 deferred.promise
 
-            isTopic: (slug)=>
-                if @topic? and @topic.slug?
-                    return @topic.slug is slug
+            isTopic: (slug, username) =>
+                if @topic? and @topic.slug? and @topic.author? and @topic.author.username?
+                    return (@topic.slug is slug) and @topic.author.username is username
                 no
 ]

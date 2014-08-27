@@ -6,7 +6,7 @@ import re
 
 class VirtualApi:
     def process_request(self, request):
-        regex = re.compile(r'api/([a-zA-Z0-9_\-]+)/')
+        regex = re.compile(r'api/([a-zA-Z0-9_\-.]+)/([a-zA-Z0-9_\-]+)/')
         urlparts = regex.findall(request.path)
 
         if urlparts:
@@ -21,6 +21,5 @@ class VirtualApi:
                     getattr(topics, topic.ontology_as_mod)
                 except AttributeError as e:
                     raise Http404(e)
-                
 
         return None

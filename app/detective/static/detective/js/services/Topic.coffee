@@ -1,5 +1,5 @@
 angular.module('detective.service').factory("Topic", [ '$resource', '$http', ($resource, $http)->
-    $resource '/api/common/v1/topic/:id/', {}, {
+    $resource '/api/detective/common/v1/topic/:id/', {}, {
         get:
             method : 'GET'
             isArray: no
@@ -7,7 +7,7 @@ angular.module('detective.service').factory("Topic", [ '$resource', '$http', ($r
             method : 'PUT'
             isArray: no
         invite:
-            url :'/api/common/v1/topic/:id/invite/?'
+            url :'/api/detective/common/v1/topic/:id/invite/?'
             method : 'POST'
             isArray: no
         query:

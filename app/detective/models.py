@@ -59,7 +59,7 @@ class QuoteRequest(models.Model):
 class Topic(models.Model):
     title            = models.CharField(max_length=250, help_text="Title of your topic.")
     # Value will be set for this field if it's blank
-    slug             = models.SlugField(max_length=250, unique=True, help_text="Token to use into the url.")
+    slug             = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
     description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
     about            = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public           = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
@@ -70,6 +70,9 @@ class Topic(models.Model):
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
     ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
     ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
+
+    class Meta:
+        unique_together = ('author', 'slug')
 
     def __unicode__(self):
         return self.title
@@ -82,7 +85,7 @@ class Topic(models.Model):
             return Group.objects.get(name="%s_contributor" % self.app_label())
 
     def app_label(self):
-        if self.slug in ["common", "energy"]:
+        if self.slug in ["common", "energy"] and self.author and self.author.username == 'detective':
             return self.slug
         elif not self.ontology_as_mod:
             # Already saved topic
@@ -454,22 +457,16 @@ class SearchTerm(models.Model):
 
     @property
     def field(self):
-        field = None
-        if self.name:
-            # Build a cache key with the topic token
-            cache_key = "%s__%s__field" % ( self.topic.ontology_as_mod, self.name )
-            # Try to use the cache value
-            if getattr(self, cache_key, None) is not None:
-                field = getattr(self, cache_key)
-            else:
-                topic_models = self.topic.get_models()
-                for model in topic_models:
-                    # Retreive every relationship field for this model
-                    for f in utils.get_model_fields(model):
-                        if f["name"] == self.name:
-                            field = f
-            # Very small cache to optimize recording
-            setattr(self, cache_key, field)
+        cache_key = "%s__field" % (self.name)
+        field     = utils.topic_cache.get(self.topic, cache_key)
+        if field is None and self.name:
+            topic_models = self.topic.get_models()
+            for model in topic_models:
+                # Retreive every relationship field for this model
+                for f in utils.get_model_fields(model):
+                    if f["name"] == self.name:
+                        field = f
+            utils.topic_cache.set(self.topic, cache_key, field)
         return field
 
     @property

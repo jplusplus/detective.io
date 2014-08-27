@@ -244,11 +244,11 @@ def topic_models(path, force=False):
     urls = importlib.import_module("app.detective.urls")
     # Add api url pattern with the highest priority
     new_patterns = patterns(app_label,
-        url(r'^%s/' % topic.slug, include(urls_path, namespace=app_label) ),
+        url(r'^{0}/{1}/'.format(topic.author, topic.slug), include(urls_path, namespace=app_label) ),
     )
     if hasattr(urls, "urlpatterns"):
         # Merge with a filtered version of the urlpattern to avoid duplicates
-        new_patterns += [u for u in urls.urlpatterns if getattr(u, "namespace", None) != topic.slug ]
+        new_patterns += [u for u in urls.urlpatterns if getattr(u, "namespace", None) != app_label ]
     # Then update url pattern
     urls.urlpatterns = new_patterns
     # At last, force the url resolver to reload (because we update it)

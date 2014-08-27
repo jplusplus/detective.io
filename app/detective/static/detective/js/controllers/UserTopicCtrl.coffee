@@ -33,7 +33,7 @@ class UserTopicCtrl
         individual: (Individual, $stateParams)=>
             Individual.get($stateParams).$promise
         forms: (Summary, $stateParams)=>
-            Summary.cachedGet(topic: $stateParams.topic, author__username: $stateParams.username, id: "forms").$promise
+            Summary.cachedGet(topic: $stateParams.topic, username: $stateParams.username, id: "forms").$promise
 
 
 

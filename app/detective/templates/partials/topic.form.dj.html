@@ -1,35 +1,43 @@
-<div id="create-topic" class="container">
-    <h1><i class="fa fa-plus">&nbsp;Create a new investigation</i></h1>
-    <p>What are you investigating on? Pick on one scheme from the list</p>
-    <ul class="list-unstyled row skeletons">
-        <li class="col-sm-4" ng-repeat="skeleton in skeletons">
-            <div class="skeletons__item"
-                  ng-class="{ 'skeletons__item--selected': isSelected(skeleton) }">
-                <img ng-click="selectSkeleton(skeleton)" ng-src="[[ skeleton.thumbnail.medium ]]"/>
-                <h4>[[ skeleton.title ]]</h4>
-                <p>[[ skeleton.description ]]</p>
-            </div>
-        </li>
-        <li class="col-sm-4">
-            <div class="skeletons__item skeletons__item--new-skeleton"
-                 ng-click="goToPlans()">
-                <p>
-                    Need another data scheme?<br/>
-                    Check out our premium plans!
-                </p>
-            </div>
-        </li>
-    </ul>
+<div id="create-topic" class="container topic-form topic-form--[[formMode()]]">
+    <div class="topic-form__header">
+        <div ng-if="isEditing()">
+            <h1><i class="fa fa-cog">&nbsp;Settings</i></h1>
+            <label>Selected ontology: [[ topic.skeleton_title]]</label>
+        </div>
+        <div ng-if="isCreating()">
+            <h1><i class="fa fa-plus">&nbsp;Create a new investigation</i></h1>
+            <p>What are you investigating on? Pick on one scheme from the list</p>
+            <ul class="list-unstyled row skeletons">
+                <li class="col-sm-4" ng-repeat="skeleton in skeletons">
+                    <div class="skeletons__item"
+                          ng-class="{ 'skeletons__item--selected': isSelected(skeleton) }">
+                        <img ng-click="selectSkeleton(skeleton)" ng-src="[[ skeleton.thumbnail.medium ]]"/>
+                        <h4>[[ skeleton.title ]]</h4>
+                        <p>[[ skeleton.description ]]</p>
+                    </div>
+                </li>
+                <li class="col-sm-4">
+                    <div class="skeletons__item skeletons__item--new-skeleton"
+                         ng-click="goToPlans()">
+                        <p>
+                            Need another data scheme?<br/>
+                            Check out our premium plans!
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
 
-    <div ng-if="hasSelectedSkeleton()"
+    <div ng-if="shouldShowForm()"
          class="form-horizontal panel panel-default"
          ng-class="{ 'loading': loading }">
         <form class="panel-body"
               name="form"
-              ng-submit="createTopic()"
+              ng-submit="submit()"
               enctype="multipart/form-data">
             <!-- Topic title field -->
-            <div class="row form-group">
+            <div class="row form-group" ng-if="isCreating()">
                 <div class="col-sm-3 form-label top05">
                     <label for="id_topic_title">Title</label>
                     <p class="help-block">
@@ -42,7 +50,7 @@
                            name="title"
                            ng-disabled="loading"
                            class="form-control"
-                           ng-model="new_topic.title">
+                           ng-model="topic.title">
                 </div>
             </div>
             <!-- Topic subtitle/description field -->
@@ -58,7 +66,7 @@
                            name="description"
                            ng-disabled="loading"
                            class="form-control"
-                           ng-model="new_topic.description"
+                           ng-model="topic.description"
                            ng-maxlenght="200">
                 </div>
             </div>
@@ -73,7 +81,7 @@
                 <div class="col-sm-6">
                     <input type="url"
                            name="background_url"
-                           ng-model="new_topic.background_url"
+                           ng-model="topic.background_url"
                            ng-disabled="loading"
                            class="form-control">
                 </div>
@@ -90,14 +98,25 @@
                     <div text-angular
                          name="about"
                          ng-disabled="loading"
-                         ng-model="new_topic.about"
+                         ng-model="topic.about"
                          id="id_topic_description"></div>
                 </div>
             </div>
-            <div class="row form-group">
-                <button type="submit" class="col-sm-push-3 col-sm-3 btn btn-default">
-                    I'm done, create the investigation
-                </button>
+            <div class="row form-group form-footer">
+                <div class="form-footer__wrapper col-sm-push-3 col-sm-6">
+                    <a class="col-sm-4"
+                       ng-if="isEditing()"
+                       ui-sref="user-topic-delete({
+                                    'topic': topic.slug,
+                                    'username': topic.author.username
+                                })"><i class="fa fa-warning"></i>&nbsp;Delete investigation</a>
+
+                    <button type="submit" class="col-sm-3 form-footer__submit-btn btn btn-primary"
+                        ng-class="{ 'col-sm-push-5': isEditing() }">
+                        <span ng-if="isCreating()">I'm done, create the investigation</span>
+                        <span ng-if="isEditing()">Save changes</span>
+                    </button>
+                </div>
             </div>
         </form>
     </div>

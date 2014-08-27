@@ -121,8 +121,9 @@ angular.module('detective.config').config [
             .state('user-topic-create',
                 url: '/:username/new-topic/'
                 controller: NewTopicCtrl
-                templateUrl: '/partial/topic.create.html'
+                templateUrl: '/partial/topic.form.html'
             )
+            # check previous comment before changing URLs order.
             .state('user-topic',
                 url : "/:username/:topic/"
                 controller : ExploreCtrl
@@ -130,6 +131,14 @@ angular.module('detective.config').config [
                     topic: UserTopicCtrl.resolve.topic
                 # Allow a dynamic loading by setting the templateUrl within controller
                 template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+            )
+            .state('user-topic-edit',
+                url: "/:username/:topic/edit/"
+                controller: EditTopicCtrl
+                templateUrl: '/partial/topic.form.html'
+                resolve:
+                    topic: UserTopicCtrl.resolve.topic
+                auth: true
             )
             .state('global-graph-navigation',
                 url : "/:username/:topic/graph/"

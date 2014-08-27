@@ -29,6 +29,9 @@ angular.module('detective.service').factory('User', ['$cookies', '$rootScope', (
     sdo.hasReadPermission = (topic) ->
         sdo.hasPermission topic, 'read'
 
+    sdo.owns = (topic)->
+        sdo.id is topic.author.id
+
     # Set user's values
     sdo.set(
         # Create basic user using cookies

@@ -248,7 +248,7 @@ def topic_models(path, force=False):
     )
     if hasattr(urls, "urlpatterns"):
         # Merge with a filtered version of the urlpattern to avoid duplicates
-        new_patterns += [u for u in urls.urlpatterns if getattr(u, "namespace", None) != topic.slug ]
+        new_patterns += [u for u in urls.urlpatterns if getattr(u, "namespace", None) != app_label ]
     # Then update url pattern
     urls.urlpatterns = new_patterns
     # At last, force the url resolver to reload (because we update it)

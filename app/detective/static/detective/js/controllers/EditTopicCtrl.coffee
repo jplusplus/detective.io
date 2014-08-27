@@ -4,7 +4,6 @@ class EditTopicCtrl extends TopicFormCtrl
         super
         @setEditingMode()
         @scope.topic = @topic
-        console.log 'resolved topic: ', @topic
         @Page.loading false
         @Page.title "Settings of #{@topic.title}"
 

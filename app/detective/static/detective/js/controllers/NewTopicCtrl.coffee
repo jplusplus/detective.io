@@ -1,18 +1,18 @@
-class NewTopicCtrl
-    @$inject: ['$scope','$stateParams', '$state', '$upload', 'User', 'TopicsFactory', 'Page']
-
+class NewTopicCtrl extends TopicFormCtrl
     EVENTS:
         skeleton_selected: 'skeleton:selected'
 
-    constructor: (@scope, @stateParams, @state, @upload, @User, @TopicsFactory, @Page)->
+    constructor: (@scope, @state, @TopicsFactory, @Page)->
+        super
+        @setCreatingMode()
         @scope.skeletons = @TopicsFactory.skeletons
         @scope.selected_skeleton = {}
-        @scope.new_topic = {}
+        @scope.topic = {}
         @scope.goToPlans = @goToPlans
         @scope.selectSkeleton = @selectSkeleton
         @scope.isSelected = @isSelected
         @scope.hasSelectedSkeleton = @hasSelectedSkeleton
-        @scope.createTopic = @createTopic
+        @scope.shouldShowForm = @hasSelectedSkeleton
 
         @Page.title "Create a new investigation"
 
@@ -35,18 +35,15 @@ class NewTopicCtrl
 
     onSkeletonSelected: =>
         # safe init
-        @scope.new_topic = @scope.new_topic or {}
+        @scope.topic = @scope.topic or {}
         # binding to skeleton will automaticaly bind the skeleton ontolgy
         # to this new topic in API.
-        @scope.new_topic.topic_skeleton = @scope.selected_skeleton.id
+        @scope.topic.topic_skeleton = @scope.selected_skeleton.id
 
-    createTopic: =>
+    create: =>
         @scope.loading = yes
         @TopicsFactory.post @scope.new_topic, (topic)=>
             @scope.loading = no
-            @state.go 'user-topic',
-                username: topic.author.username
-                topic: topic.slug
 
 
 angular.module('detective.controller').controller 'newTopicCtrl', NewTopicCtrl

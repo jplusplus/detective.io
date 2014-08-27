@@ -25,6 +25,7 @@ class ApiTestCase(ResourceTestCase):
 
     fixtures = ['app/detective/fixtures/default_topics.json',
                 'app/detective/fixtures/tests_topics.json',
+                'app/detective/fixtures/tests_pillen.json',
                 'app/detective/fixtures/search_terms.json',]
 
     def setUp(self):
@@ -180,7 +181,7 @@ class ApiTestCase(ResourceTestCase):
         """ Utility method to signup through API """
         return self.api_client.post('/api/detective/common/v1/user/signup/', format='json', data=user_dict)
 
-    def patch_individual(self, scope=None, model_name=None, model_id=None,
+    def patch_individual(self, scope, model_name, model_id,
                          patch_data=None, auth=None, skip_auth=False):
         if not skip_auth and not auth:
             auth = self.get_super_credentials()
@@ -721,6 +722,68 @@ class ApiTestCase(ResourceTestCase):
         }
         resp = self.patch_individual(**args)
         self.assertEqual(resp.status_code in [302, 404], True)
+
+    def test_patch_with_composite_relations(self):
+        """
+
+        Depends of fixtures/tests_pillen.json
+
+        """
+        def get_relationship_reference(pilule_id, mol_id):
+            resp = self.api_client.get('/api/detective/test-pillen/v1/pill/%d/relationships/molecules_contained/%d/' % (pilule_id, mol_id), follow=True, format='json')
+            self.assertValidJSONResponse(resp)
+            resp = json.loads(resp.content)
+            return resp
+
+        def patch_pilule_and_mol(pilule_id, mol_id):
+            patch_args = dict(
+                scope      = 'detective/test-pillen',
+                model_name = 'pill',
+                model_id   = pilule_id,
+                patch_data = {"molecules_contained" : [mol_id]})
+            resp = self.patch_individual(**patch_args)
+            self.assertValidJSONResponse(resp)
+
+        topic    = Topic.objects.get(slug='test-pillen')
+        models   = topic.get_models_module()
+        # get models
+        PillMoleculesContainedMoleculeProperties = models.PillMoleculesContainedMoleculeProperties
+        Molecule                                 = models.Molecule
+        Pill                                     = models.Pill
+        # create entities pilule and mol1
+        pilule   = Pill.objects.create(name='pilule')
+        mol1     = Molecule.objects.create(name="mol1")
+        mol2     = Molecule.objects.create(name="mol2")
+        # patch pilule to add mol1 as a molecule
+        patch_pilule_and_mol(pilule.id, mol1.id)
+        # get pilule-mol1 relation reference
+        relation_id = get_relationship_reference(pilule.id, mol1.id)["_relationship"]
+        # update relation with quantity
+        relation_args = {
+            "_endnodes"                 : [pilule.id, mol1.id],
+            "_relationship"             : relation_id,
+            "quantity_(in_milligrams)." : "10"
+        }
+        PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
+        # check
+        rel_1 = get_relationship_reference(pilule.id, mol1.id)
+        self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
+        # patch pilule to add mol2 as a molecule
+        patch_pilule_and_mol(pilule.id, mol2.id)
+        # get pilule-mol2 relation reference
+        relation_id = get_relationship_reference(pilule.id, mol2.id)["_relationship"]
+        # update relation with quantity
+        relation_args = {
+            "_endnodes"                 : [pilule.id, mol2.id],
+            "_relationship"             : relation_id,
+            "quantity_(in_milligrams)." : "20"
+        }
+        PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
+        # check
+        rel_1 = get_relationship_reference(pilule.id, mol1.id)
+        rel_2 = get_relationship_reference(pilule.id, mol2.id)
+        self.assertEqual(rel_2["quantity_(in_milligrams)."], "20")
+        self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')

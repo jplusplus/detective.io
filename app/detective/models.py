@@ -85,7 +85,7 @@ class Topic(models.Model):
             return Group.objects.get(name="%s_contributor" % self.app_label())
 
     def app_label(self):
-        if self.slug in ["common", "energy"] and self.author.username == 'detective':
+        if self.slug in ["common", "energy"] and self.author and self.author.username == 'detective':
             return self.slug
         elif not self.ontology_as_mod:
             # Already saved topic

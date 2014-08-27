@@ -726,6 +726,8 @@ class ApiTestCase(ResourceTestCase):
     def test_patch_with_composite_relations(self):
         """
 
+        Test if I can link one entity to many entities without overwritting previous relations
+        ref : https://github.com/jplusplus/detective.io/issues/452
         Depends of fixtures/tests_pillen.json
 
         """
@@ -735,12 +737,12 @@ class ApiTestCase(ResourceTestCase):
             resp = json.loads(resp.content)
             return resp
 
-        def patch_pilule_and_mol(pilule_id, mol_id):
+        def patch_pilule_and_mols(pilule_id, mol_ids=[]):
             patch_args = dict(
                 scope      = 'detective/test-pillen',
                 model_name = 'pill',
                 model_id   = pilule_id,
-                patch_data = {"molecules_contained" : [mol_id]})
+                patch_data = {"molecules_contained" : mol_ids})
             resp = self.patch_individual(**patch_args)
             self.assertValidJSONResponse(resp)
 
@@ -755,7 +757,7 @@ class ApiTestCase(ResourceTestCase):
         mol1     = Molecule.objects.create(name="mol1")
         mol2     = Molecule.objects.create(name="mol2")
         # patch pilule to add mol1 as a molecule
-        patch_pilule_and_mol(pilule.id, mol1.id)
+        patch_pilule_and_mols(pilule.id, [mol1.id])
         # get pilule-mol1 relation reference
         relation_id = get_relationship_reference(pilule.id, mol1.id)["_relationship"]
         # update relation with quantity
@@ -765,11 +767,14 @@ class ApiTestCase(ResourceTestCase):
             "quantity_(in_milligrams)." : "10"
         }
         PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
-        # check
+        # check mol1 before new patch
         rel_1 = get_relationship_reference(pilule.id, mol1.id)
         self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
         # patch pilule to add mol2 as a molecule
-        patch_pilule_and_mol(pilule.id, mol2.id)
+        patch_pilule_and_mols(pilule.id, [mol1.id, mol2.id])
+        # check mol1 after new patch
+        rel_1 = get_relationship_reference(pilule.id, mol1.id)
+        self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
         # get pilule-mol2 relation reference
         relation_id = get_relationship_reference(pilule.id, mol2.id)["_relationship"]
         # update relation with quantity

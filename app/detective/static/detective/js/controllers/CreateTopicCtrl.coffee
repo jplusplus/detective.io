@@ -1,4 +1,4 @@
-class NewTopicCtrl extends TopicFormCtrl
+class CreateTopicCtrl extends TopicFormCtrl
     EVENTS:
         skeleton_selected: 'skeleton:selected'
 
@@ -46,4 +46,4 @@ class NewTopicCtrl extends TopicFormCtrl
             @scope.loading = no
 
 
-angular.module('detective.controller').controller 'newTopicCtrl', NewTopicCtrl
+angular.module('detective.controller').controller 'createTopicCtrl', CreateTopicCtrl

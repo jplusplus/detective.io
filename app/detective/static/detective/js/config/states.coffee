@@ -119,8 +119,8 @@ angular.module('detective.config').config [
             #   pattern wont be accessible by its URL and we will never trigger
             #   the proper state.
             .state('user-topic-create',
-                url: '/:username/new-topic/'
-                controller: NewTopicCtrl
+                url: '/:username/create-investigation/'
+                controller: CreateTopicCtrl
                 templateUrl: '/partial/topic.form.html'
             )
             # check previous comment before changing URLs order.

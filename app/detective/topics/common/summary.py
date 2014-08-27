@@ -25,6 +25,7 @@ import django_rq
 import zipfile
 import time
 import inspect
+import hashlib
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -396,7 +397,7 @@ class SummaryResource(Resource):
         # check from cache
         cache_key = "summary_export_{type}_{query}" \
             .format( type  = request.GET.get("type", "all"),
-                     query = request.GET.get("q", "null"))
+                     query = hashlib.md5(request.GET.get("q", "null")).hexdigest())
         response_in_cache = utils.topic_cache.get(self.topic, cache_key)
         if response_in_cache: # could be empty or str("<filename>")
             logger.debug("export already exist from cache")

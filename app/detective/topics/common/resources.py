@@ -178,18 +178,19 @@ class TopicResource(ModelResource):
         models = get_registered_models()
         # Filter model to the one under app.detective.topics
         bundle.data["models"] = []
-        # Create a thumbnail for this topic
-        try:
-            thumbnailer = get_thumbnailer(bundle.obj.background)
-            thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
-            thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
-            bundle.data['thumbnail'] = {
-                'small' : thumbnailSmall.url,
-                'medium': thumbnailMedium.url
-            }
-        # No image available
-        except InvalidImageFormatError:
-            bundle.data['thumbnail'] = None
+        if bundle.obj.background:
+            # Create a thumbnail for this topic
+            try:
+                thumbnailer = get_thumbnailer(bundle.obj.background)
+                thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
+                thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
+                bundle.data['thumbnail'] = {
+                    'small' : thumbnailSmall.url,
+                    'medium': thumbnailMedium.url
+                }
+            # No image available
+            except InvalidImageFormatError:
+                bundle.data['thumbnail'] = None
 
         for m in bundle.obj.get_models():
             try:
@@ -207,8 +208,9 @@ class TopicResource(ModelResource):
         return bundle
 
     def hydrate(self, bundle):
-        bundle.data['author'] = bundle.request.user
-        bundle.data = TopicFactory.get_topic_bundle(**bundle.data)
+        if bundle.request.method == 'POST':
+            bundle.data['author'] = bundle.request.user
+            bundle.data = TopicFactory.get_topic_bundle(**bundle.data)
         return bundle
 
 

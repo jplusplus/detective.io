@@ -38,7 +38,7 @@
                                 placeholder="[[ search.topic.search_placeholder]]"
                                 tt-typeahead
                                 tt-individual="'summary'"
-                                tt-topic="search.topic.slug"
+                                tt-topic="search.topic.author.username + '/' + search.topic.slug"
                                 tt-model="search.selectedIndividual"
                                 tt-endpoint="'human'"
                                 value-key="label"

@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User)->
+angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User, TopicsFactory)->
     lastDataset = []
     template =
         compile: (template) ->
@@ -15,6 +15,13 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                         context.subject.label
                     else
                         no
+                $scope.getModelVerbose = ->
+                    model = do $scope.getModel
+                    if model
+                        for _model in TopicsFactory.topic.models
+                            if _model.name is model
+                                return _model.verbose_name
+                    return model
                 $scope.getFigureBg = -> $filter("strToColor") $scope.getModel()
                 $scope.isList = -> !context.predicate or context.predicate.name isnt '<<INSTANCE>>'
 
@@ -61,7 +68,11 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         start = =>
             # Select the individual to look for
             individual = (scope.individual() or "").toLowerCase()
-            itopic     = (scope.topic() or $stateParams.topic or "common").toLowerCase()
+            itopic     = "detective/common"
+            if scope.topic? and (do scope.topic)? and (do scope.topic) isnt '/'
+                itopic = do (do scope.topic).toLowerCase
+            else if $stateParams.username? and $stateParams.topic?
+                itopic = do "#{$stateParams.username}/#{$stateParams.topic}".toLowerCase
             iendpoint  = scope.endpoint() or 'search'
             # Generate URLs
             prefetchUrl = scope.prefetchUrl() or  "/api/#{itopic}/v1/#{individual}/mine/"
@@ -94,7 +105,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
 
             element.typeahead options,
                 displayKey : (scope.valueKey or "name")
-                name : 'suggestions-' + do scope.topic
+                name : 'suggestions-' + itopic.replace '/', '-'
                 source : do bh.ttAdapter
                 templates :
                     suggestion : (template.compile [
@@ -105,7 +116,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                                     '<div class="tt-suggestion__line__model__figure" ng-style="{ background: getFigureBg()}">',
                                         '<i ng-show="isList()" class="fa fa-list"></i>',
                                     '</div>',
-                                    '[[getModel()]]',
+                                    '[[getModelVerbose()]]',
                                 '</div>',
                             '</div>',
                         '</div>'

@@ -37,11 +37,11 @@ class StoreTopicList(object):
 
 class StoreTopic(object):
     def process_request(self, request):
-        regex = re.compile(r'api/([a-zA-Z0-9_\-]+)/')
+        regex = re.compile(r'api/([a-zA-Z0-9_\-.]+)/([a-zA-Z0-9_\-]+)/')
         urlparts = regex.findall(request.path)
         if urlparts:
             try:
-                request.current_topic = Topic.objects.get(slug=urlparts[0])
+                request.current_topic = Topic.objects.get(slug=urlparts[0][1], author__username=urlparts[0][0])
             except Topic.DoesNotExist:
                 pass
         return None

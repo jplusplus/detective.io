@@ -1,7 +1,7 @@
 (angular.module 'detective.service').factory 'HttpErrorInterceptor', ['$q', '$rootScope', ($q, $rootScope) =>
 
     EXCEPTED_ENDPOINTS = [
-        new RegExp("^/api/common/v1/jobs/", "i")
+        new RegExp("^/api/detective/common/v1/jobs/", "i")
     ]
 
     responseError : (rejection) =>

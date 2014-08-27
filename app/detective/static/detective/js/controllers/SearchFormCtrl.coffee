@@ -44,9 +44,9 @@ class SearchFormCtrl
     getQuery: =>
         angular.fromJson @location.search().q
 
-    isTopic: (slug)=>
+    isTopic: (slug, username)=>
         return false unless @topic?
-        @topic.slug is slug
+        (@topic.slug is slug) and @topic.author.username is username
 
     goToTopic: =>
         # Change only if the query is empty

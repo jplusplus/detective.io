@@ -126,8 +126,6 @@ def entity_list(request, **kwargs):
         logger.debug("Tried to access a non-existing model %s" % e)
         return home(request, None, **kwargs)
 
-
-
 def entity_details(request, **kwargs):
     def __entity_title(entity):
         title = getattr(entity, '_transform', None) or \
@@ -199,8 +197,8 @@ def topic(request, **kwargs):
         default_meta  = default_social_meta(request)
         default_title = default_meta['title']
         generic_description = (
-            "Part of investigation {topic_title} by "
-            "{owner} on {default_title}"
+            u"Part of investigation {topic_title} by "
+            u"{owner} on {default_title}"
         ).format(
             topic_title=topic.title,
             owner=user.username,

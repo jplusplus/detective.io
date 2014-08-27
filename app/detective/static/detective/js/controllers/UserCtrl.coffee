@@ -80,7 +80,7 @@ class UserCtrl
         # Turn on loading mode
         @scope.loading = true
         # succefull login
-        @http.post("/api/common/v1/user/signup/", data)
+        @http.post("/api/detective/common/v1/user/signup/", data)
             .success (response) =>
                 # Turn off loading mode
                 @scope.loading = false
@@ -97,7 +97,7 @@ class UserCtrl
     resetPassword: =>
         # Turn on loading mode
         @scope.loading = true
-        @http.post("/api/common/v1/user/reset_password/", email: @scope.email)
+        @http.post("/api/detective/common/v1/user/reset_password/", email: @scope.email)
             .success (response)=>
                 # Turn off loading mode
                 @scope.loading = false
@@ -125,7 +125,7 @@ class UserCtrl
                 token: token
             # Turn on loading mode
             @scope.loading = true
-            @http.post("/api/common/v1/user/reset_password_confirm/", data)
+            @http.post("/api/detective/common/v1/user/reset_password_confirm/", data)
                 .success (response)=>
                     # Turn off loading mode
                     @scope.loading = false
@@ -148,7 +148,7 @@ class UserCtrl
     readToken: =>
         @Page.loading(true)
         # Submits the token for activation
-        @http.get("/api/common/v1/user/activate/?token=#{@stateParams.token}")
+        @http.get("/api/detective/common/v1/user/activate/?token=#{@stateParams.token}")
             .success (response) =>
                 @Page.loading false
                 @scope.state = true

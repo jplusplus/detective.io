@@ -21,11 +21,12 @@ def find(function, iterable):
             return el
     return None
 
-
 class ApiTestCase(ResourceTestCase):
+
     fixtures = ['app/detective/fixtures/default_topics.json',
                 'app/detective/fixtures/default_skeletons.json',
                 'app/detective/fixtures/tests_topics.json',
+                'app/detective/fixtures/tests_pillen.json',
                 'app/detective/fixtures/search_terms.json',]
 
     def setUp(self):
@@ -182,9 +183,9 @@ class ApiTestCase(ResourceTestCase):
 
     def signup_user(self, user_dict):
         """ Utility method to signup through API """
-        return self.api_client.post('/api/common/v1/user/signup/', format='json', data=user_dict)
+        return self.api_client.post('/api/detective/common/v1/user/signup/', format='json', data=user_dict)
 
-    def patch_individual(self, scope=None, model_name=None, model_id=None,
+    def patch_individual(self, scope, model_name, model_id,
                          patch_data=None, auth=None, skip_auth=False):
         if not skip_auth and not auth:
             auth = self.get_super_credentials()
@@ -226,7 +227,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpBadRequest(resp)
 
     def test_user_signup_no_data(self):
-        resp = self.api_client.post('/api/common/v1/user/signup/', format='json')
+        resp = self.api_client.post('/api/detective/common/v1/user/signup/', format='json')
         self.assertHttpBadRequest(resp)
 
     def test_user_signup_existing_user(self):
@@ -240,26 +241,26 @@ class TopicApiTestCase(ApiTestCase):
         innactive_user = User.objects.get(email=user_dict.get('email'))
         activation_profile = RegistrationProfile.objects.get(user=innactive_user)
         activation_key = activation_profile.activation_key
-        resp_activate = self.api_client.get('/api/common/v1/user/activate/?token=%s' % activation_key)
+        resp_activate = self.api_client.get('/api/detective/common/v1/user/activate/?token=%s' % activation_key)
         self.assertHttpOK(resp_activate)
         user = User.objects.get(email=user_dict.get('email'))
         self.assertTrue(user.is_active)
 
     def test_user_activate_fake_token(self):
-        resp = self.api_client.get('/api/common/v1/user/activate/?token=FAKE')
+        resp = self.api_client.get('/api/detective/common/v1/user/activate/?token=FAKE')
         self.assertHttpForbidden(resp)
 
     def test_user_activate_no_token(self):
-        resp = self.api_client.get('/api/common/v1/user/activate/')
+        resp = self.api_client.get('/api/detective/common/v1/user/activate/')
         self.assertHttpBadRequest(resp)
 
     def test_user_activate_empty_token(self):
-        resp = self.api_client.get('/api/common/v1/user/activate/?token')
+        resp = self.api_client.get('/api/detective/common/v1/user/activate/?token')
         self.assertHttpBadRequest(resp)
 
     def test_user_contrib_login_succeed(self):
         auth = dict(username=self.contrib_username, password=self.contrib_password)
-        resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.post('/api/detective/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         data = json.loads(resp.content)
         self.assertTrue(data["success"])
@@ -267,7 +268,7 @@ class TopicApiTestCase(ApiTestCase):
 
     def test_user_login_succeed(self):
         auth = dict(username=self.super_username, password=self.super_password)
-        resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.post('/api/detective/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -275,7 +276,7 @@ class TopicApiTestCase(ApiTestCase):
 
     def test_user_login_failed(self):
         auth = dict(username=self.super_username, password=u"awrongpassword")
-        resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.post('/api/detective/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -284,16 +285,16 @@ class TopicApiTestCase(ApiTestCase):
     def test_user_logout_succeed(self):
         # First login
         auth = dict(username=self.super_username, password=self.super_password)
-        self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        self.api_client.post('/api/detective/common/v1/user/login/', format='json', data=auth)
         # Then logout
-        resp = self.api_client.get('/api/common/v1/user/logout/', format='json')
+        resp = self.api_client.get('/api/detective/common/v1/user/logout/', format='json')
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)
         self.assertEqual(data["success"], True)
 
     def test_user_logout_failed(self):
-        resp = self.api_client.get('/api/common/v1/user/logout/', format='json')
+        resp = self.api_client.get('/api/detective/common/v1/user/logout/', format='json')
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -301,19 +302,19 @@ class TopicApiTestCase(ApiTestCase):
 
     def test_user_permissions_is_logged(self):
         auth = dict(username=self.contrib_username, password=self.contrib_password)
-        self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
-        resp = self.api_client.get('/api/common/v1/user/permissions/', format='json')
+        self.api_client.post('/api/detective/common/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.get('/api/detective/common/v1/user/permissions/', format='json')
         self.assertValidJSON(resp.content)
         data = json.loads(resp.content)
         self.check_permissions(permissions=data.get("permissions"), user=self.contrib_user)
 
     def test_user_permissions_isnt_logged(self):
-        resp = self.api_client.get('/api/common/v1/user/permissions/', format='json')
+        resp = self.api_client.get('/api/detective/common/v1/user/permissions/', format='json')
         self.assertHttpUnauthorized(resp)
 
 
     def test_user_status_isnt_logged(self):
-        resp = self.api_client.get('/api/common/v1/user/status/', format='json')
+        resp = self.api_client.get('/api/detective/common/v1/user/status/', format='json')
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -322,12 +323,12 @@ class TopicApiTestCase(ApiTestCase):
     def test_user_status_is_logged(self):
         # Log in
         auth = dict(username=self.super_username, password=self.super_password)
-        resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.post('/api/detective/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         data = json.loads(resp.content)
         self.assertTrue(data['success'])
 
-        resp = self.api_client.get('/api/common/v1/user/status/', format='json')
+        resp = self.api_client.get('/api/detective/common/v1/user/status/', format='json')
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -336,12 +337,12 @@ class TopicApiTestCase(ApiTestCase):
     def test_contrib_user_status_is_logged(self):
         # Log in
         auth = dict(username=self.contrib_username, password=self.contrib_password, remember_me=True)
-        resp = self.api_client.post('/api/common/v1/user/login/', format='json', data=auth)
+        resp = self.api_client.post('/api/detective/common/v1/user/login/', format='json', data=auth)
         self.assertValidJSON(resp.content)
         data = json.loads(resp.content)
         self.assertTrue(data['success'])
 
-        resp = self.api_client.get('/api/common/v1/user/status/', format='json')
+        resp = self.api_client.get('/api/detective/common/v1/user/status/', format='json')
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -350,7 +351,7 @@ class TopicApiTestCase(ApiTestCase):
 
     def test_reset_password_success(self):
         email = dict(email=self.super_email)
-        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=email)
+        resp = self.api_client.post('/api/detective/common/v1/user/reset_password/', format='json', data=email)
         self.assertValidJSON(resp.content)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -358,15 +359,15 @@ class TopicApiTestCase(ApiTestCase):
 
     def test_reset_password_wrong_email(self):
         email = dict(email="wrong_email@detective.io")
-        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=email)
+        resp = self.api_client.post('/api/detective/common/v1/user/reset_password/', format='json', data=email)
         self.assertEqual(resp.status_code in [302, 404], True)
 
     def test_reset_password_no_data(self):
-        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json')
+        resp = self.api_client.post('/api/detective/common/v1/user/reset_password/', format='json')
         self.assertHttpBadRequest(resp)
 
     def test_reset_password_empty_email(self):
-        resp = self.api_client.post('/api/common/v1/user/reset_password/', format='json', data=dict(email=''))
+        resp = self.api_client.post('/api/detective/common/v1/user/reset_password/', format='json', data=dict(email=''))
         self.assertHttpBadRequest(resp)
 
     def test_reset_password_confirm_succes(self):
@@ -379,7 +380,7 @@ class TopicApiTestCase(ApiTestCase):
         password = "testtest"
         auth = dict(password=password, token=token)
         resp = self.api_client.post(
-                '/api/common/v1/user/reset_password_confirm/',
+                '/api/detective/common/v1/user/reset_password_confirm/',
                 format='json',
                 data=auth
             )
@@ -402,7 +403,7 @@ class TopicApiTestCase(ApiTestCase):
                 token:    ... // the reset password token (received by emai)
             }
         """
-        resp = self.api_client.post('/api/common/v1/user/reset_password_confirm/', format='json')
+        resp = self.api_client.post('/api/detective/common/v1/user/reset_password_confirm/', format='json')
         self.assertHttpBadRequest(resp)
         self.assertIsNotNone(resp.content)
 
@@ -420,7 +421,7 @@ class TopicApiTestCase(ApiTestCase):
             authenticated with a token.
         """
         auth = dict(password='', token='')
-        resp = self.api_client.post('/api/common/v1/user/reset_password_confirm/', format='json', data=auth)
+        resp = self.api_client.post('/api/detective/common/v1/user/reset_password_confirm/', format='json', data=auth)
         self.assertHttpBadRequest(resp)
 
     def test_reset_password_confirm_fake_token(self):
@@ -439,27 +440,27 @@ class TopicApiTestCase(ApiTestCase):
         fake_token = 'f4k:t0k3N'
         auth = dict(password='newpassword', token=fake_token)
         resp = self.api_client.post(
-                '/api/common/v1/user/reset_password_confirm/',
+                '/api/detective/common/v1/user/reset_password_confirm/',
                 format='json',
                 data=auth
             )
         self.assertHttpForbidden(resp)
 
     def test_get_list_json(self):
-        resp = self.api_client.get('/api/energy/v1/energyproject/?limit=20', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/energyproject/?limit=20', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Number of element on the first page
         count = min(20, EnergyProject.objects.count())
         self.assertEqual( len(self.deserialize(resp)['objects']), count)
 
     def test_post_list_unauthenticated(self):
-        self.assertHttpUnauthorized(self.api_client.post('/api/energy/v1/energyproject/', format='json', data=self.post_data_simple))
+        self.assertHttpUnauthorized(self.api_client.post('/api/detective/energy/v1/energyproject/', format='json', data=self.post_data_simple))
 
     def test_post_list_staff(self):
         # Check how many are there first.
         count = EnergyProject.objects.count()
         self.assertHttpCreated(
-            self.api_client.post('/api/energy/v1/energyproject/',
+            self.api_client.post('/api/detective/energy/v1/energyproject/',
                 format='json',
                 data=self.post_data_simple,
                 authentication=self.get_super_credentials()
@@ -472,7 +473,7 @@ class TopicApiTestCase(ApiTestCase):
         # Check how many are there first.
         count = EnergyProject.objects.count()
         self.assertHttpCreated(
-            self.api_client.post('/api/energy/v1/energyproject/',
+            self.api_client.post('/api/detective/energy/v1/energyproject/',
                 format='json',
                 data=self.post_data_simple,
                 authentication=self.get_contrib_credentials()
@@ -483,7 +484,7 @@ class TopicApiTestCase(ApiTestCase):
 
     def test_post_list_lambda(self):
         self.assertHttpUnauthorized(
-            self.api_client.post('/api/energy/v1/energyproject/',
+            self.api_client.post('/api/detective/energy/v1/energyproject/',
                 format='json',
                 data=self.post_data_simple,
                 authentication=self.get_lambda_credentials()
@@ -494,7 +495,7 @@ class TopicApiTestCase(ApiTestCase):
         # Check how many are there first.
         count = EnergyProject.objects.count()
         # Record API response to extract data
-        resp  = self.api_client.post('/api/energy/v1/energyproject/',
+        resp  = self.api_client.post('/api/detective/energy/v1/energyproject/',
             format='json',
             data=self.post_data_related,
             authentication=self.get_super_credentials()
@@ -511,21 +512,21 @@ class TopicApiTestCase(ApiTestCase):
         self.assertEqual(len(data["activity_in_country"]), len(self.post_data_related["activity_in_country"]))
 
     def test_mine(self):
-        resp = self.api_client.get('/api/energy/v1/organization/mine/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/organization/mine/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
         self.assertEqual( len(data["objects"]), 2)
 
     def test_mine_empty(self):
-        resp = self.api_client.get('/api/energy/v1/organization/mine/', format='json')
+        resp = self.api_client.get('/api/detective/energy/v1/organization/mine/', format='json')
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
         self.assertEqual( len(data["objects"]), 0)
 
     def test_search_organization(self):
-        resp = self.api_client.get('/api/energy/v1/organization/search/?q=Journalism', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/organization/search/?q=Journalism', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -533,15 +534,15 @@ class TopicApiTestCase(ApiTestCase):
         self.assertGreater( len(data.items()), 1 )
 
     def test_search_organization_wrong_page(self):
-        resp = self.api_client.get('/api/energy/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_super_credentials())
         self.assertEqual(resp.status_code in [302, 404], True)
 
     def test_cypher_detail(self):
-        resp = self.api_client.get('/api/common/v1/cypher/111/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/common/v1/cypher/111/', format='json', authentication=self.get_super_credentials())
         self.assertTrue(resp.status_code in [302, 404])
 
     def test_cypher_unauthenticated(self):
-        self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json'))
+        self.assertHttpUnauthorized(self.api_client.get('/api/detective/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json'))
 
     def test_cypher_unauthorized(self):
         # Ensure the user isn't authorized to process cypher request
@@ -549,21 +550,21 @@ class TopicApiTestCase(ApiTestCase):
         self.super_user.is_superuser = False
         self.super_user.save()
 
-        self.assertHttpUnauthorized(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_super_credentials()))
+        self.assertHttpUnauthorized(self.api_client.get('/api/detective/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_super_credentials()))
 
     def test_cypher_authorized(self):
         # Ensure the user IS authorized to process cypher request
         self.super_user.is_superuser = True
         self.super_user.save()
 
-        self.assertValidJSONResponse(self.api_client.get('/api/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_super_credentials()))
+        self.assertValidJSONResponse(self.api_client.get('/api/detective/common/v1/cypher/?q=START%20n=node%28*%29RETURN%20n;', format='json', authentication=self.get_super_credentials()))
 
     def test_summary_list(self):
-        resp = self.api_client.get('/api/common/v1/summary/', format='json')
+        resp = self.api_client.get('/api/detective/common/v1/summary/', format='json')
         self.assertEqual(resp.status_code in [302, 404], True)
 
     def test_summary_mine_success(self):
-        resp = self.api_client.get('/api/energy/v1/summary/mine/', authentication=self.get_super_credentials(), format='json')
+        resp = self.api_client.get('/api/detective/energy/v1/summary/mine/', authentication=self.get_super_credentials(), format='json')
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -572,7 +573,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertIsNotNone(find(lambda x: x['label'] == self.jg.name,  objects))
 
     def test_summary_mine_unauthenticated(self):
-        resp = self.api_client.get('/api/energy/v1/summary/mine/', format='json')
+        resp = self.api_client.get('/api/detective/energy/v1/summary/mine/', format='json')
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -580,7 +581,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertEqual(len(objects), 0)
 
     def test_countries_summary(self):
-        resp = self.api_client.get('/api/energy/v1/summary/countries/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/summary/countries/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -590,7 +591,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertEqual("count" in data["FRA"], True)
 
     def test_forms_summary(self):
-        resp = self.api_client.get('/api/energy/v1/summary/forms/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/summary/forms/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -598,11 +599,11 @@ class TopicApiTestCase(ApiTestCase):
         self.assertEqual( 11, len(data.items()) )
 
     def test_types_summary(self):
-        resp = self.api_client.get('/api/energy/v1/summary/types/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/summary/types/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
 
     def test_search_summary(self):
-        resp = self.api_client.get('/api/energy/v1/summary/search/?q=Journalism', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/summary/search/?q=Journalism', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         # Parse data to check the number of result
         data = json.loads(resp.content)
@@ -610,12 +611,12 @@ class TopicApiTestCase(ApiTestCase):
         self.assertGreater( len(data.items()), 1 )
 
     def test_search_summary_wrong_offset(self):
-        resp = self.api_client.get('/api/energy/v1/summary/search/?q=Journalism&offset=-1', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/summary/search/?q=Journalism&offset=-1', format='json', authentication=self.get_super_credentials())
         self.assertEqual(resp.status_code in [302, 404], True)
 
     def test_summary_human_search(self):
         query = "Person activity in Journalism"
-        resp = self.api_client.get('/api/energy/v1/summary/human/?q=%s' % query, format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/summary/human/?q=%s' % query, format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         data = json.loads(resp.content)
         self.assertGreater(len(data['objects']), 1)
@@ -624,7 +625,7 @@ class TopicApiTestCase(ApiTestCase):
         # RDF object for persons that have activity in J++, we need to urlencode
         # the JSON string to avoid '+' loss
         rdf_str = urllib.quote(json.dumps(self.rdf_jpp))
-        url = '/api/energy/v1/summary/rdf_search/?limit=20&offset=0&q=%s' % rdf_str
+        url = '/api/detective/energy/v1/summary/rdf_search/?limit=20&offset=0&q=%s' % rdf_str
         resp = self.api_client.get(url, format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
         data = json.loads(resp.content)
@@ -635,7 +636,7 @@ class TopicApiTestCase(ApiTestCase):
     def test_patch_individual_date_staff(self):
         """
         Test a patch request on an invidividual's date attribute.
-        Request: /api/energy/v1/organization/
+        Request: /api/detective/energy/v1/organization/
         Expected: HTTP 200 (OK)
         """
         # date are subject to special process with patch method.
@@ -644,7 +645,7 @@ class TopicApiTestCase(ApiTestCase):
             'founded': new_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
         }
         args = {
-            'scope'      : 'energy',
+            'scope'      : 'detective/energy',
             'model_id'   : self.jpp.id,
             'model_name' : 'organization',
             'patch_data' : data
@@ -661,7 +662,7 @@ class TopicApiTestCase(ApiTestCase):
             'website_url': jpp_url,
         }
         args = {
-            'scope'      : 'energy',
+            'scope'      : 'detective/energy',
             'model_id'   : self.jpp.id,
             'model_name' : 'organization',
             'patch_data' : data
@@ -678,7 +679,7 @@ class TopicApiTestCase(ApiTestCase):
             'website_url': jpp_url,
         }
         args = {
-            'scope'      : 'energy',
+            'scope'      : 'detective/energy',
             'model_id'   : self.jpp.id,
             'model_name' : 'organization',
             'patch_data' : data,
@@ -693,7 +694,7 @@ class TopicApiTestCase(ApiTestCase):
             'website_url': jpp_url,
         }
         args = {
-            'scope'      : 'energy',
+            'scope'      : 'detective/energy',
             'model_id'   : self.jpp.id,
             'model_name' : 'organization',
             'patch_data' : data,
@@ -711,7 +712,7 @@ class TopicApiTestCase(ApiTestCase):
             'website_url': jpp_url,
         }
         args = {
-            'scope'      : 'energy',
+            'scope'      : 'detective/energy',
             'model_id'   : self.jpp.id,
             'model_name' : 'organization',
             'patch_data' : data,
@@ -727,7 +728,7 @@ class TopicApiTestCase(ApiTestCase):
             'website_url': jpp_url,
         }
         args = {
-            'scope'      : 'energy',
+            'scope'      : 'detective/energy',
             'model_id'   : 1337,
             'model_name' : 'organization',
             'patch_data' : data,
@@ -735,35 +736,97 @@ class TopicApiTestCase(ApiTestCase):
         resp = self.patch_individual(**args)
         self.assertEqual(resp.status_code in [302, 404], True)
 
+    def test_patch_with_composite_relations(self):
+        """
+
+        Depends of fixtures/tests_pillen.json
+
+        """
+        def get_relationship_reference(pilule_id, mol_id):
+            resp = self.api_client.get('/api/detective/test-pillen/v1/pill/%d/relationships/molecules_contained/%d/' % (pilule_id, mol_id), follow=True, format='json')
+            self.assertValidJSONResponse(resp)
+            resp = json.loads(resp.content)
+            return resp
+
+        def patch_pilule_and_mol(pilule_id, mol_id):
+            patch_args = dict(
+                scope      = 'detective/test-pillen',
+                model_name = 'pill',
+                model_id   = pilule_id,
+                patch_data = {"molecules_contained" : [mol_id]})
+            resp = self.patch_individual(**patch_args)
+            self.assertValidJSONResponse(resp)
+
+        topic    = Topic.objects.get(slug='test-pillen')
+        models   = topic.get_models_module()
+        # get models
+        PillMoleculesContainedMoleculeProperties = models.PillMoleculesContainedMoleculeProperties
+        Molecule                                 = models.Molecule
+        Pill                                     = models.Pill
+        # create entities pilule and mol1
+        pilule   = Pill.objects.create(name='pilule')
+        mol1     = Molecule.objects.create(name="mol1")
+        mol2     = Molecule.objects.create(name="mol2")
+        # patch pilule to add mol1 as a molecule
+        patch_pilule_and_mol(pilule.id, mol1.id)
+        # get pilule-mol1 relation reference
+        relation_id = get_relationship_reference(pilule.id, mol1.id)["_relationship"]
+        # update relation with quantity
+        relation_args = {
+            "_endnodes"                 : [pilule.id, mol1.id],
+            "_relationship"             : relation_id,
+            "quantity_(in_milligrams)." : "10"
+        }
+        PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
+        # check
+        rel_1 = get_relationship_reference(pilule.id, mol1.id)
+        self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
+        # patch pilule to add mol2 as a molecule
+        patch_pilule_and_mol(pilule.id, mol2.id)
+        # get pilule-mol2 relation reference
+        relation_id = get_relationship_reference(pilule.id, mol2.id)["_relationship"]
+        # update relation with quantity
+        relation_args = {
+            "_endnodes"                 : [pilule.id, mol2.id],
+            "_relationship"             : relation_id,
+            "quantity_(in_milligrams)." : "20"
+        }
+        PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
+        # check
+        rel_1 = get_relationship_reference(pilule.id, mol1.id)
+        rel_2 = get_relationship_reference(pilule.id, mol2.id)
+        self.assertEqual(rel_2["quantity_(in_milligrams)."], "20")
+        self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
+
     def test_topic_endpoint_exists(self):
-        resp = self.api_client.get('/api/common/v1/topic/?slug=christmas', follow=True, format='json')
+        resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')
         # Parse data to check the number of result
         data = json.loads(resp.content)
         # 1 result
         self.assertEqual( len( data["objects"] ), 1 )
 
     def test_topic_api_exists(self):
-        resp = self.api_client.get('/api/christmas/v1/', format='json')
+        resp = self.api_client.get('/api/{0}/christmas/v1/'.format(self.super_username), format='json')
         self.assertValidJSONResponse(resp)
 
     def test_topic_has_person(self):
-        resp = self.api_client.get('/api/christmas/v1/', format='json')
+        resp = self.api_client.get('/api/{0}/christmas/v1/'.format(self.super_username), format='json')
         self.assertValidJSONResponse(resp)
 
     def test_topic_multiple_api(self):
         # API 1
-        resp = self.api_client.get('/api/christmas/v1/', format='json')
+        resp = self.api_client.get('/api/{0}/christmas/v1/'.format(self.super_username), format='json')
         self.assertValidJSONResponse(resp)
         # API 2
-        resp = self.api_client.get('/api/thanksgiving/v1/', format='json')
+        resp = self.api_client.get('/api/{0}/thanksgiving/v1/'.format(self.super_username), format='json')
         self.assertValidJSONResponse(resp)
 
     def test_topic_has_summary_syntax_from_ontology(self):
-        resp = self.api_client.get('/api/christmas/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/{0}/christmas/v1/summary/syntax/'.format(self.super_username), format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
 
     def test_topic_has_summary_syntax_from_file(self):
-        resp = self.api_client.get('/api/energy/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
+        resp = self.api_client.get('/api/detective/energy/v1/summary/syntax/', format='json', authentication=self.get_super_credentials())
         self.assertValidJSONResponse(resp)
 
 
@@ -772,7 +835,7 @@ class TopicApiTestCase(ApiTestCase):
         topic.delete()
 
         resp = self.api_client.get(
-            '/api/common/v1/user/{pk}/groups/'.format(pk=self.contrib_user.pk),
+            '/api/detective/common/v1/user/{pk}/groups/'.format(pk=self.contrib_user.pk),
             format='json'
         )
         resp
@@ -783,7 +846,7 @@ class TopicApiTestCase(ApiTestCase):
         topic.delete()
 
         resp = self.api_client.get(
-            '/api/common/v1/topic/?featured=1',
+            '/api/detective/common/v1/topic/?featured=1',
             format='json'
         )
         self.assertHttpOK(resp)
@@ -800,13 +863,13 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         client = self.api_client
         client.client.logout()
         # skeletons must be accessible only for logged users
-        resp = client.get('/api/common/v1/topicskeleton/',
+        resp = client.get('/api/detective/common/v1/topicskeleton/',
             format='json'
         )
         self.assertHttpUnauthorized(resp)
 
     def test_topic_skeleton_list_lambda(self):
-        resp = self.api_client.get('/api/common/v1/topicskeleton/',
+        resp = self.api_client.get('/api/detective/common/v1/topicskeleton/',
             format='json',
             authentication=self.get_lambda_credentials()
         )
@@ -816,7 +879,7 @@ class TopicSkeletonApiTestCase(ApiTestCase):
     def test_topic_create_with_skeleton(self):
         skeleton = TopicSkeleton.objects.get(title='Body Count')
         resp = self.api_client.post(
-            '/api/common/v1/topic/',
+            '/api/detective/common/v1/topic/',
             data={'topic_skeleton': skeleton.pk},
             format='json',
             authentication=self.get_contrib_credentials()

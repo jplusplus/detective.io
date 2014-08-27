@@ -5,9 +5,11 @@
 [License](https://github.com/jplusplus/detective.io/blob/master/LICENSE) •
 [Test coverage](https://coveralls.io/r/jplusplus/detective.io) •
 [Documentation](http://docs.detective.io/en/latest/) •
-*Version 1.6.4 Seelöwe*
+*Version 1.6.5 Seestern*
 
 ## Installation
+
+See also the [full installation guide](http://docs.detective.io/en/latest/installation.html).
 
 **1. Prerequisite**
 ```bash

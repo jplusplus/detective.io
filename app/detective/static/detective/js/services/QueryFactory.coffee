@@ -27,7 +27,7 @@ angular.module('detective.service').service 'QueryFactory', [
 
             humanSearch: (query, topic)=>
                 QUERY = encodeURIComponent query
-                $http.get("/api/#{topic.slug}/v1/summary/human/?q=#{QUERY}")
+                $http.get("/api/#{topic.author.username}/#{topic.slug}/v1/summary/human/?q=#{QUERY}")
 
             toHumanQuery: (query_obj=@query)=>
                 return unless query_obj?

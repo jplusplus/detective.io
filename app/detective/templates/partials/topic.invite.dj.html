@@ -25,8 +25,8 @@
 					   ng-model="collaborator_name"
 					   tt-typeahead
 					   tt-transform="prepareSearch(objects)"
-					   tt-prefetch-url="'/api/common/v1/user/?username__icontains=%QUERY'"
-					   tt-remote-url="'/api/common/v1/user/?username__icontains=%QUERY'"
+					   tt-prefetch-url="'/api/detective/common/v1/user/?username__icontains=%QUERY'"
+					   tt-remote-url="'/api/detective/common/v1/user/?username__icontains=%QUERY'"
 					   placeholder="Add new collaborator with their username or email address" />
 			</div>
 		</div>

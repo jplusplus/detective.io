@@ -1,28 +1,29 @@
 from app.detective              import utils
 from app.detective.permissions  import create_permissions, remove_permissions
+
 from django.conf                import settings
 from django.contrib.auth.models import User, Group
 from django.core.cache          import cache
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
 from django.core.paginator      import Paginator
 from django.db                  import models
 from django.db.models           import signals
 from django.utils.text          import slugify
-from django.core.files import File
-from django.core.files.temp import NamedTemporaryFile
 
-import urllib2
 from jsonfield                  import JSONField
-from tinymce.models             import HTMLField
-from psycopg2.extensions        import adapt
 from neo4django.db              import connection
+from psycopg2.extensions        import adapt
+from tinymce.models             import HTMLField
 
 import hashlib
-import re
 import importlib
 import inspect
 import os
 import random
+import re
 import string
+import urllib2
 
 # -----------------------------------------------------------------------------
 #
@@ -41,11 +42,6 @@ FEATURED = (
 
 PLANS_CHOICES = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
 
-# -----------------------------------------------------------------------------
-#
-#    MODELS
-#
-# -----------------------------------------------------------------------------
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (
         (0, "Less than 200"),
@@ -82,7 +78,7 @@ class Topic(models.Model):
     title            = models.CharField(max_length=250, editable=False, help_text="Title of your topic.")
     skeleton_title   = models.CharField(max_length=250, editable=False, default='No skeleton')
     # Value will be set for this field if it's blank
-    slug             = models.SlugField(max_length=250, help_text="Token to use into the url.")
+    slug             = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
     description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
     about            = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public           = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
@@ -105,7 +101,7 @@ class Topic(models.Model):
             return Group.objects.get(name="%s_contributor" % self.app_label())
 
     def app_label(self):
-        if self.slug in ["common", "energy"]:
+        if self.slug in ["common", "energy"] and self.author and self.author.username == 'detective':
             return self.slug
         elif not self.ontology_as_mod:
             # Already saved topic
@@ -166,10 +162,8 @@ class Topic(models.Model):
         # For automatic slug generation.
         if not self.slug:
             self.slug = slugify(self.title)[:50]
-
+        # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
-
-
         # Refresh the API
         #self.reload()
 
@@ -539,22 +533,16 @@ class SearchTerm(models.Model):
 
     @property
     def field(self):
-        field = None
-        if self.name:
-            # Build a cache key with the topic token
-            cache_key = "%s__%s__field" % ( self.topic.ontology_as_mod, self.name )
-            # Try to use the cache value
-            if getattr(self, cache_key, None) is not None:
-                field = getattr(self, cache_key)
-            else:
-                topic_models = self.topic.get_models()
-                for model in topic_models:
-                    # Retreive every relationship field for this model
-                    for f in utils.get_model_fields(model):
-                        if f["name"] == self.name:
-                            field = f
-            # Very small cache to optimize recording
-            setattr(self, cache_key, field)
+        cache_key = "%s__field" % (self.name)
+        field     = utils.topic_cache.get(self.topic, cache_key)
+        if field is None and self.name:
+            topic_models = self.topic.get_models()
+            for model in topic_models:
+                # Retreive every relationship field for this model
+                for f in utils.get_model_fields(model):
+                    if f["name"] == self.name:
+                        field = f
+            utils.topic_cache.set(self.topic, cache_key, field)
         return field
 
     @property

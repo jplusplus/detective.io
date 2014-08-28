@@ -11,7 +11,7 @@ angular.module('detective.service').factory("Topic", [ '$resource', '$http', ($r
             method : 'POST'
             isArray: no
         post:
-            url: '/api/common/v1/topic/?'
+            url: '/api/detective/common/v1/topic/?'
             method: 'POST'
             isArray: no
         query:

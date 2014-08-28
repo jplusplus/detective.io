@@ -4,7 +4,6 @@ class CreateTopicCtrl extends TopicFormCtrl
 
     @resolve:
         skeletons: ($state, $q, Page, TopicSkeleton)->
-            console.log 'CreateTopicCtrl.resolve.skeletons !'
             notFound = ->
                 do deferred.reject
                 $state.go "404"

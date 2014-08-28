@@ -63,8 +63,11 @@ class CreateTopicCtrl extends TopicFormCtrl
 
     create: =>
         @scope.loading = yes
-        @TopicsFactory.post @scope.new_topic, (topic)=>
+        @TopicsFactory.post @scope.topic, (topic)=>
             @scope.loading = no
+            @state.go 'user-topic',
+                username: topic.author.username
+                topic: topic.slug
 
 
 angular.module('detective.controller').controller 'createTopicCtrl', CreateTopicCtrl

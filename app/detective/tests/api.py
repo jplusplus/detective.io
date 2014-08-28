@@ -643,6 +643,28 @@ class ApiTestCase(ResourceTestCase):
         updated_jpp = Organization.objects.get(name=self.jpp.name)
         self.assertEqual(timezone.make_naive(updated_jpp.founded), new_date)
 
+    def test_patch_individual_date_staff_with_null(self):
+        """
+        Test a patch request on an invidividual's date attribute.
+        Request: /api/detective/energy/v1/organization/
+        Expected: HTTP 200 (OK)
+        """
+        # date are subject to special process with patch method.
+        data = {
+            'founded': None,
+        }
+        args = {
+            'scope'      : 'detective/energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpOK(resp)
+        self.assertValidJSONResponse(resp)
+        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        self.assertEqual(updated_jpp.founded, None)
+
     def test_patch_individual_website_staff(self):
         jpp_url  = 'http://jplusplus.org'
         data = {
@@ -659,6 +681,23 @@ class ApiTestCase(ResourceTestCase):
         self.assertValidJSONResponse(resp)
         updated_jpp = Organization.objects.get(name=self.jpp.name)
         self.assertEqual(updated_jpp.website_url, jpp_url)
+
+    def test_patch_individual_website_staff_with_null(self):
+        jpp_url  = 'http://jplusplus.org'
+        data = {
+            'website_url': None,
+        }
+        args = {
+            'scope'      : 'detective/energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpOK(resp)
+        self.assertValidJSONResponse(resp)
+        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        self.assertEqual(updated_jpp.website_url, None)
 
     def test_patch_individual_website_unauthenticated(self):
         jpp_url  = 'http://jplusplus.org'

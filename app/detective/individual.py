@@ -540,9 +540,9 @@ class IndividualResource(ModelResource):
                                 # Too bad! Go to the next related object
                                 continue
                 # It's a literal value and not the ID
-                elif field != 'id' and value is not None:
+                elif field != 'id':
                     field_prop = self.get_model_field(field)._property
-                    if isinstance(field_prop, DateProperty):
+                    if isinstance(field_prop, DateProperty) and value != None:
                         try:
                             # It's a date and therefor `value` should be converted as it
                             value = datetime.strptime(value, RFC_DATETIME_FORMAT)

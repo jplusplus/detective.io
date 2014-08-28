@@ -63,6 +63,11 @@ class IndividualAuthorization(Authorization):
     def create_detail(self, object_list, bundle):
         if not self.check_contribution_permission(object_list, bundle, 'add'):
             raise Unauthorized("Sorry, only staff or contributors can create resource.")
+        # check if user can add regarding to his plan
+        topic   = get_topic_from_request(bundle.request)
+        profile = bundle.request.user.detectiveprofileuser
+        if profile.nodes_max() > -1 and profile.nodes_count()[topic.slug] >= profile.nodes_max():
+            raise Unauthorized("Sorry, you have to upgrade your plan.")
         return True
 
     def update_detail(self, object_list, bundle):

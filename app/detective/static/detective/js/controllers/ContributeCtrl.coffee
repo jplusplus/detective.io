@@ -39,7 +39,7 @@ class ContributeCtrl
         @scope.id       = @stateParams.id
         @scope.meta     = topic
         # check if user is allowed to contribute
-        @scope.isOverfillingThePlan = topic.author.profile.nodes_count[@stateParams.topic] >= topic.author.profile.nodes_max
+        @scope.isOverfillingThePlan = topic.author.profile.nodes_max > -1 and topic.author.profile.nodes_count[@stateParams.topic] >= topic.author.profile.nodes_max
         # Get the list of available resources
         @scope.forms    = @forms
         # By default, hide the kick-start form

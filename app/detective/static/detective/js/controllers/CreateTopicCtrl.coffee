@@ -2,10 +2,32 @@ class CreateTopicCtrl extends TopicFormCtrl
     EVENTS:
         skeleton_selected: 'skeleton:selected'
 
-    constructor: (@scope, @state, @TopicsFactory, @Page)->
+    @resolve:
+        skeletons: ($state, $q, Page, TopicSkeleton)->
+            console.log 'CreateTopicCtrl.resolve.skeletons !'
+            notFound = ->
+                do deferred.reject
+                $state.go "404"
+                deferred
+            forbidden = ->
+                do deferred.reject
+                $state.go "403"
+                deferred
+            deferred = do $q.defer
+            # Activate loading mode
+            Page.loading yes
+            TopicSkeleton.get (data)=>
+                # Resolve the deffered result
+                deferred.resolve(data)
+            # Return a deffered object
+            deferred.promise
+
+    @$inject: ['$scope', '$state', 'TopicsFactory', 'Page', 'skeletons']
+
+    constructor: (@scope, @state, @TopicsFactory, @Page, skeletons)->
         super
         @setCreatingMode()
-        @scope.skeletons = @TopicsFactory.skeletons
+        @scope.skeletons = skeletons
         @scope.selected_skeleton = {}
         @scope.topic = {}
         @scope.goToPlans = @goToPlans
@@ -15,7 +37,7 @@ class CreateTopicCtrl extends TopicFormCtrl
         @scope.shouldShowForm = @hasSelectedSkeleton
 
         @Page.title "Create a new investigation"
-
+        @Page.loading no
         @scope.$on @EVENTS.skeleton_selected, @onSkeletonSelected
 
     # nav & scope methods

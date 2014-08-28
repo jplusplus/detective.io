@@ -122,6 +122,7 @@ angular.module('detective.config').config [
                 url: '/:username/create-investigation/'
                 controller: CreateTopicCtrl
                 templateUrl: '/partial/topic.form.html'
+                resolve: CreateTopicCtrl.resolve
             )
             # check previous comment before changing URLs order.
             .state('user-topic',

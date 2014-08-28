@@ -21,7 +21,6 @@ angular.module('detective.service').factory 'TopicsFactory', [
             reset: =>
                 # Topics list
                 @topics = []
-                @skeletons = TopicSkeleton.get()
                 # Active topic
                 @topic = {}
 

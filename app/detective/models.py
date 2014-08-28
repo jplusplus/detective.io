@@ -57,19 +57,19 @@ class QuoteRequest(models.Model):
         return "%s - %s" % (self.name, self.email,)
 
 class Topic(models.Model):
-    title            = models.CharField(max_length=250, help_text="Title of your topic.")
+    title             = models.CharField(max_length=250, help_text="Title of your topic.")
     # Value will be set for this field if it's blank
-    slug             = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
-    description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
-    about            = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
-    public           = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
-    featured         = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
-    background       = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
-    author           = models.ForeignKey(User, help_text="Author of this topic.", null=True)
+    slug              = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
+    description       = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
+    about             = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
+    public            = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
+    featured          = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
+    background        = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
+    author            = models.ForeignKey(User, help_text="Author of this topic.", null=True)
     contributor_group = models.ForeignKey(Group, help_text="", null=True, blank=True)
-    ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
-    ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
-    ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
+    ontology_as_owl   = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
+    ontology_as_mod   = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
+    ontology_as_json  = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
 
     class Meta:
         unique_together = ('author', 'slug')
@@ -211,7 +211,7 @@ class Topic(models.Model):
 
         Return the number of entities in the current topic.
         Used to inform administrator.
-        Expensive request. Can be cached a long time.
+        Expensive request. Cached a long time.
 
         """
         if not self.id: return 0
@@ -227,7 +227,7 @@ class Topic(models.Model):
                 RETURN count(leaf) AS count
             """.format(app_label=self.app_label())
             response = connection.cypher(query).to_dicts()[0].get("count")
-            cache.set(cache_key, response)
+            cache.set(cache_key, response, 60*60*12) # cached 12 hours
         return response
 
     def get_models_output(self):
@@ -383,7 +383,7 @@ class Topic(models.Model):
 
 class TopicToken(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this token is related to.")
-    token      = models.CharField(editable=False, max_length=32, help_text="Title of your article.")
+    token      = models.CharField(editable=False, max_length=32, help_text="Title of your article.", db_index=True)
     email      = models.CharField(max_length=255, default=None, null=True, help_text="Email to invite.")
     created_at = models.DateTimeField(auto_now_add=True, default=None, null=True)
 
@@ -491,21 +491,27 @@ class SearchTerm(models.Model):
 #    CUSTOM USER
 #
 # -----------------------------------------------------------------------------
-PLANS_CHOICES = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
+PLANS_CHOICES  = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
+PLANS_BY_NAMES = dict([d for p in settings.PLANS for d in p.items()])
 
 class DetectiveProfileUser(models.Model):
-    user = models.OneToOneField(User)
-    plan = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])
-
-    location = models.CharField(max_length=100, null=True, blank=True)
+    user         = models.OneToOneField(User)
+    plan         = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])
+    location     = models.CharField(max_length=100, null=True, blank=True)
     organization = models.CharField(max_length=100, null=True, blank=True)
-    url = models.CharField(max_length=100, null=True, blank=True)
+    url          = models.CharField(max_length=100, null=True, blank=True)
 
     @property
     def avatar(self):
         hash_email = hashlib.md5(self.user.email.strip().lower()).hexdigest()
         return "http://www.gravatar.com/avatar/{hash}?s=200&d=mm".format(
             hash=hash_email)
+
+    def topics_count (self): return Topic.objects.filter(author=self).count()
+    def topics_max   (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_investigation"]
+    def nodes_max    (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_entities"]
+    # NOTE: Very expensive if cache is disabled
+    def nodes_count  (self): return dict([(topic.slug, topic.entities_count) for topic in self.user.topic_set.all()])
 
 # -----------------------------------------------------------------------------
 #
@@ -542,7 +548,11 @@ def user_created(*args, **kwargs):
     DetectiveProfileUser.objects.get_or_create(user=kwargs.get('instance'))
 
 def update_topic_cache(*args, **kwargs):
-    """ update the topic cache version on topic update or sub-model update """
+    """
+
+    update the topic cache version on topic update or sub-model update
+
+    """
     instance = kwargs.get('instance')
     if not isinstance(instance, Topic):
         try:
@@ -555,9 +565,8 @@ def update_topic_cache(*args, **kwargs):
         # if topic just been created we gonna bind its sub models signals
         if isinstance(instance, Topic) and kwargs.get('created'):
             utils.topic_cache.init_version(topic)
-
             for Model in topic.get_models():
-                signals.post_save.connect(update_topic_cache, sender=Model, weak=False )
+                signals.post_save.connect(update_topic_cache, sender=Model, weak=False)
         else:
             # we increment the cache version of this topic, this will "invalidate" every
             # previously stored information related to this topic
@@ -572,7 +581,5 @@ signals.post_save.connect(update_topic_cache   , sender=Topic)
 signals.post_save.connect(update_permissions   , sender=Topic)
 signals.pre_delete.connect(remove_topic_cache  , sender=Topic)
 signals.post_delete.connect(remove_permissions , sender=Topic)
-
-
 
 # EOF

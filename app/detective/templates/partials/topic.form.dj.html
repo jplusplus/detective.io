@@ -111,8 +111,11 @@
                                     'username': topic.author.username
                                 })"><i class="fa fa-warning"></i>&nbsp;Delete investigation</a>
 
-                    <button type="submit" class="col-sm-3 form-footer__submit-btn btn btn-primary"
-                        ng-class="{ 'col-sm-push-5': isEditing() }">
+                    <button type="submit" class="form-footer__submit-btn btn btn-primary"
+                        ng-class="{
+                          'col-sm-3 col-sm-push-5': isEditing(),
+                          'col-sm-6': isCreating()
+                        }">
                         <span ng-if="isCreating()">I'm done, create the investigation</span>
                         <span ng-if="isEditing()">Save changes</span>
                     </button>

@@ -494,7 +494,6 @@ class IndividualResource(ModelResource):
 
     def get_patch(self, request, **kwargs):
         self.method_check(request, allowed=['post'])
-        #self.is_authenticated(request)
         self.throttle_check(request)
         self.is_authenticated(request)
         bundle = self.build_bundle(request=request)
@@ -527,7 +526,8 @@ class IndividualResource(ModelResource):
                     data[field] = rels = value
                     # For each relation...
                     for idx, rel in enumerate(rels):
-                        if type(rel) in [str, int]: rel = dict(id=rel)
+                        if type(rel) in [str, int]:
+                            rel = dict(id=rel)
                         # We receied an object with an id
                         if rel.has_key("id"):
                             # Get the related object
@@ -583,7 +583,6 @@ class IndividualResource(ModelResource):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
         pk = kwargs['pk']
-
         node = connection.nodes.get(pk)
         # Only the relationships for a given field
         if "field" in kwargs:

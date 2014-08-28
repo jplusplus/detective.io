@@ -620,7 +620,8 @@ class SummaryResource(Resource):
                 'object': obj.get("model", None)
             })
         # Remove duplicates proposition dicts
-        return propositions
+
+        return filter(lambda x: not(x['predicate'].has_key('subject')) or x['subject']['name'] == x['predicate']['subject'], propositions)
 
     def get_syntax(self, bundle=None, request=None):
         if not hasattr(self, "syntax"):

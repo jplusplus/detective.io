@@ -986,3 +986,10 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         self.assertHttpBadRequest(resp)
         errors = json.loads(resp.content)['topic']
         self.assertIsNotNone(errors[u'title'])
+
+    def test_topic_create_with_skeleton_unavailble_image(self):
+        data = {'title': u'Existing title', 'background_url': "http://random.stuff.co.uk"}
+        resp = self.create_topic(data=data)
+        self.assertHttpBadRequest(resp)
+        errors = json.loads(resp.content)['topic']
+        self.assertIsNotNone(errors[u'background_url'])

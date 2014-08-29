@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
+from app.detective.exceptions         import UnavailableImage
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
                                              TopicFactory
@@ -90,7 +91,11 @@ class TopicValidation(Validation):
     # relies on model validation instead of this API validation.
     def is_valid(self, bundle, request=None):
         errors = super(TopicValidation, self).is_valid(bundle, request)
-        if request.method == 'POST':
+        try:
+            TopicFactory.get_topic_bundle(**bundle.data)
+        except UnavailableImage:
+            errors['background_url'] = "Passed url is unreachable or cause HTTP errors."
+        if request and request.method == 'POST':
             title = bundle.data['title']
             results = Topic.objects.filter(author=request.user, title__iexact=title)
             if results.exists():
@@ -229,7 +234,8 @@ class TopicResource(ModelResource):
 
     def hydrate(self, bundle):
         bundle.data['author'] = bundle.request.user
-        bundle.data = TopicFactory.get_topic_bundle(**bundle.data)
+        if self.is_valid(bundle):
+            bundle.data = TopicFactory.get_topic_bundle(**bundle.data)
         return bundle
 
 

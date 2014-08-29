@@ -1,4 +1,5 @@
 from app.detective              import utils
+from app.detective.exceptions   import UnavailableImage
 from app.detective.permissions  import create_permissions, remove_permissions
 
 from django.conf                import settings
@@ -464,13 +465,18 @@ class TopicFactory:
         if background_url:
             import urllib2, os
             from urlparse import urlparse
-            name = urlparse(background_url).path.split('/')[-1]
-            img_temp = NamedTemporaryFile(delete=True)
-            img_temp.write(urllib2.urlopen(background_url).read())
-            img_temp.flush()
+            try:
+                name = urlparse(background_url).path.split('/')[-1]
+                img_temp = NamedTemporaryFile(delete=True)
+                img_temp.write(urllib2.urlopen(background_url).read())
+                img_temp.flush()
 
-            kwargs['background'] = File(img_temp, name)
-            del kwargs['background_url']
+                kwargs['background'] = File(img_temp, name)
+                del kwargs['background_url']
+            except urllib2.HTTPError:
+                raise UnavailableImage()
+            except urllib2.URLError:
+                raise UnavailableImage()
 
         if topic_skeleton:
             # injecting parameters took from skeleton

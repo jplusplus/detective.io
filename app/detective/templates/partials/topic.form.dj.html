@@ -91,6 +91,10 @@
                            ng-disabled="loading"
                            class="form-control">
                 </div>
+                <span class="col-sm-6 text-danger"
+                      ng-show="submitted && form.background_url.$error.url">
+                    You have to enter a valid URL.
+                </span>
             </div>
             <!-- Topic about field -->
             <div class="row form-group">

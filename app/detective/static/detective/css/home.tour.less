@@ -95,6 +95,11 @@
         position:relative;
         overflow:hidden;
 
+        &--pined {
+            left:0 !important;
+            right:0 !important;
+        }
+
 
         &:after {
             content:"";
@@ -113,13 +118,16 @@
         }
 
         &__single {
-            position:absolute;
-            top:50%;
-            right:0;
             width: 55%;
             z-index: 10;
             padding:20px;
+            position:absolute;
+            top:50%;
+            right:0;
             .translate(0, -50%);
+            // Reset by scrollmagic
+            margin-top: 50px;
+            opacity:0;
         }
     }
 
@@ -131,7 +139,9 @@
         padding:100px 0;
         background:mix(#000, @brand-secondary, 10%);
 
+
         &__plan {
+
 
             text-align: center;
             padding:0;
@@ -145,9 +155,8 @@
                 margin-top:-4px;
             }
 
-            &:nth-child(1),
-            &:nth-child(3) {
-                border-right:0;
+            &:nth-child(4) {
+                border-left:0;
             }
 
             &__name {

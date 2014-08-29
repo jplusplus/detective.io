@@ -12,7 +12,7 @@
 {% block extrajs %}
 
     {% compress js %}
-        <script type="text/javascript" src="{% static 'components/jquery/jquery.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/chroma-js/index.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/kartograph.js/index.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/raphael/raphael-min.js' %}"></script>
@@ -38,6 +38,8 @@
         <script type="text/javascript" src="{% static 'components/ngprogress-lite/ngprogress-lite.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/textAngular/textAngular.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'components/rangy/rangy-core.js' %}"></script>
+        <script type="text/javascript" src="{% static 'components/gsap/src/minified/TweenMax.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'components/ScrollMagic/js/jquery.scrollmagic.min.js' %}"></script>
     {% endcompress %}
 
     {% compress js %}

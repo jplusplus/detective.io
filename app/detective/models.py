@@ -27,7 +27,7 @@ import urllib2
 
 # -----------------------------------------------------------------------------
 #
-#    CHOICES & ENUMERATIONS
+#    CHOICES & ENUMERATIONS & DICTS
 #
 # -----------------------------------------------------------------------------
 PUBLIC = (
@@ -41,6 +41,7 @@ FEATURED = (
 )
 
 PLANS_CHOICES = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
+PLANS_BY_NAMES = dict([d for p in settings.PLANS for d in p.items()])
 
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (

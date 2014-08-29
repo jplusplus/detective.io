@@ -1,4 +1,5 @@
-class EditTopicCtrl extends TopicFormCtrl
+#=require TopicFormCtrl
+class window.EditTopicCtrl extends window.TopicFormCtrl
     @$inject: TopicFormCtrl.$inject.concat ['topic']
     constructor: (@scope, @state, @TopicsFactory, @Page, @topic)->
         super

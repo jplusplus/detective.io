@@ -1,4 +1,4 @@
-class DeleteTopicCtrl
+class window.DeleteTopicCtrl
     @$inject: ['$scope', '$state', '$timeout', 'TopicsFactory', 'Page', 'topic']
 
     REDIRECT_SUCCESS_TIMEOUT: 3000

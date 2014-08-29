@@ -1,4 +1,4 @@
-class TopicFormCtrl
+class window.TopicFormCtrl
     @$inject: ['$scope', '$state', 'TopicsFactory', 'Page']
 
     MODES:

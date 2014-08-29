@@ -1,4 +1,5 @@
-class CreateTopicCtrl extends TopicFormCtrl
+#=require TopicFormCtrl
+class window.CreateTopicCtrl extends window.TopicFormCtrl
     EVENTS:
         skeleton_selected: 'skeleton:selected'
         trigger_scroll: 'scrollTo:trigger'

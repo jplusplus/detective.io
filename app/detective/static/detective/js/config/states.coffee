@@ -8,7 +8,7 @@ angular.module('detective.config').config [
         # ui-router configuration
         $stateProvider
             .state('home',
-                url : "/"
+                url: "/"
                 template: '<ui-view/>'
                 controller: ["Auth", "$state", (Auth, $state)->
                     unless $state.includes("home.*")
@@ -20,95 +20,95 @@ angular.module('detective.config').config [
             )
             .state('home.tour',
                 url: 'tour/?scrollTo'
-                controller : TourCtrl
-                templateUrl : '/partial/home.tour.html'
+                controller: TourCtrl
+                templateUrl: '/partial/home.tour.html'
             )
             .state('home.dashboard',
-                controller : DashboardCtrl
-                templateUrl : '/partial/home.dashboard.html'
+                controller: DashboardCtrl
+                templateUrl: '/partial/home.dashboard.html'
                 resolve: DashboardCtrl.resolve
                 auth: true
             )
             .state('404-page',
-                url : "/404/"
-                controller : NotFoundCtrl
-                templateUrl : '/partial/404.html'
+                url: "/404/"
+                controller: NotFoundCtrl
+                templateUrl: '/partial/404.html'
             )
             .state('404',
-                controller : NotFoundCtrl
-                templateUrl : '/partial/404.html'
+                controller: NotFoundCtrl
+                templateUrl: '/partial/404.html'
             )
             .state('403',
-                controller : NotFoundCtrl
-                templateUrl : '/partial/403.html'
+                controller: NotFoundCtrl
+                templateUrl: '/partial/403.html'
             )
             .state('contact-us',
-                url : "/contact-us/"
-                controller : ContactUsCtrl
-                templateUrl : '/partial/contact-us.html'
+                url: "/contact-us/"
+                controller: ContactUsCtrl
+                templateUrl: '/partial/contact-us.html'
             )
             # Accounts
             .state('activate',
-                url : "/account/activate/?token"
-                controller : UserCtrl
-                templateUrl : '/partial/account.activation.html'
+                url: "/account/activate/?token"
+                controller: UserCtrl
+                templateUrl: '/partial/account.activation.html'
             )
             .state('reset-password',
-                url : "/account/reset-password/?token"
-                controller : UserCtrl
-                templateUrl : '/partial/account.reset-password.html'
+                url: "/account/reset-password/?token"
+                controller: UserCtrl
+                templateUrl: '/partial/account.reset-password.html'
             )
             .state('reset-password-confirm',
-                url : "/account/reset-password-confirm/?token"
-                controller : UserCtrl
-                templateUrl : '/partial/account.reset-password.confirm.html'
+                url: "/account/reset-password-confirm/?token"
+                controller: UserCtrl
+                templateUrl: '/partial/account.reset-password.confirm.html'
             )
             .state('login',
-                url : "/login/?nextState&nextParams"
-                controller : LoginCtrl
-                templateUrl : '/partial/account.login.html'
+                url: "/login/?nextState&nextParams"
+                controller: LoginCtrl
+                templateUrl: '/partial/account.login.html'
             )
             .state('signup',
-                url : "/signup/"
-                controller : UserCtrl
-                templateUrl : '/partial/account.signup.html'
+                url: "/signup/"
+                controller: UserCtrl
+                templateUrl: '/partial/account.signup.html'
             )
             .state('signup-invitation'
-                url : "/signup/:token/"
-                controller : UserCtrl
-                templateUrl : '/partial/account.signup.html'
+                url: "/signup/:token/"
+                controller: UserCtrl
+                templateUrl: '/partial/account.signup.html'
             )
             # Pages
             .state('page',
-                url : "/page/:slug/"
-                controller : PageCtrl
+                url: "/page/:slug/"
+                controller: PageCtrl
                 # Allow a dynamic loading by setting the templateUrl within controller
-                template : "<div ng-include src='templateUrl'></div>"
+                template: "<div ng-include src='templateUrl'></div>"
             )
             # User-related url
             .state('user',
-                url : "/:username/"
+                url: "/:username/"
                 template: '<ui-view/>'
                 controller: ['Auth', 'User', '$state', '$stateParams', (Auth, User, $state, $stateParams) =>
                     unless $state.includes("user.*")
                         if (do Auth.isAuthenticated) and User.username is $stateParams.username
-                            $state.go 'user.me', { username : $stateParams.username }
+                            $state.go 'user.me', { username: $stateParams.username }
                         else
-                            $state.go 'user.notme', { username : $stateParams.username }
+                            $state.go 'user.notme', { username: $stateParams.username }
                 ]
             )
             .state('user.notme',
-                controller : ProfileCtrl
-                templateUrl : "/partial/account.html"
-                resolve : UserCtrl.resolve
-                default : 'user'
+                controller: ProfileCtrl
+                templateUrl: "/partial/account.html"
+                resolve: UserCtrl.resolve
+                default: 'user'
             )
             .state('user.me',
-                auth : true
-                controller : ProfileCtrl
-                templateUrl : "/partial/account.html"
-                resolve : UserCtrl.resolve
-                default : 'user'
+                auth: true
+                controller: ProfileCtrl
+                templateUrl: "/partial/account.html"
+                resolve: UserCtrl.resolve
+                default: 'user'
             )
             # ------------------
             # Topic-related URLs
@@ -127,12 +127,12 @@ angular.module('detective.config').config [
             )
             # check previous comment before changing URLs order.
             .state('user-topic',
-                url : "/:username/:topic/"
-                controller : ExploreCtrl
-                resolve :
+                url: "/:username/:topic/"
+                controller: ExploreCtrl
+                resolve:
                     topic: UserTopicCtrl.resolve.topic
                 # Allow a dynamic loading by setting the templateUrl within controller
-                template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+                template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
             )
             .state('user-topic-edit',
                 url: "/:username/:topic/edit/"
@@ -151,12 +151,12 @@ angular.module('detective.config').config [
                 auth: true
             )
             .state('global-graph-navigation',
-                url : "/:username/:topic/graph/"
-                controller : ExploreCtrl
-                resolve :
+                url: "/:username/:topic/graph/"
+                controller: ExploreCtrl
+                resolve:
                     topic: UserTopicCtrl.resolve.topic
                 # Allow a dynamic loading by setting the templateUrl within controller
-                template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+                template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
             )
             .state('user-topic-invite',
                 url: "/:username/:topic/invite/"

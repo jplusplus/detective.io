@@ -42,95 +42,13 @@
 
     {% compress js %}
         <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>
-        <!-- CONFIG -->
-        <script type="text/coffeescript" src="{% static 'detective/js/config/authWatch.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/httpProvider.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/interpolation.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/ngProgressLite.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/locationScrollTo.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/rootScope.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/safeApply.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/states.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/textAngular.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/tooltip.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/urlRouter.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/config/uiViewScroll.coffee' %}"></script>
-        <!-- CONTROLLERS -->
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/AddCollaboratorsCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/ArticleCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/BulkUploadCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContactUsCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/ContributeCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/DashboardCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/ExploreCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/HeaderCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualListCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualSearchCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/IndividualSingleCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/LoginCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/MainAsideCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/NotFoundCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/TopicFormCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/CreateTopicCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/DeleteTopicCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/EditTopicCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/PageCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/ProfileCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/RelationshipPropertiesCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/SearchFormCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/TopicBannerCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/TourCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserCtrl.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/controllers/UserTopicCtrl.coffee' %}"></script>
-        <!-- DIRECTIVES -->
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/card.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/changeOnBlur.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/clickOutside.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/colorTag.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/countryMap.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/focusOn.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/noDuplicates.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/parallax.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/match.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/screenHeight.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/scrollTo.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/topic.single.sources.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/ttTypeahead.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/unique.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/topic.single.graph.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/classOnFocus.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/autofill.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/httpErrorDisplayer.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/directives/planOverfillDisplayer.coffee' %}"></script>
-        <!-- FILTERS -->
-        <script type="text/coffeescript" src="{% static 'detective/js/filters/individualPreview.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/filters/nl2br.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/filters/titlecase.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/filters/strToColor.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/filters/yesorno.coffee' %}"></script>
-        <!-- SERVICES -->
-        <script type="text/coffeescript" src="{% static 'detective/js/services/Auth.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/AuthHttpInterceptor.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/HttpErrorInterceptor.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/Common.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/QueryFactory.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/Topic.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/TopicSkeleton.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/TopicsFactory.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/UtilsFactory.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/Individual.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/IndividualForm.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/Page.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/Search.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/Summary.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'detective/js/services/User.coffee' %}"></script>
     {% endcompress %}
 
-        <span class='topic__single__graph__worker'>
-            {% compress js %}
-                <script type="text/coffeescript" src="{% static 'detective/js/workers/topic.single.graph.coffee' %}"></script>
-            {% endcompress %}
-        </span>
+    <span class='topic__single__graph__worker'>
+        {% compress js %}
+            <script type="text/coffeescript" src="{% static 'detective/js/workers/topic.single.graph.coffee' %}"></script>
+        {% endcompress %}
+    </span>
 {% endblock %}
 
 {% block content %}

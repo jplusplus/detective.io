@@ -1,4 +1,4 @@
-class IndividualSearchCtrl extends IndividualListCtrl
+class window.IndividualSearchCtrl extends window.IndividualListCtrl
     @$inject: IndividualListCtrl.$inject.concat ['QueryFactory', 'TopicsFactory']
 
     constructor:->

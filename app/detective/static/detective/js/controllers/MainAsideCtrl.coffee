@@ -1,4 +1,4 @@
-class MainAsideCtrl
+class window.MainAsideCtrl
     @$inject: ['$scope', 'Common', 'TopicsFactory']
 
     constructor: (@scope, @Common, @TopicsFactory)->

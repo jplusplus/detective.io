@@ -1,4 +1,4 @@
-class ArticleCtrl
+class window.ArticleCtrl
     # Injects dependencies
     @$inject: ['$scope', '$stateParams', '$state', 'Common', 'Page']
 

@@ -1,4 +1,4 @@
-class TourCtrl
+class window.TourCtrl
     # Injects dependencies
     @$inject: ['$scope', 'Page', "Common"]
     constructor: (@scope, @Page, @Common)->

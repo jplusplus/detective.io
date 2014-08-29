@@ -1,4 +1,4 @@
-class RelationshipPropertiesCtrl
+class window.RelationshipPropertiesCtrl
     # Injects dependencies
     @$inject: ['$scope', '$modalInstance', 'Individual', "properties", "relationship", "meta"]
     constructor: (@scope, @modalInstance, @Individual, @properties, @relationship, @meta)->
@@ -45,4 +45,4 @@ class RelationshipPropertiesCtrl
 
 
 
-angular.module('detective.controller').controller 'RelationshipPropertiesCtrl', RelationshipPropertiesCtrl
+angular.module('detective.controller').controller 'relationshipPropertiesCtrl', RelationshipPropertiesCtrl

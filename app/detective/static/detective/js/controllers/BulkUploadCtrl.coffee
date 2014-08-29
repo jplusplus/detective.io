@@ -1,4 +1,4 @@
-class BulkUploadCtrl
+class window.BulkUploadCtrl
     # Injects dependencies
     @$inject: ['$scope', '$http', '$stateParams', '$location', 'Page', 'Individual', '$timeout', 'Common', 'User']
 

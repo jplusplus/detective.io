@@ -1,4 +1,4 @@
-class SearchFormCtrl
+class window.SearchFormCtrl
     # Injects dependencies
     @$inject: ['$scope', '$rootScope', '$location', '$state', 'Page', 'QueryFactory', 'TopicsFactory', 'UtilsFactory']
 
@@ -9,7 +9,7 @@ class SearchFormCtrl
         @selectedIndividual = {}
         @topics = @TopicsFactory.topics
         @topic  = @TopicsFactory.topic
-        @human_query = @QueryFactory.human_query 
+        @human_query = @QueryFactory.human_query
         @bindHumanQuery()
 
         # ------------

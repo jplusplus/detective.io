@@ -1,4 +1,4 @@
-class DashboardCtrl
+class window.DashboardCtrl
     # Injects dependancies
     @$inject: ['$scope', '$q', '$http', 'Common', 'Page', 'User', 'userGroups']
     constructor: (@scope, @q, @http, @Common, @Page, @User, @userGroups)->

@@ -1,4 +1,4 @@
-class ContributeCtrl
+class window.ContributeCtrl
     # Injects dependencies
     @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'Page', 'User', 'topic', 'forms', 'UtilsFactory']
 
@@ -481,7 +481,7 @@ class ContributeCtrl
 
         @relationshipProperties = @modal.open
             templateUrl: '/partial/topic.contribute.relationship-properties.html'
-            controller : 'RelationshipPropertiesCtrl as form'
+            controller : 'relationshipPropertiesCtrl as form'
             resolve    :
                 # Load the properties of this field
                 properties  : => @Individual.relationships(params).$promise

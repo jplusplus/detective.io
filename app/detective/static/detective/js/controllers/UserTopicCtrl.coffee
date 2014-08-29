@@ -1,4 +1,4 @@
-class UserTopicCtrl
+class window.UserTopicCtrl
     # Public method to resolve
     @resolve:
         topic: ($rootScope, $stateParams, $state, $q, Common, Page, User)->

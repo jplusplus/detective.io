@@ -1,6 +1,6 @@
 # See also :
 # http://blog.brunoscopelliti.com/deal-with-users-authentication-in-an-angularjs-web-app
-class UserCtrl
+class window.UserCtrl
     # Public method to resolve
     @resolve:
         user: [

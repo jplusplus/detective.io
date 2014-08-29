@@ -1,4 +1,4 @@
-class TopicBannerCtrl
+class window.TopicBannerCtrl
     # Injects dependencies
     @$inject: ['$scope', '$stateParams', '$state', 'Summary', '$filter']
 
@@ -23,8 +23,8 @@ class TopicBannerCtrl
         # get forms classes
         @Summary.get({id: "forms"}, @retrieveTopicForms)
         # render the graph on filters change
-        @scope.$watch("filtersSelected", @renderGraph, true) # From angular doc : 
-        # true means that inequality of the watchExpression is determined according to the angular.equals function. 
+        @scope.$watch("filtersSelected", @renderGraph, true) # From angular doc :
+        # true means that inequality of the watchExpression is determined according to the angular.equals function.
         # To save the value of the object for later comparison, the angular.copy function is used.
         # This therefore means that watching complex objects will have adverse memory and performance implications.
         if @state.is("global-graph-navigation")

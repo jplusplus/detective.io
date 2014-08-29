@@ -1,4 +1,4 @@
-class AddCollaboratorsCtrl
+class window.AddCollaboratorsCtrl
     # Injects dependancies
     @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic']
     constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic)->

@@ -1,4 +1,4 @@
-NotFoundCtrl = ($scope, Page)->
+window.NotFoundCtrl = ($scope, Page)->
     Page.loading false
     Page.title "Page not found"
 

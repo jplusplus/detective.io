@@ -1,24 +1,35 @@
 from app.detective              import utils
 from app.detective.permissions  import create_permissions, remove_permissions
+
+from django.conf                import settings
 from django.contrib.auth.models import User, Group
+from django.core.cache          import cache
+from django.core.files          import File
+from django.core.files.temp     import NamedTemporaryFile
+from django.core.paginator      import Paginator
 from django.db                  import models
 from django.db.models           import signals
+from django.utils.text          import slugify
 
 from jsonfield                  import JSONField
-from tinymce.models             import HTMLField
-from psycopg2.extensions        import adapt
 from neo4django.db              import connection
-from django.core.paginator      import Paginator
-from django.core.cache          import cache
-from django.conf                import settings
+from psycopg2.extensions        import adapt
+from tinymce.models             import HTMLField
 
 import hashlib
 import importlib
 import inspect
 import os
 import random
+import re
 import string
+import urllib2
 
+# -----------------------------------------------------------------------------
+#
+#    CHOICES & ENUMERATIONS
+#
+# -----------------------------------------------------------------------------
 PUBLIC = (
     (True, "Yes, public"),
     (False, "No, just for a small group of users"),
@@ -28,6 +39,8 @@ FEATURED = (
     (True, "Yes, show it on the homepage"),
     (False, "No, stay out of the ligth"),
 )
+
+PLANS_CHOICES = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
 
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (
@@ -57,22 +70,25 @@ class QuoteRequest(models.Model):
         return "%s - %s" % (self.name, self.email,)
 
 class Topic(models.Model):
-    title             = models.CharField(max_length=250, help_text="Title of your topic.")
-    # Value will be set for this field if it's blank
-    slug              = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
-    description       = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
-    about             = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
-    public            = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
-    featured          = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
-    background        = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
-    author            = models.ForeignKey(User, help_text="Author of this topic.", null=True)
-    contributor_group = models.ForeignKey(Group, help_text="", null=True, blank=True)
-    ontology_as_owl   = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
-    ontology_as_mod   = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
-    ontology_as_json  = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
-
+    background_upload_to='topics'
     class Meta:
-        unique_together = ('author', 'slug')
+        unique_together = (
+            ('slug','author')
+        )
+    title            = models.CharField(max_length=250, help_text="Title of your topic.")
+    skeleton_title   = models.CharField(max_length=250, default='No skeleton')
+    # Value will be set for this field if it's blank
+    slug             = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
+    description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
+    about            = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
+    public           = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
+    featured         = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
+    background       = models.ImageField(null=True, blank=True, upload_to=background_upload_to, help_text="Background image displayed on the topic's landing page.")
+    author           = models.ForeignKey(User, help_text="Author of this topic.", null=True)
+    contributor_group = models.ForeignKey(Group, help_text="", null=True, blank=True)
+    ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
+    ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
+    ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
 
     def __unicode__(self):
         return self.title
@@ -142,6 +158,10 @@ class Topic(models.Model):
     def save(self, *args, **kwargs):
         # Ensure that the module field is populated with app_label()
         self.ontology_as_mod = self.app_label()
+
+        # For automatic slug generation.
+        if not self.slug:
+            self.slug = slugify(self.title)[:50]
         # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
         # Refresh the API
@@ -406,6 +426,63 @@ class TopicToken(models.Model):
                 pass
         super(TopicToken, self).save()
 
+class TopicSkeleton(models.Model):
+    title           = models.CharField(max_length=250, help_text="Title of the skeleton")
+    description     = HTMLField(null=True, blank=True, help_text="A small description of the skeleton")
+    picture         = models.ImageField(upload_to="topics-skeletons", null=True, blank=True, help_text='The default picture for this skeleton')
+    picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
+    schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
+    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
+    target_plans    = models.CharField(max_length=50)
+
+    def selected_plans(self):
+        plans = re.sub('[\[\]]', '', self.target_plans)
+        return plans.split(',')
+
+# utility class to create a topic thanks to a skeleton
+class TopicFactory:
+    @staticmethod
+    def get_topic_bundle(**kwargs):
+        topic_skeleton = kwargs.get('topic_skeleton', None)
+        background_url = kwargs.get('background_url', None)
+        if topic_skeleton and not isinstance(topic_skeleton, TopicSkeleton):
+            topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton)
+
+        # if no background is provided we inject skeleton's (if skeleton is passed)
+        if not kwargs.get('background', None) and not background_url and topic_skeleton:
+            kwargs['background'] = topic_skeleton.picture
+            about = kwargs.get('about', '')
+            if about != '':
+                about = about + "<br/>"
+            about = "{about}{credit}".format(
+                about=about,
+                credit=topic_skeleton.picture_credits
+            )
+            kwargs['about'] = about
+
+        if background_url:
+            import urllib2, os
+            from urlparse import urlparse
+            name = urlparse(background_url).path.split('/')[-1]
+            img_temp = NamedTemporaryFile(delete=True)
+            img_temp.write(urllib2.urlopen(background_url).read())
+            img_temp.flush()
+
+            kwargs['background'] = File(img_temp, name)
+            del kwargs['background_url']
+
+        if topic_skeleton:
+            # injecting parameters took from skeleton
+            kwargs['ontology_as_json'] = topic_skeleton.ontology
+            kwargs['skeleton_title'] = topic_skeleton.title
+            del kwargs['topic_skeleton']
+        return kwargs
+
+    @staticmethod
+    def create_topic(**kwargs):
+        kwargs = TopicFactory.get_topic_bundle(**kwargs)
+        return Topic.objects.create(**kwargs)
+
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
     title      = models.CharField(max_length=250, help_text="Title of your article.")
@@ -491,15 +568,13 @@ class SearchTerm(models.Model):
 #    CUSTOM USER
 #
 # -----------------------------------------------------------------------------
-PLANS_CHOICES  = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
-PLANS_BY_NAMES = dict([d for p in settings.PLANS for d in p.items()])
-
 class DetectiveProfileUser(models.Model):
-    user         = models.OneToOneField(User)
-    plan         = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])
-    location     = models.CharField(max_length=100, null=True, blank=True)
+    user = models.OneToOneField(User)
+    plan = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])
+
+    location = models.CharField(max_length=100, null=True, blank=True)
     organization = models.CharField(max_length=100, null=True, blank=True)
-    url          = models.CharField(max_length=100, null=True, blank=True)
+    url = models.CharField(max_length=100, null=True, blank=True)
 
     @property
     def avatar(self):

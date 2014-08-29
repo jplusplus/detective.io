@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
-from app.detective.models             import QuoteRequest, Topic, TopicToken, Article, User
+from app.detective.models             import QuoteRequest, Topic, TopicToken, \
+                                             TopicSkeleton, Article, User, \
+                                             TopicFactory
 from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
 from app.detective.topics.common.user import UserResource
 from django.conf                      import settings
@@ -20,6 +22,7 @@ from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
 from tastypie.utils                   import trailing_slash
+from tastypie.validation              import Validation
 from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
@@ -50,13 +53,17 @@ class QuoteRequestResource(ModelResource):
 
 class TopicAuthorization(ReadOnlyAuthorization):
     def update_detail(self, object_list, bundle):
-        contributor_group = bundle.obj.get_contributor_group().name
-        isAuthor = bundle.obj.author == bundle.request.user
-        # Only authenticated user can update there own topic or people from the contributor group
-        return isAuthor or not not bundle.request.user.groups.filter(name=contributor_group)
+        user         = bundle.request.user
+        contributors = bundle.obj.get_contributor_group().name
+        is_author    = user.is_authenticated() and bundle.obj.author == user
+        # Only authenticated user can update there own topic or people from the
+        # contributor group
+        return is_author or user.groups.filter(name=contributors).exists()
+
     # Only authenticated user can create topics
     def create_detail(self, object_list, bundle):
         return bundle.request.user.is_authenticated()
+
     def read_list(self, object_list, bundle):
         if bundle.request.user and bundle.request.user.is_staff:
             return object_list
@@ -68,16 +75,40 @@ class TopicAuthorization(ReadOnlyAuthorization):
                 q_filter = Q(public=True)
             return object_list.filter(q_filter)
 
-class TopicResource(ModelResource):
+    def delete_detail(self, obj_list, bundle):
+        return bundle.request.user == bundle.obj.author
 
+class TopicSkeletonAuthorization(ReadOnlyAuthorization):
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.is_authenticated():
+            return object_list
+        else:
+            raise Unauthorized("Only logged user can retrieve skeletons")
+
+class TopicValidation(Validation):
+    # Ways of improvements: use FormValidation instead of Validation and
+    # relies on model validation instead of this API validation.
+    def is_valid(self, bundle, request=None):
+        errors = super(TopicValidation, self).is_valid(bundle, request)
+        title = bundle.data['title']
+        results = Topic.objects.filter(author=request.user, title__iexact=title)
+        if results.exists():
+            title = results[0].title
+            errors['title'] = (
+                u"You already have a topic called {title}, "
+                u"please chose another title").format(title=title)
+        return errors
+
+class TopicResource(ModelResource):
     author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path', readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
-
     class Meta:
-        authorization = TopicAuthorization()
-        queryset  = Topic.objects.all().prefetch_related('author')
-        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
+        always_return_data = True
+        authorization      = TopicAuthorization()
+        validation         = TopicValidation()
+        queryset           = Topic.objects.all().prefetch_related('author')
+        filtering          = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
 
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
@@ -166,18 +197,19 @@ class TopicResource(ModelResource):
         models = get_registered_models()
         # Filter model to the one under app.detective.topics
         bundle.data["models"] = []
-        # Create a thumbnail for this topic
-        try:
-            thumbnailer = get_thumbnailer(bundle.obj.background)
-            thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
-            thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
-            bundle.data['thumbnail'] = {
-                'small' : thumbnailSmall.url,
-                'medium': thumbnailMedium.url
-            }
-        # No image available
-        except InvalidImageFormatError:
-            bundle.data['thumbnail'] = None
+        if bundle.obj.background:
+            # Create a thumbnail for this topic
+            try:
+                thumbnailer = get_thumbnailer(bundle.obj.background)
+                thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
+                thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
+                bundle.data['thumbnail'] = {
+                    'small' : thumbnailSmall.url,
+                    'medium': thumbnailMedium.url
+                }
+            # No image available
+            except InvalidImageFormatError:
+                bundle.data['thumbnail'] = None
 
         for m in bundle.obj.get_models():
             try:
@@ -192,6 +224,32 @@ class TopicResource(ModelResource):
                 'index': idx
             }
             bundle.data["models"].append(model)
+        return bundle
+
+    def hydrate(self, bundle):
+        bundle.data['author'] = bundle.request.user
+        bundle.data = TopicFactory.get_topic_bundle(**bundle.data)
+        return bundle
+
+
+class TopicSkeletonResource(ModelResource):
+    class Meta:
+        authorization = TopicSkeletonAuthorization()
+        queryset = TopicSkeleton.objects.all()
+
+    def dehydrate(self, bundle):
+        try:
+            thumbnailer     = get_thumbnailer(bundle.obj.picture)
+            thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
+            thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
+            bundle.data['thumbnail'] = {
+                'small' : thumbnailSmall.url,
+                'medium': thumbnailMedium.url
+            }
+        # No image available
+        except InvalidImageFormatError:
+            bundle.data['thumbnail'] = None
+
         return bundle
 
 class ArticleResource(ModelResource):

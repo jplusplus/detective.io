@@ -19,7 +19,7 @@ angular.module('detective.config').config [
                 ]
             )
             .state('home.tour',
-                url: 'tour/'
+                url: 'tour/?scrollTo'
                 controller : TourCtrl
                 templateUrl : '/partial/home.tour.html'
             )
@@ -110,7 +110,22 @@ angular.module('detective.config').config [
                 resolve : UserCtrl.resolve
                 default : 'user'
             )
-            # Topic-related url
+            # ------------------
+            # Topic-related URLs
+            # ------------------
+            # Note:
+            #   URL order matters. Like in django if we declare a pattern like
+            #   `/user/:type/` before another pattern `/user/stuff/` the second
+            #   pattern wont be accessible by its URL and we will never trigger
+            #   the proper state.
+            .state('user-topic-create',
+                url: '/:username/create-investigation/?scrollTo'
+                controller: CreateTopicCtrl
+                reloadOnSearch: no
+                templateUrl: '/partial/topic.form.html'
+                resolve: CreateTopicCtrl.resolve
+            )
+            # check previous comment before changing URLs order.
             .state('user-topic',
                 url : "/:username/:topic/"
                 controller : ExploreCtrl
@@ -118,6 +133,22 @@ angular.module('detective.config').config [
                     topic: UserTopicCtrl.resolve.topic
                 # Allow a dynamic loading by setting the templateUrl within controller
                 template : "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+            )
+            .state('user-topic-edit',
+                url: "/:username/:topic/edit/"
+                controller: EditTopicCtrl
+                templateUrl: '/partial/topic.form.html'
+                resolve:
+                    topic: UserTopicCtrl.resolve.topic
+                auth: true
+            )
+            .state('user-topic-delete',
+                url: "/:username/:topic/delete/"
+                controller: DeleteTopicCtrl
+                templateUrl: '/partial/topic.delete.html'
+                resolve:
+                    topic: UserTopicCtrl.resolve.topic
+                auth: true
             )
             .state('global-graph-navigation',
                 url : "/:username/:topic/graph/"

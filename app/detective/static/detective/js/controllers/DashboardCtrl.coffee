@@ -12,6 +12,7 @@ class DashboardCtrl
         @scope.hasPrevious = @hasPrevious
         @scope.nextPage = @nextPage
         @scope.previousPage = @previousPage
+        @scope.user = @User
 
     # Concatenates @userTopics's objects with @userGroups's topics
     getTopics: =>

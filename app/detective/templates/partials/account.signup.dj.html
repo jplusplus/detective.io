@@ -94,7 +94,7 @@
                  type="password"
                  name="password2"
                  ng-model="password2"
-                 pw-match with="password"
+                 match with="password"
                  class="form-control"
                  id="inputPasswordCheck"
                  placeholder="Enter this password again">
@@ -103,7 +103,7 @@
             <i class="fa fa-square-o" ng-hide="form.password2.$valid"></i>
           </span>
         </div>
-        <p class="text-danger top05" ng-show="form.password2.$error.pwmatch">
+        <p class="text-danger top05" ng-show="form.password2.$error.match">
           Passwords don't match.
         </p>
         <p class="text-danger" ng-show="submitted && form.password2.$error.required">

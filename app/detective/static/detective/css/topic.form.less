@@ -1,0 +1,64 @@
+.topic-form {
+    .skeletons {
+        margin-top: 20px;
+        li {
+            margin-bottom: 30px;
+            .skeletons__item {
+                img {
+                    .transition(all .35s);
+                    cursor:pointer;
+                    .opacity(.5);
+                    &:before {
+                        background: #DDD;
+                        content: " ";
+                        position: relative;
+                        .transition(all .35s);
+                        .opacity(.5);
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                    }
+
+                }
+                min-height: 240px;
+                max-width:  350px;
+
+                &--selected {
+                    img {
+                        .opacity(1);
+                        &:after {
+                            .opacity(0);
+                        }
+                    }
+                }
+
+                &--new-skeleton {
+                    padding-top: 40px;
+                    padding-left: 20px;
+                    cursor:pointer;
+                    border: 3px @brand-secondary dashed;
+                    color: @brand-secondary;
+                    vertical-align: middle;
+                    p {
+                        font-size: 15px;
+                    }
+                }
+            }
+        }
+    }
+    .form-horizontal {
+        .ta-editor.form-control {
+            min-height: 380px;
+        }
+
+    }
+    &--edit {
+        .form-footer {
+            &__submit-btn {
+                right: 10px;
+            }
+        }
+
+    }
+}

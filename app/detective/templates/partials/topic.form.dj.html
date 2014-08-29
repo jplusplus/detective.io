@@ -1,0 +1,140 @@
+<div id="create-topic" class="container topic-form topic-form--[[formMode()]]">
+    <div class="topic-form__header">
+        <div ng-if="isEditing()">
+            <h2><i class="fa fa-cog">&nbsp;Settings</i></h2>
+            <label>Selected data scheme: [[ topic.skeleton_title]]</label>
+        </div>
+        <div ng-if="isCreating()">
+            <h2><i class="fa fa-plus">&nbsp;Create a new investigation</i></h2>
+            <p>What are you investigating on? Pick a scheme from the list</p>
+            <ul class="list-unstyled row skeletons">
+                <li class="col-sm-4" ng-repeat="skeleton in skeletons">
+                    <div class="skeletons__item"
+                          ng-class="{ 'skeletons__item--selected': isSelected(skeleton) }">
+                        <img ng-click="selectSkeleton(skeleton)" ng-src="[[ skeleton.thumbnail.medium ]]"/>
+                        <h4>[[ skeleton.title ]]</h4>
+                        <p>[[ skeleton.description ]]</p>
+                    </div>
+                </li>
+                <li class="col-sm-4">
+                    <div class="skeletons__item skeletons__item--new-skeleton"
+                         ng-click="goToPlans()">
+                        <p>
+                            Need a custom data scheme?<br/>
+                            Check out our paid plans!
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div ng-if="shouldShowForm()"
+         class="form-horizontal panel panel-default"
+         id="topic-form"
+         ng-class="{ 'loading': loading }">
+        <form class="panel-body"
+              name="form"
+              ng-submit="submit(form)"
+              novalidate>
+            <!-- Topic title field -->
+            <div class="row form-group" ng-if="isCreating()">
+                <div class="col-sm-3 form-label top05">
+                    <label for="id_topic_title">Title</label>
+                    <p class="help-block">
+                        Mandatory.<br/>
+                        You <b>cannot</b> change it later.
+                    </p>
+                </div>
+                <div class="col-sm-6">
+                    <input id="id_topic_title"
+                           name="title"
+                           ng-disabled="loading"
+                           class="form-control"
+                           ng-model="topic.title"
+                           required>
+                </div>
+                <span ng-show="submitted &&  form.title.$error.required "
+                      class="text-danger col-sm-6">Enter a title.</span>
+                <span ng-show="submitted &&  error && error.title"
+                      class="text-danger col-sm-6">[[error.title]]</span>
+            </div>
+            <!-- Topic subtitle/description field -->
+            <div class="row form-group">
+                <div class="col-sm-3 form-label top05">
+                    <label for="id_topic_description">Subtitle</label>
+                    <p class="help-block">
+                        max. 200 char.
+                    </p>
+                </div>
+                <div class="col-sm-6">
+                    <input id="id_topic_description"
+                           name="description"
+                           ng-disabled="loading"
+                           class="form-control"
+                           ng-model="topic.description"
+                           ng-maxlenght="200">
+                </div>
+            </div>
+            <!-- Topic background field -->
+            <div class="row form-group">
+                <div class="col-sm-3 form-label top05">
+                    <label for="id_topic_about">Cover picture</label>
+                    <p class="help-block">
+                        URL.
+                    </p>
+                </div>
+                <div class="col-sm-6">
+                    <input type="url"
+                           name="background_url"
+                           ng-model="topic.background_url"
+                           ng-disabled="loading"
+                           class="form-control">
+                </div>
+                <span class="col-sm-6 text-danger"
+                      ng-show="submitted && form.background_url.$error.url">
+                    You have to enter a valid URL.
+                </span>
+            </div>
+            <!-- Topic about field -->
+            <div class="row form-group">
+                <div class="col-sm-3 form-label top05">
+                    <label for="id_topic_about">About your investigation</label>
+                    <p class="help-block">
+                        max. 1500 char.
+                    </p>
+                </div>
+                <div class="col-sm-6">
+                    <div text-angular
+                         name="about"
+                         ng-disabled="loading"
+                         ng-model="topic.about"
+                         id="id_topic_description"></div>
+                </div>
+            </div>
+            <div class="row form-group form-footer">
+                <div class="form-footer__wrapper col-sm-push-3 col-sm-6">
+                    <i class="fa fa-warning"></i>&nbsp;<a class="col-sm-4"
+                       ng-if="isEditing()"
+                       ui-sref="user-topic-delete({
+                                    'topic': topic.slug,
+                                    'username': topic.author.username
+                                })">Delete investigation</a>
+
+                    <button type="submit" class="form-footer__submit-btn btn btn-primary"
+                        ng-class="{
+                          'col-sm-3 col-sm-push-5': isEditing(),
+                          'col-sm-6': isCreating()
+                        }">
+                        <span ng-if="isCreating()">I'm done, create the investigation</span>
+                        <span ng-if="isEditing()">Save changes</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <a ui-sref="home.dashboard"><i class='fa fa-arrow-left'></i>&nbsp;Go back to your dashboard</a>
+
+
+</div>

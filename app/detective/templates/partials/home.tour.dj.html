@@ -1,14 +1,22 @@
 {% load staticfiles %}
 
-<div id="home">
+<div class="home__tour">
 
-    <div class="front" screen-height="600">
+    <div class="home__tour__front" screen-height="600">
         <div class="container">
             <div class="middle">
                 <h1>
                     Detective<i>.io</i>
                 </h1>
                 <h3 class="top0">Investigations made easy.</h3>
+                <div ng-hide="user.is_logged">
+                    <a ui-sref="login" class="btn btn-lg btn-stroke">
+                        Login
+                    </a>
+                    <a ui-sref="signup" class="btn btn-default btn-lg">
+                        Sign up
+                    </a>
+                </div>
             </div>
             <a class="go-down" ng-click="scrollToFeatures = true">
                 <span class="text">Discover how</span><br />
@@ -18,104 +26,182 @@
     </div>
 
 
-    <div class="features bg-light">
+    <div class="home__tour__features bg-light">
         <div class="container">
-            <div class="text-center top40 bottom40">
-                <a scroll-to="600" ng-if="scrollToFeatures == true" reset="scrollToFeatures"></a>
-                <p class="lead">
-                    Simply describe your field of inquiry and <strong>Detective.io builds</strong><br />
-                    the input interface as well as a state of the art front-end.
+            <p>
+                Detective.io lets you organize your information on a topic easily. Because everything is structured, you can find a source or explore connections in your data in seconds.
+            </p>
+            <p>
+                Whether small or big, it turns your data into knowledge.
+            </p>
+        </div>
+    </div>
+
+    <div class="home__tour__quotes">
+        <div class="container">
+            <div class="home__tour__quotes__single">
+                <h3 class="home__tour__quotes__single__title">
+                    "Like putting a thousand-piece puzzle together"
+                </h3>
+                <p class="home__tour__quotes____singe__desc lead">
+                    Verena Porsch is consulting for NGOs. She used detective.io to expose agreements between textile companies and subcontracting factories, and linked it back to accidents. Thousands of brands and companies came together in her investigation, The Origin of Clothes.
                 </p>
             </div>
 
-            <div class="row">
-                <div class="col-sm-6 col-md-3">
-                    <div class="card">
-                        <img class="illustration" src="{% static 'detective/img/mobile.png' %}" />
-                        <div class="text">
-                            <h4>Mobile-first</h4>
-                            <p class="text-muted">Why store your data in a notepad when you can access Detective.io on your tablet or mobile? Database replication means it's much safer than notes on paper, too.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-md-3">
-                    <div class="card">
-                        <img class="illustration" src="{% static 'detective/img/semantic.png' %}" />
-                        <div class="text">
-                            <h4>Semantic</h4>
-                            <p class="text-muted">Detective.io relies on purpose-built ontologies for each topic. They can be plugged into other ontologies to unleash the power of linked data.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="clearfix visible-sm"></div>
-
-                <div class="col-sm-6 col-md-3">
-                    <div class="card">
-                        <img class="illustration" src="{% static 'detective/img/journo-tools.png' %}" />
-                        <div class="text">
-                            <h4>By journalists, for journalists</h4>
-                            <p class="text-muted">Journalism++ is a team of news nerds working for news nerds. We build tools - and use them in our daily work.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-md-3">
-                    <div class="card">
-                        <img class="illustration" src="{% static 'detective/img/network.png' %}" />
-                        <div class="text">
-                            <h4>Graph search</h4>
-                            <p class="text-muted">Your own graph search module for each investigation. Make complex queries in a breeze and find hidden patterns in your data.</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="home__tour__quotes__single">
+                <h3 class="home__tour__quotes__single__title">
+                    "All my knowledge in one place"
+                </h3>
+                <p class="home__tour__quotes____singe__desc lead">
+                    Adeline Agut is a consultant for water issues. She used Detective.io to organize her data on innovative water projects in developing countries. She can now reach into her own knowledge base at any time, on any device.
+                </p>
             </div>
 
-            <div class="bottom50 text-center top20">
-                <a class="btn btn-primary btn-lg get-a-quote" ng-href="/contact-us">
-                    Get a quote
-                    <i class="left10 fa fa-arrow-right"></i>
-                </a>
+            <div class="home__tour__quotes__single">
+                <h3 class="home__tour__quotes__single__title">
+                    "Collaboration made easy"
+                </h3>
+                <p class="home__tour__quotes____singe__desc lead">
+                    Alexandre Léchenet is an investigative journalist. He used Detective.io to store data on a transnational investigation. Because it's easy to use, he could invite colleagues from all over Europe to collaborate.
+                </p>
             </div>
         </div>
     </div>
 
 
-    <div class="featured-investigations pull-footer">
+    <div class="home__tour__get-ready">
         <div class="container">
-            <h3 class="container">Featured investigations</h3>
-            <div class="boxes">
-
-                <div ng-repeat-start="topic in featured"></div>
-
-                    <div class="col-md-4 col-sm-6">
-                        <div class="box">
-                            <a class="fg" href="[[topic.link]]"></a>
-                            <img ng-src="[[topic.thumbnail.medium]]" class="bg" />
-                        </div>
-                        <h4>
-                            <a href="[[topic.link]]">
-                                [[topic.title]]
-                            </a><br />
-                            <span>
-                                by
-                                <a href="[[topic.author.username]]">
-                                    [[topic.author.username]]
-                                </a>
-                            </span>
-                        </h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>Detective.io</h2>
+                    <p class="lead">
+                        Organize your investigation online, securely.
+                    </p>
+                    <p class="lead">
+                        Add, structure, and mine information anywhere, from any device. Make your knowledge is accessible to your colleagues, readers or clients in seconds.
+                    </p>
+                    <p class="lead">
+                        Detective.io<br />
+                        Investigate like it's 2014.
+                    </p>
+                    <div ng-hide="user.is_logged" class="top40">
+                        <a ui-sref="login" class="btn btn-lg btn-default">
+                            Login
+                        </a>
+                        <a ui-sref="signup" class="btn btn-primary btn-lg">
+                            Sign up
+                        </a>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    <div class="clearfix visible-md visible-lg" ng-if="$index > 0 && ($index + 1)%3 == 0"></div>
-                    <div class="clearfix visible-sm" ng-if="$index > 0 && ($index + 1)%2 == 0"></div>
+    <div class="home__tour__pricing pull-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-3 home__tour__pricing__plan">
+                    <h4 class="home__tour__pricing__plan__name">free</h4>
+                    <div class="home__tour__pricing__plan__price">
+                        €<b class="home__tour__pricing__plan__price__figure">0</b>/ year (+tax)
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>3</b> investigations
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>100</b> entities per investigation
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>3</b> generic data schemes
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>Public</b> investigations
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        No custom data schemes
+                    </div>
+                    <div class="home__tour__pricing__plan__subscribe"></div>
+                </div>
 
-                <div ng-repeat-end></div>
+                <div class="col-sm-3 home__tour__pricing__plan home__tour__pricing__plan--highlight">
+                    <h4 class="home__tour__pricing__plan__name">Jane</h4>
+                    <div class="home__tour__pricing__plan__price">
+                        €<b class="home__tour__pricing__plan__price__figure">199</b>/ year (+tax)
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>5</b> investigations
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>500</b> entities per investigation
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>All</b> generic data schemes
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>Public</b> investigations
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        No custom data schemes
+                    </div>
+                    <div class="home__tour__pricing__plan__subscribe">
+                        <a class="btn btn-lg btn-default">
+                            Subscribe
+                        </a>
+                    </div>
+                </div>
 
-                <div class="col-sm-4">
-                    <div class="box box-placeholder">
-                        <a class="fg" href="/contact-us">
-                            And yours?
+
+                <div class="col-sm-3 home__tour__pricing__plan">
+                    <h4 class="home__tour__pricing__plan__name">Hank</h4>
+                    <div class="home__tour__pricing__plan__price">
+                        €<b class="home__tour__pricing__plan__price__figure">799</b>/ year (+tax)
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>Unlimited</b> investigations
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>1000</b> entities per investigation
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>All</b> generic data schemes
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>Public and private</b> investigations
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>1</b> custom data schemes
+                    </div>
+                    <div class="home__tour__pricing__plan__subscribe">
+                        <a class="btn btn-lg btn-stroke">
+                            Subscribe
+                        </a>
+                    </div>
+                </div>
+
+
+                <div class="col-sm-3 home__tour__pricing__plan">
+                    <h4 class="home__tour__pricing__plan__name">Sherlock</h4>
+                    <div class="home__tour__pricing__plan__price">
+                        €<b class="home__tour__pricing__plan__price__figure">1999</b>/ year (+tax)
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>Unlimited</b> investigations
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>Unlimited</b> entities per investigation
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>All</b> generic data schemes
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>Public and private</b> investigations
+                    </div>
+                    <div class="home__tour__pricing__plan__included">
+                        <b>5</b> custom data schemes
+                    </div>
+                    <div class="home__tour__pricing__plan__subscribe">
+                        <a class="btn btn-lg btn-stroke">
+                            Subscribe
                         </a>
                     </div>
                 </div>

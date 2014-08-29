@@ -1,6 +1,6 @@
-#home {
+.home__tour {
 
-    .front {
+    &__front {
         position:relative;
         background:@brand-tertiary;
         color:#fff;
@@ -63,17 +63,8 @@
         h3 {
             position:relative;
             padding-bottom:40px;
-            margin-bottom:40px;
+            margin-bottom:0px;
 
-            &:after {
-                content:"";
-                position:absolute;
-                top:100%;
-                left:0;
-                width:80px;
-                height:1px;
-                background:white;
-            }
         }
 
         .middle {
@@ -91,57 +82,19 @@
     }
 
 
-    .features {
-
-
-        .card {
-
-            padding-top:40px;
-            background: @brand-secondary;
-            position:relative;
-            overflow:hidden;
-
-            &:after {
-                z-index:1;
-                position:absolute;
-                width:300px;
-                height:300px;
-                content:"";
-                background:fade(white, 5);
-                position:absolute;
-                left:50%;
-                margin-left:300px/-2px;
-                top:60px;
-                .rotate(45deg);
-            }
-
-            .illustration {
-                display:block;
-                margin:auto;
-                margin-bottom:40px;
-                width:200px;
-                height:75px;
-                position:relative;
-                z-index:2;
-            }
-
-            .text {
-                padding:10px;
-                background:white;
-                display:block;
-                position:relative;
-                z-index:3;
-            }
-        }
+    &__features {
+        padding:100px 0;
+        text-align: center;
+        font-size:200%;
     }
 
-
-    .featured-investigations {
+    &__quotes {
         padding:40px 0;
         background: @brand-secondary;
         color: contrast(@brand-secondary);
         position:relative;
         overflow:hidden;
+
 
         &:after {
             content:"";
@@ -154,26 +107,88 @@
             .rotate(-25deg);
         }
 
-        .boxes {
+        .container {
+            position:relative;
+            height: 600px;
+        }
 
-            padding:0 20px;
+        &__single {
+            position:absolute;
+            top:50%;
+            right:0;
+            width: 55%;
+            z-index: 10;
+            padding:20px;
+            .translate(0, -50%);
+        }
+    }
 
-            h4 {
-                a {
+    &__get-ready {
+        padding:60px 0;
+    }
+
+    &__pricing {
+        padding:100px 0;
+        background:mix(#000, @brand-secondary, 10%);
+
+        &__plan {
+
+            text-align: center;
+            padding:0;
+            padding-top:20px;
+            background: @brand-secondary;
+            color:white;
+            border:1px solid mix(white, @brand-secondary, 10%);
+
+            &--highlight {
+                border:5px solid white;
+                margin-top:-4px;
+            }
+
+            &:nth-child(1),
+            &:nth-child(3) {
+                border-right:0;
+            }
+
+            &__name {
+                font-size:100%;
+                text-transform: uppercase;
+                margin:0;
+                padding:0;
+                color:white;
+            }
+
+            &__price {
+                color: mix(white, @brand-secondary);
+                height: 30px;
+                margin-bottom:40px;
+
+                &__figure {
+                    font-size: 30px;
                     color:white;
-                }
-
-                span {
-                    opacity: 0.4;
                 }
             }
 
+            &__included {
+                height: 50px;
+                line-height: 50px;
+
+                &:nth-child(odd) {
+                    background: mix(#000, @brand-secondary, 15%);
+                }
+            }
+
+            &__subscribe {
+                height: 100px;
+                line-height: 100px;
+            }
         }
     }
 
 
+
     @media(max-width: @screen-tablet){ // for mobile
-        .front  {
+        &__front  {
             .middle {
                 left: 5%;
                 right: 5%;

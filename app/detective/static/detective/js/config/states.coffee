@@ -119,8 +119,9 @@ angular.module('detective.config').config [
             #   pattern wont be accessible by its URL and we will never trigger
             #   the proper state.
             .state('user-topic-create',
-                url: '/:username/create-investigation/'
+                url: '/:username/create-investigation/?scrollTo'
                 controller: CreateTopicCtrl
+                reloadOnSearch: no
                 templateUrl: '/partial/topic.form.html'
                 resolve: CreateTopicCtrl.resolve
             )

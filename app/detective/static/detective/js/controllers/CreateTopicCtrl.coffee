@@ -1,6 +1,7 @@
 class CreateTopicCtrl extends TopicFormCtrl
     EVENTS:
         skeleton_selected: 'skeleton:selected'
+        trigger_scroll: 'scrollTo:trigger'
 
     @resolve:
         skeletons: ($state, $q, Page, TopicSkeleton)->
@@ -21,9 +22,11 @@ class CreateTopicCtrl extends TopicFormCtrl
             # Return a deffered object
             deferred.promise
 
-    @$inject: ['$scope', '$state', 'TopicsFactory', 'Page', 'skeletons']
+    @$inject: ['$scope', '$state', 'TopicsFactory', 'Page', '$rootScope', '$timeout', '$location', 'skeletons']
 
-    constructor: (@scope, @state, @TopicsFactory, @Page, skeletons)->
+    # Note: The 4 first parameters need to stay in that order if we want the
+    # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
+    constructor: (@scope, @state, @TopicsFactory, @Page, @rootScope, @timeout, @location, skeletons)->
         super
         @setCreatingMode()
         @scope.skeletons = skeletons
@@ -60,6 +63,13 @@ class CreateTopicCtrl extends TopicFormCtrl
         # binding to skeleton will automaticaly bind the skeleton ontolgy
         # to this new topic in API.
         @scope.topic.topic_skeleton = @scope.selected_skeleton.id
+        # Angular scroll
+        @location.search({scrollTo: 'topic-form'})
+        @timeout(=>
+                @rootScope.$broadcast @EVENTS.trigger_scroll
+            , 250
+        )
+
 
     create: =>
         @scope.loading = yes

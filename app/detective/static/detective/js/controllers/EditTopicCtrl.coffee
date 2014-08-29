@@ -1,5 +1,5 @@
 #=require TopicFormCtrl
-class window.EditTopicCtrl extends TopicFormCtrl
+class window.EditTopicCtrl extends window.TopicFormCtrl
     @$inject: TopicFormCtrl.$inject.concat ['topic']
     constructor: (@scope, @state, @TopicsFactory, @Page, @topic)->
         super
@@ -35,9 +35,16 @@ class window.EditTopicCtrl extends TopicFormCtrl
 
     edit: =>
         @scope.loading = yes
-        @TopicsFactory.put {id: @scope.topic.id}, @scope.topic, (data)=>
-            @scope.loading = no
-            @scope.saved = yes
+        @TopicsFactory.put({id: @scope.topic.id}, @scope.topic, (data)=>
+                @scope.loading = no
+                @scope.saved = yes
+            , (response)=>
+                @scope.loading = no
+                @scope.save = no
+                if response.status is 400
+                    @scope.error = response.data.topic
+        )
+
 
 
 angular.module('detective.controller').controller 'editTopicCtrl', EditTopicCtrl

@@ -1,0 +1,1 @@
+class UnavailableImage(Exception): pass

@@ -112,6 +112,10 @@
                       ng-show="submitted && form.background_url.$error.url">
                     You have to enter a valid URL.
                 </span>
+                <span class="col-sm-6 text-danger"
+                      ng-show="submitted && error.background_url">
+                    [[ error.background_url ]]
+                </span>
             </div>
 
             <!-- Topic about field -->

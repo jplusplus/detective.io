@@ -6,7 +6,7 @@
         </div>
         <div ng-if="isCreating()">
             <h1><i class="fa fa-plus">&nbsp;Create a new investigation</i></h1>
-            <p>What are you investigating on? Pick on one scheme from the list</p>
+            <p>What are you investigating on? Pick a scheme from the list</p>
             <ul class="list-unstyled row skeletons">
                 <li class="col-sm-4" ng-repeat="skeleton in skeletons">
                     <div class="skeletons__item"
@@ -21,7 +21,7 @@
                          ng-click="goToPlans()">
                         <p>
                             Need another data scheme?<br/>
-                            Check out our premium plans!
+                            Check out our paid plans!
                         </p>
                     </div>
                 </li>
@@ -105,12 +105,12 @@
             </div>
             <div class="row form-group form-footer">
                 <div class="form-footer__wrapper col-sm-push-3 col-sm-6">
-                    <a class="col-sm-4"
+                    <i class="fa fa-warning"></i>&nbsp;<a class="col-sm-4"
                        ng-if="isEditing()"
                        ui-sref="user-topic-delete({
                                     'topic': topic.slug,
                                     'username': topic.author.username
-                                })"><i class="fa fa-warning"></i>&nbsp;Delete investigation</a>
+                                })">Delete investigation</a>
 
                     <button type="submit" class="form-footer__submit-btn btn btn-primary"
                         ng-class="{

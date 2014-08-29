@@ -428,6 +428,7 @@ class TopicToken(models.Model):
 
 class TopicSkeleton(models.Model):
     title           = models.CharField(max_length=250, help_text="Title of the skeleton")
+    description     = HTMLField(null=True, blank=True, help_text="A small description of the skeleton")
     picture         = models.ImageField(upload_to="topics-skeletons", null=True, blank=True, help_text='The default picture for this skeleton')
     picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
     schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')

@@ -859,6 +859,18 @@ class TopicSkeletonApiTestCase(ApiTestCase):
     def tearDown(self):
         super(TopicSkeletonApiTestCase, self).tearDown()
 
+    def create_topic(self, skeleton=None, data={}):
+        if skeleton is None:
+            skeleton = TopicSkeleton.objects.get(title='Body Count')
+        data['topic_skeleton'] = skeleton.pk
+        print data
+        return self.api_client.post(
+            '/api/detective/common/v1/topic/',
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+
     def test_topic_skeleton_list_unauthorized(self):
         client = self.api_client
         client.client.logout()
@@ -875,15 +887,21 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         )
         self.assertValidJSONResponse(resp)
 
-
     def test_topic_create_with_skeleton(self):
         skeleton = TopicSkeleton.objects.get(title='Body Count')
-        resp = self.api_client.post(
-            '/api/detective/common/v1/topic/',
-            data={'topic_skeleton': skeleton.pk},
-            format='json',
-            authentication=self.get_contrib_credentials()
-        )
+        resp = self.create_topic(skeleton=skeleton,
+                                 data={'title': u'Skeletonist'})
         self.assertHttpCreated(resp)
         created_topic = json.loads(resp.content)
         self.assertEqual(created_topic['background'], skeleton.picture.url)
+
+    def test_topic_create_with_skeleton_already_existing_title(self):
+        data = {'title': u'Existing title'}
+        resp = self.create_topic(data=data)
+        self.assertHttpCreated(resp)
+
+        resp = self.create_topic(data=data)
+        self.assertHttpBadRequest(resp)
+        errors = json.loads(resp.content)['topic']
+        self.assertIsNotNone(errors[u'title'])
+

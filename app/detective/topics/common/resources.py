@@ -22,6 +22,7 @@ from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
 from tastypie.utils                   import trailing_slash
+from tastypie.validation              import Validation
 from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
@@ -84,6 +85,18 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
         else:
             raise Unauthorized("Only logged user can retrieve skeletons")
 
+class TopicValidation(Validation):
+    def is_valid(self, bundle, request=None):
+        errors = super(TopicValidation, self).is_valid(bundle, request)
+        title = bundle.data['title']
+        results = Topic.objects.filter(author=request.user, title__iexact=title)
+        if results.exists():
+            title = results[0].title
+            errors['title'] = (
+                u"You already have a topic called {title}, "
+                u"please chose another title").format(title=title)
+        return errors
+
 class TopicResource(ModelResource):
     author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path', readonly=True)
@@ -91,6 +104,7 @@ class TopicResource(ModelResource):
     class Meta:
         always_return_data = True
         authorization      = TopicAuthorization()
+        validation         = TopicValidation()
         queryset           = Topic.objects.all().prefetch_related('author')
         filtering          = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
 

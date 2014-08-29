@@ -159,8 +159,8 @@ TEMPLATE_DIRS = (
 
 # JS/CSS COMPRESSOR SETTINGS
 COMPRESS_PRECOMPILERS = (
-    ('text/coffeescript', 'coffee --compile --stdio --bare'),
-    ('text/less', 'lessc --include-path="%s" {infile} {outfile}' % here('static') ),
+    ('text/coffeescript', 'node_modules/.bin/snockets {infile} > {outfile}'),
+    ('text/less', 'node_modules/.bin/lessc --include-path="%s" {infile} {outfile}' % here('static') ),
 )
 
 # Remove BeautifulSoup requirement

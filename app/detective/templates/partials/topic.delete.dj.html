@@ -4,7 +4,7 @@
             <div class="panel-body">
                 <h1>Delete [[ topic.title ]] </h1>
                 <p>
-                    Be carefull, when you delete an investigation <b>all your data</b>
+                    Be careful, when you delete an investigation <b>all your data</b>
                     and all data your collaborators have contributed will be lost.
                 </p>
                 <div class="row form-group">
@@ -24,7 +24,7 @@
                             Title doesn't match
                         </span>
                         <span class="text text-danger" ng-show="submitted && form.check_title.$error.required">
-                            You have to enter investigation title in order to delete it
+                            You have to enter the investigation title in order to delete it
                         </span>
                         <span class="text-danger" ng-if="submitted && error">
                             [[ error ]]
@@ -41,6 +41,6 @@
         </form>
     </div>
     <div ng-show="deleted" class="alert alert-success">
-        Your topic has been successfuly deleted ! We will redirect you to your dashboard.
+        Your topic has been successfully deleted ! We will redirect you to your dashboard.
     </div>
 </div>

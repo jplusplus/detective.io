@@ -1,10 +1,13 @@
 #=require TopicFormCtrl
-class window.EditTopicCtrl extends window.TopicFormCtrl
+class window.EditTopicCtrl extends TopicFormCtrl
     @$inject: TopicFormCtrl.$inject.concat ['topic']
     constructor: (@scope, @state, @TopicsFactory, @Page, @topic)->
         super
         @setEditingMode()
         @scope.topic = @topic
+        @scope.saved = no
+        @scope.$on 'topic:updated', =>
+            @scope.saved = no
         @Page.loading false
         @Page.title "Settings of #{@topic.title}"
 
@@ -34,6 +37,7 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
         @scope.loading = yes
         @TopicsFactory.put {id: @scope.topic.id}, @scope.topic, (data)=>
             @scope.loading = no
+            @scope.saved = yes
 
 
 angular.module('detective.controller').controller 'editTopicCtrl', EditTopicCtrl

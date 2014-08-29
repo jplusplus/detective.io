@@ -13,9 +13,11 @@ class window.TopicFormCtrl
         @scope.isEditing = @isEditing
         @scope.isCreating = @isCreating
         @scope.hideErrors = @hideErrors
-        @scope.$watch 'topic', @hideErrors, yes
+
         @scope.formMode = =>
             @form_mode
+
+        @scope.$watch 'topic', @onTopicUpdated, yes
 
     isEditing: =>
         @form_mode is @MODES.editing
@@ -28,6 +30,10 @@ class window.TopicFormCtrl
 
     setEditingMode: =>
         @form_mode = @MODES.editing
+
+    onTopicUpdated: =>
+        @hideErrors()
+        @scope.$broadcast 'topic:updated'
 
     hideErrors: =>
         unless @scope.loading

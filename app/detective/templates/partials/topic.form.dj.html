@@ -77,9 +77,26 @@
                 </div>
             </div>
             <!-- Topic background field -->
+            <div class="row form-group" ng-if="isEditing()">
+                <div class="col-sm-3">
+                  <label>Cover picture</label>
+                </div>
+                <div class="col-sm-6">
+                  <span class="text-disabled" ng-if="!!!topic.background">None</span>
+                  <a ng-if="topic.background"
+                     title="Cover picture of [[ topic.title ]]"
+                     ng-href="[[topic.background]]">
+                    [[topic.background]]
+                  </a>
+                </div>
+                <a ng-if="topic.background" class="col-sm-1" ng-click="deleteTopicBackground()">Remove this picture&nbsp;<i class="fa fa-close"></i></a>
+            </div>
             <div class="row form-group">
                 <div class="col-sm-3 form-label top05">
-                    <label for="id_topic_about">Cover picture</label>
+                    <label for="id_topic_about">
+                      <span ng-if="isCreating()">Cover picture</span>
+                      <span ng-if="isEditing()">Enter a new picture</span>
+                    </label>
                     <p class="help-block">
                         URL.
                     </p>
@@ -96,6 +113,7 @@
                     You have to enter a valid URL.
                 </span>
             </div>
+
             <!-- Topic about field -->
             <div class="row form-group">
                 <div class="col-sm-3 form-label top05">
@@ -114,16 +132,16 @@
             </div>
             <div class="row form-group form-footer">
                 <div class="form-footer__wrapper col-sm-push-3 col-sm-6">
-                    <i class="fa fa-warning"></i>&nbsp;<a class="col-sm-4"
-                       ng-if="isEditing()"
-                       ui-sref="user-topic-delete({
+                    <span class="col-sm-5" ng-if="isEditing()">
+                      <i class="fa fa-warning"></i>&nbsp;
+                      <a ui-sref="user-topic-delete({
                                     'topic': topic.slug,
                                     'username': topic.author.username
                                 })">Delete investigation</a>
-
+                    </span>
                     <button type="submit" class="form-footer__submit-btn btn btn-primary"
                         ng-class="{
-                          'col-sm-3 col-sm-push-5': isEditing(),
+                          'col-sm-3 col-sm-push-4': isEditing(),
                           'col-sm-6': isCreating()
                         }">
                         <span ng-if="isCreating()">I'm done, create the investigation</span>
@@ -132,6 +150,9 @@
                 </div>
             </div>
         </form>
+        <div class="panel-footer panel-success" ng-show="isEditing() && !!saved">
+            <span class="text-success">Changes saved !</span>
+        </div>
     </div>
 
     <a ui-sref="home.dashboard"><i class='fa fa-arrow-left'></i>&nbsp;Go back to your dashboard</a>

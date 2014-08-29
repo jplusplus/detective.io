@@ -1,7 +1,16 @@
 .home__tour {
 
-    &__front {
+    &__screen {
+        z-index:20;
         position:relative;
+
+        &--pined {
+            left:0 !important;
+            right:0 !important;
+        }
+    }
+
+    &__front {
         background:@brand-tertiary;
         color:#fff;
         padding-top:100px;
@@ -94,12 +103,6 @@
         color: contrast(@brand-secondary);
         position:relative;
         overflow:hidden;
-
-        &--pined {
-            left:0 !important;
-            right:0 !important;
-        }
-
 
         &:after {
             content:"";

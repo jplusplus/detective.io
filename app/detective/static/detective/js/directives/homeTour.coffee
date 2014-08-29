@@ -13,7 +13,7 @@ angular.module('detective.directive').directive 'homeTour', ->
                 triggerElement: ".home__tour__quotes"
                 duration: QUOTE_DURATION * (QUOTE_COUNT + QUOTE_COUNT-1)
             )
-            .setPin(".home__tour__quotes", pinnedClass: "home__tour__quotes--pined")
+            .setPin(".home__tour__quotes", pinnedClass: "home__tour__screen--pined")
             .addTo(controller)
 
         showStyle =

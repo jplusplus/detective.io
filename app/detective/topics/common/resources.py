@@ -86,6 +86,8 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
             raise Unauthorized("Only logged user can retrieve skeletons")
 
 class TopicValidation(Validation):
+    # Ways of improvements: use FormValidation instead of Validation and
+    # relies on model validation instead of this API validation.
     def is_valid(self, bundle, request=None):
         errors = super(TopicValidation, self).is_valid(bundle, request)
         title = bundle.data['title']

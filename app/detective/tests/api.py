@@ -905,6 +905,35 @@ class TopicApiTestCase(ApiTestCase):
         )
         self.assertHttpOK(resp)
 
+    def test_topic_update(self):
+        def topic_to_dict(topic):
+            return {
+                'description': topic.description,
+                'title': topic.title,
+                'slug': topic.slug,
+                'ontology_as_json': topic.ontology_as_json,
+                'ontology_as_owl': topic.ontology_as_owl,
+                'ontology_as_mod': topic.ontology_as_mod,
+                'about': topic.about,
+                'background': topic.background,
+                'public': topic.public,
+                'featured': topic.featured,
+                'author': topic.author
+            }
+        topic = Topic.objects.get(slug='test-topic')
+        topic.author = self.contrib_user
+        topic.save()
+        data  = topic_to_dict(topic)
+        data['about'] = 'Changed'
+        resp  = self.api_client.put(
+            '/api/detective/common/v1/topic/{pk}/'.format(pk=topic.pk),
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        self.assertHttpOK(resp)
+
+
 
 class TopicSkeletonApiTestCase(ApiTestCase):
     def setUp(self):
@@ -917,7 +946,6 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         if skeleton is None:
             skeleton = TopicSkeleton.objects.get(title='Body Count')
         data['topic_skeleton'] = skeleton.pk
-        print data
         return self.api_client.post(
             '/api/detective/common/v1/topic/',
             data=data,
@@ -958,4 +986,3 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         self.assertHttpBadRequest(resp)
         errors = json.loads(resp.content)['topic']
         self.assertIsNotNone(errors[u'title'])
-

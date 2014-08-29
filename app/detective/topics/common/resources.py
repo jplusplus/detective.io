@@ -90,13 +90,14 @@ class TopicValidation(Validation):
     # relies on model validation instead of this API validation.
     def is_valid(self, bundle, request=None):
         errors = super(TopicValidation, self).is_valid(bundle, request)
-        title = bundle.data['title']
-        results = Topic.objects.filter(author=request.user, title__iexact=title)
-        if results.exists():
-            title = results[0].title
-            errors['title'] = (
-                u"You already have a topic called {title}, "
-                u"please chose another title").format(title=title)
+        if request.method == 'POST':
+            title = bundle.data['title']
+            results = Topic.objects.filter(author=request.user, title__iexact=title)
+            if results.exists():
+                title = results[0].title
+                errors['title'] = (
+                    u"You already have a topic called {title}, "
+                    u"please chose another title").format(title=title)
         return errors
 
 class TopicResource(ModelResource):

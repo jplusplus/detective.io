@@ -35,8 +35,8 @@
          ng-class="{ 'loading': loading }">
         <form class="panel-body"
               name="form"
-              ng-submit="submit()"
-              enctype="multipart/form-data">
+              ng-submit="submit(form)"
+              novalidate>
             <!-- Topic title field -->
             <div class="row form-group" ng-if="isCreating()">
                 <div class="col-sm-3 form-label top05">
@@ -51,8 +51,13 @@
                            name="title"
                            ng-disabled="loading"
                            class="form-control"
-                           ng-model="topic.title">
+                           ng-model="topic.title"
+                           required>
                 </div>
+                <span ng-show="submitted &&  form.title.$error.required "
+                      class="text-danger col-sm-6">Enter a title.</span>
+                <span ng-show="submitted &&  error && error.title"
+                      class="text-danger col-sm-6">[[error.title]]</span>
             </div>
             <!-- Topic subtitle/description field -->
             <div class="row form-group">

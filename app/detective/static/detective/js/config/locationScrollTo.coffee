@@ -1,7 +1,8 @@
 angular.module('detective.config').run [
     '$rootScope'
     '$location'
-    ($rootScope, $location)->
+    'constants.events'
+    ($rootScope, $location, EVENTS)->
         scrollTo = ->
             # if location search params contain a scollTo
             hash = $location.search().scrollTo
@@ -15,6 +16,5 @@ angular.module('detective.config').run [
                     )
         # wait for the DOM to be loaded
         $rootScope.$on '$viewContentLoaded', scrollTo
-
-        $rootScope.$on 'scrollTo:trigger', scrollTo
+        $rootScope.$on EVENTS.trigger.scroll, scrollTo
 ]

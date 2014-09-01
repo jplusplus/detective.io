@@ -67,8 +67,8 @@
 
 			<div class="head panel-heading">
 				<div class="btns">
-					<span ng-if="individual.permalink()" >
-						<a class="left10" ng-href="[[individual.permalink()]]">See in detail</a>
+					<span ng-if="individual.hasSrefOptions()" >
+						<a class="left10" ng-click="seeDetails(individual)">See in detail</a>
 						<button class="btn btn-danger left10"
 						   ng-if="user.hasDeletePermission(meta.ontology_as_mod)"
 						   ng-click="individual.delete($index)">

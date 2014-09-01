@@ -1,8 +1,16 @@
 {% load staticfiles %}
 
-<div class="home__tour" home-tour>
+<div class="home__tour" home-tour tracker="tracker">
 
-    <div class="home__tour__front home__tour__screen" screen-height="600">
+    <ul class="list-unstyled home__tour__tracker">
+        <li ng-repeat="screen in ['tour', 'quote 0', 'quote 1', 'quote 2', 'get ready', 'pricing']">
+            <a ng-click="scrollTo($index)" class="home__tour__tracker__screen" ng-class="$index == tracker ? 'home__tour__tracker__screen--active' : ''">
+                <span class="sr-only">Go to[[screen]]</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="home__tour__front home__tour__screen" data-level="0" screen-height="600">
         <div class="container">
             <div class="middle">
                 <h1>
@@ -18,7 +26,7 @@
                     </a>
                 </div>
             </div>
-            <a class="go-down" ng-click="scrollToFeatures = true">
+            <a class="go-down" ng-click="scrollTo(1)">
                 <span class="text">Discover how</span><br />
                 <i class="fa fa-arrow-down"></i>
             </a>
@@ -39,7 +47,8 @@
 
     <div class="home__tour__quotes home__tour__screen">
         <div class="container">
-            <div class="home__tour__quotes__single home__tour__quotes__single--n0">
+            <img src="{% static 'detective/img/tour-iphone.png' %}" class="home__tour__quotes__iphone" />
+            <div class="home__tour__quotes__single home__tour__quotes__single--n0" data-level="1">
                 <h3 class="home__tour__quotes__single__title">
                     "Like putting a thousand-piece puzzle together"
                 </h3>
@@ -48,7 +57,7 @@
                 </p>
             </div>
 
-            <div class="home__tour__quotes__single home__tour__quotes__single--n1">
+            <div class="home__tour__quotes__single home__tour__quotes__single--n1" data-level="2">
                 <h3 class="home__tour__quotes__single__title">
                     "All my knowledge in one place"
                 </h3>
@@ -57,7 +66,7 @@
                 </p>
             </div>
 
-            <div class="home__tour__quotes__single home__tour__quotes__single--n2">
+            <div class="home__tour__quotes__single home__tour__quotes__single--n2" data-level="3">
                 <h3 class="home__tour__quotes__single__title">
                     "Collaboration made easy"
                 </h3>
@@ -69,7 +78,7 @@
     </div>
 
 
-    <div class="home__tour__get-ready home__tour__screen">
+    <div class="home__tour__get-ready home__tour__screen" data-level="4">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
@@ -93,11 +102,14 @@
                         </a>
                     </div>
                 </div>
+                <div class="col-md-6">
+                    <img src="{% static 'detective/img/tour-ipad.png' %}" class="home__tour__get-ready__ipad" />
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="home__tour__pricing  home__tour__screen pull-footer">
+    <div class="home__tour__pricing  home__tour__screen pull-footer" data-level="5">
         <div class="container">
             <div class="row">
                 <div class="col-sm-3 home__tour__pricing__plan">

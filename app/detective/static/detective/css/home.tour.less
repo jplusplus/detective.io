@@ -1,5 +1,29 @@
 .home__tour {
 
+    &__tracker {
+        border-radius: 20px;
+        z-index:40;
+        position:fixed;
+        right:20px;
+        top:50%;
+        background-color: fade(@brand-secondary, 10);
+        .translate(0, -50%);
+
+        &__screen {
+            border-radius: 10px;
+            height:10px;
+            width:10px;
+            margin: 5px;
+            border:2px solid contrast(@brand-secondary);
+            display: block;
+            cursor:pointer;
+
+            &--active {
+                background:contrast(@brand-secondary);
+            }
+        }
+    }
+
     &__screen {
         z-index:20;
         position:relative;
@@ -22,7 +46,7 @@
             bottom:20px;
             left:50%;
             width:100px;
-            margin-left:-50px;
+            margin-top:-50px;
             text-align:center;
             color:white;
             text-decoration:none;
@@ -129,13 +153,20 @@
             right:0;
             .translate(0, -50%);
             // Reset by scrollmagic
-            margin-top: 50px;
+            margin-right: 50px;
             opacity:0;
         }
     }
 
     &__get-ready {
-        padding:60px 0;
+        padding:100px 0;
+        height: 600px;
+        overflow: hidden;
+
+        &__ipad {
+            position:relative;
+            top:0;
+        }
     }
 
     &__pricing {

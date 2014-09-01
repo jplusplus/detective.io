@@ -558,6 +558,10 @@ class SummaryResource(Resource):
                 # We reach the end
                 else: objects.append( ending_tokens )
 
+        # Only keep predicates that concern our subjects
+        subject_names = set([subject['name'] for subject in subjects])
+        predicates = filter(lambda predicate: predicate['subject'] in subject_names, predicates)
+
         # We find some subjects
         if len(subjects) and not len(predicates):
             terms  = self.get_syntax().get("predicate").get("relationship")
@@ -620,8 +624,7 @@ class SummaryResource(Resource):
                 'object': obj.get("model", None)
             })
         # Remove duplicates proposition dicts
-
-        return filter(lambda x: not(x['predicate'].has_key('subject')) or x['subject']['name'] == x['predicate']['subject'], propositions)
+        return propositions
 
     def get_syntax(self, bundle=None, request=None):
         if not hasattr(self, "syntax"):

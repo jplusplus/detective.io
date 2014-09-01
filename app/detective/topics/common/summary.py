@@ -325,6 +325,7 @@ class SummaryResource(Resource):
             raise Exception("Missing 'q' parameter")
 
         query        = request.GET["q"]
+        query        = query.strip()
         # Find the kown match for the given query
         matches      = self.find_matches(query)
         # Build and returns a list of proposal

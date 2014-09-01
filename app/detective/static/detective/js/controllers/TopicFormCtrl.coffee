@@ -1,11 +1,11 @@
 class window.TopicFormCtrl
-    @$inject: ['$scope', '$state', 'TopicsFactory', 'Page']
+    @$inject: ['$scope', '$state', 'TopicsFactory', 'Page', 'constants.events']
 
     MODES:
         editing: 'edit'
         creating: 'create'
 
-    constructor: (@scope, @state, @TopicFactory, @Page)->
+    constructor: (@scope, @state, @TopicFactory, @Page, @EVENTS)->
         @form_mode = undefined
         @scope.submitted = no
         @scope.submit = @submit
@@ -33,7 +33,7 @@ class window.TopicFormCtrl
 
     onTopicUpdated: =>
         @hideErrors()
-        @scope.$broadcast 'topic:updated'
+        @scope.$broadcast @EVENTS.topic.user_updated
 
     hideErrors: =>
         unless @scope.loading

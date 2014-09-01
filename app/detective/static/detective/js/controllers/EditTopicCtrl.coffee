@@ -1,12 +1,12 @@
 #=require TopicFormCtrl
 class window.EditTopicCtrl extends window.TopicFormCtrl
     @$inject: TopicFormCtrl.$inject.concat ['topic']
-    constructor: (@scope, @state, @TopicsFactory, @Page, @topic)->
+    constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @topic)->
         super
         @setEditingMode()
         @scope.topic = @topic
         @scope.saved = no
-        @scope.$on 'topic:updated', =>
+        @scope.$on @EVENTS.topic.user_updated, =>
             @scope.saved = no
         @Page.loading false
         @Page.title "Settings of #{@topic.title}"
@@ -17,7 +17,7 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
 
     selectSkeleton: (skeleton)=>
         @scope.selected_skeleton = skeleton
-        @scope.$broadcast @EVENTS.skeleton_selected
+        @scope.$broadcast @EVENTS.skeleton.selected
 
     isSelected: (skeleton)=>
         return false unless @scope.selected_skeleton?

@@ -1,9 +1,5 @@
 #=require TopicFormCtrl
 class window.CreateTopicCtrl extends window.TopicFormCtrl
-    EVENTS:
-        skeleton_selected: 'skeleton:selected'
-        trigger_scroll: 'scrollTo:trigger'
-
     @resolve:
         skeletons: ($state, $q, Page, TopicSkeleton)->
             notFound = ->
@@ -23,11 +19,11 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
             # Return a deffered object
             deferred.promise
 
-    @$inject: ['$scope', '$state', 'TopicsFactory', 'Page', '$rootScope', '$timeout', '$location', 'skeletons']
+    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location', 'skeletons']
 
     # Note: The 4 first parameters need to stay in that order if we want the
     # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
-    constructor: (@scope, @state, @TopicsFactory, @Page, @rootScope, @timeout, @location, skeletons)->
+    constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @timeout, @location, skeletons)->
         super
         @setCreatingMode()
         @scope.skeletons = skeletons
@@ -41,7 +37,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
 
         @Page.title "Create a new investigation"
         @Page.loading no
-        @scope.$on @EVENTS.skeleton_selected, @onSkeletonSelected
+        @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
 
     # nav & scope methods
     goToPlans: =>
@@ -49,7 +45,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
 
     selectSkeleton: (skeleton)=>
         @scope.selected_skeleton = skeleton
-        @scope.$broadcast @EVENTS.skeleton_selected
+        @scope.$broadcast @EVENTS.skeleton.selected
 
     isSelected: (skeleton)=>
         return false unless @scope.selected_skeleton?
@@ -67,7 +63,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         # Angular scroll
         @location.search({scrollTo: 'topic-form'})
         @timeout(=>
-                @rootScope.$broadcast @EVENTS.trigger_scroll
+                @rootScope.$broadcast @EVENTS.trigger.scroll
             , 250
         )
 
@@ -75,6 +71,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
     create: ()=>
         @scope.loading = yes
         @TopicsFactory.post(@scope.topic, (topic)=>
+            @rootScope.$broadcast @EVENTS.topic.created
             @scope.loading = no
             @state.go 'user-topic',
                 username: topic.author.username

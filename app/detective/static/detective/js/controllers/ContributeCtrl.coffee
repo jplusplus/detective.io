@@ -1,8 +1,8 @@
 class window.ContributeCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'Page', 'User', 'topic', 'forms', 'UtilsFactory']
+    @$inject: ['$scope', '$modal', '$state', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'Page', 'User', 'topic', 'forms', 'UtilsFactory']
 
-    constructor: (@scope, @modal, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @Page, @User, topic, @forms, @UtilsFactory)->
+    constructor: (@scope, @modal, @state, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @Page, @User, topic, @forms, @UtilsFactory)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading false
@@ -22,6 +22,7 @@ class window.ContributeCtrl
         @scope.removeRelated       = @removeRelated
         @scope.replaceIndividual   = @replaceIndividual
         @scope.topicResources      = @topicResources
+        @scope.seeDetails          = @seeDetails
         @scope.scrollTo            = @scrollTo
         @scope.setNewIndividual    = @setNewIndividual
         @scope.showKickStart       = @showKickStart
@@ -212,6 +213,19 @@ class window.ContributeCtrl
         permalink: =>
             return false unless @fields.id? and @scope.topic
             return "/#{@scope.username}/#{@scope.topic}/#{@type}/#{@fields.id}"
+
+        hasSrefOptions: =>
+            @fields.id? and @scope.topic?
+
+        srefOptions: =>
+            return false unless @fields.id and @scope.topic
+            return {
+                username: @scope.username
+                topic   : @scope.topic
+                type    : @type
+                id      : @fields.id
+            }
+
 
         # Event when fields changed
         update: (data)=>
@@ -542,6 +556,9 @@ class window.ContributeCtrl
         # Add it to the list using @scope.new
         # and save the form a first time
         @scope.addIndividual(true, form).save()
+
+    seeDetails: (individual)=>
+        @state.go 'user-topic-detail', individual.srefOptions()
 
     # Change the scrollIdx to scroll to the given individual
     scrollTo: (individual)=>

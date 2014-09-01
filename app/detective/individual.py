@@ -502,7 +502,7 @@ class IndividualResource(ModelResource):
         try:
             node = model.objects.get(id=kwargs["pk"])
         except ObjectDoesNotExist:
-            raise Http404("Sorry, unkown node.")
+            raise Http404("Sorry, unknown node.")
         # Parse only body string
         body = json.loads(request.body) if type(request.body) is str else request.body
         # Copy data to allow dictionary resizing
@@ -533,12 +533,31 @@ class IndividualResource(ModelResource):
                             # Get the related object
                             try:
                                 related = related_model.objects.get(id=rel["id"])
-                                # Creates the relationship between the two objects
-                                attr.add(related)
                             except ObjectDoesNotExist:
                                 del data[field][idx]
                                 # Too bad! Go to the next related object
                                 continue
+                            else:
+                                # Creates the relationship between the two objects
+                                attr.add(related)
+                                # Update links from properties to relationships
+                                # model that manages properties
+                                though = request.current_topic.get_rules().model(self.get_model()).field(field).get("through")
+                                try:
+                                    properties = though.objects.get(_endnodes=[int(kwargs['pk']), rel["id"]])
+                                except ObjectDoesNotExist:
+                                    pass
+                                else:
+                                    # save to update the relationships
+                                    node.save()
+                                    rel_type = self.get_model_field(field).rel_type
+                                    # retrieve from node all the `field` relationship
+                                    new_relationships = node.node.relationships.all(types=[rel_type]) # after a node.save()
+                                    relationship = new_relationships.next()
+                                    if relationship:
+                                        # update the link between properties and relationship
+                                        properties._relationship = relationship.id
+                                        properties.save()
                 # It's a literal value and not the ID
                 elif field != 'id':
                     field_prop = self.get_model_field(field)._property
@@ -575,10 +594,10 @@ class IndividualResource(ModelResource):
 
     def get_relationships(self, request, **kwargs):
         # Extract node id from given node uri
-        node_id = lambda uri: re.search(r'(\d+)$', uri).group(1)
+        def node_id(uri)       : return re.search(r'(\d+)$', uri).group(1)
         # Get the end of the given relationship
-        rel_from  = lambda rel, side: node_id(rel.__dict__["_dic"][side])
-        connected = lambda rel, idx: rel_from(rel, "end") == idx or rel_from(rel, "start") == idx
+        def rel_from(rel, side): return node_id(rel.__dict__["_dic"][side])
+        def connected(rel, idx): return rel_from(rel, "end") == idx or rel_from(rel, "start") == idx
 
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)

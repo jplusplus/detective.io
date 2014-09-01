@@ -14,7 +14,7 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
             QUOTE_DURATION = 300
             QUOTE_COUNT = 3
             QUOTE_SHOW = opacity: 1, marginTop: 0
-            QUOTE_HIDE = opacity: 0, marginTop: -50
+            QUOTE_HIDE = opacity: 0, marginTop: 50
             # Entering closure function
             enter = (index)->->
                 # Enter into an angular digest
@@ -24,7 +24,7 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
             # Leaving closure function
             leave = (index)->->
                 # Hide the selected quote
-                TweenMax.to(".home__tour__quotes__single--n#{index}", 0.5, QUOTE_HIDE)
+                TweenMax.fromTo(".home__tour__quotes__single--n#{index}", 0.5, QUOTE_SHOW, QUOTE_HIDE)
             # Init scrollmagic controller
             controller = new ScrollMagic()
             # Activate scrolling animation

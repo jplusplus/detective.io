@@ -3,13 +3,15 @@ angular.module("detective.service").factory "Auth", [
     "$q",
     "$rootScope",
     "User",
-    ($http, $q, $rootScope, User)->
+    'constants.events'
+    ($http, $q, $rootScope, User, EVENTS)->
         new class Auth
             constructor: ->
                 # Watch current token
-                $rootScope.$on "user:login", @load
+                $rootScope.$on EVENTS.user.login, @load
+                $rootScope.$on EVENTS.topic.created, @load
                 # User already logged in
-                $rootScope.$broadcast "user:login" if @isAuthenticated()
+                $rootScope.$broadcast EVENTS.user.login if @isAuthenticated()
 
             load: ->
                 deferred = $q.defer()
@@ -41,7 +43,7 @@ angular.module("detective.service").factory "Auth", [
                             username    : data.username
                             permissions : []
                         # Propagate login
-                        $rootScope.$broadcast "user:login", User
+                        $rootScope.$broadcast EVENTS.user.login, User
                     return response
                 )
 
@@ -57,7 +59,7 @@ angular.module("detective.service").factory "Auth", [
                             username   : null
                             permissions: []
                         # Propagate logout
-                        $rootScope.$broadcast "user:logout", User
+                        $rootScope.$broadcast EVENTS.user.logout, User
                     return response
                 )
 

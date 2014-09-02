@@ -48,6 +48,23 @@ class window.UserCtrl
         @scope.loading = false
         @scope.logout  = @logout
         @scope.signup  = @signup
+
+        @scope_vars = ['username', 'password', 'password2', 'email', 'terms']
+
+        # add watch for scope values and set them as not submitted if value
+        # changes
+        angular.forEach @scope_vars, (name)=>
+            @scope.$watch name, =>
+                @scope["#{name}Submitted"] = false
+                @scope.submitted = false
+
+        @scope.$watch 'submitted', (v)=>
+            return unless v
+            angular.forEach @scope_vars, (name)=>
+                @scope["#{name}Submitted"] = true
+
+
+
         @scope.resetPassword = @resetPassword
         @scope.resetPasswordConfirm = @resetPasswordConfirm
         # Set page title with no title-case
@@ -62,6 +79,7 @@ class window.UserCtrl
             @Page.title "Enter a new password", false
 
         @Page.loading no
+
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods

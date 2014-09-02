@@ -325,6 +325,7 @@ class SummaryResource(Resource):
             raise Exception("Missing 'q' parameter")
 
         query        = request.GET["q"]
+        query        = query.strip()
         # Find the kown match for the given query
         matches      = self.find_matches(query)
         # Build and returns a list of proposal
@@ -529,7 +530,6 @@ class SummaryResource(Resource):
         subjects        = []
         objects         = []
         propositions    = []
-        ending_tokens   = ""
         searched_tokens = set()
         # Picks candidates for subjects and predicates
         for idx, match in enumerate(matches):
@@ -539,7 +539,7 @@ class SummaryResource(Resource):
             # True when the current token is the last of the series
             is_last_token = query.endswith(token)
             # Objects are detected when they start and end by double quotes
-            if  token.startswith('"') and token.endswith('"'):
+            if token.startswith('"') and token.endswith('"'):
                 # Remove the quote from the token
                 token = token.replace('"', '')
                 # Store the token as an object
@@ -553,10 +553,11 @@ class SummaryResource(Resource):
                     searched_tokens.add(token)
                     # We found some result
                     if len(entities): objects += entities
-                # Save every tokens until the last one
-                if not is_last_token: ending_tokens = token
-                # We reach the end
-                else: objects.append( ending_tokens )
+
+
+        # Only keep predicates that concern our subjects
+        subject_names = set([subject['name'] for subject in subjects])
+        predicates = filter(lambda predicate: predicate['subject'] in subject_names, predicates)
 
         # We find some subjects
         if len(subjects) and not len(predicates):

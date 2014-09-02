@@ -216,6 +216,8 @@ class TopicResource(ModelResource):
             # No image available
             except InvalidImageFormatError:
                 bundle.data['thumbnail'] = None
+        else:
+            bundle.data['thumbnail'] = None
 
         for m in bundle.obj.get_models():
             try:

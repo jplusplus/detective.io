@@ -141,6 +141,7 @@ angular.module('detective.config').config [
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
                 auth: true
+                owner: true
             )
             .state('user-topic-delete',
                 url: "/:username/:topic/delete/"
@@ -149,6 +150,7 @@ angular.module('detective.config').config [
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
                 auth: true
+                owner: true
             )
             .state('global-graph-navigation',
                 url: "/:username/:topic/graph/"

@@ -198,6 +198,21 @@ class ApiTestCase(ResourceTestCase):
         for perm in user_permissions:
             self.assertTrue(perm in permissions)
 
+    def topic_to_dict(self, topic):
+        return {
+            'description': topic.description,
+            'title': topic.title,
+            'slug': topic.slug,
+            'ontology_as_json': topic.ontology_as_json,
+            'ontology_as_owl': topic.ontology_as_owl,
+            'ontology_as_mod': topic.ontology_as_mod,
+            'about': topic.about,
+            'background': topic.background,
+            'public': topic.public,
+            'featured': topic.featured,
+            'author': topic.author
+        }
+
 
 class TopicApiTestCase(ApiTestCase):
 
@@ -906,20 +921,6 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpOK(resp)
 
     def test_topic_update(self):
-        def topic_to_dict(topic):
-            return {
-                'description': topic.description,
-                'title': topic.title,
-                'slug': topic.slug,
-                'ontology_as_json': topic.ontology_as_json,
-                'ontology_as_owl': topic.ontology_as_owl,
-                'ontology_as_mod': topic.ontology_as_mod,
-                'about': topic.about,
-                'background': topic.background,
-                'public': topic.public,
-                'featured': topic.featured,
-                'author': topic.author
-            }
         topic = Topic.objects.get(slug='test-topic')
         topic.author = self.contrib_user
         topic.save()
@@ -933,6 +934,40 @@ class TopicApiTestCase(ApiTestCase):
         )
         self.assertHttpOK(resp)
 
+    def test_topic_patch_empty_background(self):
+        # Use Case: we want to patch a topic with an empty background to remove
+        # it.
+        # Excepted: updated topic should not have any background
+        topic = Topic.objects.get(slug='test-topic')
+        data = { 'background': None }
+        resp  = self.api_client.patch(
+            '/api/detective/common/v1/topic/{pk}/'.format(pk=topic.pk),
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        updated_topic = Topic.objects.get(slug='test-topic')
+        # Accessing url attribute on topic.background will cause an error if no
+        # file is related to this background, which is what we want
+        self.assertRaises(ValueError, lambda t: t.background.url, updated_topic)
+
+    def test_topic_update_empty_background(self):
+        # Use Case: we want to patch a topic with an empty background to remove
+        # it.
+        # Excepted: updated topic should not have any background
+        topic = Topic.objects.get(slug='test-topic')
+        data  = self.topic_to_dict(topic)
+        data['background'] =  None
+        resp  = self.api_client.put(
+            '/api/detective/common/v1/topic/{pk}/'.format(pk=topic.pk),
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        updated_topic = Topic.objects.get(slug='test-topic')
+        # Accessing url attribute on topic.background will cause an error if no
+        # file is related to this background, which is what we want
+        self.assertRaises(ValueError, lambda t: t.background.url, updated_topic)
 
 
 class TopicSkeletonApiTestCase(ApiTestCase):

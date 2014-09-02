@@ -10,7 +10,7 @@
         "ontology_as_owl": null,
         "ontology_as_mod": "testtopic",
         "about": "",
-        "background": "",
+        "background": "topics-skeletons/supply-chain.jpg",
         "public": true,
         "featured": true
     }

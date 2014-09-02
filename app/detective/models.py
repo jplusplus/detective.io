@@ -227,7 +227,6 @@ class Topic(models.Model):
     def module(self):
         return self.ontology_as_mod
 
-    @property
     def entities_count(self):
         """
 
@@ -595,7 +594,7 @@ class DetectiveProfileUser(models.Model):
     def topics_max   (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_investigation"]
     def nodes_max    (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_entities"]
     # NOTE: Very expensive if cache is disabled
-    def nodes_count  (self): return dict([(topic.slug, topic.entities_count) for topic in self.user.topic_set.all()])
+    def nodes_count  (self): return dict([(topic.slug, topic.entities_count()) for topic in self.user.topic_set.all()])
 
 # -----------------------------------------------------------------------------
 #

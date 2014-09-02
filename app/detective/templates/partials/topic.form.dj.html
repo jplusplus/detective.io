@@ -63,17 +63,14 @@
             <div class="row form-group">
                 <div class="col-sm-3 form-label top05">
                     <label for="id_topic_description">Subtitle</label>
-                    <p class="help-block">
-                        max. 200 char.
-                    </p
->                </div>
+                </div>
                 <div class="col-sm-6">
-                    <input id="id_topic_description"
+                    <div  id="id_topic_description"
+                           text-angular
                            name="description"
+                           class="short-text"
                            ng-disabled="loading"
-                           class="form-control"
-                           ng-model="topic.description"
-                           ng-maxlenght="200">
+                           ng-model="topic.description"></div>
                 </div>
             </div>
             <!-- Topic background field -->
@@ -127,6 +124,7 @@
                 <div class="col-sm-6">
                     <div text-angular
                          name="about"
+                         class="long-text"
                          ng-disabled="loading"
                          ng-model="topic.about"
                          id="id_topic_description"></div>

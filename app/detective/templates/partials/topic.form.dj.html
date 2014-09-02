@@ -65,8 +65,8 @@
                     <label for="id_topic_description">Subtitle</label>
                     <p class="help-block">
                         max. 200 char.
-                    </p>
-                </div>
+                    </p
+>                </div>
                 <div class="col-sm-6">
                     <input id="id_topic_description"
                            name="description"
@@ -83,11 +83,9 @@
                 </div>
                 <div class="col-sm-6">
                   <span class="text-disabled" ng-if="!!!topic.background">None</span>
-                  <a ng-if="topic.background"
+                  <img ng-if="topic.background"
                      title="Cover picture of [[ topic.title ]]"
-                     ng-href="[[topic.background]]">
-                    [[topic.background]]
-                  </a>
+                     ng-src="[[topic.thumbnail.medium]]"/>
                 </div>
                 <a ng-if="topic.background" class="col-sm-1" ng-click="deleteTopicBackground()">Remove this picture&nbsp;<i class="fa fa-close"></i></a>
             </div>

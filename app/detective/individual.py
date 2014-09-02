@@ -520,11 +520,9 @@ class IndividualResource(ModelResource):
                 # It's a relationship
                 if hasattr(attr, "_rel"):
                     related_model = attr._rel.relationship.target_model
-                    # Clean the field to avoid duplicates
-                    attr.clear()
                     # Load the json-formated relationships
                     data[field] = rels = value
-                    # For each relation...
+                    # For each relationship...
                     for idx, rel in enumerate(rels):
                         if type(rel) in [str, int]:
                             rel = dict(id=rel)
@@ -538,26 +536,15 @@ class IndividualResource(ModelResource):
                                 # Too bad! Go to the next related object
                                 continue
                             else:
-                                # Creates the relationship between the two objects
+                                # skip for existing relationships
+                                if any(r.id == rel["id"] for r in attr.all()):
+                                    continue
                                 attr.add(related)
-                                # Update links from properties to relationships
-                                # model that manages properties
-                                though = request.current_topic.get_rules().model(self.get_model()).field(field).get("through")
-                                try:
-                                    properties = though.objects.get(_endnodes=[int(kwargs['pk']), rel["id"]])
-                                except ObjectDoesNotExist:
-                                    pass
-                                else:
-                                    # save to update the relationships
-                                    node.save()
-                                    rel_type = self.get_model_field(field).rel_type
-                                    # retrieve from node all the `field` relationship
-                                    new_relationships = node.node.relationships.all(types=[rel_type]) # after a node.save()
-                                    relationship = new_relationships.next()
-                                    if relationship:
-                                        # update the link between properties and relationship
-                                        properties._relationship = relationship.id
-                                        properties.save()
+                    # removing unused relationship
+                    rel_type = self.get_model_field(field).rel_type
+                    for relationship in node.node.relationships.all(types=[rel_type]):
+                        if relationship.end.id not in rels:
+                            relationship.delete()
                 # It's a literal value and not the ID
                 elif field != 'id':
                     field_prop = self.get_model_field(field)._property

@@ -37,7 +37,8 @@
     }
 
     &__front {
-        background:@brand-tertiary;
+        background:center center no-repeat url("https://s3.amazonaws.com/ooomf-com-files/OSASuBX1SGu4kb3ozvne_IMG_1088.jpg");
+        background-size:cover;
         color:#fff;
         padding-top:100px;
         overflow:hidden;
@@ -64,17 +65,6 @@
             }
         }
 
-        &:after {
-            content:"";
-            width:100%;
-            height:200%;
-            position:absolute;
-            top:0;
-            left:50%;
-            z-index:1;
-            background:fade(#fff, 10%);
-            .rotate(25deg);
-        }
 
         h1 {
 
@@ -123,15 +113,31 @@
         font-size:200%;
         font-family: @headings-font-family;
         font-weight:300;
+
+        &__content p {
+            padding:50px;
+        }
     }
 
     &__quotes {
         padding:40px 0;
-        background: @brand-secondary;
-        color: contrast(@brand-secondary);
         position:relative;
         overflow:hidden;
         height: 650px;
+        color: contrast(@brand-tertiary);
+        background:@brand-tertiary;
+
+        &:after {
+            content:"";
+            width:100%;
+            height:200%;
+            position:absolute;
+            top:0;
+            left:50%;
+            z-index:1;
+            background:fade(#fff, 10%);
+            .rotate(25deg);
+        }
 
         &:after {
             content:"";
@@ -192,6 +198,10 @@
             // Reset by scrollmagic
             margin-top: 50px;
             opacity:0;
+
+            @media (max-width: @screen-sm-max) {
+                width:100%;
+            }
         }
     }
 
@@ -200,6 +210,11 @@
         height: 600px;
         overflow: hidden;
         background: white;
+
+
+        @media (max-width: @screen-sm-max) {
+            height:auto;
+        }
 
         &__ipad {
             position:relative;
@@ -229,7 +244,15 @@
 
             &:nth-child(2),
             &:nth-child(4) {
-                border-left:0;
+                border-left-width:0;
+            }
+
+            @media (max-width: @screen-sm-max) {
+                margin:20px;
+                &:nth-child(2),
+                &:nth-child(4) {
+                    border-left-width:1px;
+                }
             }
 
             &__name {

@@ -47,7 +47,16 @@
 
     <div class="home__tour__quotes home__tour__screen">
         <div class="container">
-            <img src="{% static 'detective/img/tour-iphone.png' %}" class="home__tour__quotes__iphone" />
+            <div class="home__tour__quotes__iphone">
+                <img src="{% static 'detective/img/tour-iphone.png' %}" class="home__tour__quotes__iphone" />
+                <div class="home__tour__quotes__iphone__wrapper">
+                    <div class="home__tour__quotes__iphone__screens">
+                        <img src="{% static 'detective/img/tour/quote-0.png' %}" class="home__tour__quotes__iphone__screens__single" />
+                        <img src="{% static 'detective/img/tour/quote-1.png' %}" class="home__tour__quotes__iphone__screens__single" />
+                        <img src="{% static 'detective/img/tour/quote-2.png' %}" class="home__tour__quotes__iphone__screens__single" />
+                    </div>
+                </div>
+            </div>
             <div class="home__tour__quotes__single home__tour__quotes__single--n0" data-level="1">
                 <h3 class="home__tour__quotes__single__title">
                     "Like putting a thousand-piece puzzle together"
@@ -156,7 +165,7 @@
                         No custom data schemes
                     </div>
                     <div class="home__tour__pricing__plan__subscribe">
-                        <a class="btn btn-lg btn-default">
+                        <a class="btn btn-lg btn-stroke">
                             Subscribe
                         </a>
                     </div>
@@ -184,7 +193,7 @@
                         <b>1</b> custom data schemes
                     </div>
                     <div class="home__tour__pricing__plan__subscribe">
-                        <a class="btn btn-lg btn-stroke">
+                        <a class="btn btn-lg btn-default">
                             Subscribe
                         </a>
                     </div>

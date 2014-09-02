@@ -127,6 +127,7 @@
         color: contrast(@brand-secondary);
         position:relative;
         overflow:hidden;
+        height: 650px;
 
         &:after {
             content:"";
@@ -135,6 +136,7 @@
             position:absolute;
             top:0;
             left:-50%;
+            z-index:10;
             background:fade(#000, 10%);
             .rotate(-25deg);
         }
@@ -142,6 +144,37 @@
         .container {
             position:relative;
             height: 600px;
+        }
+
+        &__iphone {
+            z-index:20;
+            position:relative;
+            float:left;
+
+            &__wrapper {
+                z-index:25;
+                position:absolute;
+                top:14%;
+                left:8%;
+                width:290px;
+                overflow: hidden;
+            }
+
+            &__screens {
+                position:relative;
+                width:290px*3px;
+                bottom:0;
+                white-space: nowrap;
+                word-spacing: 0;
+                letter-spacing: 0;
+
+                &__single {
+                    float:left;
+                    margin:0;
+                    width:290px;
+                    display: inline-block;
+                }
+            }
         }
 
         &__single {

@@ -21,10 +21,15 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
                 scope.$apply ->
                     # Update the parent scope attribute
                     angular.extend scope, tracker: index
+            # Entering close for quote
+            enterQuote = (index)->->
+                $(".home__tour__quotes__iphone__wrapper").animate
+                    # 290 is the size of each step in this wrapper
+                    scrollLeft: 290*index
             # Leaving closure function
             leave = (index)->->
                 # Hide the selected quote
-                TweenMax.fromTo(".home__tour__quotes__single--n#{index}", 0.5, QUOTE_SHOW, QUOTE_HIDE)
+                TweenMax.fromTo(".home__tour__quotes__single:eq(#{index})", 0.5, QUOTE_SHOW, QUOTE_HIDE)
             # Init scrollmagic controller
             controller = new ScrollMagic()
             # Activate scrolling animation
@@ -66,10 +71,11 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
                     .duration(QUOTE_DURATION)
                     .offset((n-1) * QUOTE_DURATION)
                     .setTween(
-                        TweenMax.to(".home__tour__quotes__single--n#{n}", 0.5, QUOTE_SHOW)
+                        TweenMax.to(".home__tour__quotes__single:eq(#{n})", 0.5, QUOTE_SHOW)
                     )
                     .addTo(controller)
                     .on("enter", enter 1+n)
+                    .on("enter", enterQuote n)
                     .on("leave", leave n)
 
             # ──────────────────────────────────────────────────────────────────────

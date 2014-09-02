@@ -268,6 +268,7 @@ class Topic(models.Model):
         _out = []
         for model in self.get_models():
             for field in [f for f in utils.get_model_fields(model) if f['type'].lower() == 'relationship']:
+                _out += [{'name': field['name'], 'label': field['verbose_name'], 'subject': model._meta.object_name}]
                 if "search_terms" in field["rules"]:
                     _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
         return _out + [ output(rs) for rs in terms ]

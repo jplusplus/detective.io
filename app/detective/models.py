@@ -451,7 +451,7 @@ class TopicFactory:
             topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton)
 
         # if no background is provided we inject skeleton's (if skeleton is passed)
-        if not kwargs.get('background', None) and not background_url and topic_skeleton:
+        if not kwargs.has_key('background') and not background_url and topic_skeleton:
             kwargs['background'] = topic_skeleton.picture
             about = kwargs.get('about', '')
             if about != '':
@@ -461,6 +461,7 @@ class TopicFactory:
                 credit=topic_skeleton.picture_credits
             )
             kwargs['about'] = about
+
 
         if background_url:
             import urllib2, os

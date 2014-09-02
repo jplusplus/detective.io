@@ -924,7 +924,7 @@ class TopicApiTestCase(ApiTestCase):
         topic = Topic.objects.get(slug='test-topic')
         topic.author = self.contrib_user
         topic.save()
-        data  = topic_to_dict(topic)
+        data  = self.topic_to_dict(topic)
         data['about'] = 'Changed'
         resp  = self.api_client.put(
             '/api/detective/common/v1/topic/{pk}/'.format(pk=topic.pk),

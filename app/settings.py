@@ -216,6 +216,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # One-week activation window
 ACCOUNT_ACTIVATION_DAYS = 7
+# Send or not an activation email
+ACCOUNT_ACTIVATION_ENABLED = False
 
 # MemCachier configuration took from https://devcenter.heroku.com/articles/memcachier#django
 def get_cache():

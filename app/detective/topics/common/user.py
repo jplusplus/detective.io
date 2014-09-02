@@ -3,6 +3,7 @@
 from .errors                      import *
 from .message                     import Recover
 from app.detective.models         import Topic, TopicToken, DetectiveProfileUser
+from django.conf                  import settings
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User, Group
@@ -189,10 +190,14 @@ class UserResource(ModelResource):
                 except TopicToken.DoesNotExist:
                     # Failed silently if the token is unkown
                     pass
-            # Send activation key by email
-            activation_key = self.get_activation_key(user.username)
-            rp = RegistrationProfile.objects.create(user=user, activation_key=activation_key)
-            rp.send_activation_email( RequestSite(request) )
+            # Could we activate the new account by email?
+            if settings.ACCOUNT_ACTIVATION_ENABLED:
+                # Creates the activation key
+                activation_key = self.get_activation_key(user.username)
+                # Create the regisration profile
+                rp = RegistrationProfile.objects.create(user=user, activation_key=activation_key)
+                # Send the activation email
+                rp.send_activation_email( RequestSite(request) )
             # Output the answer
             return http.HttpCreated()
         except MalformedRequestError as e:

@@ -21,8 +21,8 @@ class window.IndividualSearchCtrl extends window.IndividualListCtrl
         @Individual.get {type: "summary", id: "syntax"}, (d)=>
             @scope.syntax = d
             # Merge the two predicates array
-            @scope.syntax.predicates = d.predicate.literal.concat( d.predicate.relationship )
-        # Watch query change to reload the search
+            @scope.syntax.predicates = _.map (_.groupBy (d.predicate.literal.concat d.predicate.relationship), 'name'), (a) => a[0]
+       # Watch query change to reload the search
         @scope.search = @search
 
     search: =>

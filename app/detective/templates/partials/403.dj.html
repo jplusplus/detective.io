@@ -1,10 +1,22 @@
 <div class="container">
-    <h2>Sure you're logged in?</h2>
-    <p class="lead">
-        Go directly to <a href="/login">login</a> or <a href="/signup">signup</a> for free. 
-        <br />
-        You can also head to the <a href="/">Dashboard</a> to see your open investigations.
-        <br />
-        If you feel something went wrong, you can also <a href="https://github.com/jplusplus/detective.io/issues/new">report an issue</a>.
-    </p>
+    <!-- user is not logged in -->
+    <div ng-if="isUserUnlogged()">
+        <h2>Sure you're logged in?</h2>
+        <p class="lead">
+            Go directly to <a href="/login">login</a> or <a href="/signup">signup</a> for free.
+            <br />
+            You can also head to the <a href="/">Dashboard</a> to see your open investigations.
+            <br />
+            If you feel something went wrong, you can also <a href="https://github.com/jplusplus/detective.io/issues/new">report an issue</a>.
+        </p>
+    </div>
+    <div ng-if="isUserLogged()">
+        <h2>You don't have the right to access this page</h2>
+        <p class="lead">
+            You can only edit and delete investigation that you own. <br/>
+            You can head to the <a href="/">Dashboard</a> to see your open investigations.
+            <br />
+            If you feel something went wrong, you can also <a href="https://github.com/jplusplus/detective.io/issues/new">report an issue</a>.
+        </p>
+    </div>
 </div>

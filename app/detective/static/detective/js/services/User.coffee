@@ -32,6 +32,9 @@ angular.module('detective.service').factory('User', ['$cookies', '$rootScope', (
     sdo.owns = (topic)->
         sdo.id is topic.author.id
 
+    sdo.isLogged = ->
+        sdo.is_logged
+
     # Set user's values
     sdo.set(
         # Create basic user using cookies

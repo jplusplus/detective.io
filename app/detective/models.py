@@ -81,7 +81,7 @@ class Topic(models.Model):
     skeleton_title   = models.CharField(max_length=250, default='No skeleton')
     # Value will be set for this field if it's blank
     slug             = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
-    description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
+    description      = HTMLField(null=True, blank=True, verbose_name='subtitle', help_text="A short description of what is your topic.")
     about            = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public           = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
     featured         = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)

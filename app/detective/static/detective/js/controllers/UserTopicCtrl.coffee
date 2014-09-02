@@ -24,8 +24,13 @@ class window.UserTopicCtrl
                     # Stop if it's an unkown topic
                     unless data.objects and data.objects.length
                         return do (if (do User.hasReadPermission) then notFound else forbidden)
+                    topic = data.objects[0]
+                    $state.transition.then (newState)->
+                        if newState.owner and not (User.is_logged and User.owns(topic))
+                            forbidden()
+
                     # Resolve the deffered result
-                    deferred.resolve(data.objects[0])
+                    deferred.resolve(topic)
             # Reject now
             else return notFound()
             # Return a deffered object

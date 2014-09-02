@@ -737,7 +737,7 @@ class TopicApiTestCase(ApiTestCase):
             'model_id'   : self.jpp.id,
             'model_name' : 'organization',
             'patch_data' : data,
-            'skip_auth'   : True,
+            'skip_auth'  : True,
         }
         resp = self.patch_individual(**args)
         self.assertHttpUnauthorized(resp)
@@ -824,6 +824,21 @@ class TopicApiTestCase(ApiTestCase):
         pilule2 = Pill.objects.create(name='pilule2')
         mol1    = Molecule.objects.create(name="mol1")
         mol2    = Molecule.objects.create(name="mol2")
+        mol3_wo_infos = Molecule.objects.create(name="mol3")
+        mol4_wo_infos = Molecule.objects.create(name="mol4")
+        # patch pilule1 to add mol4 as a molecule
+        patch_pilule_and_mols(pilule1.id, [mol1.id, mol4_wo_infos.id])
+        # patch pilule2 to add mol1 as a molecule
+        patch_pilule_and_mols(pilule2.id, [mol1.id])
+        # get pilule2-mol1 relation reference
+        relation_id = get_relationship_reference(pilule2.id, mol1.id)["_relationship"]
+        # update relation with quantity
+        relation_args = {
+            "_endnodes"                 : [pilule2.id, mol1.id],
+            "_relationship"             : relation_id,
+            "quantity_(in_milligrams)." : "2010"
+        }
+        PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
         # patch pilule1 to add mol1 as a molecule
         patch_pilule_and_mols(pilule1.id, [mol1.id])
         # get pilule1-mol1 relation reference
@@ -852,24 +867,24 @@ class TopicApiTestCase(ApiTestCase):
             "quantity_(in_milligrams)." : "20"
         }
         PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
-        # patch pilule2 to add mol1 as a molecule
-        patch_pilule_and_mols(pilule2.id, [mol1.id])
-        # get pilule2-mol1 relation reference
-        relation_id = get_relationship_reference(pilule2.id, mol1.id)["_relationship"]
-        # update relation with quantity
-        relation_args = {
-            "_endnodes"                 : [pilule2.id, mol1.id],
-            "_relationship"             : relation_id,
-            "quantity_(in_milligrams)." : "2010"
-        }
-        PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
+        # patch pilule1 to add mol3 as a molecule
+        patch_pilule_and_mols(pilule1.id, [mol1.id, mol3_wo_infos.id])
         # check
         rel_1 = get_relationship_reference(pilule1.id, mol1.id)
         rel_2 = get_relationship_reference(pilule1.id, mol2.id)
-        rel_3 = get_relationship_reference(pilule2.id, mol1.id)
-        self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
-        self.assertEqual(rel_2["quantity_(in_milligrams)."], "20")
-        self.assertEqual(rel_3["quantity_(in_milligrams)."], "2010")
+        rel_3 = get_relationship_reference(pilule1.id, mol3_wo_infos.id)
+        rel_4 = get_relationship_reference(pilule1.id, mol4_wo_infos.id)
+        rel_5 = get_relationship_reference(pilule2.id, mol1.id)
+        self.assertIn(   "quantity_(in_milligrams).", rel_1.keys() , rel_1)
+        self.assertIn(   "quantity_(in_milligrams).", rel_2.keys() , rel_2)
+        self.assertNotIn("quantity_(in_milligrams).", rel_3.keys() , rel_3)
+        self.assertNotIn("quantity_(in_milligrams).", rel_4.keys() , rel_4)
+        self.assertIn(   "quantity_(in_milligrams).", rel_5.keys() , rel_5)
+        self.assertEqual(rel_1["quantity_(in_milligrams)."], "10"  , rel_1)
+        self.assertEqual(rel_2["quantity_(in_milligrams)."], "20"  , rel_2)
+        self.assertTrue(int(rel_3["_relationship"]) > 0            , rel_3)
+        self.assertTrue(int(rel_4["_relationship"]) > 0            , rel_4)
+        self.assertEqual(rel_5["quantity_(in_milligrams)."], "2010", rel_5)
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')

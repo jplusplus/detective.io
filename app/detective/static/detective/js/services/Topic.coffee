@@ -12,6 +12,7 @@ angular.module('detective.service').factory("Topic", [ '$resource', ($resource)-
             url: '/api/detective/common/v1/topic/:id/?'
             method: 'PUT'
         update:
+            url: '/api/detective/common/v1/topic/:id/?'
             method: 'PATCH'
         cachedGet:
             method : 'GET'

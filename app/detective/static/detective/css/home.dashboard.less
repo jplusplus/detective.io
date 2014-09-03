@@ -1,7 +1,6 @@
 .dashboard {
 
 	&__topics {
-
 		&__item {
 			position:relative;
 			display: block;
@@ -60,8 +59,11 @@
 				&, & > *, & a {
 					color: @brand-secondary;
 				}
+				display: table;
 				background: none;
 				padding: 0;
+				// padding-top: 80px;
+				width: 100%;
 				border: 3px @brand-secondary dashed;
 				text-align: center;
 				&:before {
@@ -69,12 +71,17 @@
 				}
 				a {
 					text-decoration: none;
+					display: table-cell;
+					vertical-align: middle;
+
 					h3 {
 						font-size: 22px;
-						line-height: 200px;
 						padding: 0;
 						margin: 0;
 					}
+				}
+				&:after {
+					clear: both;
 				}
 			}
 		}

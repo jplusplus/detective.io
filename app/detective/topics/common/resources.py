@@ -8,6 +8,7 @@ from app.detective.utils              import get_registered_models, get_topics_f
 from app.detective.topics.common.user import UserResource
 from django.conf                      import settings
 from django.conf.urls                 import url
+from django.core.exceptions           import SuspiciousOperation
 from django.core.mail                 import EmailMultiAlternatives
 from django.core.urlresolvers         import reverse
 from django.db                        import IntegrityError
@@ -204,15 +205,19 @@ class TopicResource(ModelResource):
         # Filter model to the one under app.detective.topics
         bundle.data["models"] = []
         if bundle.obj.background:
-            background_url = bundle.obj.background.url
-            media_url = settings.MEDIA_URL
-            # to avoid SuspiciousOperation we remove MEDIA_URL prefix
-            if background_url.startswith(media_url):
-                background_url = background_url.replace(media_url, '')
-
+            background = None
+            try:
+                background = bundle.obj.background.url
+                media_url = settings.MEDIA_URL
+                # to avoid SuspiciousOperation we remove MEDIA_URL prefix
+                if background.startswith(media_url):
+                    background = background.replace(media_url, '')
+            # S3boto raised Suspicious when we access url
+            except SuspiciousOperation:
+                background = bundle.obj.background
             # Create a thumbnail for this topic
             try:
-                thumbnailer = get_thumbnailer(background_url)
+                thumbnailer = get_thumbnailer(background)
                 thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
                 thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
                 bundle.data['thumbnail'] = {

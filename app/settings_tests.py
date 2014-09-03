@@ -20,6 +20,9 @@ INSTALLED_APPS.remove('south')
 INSTALLED_APPS.remove('compressor')
 INSTALLED_APPS.remove('debug_toolbar')
 
+# Enable account activation in order to test it
+ACCOUNT_ACTIVATION_ENABLED = True
+
 MIDDLEWARE_CLASSES = list(MIDDLEWARE_CLASSES)
 MIDDLEWARE_CLASSES.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
 MIDDLEWARE_CLASSES.remove('app.middleware.debug_toolbar.JsonAsHTML')

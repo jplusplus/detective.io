@@ -2,10 +2,10 @@
 
 <div class="home__tour" home-tour tracker="tracker">
 
-    <ul class="list-unstyled home__tour__tracker">
+    <ul class="list-unstyled home__tour__tracker hidden-xs">
         <li ng-repeat="screen in ['tour', 'quote 0', 'quote 1', 'quote 2', 'get ready', 'pricing']">
             <a ng-click="scrollTo($index)" class="home__tour__tracker__screen" ng-class="$index == tracker ? 'home__tour__tracker__screen--active' : ''">
-                <span class="sr-only">Go to[[screen]]</span>
+                <span class="sr-only">Go to [[screen]]</span>
             </a>
         </li>
     </ul>

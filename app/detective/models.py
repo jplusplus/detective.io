@@ -555,6 +555,7 @@ class SearchTerm(models.Model):
                 for f in utils.get_model_fields(model):
                     if f["name"] == self.name:
                         field = f
+            field["rules"]["through"] = None # Yes, this is ugly but this field is creating Pickling errors.
             utils.topic_cache.set(self.topic, cache_key, field)
         return field
 

@@ -445,6 +445,10 @@ class TopicSkeleton(models.Model):
 class TopicFactory:
     @staticmethod
     def get_topic_bundle(**kwargs):
+        background = kwargs.get('background', None)
+        # PITA workaround, can cause blackhole, be careful (#489)
+        if type(background) == type(""):
+            del kwargs['background']
         topic_skeleton = kwargs.get('topic_skeleton', None)
         background_url = kwargs.get('background_url', None)
         if topic_skeleton and not isinstance(topic_skeleton, TopicSkeleton):

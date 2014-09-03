@@ -83,8 +83,10 @@ class TopicAuthorization(ReadOnlyAuthorization):
 
 class TopicSkeletonAuthorization(ReadOnlyAuthorization):
     def read_list(self, object_list, bundle):
-        if bundle.request.user.is_authenticated():
-            return object_list
+        user = bundle.request.user
+        if user.is_authenticated():
+            plan = user.detectiveprofileuser.plan
+            return object_list.filter(target_plans__contains=plan)
         else:
             raise Unauthorized("Only logged user can retrieve skeletons")
 

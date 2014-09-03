@@ -162,6 +162,10 @@
             position:relative;
             float:left;
 
+            &__img {
+                width:335px;
+            }
+
             &__wrapper {
                 z-index:25;
                 position:absolute;
@@ -212,7 +216,6 @@
         overflow: hidden;
         background: white;
 
-
         @media (max-width: @screen-sm-max) {
             height:auto;
         }
@@ -220,6 +223,21 @@
         &__ipad {
             position:relative;
             top:0;
+
+            &:before {
+                content:"";
+                background: url("@{staticPath}img/tour/get-ready.png") center center no-repeat;
+                background-size: 100% auto;
+                position:absolute;
+                top:1.5%;
+                left:12%;
+                right:12%;
+                bottom:0;
+            }
+
+            &__img {
+                width:100%;
+            }
         }
     }
 

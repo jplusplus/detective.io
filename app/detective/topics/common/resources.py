@@ -204,9 +204,14 @@ class TopicResource(ModelResource):
         # Filter model to the one under app.detective.topics
         bundle.data["models"] = []
         if bundle.obj.background:
+            background_url = bundle.obj.background.url
+            # to avoid SuspiciousOperation we remove /public/ prefix
+            if background_url.startswith('/public/'):
+                background_url = background_url.replace('/public/', '')
+
             # Create a thumbnail for this topic
             try:
-                thumbnailer = get_thumbnailer(bundle.obj.background)
+                thumbnailer = get_thumbnailer(background_url)
                 thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
                 thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
                 bundle.data['thumbnail'] = {

@@ -205,9 +205,10 @@ class TopicResource(ModelResource):
         bundle.data["models"] = []
         if bundle.obj.background:
             background_url = bundle.obj.background.url
-            # to avoid SuspiciousOperation we remove /public/ prefix
-            if background_url.startswith('/public/'):
-                background_url = background_url.replace('/public/', '')
+            media_url = settings.MEDIA_URL
+            # to avoid SuspiciousOperation we remove MEDIA_URL prefix
+            if background_url.startswith(media_url):
+                background_url = background_url.replace(media_url, '')
 
             # Create a thumbnail for this topic
             try:

@@ -605,7 +605,7 @@ class SummaryResource(Resource):
                         })
 
         # It might be a classic search
-        for obj in [ obj for obj in objects if 'id' in obj ]:
+        for obj in [ obj for obj in remove_duplicates(objects) if 'id' in obj ]:
             # Build the label
             label = obj.get("name", None)
             propositions.append({

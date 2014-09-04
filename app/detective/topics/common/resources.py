@@ -2,8 +2,7 @@
 from .models                          import *
 from app.detective.exceptions         import UnavailableImage
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
-                                             TopicSkeleton, Article, User, \
-                                             TopicFactory
+                                             TopicSkeleton, Article, User
 from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
 from app.detective.topics.common.user import UserResource
 from django.conf                      import settings
@@ -11,6 +10,8 @@ from django.conf.urls                 import url
 from django.core.exceptions           import SuspiciousOperation
 from django.core.mail                 import EmailMultiAlternatives
 from django.core.urlresolvers         import reverse
+from django.core.files                import File
+from django.core.files.temp           import NamedTemporaryFile
 from django.db                        import IntegrityError
 from django.db.models                 import Q
 from django.http                      import Http404, HttpResponse
@@ -32,6 +33,8 @@ from django.db.models                 import Q
 import copy
 import json
 import re
+import urllib2, os
+from urlparse import urlparse
 
 # Only staff can consult QuoteRequests
 class QuoteRequestAuthorization(ReadOnlyAuthorization):
@@ -90,15 +93,38 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
         else:
             raise Unauthorized("Only logged user can retrieve skeletons")
 
+
+
+TopicValidationErrors = {
+    'background': {
+        'image_unavailable': {
+            'code': 0,
+            'message': "Passed url is unreachable or cause HTTP errors."
+        },
+        'oversized_file': {
+            'code': 1,
+            'message': "Passed url is unreachable or cause HTTP errors."
+        }
+    }
+}
+
 class TopicValidation(Validation):
-    # Ways of improvements: use FormValidation instead of Validation and
-    # relies on model validation instead of this API validation.
-    def is_valid(self, bundle, request=None):
-        errors = super(TopicValidation, self).is_valid(bundle, request)
-        try:
-            TopicFactory.get_topic_bundle(**bundle.data)
-        except UnavailableImage:
-            errors['background_url'] = "Passed url is unreachable or cause HTTP errors."
+
+    def is_valid_background_image(self, bundle, request, errors={}):
+        def get_error_message(code):
+            errors =  TopicValidationErrors['background']
+            for error_key in errors.keys():
+                error = errors[error_key]
+                if error['code'] == code:
+                    return error['message']
+            return None
+
+        background = bundle.data.get('background', None)
+        if type(background) == type(0):
+            errors['background_url'] = get_error_message(background)
+
+
+    def is_valid_topic_title(self, bundle, request, errors={}):
         if request and request.method == 'POST':
             title = bundle.data['title']
             results = Topic.objects.filter(author=request.user, title__iexact=title)
@@ -106,13 +132,26 @@ class TopicValidation(Validation):
                 title = results[0].title
                 errors['title'] = (
                     u"You already have a topic called {title}, "
-                    u"please chose another title").format(title=title)
+                    u"please chose another title"
+                ).format(title=title)
+
+
+    # Ways of improvements: use FormValidation instead of Validation and
+    # relies on model validation instead of this API validation.
+    def is_valid(self, bundle, request=None):
+        errors = super(TopicValidation, self).is_valid(bundle, request)
+        self.is_valid_background_image(bundle, request, errors)
+        self.is_valid_topic_title(bundle, request, errors)
         return errors
 
 class TopicResource(ModelResource):
     author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
-    link               = fields.CharField(attribute='get_absolute_path', readonly=True)
+    link               = fields.CharField(attribute='get_absolute_path',  readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
+    ontology_as_json   = fields.ApiField(blank=True)
+    ontology_as_mod    = fields.ApiField(readonly=True)
+    ontology_as_owl    = fields.ApiField(readonly=True)
+
     class Meta:
         always_return_data = True
         authorization      = TopicAuthorization()
@@ -238,10 +277,61 @@ class TopicResource(ModelResource):
             bundle.data["models"].append(model)
         return bundle
 
-    def hydrate(self, bundle):
+    def download_url(self, url):
+        if url == None:
+            return None
+        try:
+            name = urlparse(url).path.split('/')[-1]
+            tmp_file = NamedTemporaryFile(delete=True)
+            tmp_file.write(urllib2.urlopen(url).read())
+            tmp_file.flush()
+            return File(tmp_file, name)
+        except urllib2.HTTPError:
+            raise UnavailableImage()
+        except urllib2.URLError:
+            raise UnavailableImage()
+
+    def get_skeleton(self, bundle):
+        topic_skeleton = None
+        topic_skeleton_pk = bundle.data.get('topic_skeleton', None)
+        if topic_skeleton_pk:
+            topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton_pk)
+        return topic_skeleton
+
+    def hydrate_author(self, bundle):
         bundle.data['author'] = bundle.request.user
-        if self.is_valid(bundle):
-            bundle.data = TopicFactory.get_topic_bundle(**bundle.data)
+        return bundle
+
+    def hydrate_background(self, bundle):
+        topic_skeleton = self.get_skeleton(bundle)
+        background_url = bundle.data.get('background_url', None)
+        if topic_skeleton and not background_url:
+            bundle.data['background'] = topic_skeleton.picture
+        else:
+            try:
+                bundle.data['background'] = self.download_url(background_url)
+            except UnavailableImage:
+                bundle.data['background'] = TopicValidationErrors['background']['image_unavailable']['code']
+        return bundle
+
+    def hydrate_ontology_as_json(self, bundle):
+        topic_skeleton = self.get_skeleton(bundle)
+        if topic_skeleton:
+            bundle.data['ontology_as_json'] = topic_skeleton.ontology
+        return bundle
+
+    def full_hydrate(self, bundle):
+        bundle = super(TopicResource, self).full_hydrate(bundle)
+        bundle = self.clean_bundle(bundle)
+        return bundle
+
+    def clean_bundle(self, bundle):
+        def clean_bundle_key(key, bundle):
+            if bundle.data.has_key(key):
+                del bundle.data[key]
+            return bundle
+        clean_bundle_key('background_url', bundle)
+        clean_bundle_key('topic_skeleton', bundle)
         return bundle
 
 

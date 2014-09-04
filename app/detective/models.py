@@ -5,8 +5,6 @@ from app.detective.permissions  import create_permissions, remove_permissions
 from django.conf                import settings
 from django.contrib.auth.models import User, Group
 from django.core.cache          import cache
-from django.core.files          import File
-from django.core.files.temp     import NamedTemporaryFile
 from django.core.paginator      import Paginator
 from django.db                  import models
 from django.db.models           import signals
@@ -78,7 +76,7 @@ class Topic(models.Model):
             ('slug','author')
         )
     title            = models.CharField(max_length=250, help_text="Title of your topic.")
-    skeleton_title   = models.CharField(max_length=250, default='No skeleton')
+    skeleton_title   = models.CharField(max_length=250, default='Custom')
     # Value will be set for this field if it's blank
     slug             = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
     description      = HTMLField(null=True, blank=True, verbose_name='subtitle', help_text="A short description of what is your topic.")
@@ -164,6 +162,7 @@ class Topic(models.Model):
         # For automatic slug generation.
         if not self.slug:
             self.slug = slugify(self.title)[:50]
+
         # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
         # Refresh the API
@@ -440,60 +439,6 @@ class TopicSkeleton(models.Model):
     def selected_plans(self):
         plans = re.sub('[\[\]]', '', self.target_plans)
         return plans.split(',')
-
-# utility class to create a topic thanks to a skeleton
-class TopicFactory:
-    @staticmethod
-    def get_topic_bundle(**kwargs):
-        background = kwargs.get('background', None)
-        # PITA workaround, can cause blackhole, be careful (#489)
-        if type(background) == type(""):
-            del kwargs['background']
-        topic_skeleton = kwargs.get('topic_skeleton', None)
-        background_url = kwargs.get('background_url', None)
-        if topic_skeleton and not isinstance(topic_skeleton, TopicSkeleton):
-            topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton)
-
-        # if no background is provided we inject skeleton's (if skeleton is passed)
-        if not kwargs.has_key('background') and not background_url and topic_skeleton:
-            kwargs['background'] = topic_skeleton.picture
-            about = kwargs.get('about', '')
-            if about != '':
-                about = about + "<br/>"
-            about = "{about}{credit}".format(
-                about=about,
-                credit=topic_skeleton.picture_credits
-            )
-            kwargs['about'] = about
-
-
-        if background_url:
-            import urllib2, os
-            from urlparse import urlparse
-            try:
-                name = urlparse(background_url).path.split('/')[-1]
-                img_temp = NamedTemporaryFile(delete=True)
-                img_temp.write(urllib2.urlopen(background_url).read())
-                img_temp.flush()
-
-                kwargs['background'] = File(img_temp, name)
-                del kwargs['background_url']
-            except urllib2.HTTPError:
-                raise UnavailableImage()
-            except urllib2.URLError:
-                raise UnavailableImage()
-
-        if topic_skeleton:
-            # injecting parameters took from skeleton
-            kwargs['ontology_as_json'] = topic_skeleton.ontology
-            kwargs['skeleton_title'] = topic_skeleton.title
-            del kwargs['topic_skeleton']
-        return kwargs
-
-    @staticmethod
-    def create_topic(**kwargs):
-        kwargs = TopicFactory.get_topic_bundle(**kwargs)
-        return Topic.objects.create(**kwargs)
 
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")

@@ -737,7 +737,7 @@ class TopicApiTestCase(ApiTestCase):
             'model_id'   : self.jpp.id,
             'model_name' : 'organization',
             'patch_data' : data,
-            'skip_auth'   : True,
+            'skip_auth'  : True,
         }
         resp = self.patch_individual(**args)
         self.assertHttpUnauthorized(resp)
@@ -790,82 +790,95 @@ class TopicApiTestCase(ApiTestCase):
         resp = self.patch_individual(**args)
         self.assertEqual(resp.status_code in [302, 404], True)
 
-    # NOTE: Fix on going... Coming Soon !
-    # def test_patch_with_composite_relations(self):
-    #     """
+    def test_patch_with_composite_relations(self):
+        """
 
-    #     Test if I can link one entity to many entities without overwritting previous relations
-    #     ref : https://github.com/jplusplus/detective.io/issues/452
-    #     Depends of fixtures/tests_pillen.json
+        Test if I can link one entity to many entities without overwritting previous relations
+        ref : https://github.com/jplusplus/detective.io/issues/452
+        Depends of fixtures/tests_pillen.json
 
-    #     """
-    #     def get_relationship_reference(pilule_id, mol_id):
-    #         resp = self.api_client.get('/api/detective/test-pillen/v1/pill/%d/relationships/molecules_contained/%d/' % (pilule_id, mol_id), follow=True, format='json')
-    #         self.assertValidJSONResponse(resp)
-    #         resp = json.loads(resp.content)
-    #         return resp
+        """
+        def get_relationship_reference(pilule_id, mol_id):
+            resp = self.api_client.get('/api/detective/test-pillen/v1/pill/%d/relationships/molecules_contained/%d/' % (pilule_id, mol_id), follow=True, format='json')
+            self.assertValidJSONResponse(resp)
+            resp = json.loads(resp.content)
+            return resp
 
-    #     def patch_pilule_and_mols(pilule_id, mol_ids=[]):
-    #         patch_args = dict(
-    #             scope      = 'detective/test-pillen',
-    #             model_name = 'pill',
-    #             model_id   = pilule_id,
-    #             patch_data = {"molecules_contained" : mol_ids})
-    #         resp = self.patch_individual(**patch_args)
-    #         self.assertValidJSONResponse(resp)
+        def patch_pilule_and_mols(pilule_id, mol_ids=[]):
+            patch_args = dict(
+                scope      = 'detective/test-pillen',
+                model_name = 'pill',
+                model_id   = pilule_id,
+                patch_data = {"molecules_contained" : [{"id":mol_id} for mol_id in mol_ids]})
+            resp = self.patch_individual(**patch_args)
+            self.assertValidJSONResponse(resp)
 
-    #     topic    = Topic.objects.get(slug='test-pillen')
-    #     models   = topic.get_models_module()
-    #     # get models
-    #     PillMoleculesContainedMoleculeProperties = models.PillMoleculesContainedMoleculeProperties
-    #     Molecule                                 = models.Molecule
-    #     Pill                                     = models.Pill
-    #     # create entities pilule and mol1
-    #     pilule   = Pill.objects.create(name='pilule')
-    #     mol1     = Molecule.objects.create(name="mol1")
-    #     mol2     = Molecule.objects.create(name="mol2")
-    #     # patch pilule to add mol1 as a molecule
-    #     patch_pilule_and_mols(pilule.id, [mol1.id])
-    #     # get pilule-mol1 relation reference
-    #     relation_id = get_relationship_reference(pilule.id, mol1.id)["_relationship"]
-    #     # update relation with quantity
-    #     relation_args = {
-    #         "_endnodes"                 : [pilule.id, mol1.id],
-    #         "_relationship"             : relation_id,
-    #         "quantity_(in_milligrams)." : "10"
-    #     }
-    #     PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
-    #     # check mol1 before new patch
-    #     rel_1 = get_relationship_reference(pilule.id, mol1.id)
-    #     self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
-    #     from pprint import pprint as pp
-    #     print "PillMoleculesContainedMoleculeProperties before patch"
-    #     pp([_.__dict__ for _ in PillMoleculesContainedMoleculeProperties.objects.all()])
-    #     # patch pilule to add mol2 as a molecule
-    #     patch_pilule_and_mols(pilule.id, [mol1.id, mol2.id])
-    #     print "Pill after"
-    #     pp([_.__dict__ for _ in Pill.objects.all()])
-    #     print "Molecule"
-    #     pp([_.__dict__ for _ in Molecule.objects.all()])
-    #     print "PillMoleculesContainedMoleculeProperties"
-    #     pp([_.__dict__ for _ in PillMoleculesContainedMoleculeProperties.objects.all()])
-    #     # check mol1 after new patch
-    #     rel_1 = get_relationship_reference(pilule.id, mol1.id)
-    #     self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
-    #     # get pilule-mol2 relation reference
-    #     relation_id = get_relationship_reference(pilule.id, mol2.id)["_relationship"]
-    #     # update relation with quantity
-    #     relation_args = {
-    #         "_endnodes"                 : [pilule.id, mol2.id],
-    #         "_relationship"             : relation_id,
-    #         "quantity_(in_milligrams)." : "20"
-    #     }
-    #     PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
-    #     # check
-    #     rel_1 = get_relationship_reference(pilule.id, mol1.id)
-    #     rel_2 = get_relationship_reference(pilule.id, mol2.id)
-    #     self.assertEqual(rel_2["quantity_(in_milligrams)."], "20")
-    #     self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
+        def add_properties(pilule_id, molecule_id, property):
+            relation_id   = get_relationship_reference(pilule_id, molecule_id)["_relationship"]
+            relation_args = {
+                "_endnodes"                 : [pilule_id, molecule_id],
+                "_relationship"             : relation_id,
+                "quantity_(in_milligrams)." : property
+            }
+            PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
+            relation = get_relationship_reference(pilule_id, molecule_id)
+            self.assertIn("quantity_(in_milligrams).", relation.keys()        , relation)
+            self.assertEqual(relation["quantity_(in_milligrams)."], property  , relation)
+
+        topic    = Topic.objects.get(slug='test-pillen')
+        models   = topic.get_models_module()
+        # get models
+        PillMoleculesContainedMoleculeProperties = models.PillMoleculesContainedMoleculeProperties
+        Molecule                                 = models.Molecule
+        Pill                                     = models.Pill
+        # create entities
+        pilulea       = Pill    .objects.create(name='pilule A')
+        mola          = Molecule.objects.create(name="molecule A")
+        molb          = Molecule.objects.create(name="molecule B")
+        molc          = Molecule.objects.create(name="molecule C")
+        mold_wo_infos = Molecule.objects.create(name="molecule D")
+        # start to patch
+        patch_pilule_and_mols(pilulea.id, [mola.id])
+        add_properties(pilulea.id, mola.id, "10")
+        # test to remove a relation
+        patch_pilule_and_mols(pilulea.id, [])
+        # check deletion
+        relation = get_relationship_reference(pilulea.id, mola.id)
+        self.assertNotIn("quantity_(in_milligrams).", relation.keys() , relation)
+        self.assertIsNone(relation["_relationship"] , relation)
+        # continue to add more relations
+        def patch_mol_b_c_d():
+            patch_pilule_and_mols(pilulea.id, [molb.id])
+            patch_pilule_and_mols(pilulea.id, [molb.id, molc.id, mold_wo_infos.id])
+            add_properties(pilulea.id, molb.id, "20")
+            add_properties(pilulea.id, molc.id, "30")
+        patch_mol_b_c_d()
+        #remove all again
+        patch_pilule_and_mols(pilulea.id, [])
+        # and create again
+        patch_mol_b_c_d()
+        #check final states
+        relation_pama = get_relationship_reference(pilulea.id, mola.id)
+        relation_pamb = get_relationship_reference(pilulea.id, molb.id)
+        relation_pamc = get_relationship_reference(pilulea.id, molc.id)
+        relation_pamd = get_relationship_reference(pilulea.id, mold_wo_infos.id)
+        # pila-mola
+        self.assertNotIn("quantity_(in_milligrams).", relation_pama.keys() , relation_pama)
+        self.assertIsNone(relation["_relationship"]                        , relation_pama)
+        # pila-molb
+        self.assertIn("quantity_(in_milligrams).", relation_pamb.keys()    , relation_pamb)
+        self.assertEqual(relation_pamb["quantity_(in_milligrams)."], "20"  , relation_pamb)
+        self.assertTrue(int(relation_pamb["_relationship"]) > 0            , relation_pamb)
+        self.assertTrue(relation_pamb["_endnodes"], [pilulea.id, molb.id])
+        # pila-molc
+        self.assertIn("quantity_(in_milligrams).", relation_pamc.keys()    , relation_pamc)
+        self.assertEqual(relation_pamc["quantity_(in_milligrams)."], "30"  , relation_pamc)
+        self.assertTrue(int(relation_pamc["_relationship"]) > 0            , relation_pamc)
+        self.assertTrue(relation_pamc["_endnodes"], [pilulea.id, molc.id])
+        # pila-mold
+        self.assertNotIn("quantity_(in_milligrams).", relation_pamd.keys() , relation_pamd)
+        self.assertTrue(int(relation_pamd["_relationship"]) > 0            , relation_pamd)
+        self.assertTrue(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')

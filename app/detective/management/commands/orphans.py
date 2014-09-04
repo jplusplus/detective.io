@@ -16,13 +16,13 @@ from django.db.models.loading import get_model
 from optparse import make_option
 
 class Command(BaseCommand):
-    help = "Detect orphelins in the graph."    
+    help = "Detect orphans in the graph."    
     option_list = BaseCommand.option_list + (
         make_option('--fix',
             action='store_true',
             dest='fix',
             default=False,
-            help='Delete orphelins'),
+            help='Delete orphans'),
         )
 
     def handle(self, *args, **options):
@@ -32,7 +32,7 @@ class Command(BaseCommand):
             # escape common & energy as usual
             if topic.slug in ["common", "energy"]: continue
             self.stdout.write("Topic: %s" % (topic))
-            orphelins_count = 0
+            orphans_count = 0
             for Model in topic.get_models():
                 fields = utils.get_model_fields(Model)
                 for field in fields:
@@ -45,12 +45,12 @@ class Command(BaseCommand):
                             for info in Properties.objects.all():
                                 if info._relationship not in ids:
                                     self.stdout.write("\t%s is an orphelin property of the model %s. The relation doesn't exist no more." % (info._NodeModel__node, Model.__class__.__name__))
-                                    orphelins_count += 1
+                                    orphans_count += 1
                                     if options["fix"]:
                                         self.stdout.write("\tremoving %s" % (info))
                                         info.delete()
                         except Exception as e:
                             self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))
-            self.stdout.write("\tfound %d orphelins" % (orphelins_count))
+            self.stdout.write("\tfound %d orphans" % (orphans_count))
 
 # EOF

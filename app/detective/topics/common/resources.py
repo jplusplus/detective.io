@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
-from app.detective.exceptions         import UnavailableImage
+from app.detective.exceptions         import UnavailableImage, NotAnImage
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User
 from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
@@ -32,6 +32,7 @@ from django.db.models                 import Q
 
 import copy
 import json
+import magic
 import re
 import urllib2, os
 from urlparse import urlparse
@@ -104,6 +105,10 @@ TopicValidationErrors = {
         'oversized_file': {
             'code': 1,
             'message': "Passed url is unreachable or cause HTTP errors."
+        },
+        'not_an_image': {
+            'code': 2,
+            'message': "Retrieved file is not an image, please check your URL"
         }
     }
 }
@@ -275,6 +280,10 @@ class TopicResource(ModelResource):
         return bundle
 
     def download_url(self, url):
+        def is_image(tmp):
+            mimetype = magic.from_file(tmp.name, True)
+            return mimetype.startswith('image')
+
         if url == None:
             return None
         try:
@@ -282,6 +291,8 @@ class TopicResource(ModelResource):
             tmp_file = NamedTemporaryFile(delete=True)
             tmp_file.write(urllib2.urlopen(url).read())
             tmp_file.flush()
+            if not is_image(tmp_file):
+                raise NotAnImage()
             return File(tmp_file, name)
         except urllib2.HTTPError:
             raise UnavailableImage()
@@ -312,7 +323,9 @@ class TopicResource(ModelResource):
                     bundle.data['background'] = self.download_url(background_url)
                 except UnavailableImage:
                     bundle.data['background'] = TopicValidationErrors['background']['image_unavailable']['code']
-            else:
+                except NotAnImage:
+                    bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
+            elif bundle.data.get('background', None):
                 # we remove from data the previously setted background to avoid
                 # further supsicious operation errors
                 self.clean_bundle_key('background', bundle)
@@ -323,6 +336,8 @@ class TopicResource(ModelResource):
         topic_skeleton = self.get_skeleton(bundle)
         if topic_skeleton:
             bundle.data['ontology_as_json'] = topic_skeleton.ontology
+        else:
+            self.clean_bundle_key('ontology_as_json', bundle)
         return bundle
 
     def full_hydrate(self, bundle):

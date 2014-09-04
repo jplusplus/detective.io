@@ -996,7 +996,7 @@ class TopicApiTestCase(ApiTestCase):
             format='json',
             authentication=self.get_contrib_credentials()
         )
-        self.assertHttpOK(resp)
+        self.assertTrue(resp.status_code in [200, 202])
         updated_topic = Topic.objects.get(slug='test-topic')
         self.assertEqual(updated_topic.title, data['title'])
         self.assertIsNotNone(updated_topic.background)

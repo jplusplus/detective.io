@@ -300,6 +300,8 @@ class TopicResource(ModelResource):
         return bundle
 
     def hydrate_background(self, bundle):
+        # handle background setting from topic skeleton and from background_url
+        # if provided
         topic_skeleton = self.get_skeleton(bundle)
         background_url = bundle.data.get('background_url', None)
         if topic_skeleton and not background_url:
@@ -317,6 +319,7 @@ class TopicResource(ModelResource):
         return bundle
 
     def hydrate_ontology_as_json(self, bundle):
+        # feed ontology_as_json attribute when needed
         topic_skeleton = self.get_skeleton(bundle)
         if topic_skeleton:
             bundle.data['ontology_as_json'] = topic_skeleton.ontology
@@ -328,11 +331,13 @@ class TopicResource(ModelResource):
         return bundle
 
     def clean_bundle_key(self, key, bundle):
+        # safely remove a key from bundle.data dict
         if bundle.data.has_key(key):
             del bundle.data[key]
         return bundle
 
     def clean_bundle(self, bundle):
+        # we remove useless (for topic's model class) keys from bundle
         self.clean_bundle_key('background_url', bundle)
         self.clean_bundle_key('topic_skeleton', bundle)
         return bundle

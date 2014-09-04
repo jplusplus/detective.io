@@ -833,7 +833,6 @@ class TopicApiTestCase(ApiTestCase):
         Pill                                     = models.Pill
         # create entities
         pilulea       = Pill    .objects.create(name='pilule A')
-        piluleb       = Pill    .objects.create(name='pilule B')
         mola          = Molecule.objects.create(name="molecule A")
         molb          = Molecule.objects.create(name="molecule B")
         molc          = Molecule.objects.create(name="molecule C")
@@ -869,12 +868,17 @@ class TopicApiTestCase(ApiTestCase):
         # pila-molb
         self.assertIn("quantity_(in_milligrams).", relation_pamb.keys()    , relation_pamb)
         self.assertEqual(relation_pamb["quantity_(in_milligrams)."], "20"  , relation_pamb)
+        self.assertTrue(int(relation_pamb["_relationship"]) > 0            , relation_pamb)
+        self.assertTrue(relation_pamb["_endnodes"], [pilulea.id, molb.id])
         # pila-molc
         self.assertIn("quantity_(in_milligrams).", relation_pamc.keys()    , relation_pamc)
         self.assertEqual(relation_pamc["quantity_(in_milligrams)."], "30"  , relation_pamc)
+        self.assertTrue(int(relation_pamc["_relationship"]) > 0            , relation_pamc)
+        self.assertTrue(relation_pamc["_endnodes"], [pilulea.id, molc.id])
         # pila-mold
         self.assertNotIn("quantity_(in_milligrams).", relation_pamd.keys() , relation_pamd)
         self.assertTrue(int(relation_pamd["_relationship"]) > 0            , relation_pamd)
+        self.assertTrue(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')

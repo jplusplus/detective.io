@@ -211,7 +211,7 @@ def get_model_fields(model, order_by='name'):
 
             if verbose_name is None:
                 # Use the name as verbose_name fallback
-                verbose_name = pretty_name(f.name)
+                verbose_name = pretty_name(f.name).lower()
 
             field = {
                 'name'         : f.name,

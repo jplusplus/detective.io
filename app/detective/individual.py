@@ -517,8 +517,12 @@ class IndividualResource(ModelResource):
                 value = data[field]
                 # Get the field
                 attr = getattr(node, field)
+                existing_rels_id = [r.id for r in attr.all()]
                 # It's a relationship
                 if hasattr(attr, "_rel"):
+                    rules  = request.current_topic.get_rules()
+                    # Model that manages properties
+                    though = rules.model( self.get_model() ).field(field).get("through")
                     related_model = attr._rel.relationship.target_model
                     # Load the json-formated relationships
                     data[field] = rels = value
@@ -528,6 +532,9 @@ class IndividualResource(ModelResource):
                             rel = dict(id=rel)
                         # We receied an object with an id
                         if rel.has_key("id"):
+                            # skip for existing relationships
+                            if rel["id"] in existing_rels_id:
+                                continue
                             # Get the related object
                             try:
                                 related = related_model.objects.get(id=rel["id"])
@@ -536,15 +543,20 @@ class IndividualResource(ModelResource):
                                 # Too bad! Go to the next related object
                                 continue
                             else:
-                                # skip for existing relationships
-                                if any(r.id == rel["id"] for r in attr.all()):
-                                    continue
                                 attr.add(related)
                     # removing unused relationship
                     rel_type = self.get_model_field(field).rel_type
                     for relationship in node.node.relationships.all(types=[rel_type]):
-                        if relationship.end.id not in rels:
+                        if relationship.end.id not in [rel["id"] for rel in rels]:
+                            relation_id = relationship.id
                             relationship.delete()
+                            try:
+                                property = though.objects.get(_relationship=relation_id)
+                            except ObjectDoesNotExist:
+                                pass
+                            else:
+                                property.delete()
+
                 # It's a literal value and not the ID
                 elif field != 'id':
                     field_prop = self.get_model_field(field)._property

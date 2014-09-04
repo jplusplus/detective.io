@@ -148,8 +148,6 @@ class TopicResource(ModelResource):
     author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path',  readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
-    ontology_as_mod    = fields.ApiField(readonly=True)
-    ontology_as_owl    = fields.ApiField(readonly=True)
 
     class Meta:
         always_return_data = True
@@ -307,10 +305,15 @@ class TopicResource(ModelResource):
         if topic_skeleton and not background_url:
             bundle.data['background'] = topic_skeleton.picture
         else:
-            try:
-                bundle.data['background'] = self.download_url(background_url)
-            except UnavailableImage:
-                bundle.data['background'] = TopicValidationErrors['background']['image_unavailable']['code']
+            if background_url:
+                try:
+                    bundle.data['background'] = self.download_url(background_url)
+                except UnavailableImage:
+                    bundle.data['background'] = TopicValidationErrors['background']['image_unavailable']['code']
+            else:
+                # we remove from data the previously setted background to avoid
+                # further supsicious operation errors
+                self.clean_bundle_key('background', bundle)
         return bundle
 
     def hydrate_ontology_as_json(self, bundle):
@@ -324,13 +327,14 @@ class TopicResource(ModelResource):
         bundle = self.clean_bundle(bundle)
         return bundle
 
+    def clean_bundle_key(self, key, bundle):
+        if bundle.data.has_key(key):
+            del bundle.data[key]
+        return bundle
+
     def clean_bundle(self, bundle):
-        def clean_bundle_key(key, bundle):
-            if bundle.data.has_key(key):
-                del bundle.data[key]
-            return bundle
-        clean_bundle_key('background_url', bundle)
-        clean_bundle_key('topic_skeleton', bundle)
+        self.clean_bundle_key('background_url', bundle)
+        self.clean_bundle_key('topic_skeleton', bundle)
         return bundle
 
 

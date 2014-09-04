@@ -985,6 +985,24 @@ class TopicApiTestCase(ApiTestCase):
         # file is related to this background, which is what we want
         self.assertRaises(ValueError, lambda t: t.background.url, updated_topic)
 
+    def test_topic_patch_no_image_given(self):
+        topic = Topic.objects.get(slug='test-topic')
+        data  = { 'title': u'new title' }
+
+
+        resp  = self.api_client.patch(
+            '/api/detective/common/v1/topic/{pk}/'.format(pk=topic.pk),
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        self.assertHttpOK(resp)
+        updated_topic = Topic.objects.get(slug='test-topic')
+        self.assertEqual(updated_topic.title, data['title'])
+        self.assertIsNotNone(updated_topic.background)
+
+
+
 
 class TopicSkeletonApiTestCase(ApiTestCase):
     def setUp(self):
@@ -1033,7 +1051,6 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         data = {'title': u'Existing title'}
         resp = self.create_topic(data=data)
         self.assertHttpCreated(resp)
-
         resp = self.create_topic(data=data)
         self.assertHttpBadRequest(resp)
         errors = json.loads(resp.content)['topic']
@@ -1045,3 +1062,28 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         self.assertHttpBadRequest(resp)
         errors = json.loads(resp.content)['topic']
         self.assertIsNotNone(errors[u'background_url'])
+
+
+    def test_create_then_patch_topic(self):
+        skeleton = TopicSkeleton.objects.get(title='Body Count')
+        resp = self.create_topic(skeleton=skeleton,
+                                 data={'title': u'Skeletonist'})
+
+        self.assertHttpCreated(resp)
+        created_topic = json.loads(resp.content)
+        self.assertEqual(created_topic['background'], skeleton.picture.url)
+        self.assertIsNotNone(created_topic['ontology_as_json'])
+
+        data  = { 'title': u'new title' }
+
+        resp  = self.api_client.patch(
+            '/api/detective/common/v1/topic/{pk}/'.format(pk=created_topic['id']),
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        self.assertTrue(resp.status_code in [200, 202])
+        updated_topic = Topic.objects.get(slug=created_topic['slug'])
+        self.assertEqual(updated_topic.title, data['title'])
+        self.assertIsNotNone(updated_topic.background)
+

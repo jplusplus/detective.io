@@ -148,7 +148,6 @@ class TopicResource(ModelResource):
     author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path',  readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
-    ontology_as_json   = fields.ApiField(blank=True)
     ontology_as_mod    = fields.ApiField(readonly=True)
     ontology_as_owl    = fields.ApiField(readonly=True)
 

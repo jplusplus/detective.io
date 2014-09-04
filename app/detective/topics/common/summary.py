@@ -577,7 +577,7 @@ class SummaryResource(Resource):
                     pred_sub = predicate.get("subject", None)
                     # If the predicate has a subject
                     # and it matches to the current one
-                    if pred_sub != None:
+                    if pred_sub != None and pred_sub == subject.get("name", None):
 
                         # Target Model of the predicate
                         target = SearchTerm(

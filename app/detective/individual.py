@@ -517,9 +517,9 @@ class IndividualResource(ModelResource):
                 value = data[field]
                 # Get the field
                 attr = getattr(node, field)
-                existing_rels_id = [r.id for r in attr.all()]
                 # It's a relationship
                 if hasattr(attr, "_rel"):
+                    existing_rels_id = [r.id for r in attr.all()]
                     rules  = request.current_topic.get_rules()
                     # Model that manages properties
                     though = rules.model( self.get_model() ).field(field).get("through")

@@ -344,7 +344,7 @@ class TopicResource(ModelResource):
             if topic_about != '':
                 topic_about = "%s<br/><br/>" % topic_about
 
-            topic_about = "%s%s" % (topic_about, skeleton.picture_credits)
+            topic_about = "%s%s" % (topic_about, topic_skeleton.picture_credits)
         bundle.data['about'] = topic_about
         return bundle
 

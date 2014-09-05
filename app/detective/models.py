@@ -540,8 +540,16 @@ class DetectiveProfileUser(models.Model):
             hash=hash_email)
 
     def topics_count (self): return Topic.objects.filter(author=self.user).count()
-    def topics_max   (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_investigation"]
-    def nodes_max    (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_entities"]
+    def topics_max   (self):
+        if self.user.is_superuser:
+            return -1
+        else:
+            return PLANS_BY_NAMES[self.get_plan_display()]["max_investigation"]
+    def nodes_max    (self):
+        if self.user.is_superuser:
+            return -1
+        else:
+            return PLANS_BY_NAMES[self.get_plan_display()]["max_entities"]
     # NOTE: Very expensive if cache is disabled
     def nodes_count  (self): return dict([(topic.slug, topic.entities_count()) for topic in self.user.topic_set.all()])
 

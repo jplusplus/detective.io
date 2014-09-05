@@ -8,16 +8,14 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'Topic.skeleton_title'
-        db.add_column(u'detective_topic', 'skeleton_title',
-                      self.gf('django.db.models.fields.CharField')(default='No skeleton', max_length=250),
-                      keep_default=False)
 
+        # Changing field 'Topic.skeleton_title'
+        db.alter_column(u'detective_topic', 'skeleton_title', self.gf('django.db.models.fields.CharField')(max_length=250, null=True))
 
     def backwards(self, orm):
-        # Deleting field 'Topic.skeleton_title'
-        db.delete_column(u'detective_topic', 'skeleton_title')
 
+        # Changing field 'Topic.skeleton_title'
+        db.alter_column(u'detective_topic', 'skeleton_title', self.gf('django.db.models.fields.CharField')(max_length=250))
 
     models = {
         u'auth.group': {
@@ -110,12 +108,13 @@ class Migration(SchemaMigration):
             'ontology_as_mod': ('django.db.models.fields.SlugField', [], {'max_length': '250', 'blank': 'True'}),
             'ontology_as_owl': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'public': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'skeleton_title': ('django.db.models.fields.CharField', [], {'default': "'No skeleton'", 'max_length': '250'}),
+            'skeleton_title': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '250'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '250'})
         },
         u'detective.topicskeleton': {
             'Meta': {'object_name': 'TopicSkeleton'},
+            'description': ('tinymce.models.HTMLField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'ontology': ('jsonfield.fields.JSONField', [], {'null': 'True', 'blank': 'True'}),
             'picture': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),

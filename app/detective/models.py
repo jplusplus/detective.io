@@ -76,7 +76,7 @@ class Topic(models.Model):
             ('slug','author')
         )
     title            = models.CharField(max_length=250, help_text="Title of your topic.")
-    skeleton_title   = models.CharField(max_length=250, default='Custom')
+    skeleton_title   = models.CharField(max_length=250, null=True, blank=True)
     # Value will be set for this field if it's blank
     slug             = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
     description      = HTMLField(null=True, blank=True, verbose_name='subtitle', help_text="A short description of what is your topic.")

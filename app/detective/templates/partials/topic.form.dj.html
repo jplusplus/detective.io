@@ -2,7 +2,7 @@
     <div class="topic-form__header">
         <div ng-if="isEditing()">
             <h2><i class="fa fa-cog">&nbsp;Settings</i></h2>
-            <label>Selected data scheme: [[ topic.skeleton_title]]</label>
+            <label>Selected data scheme: [[ topic.skeleton_title | "Custom" ]]</label>
         </div>
         <div ng-if="isCreating()">
             <h2><i class="fa fa-plus">&nbsp;Create a new investigation</i></h2>

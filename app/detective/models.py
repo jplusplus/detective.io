@@ -539,7 +539,7 @@ class DetectiveProfileUser(models.Model):
         return "http://www.gravatar.com/avatar/{hash}?s=200&d=mm".format(
             hash=hash_email)
 
-    def topics_count (self): return Topic.objects.filter(author=self).count()
+    def topics_count (self): return Topic.objects.filter(author=self.user).count()
     def topics_max   (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_investigation"]
     def nodes_max    (self): return PLANS_BY_NAMES[self.get_plan_display()]["max_entities"]
     # NOTE: Very expensive if cache is disabled

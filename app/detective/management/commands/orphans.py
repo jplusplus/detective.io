@@ -14,6 +14,8 @@ from django.core.management.base import BaseCommand, CommandError
 import json
 from django.db.models.loading import get_model
 from optparse import make_option
+from app.detective.models import Topic
+from app.detective import utils
 
 class Command(BaseCommand):
     help = "Detect orphans in the graph."    
@@ -26,8 +28,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        from detective.models import Topic
-        from detective        import utils
         for topic in Topic.objects.all():
             # escape common & energy as usual
             if topic.slug in ["common", "energy"]: continue

@@ -190,7 +190,6 @@ def topic(request, **kwargs):
     try:
         user  = __get_user(request, **kwargs)
         topic = __get_topic(request, user, **kwargs)
-        import pdb; pdb.set_trace()
         if not topic.public:
             return home(request, None, **kwargs)
 

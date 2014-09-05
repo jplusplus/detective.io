@@ -433,7 +433,7 @@ class TopicSkeleton(models.Model):
     picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
     schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
     ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
-    target_plans    = models.CharField(max_length=50)
+    target_plans    = models.CharField(max_length=60)
 
     def selected_plans(self):
         plans = re.sub('[\[\]]', '', self.target_plans)

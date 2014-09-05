@@ -190,7 +190,7 @@ def topic(request, **kwargs):
     try:
         user  = __get_user(request, **kwargs)
         topic = __get_topic(request, user, **kwargs)
-
+        import pdb; pdb.set_trace()
         if not topic.public:
             return home(request, None, **kwargs)
 
@@ -205,7 +205,7 @@ def topic(request, **kwargs):
             default_title=default_title
         )
 
-        meta_description = topic.description or generic_description
+        meta_description = getattr(topic, 'about', None) or generic_description
         meta_pictures    = []
         if topic.background:
             meta_pictures.append(topic.background.url)

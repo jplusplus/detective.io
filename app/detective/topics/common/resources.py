@@ -300,11 +300,20 @@ class TopicResource(ModelResource):
             raise UnavailableImage()
 
     def get_skeleton(self, bundle):
-        topic_skeleton = None
-        topic_skeleton_pk = bundle.data.get('topic_skeleton', None)
-        if topic_skeleton_pk:
-            topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton_pk)
+        # workaround to avoid SQL lazyness, store topic skeleton in bundle obj.
+        topic_skeleton = getattr(bundle, 'skeleton', None)
+        if not topic_skeleton:
+            topic_skeleton_pk = bundle.data.get('topic_skeleton', None)
+            if topic_skeleton_pk:
+                topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton_pk)
+                setattr(bundle, 'skeleton', topic_skeleton)
         return topic_skeleton
+
+    def hydrate_skeleton_title(self, bundle):
+        topic_skeleton = self.get_skeleton(bundle)
+        if topic_skeleton:
+            bundle.data['skeleton_title'] = topic_skeleton.title
+        return bundle
 
     def hydrate_author(self, bundle):
         bundle.data['author'] = bundle.request.user

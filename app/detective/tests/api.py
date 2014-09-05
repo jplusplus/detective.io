@@ -474,13 +474,16 @@ class TopicApiTestCase(ApiTestCase):
     def test_post_list_staff(self):
         # Check how many are there first.
         count = EnergyProject.objects.count()
-        self.assertHttpCreated(
-            self.api_client.post('/api/detective/energy/v1/energyproject/',
+        resp = self.api_client.post('/api/detective/energy/v1/energyproject/',
                 format='json',
                 data=self.post_data_simple,
                 authentication=self.get_super_credentials()
-            )
         )
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(resp)
+        pp.pprint(resp.content)
+        self.assertHttpCreated( resp )
         # Verify a new one has been added.
         self.assertEqual(EnergyProject.objects.count(), count+1)
 
@@ -1045,7 +1048,10 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         self.assertHttpCreated(resp)
         created_topic = json.loads(resp.content)
         self.assertEqual(created_topic['background'], skeleton.picture.url)
+        self.assertEqual(created_topic['skeleton_title'], skeleton.title)
         self.assertIsNotNone(created_topic['ontology_as_json'])
+        self.assertTrue(skeleton.picture_credits in created_topic['about'])
+
 
     def test_topic_create_with_skeleton_already_existing_title(self):
         data = {'title': u'Existing title'}

@@ -239,12 +239,11 @@ class Topic(models.Model):
         response = cache.get(cache_key)
         if response is None:
             query = """
-                START root=node(*)
-                MATCH p = (root)--(leaf)<-[:`<<INSTANCE>>`]-(type)
-                WHERE HAS(leaf.name)
-                AND type.app_label = '{app_label}'
-                AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
-                RETURN count(leaf) AS count
+                START a = node(0)
+                MATCH a-[`<<TYPE>>`]->(b)--> c
+                WHERE b.app_label = "{app_label}"
+                AND not(has(c._relationship))
+                RETURN count(c) as count;
             """.format(app_label=self.app_label())
             response = connection.cypher(query).to_dicts()[0].get("count")
             cache.set(cache_key, response, 60*60*12) # cached 12 hours

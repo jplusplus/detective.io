@@ -38,10 +38,10 @@
               ng-submit="submit(form)"
               novalidate>
             <!-- Topic title field -->
-            <div class="row form-group" ng-if="isCreating()">
+            <div class="row form-group">
                 <div class="col-sm-3 form-label top05">
                     <label for="id_topic_title">Title</label>
-                    <p class="help-block">
+                    <p class="help-block" ng-if="isCreating()">
                         Mandatory.<br/>
                         You <b>cannot</b> change it later.
                     </p>
@@ -49,7 +49,7 @@
                 <div class="col-sm-6">
                     <input id="id_topic_title"
                            name="title"
-                           ng-disabled="loading"
+                           ng-disabled="loading || isEditing()"
                            class="form-control"
                            ng-model="topic.title"
                            required>

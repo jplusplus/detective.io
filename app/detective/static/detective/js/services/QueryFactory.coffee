@@ -13,7 +13,7 @@ angular.module('detective.service').service 'QueryFactory', [
                 $rootScope.$on '$stateChangeStart', (e, current, params)=>
                     if current.name is "user-topic"
                         @updateHumanQuery("")
-                        @query ""
+                        @updateQuery ""
 
                 $rootScope.$on @EVENTS.query_updated, (e, query)=>
                     @updateHumanQuery @toHumanQuery query

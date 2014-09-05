@@ -60,6 +60,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         # binding to skeleton will automaticaly bind the skeleton ontolgy
         # to this new topic in API.
         @scope.topic.topic_skeleton = @scope.selected_skeleton.id
+        @scope.topic.about = @scope.selected_skeleton.picture_credits
         # Angular scroll
         @location.search({scrollTo: 'topic-form'})
         @timeout(=>

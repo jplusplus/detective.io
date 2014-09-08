@@ -235,8 +235,8 @@ class Topic(models.Model):
 
         """
         if not self.id: return 0
-        cache_key = "topic_{topic_slug}_entities_count".format(topic_slug=self.app_label())
-        response = cache.get(cache_key)
+        cache_key = "entities_count"
+        response = utils.topic_cache.get(self, cache_key)
         if response is None:
             query = """
                 START a = node(0)
@@ -246,7 +246,7 @@ class Topic(models.Model):
                 RETURN count(c) as count;
             """.format(app_label=self.app_label())
             response = connection.cypher(query).to_dicts()[0].get("count")
-            cache.set(cache_key, response, 60*60*12) # cached 12 hours
+            utils.topic_cache.set(self, cache_key, response, 60*60*12) # cached 12 hours
         return response
 
     def get_models_output(self):

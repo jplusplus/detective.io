@@ -487,6 +487,8 @@ class TopicCachier(object):
 
     def set(self, topic, suffix_key, value, timeout=None):
         rev = self.version(topic)
+        if rev is None:
+            self.incr_version(topic)
         if timeout == None:
             timeout = self.__timeout()
         cache_key = self.__get_key(topic, suffix_key)
@@ -497,14 +499,6 @@ class TopicCachier(object):
         rev = self.version(topic)
         cache.delete(cache_key, version=rev)
 
-    def debug(self, msg):
-        print "\nDEBUG - TopicCachier %s\n" % msg
-
-    def __new__(self):
-        # singleton instanciation
-        if self.__instance == None:
-            self.__instance = super(TopicCachier, self).__new__(self)
-        return self.__instance
-
 topic_cache = TopicCachier()
+
 # EOF

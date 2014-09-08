@@ -2,7 +2,8 @@
       name="form"
       ng-class="{loading:loading}"
       novalidate
-      ng-submit="subscribe(form)">
+      ng-submit="subscribe(form)"
+      one-required="siret,vat,idnumber">
     <div class="panel-body">
         <h2>Subscribe to a paid plan</h2>
         <p>
@@ -16,7 +17,7 @@
         </p>
         <fieldset ng-disabled="loading">
             <h3>Contact information</h3>
-            <div class="form-group">
+            <div class="form-group" ng-if="user.is_logged">
                 <label for="inputUsername">Username</label>
                 <div class="input-group">
                     <input required
@@ -28,14 +29,14 @@
                            ng-model="subscription.username"
                            class="form-control"
                            id="inputUsername"
-                           ng-disabled="user.is_logged"
+                           ng-disabled="true"
                            placeholder="Choose a username" />
                     <span class="input-group-addon">
                         <i class="fa fa-check-square-o text-success" ng-show="form.username.$valid"></i>
                         <i class="fa fa-square-o" ng-hide="form.username.$valid"></i>
                     </span>
                 </div>
-                <p class="text-muted top05" ng-if="user.is_logged">
+                <p class="text-muted top05">
                     You’ll subscribe with your existing username. If you want to create a new one log out.
                 </p>
             </div>
@@ -57,7 +58,7 @@
                         <i class="fa fa-check-square-o text-success" ng-show="form.email.$valid"></i>
                         <i class="fa fa-square-o" ng-hide="form.email.$valid"></i>
                     </span>
-              </div>
+                </div>
             </div>
         </fieldset>
         <fieldset ng-disabled="loading">
@@ -123,8 +124,7 @@
             <div class="form-group">
                 <label for="inputSIRET">SIRET number (French companies only)</label>
                 <div class="input-group">
-                    <input required
-                           autocorrect="off"
+                    <input autocorrect="off"
                            autocapitalize="off"
                            type="text"
                            name="siret"
@@ -140,8 +140,7 @@
             <div class="form-group">
                 <label for="inputVAT">VAT number (EU companies only)</label>
                 <div class="input-group">
-                    <input required
-                           autocorrect="off"
+                    <input autocorrect="off"
                            autocapitalize="off"
                            type="text"
                            name="vat"
@@ -157,8 +156,7 @@
             <div class="form-group">
                 <label for="inputIDNumber">identification number (non-EU companies only)</label>
                 <div class="input-group">
-                    <input required
-                           autocorrect="off"
+                    <input autocorrect="off"
                            autocapitalize="off"
                            type="text"
                            name="idnumber"

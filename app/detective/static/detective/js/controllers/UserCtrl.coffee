@@ -118,6 +118,8 @@ class window.UserCtrl
                 # Record the error
                 @scope.error = message if message?
 
+    subscribe: (form) =>
+
     resetPassword: =>
         # Turn on loading mode
         @scope.loading = true

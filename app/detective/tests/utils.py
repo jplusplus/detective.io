@@ -91,7 +91,7 @@ class TopicCachierTestCase(TestCase):
     def test_topic_delete(self):
         topic = self.create_topic()
         topic.delete()
-        self.assertIsNone(topic_cache.version(topic))
+        self.assertEqual(topic_cache.version(topic), 0)
 
     def test_topic_model_create(self):
         topic = self.create_topic()

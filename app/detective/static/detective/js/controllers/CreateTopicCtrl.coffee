@@ -42,7 +42,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
 
     # nav & scope methods
     goToPlans: =>
-        @state.go 'home.tour', {scrollTo: 'pricing'}
+        @state.go 'plans'
 
     selectSkeleton: (skeleton)=>
         @scope.selected_skeleton = skeleton

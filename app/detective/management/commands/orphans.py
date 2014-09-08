@@ -28,6 +28,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        total_orphans_count = 0
         try:
             for topic in Topic.objects.all():
                 # escape common & energy as usual
@@ -47,12 +48,14 @@ class Command(BaseCommand):
                                     if info._relationship not in ids:
                                         self.stdout.write("\t%s is an orphelin property of the model %s. The relation doesn't exist no more." % (info._NodeModel__node, Model.__class__.__name__))
                                         orphans_count += 1
+                                        total_orphans_count += 1
                                         if options["fix"]:
                                             self.stdout.write("\tremoving %s" % (info))
                                             info.delete()
                     except Exception as e:
                         self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))
                 self.stdout.write("\tfound %d orphans" % (orphans_count))
+            self.stdout.write("\tTOTAL: found %d orphans" % (total_orphans_count))
         except Exception as e:
             self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))
 

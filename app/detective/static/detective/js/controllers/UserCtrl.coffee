@@ -83,6 +83,7 @@ class window.UserCtrl
             @scope.subscription =
                 plan : @stateParams.plan or 'hank'
                 username : User.username
+            @scope.subscribe = @subscribe
 
         @Page.loading no
 
@@ -119,6 +120,27 @@ class window.UserCtrl
                 @scope.error = message if message?
 
     subscribe: (form) =>
+        return if form.$invalid
+
+        # Get basic data
+        data =
+            plan : @scope.subscription.plan
+            type : @scope.subscription.type
+            name : @scope.subscription.name
+            address : @scope.subscription.address
+            country : @scope.subscription.country
+            siret : @scope.subscription.siret
+            vat : @scope.subscription.vat
+            identification : @scope.idnumber
+
+        # Get data for logged users
+        if @User.is_logged
+            data.user = @User.id
+        # Get data for anonymous users
+        else
+            data.email = @scope.subscription.email
+
+        console.debug data
 
     resetPassword: =>
         # Turn on loading mode

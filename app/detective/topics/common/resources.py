@@ -69,7 +69,14 @@ class TopicAuthorization(ReadOnlyAuthorization):
 
     # Only authenticated user can create topics
     def create_detail(self, object_list, bundle):
-        return bundle.request.user.is_authenticated()
+        authorize = False
+        user = bundle.request.user
+        if user.is_authenticated():
+            profile     = user.detectiveprofileuser
+            unlimited   = profile.topics_max() < 0
+            under_limit = profile.topics_count() < profile.topics_max()
+            authorize   = unlimited or under_limit
+        return authorize
 
     def read_list(self, object_list, bundle):
         if bundle.request.user and bundle.request.user.is_staff:

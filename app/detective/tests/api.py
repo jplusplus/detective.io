@@ -167,6 +167,28 @@ class ApiTestCase(ResourceTestCase):
         # Simply flush the database
         management.call_command('flush', verbosity=0, interactive=False)
 
+    def create_user(self, username='default', password=None, email=None, plan=None):
+        if not email:
+            email = "%s@test.me" % username
+
+        if not plan:
+            plan = PLANS_CHOICES[-1][0]
+
+        if not password:
+            password = username
+
+        user = User.objects.create(
+            username=username,
+            email=email,
+            is_active=True
+        )
+        # put the user in the best plan
+        profile = user.detectiveprofileuser
+        profile.plan = plan
+        profile.save()
+        user.set_password(password)
+        user.save()
+        return user
 
     # Utility functions (Auth, operation etc.)
     def login(self, username, password):
@@ -482,10 +504,6 @@ class TopicApiTestCase(ApiTestCase):
                 data=self.post_data_simple,
                 authentication=self.get_super_credentials()
         )
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(resp)
-        pp.pprint(resp.content)
         self.assertHttpCreated( resp )
         # Verify a new one has been added.
         self.assertEqual(EnergyProject.objects.count(), count+1)
@@ -995,7 +1013,6 @@ class TopicApiTestCase(ApiTestCase):
         topic = Topic.objects.get(slug='test-topic')
         data  = { 'title': u'new title' }
 
-
         resp  = self.api_client.patch(
             '/api/detective/common/v1/topic/{pk}/'.format(pk=topic.pk),
             data=data,
@@ -1007,9 +1024,6 @@ class TopicApiTestCase(ApiTestCase):
         self.assertEqual(updated_topic.title, data['title'])
         self.assertIsNotNone(updated_topic.background)
 
-
-
-
 class TopicSkeletonApiTestCase(ApiTestCase):
     def setUp(self):
         super(TopicSkeletonApiTestCase, self).setUp()
@@ -1017,7 +1031,9 @@ class TopicSkeletonApiTestCase(ApiTestCase):
     def tearDown(self):
         super(TopicSkeletonApiTestCase, self).tearDown()
 
-    def create_topic(self, skeleton=None, data={}):
+    def create_topic(self, skeleton=None, credentials=None, data={}):
+        if credentials is None:
+            credentials = self.get_contrib_credentials()
         if skeleton is None:
             skeleton = TopicSkeleton.objects.get(title='Body Count')
         data['topic_skeleton'] = skeleton.pk
@@ -1025,7 +1041,7 @@ class TopicSkeletonApiTestCase(ApiTestCase):
             '/api/detective/common/v1/topic/',
             data=data,
             format='json',
-            authentication=self.get_contrib_credentials()
+            authentication=credentials
         )
 
     def test_topic_skeleton_list_unauthorized(self):
@@ -1095,4 +1111,20 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         updated_topic = Topic.objects.get(slug=created_topic['slug'])
         self.assertEqual(updated_topic.title, data['title'])
         self.assertIsNotNone(updated_topic.background)
+
+    def test_create_unauthorized(self):
+        user = self.create_user(username='overrated', plan=PLANS_CHOICES[1][0])
+        credentials = self.login(username=user.username, password=user.username)
+
+        # should pass
+        for i in range(0, 5):
+            resp = self.create_topic(
+                credentials=credentials,
+                data={ 'title': 'Title %s' % i }
+            )
+            self.assertHttpCreated(resp)
+
+        # should fail because of the plan selection
+        resp = self.create_topic(credentials=credentials, data={'title': 'Title 5'})
+        self.assertHttpUnauthorized(resp)
 

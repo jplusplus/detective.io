@@ -25,7 +25,7 @@
                            unique="username"
                            type="text"
                            name="username"
-                           ng-model="user.username"
+                           ng-model="subscription.username"
                            class="form-control"
                            id="inputUsername"
                            ng-disabled="user.is_logged"
@@ -49,10 +49,9 @@
                            unique="email"
                            type="email"
                            name="email"
-                           ng-model="user.email"
+                           ng-model="subscription.email"
                            class="form-control"
                            id="inputEmail"
-                           ng-disabled="user.is_logged"
                            placeholder="Enter your email address" />
                     <span class="input-group-addon">
                         <i class="fa fa-check-square-o text-success" ng-show="form.email.$valid"></i>
@@ -63,6 +62,13 @@
         </fieldset>
         <fieldset ng-disabled="loading">
             <h3>Billing information</h3>
+            <div class="form-group">
+                <div class="btn-group">
+                    <label class="btn btn-default" ng-model="subscription.reason" btn-radio="'mr'">Mr.</label>
+                    <label class="btn btn-default" ng-model="subscription.reason" btn-radio="'ms'">Ms.</label>
+                    <label class="btn btn-default" ng-model="subscription.reason" btn-radio="'company'">Company</label>
+                </div>
+            </div>
             <div class="form-group">
                 <label for="inputName">Name</label>
                 <div class="input-group">

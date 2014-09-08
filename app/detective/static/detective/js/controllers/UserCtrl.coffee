@@ -77,6 +77,11 @@ class window.UserCtrl
             @Page.title "Reset password", false
         else if @state.is("reset-password-confirm")
             @Page.title "Enter a new password", false
+        else if (@state.is "subscribe")
+            @Page.title "Subscribe to a paid plan", false
+            if User.is_logged
+                @scope.subscription =
+                    username : User.username
 
         @Page.loading no
 

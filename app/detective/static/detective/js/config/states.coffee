@@ -69,7 +69,7 @@ angular.module('detective.config').config [
                 templateUrl: '/partial/account.login.html'
             )
             .state('signup',
-                url: "/signup/"
+                url: "/signup/?email"
                 controller: UserCtrl
                 templateUrl: '/partial/account.signup.html'
             )

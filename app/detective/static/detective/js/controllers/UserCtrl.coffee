@@ -70,6 +70,7 @@ class window.UserCtrl
         # Set page title with no title-case
         if @state.is("signup") or @state.is("signup-invitation")
             @Page.title "Request an account", false
+            @scope.email = @stateParams.email if @stateParams.email?
         else if @state.is("activate")
             @Page.title "Activate your account", false
             @readToken()

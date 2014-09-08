@@ -79,9 +79,9 @@ angular.module('detective.config').config [
                 templateUrl: '/partial/account.signup.html'
             )
             .state('subscribe'
-                url: "/subscribe/"
-                controller: UserCtrl
+                url: "/subscribe/?plan"
                 templateUrl: '/partial/account.subscribe.html'
+                controller: UserCtrl
             )
             # Pages
             .state('page',

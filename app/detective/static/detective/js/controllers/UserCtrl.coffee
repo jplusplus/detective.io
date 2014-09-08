@@ -79,9 +79,9 @@ class window.UserCtrl
             @Page.title "Enter a new password", false
         else if (@state.is "subscribe")
             @Page.title "Subscribe to a paid plan", false
-            if User.is_logged
-                @scope.subscription =
-                    username : User.username
+            @scope.subscription =
+                plan : @stateParams.plan or 'jane'
+                username : User.username
 
         @Page.loading no
 

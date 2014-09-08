@@ -10,7 +10,7 @@ notifications:
   slack:
     secure: lc2NcRnOWDXmxoQt8wJh0947g9+cIpDaSe2SAJlXigdPL8qzq04GriV0KmRlcVBvjqB4bViWfEsn5ldtGBBiu5wyQ/nIckESfV/8zpLmUM5uEqhx1U3f9YJLDLjH1THNAJBIL9EI9DKo9IHF2uiZF0/sGj4ejorjiZC8J+K3MWk=
 before_install:
-- export COVERALLS_REPO_TOKEN=6opRu71NU2ODTYXULbiEUS1EPTcDNcZqI
+- export COVERALLS_REPO_TOKEN=UDtLCy1He2SylMvJMjq1Uu9f1zVFbTim8
 - export COVERALLS_SERVICE_NAME=travis-ci
 - export DATABASE_URL=sqlite:///test.db
 - export DJANGO_SETTINGS_MODULE=app.settings_tests

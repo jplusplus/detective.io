@@ -3,7 +3,7 @@
 # @Author: Pierre Bellon
 # @Date:   2014-09-08 11:45:45
 # @Last Modified by:   pbellon
-# @Last Modified time: 2014-09-08 12:03:03
+# @Last Modified time: 2014-09-08 12:36:39
 from django.core.management.base import BaseCommand
 from app.detective.models        import Topic
 from optparse import make_option
@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         abnormal_topics = self.get_anomalies()
-        print "Detected %s abnormal topics" % len(abnormal_topics)
+        self.stdout.write("Detected %s abnormal topics" % len(abnormal_topics))
         for topic in abnormal_topics:
 
             msg = "{title}({module}) by {author}".format(
@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 contributors.save()
                 msg += ' - FIXED'
 
-            print msg
+            self.stdout.write(msg)
 
 
     def get_anomalies(self):

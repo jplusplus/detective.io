@@ -19,11 +19,11 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
             # Return a deffered object
             deferred.promise
 
-    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location', 'skeletons']
+    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location', 'User', 'skeletons']
 
     # Note: The 4 first parameters need to stay in that order if we want the
     # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
-    constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @timeout, @location, skeletons)->
+    constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @timeout, @location, @User, skeletons)->
         super
         @setCreatingMode()
         @scope.skeletons = skeletons
@@ -34,6 +34,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.isSelected = @isSelected
         @scope.hasSelectedSkeleton = @hasSelectedSkeleton
         @scope.shouldShowForm = @hasSelectedSkeleton
+        @scope.max_reached = @userMaxReached()
 
         @Page.title "Create a new investigation"
         @Page.loading no
@@ -68,6 +69,10 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
             , 250
         )
 
+    userMaxReached: =>
+        profile = @User.profile
+        return false if profile.topics_max < 0 # unlimited plans
+        profile.topics_count >= profile.topics_max
 
     create: ()=>
         @scope.loading = yes
@@ -79,8 +84,12 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
                 topic: topic.slug
         , (response)=>
             @scope.loading = no
+            # BAD REQUEST
             if response.status is 400
                 @scope.error = response.data.topic
+            # UNAUTHORIZED
+            if response.status is 401
+                @scope.error = "Your not authorized to perform this action."
         )
 
 

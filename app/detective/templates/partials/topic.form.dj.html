@@ -31,12 +31,24 @@
 
     <div ng-if="shouldShowForm()"
          class="form-horizontal panel panel-default"
+         ng-class="{'panel-danger': max_reached}"
          id="topic-form"
          ng-class="{ 'loading': loading }">
+
+        <div class="panel-heading" ng-if="isCreating() && max_reached">
+            <h3 class="panel-title">You've reached the limit of your plan! </h3>
+            Your <span class="bold">[[ plan_name ]]</span> plan lets you store [[ topics_max ]] topics.
+            You're now at [[ topics_count ]]. If you want to create new investigations it's time
+            to <a ui-sref="home.tour({scrollTo: 'plan'})">upgrade</a>!
+        </div>
+
         <form class="panel-body"
               name="form"
               ng-submit="submit(form)"
               novalidate>
+
+
+
             <!-- Topic title field -->
             <div class="row form-group">
                 <div class="col-sm-3 form-label top05">
@@ -49,7 +61,7 @@
                 <div class="col-sm-6">
                     <input id="id_topic_title"
                            name="title"
-                           ng-disabled="loading || isEditing()"
+                           ng-disabled="loading || max_reached || isEditing()"
                            class="form-control"
                            ng-model="topic.title"
                            required>
@@ -66,10 +78,10 @@
                 </div>
                 <div class="col-sm-6">
                     <div  id="id_topic_description"
-                           text-angular
                            name="description"
                            class="short-text"
-                           ng-disabled="loading"
+                           text-angular
+                           ta-disabled="loading || max_reached"
                            ng-model="topic.description"></div>
                 </div>
             </div>
@@ -100,7 +112,7 @@
                     <input type="url"
                            name="background_url"
                            ng-model="topic.background_url"
-                           ng-disabled="loading"
+                           ng-disabled="loading || max_reached"
                            class="form-control">
                 </div>
                 <span class="col-sm-6 text-danger"
@@ -109,7 +121,7 @@
                 </span>
                 <span class="col-sm-6 text-danger"
                       ng-show="submitted && error.background_url">
-                    [[ error.background_url ]]
+                    Sorry, we're haven't managed to process your photo. Please try another one.
                 </span>
             </div>
 
@@ -125,7 +137,7 @@
                     <div text-angular
                          name="about"
                          class="long-text"
-                         ng-disabled="loading"
+                         ta-disabled="loading || max_reached"
                          ng-model="topic.about"
                          id="id_topic_description"></div>
                 </div>
@@ -143,14 +155,16 @@
                         ng-class="{
                           'col-sm-3 col-sm-push-4': isEditing(),
                           'col-sm-6': isCreating()
-                        }">
+                        }"
+                        ng-disabled="isCreating() && max_reached">
+
                         <span ng-if="isCreating()">I'm done, create the investigation</span>
                         <span ng-if="isEditing()">Save changes</span>
                     </button>
                 </div>
             </div>
         </form>
-        <div class="panel-footer panel-success" ng-show="isEditing() && !!saved">
+        <div class="panel-footer panel-success" ng-show="(isEditing() && !!saved)">
             <span class="text-success">Changes saved !</span>
         </div>
     </div>

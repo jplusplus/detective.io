@@ -49,6 +49,7 @@
             }
         }
     }
+
     .form-horizontal {
         .short-text .ta-editor {
             min-height: 55px;
@@ -56,7 +57,13 @@
         .long-text .ta-editor {
             min-height: 380px;
         }
+    }
 
+    .panel.panel-danger {
+        .panel-heading {
+            background-color: lighten(@brand-danger, 20%);
+        }
+        border-bottom: 1px solid @brand-danger;
     }
     &--create {
         .form-footer {

@@ -3,6 +3,7 @@
       ng-class="{loading:loading}"
       novalidate
       ng-submit="subscribe(form)"
+      ng-hide="signupSucceed"
       one-required="siret,vat,idnumber">
     <div class="panel-body">
         <h2>Subscribe to a paid plan</h2>
@@ -176,3 +177,24 @@
         <button type="submit" class="btn btn-primary">Subscribe</button>
     </div>
 </form>
+<div class="login-form panel top30" ng-show="signupSucceed">
+    <div class="panel-heading">
+        <h2>Thanks for subscribing to Detective.io.</h2>
+    </div>
+    <div ng-switch="user.is_logged">
+        <div ng-switch-when="1" class="panel-body">
+            <p>
+                It’s a pleasure to work for you!<br />
+                Until we’ve processed your payment, you’ll be able to use Detective.io with your existing plan. <br />
+                Go back to your <a ui-sref="home">Dashboard</a> to continue investigating.
+            </p>
+        </div>
+        <div ng-switch-default class="panel-body">
+            <p>
+                It will be a pleasure to work for you!<br />
+                Until we’ve processed your payment, you’ll be able to use Detective.io with a free plan.<br />
+                <a ui-sref="">Create your account</a> - we’ll activate it for you very shortly.
+            </p>
+        </div>
+    </div>
+</div>

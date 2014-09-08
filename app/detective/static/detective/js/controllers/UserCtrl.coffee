@@ -140,11 +140,14 @@ class window.UserCtrl
         else
             data.email = @scope.subscription.email
 
+        @scope.loading = yes
         (@http.post "/api/detective/common/v1/subscription/", data)
             .success =>
-                console.debug 'OK'
+                @scope.loading = no
+                @scope.signupSucceed = yes
             .error (message) =>
-                console.debug 'ERROR :', message
+                @scope.loading = no
+                @scope.signupSucceed = no
 
     resetPassword: =>
         # Turn on loading mode

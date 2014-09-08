@@ -47,6 +47,13 @@ angular.module('detective.config').config [
                 controller: ContactUsCtrl
                 templateUrl: '/partial/contact-us.html'
             )
+            .state('plans',
+                url: "/plans/"
+                templateUrl: '/partial/plans.html'
+                controller: ["Page", (Page) ->
+                    Page.title "Paid plans"
+                ]
+            )
             # Accounts
             .state('activate',
                 url: "/account/activate/?token"

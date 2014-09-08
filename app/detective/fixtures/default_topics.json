@@ -10,6 +10,17 @@
     }
 },
 {
+    "fields": {
+        "location": "",
+        "organization": "",
+        "plan": "high",
+        "url": "",
+        "user": 100000
+    },
+    "model": "detective.detectiveprofileuser",
+    "pk": 1
+},
+{
     "pk": 1,
     "model": "detective.topic",
     "fields": {

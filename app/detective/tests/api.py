@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective.models                import Topic, TopicSkeleton
+from app.detective.models                import Topic, TopicSkeleton, PLANS_CHOICES
 from app.detective.topics.common.message import SaltMixin
 from app.detective.topics.energy.models  import Organization, EnergyProject, Person, Country
 from datetime                            import datetime
@@ -68,7 +68,10 @@ class ApiTestCase(ResourceTestCase):
             email=self.contrib_email,
             is_active=True
         )
-
+        # put the user in the best plan
+        profile = contrib_user.detectiveprofileuser
+        profile.plan = PLANS_CHOICES[-1][0]
+        profile.save()
         contrib_user.groups.add(contributors)
         contrib_user.groups.add(test_contributors)
         contrib_user.set_password(self.contrib_password)

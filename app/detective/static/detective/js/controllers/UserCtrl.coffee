@@ -140,7 +140,11 @@ class window.UserCtrl
         else
             data.email = @scope.subscription.email
 
-        console.debug data
+        (@http.post "/api/detective/common/v1/subscription/", data)
+            .success =>
+                console.debug 'OK'
+            .error (message) =>
+                console.debug 'ERROR :', message
 
     resetPassword: =>
         # Turn on loading mode

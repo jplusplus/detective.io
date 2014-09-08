@@ -50,6 +50,9 @@ angular.module('detective.config').config [
             .state('plans',
                 url: "/plans/"
                 templateUrl: '/partial/plans.html'
+                controller: ["Page", (Page) ->
+                    Page.title "Paid plans"
+                ]
             )
             # Accounts
             .state('activate',

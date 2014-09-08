@@ -1,0 +1,174 @@
+<form class="login-form panel panel-default top30 black"
+      name="form"
+      ng-class="{loading:loading}"
+      novalidate
+      ng-submit="subscribe(form)">
+    <div class="panel-body">
+        <h2>Subscribe to a paid plan</h2>
+        <p>
+            Thanks for subscribing to the
+            <select>
+                <option value="jane">Jane</value>
+                <option value="hank">Hank</value>
+                <option value="sherlock">Sherlock</value>
+            </select>
+            plan!
+        </p>
+        <fieldset ng-disabled="loading">
+            <h3>Contact information</h3>
+            <div class="form-group">
+                <label for="inputUsername">Username</label>
+                <div class="input-group">
+                    <input required
+                           autocorrect="off"
+                           autocapitalize="off"
+                           unique="username"
+                           type="text"
+                           name="username"
+                           ng-model="user.username"
+                           class="form-control"
+                           id="inputUsername"
+                           ng-disabled="user.is_logged"
+                           placeholder="Choose a username" />
+                    <span class="input-group-addon">
+                        <i class="fa fa-check-square-o text-success" ng-show="form.username.$valid"></i>
+                        <i class="fa fa-square-o" ng-hide="form.username.$valid"></i>
+                    </span>
+                </div>
+                <p class="text-muted top05" ng-if="user.is_logged">
+                    You’ll subscribe with your existing username. If you want to create a new one log out.
+                </p>
+            </div>
+
+            <div class="form-group" ng-if="!user.is_logged">
+                <label for="inputEmail">Email</label>
+                <div class="input-group">
+                    <input required
+                           autocorrect="off"
+                           autocapitalize="off"
+                           unique="email"
+                           type="email"
+                           name="email"
+                           ng-model="user.email"
+                           class="form-control"
+                           id="inputEmail"
+                           ng-disabled="user.is_logged"
+                           placeholder="Enter your email address" />
+                    <span class="input-group-addon">
+                        <i class="fa fa-check-square-o text-success" ng-show="form.email.$valid"></i>
+                        <i class="fa fa-square-o" ng-hide="form.email.$valid"></i>
+                    </span>
+              </div>
+            </div>
+        </fieldset>
+        <fieldset ng-disabled="loading">
+            <h3>Billing information</h3>
+            <div class="form-group">
+                <label for="inputName">Name</label>
+                <div class="input-group">
+                    <input required
+                           autocorrect="off"
+                           autocapitalize="off"
+                           type="text"
+                           name="name"
+                           ng-model="subscription.name"
+                           class="form-control"
+                           id="inputName" />
+                    <span class="input-group-addon">
+                        <i class="fa fa-check-square-o text-success" ng-show="form.name.$valid"></i>
+                        <i class="fa fa-square-o" ng-hide="form.name.$valid"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputAddress">Address</label>
+                <div class="input-group">
+                    <input required
+                           autocorrect="off"
+                           autocapitalize="off"
+                           type="text"
+                           name="address"
+                           ng-model="subscription.address"
+                           class="form-control"
+                           id="inputAddress" />
+                    <span class="input-group-addon">
+                        <i class="fa fa-check-square-o text-success" ng-show="form.address.$valid"></i>
+                        <i class="fa fa-square-o" ng-hide="form.address.$valid"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputCountry">Country</label>
+                <div class="input-group">
+                    <input required
+                           autocorrect="off"
+                           autocapitalize="off"
+                           type="text"
+                           name="country"
+                           ng-model="subscription.country"
+                           class="form-control"
+                           id="inputCountry" />
+                    <span class="input-group-addon">
+                        <i class="fa fa-check-square-o text-success" ng-show="form.country.$valid"></i>
+                        <i class="fa fa-square-o" ng-hide="form.country.$valid"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputSIRET">SIRET number (French companies only)</label>
+                <div class="input-group">
+                    <input required
+                           autocorrect="off"
+                           autocapitalize="off"
+                           type="text"
+                           name="siret"
+                           ng-model="subscription.siret"
+                           class="form-control"
+                           id="inputSIRET" />
+                    <span class="input-group-addon">
+                        <i class="fa fa-check-square-o text-success" ng-show="form.siret.$valid"></i>
+                        <i class="fa fa-square-o" ng-hide="form.siret.$valid"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputVAT">VAT number (EU companies only)</label>
+                <div class="input-group">
+                    <input required
+                           autocorrect="off"
+                           autocapitalize="off"
+                           type="text"
+                           name="vat"
+                           ng-model="subscription.vat"
+                           class="form-control"
+                           id="inputVAT" />
+                    <span class="input-group-addon">
+                        <i class="fa fa-check-square-o text-success" ng-show="form.vat.$valid"></i>
+                        <i class="fa fa-square-o" ng-hide="form.vat.$valid"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputIDNumber">identification number (non-EU companies only)</label>
+                <div class="input-group">
+                    <input required
+                           autocorrect="off"
+                           autocapitalize="off"
+                           type="text"
+                           name="idnumber"
+                           ng-model="subscription.idnumber"
+                           class="form-control"
+                           id="inputIDNumber" />
+                    <span class="input-group-addon">
+                        <i class="fa fa-check-square-o text-success" ng-show="form.idnumber.$valid"></i>
+                        <i class="fa fa-square-o" ng-hide="form.idnumber.$valid"></i>
+                    </span>
+                </div>
+            </div>
+        </fieldset>
+        <p>We’ll send you an invoice very shortly. Upon payment, your plan will be activated.</p>
+    </div>
+    <div class="tr panel-footer">
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+    </div>
+</form>

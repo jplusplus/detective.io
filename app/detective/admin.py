@@ -164,7 +164,8 @@ class DetectiveProfileUserInline(admin.StackedInline):
     verbose_name_plural = 'detective settings'
 
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ("user", "email", "plan", "type", "name", )
+    list_display = ("user", "email", "plan", "type", "name", "status")
+    list_filter = ("status", )
 
 admin.site.register(Subscription, SubscriptionAdmin)
 

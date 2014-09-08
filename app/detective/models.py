@@ -521,6 +521,11 @@ class Subscription(models.Model):
         ("hank", "Hank"),
         ("sherlock", "Sherlock")
     )
+    STATUSES = (
+        (0, "..."),
+        (1, "Invoice sent"),
+        (2, "Processed")
+    )
     email = models.EmailField(max_length=100, blank=True, null=True)
     user =  models.ForeignKey(User, null=True, blank=True)
     type = models.CharField(choices=TYPES, max_length=7)
@@ -531,6 +536,7 @@ class Subscription(models.Model):
     vat = models.CharField(max_length=20, blank=True, null=True)
     identification = models.CharField(max_length=20, blank=True, null=True)
     plan = models.CharField(choices=PLANS, max_length=8)
+    status = models.IntegerField(choices=STATUSES, default=0)
 
 # This model aims to describe a research alongside a relationship.
 class SearchTerm(models.Model):

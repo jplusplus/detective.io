@@ -265,6 +265,8 @@ RQ_QUEUES = {
     'low'    : RQ_CONFIG
 }
 
+APP_TITLE = 'Detective.io'
+
 # GROUPS of user / Plans
 # NOTE: keys limited to 10 characters
 PLANS = [

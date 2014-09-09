@@ -15,9 +15,7 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
             # on init
             changes = @topicChanges @scope.topic
             @scope.saved = _.isEmpty(changes) and not @init
-            console.log 'changes:', changes
-            if @init
-                @init = no
+            @init = no if @init
 
         @scope.$on @EVENTS.topic.updated, (e, topic)=>
             @topic = topic

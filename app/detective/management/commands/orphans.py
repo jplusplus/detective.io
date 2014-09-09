@@ -29,12 +29,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         total_orphans_count = 0
-        try:
-            for topic in Topic.objects.all():
-                # escape common & energy as usual
-                if topic.slug in ["common", "energy"]: continue
-                self.stdout.write("Topic: %s" % (topic))
-                orphans_count = 0
+        for topic in Topic.objects.all():
+            # escape common & energy as usual
+            if topic.slug in ["common", "energy"]: continue
+            self.stdout.write("Topic: %s" % (topic))
+            orphans_count = 0
+            try:
                 for Model in topic.get_models():
                     try:
                         fields = utils.get_model_fields(Model)
@@ -55,8 +55,8 @@ class Command(BaseCommand):
                     except Exception as e:
                         self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))
                 self.stdout.write("\tfound %d orphans" % (orphans_count))
-            self.stdout.write("TOTAL: found %d orphans" % (total_orphans_count))
-        except Exception as e:
-            self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))
+            except Exception as e:
+                self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))
+        self.stdout.write("TOTAL: found %d orphans" % (total_orphans_count))
 
 # EOF

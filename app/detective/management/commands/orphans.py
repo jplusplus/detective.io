@@ -55,7 +55,7 @@ class Command(BaseCommand):
                     except Exception as e:
                         self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))
                 self.stdout.write("\tfound %d orphans" % (orphans_count))
-            self.stdout.write("\tTOTAL: found %d orphans" % (total_orphans_count))
+            self.stdout.write("TOTAL: found %d orphans" % (total_orphans_count))
         except Exception as e:
             self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))
 

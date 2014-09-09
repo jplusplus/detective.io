@@ -6,19 +6,9 @@
         "first_name": "detective",
         "last_name": "detective",
         "username": "detective",
-        "password": ""
+        "password": "",
+        "is_superuser" : true
     }
-},
-{
-    "fields": {
-        "location": "",
-        "organization": "",
-        "plan": "high",
-        "url": "",
-        "user": 100000
-    },
-    "model": "detective.detectiveprofileuser",
-    "pk": 1
 },
 {
     "pk": 1,

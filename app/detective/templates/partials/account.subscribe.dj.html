@@ -171,28 +171,29 @@
                 </div>
             </div>
         </fieldset>
-        <p>We’ll send you an invoice very shortly. Upon payment, your plan will be activated.</p>
+        <p>We’ll get in touch very shortly. Upon payment, your plan will be activated.</p>
+        <p>For any question, contact us at <a href="mailto:contact@detective.io">contact@detective.io</a>.</p>
     </div>
     <div class="tr panel-footer">
-        <button type="submit" class="btn btn-primary">Subscribe</button>
+        <button type="submit" class="btn btn-primary">Send</button>
     </div>
 </form>
 <div class="login-form panel top30" ng-show="signupSucceed">
     <div class="panel-heading">
-        <h2>Thanks for subscribing to Detective.io.</h2>
+        <h2>Thanks for requesting a subscription to Detective.io.</h2>
     </div>
     <div ng-switch="user.is_logged">
         <div ng-switch-when="1" class="panel-body">
             <p>
                 It’s a pleasure to work for you!<br />
-                Until we’ve processed your payment, you’ll be able to use Detective.io with your existing plan. <br />
+                Until we’ve processed your request, you’ll be able to use Detective.io with your existing plan. <br />
                 Go back to your <a ui-sref="home">Dashboard</a> to continue investigating.
             </p>
         </div>
         <div ng-switch-default class="panel-body">
             <p>
                 It will be a pleasure to work for you!<br />
-                Until we’ve processed your payment, you’ll be able to use Detective.io with a free plan.<br />
+                Until we’ve processed your request, you’ll be able to use Detective.io with a free plan.<br />
                 <a ui-sref="signup({email:subscription.email})">Create your account</a> - we’ll activate it for you very shortly.
             </p>
         </div>

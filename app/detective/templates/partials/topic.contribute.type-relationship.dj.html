@@ -61,19 +61,25 @@
 					<i class="gray-darker fa fa-times"></i>
 				</span>
 
-				<span class="btn btn-default" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable ">
+				<span class="btn btn-default" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable && !f.duplicated">
 					<i class="gray-darker fa fa-edit"></i>
 				</span>
 
 				<button class="btn btn-default left10"
 				        tooltip="Add information about this relationship"
-						ng-if="field.rules.has_properties && f.id"
+						ng-if="field.rules.has_properties && f.id && !f.duplicated"
 						ng-click="addInfo(individual, field.name, f)">
 					Add info
 				</button>
 			</span>
 		</div>
 
+		<div class="ask-for-duplicated-relationship" ng-show="f.duplicated">
+			<div class="pan" ng-if="field.rules.is_editable">
+				<h4>Heads Up!</h4>
+				<p>This relationship already exists.</p>
+			</div>
+		</div>
 		<div class="ask-for-new" ng-show="askForNew(f) && relatedState(f) == 'input'">
 			<div class="pan" ng-if="field.rules.is_editable">
 				<h4>Heads Up!</h4>

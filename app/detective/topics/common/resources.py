@@ -3,7 +3,7 @@ from .models                          import *
 from app.detective.exceptions         import UnavailableImage
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
-                                             TopicFactory
+                                             TopicFactory, Subscription
 from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
 from app.detective.topics.common.user import UserResource
 from django.conf                      import settings
@@ -18,7 +18,7 @@ from django.template.loader           import get_template
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from easy_thumbnails.files            import get_thumbnailer
 from tastypie                         import fields, http
-from tastypie.authorization           import ReadOnlyAuthorization
+from tastypie.authorization           import ReadOnlyAuthorization, Authorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
@@ -267,3 +267,26 @@ class ArticleResource(ModelResource):
         authorization = ReadOnlyAuthorization()
         queryset      = Article.objects.filter(public=True)
         filtering     = {'slug': ALL, 'topic': ALL_WITH_RELATIONS, 'public': ALL, 'title': ALL}
+
+class SubscriptionAuthorization(Authorization):
+    def read_list(self, object_list, bundle): raise Unauthorized()
+    def read_detail(self, object_list, bundle): raise Unauthorized()
+    def create_list(self, object_list, bundle): raise Unauthorized()
+    def update_list(self, object_list, bundle): raise Unauthorized()
+    def update_detail(self, object_list, bundle): raise Unauthorized()
+    def delete_list(self, object_list, bundle): raise Unauthorized()
+    def delete_detail(self, object_list, bundle): raise Unauthorized()
+
+class SubscriptionResource(ModelResource):
+    user = fields.ToOneField(UserResource, 'user', full=False)
+    class Meta:
+        authorization = SubscriptionAuthorization()
+        queryset = Subscription.objects.all()
+
+    def hydrate(self, bundle):
+        if bundle.data.has_key('user'):
+            if hasattr(bundle.request, 'user') and bundle.data['user'] == bundle.request.user.id:
+                bundle.data['user'] = bundle.request.user
+            else:
+                raise Unauthorized()
+        return bundle

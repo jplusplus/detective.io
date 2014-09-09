@@ -76,7 +76,7 @@ angular.module('detective.config').config [
                 templateUrl: '/partial/account.login.html'
             )
             .state('signup',
-                url: "/signup/"
+                url: "/signup/?email"
                 controller: UserCtrl
                 templateUrl: '/partial/account.signup.html'
             )
@@ -84,6 +84,11 @@ angular.module('detective.config').config [
                 url: "/signup/:token/"
                 controller: UserCtrl
                 templateUrl: '/partial/account.signup.html'
+            )
+            .state('subscribe'
+                url: "/subscribe/?plan"
+                templateUrl: '/partial/account.subscribe.html'
+                controller: UserCtrl
             )
             # Pages
             .state('page',

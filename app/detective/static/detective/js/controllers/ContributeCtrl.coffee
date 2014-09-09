@@ -127,13 +127,6 @@ class window.ContributeCtrl
                     related_to: @related_to ? null
                 # It's not a new individual now
                 @isNew = no
-            # Looks for duplicated entities in fields. Mark them as duplicated. Prevents duplicated relationships (#521)
-            for name, value of @fields
-                if value? and typeof(value) is "object" and name isnt "field_sources" and name.indexOf("$") != 0
-                    exist = {}
-                    for entity in value
-                        entity.duplicated = exist[entity.id]? and exist[entity.id]
-                        exist[entity.id] = true
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
                 changes = @getChanges()
@@ -176,32 +169,36 @@ class window.ContributeCtrl
                             # Field no more loading
                             delete @updating[rel]
 
+
+
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
             # Function to remove nested resources without id
             clean   = (val, name="")->
                 # copy the current value
                 val = angular.copy val
-                value_to_return = []
                 if val instanceof Date
                     # remove timezone offset
                     val.setHours(val.getHours() - val.getTimezoneOffset() / 60)
                     # Convert date object to string
-                    value_to_return = val.toJSON()
+                    val = val.toJSON()
                 else if typeof(val) is "object" and name isnt "field_sources"
                     # Fetch each nested value
                     for pc of val
-                        # ignore the nested values without id
-                        continue unless val[pc].id?
-                        # ignore duplicated. Prevents duplicated relationships (#521)
-                        if not _.findWhere(value_to_return, {id: val[pc].id})?
-                            # Create a new object that only contains an id
-                            value_to_return[pc] = id: val[pc].id
-                else if value_to_return == "" or value_to_return == undefined
-                    # Empty input must be null
-                    value_to_return = null
-                return value_to_return
+                        # Remove the nested values without id
+                        unless val[pc].id?
+                            delete val[pc]
+                            # Apply splice only on array
+                            val.splice(pc) if val instanceof Array
+                            # Go to the next value
+                            continue
+                        # Create a new object that only contains an id
+                        val[pc] = id: val[pc].id
 
+                else if val == "" or val == undefined
+                    # Empty input must be null
+                    val = null
+                val
             for prop of now
                 val = clean(now[prop], prop)
                 # Remove resource methods
@@ -210,7 +207,7 @@ class window.ContributeCtrl
                     # Previous and new value are different
                     unless angular.equals clean(prev[prop], prop), val
                         changes[prop] = val
-            return changes
+            changes
 
         # Generates the permalink to this individual
         permalink: =>
@@ -530,13 +527,8 @@ class window.ContributeCtrl
             @scope.scrollIdx = @scope.loadIndividual type.toLowerCase(), related.id,  individual
 
     relatedState: (related)=>
-        ###
-        Return the visual state of the field.
-        - `input`  for editable fields,
-        - `linked` for field which represent an Individal but isn't duplicated. The field will be shown as an uneditable field.
-        ###
         switch true
-            when related instanceof @Individual or (related.id? and not related.duplicated) then 'linked'
+            when related instanceof @Individual or related.id? then 'linked'
             else 'input'
 
     askForNew: (related)=>

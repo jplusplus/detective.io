@@ -271,12 +271,11 @@ APP_TITLE = 'Detective.io'
 # NOTE: keys limited to 10 characters
 PLANS = [
     {"free"       : {"max_investigation" :  3, "max_entities"  :  100 }},
-    {"low"        : {"max_investigation" :  5, "max_entities"  :  500 }},
-    {"medium"     : {"max_investigation" : -1, "max_entities"  :  1000}},
-    {"high"       : {"max_investigation" : -1, "max_entities"  : -1   }},
+    {"jane"       : {"max_investigation" :  5, "max_entities"  :  500 }},
+    {"hank"       : {"max_investigation" : -1, "max_entities"  :  1000}},
+    {"sherlock"   : {"max_investigation" : -1, "max_entities"  : -1   }},
     {"enterprise" : {"max_investigation" : -1, "max_entities"  : -1   }}
 ]
-
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.

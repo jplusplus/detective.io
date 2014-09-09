@@ -31,9 +31,9 @@ class window.TopicFormCtrl
     setEditingMode: =>
         @form_mode = @MODES.editing
 
-    onTopicUpdated: =>
+    onTopicUpdated: (old_val, new_val) =>
         @hideErrors()
-        @scope.$broadcast @EVENTS.topic.user_updated
+        @scope.$broadcast @EVENTS.topic.user_updated, old_val, new_val
 
     hideErrors: =>
         unless @scope.loading

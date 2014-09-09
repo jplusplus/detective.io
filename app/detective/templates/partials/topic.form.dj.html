@@ -31,9 +31,12 @@
 
     <div ng-if="shouldShowForm()"
          class="form-horizontal panel panel-default"
-         ng-class="{'panel-danger': max_reached}"
-         id="topic-form"
-         ng-class="{ 'loading': loading }">
+         ng-class="{
+            'error': max_reached,
+            'saved': (isEditing() && !!saved),
+            'loading': loading
+          }"
+         id="topic-form">
 
         <div class="panel-heading" ng-if="isCreating() && max_reached">
             <h3 class="panel-title">You've reached the limit of your plan! </h3>
@@ -142,7 +145,7 @@
                          id="id_topic_description"></div>
                 </div>
             </div>
-            <div class="row form-group form-footer">
+            <div class="row form-group">
                 <div class="form-footer__wrapper col-sm-push-3 col-sm-6">
                     <span class="col-sm-5" ng-if="isEditing()">
                       <i class="fa fa-warning"></i>&nbsp;
@@ -164,8 +167,12 @@
                 </div>
             </div>
         </form>
-        <div class="panel-footer panel-success" ng-show="(isEditing() && !!saved)">
-            <span class="text-success">Changes saved !</span>
+        <div class="panel-footer form-footer" ng-show="(isEditing() && !!saved)">
+          <div class="row">
+            <div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+              <span class="text-success">Changes saved !</span>
+            </div>
+          </div>
         </div>
     </div>
 

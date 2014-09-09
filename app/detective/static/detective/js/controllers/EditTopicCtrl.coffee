@@ -4,12 +4,20 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
     constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @topic)->
         super
         @setEditingMode()
+        @init   = yes
         @master = angular.copy @topic
         @scope.topic = @topic
         @scope.saved = no
         @scope.deleteTopicBackground = @deleteTopicBackground
-        @scope.$on @EVENTS.topic.user_updated, =>
-            @scope.saved = no
+
+        @scope.$on @EVENTS.topic.user_updated, (e, previous, next)=>
+            # workaround to properly handle saved state & avoid "saved" state
+            # on init
+            changes = @topicChanges @scope.topic
+            @scope.saved = _.isEmpty(changes) and not @init
+            console.log 'changes:', changes
+            if @init
+                @init = no
 
         @scope.$on @EVENTS.topic.updated, (e, topic)=>
             @topic = topic
@@ -44,15 +52,16 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
 
     edit: =>
         @scope.loading = yes
+        @scope.saved = no
         changes = @topicChanges @scope.topic
 
         @TopicsFactory.update({id: @scope.topic.id}, changes, (data)=>
                 @scope.$broadcast @EVENTS.topic.updated, data
-                @scope.loading = no
                 @scope.saved = yes
+                @scope.loading = no
             , (response)=>
                 @scope.loading = no
-                @scope.save = no
+                @scope.saved = no
                 if response.status is 400
                     @scope.error = response.data.topic
         )

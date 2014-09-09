@@ -368,8 +368,6 @@ class window.ContributeCtrl
             if @isFieldFocused field
                 @focusedField.source = !@focusedField.source
 
-        isSaved: => @fields.id? and _.isEmpty( @getChanges() )
-
         isSourceURLValid: (source)=>
             return false unless source?
             @UtilsFactory.isValidURL(source.reference)

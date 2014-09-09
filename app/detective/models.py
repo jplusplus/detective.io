@@ -458,6 +458,33 @@ class Article(models.Model):
         return '<a href="%s">%s</a>' % (path, path, )
     link.allow_tags = True
 
+class Subscription(models.Model):
+    TYPES = (
+        ("mr", "Mr."),
+        ("ms", "Ms."),
+        ("company", "Company")
+    )
+    PLANS = (
+        ("jane", "Jane"),
+        ("hank", "Hank"),
+        ("sherlock", "Sherlock")
+    )
+    STATUSES = (
+        (0, "..."),
+        (1, "Invoice sent"),
+        (2, "Processed")
+    )
+    email = models.EmailField(max_length=100, blank=True, null=True)
+    user =  models.ForeignKey(User, null=True, blank=True)
+    type = models.CharField(choices=TYPES, max_length=7)
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=255)
+    country = models.CharField(max_length=100)
+    siret = models.CharField(max_length=20, blank=True, null=True)
+    vat = models.CharField(max_length=20, blank=True, null=True)
+    identification = models.CharField(max_length=20, blank=True, null=True)
+    plan = models.CharField(choices=PLANS, max_length=8)
+    status = models.IntegerField(choices=STATUSES, default=0)
 
 # This model aims to describe a research alongside a relationship.
 class SearchTerm(models.Model):

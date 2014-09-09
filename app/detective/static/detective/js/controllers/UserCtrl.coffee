@@ -70,6 +70,7 @@ class window.UserCtrl
         # Set page title with no title-case
         if @state.is("signup") or @state.is("signup-invitation")
             @Page.title "Request an account", false
+            @scope.email = @stateParams.email if @stateParams.email?
         else if @state.is("activate")
             @Page.title "Activate your account", false
             @readToken()
@@ -77,6 +78,13 @@ class window.UserCtrl
             @Page.title "Reset password", false
         else if @state.is("reset-password-confirm")
             @Page.title "Enter a new password", false
+        else if (@state.is "subscribe")
+            @Page.title "Subscribe to a paid plan", false
+            # We need @scope.subscription if we're on the subscription page
+            @scope.subscription =
+                plan : @stateParams.plan or 'hank'
+                username : User.username
+            @scope.subscribe = @subscribe
 
         @Page.loading no
 
@@ -111,6 +119,36 @@ class window.UserCtrl
                 @scope.signupSucceed = false
                 # Record the error
                 @scope.error = message if message?
+
+    subscribe: (form) =>
+        return if form.$invalid
+
+        # Get basic data
+        data =
+            plan : @scope.subscription.plan
+            type : @scope.subscription.type
+            name : @scope.subscription.name
+            address : @scope.subscription.address
+            country : @scope.subscription.country
+            siret : @scope.subscription.siret
+            vat : @scope.subscription.vat
+            identification : @scope.idnumber
+
+        # Get data for logged users
+        if @User.is_logged
+            data.user = @User.id
+        # Get data for anonymous users
+        else
+            data.email = @scope.subscription.email
+
+        @scope.loading = yes
+        (@http.post "/api/detective/common/v1/subscription/", data)
+            .success =>
+                @scope.loading = no
+                @scope.signupSucceed = yes
+            .error (message) =>
+                @scope.loading = no
+                @scope.signupSucceed = no
 
     resetPassword: =>
         # Turn on loading mode

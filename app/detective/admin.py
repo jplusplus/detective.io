@@ -6,6 +6,7 @@ from app.detective.models       import TopicToken
 from app.detective.models       import SearchTerm
 from app.detective.models       import Article
 from app.detective.models       import DetectiveProfileUser
+from app.detective.models       import Subscription
 from app.detective.models       import PLANS_CHOICES
 from django.conf                import settings
 from django.contrib             import admin
@@ -161,6 +162,12 @@ class DetectiveProfileUserInline(admin.StackedInline):
     model               = DetectiveProfileUser
     can_delete          = False
     verbose_name_plural = 'detective settings'
+
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ("user", "email", "plan", "type", "name", "status")
+    list_filter = ("status", )
+
+admin.site.register(Subscription, SubscriptionAdmin)
 
 # Define a new User admin
 class UserAdmin(UserAdmin):

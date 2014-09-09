@@ -1,126 +1,129 @@
 {% load staticfiles %}
 
-<div id="home">
+<div class="home__tour" home-tour tracker="tracker">
 
-    <div class="front" screen-height="600">
+    <ul class="list-unstyled home__tour__tracker hidden-xs">
+        <li ng-repeat="screen in ['tour', 'quote 0', 'quote 1', 'quote 2', 'get ready', 'pricing']">
+            <a ng-click="scrollTo($index)" class="home__tour__tracker__screen" ng-class="$index == tracker ? 'home__tour__tracker__screen--active' : ''">
+                <span class="sr-only">Go to [[screen]]</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="home__tour__front home__tour__screen" data-level="0" screen-height="600">
         <div class="container">
             <div class="middle">
                 <h1>
                     Detective<i>.io</i>
                 </h1>
-                <h3 class="top0">Structure your investigation<br />&amp; mine your data</h3>
+                <h3 class="top0">Investigations made easy.</h3>
+                <div ng-hide="user.is_logged">
+                    <a ui-sref="login" class="btn btn-lg btn-stroke">
+                        Login
+                    </a>
+                    <a ui-sref="signup" class="btn btn-default btn-lg">
+                        Sign up
+                    </a>
+                </div>
             </div>
-            <a class="go-down" ng-click="scrollToFeatures = true">
+            <a class="go-down" ng-click="scrollTo(1)">
                 <span class="text">Discover how</span><br />
-                <i class="fa fa-arrow-down"></i>
+                <i class="fa fa-2x fa-angle-down"></i>
             </a>
         </div>
     </div>
 
 
-    <div class="features bg-light">
+    <div class="home__tour__features home__tour__screen bg-light">
         <div class="container">
-            <div class="text-center top40 bottom40">
-                <a scroll-to="600" ng-if="scrollToFeatures == true" reset="scrollToFeatures"></a>
-                <p class="lead">
-                    Simply describe your field of inquiry and <strong>Detective.io builds</strong><br />
-                    the input interface as well as a state of the art front-end.
+            <div class="home__tour__features__content">
+                <p>
+                    Detective.io lets you organize your information on a topic easily.<br />
+                    Because everything is structured, you can find a source or explore
+                    connections in your data in seconds.
+                </p>
+                <p>
+                    <strong>Whether small or big, it turns your data into knowledge.</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="home__tour__quotes home__tour__screen">
+        <div class="container">
+            <div class="home__tour__quotes__iphone hidden-sm hidden-xs">
+                <img src="{% static 'detective/img/tour-iphone.svg' %}" class="home__tour__quotes__iphone__img" />
+                <div class="home__tour__quotes__iphone__wrapper">
+                    <div class="home__tour__quotes__iphone__screens">
+                        <img src="{% static 'detective/img/tour/quote-0.png' %}" class="home__tour__quotes__iphone__screens__single" />
+                        <img src="{% static 'detective/img/tour/quote-1.png' %}" class="home__tour__quotes__iphone__screens__single" />
+                        <img src="{% static 'detective/img/tour/quote-2.png' %}" class="home__tour__quotes__iphone__screens__single" />
+                    </div>
+                </div>
+            </div>
+            <div class="home__tour__quotes__single home__tour__quotes__single--n0" data-level="1">
+                <h3 class="home__tour__quotes__single__title">
+                    "Like putting a thousand-piece puzzle together"
+                </h3>
+                <p class="home__tour__quotes____singe__desc lead">
+                    Verena Porsch is consulting for NGOs. She used detective.io to expose agreements between textile companies and subcontracting factories, and linked it back to accidents. Thousands of brands and companies came together in her investigation, The Origin of Clothes.
                 </p>
             </div>
 
-            <div class="row">
-                <div class="col-sm-6 col-md-3">
-                    <div class="card">
-                        <img class="illustration" src="{% static 'detective/img/mobile.png' %}" />
-                        <div class="text">
-                            <h4>Mobile-first</h4>
-                            <p class="text-muted">Why store your data in a notepad when you can access Detective.io on your tablet or mobile? Database replication means it's much safer than notes on paper, too.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-md-3">
-                    <div class="card">
-                        <img class="illustration" src="{% static 'detective/img/semantic.png' %}" />
-                        <div class="text">
-                            <h4>Semantic</h4>
-                            <p class="text-muted">Detective.io relies on purpose-built ontologies for each topic. They can be plugged into other ontologies to unleash the power of linked data.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="clearfix visible-sm"></div>
-
-                <div class="col-sm-6 col-md-3">
-                    <div class="card">
-                        <img class="illustration" src="{% static 'detective/img/journo-tools.png' %}" />
-                        <div class="text">
-                            <h4>By journalists, for journalists</h4>
-                            <p class="text-muted">Journalism++ is a team of news nerds working for news nerds. We build tools - and use them in our daily work.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-md-3">
-                    <div class="card">
-                        <img class="illustration" src="{% static 'detective/img/network.png' %}" />
-                        <div class="text">
-                            <h4>Graph search</h4>
-                            <p class="text-muted">Your own graph search module for each investigation. Make complex queries in a breeze and find hidden patterns in your data.</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="home__tour__quotes__single home__tour__quotes__single--n1" data-level="2">
+                <h3 class="home__tour__quotes__single__title">
+                    "All my knowledge in one place"
+                </h3>
+                <p class="home__tour__quotes____singe__desc lead">
+                    Adeline Agut is a consultant for water issues. She used Detective.io to organize her data on innovative water projects in developing countries. She can now reach into her own knowledge base at any time, on any device.
+                </p>
             </div>
 
-            <div class="bottom50 text-center top20">
-                <a class="btn btn-primary btn-lg get-a-quote" ng-href="/contact-us">
-                    Get a quote
-                    <i class="left10 fa fa-arrow-right"></i>
-                </a>
+            <div class="home__tour__quotes__single home__tour__quotes__single--n2" data-level="3">
+                <h3 class="home__tour__quotes__single__title">
+                    "Collaboration made easy"
+                </h3>
+                <p class="home__tour__quotes____singe__desc lead">
+                    Alexandre Léchenet is an investigative journalist. He used Detective.io to store data on a transnational investigation. Because it's easy to use, he could invite colleagues from all over Europe to collaborate.
+                </p>
             </div>
         </div>
     </div>
 
 
-    <div class="featured-investigations pull-footer">
+    <div class="home__tour__get-ready home__tour__screen" data-level="4">
         <div class="container">
-            <h3 class="container">Featured investigations</h3>
-            <div class="boxes">
-
-                <div ng-repeat-start="topic in featured"></div>
-
-                    <div class="col-md-4 col-sm-6">
-                        <div class="box">
-                            <a class="fg" href="[[topic.link]]"></a>
-                            <img ng-src="[[topic.thumbnail.medium]]" class="bg" />
-                        </div>
-                        <h4>
-                            <a href="[[topic.link]]">
-                                [[topic.title]]
-                            </a><br />
-                            <span>
-                                by
-                                <a href="[[topic.author.username]]">
-                                    [[topic.author.username]]
-                                </a>
-                            </span>
-                        </h4>
-                    </div>
-
-                    <div class="clearfix visible-md visible-lg" ng-if="$index > 0 && ($index + 1)%3 == 0"></div>
-                    <div class="clearfix visible-sm" ng-if="$index > 0 && ($index + 1)%2 == 0"></div>
-
-                <div ng-repeat-end></div>
-
-                <div class="col-sm-4">
-                    <div class="box box-placeholder">
-                        <a class="fg" href="/contact-us">
-                            And yours?
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>Detective.io</h2>
+                    <p class="lead">
+                        Organize your investigation online, securely.
+                    </p>
+                    <p class="lead">
+                        Add, structure, and mine information anywhere, from any device. Make your knowledge is accessible to your colleagues, readers or clients in seconds.
+                    </p>
+                    <p class="lead">
+                        Detective.io<br />
+                        Investigate like it's 2014.
+                    </p>
+                    <div ng-hide="user.is_logged" class="top40">
+                        <a ui-sref="login" class="btn btn-lg btn-default">
+                            Login
+                        </a>
+                        <a ui-sref="signup" class="btn btn-primary btn-lg">
+                            Sign up
                         </a>
                     </div>
                 </div>
+                <div class="col-md-6 hidden-sm hidden-xs home__tour__get-ready__ipad">
+                    <img src="{% static 'detective/img/tour-ipad.svg' %}" class="home__tour__get-ready__ipad__img" />
+                </div>
             </div>
         </div>
+    </div>
+
+    <div class="home__tour__pricing  home__tour__screen pull-footer" data-level="5">
+        <div ng-include="'/partial/plans.table.html'"></div>
     </div>
 
 </div>

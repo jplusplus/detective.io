@@ -1,5 +1,5 @@
 from .resources       import QuoteRequestResource, TopicResource, \
-                             TopicSkeletonResource, ArticleResource
+                             TopicSkeletonResource, ArticleResource, SubscriptionResource
 from .summary         import SummaryResource
 from .user            import UserResource, ProfileResource
 from .cypher          import CypherResource
@@ -17,6 +17,7 @@ api.register(ProfileResource())
 api.register(UserResource())
 api.register(ArticleResource())
 api.register(JobResource())
+api.register(SubscriptionResource())
 
 urlpatterns = patterns('common',
     url(r'', include(api.urls)),

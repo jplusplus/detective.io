@@ -1,31 +1,22 @@
-angular.module('detective.service').factory("Topic", [ '$resource', '$http', ($resource, $http)->
+angular.module('detective.service').factory("Topic", [ '$resource', ($resource)->
     $resource '/api/detective/common/v1/topic/:id/', {}, {
-        get:
-            method : 'GET'
-            isArray: no
-        put:
-            method : 'PUT'
-            isArray: no
         invite:
             url :'/api/detective/common/v1/topic/:id/invite/?'
             method : 'POST'
             isArray: no
-        query:
-            method : 'GET'
-            isArray: yes
-            transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
-                data.objects
-            ])
+        post:
+            url: '/api/detective/common/v1/topic/?'
+            method: 'POST'
+            isArray: no
+        put:
+            url: '/api/detective/common/v1/topic/:id/?'
+            method: 'PUT'
+        update:
+            url: '/api/detective/common/v1/topic/:id/?'
+            method: 'PATCH'
         cachedGet:
             method : 'GET'
             isArray: no
             cache  : yes
-        cachedQuery:
-            method : 'GET'
-            isArray: yes
-            cache  : yes
-            transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
-                data.objects
-            ])
     }
 ])

@@ -1,4 +1,4 @@
-class LoginCtrl
+class window.LoginCtrl
     # Injects dependencies
     @$inject : ["$scope", "$stateParams", "$state", "Auth", "User", "Page", "$rootElement"]
 

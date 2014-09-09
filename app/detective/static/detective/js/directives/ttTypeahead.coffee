@@ -85,9 +85,11 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 datumTokenizer : Bloodhound.tokenizers.obj.whitespace
                 queryTokenizer : Bloodhound.tokenizers.whitespace
                 dupDetector : (a, b) ->
-                    a_id = a.id or a.subject.name
-                    b_id = b.id or b.subject.name
-                    a_id is b_id
+                    a_id = a.id
+                    b_id = b.id
+                    if a_id? and b_id?
+                        return a_id is b_id
+                    false
                 prefetch :
                     url : prefetchUrl
                     filter : responseFilter

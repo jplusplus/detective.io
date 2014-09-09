@@ -1,4 +1,4 @@
-class ProfileCtrl
+class window.ProfileCtrl
     # Injects dependencies
     @$inject: ['$scope', 'Common', 'Page', 'user', '$state', '$q', '$http']
 

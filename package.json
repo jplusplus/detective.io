@@ -1,9 +1,10 @@
 {
   "name": "detective",
-  "version": "1.6.5",
+  "version": "1.7.0",
   "dependencies": {
     "bower": "latest",
     "coffee-script": "1.6.2",
-    "less": "1.7.1"
+    "less": "1.7.1",
+    "snockets-cli": "^0.1.1"
   }
 }

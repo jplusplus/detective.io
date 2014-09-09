@@ -3,6 +3,7 @@
 from .errors                      import *
 from .message                     import Recover
 from app.detective.models         import Topic, TopicToken, DetectiveProfileUser
+from django.conf                  import settings
 from django.conf.urls             import url
 from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User, Group
@@ -55,7 +56,13 @@ class UserAuthorization(ReadOnlyAuthorization):
         return authorized
 
 class ProfileResource(ModelResource):
-    avatar = fields.CharField(attribute='avatar', readonly=True)
+    avatar       = fields.CharField(   attribute='avatar'      , readonly=True)
+    topics_max   = fields.IntegerField(attribute='topics_max'  , readonly=True)
+    topics_count = fields.IntegerField(attribute='topics_count', readonly=True)
+    nodes_max    = fields.IntegerField(attribute='nodes_max'   , readonly=True)
+    # NOTE: Very expensive if cache is disabled
+    nodes_count  = fields.DictField(   attribute='nodes_count' , readonly=True)
+
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
@@ -63,7 +70,7 @@ class ProfileResource(ModelResource):
         queryset           = DetectiveProfileUser.objects.all()
         resource_name      = 'profile'
         allowed_methods    = ['get', 'patch']
-        fields             = ['id', 'location', 'organization', 'url', 'avatar']
+        fields             = ['id', 'location', 'organization', 'url', 'avatar', 'plan', 'topics_count', 'topics_max', 'nodes_max', 'nodes_count']
 
 class UserResource(ModelResource):
     profile = fields.ToOneField(ProfileResource, 'detectiveprofileuser', full=True, null=True)
@@ -183,10 +190,14 @@ class UserResource(ModelResource):
                 except TopicToken.DoesNotExist:
                     # Failed silently if the token is unkown
                     pass
-            # Send activation key by email
-            activation_key = self.get_activation_key(user.username)
-            rp = RegistrationProfile.objects.create(user=user, activation_key=activation_key)
-            rp.send_activation_email( RequestSite(request) )
+            # Could we activate the new account by email?
+            if settings.ACCOUNT_ACTIVATION_ENABLED:
+                # Creates the activation key
+                activation_key = self.get_activation_key(user.username)
+                # Create the regisration profile
+                rp = RegistrationProfile.objects.create(user=user, activation_key=activation_key)
+                # Send the activation email
+                rp.send_activation_email( RequestSite(request) )
             # Output the answer
             return http.HttpCreated()
         except MalformedRequestError as e:

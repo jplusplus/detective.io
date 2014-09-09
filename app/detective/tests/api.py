@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective.models                import Topic
+from app.detective.models                import Topic, TopicSkeleton, PLANS_CHOICES
 from app.detective.topics.common.message import SaltMixin
 from app.detective.topics.energy.models  import Organization, EnergyProject, Person, Country
 from datetime                            import datetime
@@ -24,6 +24,7 @@ def find(function, iterable):
 class ApiTestCase(ResourceTestCase):
 
     fixtures = ['app/detective/fixtures/default_topics.json',
+                'app/detective/fixtures/default_skeletons.json',
                 'app/detective/fixtures/tests_topics.json',
                 'app/detective/fixtures/tests_pillen.json',
                 'app/detective/fixtures/search_terms.json',]
@@ -67,7 +68,10 @@ class ApiTestCase(ResourceTestCase):
             email=self.contrib_email,
             is_active=True
         )
-
+        # put the user in the best plan
+        profile = contrib_user.detectiveprofileuser
+        profile.plan = PLANS_CHOICES[-1][0]
+        profile.save()
         contrib_user.groups.add(contributors)
         contrib_user.groups.add(test_contributors)
         contrib_user.set_password(self.contrib_password)
@@ -163,10 +167,35 @@ class ApiTestCase(ResourceTestCase):
         # Simply flush the database
         management.call_command('flush', verbosity=0, interactive=False)
 
+    def create_user(self, username='default', password=None, email=None, plan=None):
+        if not email:
+            email = "%s@test.me" % username
+
+        if not plan:
+            plan = PLANS_CHOICES[-1][0]
+
+        if not password:
+            password = username
+
+        user = User.objects.create(
+            username=username,
+            email=email,
+            is_active=True
+        )
+        # put the user in the best plan
+        profile = user.detectiveprofileuser
+        profile.plan = plan
+        profile.save()
+        user.set_password(password)
+        user.save()
+        return user
 
     # Utility functions (Auth, operation etc.)
     def login(self, username, password):
         return self.api_client.client.login(username=username, password=password)
+
+    def logout(self):
+        return self.api_client.client.logout()
 
     def get_super_credentials(self):
         return self.login(self.super_username, self.super_password)
@@ -193,6 +222,30 @@ class ApiTestCase(ResourceTestCase):
         self.assertEqual(len(user_permissions), len(permissions))
         for perm in user_permissions:
             self.assertTrue(perm in permissions)
+
+    def topic_to_dict(self, topic):
+        return {
+            'description': topic.description,
+            'title': topic.title,
+            'slug': topic.slug,
+            'ontology_as_json': topic.ontology_as_json,
+            'ontology_as_owl': topic.ontology_as_owl,
+            'ontology_as_mod': topic.ontology_as_mod,
+            'about': topic.about,
+            'background': topic.background,
+            'public': topic.public,
+            'featured': topic.featured,
+            'author': topic.author
+        }
+
+
+class TopicApiTestCase(ApiTestCase):
+
+    def setUp(self):
+        super(TopicApiTestCase, self).setUp()
+
+    def tearDown(self):
+        super(TopicApiTestCase, self).tearDown()
 
     # All test functions
     def test_user_signup_succeed(self):
@@ -446,13 +499,12 @@ class ApiTestCase(ResourceTestCase):
     def test_post_list_staff(self):
         # Check how many are there first.
         count = EnergyProject.objects.count()
-        self.assertHttpCreated(
-            self.api_client.post('/api/detective/energy/v1/energyproject/',
+        resp = self.api_client.post('/api/detective/energy/v1/energyproject/',
                 format='json',
                 data=self.post_data_simple,
                 authentication=self.get_super_credentials()
-            )
         )
+        self.assertHttpCreated( resp )
         # Verify a new one has been added.
         self.assertEqual(EnergyProject.objects.count(), count+1)
 
@@ -643,6 +695,28 @@ class ApiTestCase(ResourceTestCase):
         updated_jpp = Organization.objects.get(name=self.jpp.name)
         self.assertEqual(timezone.make_naive(updated_jpp.founded), new_date)
 
+    def test_patch_individual_date_staff_with_null(self):
+        """
+        Test a patch request on an invidividual's date attribute.
+        Request: /api/detective/energy/v1/organization/
+        Expected: HTTP 200 (OK)
+        """
+        # date are subject to special process with patch method.
+        data = {
+            'founded': None,
+        }
+        args = {
+            'scope'      : 'detective/energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpOK(resp)
+        self.assertValidJSONResponse(resp)
+        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        self.assertEqual(updated_jpp.founded, None)
+
     def test_patch_individual_website_staff(self):
         jpp_url  = 'http://jplusplus.org'
         data = {
@@ -660,6 +734,23 @@ class ApiTestCase(ResourceTestCase):
         updated_jpp = Organization.objects.get(name=self.jpp.name)
         self.assertEqual(updated_jpp.website_url, jpp_url)
 
+    def test_patch_individual_website_staff_with_null(self):
+        jpp_url  = 'http://jplusplus.org'
+        data = {
+            'website_url': None,
+        }
+        args = {
+            'scope'      : 'detective/energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        resp = self.patch_individual(**args)
+        self.assertHttpOK(resp)
+        self.assertValidJSONResponse(resp)
+        updated_jpp = Organization.objects.get(name=self.jpp.name)
+        self.assertEqual(updated_jpp.website_url, None)
+
     def test_patch_individual_website_unauthenticated(self):
         jpp_url  = 'http://jplusplus.org'
         data = {
@@ -670,7 +761,7 @@ class ApiTestCase(ResourceTestCase):
             'model_id'   : self.jpp.id,
             'model_name' : 'organization',
             'patch_data' : data,
-            'skip_auth'   : True,
+            'skip_auth'  : True,
         }
         resp = self.patch_individual(**args)
         self.assertHttpUnauthorized(resp)
@@ -726,6 +817,8 @@ class ApiTestCase(ResourceTestCase):
     def test_patch_with_composite_relations(self):
         """
 
+        Test if I can link one entity to many entities without overwritting previous relations
+        ref : https://github.com/jplusplus/detective.io/issues/452
         Depends of fixtures/tests_pillen.json
 
         """
@@ -735,14 +828,26 @@ class ApiTestCase(ResourceTestCase):
             resp = json.loads(resp.content)
             return resp
 
-        def patch_pilule_and_mol(pilule_id, mol_id):
+        def patch_pilule_and_mols(pilule_id, mol_ids=[]):
             patch_args = dict(
                 scope      = 'detective/test-pillen',
                 model_name = 'pill',
                 model_id   = pilule_id,
-                patch_data = {"molecules_contained" : [mol_id]})
+                patch_data = {"molecules_contained" : [{"id":mol_id} for mol_id in mol_ids]})
             resp = self.patch_individual(**patch_args)
             self.assertValidJSONResponse(resp)
+
+        def add_properties(pilule_id, molecule_id, property):
+            relation_id   = get_relationship_reference(pilule_id, molecule_id)["_relationship"]
+            relation_args = {
+                "_endnodes"                 : [pilule_id, molecule_id],
+                "_relationship"             : relation_id,
+                "quantity_(in_milligrams)." : property
+            }
+            PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
+            relation = get_relationship_reference(pilule_id, molecule_id)
+            self.assertIn("quantity_(in_milligrams).", relation.keys()        , relation)
+            self.assertEqual(relation["quantity_(in_milligrams)."], property  , relation)
 
         topic    = Topic.objects.get(slug='test-pillen')
         models   = topic.get_models_module()
@@ -750,40 +855,54 @@ class ApiTestCase(ResourceTestCase):
         PillMoleculesContainedMoleculeProperties = models.PillMoleculesContainedMoleculeProperties
         Molecule                                 = models.Molecule
         Pill                                     = models.Pill
-        # create entities pilule and mol1
-        pilule   = Pill.objects.create(name='pilule')
-        mol1     = Molecule.objects.create(name="mol1")
-        mol2     = Molecule.objects.create(name="mol2")
-        # patch pilule to add mol1 as a molecule
-        patch_pilule_and_mol(pilule.id, mol1.id)
-        # get pilule-mol1 relation reference
-        relation_id = get_relationship_reference(pilule.id, mol1.id)["_relationship"]
-        # update relation with quantity
-        relation_args = {
-            "_endnodes"                 : [pilule.id, mol1.id],
-            "_relationship"             : relation_id,
-            "quantity_(in_milligrams)." : "10"
-        }
-        PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
-        # check
-        rel_1 = get_relationship_reference(pilule.id, mol1.id)
-        self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
-        # patch pilule to add mol2 as a molecule
-        patch_pilule_and_mol(pilule.id, mol2.id)
-        # get pilule-mol2 relation reference
-        relation_id = get_relationship_reference(pilule.id, mol2.id)["_relationship"]
-        # update relation with quantity
-        relation_args = {
-            "_endnodes"                 : [pilule.id, mol2.id],
-            "_relationship"             : relation_id,
-            "quantity_(in_milligrams)." : "20"
-        }
-        PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
-        # check
-        rel_1 = get_relationship_reference(pilule.id, mol1.id)
-        rel_2 = get_relationship_reference(pilule.id, mol2.id)
-        self.assertEqual(rel_2["quantity_(in_milligrams)."], "20")
-        self.assertEqual(rel_1["quantity_(in_milligrams)."], "10")
+        # create entities
+        pilulea       = Pill    .objects.create(name='pilule A')
+        mola          = Molecule.objects.create(name="molecule A")
+        molb          = Molecule.objects.create(name="molecule B")
+        molc          = Molecule.objects.create(name="molecule C")
+        mold_wo_infos = Molecule.objects.create(name="molecule D")
+        # start to patch
+        patch_pilule_and_mols(pilulea.id, [mola.id])
+        add_properties(pilulea.id, mola.id, "10")
+        # test to remove a relation
+        patch_pilule_and_mols(pilulea.id, [])
+        # check deletion
+        relation = get_relationship_reference(pilulea.id, mola.id)
+        self.assertNotIn("quantity_(in_milligrams).", relation.keys() , relation)
+        self.assertIsNone(relation["_relationship"] , relation)
+        # continue to add more relations
+        def patch_mol_b_c_d():
+            patch_pilule_and_mols(pilulea.id, [molb.id])
+            patch_pilule_and_mols(pilulea.id, [molb.id, molc.id, mold_wo_infos.id])
+            add_properties(pilulea.id, molb.id, "20")
+            add_properties(pilulea.id, molc.id, "30")
+        patch_mol_b_c_d()
+        #remove all again
+        patch_pilule_and_mols(pilulea.id, [])
+        # and create again
+        patch_mol_b_c_d()
+        #check final states
+        relation_pama = get_relationship_reference(pilulea.id, mola.id)
+        relation_pamb = get_relationship_reference(pilulea.id, molb.id)
+        relation_pamc = get_relationship_reference(pilulea.id, molc.id)
+        relation_pamd = get_relationship_reference(pilulea.id, mold_wo_infos.id)
+        # pila-mola
+        self.assertNotIn("quantity_(in_milligrams).", relation_pama.keys() , relation_pama)
+        self.assertIsNone(relation["_relationship"]                        , relation_pama)
+        # pila-molb
+        self.assertIn("quantity_(in_milligrams).", relation_pamb.keys()    , relation_pamb)
+        self.assertEqual(relation_pamb["quantity_(in_milligrams)."], "20"  , relation_pamb)
+        self.assertTrue(int(relation_pamb["_relationship"]) > 0            , relation_pamb)
+        self.assertTrue(relation_pamb["_endnodes"], [pilulea.id, molb.id])
+        # pila-molc
+        self.assertIn("quantity_(in_milligrams).", relation_pamc.keys()    , relation_pamc)
+        self.assertEqual(relation_pamc["quantity_(in_milligrams)."], "30"  , relation_pamc)
+        self.assertTrue(int(relation_pamc["_relationship"]) > 0            , relation_pamc)
+        self.assertTrue(relation_pamc["_endnodes"], [pilulea.id, molc.id])
+        # pila-mold
+        self.assertNotIn("quantity_(in_milligrams).", relation_pamd.keys() , relation_pamd)
+        self.assertTrue(int(relation_pamd["_relationship"]) > 0            , relation_pamd)
+        self.assertTrue(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')
@@ -828,7 +947,6 @@ class ApiTestCase(ResourceTestCase):
         resp
         self.assertHttpOK(resp)
 
-
     def test_featured_success_after_topic_delete(self):
         topic = Topic.objects.get(slug='test-topic')
         topic.delete()
@@ -838,3 +956,175 @@ class ApiTestCase(ResourceTestCase):
             format='json'
         )
         self.assertHttpOK(resp)
+
+    def test_topic_update(self):
+        topic = Topic.objects.get(slug='test-topic')
+        topic.author = self.contrib_user
+        topic.save()
+        data  = self.topic_to_dict(topic)
+        data['about'] = 'Changed'
+        resp  = self.api_client.put(
+            '/api/detective/common/v1/topic/{pk}/'.format(pk=topic.pk),
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        self.assertHttpOK(resp)
+        updated_topic = Topic.objects.get(slug='test-topic')
+        models_list = updated_topic.get_models()
+        self.assertTrue(len(models_list) > 0)
+
+    def test_topic_patch_empty_background(self):
+        # Use Case: we want to patch a topic with an empty background to remove
+        # it.
+        # Excepted: updated topic should not have any background
+        topic = Topic.objects.get(slug='test-topic')
+        data = { 'background': None }
+        resp  = self.api_client.patch(
+            '/api/detective/common/v1/topic/{pk}/'.format(pk=topic.pk),
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        updated_topic = Topic.objects.get(slug='test-topic')
+        # Accessing url attribute on topic.background will cause an error if no
+        # file is related to this background, which is what we want
+        self.assertRaises(ValueError, lambda t: t.background.url, updated_topic)
+
+    def test_topic_update_empty_background(self):
+        # Use Case: we want to patch a topic with an empty background to remove
+        # it.
+        # Excepted: updated topic should not have any background
+        topic = Topic.objects.get(slug='test-topic')
+        data  = self.topic_to_dict(topic)
+        data['background'] =  None
+        resp  = self.api_client.put(
+            '/api/detective/common/v1/topic/{pk}/'.format(pk=topic.pk),
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        updated_topic = Topic.objects.get(slug='test-topic')
+        # Accessing url attribute on topic.background will cause an error if no
+        # file is related to this background, which is what we want
+        self.assertRaises(ValueError, lambda t: t.background.url, updated_topic)
+
+    def test_topic_patch_no_image_given(self):
+        topic = Topic.objects.get(slug='test-topic')
+        data  = { 'title': u'new title' }
+
+        resp  = self.api_client.patch(
+            '/api/detective/common/v1/topic/{pk}/'.format(pk=topic.pk),
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        self.assertTrue(resp.status_code in [200, 202])
+        updated_topic = Topic.objects.get(slug='test-topic')
+        self.assertEqual(updated_topic.title, data['title'])
+        self.assertIsNotNone(updated_topic.background)
+
+class TopicSkeletonApiTestCase(ApiTestCase):
+    def setUp(self):
+        super(TopicSkeletonApiTestCase, self).setUp()
+
+    def tearDown(self):
+        super(TopicSkeletonApiTestCase, self).tearDown()
+
+    def create_topic(self, skeleton=None, credentials=None, data={}):
+        if credentials is None:
+            credentials = self.get_contrib_credentials()
+        if skeleton is None:
+            skeleton = TopicSkeleton.objects.get(title='Body Count')
+        data['topic_skeleton'] = skeleton.pk
+        return self.api_client.post(
+            '/api/detective/common/v1/topic/',
+            data=data,
+            format='json',
+            authentication=credentials
+        )
+
+    def test_topic_skeleton_list_unauthorized(self):
+        client = self.api_client
+        client.client.logout()
+        # skeletons must be accessible only for logged users
+        resp = client.get('/api/detective/common/v1/topicskeleton/',
+            format='json'
+        )
+        self.assertHttpUnauthorized(resp)
+
+    def test_topic_skeleton_list_lambda(self):
+        resp = self.api_client.get('/api/detective/common/v1/topicskeleton/',
+            format='json',
+            authentication=self.get_lambda_credentials()
+        )
+        self.assertValidJSONResponse(resp)
+
+    def test_topic_create_with_skeleton(self):
+        skeleton = TopicSkeleton.objects.get(title='Body Count')
+        resp = self.create_topic(skeleton=skeleton,
+                                 data={'title': u'Skeletonist'})
+        self.assertHttpCreated(resp)
+        created_topic = json.loads(resp.content)
+        self.assertEqual(created_topic['background'], skeleton.picture.url)
+        self.assertEqual(created_topic['skeleton_title'], skeleton.title)
+        self.assertIsNotNone(created_topic['ontology_as_json'])
+        self.assertTrue(skeleton.picture_credits in created_topic['about'])
+
+
+    def test_topic_create_with_skeleton_already_existing_title(self):
+        data = {'title': u'Existing title'}
+        resp = self.create_topic(data=data)
+        self.assertHttpCreated(resp)
+        resp = self.create_topic(data=data)
+        self.assertHttpBadRequest(resp)
+        errors = json.loads(resp.content)['topic']
+        self.assertIsNotNone(errors[u'title'])
+
+    def test_topic_create_with_skeleton_unavailble_image(self):
+        data = {'title': u'Unavailable image test', 'background_url': "http://random.stuff.co.uk"}
+        resp = self.create_topic(data=data)
+        self.assertHttpBadRequest(resp)
+        errors = json.loads(resp.content)['topic']
+        self.assertIsNotNone(errors[u'background_url'])
+
+
+    def test_create_then_patch_topic(self):
+        skeleton = TopicSkeleton.objects.get(title='Body Count')
+        resp = self.create_topic(skeleton=skeleton,
+                                 data={'title': u'Skeletonist'})
+
+        self.assertHttpCreated(resp)
+        created_topic = json.loads(resp.content)
+        self.assertEqual(created_topic['background'], skeleton.picture.url)
+        self.assertIsNotNone(created_topic['ontology_as_json'])
+
+        data  = { 'title': u'new title' }
+
+        resp  = self.api_client.patch(
+            '/api/detective/common/v1/topic/{pk}/'.format(pk=created_topic['id']),
+            data=data,
+            format='json',
+            authentication=self.get_contrib_credentials()
+        )
+        self.assertTrue(resp.status_code in [200, 202])
+        updated_topic = Topic.objects.get(slug=created_topic['slug'])
+        self.assertEqual(updated_topic.title, data['title'])
+        self.assertIsNotNone(updated_topic.background)
+
+    def test_create_unauthorized(self):
+        user = self.create_user(username='overrated', plan=PLANS_CHOICES[1][0])
+        credentials = self.login(username=user.username, password=user.username)
+
+        # should pass
+        for i in range(0, 5):
+            resp = self.create_topic(
+                credentials=credentials,
+                data={ 'title': 'Title %s' % i }
+            )
+            self.assertHttpCreated(resp)
+
+        # should fail because of the plan selection
+        resp = self.create_topic(credentials=credentials, data={'title': 'Title 5'})
+        self.assertHttpUnauthorized(resp)
+

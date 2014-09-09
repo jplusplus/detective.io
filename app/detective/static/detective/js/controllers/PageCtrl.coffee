@@ -1,4 +1,4 @@
-class PageCtrl
+class window.PageCtrl
     # Injects dependencies
     @$inject: ['$scope', '$stateParams', 'Page']
 

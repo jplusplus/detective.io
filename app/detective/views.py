@@ -14,6 +14,8 @@ import mimetypes
 
 logger = logging.getLogger(__name__)
 
+APP_TITLE = settings.APP_TITLE
+
 def __get_user(request, **kwargs):
     return get_user_model().objects.get(username=kwargs.get('user'))
 
@@ -37,21 +39,19 @@ def __get_entity(topic_obj, **kwargs):
 
 def default_social_meta(request):
     return {
-        "title": "Detective.io",
+        "title": "Data-driven investigations - %s" % APP_TITLE,
         "description": (
-            'Throw away your Moleskine! Detective.io is a platform that hosts'
-            ' your investigation and lets you make powerful queries to mine '
-            'it.'
-        ),
+            "{app_title} makes it easy to organize information. Because it "
+            "structures your research, you can explore connections in your "
+            "collected data in seconds."
+        ).format(app_title=APP_TITLE),
         "url": request.build_absolute_uri()
     }
-
-def build_meta(request, meta):
-    meta.update()
 
 def home(request, social_meta_dict=None,**kwargs):
     if social_meta_dict == None:
         social_meta_dict = default_social_meta(request)
+
     # Render template without any argument
     response = render_to_response('home.dj.html', { 'meta': social_meta_dict } )
 
@@ -110,7 +110,7 @@ def entity_list(request, **kwargs):
                 )
                 meta_title = u"{list_title} - {title}".format(
                     list_title=list_title,
-                    title=default_meta['title']
+                    title=APP_TITLE
                 )
                 meta_description = __entity_type_description(entity_klass) or \
                                    topic.description or default_meta['description']
@@ -163,9 +163,9 @@ def entity_details(request, **kwargs):
             owner=user.username
         )
 
-        meta_title = u"{entity_title} - {title}".format(
+        meta_title = u"{entity_title} - {app_title}".format(
             entity_title=entity_title,
-            title=default_meta['title']
+            app_title=APP_TITLE
         )
         meta_description = entity_description or generic_description
         if topic.background:
@@ -190,30 +190,28 @@ def topic(request, **kwargs):
     try:
         user  = __get_user(request, **kwargs)
         topic = __get_topic(request, user, **kwargs)
-
         if not topic.public:
             return home(request, None, **kwargs)
 
         default_meta  = default_social_meta(request)
-        default_title = default_meta['title']
         generic_description = (
-            u"Part of investigation {topic_title} by "
-            u"{owner} on {default_title}"
+            u"Part of investigation {topic_title} by {owner} on {app_title}"
         ).format(
             topic_title=topic.title,
             owner=user.username,
-            default_title=default_title
+            app_title=APP_TITLE
         )
 
-        meta_description = topic.description or generic_description
+        meta_description = getattr(topic, 'about', None) or generic_description
         meta_pictures    = []
         if topic.background:
             meta_pictures.append(topic.background.url)
 
-        meta_title = u"{topic_title} - {title}".format(
+        meta_title = u"{topic_title} - {app_title}".format(
             topic_title=topic.title,
-            title=default_meta['title']
+            app_title=APP_TITLE
         )
+
         meta_dict = {
             'title'       : meta_title,
             'description' : meta_description,
@@ -230,12 +228,11 @@ def profile(request, **kwargs):
         user          = __get_user(request, **kwargs)
         profile       = DetectiveProfileUser.objects.get(user=user)
         default_meta  = default_social_meta(request)
-        default_title = default_meta['title']
-        meta_title = "{user} - {title}".format(
-            user=user.username, title=default_title
+        meta_title = "{user} - {app_title}".format(
+            user=user.username, app_title=APP_TITLE
         )
-        meta_description = "{user}'s profile on {title}".format(
-            user=user.username, title=default_title
+        meta_description = "{user}'s profile on {app_title}".format(
+            user=user.username, app_title=APP_TITLE
         )
 
         meta_dict = {

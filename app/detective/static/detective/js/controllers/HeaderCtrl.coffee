@@ -1,4 +1,4 @@
-class HeaderCtrl
+class window.HeaderCtrl
     @$inject: ['$scope', '$state', 'Common', 'TopicsFactory', '$location']
 
     constructor: (@scope, @state, @Common, @TopicsFactory, @location)->

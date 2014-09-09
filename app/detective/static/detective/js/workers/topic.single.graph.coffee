@@ -1,5 +1,6 @@
+
 class GraphWorker
-    constructor : (@_) ->
+    constructor: (@_) ->
         @_.addEventListener 'message', @on_message
         @d3_layout             = d3.layout.force()
         @aggregation_type      = '__aggregation_bubble'

@@ -1,8 +1,8 @@
-class ContributeCtrl
+class window.ContributeCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$modal', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'Page', 'User', 'topic', 'forms', 'UtilsFactory']
+    @$inject: ['$scope', '$modal', '$state', '$stateParams', '$filter', '$timeout', '$location', 'Individual', 'Summary', 'Page', 'User', 'topic', 'forms', 'UtilsFactory']
 
-    constructor: (@scope, @modal, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @Page, @User, topic, @forms, @UtilsFactory)->
+    constructor: (@scope, @modal, @state, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @Page, @User, topic, @forms, @UtilsFactory)->
         @Page.title "Contribute"
         # Global loading mode
         Page.loading false
@@ -22,6 +22,7 @@ class ContributeCtrl
         @scope.removeRelated       = @removeRelated
         @scope.replaceIndividual   = @replaceIndividual
         @scope.topicResources      = @topicResources
+        @scope.seeDetails          = @seeDetails
         @scope.scrollTo            = @scrollTo
         @scope.setNewIndividual    = @setNewIndividual
         @scope.showKickStart       = @showKickStart
@@ -38,6 +39,8 @@ class ContributeCtrl
         @scope.type     = @stateParams.type
         @scope.id       = @stateParams.id
         @scope.meta     = topic
+        # check if user is allowed to contribute
+        @scope.isOverfillingThePlan = topic.author.profile.nodes_max > -1 and topic.author.profile.nodes_count[@stateParams.topic] >= topic.author.profile.nodes_max
         # Get the list of available resources
         @scope.forms    = @forms
         # By default, hide the kick-start form
@@ -211,6 +214,19 @@ class ContributeCtrl
             return false unless @fields.id? and @scope.topic
             return "/#{@scope.username}/#{@scope.topic}/#{@type}/#{@fields.id}"
 
+        hasSrefOptions: =>
+            @fields.id? and @scope.topic?
+
+        srefOptions: =>
+            return false unless @fields.id and @scope.topic
+            return {
+                username: @scope.username
+                topic   : @scope.topic
+                type    : @type
+                id      : @fields.id
+            }
+
+
         # Event when fields changed
         update: (data)=>
             params = type: @type, id: @fields.id
@@ -349,8 +365,6 @@ class ContributeCtrl
             if @isFieldFocused field
                 @focusedField.source = !@focusedField.source
 
-        isSaved: => @fields.id? and _.isEmpty( @getChanges() )
-
         isSourceURLValid: (source)=>
             return false unless source?
             @UtilsFactory.isValidURL(source.reference)
@@ -479,7 +493,7 @@ class ContributeCtrl
 
         @relationshipProperties = @modal.open
             templateUrl: '/partial/topic.contribute.relationship-properties.html'
-            controller : 'RelationshipPropertiesCtrl as form'
+            controller : 'relationshipPropertiesCtrl as form'
             resolve    :
                 # Load the properties of this field
                 properties  : => @Individual.relationships(params).$promise
@@ -540,6 +554,9 @@ class ContributeCtrl
         # Add it to the list using @scope.new
         # and save the form a first time
         @scope.addIndividual(true, form).save()
+
+    seeDetails: (individual)=>
+        @state.go 'user-topic-detail', individual.srefOptions()
 
     # Change the scrollIdx to scroll to the given individual
     scrollTo: (individual)=>

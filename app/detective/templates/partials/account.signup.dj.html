@@ -5,7 +5,7 @@
       ng-submit="signup(form)"
       novalidate>
   <div class="panel-body">
- 	  <h2>Request an account</h2>
+ 	  <h2>Request an account for the beta version</h2>
     <fieldset ng-disabled="loading">
       <div class="form-group">
         <label for="inputUsername">Username</label>
@@ -25,10 +25,10 @@
             <i class="fa fa-square-o"             ng-hide="form.username.$valid"></i>
           </span>
         </div>
-        <p class="text-danger top05" ng-show="form.username.$error.unique">
+        <p class="text-danger top05" ng-show="usernameSubmitted && form.username.$error.unique">
           This username is already taken.
         </p>
-        <p class="text-danger" ng-show="submitted && form.username.$error.required">
+        <p class="text-danger" ng-show="usernameSubmitted && form.username.$error.required">
           You have to enter a username.
         </p>
       </div>
@@ -48,13 +48,13 @@
                  placeholder="Enter your email address">
           <span class="input-group-addon">
             <i class="fa fa-check-square-o text-success" ng-show="form.email.$valid"></i>
-            <i class="fa fa-square-o"             ng-hide="form.email.$valid"></i>
+            <i class="fa fa-square-o" ng-hide="form.email.$valid"></i>
           </span>
         </div>
-        <p class="text-danger top05" ng-show="form.email.$error.unique">
+        <p class="text-danger top05" ng-show="emailSubmitted && form.email.$error.unique">
           This email is already in use.
         </p>
-        <p class="text-danger" ng-show="submitted && form.email.$error.required">
+        <p class="text-danger" ng-show="emailSubmitted && form.email.$error.required">
           You have to enter an email.
         </p>
       </div>
@@ -80,7 +80,7 @@
         <p class="text-muted top05">
           At least 6 characters.
         </p>
-        <p class="text-danger" ng-show="submitted && form.password.$error.required">
+        <p class="text-danger" ng-show="passwordSubmitted && form.password.$error.required">
           You have to enter a password.
         </p>
       </div>
@@ -94,7 +94,7 @@
                  type="password"
                  name="password2"
                  ng-model="password2"
-                 pw-match with="password"
+                 match with="password"
                  class="form-control"
                  id="inputPasswordCheck"
                  placeholder="Enter this password again">
@@ -103,10 +103,10 @@
             <i class="fa fa-square-o" ng-hide="form.password2.$valid"></i>
           </span>
         </div>
-        <p class="text-danger top05" ng-show="form.password2.$error.pwmatch">
+        <p class="text-danger top05" ng-show="form.password2.$error.match">
           Passwords don't match.
         </p>
-        <p class="text-danger" ng-show="submitted && form.password2.$error.required">
+        <p class="text-danger" ng-show="password2Submitted && form.password2.$error.required">
           You have to repeat your password.
         </p>
       </div>
@@ -119,7 +119,7 @@
                  ng-model="terms"
                  id="inputTermsCheck">
         </label>
-        <p class="text-danger" ng-show="submitted && form.terms.$error.required">
+        <p class="text-danger" ng-show="termsSubmitted && form.terms.$error.required">
             You have to agree to the <a ui-sref="page({slug:'terms'})" target="_blank" rel="nofollow" title="Terms">Terms</a> to use Detective.io
         </p>
       </div>
@@ -135,7 +135,9 @@
 
 <div class="login-form panel top30 panel-success" ng-show="signupSucceed">
   <div class="panel-heading">
-    <h2>Well done and welcome to Detective.io</h2>
-    <p>We've sent you an activation link.</p>
+    <h2>Beta account request completed!</h2>
+  </div>
+  <div class="panel-body">
+    <p>Your <strong>Detective.io</strong> beta account is now awaiting approval. We'd love to meet you soon and we'll be in touch with you during the day.</p>
   </div>
 </div>

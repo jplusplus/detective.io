@@ -19,8 +19,7 @@
         <meta name="viewport" content="width=device-width">
         <link rel="icon" type="image/png" href="{% static 'detective/img/favicon.ico' %}">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-
-        <link type='text/css' href='//fonts.googleapis.com/css?family=Arvo:400,700,300|Lato:400,300,700&amp;subset=latin,latin-ext' rel='stylesheet'>
+        <link href='http://fonts.googleapis.com/css?family=Noto+Sans:400,700|Fira+Sans:300,500,700&amp;subset=latin,latin-ext' rel='stylesheet' type='text/css'>
         {% block extracss %}{% endblock %}
         <base href="{% url 'home' %}" />
         <script type="text/javascript">
@@ -28,6 +27,7 @@
         </script>
     </head>
     <body ng-cloak  ng-class="{ 'is-home': $state.is('home.tour'), 'show-aside': Page.showAside  }">
+        <div plan-overfill-displayer class="plan-overfill-message hidden"></div>
         <div http-error-displayer></div>
         {% load cache %}
         {% cache 3600 fullpage %}

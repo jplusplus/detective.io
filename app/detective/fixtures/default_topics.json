@@ -6,7 +6,8 @@
         "first_name": "detective",
         "last_name": "detective",
         "username": "detective",
-        "password": ""
+        "password": "",
+        "is_superuser" : true
     }
 },
 {

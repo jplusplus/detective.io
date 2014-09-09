@@ -1,25 +1,27 @@
 language: python
 python:
-  - "2.7"
+- '2.7'
 notifications:
   irc:
     channels:
-      - "anchor.foonetic.net#jplusplus"
+    - anchor.foonetic.net#jplusplus
     on_success: always
     on_failure: always
+  slack:
+    secure: lc2NcRnOWDXmxoQt8wJh0947g9+cIpDaSe2SAJlXigdPL8qzq04GriV0KmRlcVBvjqB4bViWfEsn5ldtGBBiu5wyQ/nIckESfV/8zpLmUM5uEqhx1U3f9YJLDLjH1THNAJBIL9EI9DKo9IHF2uiZF0/sGj4ejorjiZC8J+K3MWk=
 before_install:
-  - export COVERALLS_REPO_TOKEN=6opRu71NU2ODTYXULbiEUS1EPTcDNcZqI
-  - export COVERALLS_SERVICE_NAME=travis-ci
-  - export DATABASE_URL=sqlite:///test.db
-  - export DJANGO_SETTINGS_MODULE=app.settings_tests
-  - export NEO4J_PORT=7474
-  - export NEO4J_VERSION=1.9.1
+- export COVERALLS_REPO_TOKEN=UDtLCy1He2SylMvJMjq1Uu9f1zVFbTim8
+- export COVERALLS_SERVICE_NAME=travis-ci
+- export DATABASE_URL=sqlite:///test.db
+- export DJANGO_SETTINGS_MODULE=app.settings_tests
+- export NEO4J_PORT=7474
+- export NEO4J_VERSION=1.9.1
 install:
-  - ./install_local_neo4j.bash $NEO4J_VERSION
-  - ./lib/neo4j/bin/neo4j start
-  - pip install -r test_requirements.txt
-  - pip install coveralls
+- ./install_local_neo4j.bash $NEO4J_VERSION
+- ./lib/neo4j/bin/neo4j start
+- pip install -r test_requirements.txt
+- pip install coveralls
 script:
-  - coverage run --source=app.detective ./manage.py test detective --pythonpath=. --traceback
+- coverage run --source=app.detective ./manage.py test detective --pythonpath=. --traceback
 after_success:
-  - coveralls
+- coveralls

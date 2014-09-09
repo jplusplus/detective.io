@@ -1,4 +1,4 @@
-angular.module("detective.directive").directive "pwMatch", ->
+angular.module("detective.directive").directive "match", ->
     restrict: 'A'
     require: "ngModel"
     transclude: true
@@ -6,7 +6,7 @@ angular.module("detective.directive").directive "pwMatch", ->
         with: "&"
     link: (scope, elem, attrs, ctrl) ->
         # Function to check the validity of the field
-        check = -> ctrl.$setValidity "pwmatch",
+        check = -> ctrl.$setValidity "match",
             # Do not check empty fields
             elem.val()   is "" or
             scope.with() is "" or

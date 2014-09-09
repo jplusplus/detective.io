@@ -1,24 +1,7 @@
-angular.module('detective.config',     ['ngProgressLite', 'ui.router', 'ui.bootstrap', 'textAngular'])
-angular.module('detective.controller', ['ngResource', 'ngSanitize', 'ngCookies'])
-angular.module('detective.directive',  ['ngResource', 'ngSanitize', 'ngCookies', 'ui.router'])
-angular.module('detective.filter',     ['ngResource', 'ngSanitize', 'ngCookies'])
-angular.module('detective.service',    ['ngResource', 'ngSanitize', 'ngCookies'])
-angular.module('detective', [
-    "angularFileUpload"
-    "detective.config"
-    "detective.controller"
-    "detective.directive"
-    "detective.filter"
-    "detective.service"
-    "monospaced.elastic"
-    "ngProgressLite"
-    "sun.scrollable"
-    "truncate"
-    "ui.bootstrap"
-    'ngCookies'
-    'ngResource'
-    'ngSanitize'
-    'ui.router'
-    'textAngular'
-])
-
+#=require modules
+#=require_tree constants
+#=require_tree controllers
+#=require_tree config
+#=require_tree directives
+#=require_tree filters
+#=require_tree services

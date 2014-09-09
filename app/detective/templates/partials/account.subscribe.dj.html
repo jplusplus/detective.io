@@ -1,0 +1,159 @@
+<form class="login-form panel panel-default top30 black"
+      name="form"
+      ng-class="{loading:loading}"
+      novalidate
+      ng-submit="subscribe(form)"
+      ng-hide="signupSucceed">
+    <div class="panel-body">
+        <h2>Subscribe to a paid plan</h2>
+        <p>
+            Thanks for subscribing to the
+            <select ng-model="subscription.plan">
+                <option value="jane">Jane</value>
+                <option value="hank">Hank</value>
+                <option value="sherlock">Sherlock</value>
+            </select>
+            plan!
+        </p>
+        <fieldset ng-disabled="loading">
+            <h3>Contact information</h3>
+            <div class="form-group" ng-if="user.is_logged">
+                <label for="inputUsername">Username</label>
+                <div class="input-group">
+                    <input required
+                           autocorrect="off"
+                           autocapitalize="off"
+                           unique="username"
+                           type="text"
+                           name="username"
+                           ng-model="subscription.username"
+                           class="form-control"
+                           id="inputUsername"
+                           ng-disabled="true"
+                           placeholder="Choose a username" />
+                    <span class="input-group-addon">
+                        <i class="fa fa-check-square-o text-success" ng-show="form.username.$valid"></i>
+                        <i class="fa fa-square-o" ng-hide="form.username.$valid"></i>
+                    </span>
+                </div>
+                <p class="text-muted top05">
+                    You’ll subscribe with your existing username. If you want to create a new one log out.
+                </p>
+            </div>
+
+            <div class="form-group" ng-if="!user.is_logged">
+                <label for="inputEmail">Email</label>
+                <div class="input-group">
+                    <input required
+                           autocorrect="off"
+                           autocapitalize="off"
+                           unique="email"
+                           type="email"
+                           name="email"
+                           ng-model="subscription.email"
+                           class="form-control"
+                           id="inputEmail"
+                           placeholder="Enter your email address" />
+                    <span class="input-group-addon">
+                        <i class="fa fa-check-square-o text-success" ng-show="form.email.$valid"></i>
+                        <i class="fa fa-square-o" ng-hide="form.email.$valid"></i>
+                    </span>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset ng-disabled="loading">
+            <h3>Billing information</h3>
+            <div class="form-group">
+                <div class="btn-group">
+                    <label class="btn btn-default" ng-model="subscription.type" btn-radio="'mr'">Mr.</label>
+                    <label class="btn btn-default" ng-model="subscription.type" btn-radio="'ms'">Ms.</label>
+                    <label class="btn btn-default" ng-model="subscription.type" btn-radio="'company'">Company</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputName">Name</label>
+                <input autocorrect="off"
+                       autocapitalize="off"
+                       type="text"
+                       name="name"
+                       ng-model="subscription.name"
+                       class="form-control"
+                       id="inputName" />
+            </div>
+            <div class="form-group">
+                <label for="inputAddress">Address</label>
+                <input autocorrect="off"
+                       autocapitalize="off"
+                       type="text"
+                       name="address"
+                       ng-model="subscription.address"
+                       class="form-control"
+                       id="inputAddress" />
+            </div>
+            <div class="form-group">
+                <label for="inputCountry">Country</label>
+                <input autocorrect="off"
+                       autocapitalize="off"
+                       type="text"
+                       name="country"
+                       ng-model="subscription.country"
+                       class="form-control"
+                       id="inputCountry" />
+            </div>
+            <div class="form-group">
+                <label for="inputSIRET">SIRET number (French companies only)</label>
+                <input autocorrect="off"
+                       autocapitalize="off"
+                       type="text"
+                       name="siret"
+                       ng-model="subscription.siret"
+                       class="form-control"
+                       id="inputSIRET" />
+            </div>
+            <div class="form-group">
+                <label for="inputVAT">VAT number (EU companies only)</label>
+                <input autocorrect="off"
+                       autocapitalize="off"
+                       type="text"
+                       name="vat"
+                       ng-model="subscription.vat"
+                       class="form-control"
+                       id="inputVAT" />
+            </div>
+            <div class="form-group">
+                <label for="inputIDNumber">Identification number (non-EU companies only)</label>
+                <input autocorrect="off"
+                       autocapitalize="off"
+                       type="text"
+                       name="idnumber"
+                       ng-model="subscription.idnumber"
+                       class="form-control"
+                       id="inputIDNumber" />
+            </div>
+        </fieldset>
+        <p>We’ll get in touch very shortly. Upon payment, your plan will be activated.</p>
+        <p>For any question, contact us at <a href="mailto:contact@detective.io">contact@detective.io</a>.</p>
+    </div>
+    <div class="tr panel-footer">
+        <button type="submit" class="btn btn-primary">Send</button>
+    </div>
+</form>
+<div class="login-form panel top30" ng-show="signupSucceed">
+    <div class="panel-heading">
+        <h2>Thanks for requesting a subscription to Detective.io.</h2>
+    </div>
+    <div ng-if="user.is_logged" class="panel-body">
+        <p>
+            It’s a pleasure to work for you!<br />
+            Until we’ve processed your request, you’ll be able to use Detective.io with your existing plan. <br />
+            Go back to your <a ui-sref="home">Dashboard</a> to continue investigating.
+        </p>
+    </div>
+    <div ng-if="!user.is_logged" class="panel-body">
+        <p>
+            It will be a pleasure to work for you!<br />
+            Until we’ve processed your request, you’ll be able to use Detective.io with a free plan.<br />
+            <a ui-sref="signup({email:subscription.email})">Create your account</a> - we’ll activate it for you very shortly.
+        </p>
+    </div>
+</div>

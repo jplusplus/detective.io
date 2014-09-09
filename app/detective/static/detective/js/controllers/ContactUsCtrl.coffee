@@ -1,4 +1,4 @@
-class ContactUsCtrl
+class window.ContactUsCtrl
     # Injects dependencies
     @$inject: ['$scope', '$stateParams', 'Page', 'Individual']
 

@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
-from app.detective.models             import QuoteRequest, Topic, TopicToken, Article, User
+from app.detective.exceptions         import UnavailableImage, NotAnImage
+from app.detective.models             import QuoteRequest, Topic, TopicToken, \
+                                             TopicSkeleton, Article, User, \
+                                             Subscription
 from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
 from app.detective.topics.common.user import UserResource
 from django.conf                      import settings
 from django.conf.urls                 import url
+from django.core.exceptions           import SuspiciousOperation
 from django.core.mail                 import EmailMultiAlternatives
 from django.core.urlresolvers         import reverse
+from django.core.files                import File
+from django.core.files.temp           import NamedTemporaryFile
 from django.db                        import IntegrityError
 from django.db.models                 import Q
 from django.http                      import Http404, HttpResponse
@@ -15,17 +21,22 @@ from django.template.loader           import get_template
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from easy_thumbnails.files            import get_thumbnailer
 from tastypie                         import fields, http
-from tastypie.authorization           import ReadOnlyAuthorization
+from tastypie.authorization           import ReadOnlyAuthorization, Authorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
 from tastypie.utils                   import trailing_slash
+from tastypie.validation              import Validation
 from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
 
+import copy
 import json
+import magic
 import re
+import urllib2, os
+from urlparse import urlparse
 
 # Only staff can consult QuoteRequests
 class QuoteRequestAuthorization(ReadOnlyAuthorization):
@@ -50,13 +61,24 @@ class QuoteRequestResource(ModelResource):
 
 class TopicAuthorization(ReadOnlyAuthorization):
     def update_detail(self, object_list, bundle):
-        contributor_group = bundle.obj.get_contributor_group().name
-        isAuthor = bundle.obj.author == bundle.request.user
-        # Only authenticated user can update there own topic or people from the contributor group
-        return isAuthor or not not bundle.request.user.groups.filter(name=contributor_group)
+        user         = bundle.request.user
+        contributors = bundle.obj.get_contributor_group().name
+        is_author    = user.is_authenticated() and bundle.obj.author == user
+        # Only authenticated user can update there own topic or people from the
+        # contributor group
+        return is_author or user.groups.filter(name=contributors).exists()
+
     # Only authenticated user can create topics
     def create_detail(self, object_list, bundle):
-        return bundle.request.user.is_authenticated()
+        authorize = False
+        user = bundle.request.user
+        if user.is_authenticated():
+            profile     = user.detectiveprofileuser
+            unlimited   = profile.topics_max() < 0
+            under_limit = profile.topics_count() < profile.topics_max()
+            authorize   = unlimited or under_limit
+        return authorize
+
     def read_list(self, object_list, bundle):
         if bundle.request.user and bundle.request.user.is_staff:
             return object_list
@@ -68,16 +90,84 @@ class TopicAuthorization(ReadOnlyAuthorization):
                 q_filter = Q(public=True)
             return object_list.filter(q_filter)
 
-class TopicResource(ModelResource):
+    def delete_detail(self, obj_list, bundle):
+        return bundle.request.user == bundle.obj.author
 
+class TopicSkeletonAuthorization(ReadOnlyAuthorization):
+    def read_list(self, object_list, bundle):
+        user = bundle.request.user
+        if user.is_authenticated():
+            plan = user.detectiveprofileuser.plan
+            return object_list.filter(target_plans__contains=plan)
+        else:
+            raise Unauthorized("Only logged user can retrieve skeletons")
+
+
+
+TopicValidationErrors = {
+    'background': {
+        'image_unavailable': {
+            'code': 0,
+            'message': "Passed url is unreachable or cause HTTP errors."
+        },
+        'oversized_file': {
+            'code': 1,
+            'message': "Passed url is unreachable or cause HTTP errors."
+        },
+        'not_an_image': {
+            'code': 2,
+            'message': "Retrieved file is not an image, please check your URL"
+        }
+    }
+}
+
+class TopicValidation(Validation):
+
+    def is_valid_background_image(self, bundle, request, errors={}):
+        def get_error_message(code):
+            errors =  TopicValidationErrors['background']
+            for error_key in errors.keys():
+                error = errors[error_key]
+                if error['code'] == code:
+                    return error['message']
+            return None
+
+        background = bundle.data.get('background', None)
+        if type(background) == type(0):
+            errors['background_url'] = get_error_message(background)
+
+
+    def is_valid_topic_title(self, bundle, request, errors={}):
+        if request and request.method == 'POST':
+            title = bundle.data['title']
+            results = Topic.objects.filter(author=request.user, title__iexact=title)
+            if results.exists():
+                title = results[0].title
+                errors['title'] = (
+                    u"You already have a topic called {title}, "
+                    u"please chose another title"
+                ).format(title=title)
+
+
+    # Ways of improvements: use FormValidation instead of Validation and
+    # relies on model validation instead of this API validation.
+    def is_valid(self, bundle, request=None):
+        errors = super(TopicValidation, self).is_valid(bundle, request)
+        self.is_valid_background_image(bundle, request, errors)
+        self.is_valid_topic_title(bundle, request, errors)
+        return errors
+
+class TopicResource(ModelResource):
     author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
-    link               = fields.CharField(attribute='get_absolute_path', readonly=True)
+    link               = fields.CharField(attribute='get_absolute_path',  readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
 
     class Meta:
-        authorization = TopicAuthorization()
-        queryset  = Topic.objects.all().prefetch_related('author')
-        filtering = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
+        always_return_data = True
+        authorization      = TopicAuthorization()
+        validation         = TopicValidation()
+        queryset           = Topic.objects.all().prefetch_related('author')
+        filtering          = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
 
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
@@ -166,17 +256,20 @@ class TopicResource(ModelResource):
         models = get_registered_models()
         # Filter model to the one under app.detective.topics
         bundle.data["models"] = []
-        # Create a thumbnail for this topic
-        try:
-            thumbnailer = get_thumbnailer(bundle.obj.background)
-            thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
-            thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
-            bundle.data['thumbnail'] = {
-                'small' : thumbnailSmall.url,
-                'medium': thumbnailMedium.url
-            }
-        # No image available
-        except InvalidImageFormatError:
+        if bundle.obj.background:
+            # Create a thumbnail for this topic
+            try:
+                thumbnailer = get_thumbnailer(bundle.obj.background)
+                thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
+                thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
+                bundle.data['thumbnail'] = {
+                    'small' : thumbnailSmall.url,
+                    'medium': thumbnailMedium.url
+                }
+            # No image available
+            except InvalidImageFormatError:
+                bundle.data['thumbnail'] = None
+        else:
             bundle.data['thumbnail'] = None
 
         for m in bundle.obj.get_models():
@@ -194,9 +287,157 @@ class TopicResource(ModelResource):
             bundle.data["models"].append(model)
         return bundle
 
+    def download_url(self, url):
+        def is_image(tmp):
+            mimetype = magic.from_file(tmp.name, True)
+            return mimetype.startswith('image')
+
+        if url == None:
+            return None
+        try:
+            name = urlparse(url).path.split('/')[-1]
+            tmp_file = NamedTemporaryFile(delete=True)
+            tmp_file.write(urllib2.urlopen(url).read())
+            tmp_file.flush()
+            if not is_image(tmp_file):
+                raise NotAnImage()
+            return File(tmp_file, name)
+        except urllib2.HTTPError:
+            raise UnavailableImage()
+        except urllib2.URLError:
+            raise UnavailableImage()
+
+    def get_skeleton(self, bundle):
+        # workaround to avoid SQL lazyness, store topic skeleton in bundle obj.
+        topic_skeleton = getattr(bundle, 'skeleton', None)
+        if not topic_skeleton:
+            topic_skeleton_pk = bundle.data.get('topic_skeleton', None)
+            if topic_skeleton_pk:
+                topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton_pk)
+                setattr(bundle, 'skeleton', topic_skeleton)
+        return topic_skeleton
+
+    def hydrate_skeleton_title(self, bundle):
+        topic_skeleton = self.get_skeleton(bundle)
+        if topic_skeleton:
+            bundle.data['skeleton_title'] = topic_skeleton.title
+        return bundle
+
+    def hydrate_author(self, bundle):
+        bundle.data['author'] = bundle.request.user
+        return bundle
+
+    def hydrate_background(self, bundle):
+        # handle background setting from topic skeleton and from background_url
+        # if provided
+        topic_skeleton = self.get_skeleton(bundle)
+        background_url = bundle.data.get('background_url', None)
+        if topic_skeleton and not background_url:
+            bundle.data['background'] = topic_skeleton.picture
+        else:
+            if background_url:
+                try:
+                    bundle.data['background'] = self.download_url(background_url)
+                except UnavailableImage:
+                    bundle.data['background'] = TopicValidationErrors['background']['image_unavailable']['code']
+                except NotAnImage:
+                    bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
+            elif bundle.data.get('background', None):
+                # we remove from data the previously setted background to avoid
+                # further supsicious operation errors
+                self.clean_bundle_key('background', bundle)
+        return bundle
+
+    def hydrate_about(self, bundle):
+        def should_have_credits(about, skeleton):
+            if not skeleton:
+                return False
+            credits = ( skeleton.picture_credits or '')
+            return (skeleton and not (credits.lower() in about.lower()))
+
+        topic_skeleton = self.get_skeleton(bundle)
+        topic_about = bundle.data.get('about', '')
+        if should_have_credits(topic_about, topic_skeleton):
+            if topic_about != '':
+                topic_about = "%s<br/><br/>" % topic_about
+
+            topic_about = "%s%s" % (topic_about, topic_skeleton.picture_credits)
+        bundle.data['about'] = topic_about
+        return bundle
+
+    def hydrate_ontology_as_json(self, bundle):
+        # feed ontology_as_json attribute when needed
+        topic_skeleton = self.get_skeleton(bundle)
+        if topic_skeleton:
+            bundle.data['ontology_as_json'] = topic_skeleton.ontology
+        else:
+            self.clean_bundle_key('ontology_as_json', bundle)
+        return bundle
+
+    def full_hydrate(self, bundle):
+        bundle = super(TopicResource, self).full_hydrate(bundle)
+        bundle = self.clean_bundle(bundle)
+        return bundle
+
+    def clean_bundle_key(self, key, bundle):
+        # safely remove a key from bundle.data dict
+        if bundle.data.has_key(key):
+            del bundle.data[key]
+        return bundle
+
+    def clean_bundle(self, bundle):
+        # we remove useless (for topic's model class) keys from bundle
+        self.clean_bundle_key('background_url', bundle)
+        self.clean_bundle_key('topic_skeleton', bundle)
+        return bundle
+
+
+class TopicSkeletonResource(ModelResource):
+    class Meta:
+        authorization = TopicSkeletonAuthorization()
+        queryset = TopicSkeleton.objects.all()
+
+    def dehydrate(self, bundle):
+        try:
+            thumbnailer     = get_thumbnailer(bundle.obj.picture)
+            thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
+            thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
+            bundle.data['thumbnail'] = {
+                'small' : thumbnailSmall.url,
+                'medium': thumbnailMedium.url
+            }
+        # No image available
+        except InvalidImageFormatError:
+            bundle.data['thumbnail'] = None
+
+        return bundle
+
 class ArticleResource(ModelResource):
     topic = fields.ToOneField(TopicResource, 'topic', full=True)
     class Meta:
         authorization = ReadOnlyAuthorization()
         queryset      = Article.objects.filter(public=True)
         filtering     = {'slug': ALL, 'topic': ALL_WITH_RELATIONS, 'public': ALL, 'title': ALL}
+
+class SubscriptionAuthorization(Authorization):
+    def read_list(self, object_list, bundle): raise Unauthorized()
+    def read_detail(self, object_list, bundle): raise Unauthorized()
+    def create_list(self, object_list, bundle): raise Unauthorized()
+    def update_list(self, object_list, bundle): raise Unauthorized()
+    def update_detail(self, object_list, bundle): raise Unauthorized()
+    def delete_list(self, object_list, bundle): raise Unauthorized()
+    def delete_detail(self, object_list, bundle): raise Unauthorized()
+
+class SubscriptionResource(ModelResource):
+    user = fields.ToOneField(UserResource, 'user', full=False)
+    class Meta:
+        authorization = SubscriptionAuthorization()
+        queryset = Subscription.objects.all()
+
+    def hydrate(self, bundle):
+        if bundle.data.has_key('user'):
+            if hasattr(bundle.request, 'user') and bundle.data['user'] == bundle.request.user.id:
+                bundle.data['user'] = bundle.request.user
+            else:
+                raise Unauthorized()
+        return bundle

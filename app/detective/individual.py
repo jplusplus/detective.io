@@ -63,6 +63,11 @@ class IndividualAuthorization(Authorization):
     def create_detail(self, object_list, bundle):
         if not self.check_contribution_permission(object_list, bundle, 'add'):
             raise Unauthorized("Sorry, only staff or contributors can create resource.")
+        # check if user can add regarding to his plan
+        topic         = get_topic_from_request(bundle.request)
+        owner_profile = topic.author.detectiveprofileuser
+        if owner_profile.nodes_max() > -1 and owner_profile.nodes_count()[topic.slug] >= owner_profile.nodes_max():
+            raise Unauthorized("Sorry, you have to upgrade your plan.")
         return True
 
     def update_detail(self, object_list, bundle):
@@ -489,7 +494,6 @@ class IndividualResource(ModelResource):
 
     def get_patch(self, request, **kwargs):
         self.method_check(request, allowed=['post'])
-        #self.is_authenticated(request)
         self.throttle_check(request)
         self.is_authenticated(request)
         bundle = self.build_bundle(request=request)
@@ -498,7 +502,7 @@ class IndividualResource(ModelResource):
         try:
             node = model.objects.get(id=kwargs["pk"])
         except ObjectDoesNotExist:
-            raise Http404("Sorry, unkown node.")
+            raise Http404("Sorry, unknown node.")
         # Parse only body string
         body = json.loads(request.body) if type(request.body) is str else request.body
         # Copy data to allow dictionary resizing
@@ -515,29 +519,48 @@ class IndividualResource(ModelResource):
                 attr = getattr(node, field)
                 # It's a relationship
                 if hasattr(attr, "_rel"):
+                    existing_rels_id = [r.id for r in attr.all()]
+                    rules  = request.current_topic.get_rules()
+                    # Model that manages properties
+                    though = rules.model( self.get_model() ).field(field).get("through")
                     related_model = attr._rel.relationship.target_model
-                    # Clean the field to avoid duplicates
-                    attr.clear()
                     # Load the json-formated relationships
                     data[field] = rels = value
-                    # For each relation...
+                    # For each relationship...
                     for idx, rel in enumerate(rels):
-                        if type(rel) in [str, int]: rel = dict(id=rel)
+                        if type(rel) in [str, int]:
+                            rel = dict(id=rel)
                         # We receied an object with an id
                         if rel.has_key("id"):
+                            # skip for existing relationships
+                            if rel["id"] in existing_rels_id:
+                                continue
                             # Get the related object
                             try:
                                 related = related_model.objects.get(id=rel["id"])
-                                # Creates the relationship between the two objects
-                                attr.add(related)
                             except ObjectDoesNotExist:
                                 del data[field][idx]
                                 # Too bad! Go to the next related object
                                 continue
+                            else:
+                                attr.add(related)
+                    # removing unused relationship
+                    rel_type = self.get_model_field(field).rel_type
+                    for relationship in node.node.relationships.all(types=[rel_type]):
+                        if relationship.end.id not in [rel["id"] for rel in rels]:
+                            relation_id = relationship.id
+                            relationship.delete()
+                            try:
+                                property = though.objects.get(_relationship=relation_id)
+                            except ObjectDoesNotExist:
+                                pass
+                            else:
+                                property.delete()
+
                 # It's a literal value and not the ID
-                elif field != 'id' and value is not None:
+                elif field != 'id':
                     field_prop = self.get_model_field(field)._property
-                    if isinstance(field_prop, DateProperty):
+                    if isinstance(field_prop, DateProperty) and value != None:
                         try:
                             # It's a date and therefor `value` should be converted as it
                             value = datetime.strptime(value, RFC_DATETIME_FORMAT)
@@ -570,15 +593,14 @@ class IndividualResource(ModelResource):
 
     def get_relationships(self, request, **kwargs):
         # Extract node id from given node uri
-        node_id = lambda uri: re.search(r'(\d+)$', uri).group(1)
+        def node_id(uri)       : return re.search(r'(\d+)$', uri).group(1)
         # Get the end of the given relationship
-        rel_from  = lambda rel, side: node_id(rel.__dict__["_dic"][side])
-        connected = lambda rel, idx: rel_from(rel, "end") == idx or rel_from(rel, "start") == idx
+        def rel_from(rel, side): return node_id(rel.__dict__["_dic"][side])
+        def connected(rel, idx): return rel_from(rel, "end") == idx or rel_from(rel, "start") == idx
 
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
         pk = kwargs['pk']
-
         node = connection.nodes.get(pk)
         # Only the relationships for a given field
         if "field" in kwargs:

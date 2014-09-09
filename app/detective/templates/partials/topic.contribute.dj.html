@@ -1,4 +1,11 @@
-<div id="contribute">
+<div ng-if="isOverfillingThePlan">
+	<div class="container">
+		<p>This investigation has reached the limit of its owner’s plan.</p>
+		<p>If you are the owner, you can upgrade now!</p>
+	</div>
+</div>
+<div ng-if="!isOverfillingThePlan" id="contribute">
+
 	<div class="contribute-start panel" ng-class="{ open: showKickStart || !individuals.length }">
 		<div class="container">
 			<h2>Add a new entity to the database</h2>
@@ -60,8 +67,8 @@
 
 			<div class="head panel-heading">
 				<div class="btns">
-					<span ng-if="individual.permalink()" >
-						<a class="left10" ng-href="[[individual.permalink()]]">See in detail</a>
+					<span ng-if="individual.hasSrefOptions()" >
+						<a class="left10" ng-click="seeDetails(individual)">See in detail</a>
 						<button class="btn btn-danger left10"
 						   ng-if="user.hasDeletePermission(meta.ontology_as_mod)"
 						   ng-click="individual.delete($index)">

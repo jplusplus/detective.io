@@ -1,0 +1,98 @@
+.topic-form {
+    .skeletons {
+        margin-top: 20px;
+        li {
+            margin-bottom: 30px;
+            min-width:  350px + 20px;
+
+            .skeletons__item {
+                min-height : 240px;
+                width      : 350px;
+                margin     : auto;
+                img {
+                    .transition(all .35s);
+                    cursor:pointer;
+                    .opacity(.5);
+                    &:before {
+                        background: #DDD;
+                        content: " ";
+                        position: relative;
+                        .transition(all .35s);
+                        .opacity(.5);
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                    }
+
+                }
+                &--selected {
+                    img {
+                        .opacity(1);
+                        &:after {
+                            .opacity(0);
+                        }
+                    }
+                }
+
+                &--new-skeleton {
+                    padding-top: 40px;
+                    padding-left: 20px;
+                    cursor:pointer;
+                    border: 3px @brand-secondary dashed;
+                    color: @brand-secondary;
+                    vertical-align: middle;
+                    p {
+                        font-size: 15px;
+                    }
+                }
+            }
+        }
+    }
+
+    .form-horizontal {
+        .short-text .ta-editor {
+            min-height: 55px;
+        }
+        .long-text .ta-editor {
+            min-height: 380px;
+        }
+
+        &.error {
+            .panel-heading {
+                color: @panel-warning-text;
+                border-color: darken(@panel-warning-border, 5);
+                background: @panel-warning-heading-bg;
+                // background-color: lighten(@brand-danger, 20%);
+            }
+            border-bottom: 1px solid @brand-danger;
+        }
+
+        &.saved {
+            .form-footer {
+                 color: @panel-success-text;
+                background: @panel-success-heading-bg;
+                border-color: darken(@panel-success-border, 5);
+            }
+
+        }
+
+    }
+
+
+    &--create {
+        .form-footer {
+            &__submit-btn {
+                min-width: 233px;
+            }
+        }
+
+    }
+    &--edit {
+        .form-footer {
+            &__submit-btn {
+                right: 10px;
+            }
+        }
+    }
+}

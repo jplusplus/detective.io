@@ -1,4 +1,4 @@
-class IndividualSingleCtrl
+class window.IndividualSingleCtrl
     # Injects dependencies
     @$inject: ['$scope', '$stateParams', '$state', 'Individual',  'topic', 'individual', 'forms', '$filter', '$anchorScroll', '$location', 'Page', 'QueryFactory', '$sce']
 

@@ -1,4 +1,4 @@
-class IndividualListCtrl
+class window.IndividualListCtrl
     # Injects dependencies
     @$inject: ['$scope', '$stateParams', '$state', 'Individual', 'Summary', 'Common', '$location',  'Page', '$timeout', '$rootScope']
 

@@ -47,8 +47,8 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     if fields: attrs.update(fields)
     # Create the class, which automatically triggers ModelBase processing
     cls = type(name, (models.NodeModel,), attrs)
-    # for Model in topic.get_models():
     signals.post_save.connect(update_topic_cache, sender=cls)
+    signals.post_delete.connect(update_topic_cache, sender=cls)
     return cls
 
 def create_model_resource(model, path=None, Resource=None, Meta=None):
@@ -212,7 +212,7 @@ def get_model_fields(model, order_by='name'):
 
             if verbose_name is None:
                 # Use the name as verbose_name fallback
-                verbose_name = pretty_name(f.name)
+                verbose_name = pretty_name(f.name).lower()
 
             field = {
                 'name'         : f.name,
@@ -463,12 +463,16 @@ class TopicCachier(object):
 
     def init_version(self, topic):
         cache.set(
-            self.__version_key(topic), 0, self.__timeout()
+            self.__version_key(topic), 1, self.__timeout()
         )
 
     def version(self, topic):
         cache_key = self.__version_key(topic)
-        return cache.get(cache_key)
+        version = cache.get(cache_key)
+        if version is None:
+            return 0
+        else:
+            return int(version)
 
     def incr_version(self, topic):
         cache_key = self.__version_key(topic)
@@ -488,6 +492,8 @@ class TopicCachier(object):
 
     def set(self, topic, suffix_key, value, timeout=None):
         rev = self.version(topic)
+        if rev is None:
+            self.incr_version(topic)
         if timeout == None:
             timeout = self.__timeout()
         cache_key = self.__get_key(topic, suffix_key)
@@ -498,14 +504,6 @@ class TopicCachier(object):
         rev = self.version(topic)
         cache.delete(cache_key, version=rev)
 
-    def debug(self, msg):
-        print "\nDEBUG - TopicCachier %s\n" % msg
-
-    def __new__(self):
-        # singleton instanciation
-        if self.__instance == None:
-            self.__instance = super(TopicCachier, self).__new__(self)
-        return self.__instance
-
 topic_cache = TopicCachier()
+
 # EOF

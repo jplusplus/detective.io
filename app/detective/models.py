@@ -1,24 +1,34 @@
 from app.detective              import utils
+from app.detective.exceptions   import UnavailableImage
 from app.detective.permissions  import create_permissions, remove_permissions
+
+from django.conf                import settings
 from django.contrib.auth.models import User, Group
+from django.core.cache          import cache
+from django.core.paginator      import Paginator
 from django.db                  import models
 from django.db.models           import signals
+from django.utils.text          import slugify
 
 from jsonfield                  import JSONField
-from tinymce.models             import HTMLField
-from psycopg2.extensions        import adapt
 from neo4django.db              import connection
-from django.core.paginator      import Paginator
-from django.core.cache          import cache
-from django.conf                import settings
+from psycopg2.extensions        import adapt
+from tinymce.models             import HTMLField
 
 import hashlib
 import importlib
 import inspect
 import os
 import random
+import re
 import string
+import urllib2
 
+# -----------------------------------------------------------------------------
+#
+#    CHOICES & ENUMERATIONS & DICTS
+#
+# -----------------------------------------------------------------------------
 PUBLIC = (
     (True, "Yes, public"),
     (False, "No, just for a small group of users"),
@@ -28,6 +38,9 @@ FEATURED = (
     (True, "Yes, show it on the homepage"),
     (False, "No, stay out of the ligth"),
 )
+
+PLANS_CHOICES = [(d[:10], d) for p in settings.PLANS for d in p.keys()]
+PLANS_BY_NAMES = dict([d for p in settings.PLANS for d in p.items()])
 
 class QuoteRequest(models.Model):
     RECORDS_SIZE = (
@@ -57,22 +70,25 @@ class QuoteRequest(models.Model):
         return "%s - %s" % (self.name, self.email,)
 
 class Topic(models.Model):
+    background_upload_to='topics'
+    class Meta:
+        unique_together = (
+            ('slug','author')
+        )
     title            = models.CharField(max_length=250, help_text="Title of your topic.")
+    skeleton_title   = models.CharField(max_length=250, null=True, blank=True)
     # Value will be set for this field if it's blank
     slug             = models.SlugField(max_length=250, db_index=True, help_text="Token to use into the url.")
-    description      = HTMLField(null=True, blank=True, help_text="A short description of what is your topic.")
+    description      = HTMLField(null=True, blank=True, verbose_name='subtitle', help_text="A short description of what is your topic.")
     about            = HTMLField(null=True, blank=True, help_text="A longer description of what is your topic.")
     public           = models.BooleanField(help_text="Is your topic public?", default=True, choices=PUBLIC)
     featured         = models.BooleanField(help_text="Is your topic a featured topic?", default=False, choices=FEATURED)
-    background       = models.ImageField(null=True, blank=True, upload_to="topics", help_text="Background image displayed on the topic's landing page.")
+    background       = models.ImageField(null=True, blank=True, upload_to=background_upload_to, help_text="Background image displayed on the topic's landing page.")
     author           = models.ForeignKey(User, help_text="Author of this topic.", null=True)
     contributor_group = models.ForeignKey(Group, help_text="", null=True, blank=True)
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
     ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
     ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
-
-    class Meta:
-        unique_together = ('author', 'slug')
 
     def __unicode__(self):
         return self.title
@@ -142,6 +158,11 @@ class Topic(models.Model):
     def save(self, *args, **kwargs):
         # Ensure that the module field is populated with app_label()
         self.ontology_as_mod = self.app_label()
+
+        # For automatic slug generation.
+        if not self.slug:
+            self.slug = slugify(self.title)[:50]
+
         # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
         # Refresh the API
@@ -205,29 +226,27 @@ class Topic(models.Model):
     def module(self):
         return self.ontology_as_mod
 
-    @property
     def entities_count(self):
         """
 
         Return the number of entities in the current topic.
         Used to inform administrator.
-        Expensive request. Can be cached a long time.
+        Expensive request. Cached a long time.
 
         """
         if not self.id: return 0
-        cache_key = "topic_{topic_slug}_entities_count".format(topic_slug=self.app_label())
-        response = cache.get(cache_key)
+        cache_key = "entities_count"
+        response = utils.topic_cache.get(self, cache_key)
         if response is None:
             query = """
-                START root=node(*)
-                MATCH p = (root)--(leaf)<-[:`<<INSTANCE>>`]-(type)
-                WHERE HAS(leaf.name)
-                AND type.app_label = '{app_label}'
-                AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
-                RETURN count(leaf) AS count
+                START a = node(0)
+                MATCH a-[`<<TYPE>>`]->(b)--> c
+                WHERE b.app_label = "{app_label}"
+                AND not(has(c._relationship))
+                RETURN count(c) as count;
             """.format(app_label=self.app_label())
             response = connection.cypher(query).to_dicts()[0].get("count")
-            cache.set(cache_key, response)
+            utils.topic_cache.set(self, cache_key, response, 60*60*12) # cached 12 hours
         return response
 
     def get_models_output(self):
@@ -246,6 +265,7 @@ class Topic(models.Model):
         _out = []
         for model in self.get_models():
             for field in [f for f in utils.get_model_fields(model) if f['type'].lower() == 'relationship']:
+                _out += [{'name': field['name'], 'label': field['verbose_name'], 'subject': model._meta.object_name}]
                 if "search_terms" in field["rules"]:
                     _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
         return _out + [ output(rs) for rs in terms ]
@@ -383,7 +403,7 @@ class Topic(models.Model):
 
 class TopicToken(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this token is related to.")
-    token      = models.CharField(editable=False, max_length=32, help_text="Title of your article.")
+    token      = models.CharField(editable=False, max_length=32, help_text="Title of your article.", db_index=True)
     email      = models.CharField(max_length=255, default=None, null=True, help_text="Email to invite.")
     created_at = models.DateTimeField(auto_now_add=True, default=None, null=True)
 
@@ -406,6 +426,19 @@ class TopicToken(models.Model):
                 pass
         super(TopicToken, self).save()
 
+class TopicSkeleton(models.Model):
+    title           = models.CharField(max_length=250, help_text="Title of the skeleton")
+    description     = HTMLField(null=True, blank=True, help_text="A small description of the skeleton")
+    picture         = models.ImageField(upload_to="topics-skeletons", null=True, blank=True, help_text='The default picture for this skeleton')
+    picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
+    schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
+    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
+    target_plans    = models.CharField(max_length=60)
+
+    def selected_plans(self):
+        plans = re.sub('[\[\]]', '', self.target_plans)
+        return plans.split(',')
+
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
     title      = models.CharField(max_length=250, help_text="Title of your article.")
@@ -425,6 +458,33 @@ class Article(models.Model):
         return '<a href="%s">%s</a>' % (path, path, )
     link.allow_tags = True
 
+class Subscription(models.Model):
+    TYPES = (
+        ("mr", "Mr."),
+        ("ms", "Ms."),
+        ("company", "Company")
+    )
+    PLANS = (
+        ("jane", "Jane"),
+        ("hank", "Hank"),
+        ("sherlock", "Sherlock")
+    )
+    STATUSES = (
+        (0, "..."),
+        (1, "Invoice sent"),
+        (2, "Processed")
+    )
+    email = models.EmailField(max_length=100, blank=True, null=True)
+    user =  models.ForeignKey(User, null=True, blank=True)
+    type = models.CharField(choices=TYPES, max_length=7)
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=255)
+    country = models.CharField(max_length=100)
+    siret = models.CharField(max_length=20, blank=True, null=True)
+    vat = models.CharField(max_length=20, blank=True, null=True)
+    identification = models.CharField(max_length=20, blank=True, null=True)
+    plan = models.CharField(choices=PLANS, max_length=8)
+    status = models.IntegerField(choices=STATUSES, default=0)
 
 # This model aims to describe a research alongside a relationship.
 class SearchTerm(models.Model):
@@ -466,6 +526,7 @@ class SearchTerm(models.Model):
                 for f in utils.get_model_fields(model):
                     if f["name"] == self.name:
                         field = f
+            field["rules"]["through"] = None # Yes, this is ugly but this field is creating Pickling errors.
             utils.topic_cache.set(self.topic, cache_key, field)
         return field
 
@@ -491,8 +552,6 @@ class SearchTerm(models.Model):
 #    CUSTOM USER
 #
 # -----------------------------------------------------------------------------
-PLANS_CHOICES = [(d.lower()[:10], d) for p in settings.PLANS for d in p.keys()]
-
 class DetectiveProfileUser(models.Model):
     user = models.OneToOneField(User)
     plan = models.CharField(max_length=10, choices=PLANS_CHOICES, default=PLANS_CHOICES[0][0])
@@ -506,6 +565,20 @@ class DetectiveProfileUser(models.Model):
         hash_email = hashlib.md5(self.user.email.strip().lower()).hexdigest()
         return "http://www.gravatar.com/avatar/{hash}?s=200&d=mm".format(
             hash=hash_email)
+
+    def topics_count (self): return Topic.objects.filter(author=self.user).count()
+    def topics_max   (self):
+        if self.user.is_superuser:
+            return -1
+        else:
+            return PLANS_BY_NAMES[self.get_plan_display()]["max_investigation"]
+    def nodes_max    (self):
+        if self.user.is_superuser:
+            return -1
+        else:
+            return PLANS_BY_NAMES[self.get_plan_display()]["max_entities"]
+    # NOTE: Very expensive if cache is disabled
+    def nodes_count  (self): return dict([(topic.slug, topic.entities_count()) for topic in self.user.topic_set.all()])
 
 # -----------------------------------------------------------------------------
 #
@@ -542,7 +615,11 @@ def user_created(*args, **kwargs):
     DetectiveProfileUser.objects.get_or_create(user=kwargs.get('instance'))
 
 def update_topic_cache(*args, **kwargs):
-    """ update the topic cache version on topic update or sub-model update """
+    """
+
+    update the topic cache version on topic update or sub-model update
+
+    """
     instance = kwargs.get('instance')
     if not isinstance(instance, Topic):
         try:
@@ -555,9 +632,8 @@ def update_topic_cache(*args, **kwargs):
         # if topic just been created we gonna bind its sub models signals
         if isinstance(instance, Topic) and kwargs.get('created'):
             utils.topic_cache.init_version(topic)
-
             for Model in topic.get_models():
-                signals.post_save.connect(update_topic_cache, sender=Model, weak=False )
+                signals.post_save.connect(update_topic_cache, sender=Model, weak=False)
         else:
             # we increment the cache version of this topic, this will "invalidate" every
             # previously stored information related to this topic
@@ -572,7 +648,5 @@ signals.post_save.connect(update_topic_cache   , sender=Topic)
 signals.post_save.connect(update_permissions   , sender=Topic)
 signals.pre_delete.connect(remove_topic_cache  , sender=Topic)
 signals.post_delete.connect(remove_permissions , sender=Topic)
-
-
 
 # EOF

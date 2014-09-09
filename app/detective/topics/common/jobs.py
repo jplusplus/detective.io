@@ -11,10 +11,12 @@
 # Last mod : 30-Jul-2014
 # -----------------------------------------------------------------------------
 from tastypie.resources         import Resource
+from django.core.exceptions     import ObjectDoesNotExist
 from tastypie                   import fields
 from rq.job                     import Job
 from django.contrib.auth.models import User
 from rq                         import get_current_job
+from rq.exceptions              import NoSuchJobError
 from django.utils.timezone      import utc
 from neo4django.db              import connection
 from django.conf                import settings
@@ -22,7 +24,6 @@ from django.core.paginator      import InvalidPage
 from django.core.files.storage  import default_storage
 from django.core.files.base     import ContentFile
 from cStringIO                  import StringIO
-from django.core.cache          import cache
 import app.detective.utils      as utils
 import django_rq
 import json
@@ -421,7 +422,10 @@ class JobResource(Resource):
         Returns redis document from provided id.
         """
         queue = django_rq.get_queue('default')
-        job = Job.fetch(kwargs['pk'], connection=queue.connection)
+        try:
+            job = Job.fetch(kwargs['pk'], connection=queue.connection)
+        except NoSuchJobError:
+            raise ObjectDoesNotExist()
         job.meta["user"] = bundle.request.user.pk
         job.save()
         return Document(**job.__dict__)

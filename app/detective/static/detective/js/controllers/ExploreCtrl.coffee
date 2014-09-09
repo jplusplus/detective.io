@@ -1,4 +1,4 @@
-class ExploreCtrl
+class window.ExploreCtrl
     # Injects dependencies
     @$inject: ['$scope', '$stateParams', 'Summary', '$location', '$timeout', '$filter', 'Page', 'QueryFactory', 'topic']
 

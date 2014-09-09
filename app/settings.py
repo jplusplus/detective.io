@@ -159,8 +159,8 @@ TEMPLATE_DIRS = (
 
 # JS/CSS COMPRESSOR SETTINGS
 COMPRESS_PRECOMPILERS = (
-    ('text/coffeescript', 'coffee --compile --stdio --bare'),
-    ('text/less', 'lessc --include-path="%s" {infile} {outfile}' % here('static') ),
+    ('text/coffeescript', 'node_modules/.bin/snockets {infile} > {outfile}'),
+    ('text/less', 'node_modules/.bin/lessc --include-path="%s" {infile} {outfile}' % here('static') ),
 )
 
 # Remove BeautifulSoup requirement
@@ -216,6 +216,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # One-week activation window
 ACCOUNT_ACTIVATION_DAYS = 7
+# Send or not an activation email
+ACCOUNT_ACTIVATION_ENABLED = False
 
 # MemCachier configuration took from https://devcenter.heroku.com/articles/memcachier#django
 def get_cache():
@@ -263,16 +265,17 @@ RQ_QUEUES = {
     'low'    : RQ_CONFIG
 }
 
+APP_TITLE = 'Detective.io'
+
 # GROUPS of user / Plans
 # NOTE: keys limited to 10 characters
 PLANS = [
-    {"Free"       : {"max_investigation" :  3, "max_entities"  :  100 }},
-    {"Low"        : {"max_investigation" :  5, "max_entities"  :  500 }},
-    {"Medium"     : {"max_investigation" : -1, "max_entities"  :  1000}},
-    {"High"       : {"max_investigation" : -1, "max_entities"  : -1   }},
-    {"Enterprise" : {"max_investigation" : -1, "max_entities"  : -1   }}
+    {"free"       : {"max_investigation" :  3, "max_entities"  :  100 }},
+    {"jane"       : {"max_investigation" :  5, "max_entities"  :  500 }},
+    {"hank"       : {"max_investigation" : -1, "max_entities"  :  1000}},
+    {"sherlock"   : {"max_investigation" : -1, "max_entities"  : -1   }},
+    {"enterprise" : {"max_investigation" : -1, "max_entities"  : -1   }}
 ]
-
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.

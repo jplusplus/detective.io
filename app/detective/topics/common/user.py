@@ -74,30 +74,12 @@ class ProfileResource(ModelResource):
         allowed_methods    = ['get', 'patch']
         fields             = ['id', 'location', 'organization', 'url', 'avatar', 'plan', 'topics_count', 'topics_max', 'nodes_max', 'nodes_count']
 
-class UserValidation(Validation):
-    def is_valid_username(self, bundle, request, errors={}):
-        request = bundle.request
-        if request and request.method == "POST":
-            username = bundle.data['username']
-            # match only a-z, A-Z, 0-9 and [@,+,-,_,.] chars
-            pattern  = re.compile("^([\w\.@\-\+])+$")
-            matching = re.match(pattern, username)
-            if not matching:
-                errors['username'] = 'Nice touch, but you can only use umbers, letters, and - _ or . here.'
-        return errors
-
-    def is_valid(self, bundle, request=None):
-        errors = super(UserValidation, self).is_valid(bundle, request)
-        self.is_valid_username(bundle, request, errors)
-        return errors
-
 class UserResource(ModelResource):
     profile = fields.ToOneField(ProfileResource, 'detectiveprofileuser', full=True, null=True)
 
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
-        validation         = UserValidation()
         allowed_methods    = ['get', 'post']
         always_return_data = True
         fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password', 'profile']
@@ -188,45 +170,39 @@ class UserResource(ModelResource):
     def signup(self, request, **kwargs):
         self.method_check(request, allowed=['post'])
         data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
-        bundle = self.build_bundle(obj=None, data=data, request=request)
         try:
             self.validate_request(data, ['username', 'email', 'password'])
-            errors = self._meta.validation.is_valid(bundle, request)
-            if len(errors.keys()):
-                response = self.serialize(None, {'errors': errors, 'success': False}, format='application/json' )
-                return http.HttpBadRequest(response)
-            else:
-                user = User.objects.create_user(
-                    data.get("username"),
-                    data.get("email"),
-                    data.get("password")
-                )
-                # Create an inactive user
-                setattr(user, "is_active", False)
-                user.save()
-                # User used a invitation token
-                if data.get("token", None) is not None:
-                    try:
-                        topicToken = TopicToken.objects.get(token=data.get("token"))
-                        # Add the user to the topic contributor group
-                        topicToken.topic.get_contributor_group().user_set.add(user)
-                        # Remove the token
-                        topicToken.delete()
-                    except TopicToken.DoesNotExist:
-                        # Failed silently if the token is unkown
-                        pass
-                # Could we activate the new account by email?
-                if settings.ACCOUNT_ACTIVATION_ENABLED:
-                    # Creates the activation key
-                    activation_key = self.get_activation_key(user.username)
-                    # Create the regisration profile
-                    rp = RegistrationProfile.objects.create(user=user, activation_key=activation_key)
-                    # Send the activation email
-                    rp.send_activation_email( RequestSite(request) )
-                # Output the answer
-                return http.HttpCreated()
+            user = User.objects.create_user(
+                data.get("username"),
+                data.get("email"),
+                data.get("password")
+            )
+            # Create an inactive user
+            setattr(user, "is_active", False)
+            user.save()
+            # User used a invitation token
+            if data.get("token", None) is not None:
+                try:
+                    topicToken = TopicToken.objects.get(token=data.get("token"))
+                    # Add the user to the topic contributor group
+                    topicToken.topic.get_contributor_group().user_set.add(user)
+                    # Remove the token
+                    topicToken.delete()
+                except TopicToken.DoesNotExist:
+                    # Failed silently if the token is unkown
+                    pass
+            # Could we activate the new account by email?
+            if settings.ACCOUNT_ACTIVATION_ENABLED:
+                # Creates the activation key
+                activation_key = self.get_activation_key(user.username)
+                # Create the regisration profile
+                rp = RegistrationProfile.objects.create(user=user, activation_key=activation_key)
+                # Send the activation email
+                rp.send_activation_email( RequestSite(request) )
+            # Output the answer
+            return http.HttpCreated()
         except MalformedRequestError as e:
-            return http.HttpBadRequest(e)
+            return http.HttpBadRequest(e.message)
         except IntegrityError as e:
             return http.HttpForbidden("%s in request payload (JSON)" % e)
 
@@ -364,6 +340,15 @@ class UserResource(ModelResource):
         if len(missing_fields) > 0:
             message = "Malformed request. The following fields are required: %s" % ', '.join(missing_fields)
             raise MalformedRequestError(message)
+
+        if 'username' in fields:
+            username = data['username']
+            # match only a-z, A-Z, 0-9 and [@,+,-,_,.] chars
+            pattern  = re.compile("^([\w\.@\-\+])+$")
+            matching = re.match(pattern, username)
+            if not matching:
+                message = "Nice touch, but you can only use numbers, letters, and '-,+,.,_ or . here"
+                raise MalformedRequestError(message)
 
     def get_groups(self, request, **kwargs):
         from app.detective.topics.common.resources import TopicResource

@@ -1088,7 +1088,6 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         errors = json.loads(resp.content)['topic']
         self.assertIsNotNone(errors[u'background_url'])
 
-
     def test_create_then_patch_topic(self):
         skeleton = TopicSkeleton.objects.get(title='Body Count')
         resp = self.create_topic(skeleton=skeleton,
@@ -1157,5 +1156,3 @@ class UserApiTestCase(ApiTestCase):
         }
         resp = self.signup_user(user_data)
         self.assertHttpBadRequest(resp)
-        errors = json.loads(resp.content)
-        self.assertIsNotNone(errors['errors'])

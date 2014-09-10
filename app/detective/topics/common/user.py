@@ -344,10 +344,10 @@ class UserResource(ModelResource):
         if 'username' in fields:
             username = data['username']
             # match only a-z, A-Z, 0-9 and [@,+,-,_,.] chars
-            pattern  = re.compile("^([\w\.@\-\+])+$")
+            pattern  = re.compile("^([\w\.\-])+$")
             matching = re.match(pattern, username)
             if not matching:
-                message = "Nice touch, but you can only use numbers, letters, and @, -, +, _ or . for your username"
+                message = "Nice touch, but you can only use numbers, letters, and @, -, _ or . for your username"
                 raise MalformedRequestError(message)
 
     def get_groups(self, request, **kwargs):

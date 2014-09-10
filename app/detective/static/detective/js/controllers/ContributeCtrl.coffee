@@ -132,13 +132,13 @@ class window.ContributeCtrl
                 if value? and typeof(value) is "object" and name isnt "field_sources" and name.indexOf("$") != 0
                     exist = {}
                     for entity in value
-                        entity.duplicated = exist[entity.id]? and exist[entity.id]
+                        entity._duplicated = exist[entity.id]? and exist[entity.id]
                         exist[entity.id] = true
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
                 changes = @getChanges()
                 # Looks for the differences and update the db if needed
-                @update(changes) unless _.isEmpty(changes)
+                @update(changes) if not _.isEmpty(changes) and not @data_are_updating
 
         getSimilars: (event, args)=>
             # Only load similar individual if the new one is the current instance
@@ -232,6 +232,7 @@ class window.ContributeCtrl
 
         # Event when fields changed
         update: (data)=>
+            @data_are_updating = true
             params = type: @type, id: @fields.id
             # Notice that the field is loading
             @updating = _.extend @updating, data
@@ -239,6 +240,7 @@ class window.ContributeCtrl
             @Individual.update params, data, (res)=>
                 # Record master
                 @master = _.extend @master, res
+                @data_are_updating = false
                 # Notices that we stop to load the field
                 @updating = _.omit(@updating, _.keys(data))
                 # Prevent communications between forms
@@ -536,7 +538,7 @@ class window.ContributeCtrl
         - `linked` for field which represent an Individal but isn't duplicated. The field will be shown as an uneditable field.
         ###
         switch true
-            when related instanceof @Individual or (related.id? and not related.duplicated) then 'linked'
+            when related instanceof @Individual or (related.id? and not related._duplicated) then 'linked'
             else 'input'
 
     askForNew: (related)=>

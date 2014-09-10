@@ -35,6 +35,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.hasSelectedSkeleton = @hasSelectedSkeleton
         @scope.shouldShowForm = @hasSelectedSkeleton
         @scope.max_reached = @userMaxReached()
+        @scope.user = @User
 
         @Page.title "Create a new investigation"
         @Page.loading no

@@ -170,7 +170,13 @@
         <div class="panel-footer form-footer" ng-show="(isEditing() && !!saved)">
           <div class="row">
             <div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+              <i class="fa fa-check right05"></i>
               <span class="text-success">Changes saved!</span>
+              <span ng-if="topic.slug">&nbsp;Go to your investigation <a ui-sref="user-topic({
+                  username: user.username,
+                  topic: topic.slug
+                })">[[ topic.title ]]</a>
+                </span>
             </div>
           </div>
         </div>

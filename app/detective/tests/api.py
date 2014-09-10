@@ -1137,7 +1137,7 @@ class UserApiTestCase(ApiTestCase):
         super(UserApiTestCase, self).tearDown()
 
     def test_user_signup_allowed_caracaters(self):
-        special_chars = "@.+_-"
+        special_chars = "._-"
         user_data = {
             'username':"UserName" + special_chars,
             'email':"myemail@test.me",
@@ -1148,7 +1148,7 @@ class UserApiTestCase(ApiTestCase):
 
 
     def test_user_signup_unallowed_caracaters_space(self):
-        special_chars = " *&^/"
+        special_chars = " *&^/+@"
         user_data = {
             'username':"username" + special_chars,
             'email':"myemail@test.me",

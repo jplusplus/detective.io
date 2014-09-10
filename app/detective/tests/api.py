@@ -1088,7 +1088,6 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         errors = json.loads(resp.content)['topic']
         self.assertIsNotNone(errors[u'background_url'])
 
-
     def test_create_then_patch_topic(self):
         skeleton = TopicSkeleton.objects.get(title='Body Count')
         resp = self.create_topic(skeleton=skeleton,
@@ -1128,3 +1127,32 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         resp = self.create_topic(credentials=credentials, data={'title': 'Title 5'})
         self.assertHttpUnauthorized(resp)
 
+class UserApiTestCase(ApiTestCase):
+    def setUp(self):
+        # call to super setUp is required.
+        super(UserApiTestCase, self).setUp()
+
+    def tearDown(self):
+        # call to super tearDown is required.
+        super(UserApiTestCase, self).tearDown()
+
+    def test_user_signup_allowed_caracaters(self):
+        special_chars = "@.+_-"
+        user_data = {
+            'username':"UserName" + special_chars,
+            'email':"myemail@test.me",
+            'password':"r4nd0mpASSWORd_"
+        }
+        resp = self.signup_user(user_data)
+        self.assertHttpCreated(resp)
+
+
+    def test_user_signup_unallowed_caracaters_space(self):
+        special_chars = " *&^/"
+        user_data = {
+            'username':"username" + special_chars,
+            'email':"myemail@test.me",
+            'password':"r4nd0mpASSWORd_"
+        }
+        resp = self.signup_user(user_data)
+        self.assertHttpBadRequest(resp)

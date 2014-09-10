@@ -19,10 +19,12 @@ from tastypie.authentication      import Authentication, SessionAuthentication, 
 from tastypie.authorization       import ReadOnlyAuthorization
 from tastypie.constants           import ALL, ALL_WITH_RELATIONS
 from tastypie.resources           import ModelResource
+from tastypie.validation          import Validation
 from tastypie.utils               import trailing_slash
 from django.db.models             import Q
 import hashlib
 import random
+import re
 
 class GroupResource(ModelResource):
     def getTopic(bundle):
@@ -168,7 +170,6 @@ class UserResource(ModelResource):
     def signup(self, request, **kwargs):
         self.method_check(request, allowed=['post'])
         data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
-
         try:
             self.validate_request(data, ['username', 'email', 'password'])
             user = User.objects.create_user(
@@ -201,7 +202,7 @@ class UserResource(ModelResource):
             # Output the answer
             return http.HttpCreated()
         except MalformedRequestError as e:
-            return http.HttpBadRequest(e)
+            return http.HttpBadRequest(e.message)
         except IntegrityError as e:
             return http.HttpForbidden("%s in request payload (JSON)" % e)
 
@@ -339,6 +340,15 @@ class UserResource(ModelResource):
         if len(missing_fields) > 0:
             message = "Malformed request. The following fields are required: %s" % ', '.join(missing_fields)
             raise MalformedRequestError(message)
+
+        if 'username' in fields:
+            username = data['username']
+            # match only a-z, A-Z, 0-9 and [@,+,-,_,.] chars
+            pattern  = re.compile("^([\w\.@\-\+])+$")
+            matching = re.match(pattern, username)
+            if not matching:
+                message = "Nice touch, but you can only use numbers, letters, and @, -, +, _ or . for your username"
+                raise MalformedRequestError(message)
 
     def get_groups(self, request, **kwargs):
         from app.detective.topics.common.resources import TopicResource

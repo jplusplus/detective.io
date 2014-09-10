@@ -177,6 +177,14 @@ class UserAdmin(UserAdmin):
     get_plan.short_description = "Plan"
     get_plan.admin_order_field = 'detectiveprofileuser__plan'
 
+
+    actions = ['make_active']
+
+    def make_active(self, request, queryset):
+        queryset.update(is_active=True)
+    make_active.short_description = "Mark selected users as active"
+
+
 # Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)

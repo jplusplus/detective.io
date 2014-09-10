@@ -349,20 +349,21 @@ class TopicResource(ModelResource):
         return bundle
 
     def hydrate_about(self, bundle):
-        def should_have_credits(about, skeleton):
+        def should_have_credits(bundle, skeleton):
+            topic_about    = bundle.data.get('about', '')
+            background_url = bundle.data.get('background_url', None)
             if not skeleton:
                 return False
             credits = ( skeleton.picture_credits or '')
-            return (skeleton and not (credits.lower() in about.lower()))
+            return (not background_url) and skeleton and \
+                   (not (credits.lower() in topic_about.lower()))
 
         topic_skeleton = self.get_skeleton(bundle)
-        topic_about = bundle.data.get('about', '')
-        if should_have_credits(topic_about, topic_skeleton):
+        if should_have_credits(bundle, topic_skeleton):
+            topic_about = bundle.data.get('about', '')
             if topic_about != '':
                 topic_about = "%s<br/><br/>" % topic_about
-
-            topic_about = "%s%s" % (topic_about, topic_skeleton.picture_credits)
-        bundle.data['about'] = topic_about
+            bundle.data['about'] = "%s%s" % (topic_about, topic_skeleton.picture_credits)
         return bundle
 
     def hydrate_ontology_as_json(self, bundle):

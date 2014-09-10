@@ -1071,6 +1071,19 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         self.assertIsNotNone(created_topic['ontology_as_json'])
         self.assertTrue(skeleton.picture_credits in created_topic['about'])
 
+    def test_topic_create_with_skeleton_with_background_url(self):
+        # special test for caption issue: https://github.com/jplusplus/detective.io/issues/542
+        skeleton = TopicSkeleton.objects.get(title='Body Count')
+        topic_data = {
+            'title': u'Skeletonist',
+            'background_url': "http://i.imgur.com/4pObZpW.jpg"
+        }
+        resp = self.create_topic(skeleton=skeleton,
+                                 data=topic_data)
+        self.assertHttpCreated(resp)
+        created_topic = json.loads(resp.content)
+        self.assertIsNotNone(created_topic['background'])
+        self.assertTrue(created_topic.get('about') in ['', None])
 
     def test_topic_create_with_skeleton_already_existing_title(self):
         data = {'title': u'Existing title'}

@@ -17,7 +17,7 @@
                  type="text"
                  name="username"
                  ng-model="username"
-                 ng-pattern="/^([\w\.@\-\+])+$/"
+                 ng-pattern="/^([\w\.\-])+$/"
                  class="form-control"
                  id="inputUsername"
                  placeholder="Choose a username" />
@@ -33,7 +33,7 @@
           You have to enter a username.
         </p>
         <p class="text-danger" ng-show="usernameSubmitted && form.username.$error.pattern">
-          Nice touch, but you can only use numbers, letters, and @, -, +, _ or . here.
+          Nice touch, but you can only use numbers, letters, and -, _ or . here.
         </p>
 
       </div>

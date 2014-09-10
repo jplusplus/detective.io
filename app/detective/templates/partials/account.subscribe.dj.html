@@ -59,6 +59,9 @@
                         <i class="fa fa-square-o" ng-hide="form.email.$valid"></i>
                     </span>
                 </div>
+                <p class="text-danger top05" ng-show="form.email.$error.unique">
+                  Sorry you or someone else has alreasy registered with this email
+                </p>
             </div>
         </fieldset>
         <fieldset ng-disabled="loading">

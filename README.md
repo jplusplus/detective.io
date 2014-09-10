@@ -5,7 +5,7 @@
 [License](https://github.com/jplusplus/detective.io/blob/master/LICENSE) •
 [Test coverage](https://coveralls.io/r/jplusplus/detective.io) •
 [Documentation](http://docs.detective.io/en/latest/) •
-*Version 1.7.0 Seepferd*
+*Version 1.7.2 Seepferd*
 
 ## Installation
 

@@ -72,12 +72,15 @@ class TopicAuthorization(ReadOnlyAuthorization):
     # Only authenticated user can create topics
     def create_detail(self, object_list, bundle):
         authorize = False
-        user = bundle.request.user
+        user      = bundle.request.user
+        skeleton  = TopicSkeleton.objects.get(title=bundle.data['skeleton_title'])
         if user.is_authenticated():
             profile     = user.detectiveprofileuser
-            unlimited   = profile.topics_max() < 0
+            unlimited   = profile.topics_max()   < 0
             under_limit = profile.topics_count() < profile.topics_max()
             authorize   = unlimited or under_limit
+            authorize   = authorize and (profile.plan in skeleton.target_plans)
+
         return authorize
 
     def read_list(self, object_list, bundle):
@@ -102,8 +105,6 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
             return object_list.filter(target_plans__contains=plan)
         else:
             raise Unauthorized("Only logged user can retrieve skeletons")
-
-
 
 TopicValidationErrors = {
     'background': {

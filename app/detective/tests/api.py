@@ -1071,6 +1071,13 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         self.assertIsNotNone(created_topic['ontology_as_json'])
         self.assertTrue(skeleton.picture_credits in created_topic['about'])
 
+    def test_topic_create_with_skeleton_not_in_plan(self):
+        skeleton = TopicSkeleton.objects.get(title='Family Affairs')
+        resp = self.create_topic(skeleton=skeleton,
+                                 credentials=self.get_lambda_credentials(),
+                                 data={'title': u'Skeletonist'})
+        self.assertHttpUnauthorized(resp)
+
     def test_topic_create_with_skeleton_with_background_url(self):
         # special test for caption issue: https://github.com/jplusplus/detective.io/issues/542
         skeleton = TopicSkeleton.objects.get(title='Body Count')

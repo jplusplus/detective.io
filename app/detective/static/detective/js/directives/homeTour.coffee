@@ -6,7 +6,7 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
         post: (scope, element)->
             #  An event is fired to scroll to a given level
             scope.$on "tour:scrollTo", (ev, index)->
-                if index > 0 and index <= 3
+                if index > 1 and index <= 4
                     controller.scrollTo scenes[index].startPosition() + scenes[index].duration()
                 else
                     controller.scrollTo scenes[index].startPosition() + 1
@@ -41,15 +41,17 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
             # ──────────────────────────────────────────────────────────────────────
             scenes.push new ScrollScene()
                 .triggerHook(0.5)
+                .duration(600)
                 .triggerElement(".home__tour__front")
                 .addTo(controller)
                 .on("enter", enter 0)
 
-            new ScrollScene()
+            scenes.push new ScrollScene()
                 .triggerHook(0.5)
+                .duration(600)
                 .triggerElement(".home__tour__features")
                 .addTo(controller)
-                .on("enter", enter 0)
+                .on("enter", enter 1)
 
             # ──────────────────────────────────────────────────────────────────────
             # Quotes screens
@@ -74,7 +76,7 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
                         TweenMax.to(".home__tour__quotes__single:eq(#{n})", 0.5, QUOTE_SHOW)
                     )
                     .addTo(controller)
-                    .on("enter", enter 1+n)
+                    .on("enter", enter 2+n)
                     .on("enter", enterQuote n)
                     .on("leave", leave n)
 
@@ -89,7 +91,7 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
                     TweenMax.fromTo ".home__tour__get-ready__ipad", 1, {top:  100}, {top:  -400}
                 )
                 .addTo(controller)
-                .on("enter", enter QUOTE_COUNT+1)
+                .on("enter", enter QUOTE_COUNT+2)
 
             # ──────────────────────────────────────────────────────────────────────
             # Pricing screen
@@ -98,6 +100,6 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
                 .triggerHook(0.5)
                 .triggerElement(".home__tour__pricing")
                 .addTo(controller)
-                .on("enter", enter QUOTE_COUNT+2)
+                .on("enter", enter QUOTE_COUNT+3)
 
 ]

@@ -1099,7 +1099,7 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         resp = self.create_topic(data=data)
         self.assertHttpBadRequest(resp)
         errors = json.loads(resp.content)['topic']
-        self.assertIsNotNone(errors[u'background_url'])
+        self.assertIsNotNone(errors[u'background_url']['unavailable'])
 
     def test_create_then_patch_topic(self):
         skeleton = TopicSkeleton.objects.get(title='Body Count')
@@ -1139,6 +1139,18 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         # should fail because of the plan selection
         resp = self.create_topic(credentials=credentials, data={'title': 'Title 5'})
         self.assertHttpUnauthorized(resp)
+
+
+    def test_upload_over_1mb_image(self):
+        background_url = "http://upload.wikimedia.org/wikipedia/commons/2/22/Turkish_Van_Cat.jpg"
+        topic_data = {
+            'title': 'oversized',
+            'background_url': background_url
+        }
+        resp = self.create_topic(data=topic_data)
+        self.assertHttpBadRequest(resp)
+        errors = json.loads(resp.content)['topic']
+        self.assertIsNotNone(errors[u'background_url']['oversized_file'])
 
 class UserApiTestCase(ApiTestCase):
     def setUp(self):

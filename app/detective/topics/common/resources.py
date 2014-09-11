@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
-from app.detective.exceptions         import UnavailableImage, NotAnImage
+from app.detective.exceptions         import UnavailableImage, NotAnImage, OversizedFile
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
                                              Subscription
@@ -35,7 +35,8 @@ import copy
 import json
 import magic
 import re
-import urllib2, os
+import urllib2
+import os
 from urlparse import urlparse
 
 # Only staff can consult QuoteRequests
@@ -106,17 +107,17 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
 
 TopicValidationErrors = {
     'background': {
-        'image_unavailable': {
+        'unavailable': {
             'code': 0,
             'message': "Passed url is unreachable or cause HTTP errors."
         },
         'oversized_file': {
             'code': 1,
-            'message': "Passed url is unreachable or cause HTTP errors."
+            'message': "Retrieved file is oversized, please enter a new URL."
         },
         'not_an_image': {
             'code': 2,
-            'message': "Retrieved file is not an image, please check your URL"
+            'message': "Retrieved file is not an image, please check your URL."
         }
     }
 }
@@ -124,17 +125,19 @@ TopicValidationErrors = {
 class TopicValidation(Validation):
 
     def is_valid_background_image(self, bundle, request, errors={}):
-        def get_error_message(code):
-            errors =  TopicValidationErrors['background']
-            for error_key in errors.keys():
-                error = errors[error_key]
+        def get_error(code):
+            topic_errors =  TopicValidationErrors['background']
+            for error_key in topic_errors.keys():
+                error = topic_errors[error_key]
                 if error['code'] == code:
-                    return error['message']
-            return None
+                    return error_key, error
+            return None, None
 
         background = bundle.data.get('background', None)
         if type(background) == type(0):
-            errors['background_url'] = get_error_message(background)
+            key, error = get_error(background)
+            errors['background_url'] = {}
+            errors['background_url'][key] = error
 
 
     def is_valid_topic_title(self, bundle, request, errors={}):
@@ -288,9 +291,16 @@ class TopicResource(ModelResource):
         return bundle
 
     def download_url(self, url):
+        tmp_file = None
         def is_image(tmp):
             mimetype = magic.from_file(tmp.name, True)
             return mimetype.startswith('image')
+
+        def is_oversized(tmp, url):
+            max_size_in_bytes = 1 * 1024 ** 2 # 1MB
+            file_size = os.stat(tmp.name).st_size
+            oversized = file_size > max_size_in_bytes
+            return oversized
 
         if url == None:
             return None
@@ -301,6 +311,8 @@ class TopicResource(ModelResource):
             tmp_file.flush()
             if not is_image(tmp_file):
                 raise NotAnImage()
+            if is_oversized(tmp_file, url):
+                raise OversizedFile()
             return File(tmp_file, name)
         except urllib2.HTTPError:
             raise UnavailableImage()
@@ -339,9 +351,12 @@ class TopicResource(ModelResource):
                 try:
                     bundle.data['background'] = self.download_url(background_url)
                 except UnavailableImage:
-                    bundle.data['background'] = TopicValidationErrors['background']['image_unavailable']['code']
+                    bundle.data['background'] = TopicValidationErrors['background']['unavailable']['code']
                 except NotAnImage:
                     bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
+                except OversizedFile:
+                    bundle.data['background'] = TopicValidationErrors['background']['oversized_file']['code']
+
             elif bundle.data.get('background', None):
                 # we remove from data the previously setted background to avoid
                 # further supsicious operation errors

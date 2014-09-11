@@ -59,7 +59,7 @@
                         <i class="fa fa-square-o" ng-hide="form.email.$valid"></i>
                     </span>
                 </div>
-                <p class="text-danger top05" ng-show="form.email.$error.unique">
+                <p class="text-danger top05" ng-show="form.email.$error.unique && !form.email.$error.required">
                   Sorry, there is already an account with this email.
                   <a ui-sref="login({'nextState':'subscribe'})">Login</a>
                 </p>

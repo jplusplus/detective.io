@@ -546,8 +546,10 @@ class IndividualResource(ModelResource):
                                 attr.add(related)
                     # removing unused relationship
                     rel_type = self.get_model_field(field).rel_type
+                    ids_of_related_nodes = [rel["id"] for rel in rels]
                     for relationship in node.node.relationships.all(types=[rel_type]):
-                        if relationship.end.id not in [rel["id"] for rel in rels]:
+                        end_points = [relationship.start.id, relationship.end.id]
+                        if not any(ep in ids_of_related_nodes for ep in end_points):
                             relation_id = relationship.id
                             relationship.delete()
                             try:

@@ -27,6 +27,7 @@ class ApiTestCase(ResourceTestCase):
                 'app/detective/fixtures/default_skeletons.json',
                 'app/detective/fixtures/tests_topics.json',
                 'app/detective/fixtures/tests_pillen.json',
+                'app/detective/fixtures/tests_double_entities.json',
                 'app/detective/fixtures/search_terms.json',]
 
     def setUp(self):
@@ -903,6 +904,54 @@ class TopicApiTestCase(ApiTestCase):
         self.assertNotIn("quantity_(in_milligrams).", relation_pamd.keys() , relation_pamd)
         self.assertTrue(int(relation_pamd["_relationship"]) > 0            , relation_pamd)
         self.assertTrue(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
+
+    def test_patch_with_composite_relations_again(self):
+        """
+
+        Test if I can link one entity to many entities without overwritting previous relations
+        Depends of fixtures/tests_double_entities.json
+
+        """
+        def get_relationship_reference(event_id, victim_id):
+            resp = self.api_client.get('/api/detective/test-double-entities/v1/event/%d/relationships/harmed/%d/' % (event_id, victim_id), follow=True, format='json')
+            self.assertValidJSONResponse(resp)
+            resp = json.loads(resp.content)
+            return resp
+
+        def patch_event_and_victim(event_id, victim_ids=[]):
+            patch_args = dict(
+                scope      = 'detective/test-double-entities',
+                model_name = 'event',
+                model_id   = event_id,
+                patch_data = {"harmed" : [{"id":vic_id} for vic_id in victim_ids]})
+            resp = self.patch_individual(**patch_args)
+            self.assertValidJSONResponse(resp)
+
+        topic                     = Topic.objects.get(slug='test-double-entities')
+        # get models
+        models                    = topic.get_models_module()
+        Country                   = models.Country
+        Event                     = models.Event
+        Victim                    = models.Victim
+        VictimDeadEventProperties = models.VictimDeadEventProperties
+        # create entities
+        event_a  = Event.objects.create(name='event A')
+        victim_a = Victim.objects.create(name="victim A")
+        victim_b = Victim.objects.create(name="victim B")
+        # start to patch
+        patch_event_and_victim(event_a.id, [victim_a.id])
+        # check
+        relation_a = get_relationship_reference(event_a.id, victim_a.id)
+        self.assertTrue(int(relation_a["_relationship"]) > 0 , relation_a)
+        self.assertTrue(relation_a["_endnodes"]              , [event_a.id, victim_a.id])
+        patch_event_and_victim(event_a.id, [victim_a.id, victim_b.id])
+        # check again
+        relation_a = get_relationship_reference(event_a.id, victim_a.id)
+        self.assertTrue(int(relation_a["_relationship"]) > 0 , relation_a)
+        self.assertTrue(relation_a["_endnodes"]              , [event_a.id, victim_a.id])
+        relation_b = get_relationship_reference(event_a.id, victim_b.id)
+        self.assertTrue(int(relation_b["_relationship"]) > 0 , relation_b)
+        self.assertTrue(relation_b["_endnodes"]              , [event_a.id, victim_b.id])
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')

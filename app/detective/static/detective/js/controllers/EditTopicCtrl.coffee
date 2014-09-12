@@ -24,7 +24,6 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
             # empty object everytime.
             @master = angular.copy @topic
 
-        @Page.loading false
         @Page.title "Settings of #{@topic.title}"
 
     deleteTopicBackground: =>

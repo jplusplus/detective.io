@@ -4,8 +4,6 @@ class window.ContributeCtrl
 
     constructor: (@scope, @modal, @state, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @Page, @User, topic, @forms, @UtilsFactory)->
         @Page.title "Contribute"
-        # Global loading mode
-        Page.loading false
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────

@@ -56,7 +56,6 @@ class window.IndividualSingleCtrl
         @Individual.graph graph_params, (data) => @scope.graphnodes = data
 
         do @computeGeolocation
-        @Page.loading no
         # Set page's title
         title = @filter("individualPreview")(@individual)
         @Page.title title

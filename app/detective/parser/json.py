@@ -84,6 +84,8 @@ class VirtualApp:
     def add_model(self, desc, name=None):
         # Extract the class name
         model_name = gn(desc, "name", name).lower()
+        # Extract is_composite
+        is_composite = gn(desc, "is_composite", False)
         # Format the class name to be PEP compliant
         model_name = to_class_name(model_name)
         # Every class fields are recorded into an objects
@@ -93,7 +95,8 @@ class VirtualApp:
             "_topic"      : gn(desc, "scope"),
             # Default fields
             "_author": models.IntArrayProperty(null=True, help_text=u'People that edited this entity.', verbose_name=u'author'),
-            "_status": models.IntegerProperty(null=True, help_text=u'',verbose_name=u'status')
+            "_status": models.IntegerProperty(null=True, help_text=u'',verbose_name=u'status'),
+            "_is_composite": is_composite
         }
         # Pick some options (Meta class)
         model_options = {}
@@ -101,6 +104,7 @@ class VirtualApp:
         for f in ["verbose_name", "verbose_name_plural"]:
             # Extract those option into a separate class
             if f in desc: model_options[f] = desc[f]
+
         fields = []
         # List all fields
         for idx, field in enumerate(gn(desc, 'fields', [])):
@@ -192,7 +196,8 @@ class VirtualApp:
                 # Create a Model with the relation
                 composite_model = {
                     "name": composite_name,
-                    "fields": composite_fields
+                    "fields": composite_fields,
+                    "is_composite": True
                 }
                 # Create the new model!
                 model = self.add_model(composite_model)

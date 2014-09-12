@@ -149,7 +149,8 @@ class Topic(models.Model):
             klass = getattr(models_module, i)
             # Collect every Django's model subclass
             if inspect.isclass(klass) and issubclass(klass, models.Model):
-                models_list.append(klass)
+                if not hasattr(klass, "_is_composite") or not klass._is_composite:
+                    models_list.append(klass)
         return models_list
 
     def clean(self):

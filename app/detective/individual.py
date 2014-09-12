@@ -540,9 +540,12 @@ class IndividualResource(ModelResource):
                                 related = related_model.objects.get(id=rel["id"])
                             except ObjectDoesNotExist:
                                 del data[field][idx]
-                                # Too bad! Go to the next related object
                                 continue
                             else:
+                                # skip self loop-edges (Fix for #553, should be allowed but hotfix first)
+                                if type(related) is type(node) and related.id == node.id:
+                                    del data[field][idx]
+                                    continue
                                 attr.add(related)
                     # removing unused relationship
                     rel_type = self.get_model_field(field).rel_type

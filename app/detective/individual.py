@@ -71,6 +71,7 @@ class IndividualAuthorization(Authorization):
         return True
 
     def update_detail(self, object_list, bundle):
+        import ipdb; ipdb.set_trace()
         if not self.check_contribution_permission(object_list, bundle, 'change'):
             raise Unauthorized("Sorry, only staff or contributors can update resource.")
         return True
@@ -552,12 +553,13 @@ class IndividualResource(ModelResource):
                         if not any(ep in ids_of_related_nodes for ep in end_points):
                             relation_id = relationship.id
                             relationship.delete()
-                            try:
-                                property = though.objects.get(_relationship=relation_id)
-                            except ObjectDoesNotExist:
-                                pass
-                            else:
-                                property.delete()
+                            if though is not None:
+                                try:
+                                    property = though.objects.get(_relationship=relation_id)
+                                except ObjectDoesNotExist:
+                                    pass
+                                else:
+                                    property.delete()
 
                 # It's a literal value and not the ID
                 elif field != 'id':

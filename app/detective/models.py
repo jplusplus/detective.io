@@ -341,7 +341,7 @@ class Topic(models.Model):
             # Query to get every result
             query = u"""
                 START st=node(*)
-                MATCH (st)<-[:`{relationship}`]-(root)<-[:`<<INSTANCE>>`]-(type)
+                MATCH (st){is_out}-[:`{relationship}`]-{is_in}(root)<-[:`<<INSTANCE>>`]-(type)
                 WHERE HAS(root.name)
                 AND HAS(st.name)
                 AND ID(st) = {id}
@@ -350,7 +350,9 @@ class Topic(models.Model):
             """.format(
                 relationship=relationship,
                 id=adapt(identifier),
-                app=adapt(self.app_label())
+                app=adapt(self.app_label()),
+                is_out='<' if relationships[0]['direction'] == 'out' else '',
+                is_in='>' if relationships[0]['direction'] == 'in' else ''
             )
         else:
             return {'errors': 'Unkown predicate type: %s' % predicate["name"]}

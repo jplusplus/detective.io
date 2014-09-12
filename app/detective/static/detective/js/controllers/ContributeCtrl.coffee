@@ -182,7 +182,7 @@ class window.ContributeCtrl
             clean   = (val, name="")->
                 # copy the current value
                 val = angular.copy val
-                value_to_return = []
+                value_to_return = val
                 if val instanceof Date
                     # remove timezone offset
                     val.setHours(val.getHours() - val.getTimezoneOffset() / 60)
@@ -190,6 +190,7 @@ class window.ContributeCtrl
                     value_to_return = val.toJSON()
                 else if typeof(val) is "object" and name isnt "field_sources"
                     # Fetch each nested value
+                    value_to_return = []
                     for pc of val
                         # ignore the nested values without id
                         continue unless val[pc].id?
@@ -197,7 +198,7 @@ class window.ContributeCtrl
                         if not _.findWhere(value_to_return, {id: val[pc].id})?
                             # Create a new object that only contains an id
                             value_to_return[pc] = id: val[pc].id
-                else if value_to_return == "" or value_to_return == undefined
+                else if value_to_return == "" or value_to_return == undefined or _.isEmpty(value_to_return)
                     # Empty input must be null
                     value_to_return = null
                 return value_to_return

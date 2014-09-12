@@ -71,7 +71,6 @@ class IndividualAuthorization(Authorization):
         return True
 
     def update_detail(self, object_list, bundle):
-        import ipdb; ipdb.set_trace()
         if not self.check_contribution_permission(object_list, bundle, 'change'):
             raise Unauthorized("Sorry, only staff or contributors can update resource.")
         return True

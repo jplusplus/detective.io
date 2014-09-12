@@ -340,11 +340,10 @@ class Topic(models.Model):
             relationship  = relationships[0]["rel_type"]
             # Query to get every result
             query = u"""
-                START st=node(*)
+                START st=node({id})
                 MATCH (st){is_out}-[:`{relationship}`]-{is_in}(root)<-[:`<<INSTANCE>>`]-(type)
                 WHERE HAS(root.name)
                 AND HAS(st.name)
-                AND ID(st) = {id}
                 AND type.app_label = {app}
                 RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
             """.format(

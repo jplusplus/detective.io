@@ -5,6 +5,7 @@ angular.module('detective.config').config [
         $locationProvider.html5Mode true
         # Not found URL
         $urlRouterProvider.otherwise("/404");
+
         # ui-router configuration
         $stateProvider
             .state('home',
@@ -72,11 +73,13 @@ angular.module('detective.config').config [
             )
             .state('login',
                 url: "/login/?nextState&nextParams"
+                auth: false # authenticated users cannot access this page
                 controller: LoginCtrl
                 templateUrl: '/partial/account.login.html'
             )
             .state('signup',
                 url: "/signup/?email"
+                auth: false # authenticated users cannot access this page
                 controller: UserCtrl
                 templateUrl: '/partial/account.signup.html'
             )

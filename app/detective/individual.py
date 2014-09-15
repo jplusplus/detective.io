@@ -628,25 +628,27 @@ class IndividualResource(ModelResource):
                     rules  = request.current_topic.get_rules()
                     # Model that manages properties
                     though = rules.model( self.get_model() ).field(kwargs["field"]).get("through")
-                    # Get the properties for this relationship
-                    try:
-                        properties = though.objects.get(_relationship=ids[0])
-                        # Get the module for this model
-                        module = self.dummy_class_to_ressource(though)
-                        # Instanciate the resource
-                        resource = import_class(module)()
-                        # Create a bundle with this resource
-                        bundle = resource.build_bundle(obj=properties, request=request)
-                        bundle = resource.full_dehydrate(bundle, for_list=True)
-                        # We ask for relationship properties
-                        return resource.create_response(request, bundle)
-                    except though.DoesNotExist:
-                        endnodes = [ int(pk), int(end) ]
-                        # We ask for relationship properties
-                        return self.create_response(request, {
-                            "_relationship": ids[0],
-                            "_endnodes": endnodes
-                        })
+                    if though:
+                        # Get the properties for this relationship
+                        try:
+                            properties = though.objects.get(_relationship=ids[0])
+                        except though.DoesNotExist:
+                            endnodes = [ int(pk), int(end) ]
+                            # We ask for relationship properties
+                            return self.create_response(request, {
+                                "_relationship": ids[0],
+                                "_endnodes": endnodes
+                            })
+                        else:
+                            # Get the module for this model
+                            module = self.dummy_class_to_ressource(though)
+                            # Instanciate the resource
+                            resource = import_class(module)()
+                            # Create a bundle with this resource
+                            bundle = resource.build_bundle(obj=properties, request=request)
+                            bundle = resource.full_dehydrate(bundle, for_list=True)
+                            # We ask for relationship properties
+                            return resource.create_response(request, bundle)
                 else:
                     # No relationship
                     return self.create_response(request, { "_relationship": None })

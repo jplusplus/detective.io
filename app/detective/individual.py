@@ -469,6 +469,7 @@ class IndividualResource(ModelResource):
         return self.create_response(request, object_list)
 
     def patch_sources(self, sources, node):
+        if sources == None: sources = []
         def arr_no_dict_dup(in_arr):
             out_arr = []
             for el in in_arr:

@@ -175,15 +175,22 @@
 					<div class="add-source col-sm-3">
 						<div class="add-source-wrapper">
 							<button class="btn btn-primary add-source-toggle"
+									ng-disabled="individual.updating_sources[field.name]"
 							        ng-click="individual.openSourcesModal(field)">
-								<i class="fa-book fa right05"></i>
 
+							    <span class="right05">
+							    	<i ng-if="individual.updating_sources[field.name]"
+							    	   class="fa fa-circle-o-notch fa-spin"></i>
+									<i ng-if="!individual.updating_sources[field.name]"
+									   class="fa-book fa right05"></i>
+								</span>
 								<span ng-if="hasSources(field)">
 									Edit sources
 								</span>
 								<span ng-if="!hasSources(field)">
 									Add sources
 								</span>
+
 							</button>
 						</div>
 					</div>

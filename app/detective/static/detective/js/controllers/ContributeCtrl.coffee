@@ -84,6 +84,8 @@ class window.ContributeCtrl
             @loading    = false
             # List of field that are updating
             @updating   = {}
+            # List of field sources that are updating
+            @updating_sources = {}
             # Avoid object references
             fields      = angular.copy fields
             # Copy of the database's fields
@@ -322,11 +324,14 @@ class window.ContributeCtrl
                     fields: => @fields
                     # Invididual type
                     meta: =>
+                        updating: @updating_sources
                         type: @type
                         id: @fields.id
                     field: => field
 
             fields.result.then (res)=>
+                @updating_sources[field.name] = no
+                console.log 'sources updated'
                 @fields.field_sources = res.field_sources
 
         # True if the given field can be edit

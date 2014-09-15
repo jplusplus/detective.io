@@ -23,7 +23,7 @@
                        autocapitalize="off"
                        focus-on="source.focus"
                        ng-model="source.reference"
-                       ng-blur="updateSource(source, $index)"
+                       ng-blur="updateSource(source, $index, $event)"
                        ng-disabled="loading"
                        class="form-control"/>
 
@@ -70,7 +70,8 @@
     </div>
 </div>
 <div class="modal-footer" ng-class="{ loading: loading }">
-    <button class="btn btn-primary" ng-click="save(true, null, $event)">
+    <button class="btn btn-primary"
+            ng-click="save(true)">
         <strong>Save</strong>
     </button>
     <button class="btn btn-default" ng-click="cancel()">

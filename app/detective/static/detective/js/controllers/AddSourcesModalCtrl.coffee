@@ -31,6 +31,7 @@ class window.AddSourcesModalCtrl
 
     save: (close=no)=>
         @scope.loading = yes
+        @meta.updating[@field.name] = yes
         sources = angular.copy @fields.field_sources
         data    =
             field_sources: _.map sources, (v)-> _.omit v, 'focus'
@@ -40,10 +41,10 @@ class window.AddSourcesModalCtrl
 
         # Update individual sources
         promise = @Individual.update(params, data).$promise
-        promise.then (data)=>
-            @updateMasterSources()
 
+        promise.then (data)=>
             @scope.loading = no
+            @updateMasterSources()
             @scope.$broadcast "individual:updated", data
 
         @close(promise) if close
@@ -61,10 +62,15 @@ class window.AddSourcesModalCtrl
             field: @field.name
             focus: true
 
-    updateSource: (source, $index)=>
+    isSaveOrCancelBtn: (el)=>
+        /^(save|cancel)/.test ($(el).attr('ng-click') or '')
+
+    updateSource: (source, $index, $event)=>
+        # workaround to avoid loading when we click on save/or cancel
+        return if @isSaveOrCancelBtn($event.relatedTarget)
+
         master_source = @master_sources[$index]
         has_changed   = not (source? and master_source?) or source.reference != master_source.reference
-        console.log has_changed, source, master_source
         if has_changed
             @save()
 

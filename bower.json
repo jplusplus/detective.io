@@ -25,7 +25,7 @@
     "ngprogress-lite": "1.0.5",
     "raphael": "2.1.2",
     "typeahead.js": "0.10.2",
-    "underscore": "1.5.2",
+    "underscore": "1.7.0",
     "textAngular": "1.2.0",
     "rangy": "~1.2.3",
     "ScrollMagic": "~1.0.9"

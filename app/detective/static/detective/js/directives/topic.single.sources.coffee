@@ -7,6 +7,7 @@ angular.module('detective.directive').directive 'sourcesPopover', ['UtilsFactory
         sources: '=sourcesList'
         orientation: '=?sourcesPopoverOrientation'
     controller: ["$scope", ($scope)->
+        $scope.sources = _.uniq $scope.sources, no, (item) -> item.reference
         $scope.isSourceURLValid = (source)=>
             UtilsFactory.isValidURL(source.reference)
     ]

@@ -284,10 +284,6 @@ PLANS = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'root': {
-        'level': 'WARNING',
-        'handlers': ['sentry'],
-    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse',
@@ -304,18 +300,14 @@ LOGGING = {
         },
         'null': {
             'class': 'django.utils.log.NullHandler',
-        },
-        'sentry': {
-            'level': 'ERROR',
-            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-        },
+        }
     },
     'loggers': {
         'django': {
-            'handlers': ['sentry', 'console'],
+            'handlers': ['console'],
         },
         'django.request': {
-            'handlers': ['sentry', 'console'],
+            'handlers': ['console'],
             'level': 'ERROR',
             'propagate': False,
         },
@@ -323,12 +315,12 @@ LOGGING = {
             'handlers': ['console'],
         },
         'app.detective': {
-            'handlers': ['sentry', 'console'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'rq.worker': {
-            'handlers': ['sentry', 'console'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         },

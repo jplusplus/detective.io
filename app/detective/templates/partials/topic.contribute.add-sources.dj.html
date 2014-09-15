@@ -1,0 +1,79 @@
+<div class="modal-header">
+    <h3 class="modal-title">
+        Add sources about <strong>[[ field_value ]]</strong>
+    </h3>
+</div>
+<div class="modal-body">
+    <ul class="field-sources">
+        <!-- previously created sources -->
+        <li ng-repeat="source in fields.field_sources | filter:isFieldSource">
+            <div class='input-group'>
+                <!-- source external link -->
+                <span class="input-group-btn" ng-if="isSourceURLValid(source)">
+                    <a target="_blank"
+                       ng-click="$event.stopPropagation()"
+                       ng-href="[[source.reference]]"
+                       class="btn btn-default">
+                        <i class="fa fa-external-link"></i>
+                    </a>
+                </span>
+                <!-- source input -->
+                <input type="text"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       focus-on="source.focus"
+                       ng-model="source.reference"
+                       ng-blur="updateSource(source, $index)"
+                       ng-disabled="loading"
+                       class="form-control"/>
+
+                <!-- source delete button -->
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default delete-source-btn"
+                        ng-click="deleteSource(source)">
+                        <i class="fa fa-trash-o"></i>
+                    </button>
+                </span>
+            </div>
+        </li>
+        <!-- new source form -->
+        <li>
+            <form name="form" novalidate>
+                <input type="text"
+                   name="newSource"
+                   autocorrect="off"
+                   autocapitalize="off"
+                   ng-change="addSource(form, newSource); newSource=''"
+                   ng-model="newSource"
+                   no-duplicates="getSourcesRefs(field)"
+                   ng-disabled="loading"
+                   placeholder="http://exemple.com"
+                   class="form-control pull-left" />
+                <!-- duplicate error handling -->
+                <span class='text-danger' ng-if="form.newSource.$error.nodup">Source already exists, please enter another value</span>
+            </form>
+        </li>
+    </ul>
+
+
+    <div class="form-group"
+         ng-repeat="field in form.meta.fields | filter:form.isEditable track by $index">
+
+        <label for="id_[[field.name]]">
+            [[field.verbose_name]]
+        </label>
+
+
+        <p ng-if="field.help_text" class="help-block">
+            [[field.help_text]]
+        </p>
+    </div>
+</div>
+<div class="modal-footer" ng-class="{ loading: loading }">
+    <button class="btn btn-primary" ng-click="save(true, null, $event)">
+        <strong>Save</strong>
+    </button>
+    <button class="btn btn-default" ng-click="cancel()">
+        Cancel
+    </button>
+</div>

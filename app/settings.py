@@ -284,6 +284,10 @@ PLANS = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'root': {
+        'level': 'WARNING',
+        'handlers': ['sentry'],
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse',
@@ -301,18 +305,17 @@ LOGGING = {
         'null': {
             'class': 'django.utils.log.NullHandler',
         },
-        'mail_admins': {
+        'sentry': {
             'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['sentry', 'console'],
         },
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['sentry', 'console'],
             'level': 'ERROR',
             'propagate': False,
         },
@@ -320,14 +323,19 @@ LOGGING = {
             'handlers': ['console'],
         },
         'app.detective': {
-            'handlers': ['mail_admins', 'console'],
+            'handlers': ['sentry', 'console'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'rq.worker': {
-            'handlers': ['mail_admins', 'console'],
+            'handlers': ['sentry', 'console'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'sentry.errors': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
         },
     }
 }

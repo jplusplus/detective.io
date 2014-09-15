@@ -149,8 +149,7 @@ class Topic(models.Model):
             klass = getattr(models_module, i)
             # Collect every Django's model subclass
             if inspect.isclass(klass) and issubclass(klass, models.Model):
-                if not hasattr(klass, "_is_composite") or not klass._is_composite:
-                    models_list.append(klass)
+                models_list.append(klass)
         return models_list
 
     def clean(self):
@@ -250,11 +249,6 @@ class Topic(models.Model):
             utils.topic_cache.set(self, cache_key, response, 60*60*12) # cached 12 hours
         return response
 
-    def get_models_output(self):
-        # Select only some atribute
-        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
-        return [ output(m) for m in self.get_models() ]
-
     def get_relationship_search(self):
         # For an unkown reason I can't filter by "is_literal"
         # @TODO find why!
@@ -286,9 +280,10 @@ class Topic(models.Model):
         return _out + [ output(rs) for rs in terms ]
 
     def get_syntax(self):
+        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
         syntax = {
             'subject': {
-                'model':  self.get_models_output()
+                'model': [ output(m) for m in self.get_models() if not hasattr(m, "_is_composite") or not m._is_composite ]
             },
             'predicate': {
                 'relationship': self.get_relationship_search_output(),

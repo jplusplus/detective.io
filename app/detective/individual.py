@@ -488,7 +488,7 @@ class IndividualResource(ModelResource):
         # remove empty references
         all_filtered_sources_data = filter(lambda el: el['reference'] not in [None, ''], sources)
 
-        # dump patching: remove all old field_sources and put the new ones
+        # dumb patching: remove all old field_sources and put the new ones
         [ source.delete() for source in  FieldSource.objects.filter(individual=node.id)]
         for source_data in all_filtered_sources_data:
             FieldSource.objects.create(individual=node.id, **source_data)

@@ -49,6 +49,7 @@ class window.ContributeCtrl
         @scope.Individual   = @Individual
         @scope.stateParams  = @stateParams
         @scope.UtilsFactory = @UtilsFactory
+        @scope.modal        = @modal
         # Prepare future individual
         @initNewIndividual()
         # Individual list
@@ -100,6 +101,7 @@ class window.ContributeCtrl
             # ──────────────────────────────────────────────────────────────────
             @Individual   = scope.Individual
             @UtilsFactory = scope.UtilsFactory
+            @modal        = scope.modal
             @meta         = scope.forms[type] or {}
             @related_to   = related_to
             @scope        = scope
@@ -282,24 +284,6 @@ class window.ContributeCtrl
                     @error_traceback = data.traceback if data.traceback?
                 )
 
-        getSources: (field)=> _.where @fields.field_sources, field: field.name
-
-        getSourcesRefs: (field)=> _.map @getSources(field), (s)-> s.reference
-
-        addSource: (field, value)=>
-            @fields.field_sources.push
-                reference: value
-                field: field.name
-
-        deleteSource:(source, $event)=>
-            $event.preventDefault() if $event?
-            @fields.field_sources = _.reject @fields.field_sources, (e)->
-                e.field == source.field and e.reference == source.reference
-
-        hasSources: (field)->
-            sources = @getSources field
-            (not _.isEmpty sources) and _.some sources, (e)-> e? and e.reference?
-
         # Load an individual using its id
         load: (id, related_to=null)=>
             @loading    = true
@@ -322,6 +306,28 @@ class window.ContributeCtrl
                         @isClosed  = true
                         @isRemoved = false
                         @isNotFound = true
+
+        getSources: (field)=> _.where @fields.field_sources, field: field.name
+
+        hasSources: (field)=>
+            sources = @getSources(field)
+            (not _.isEmpty sources) and _.some sources, (e)-> e? and e.reference?
+
+        openSourcesModal: (field)=>
+            fields = @modal.open
+                templateUrl: '/partial/topic.contribute.add-sources.html'
+                controller : 'addSourcesModalCtrl'
+                resolve    :
+                    # Load the properties of this field
+                    fields: => @fields
+                    # Invididual type
+                    meta: =>
+                        type: @type
+                        id: @fields.id
+                    field: => field
+
+            fields.result.then (res)=>
+                @fields.field_sources = res.field_sources
 
         # True if the given field can be edit
         isEditable: (field)=>
@@ -376,9 +382,7 @@ class window.ContributeCtrl
             if @isFieldFocused field
                 @focusedField.source = !@focusedField.source
 
-        isSourceURLValid: (source)=>
-            return false unless source?
-            @UtilsFactory.isValidURL(source.reference)
+
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
@@ -522,7 +526,6 @@ class window.ContributeCtrl
         disable = => delete @relationshipProperties
         # Remove the instance when closing the modal
         @relationshipProperties.result.then disable, disable
-
 
     removeRelated: (individual, key, index)=>
         if individual.fields[key][index]?

@@ -22,6 +22,7 @@ class window.SearchFormCtrl
         # Rootscope events
         # ----------------
         @rootScope.$on 'topic:updated', =>
+            @human_query = ""
             @topic = @TopicsFactory.topic
 
         # ──────────────────────────────────────────────────────────────────────

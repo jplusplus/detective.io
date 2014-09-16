@@ -1,18 +1,18 @@
-from django.forms.forms     import pretty_name
-from django.core.cache import cache
-from django.core.validators import validate_email
+from django.core.cache      import cache
 from django.core.exceptions import ValidationError
-from random    import randint
-from os.path   import isdir, join
-from os        import listdir
+from django.core.validators import validate_email
+from django.db.models       import signals
+from django.forms.forms     import pretty_name
+from os                     import listdir
+from os.path                import isdir, join
+from random                 import randint
 import importlib
 import inspect
+import itertools
+import logging
 import os
 import re
 import tempfile
-import itertools
-import logging
-from django.db.models import signals
 logger = logging.getLogger(__name__)
 
 # for relative paths
@@ -245,7 +245,7 @@ def get_model_nodes():
         if randint(0,10) == 10: del get_model_nodes.buffer
         return results
     query = """
-        START n=node(*)
+        START n=node(0)
         MATCH n-[r:`<<TYPE>>`]->t
         WHERE HAS(t.name)
         RETURN t.name as name, ID(t) as id

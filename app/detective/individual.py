@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective                      import register
+from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request
 from app.detective.topics.common.models import FieldSource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
-from django.core.exceptions             import ObjectDoesNotExist
+from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
 from django.db.models.query             import QuerySet
@@ -503,21 +503,138 @@ class IndividualResource(ModelResource):
         for source in sources_to_add:
             FieldSource.objects.create(individual=node.id, **source)
 
+
+    def validate(self, data):
+        cleaned_data = {}
+        for field_name in data:
+            field = self.get_model_field(field_name)
+            if field is not None:
+                # Only literal values have a _property attribute
+                if hasattr(field, "_property"):
+                    formfield = field._property.formfield()
+                    try:
+                        # Validate data
+                        cleaned_data[field_name] = formfield.clean(data[field_name])
+                    except ValidationError as e:
+                        # Raise the same error the field name as key
+                        raise ValidationError({field_name: e.messages})
+                # The given value is a relationship
+                elif hasattr(field, "target_model") and type(data[field_name]) is list:
+                    # The validation method will collect targets ID
+                    cleaned_data[field_name] = []
+                    # Relationships can be added using to ways:
+                    # * a list of numeric id
+                    # * a list of objects containing an id key
+                    for rel in data[field_name]:
+                        # Common error message
+                        error = "Bad relationship value"
+                        # Evaluate the relation as a string:
+                        if type(rel) is str:
+                            # it must be a numeric value
+                            if rel.isnumeric():
+                                # We can add the value to the list.
+                                # We take care of casting it to integer.
+                                cleaned_data[field_name].append( int(rel) )
+                            else:
+                                raise ValidationError({field_name: error})
+                        # This is an integer, we're just passing
+                        elif type(rel) is int:
+                            # We can add the value to the list
+                            cleaned_data[field_name].append(rel)
+                        # This is an object
+                        elif type(rel) is dict:
+                            # The given object as no ID
+                            if "id" not in rel:
+                                raise ValidationError({field_name: error})
+                            else:
+                                # Add and cast the value
+                                cleaned_data[field_name].append( int(rel["id"]) )
+                # The type of the value was unkown
+                else: raise ValidationError({field_name: "Must be a list of ID."})
+        return cleaned_data
+
     def get_patch(self, request, **kwargs):
+        pk = kwargs["pk"]
+        # This should be a POST request
         self.method_check(request, allowed=['post'])
         self.throttle_check(request)
+        # User must be authentication
         self.is_authenticated(request)
         bundle = self.build_bundle(request=request)
+        # User allowed to update this model
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
+        # Current model
         model = self.get_model()
-        try:
-            node = model.objects.get(id=kwargs["pk"])
-        except ObjectDoesNotExist:
-            raise Http404("Sorry, unknown node.")
         # Parse only body string
         body = json.loads(request.body) if type(request.body) is str else request.body
         # Copy data to allow dictionary resizing
         data = body.copy()
+        # Validate data.
+        # If it fails, it will raise a ValidationError
+        data = self.validate(data)
+        # Get the node's data using the rest API
+        node = connection.nodes.get(pk)
+        # Load every relationship only when we need to update a relationship
+        node_rels = None
+        # @TODO check that 'node' is an instance of 'model'
+        # Set new values to the node
+        for field_name in data:
+            field_value = data[field_name]
+            # The value can be a list of ID for relationship
+            if type(field_value) is list:
+                # Prefetch all relationship
+                if node_rels is None: node_rels = node.relationships.all()
+                # Get relationship name
+                rel_type = self.get_model_field(field_name)._type
+                # We don't want to add this relation twice so we extract
+                # every node connected to the current one through this type
+                # of relationship. "existing_rels_id" will contain the ids of
+                # every node related to this one.
+                existing_rels = [ rel for rel in node_rels if rel.type == rel_type ]
+                existing_rels_id = [ graph.opposite(rel, pk) for rel in existing_rels ]
+                # Get every ids from "field_value" that ain't not in
+                # the list of existing relationship "existing_rel_id".
+                new_rels_id = set(field_value).difference(existing_rels_id)
+                # Get every ids from "existing_rels_id" that ain't no more
+                # in the new list of relationships "field_value".
+                old_rels_id = set(existing_rels_id).difference(field_value)
+                # Start a transaction to batch import values
+                with connection.transaction(commit=False) as tx:
+                    # Convert ids or related node to *node* instances
+                    new_rels_node = [ connection.nodes.get(idx) for idx in new_rels_id ]
+                    # Convert ids or unrelated node to *relationships* instances
+                    old_rels    = []
+                    # Convert ids list into relationship instances
+                    for idx in old_rels_id:
+                        # Find the relationship that match with this id
+                        matches = [ rel for rel in existing_rels if graph.connected(rel, idx) ]
+                        # Merge the list of relationships
+                        old_rels = old_rels + matches
+                # Commit change when every field was treated
+                tx.commit()
+                # Start a transaction to batch insert/delete values
+                with connection.transaction(commit=False) as tx:
+                    # Then create the new relationships (using nodes instances)
+                    [ node.relationships.create(rel_type, n) for n in new_rels_node ]
+                    # Then delete the old relationships (using relationships instance)
+                    [ rel.delete() for rel in old_rels ]
+                # Commit change when every field was treated
+                tx.commit()
+            # Or a literal value
+            # (integer, date, url, email, etc)
+            else:
+                # We simply update the node property
+                # (the value is already validated)
+                node.set(field_name, field_value)
+        # And returns cleaned data
+        return self.create_response(request, data)
+
+
+        try:
+            node = model.objects.get(id=kwargs["pk"])
+        except ObjectDoesNotExist:
+            raise Http404("Sorry, unknown node.")
+
         for field in body:
             if field == "field_sources":
                 self.patch_sources( data[field], node )
@@ -613,6 +730,7 @@ class IndividualResource(ModelResource):
         def node_id(uri)       : return re.search(r'(\d+)$', uri).group(1)
         # Get the end of the given relationship
         def rel_from(rel, side): return node_id(rel.__dict__["_dic"][side])
+        # Is the given relation connected to the given uri
         def connected(rel, idx): return rel_from(rel, "end") == idx or rel_from(rel, "start") == idx
 
         self.method_check(request, allowed=['get'])

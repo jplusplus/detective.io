@@ -164,7 +164,7 @@ angular.module('detective.config').config [
                 auth: true
                 owner: true
             )
-            .state('global-graph-navigation',
+            .state('user-topic-graph',
                 url: "/:username/:topic/graph/"
                 controller: ExploreCtrl
                 resolve:

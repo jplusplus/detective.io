@@ -41,6 +41,17 @@ footer {
             }
         }
     }
+    .credits {
+        @bg: lighten(@brand-secondary, 10%);
+        @color: contrast(@bg);
+        background: @bg;
+        color: @color;
+        padding: 5px;
+        padding-left: 10px;
+        a {
+            color: @color;
+        }
+    }
 
     .legals {
         padding:10px;

@@ -13,7 +13,7 @@
                           ng-class="{ 'skeletons__item--selected': isSelected(skeleton) }">
                         <img ng-click="selectSkeleton(skeleton)" ng-src="[[ skeleton.thumbnail.medium ]]"/>
                         <h4>[[ skeleton.title ]]</h4>
-                        <h5 ng-if="skeleton.tutorial_link"><i class="fa fa-info-circle"></i>&nbsp;<a target="_blank" ng-href="[[ skeleton.tutorial_link ]]">Watch tutorial using this data scheme”</a></h5>
+                        <h5 ng-if="skeleton.tutorial_link"><i class="fa fa-info-circle"></i>&nbsp;<a target="_blank" ng-href="[[ skeleton.tutorial_link ]]">[[ skeleton.title ]] Tutorial</a></h5>
                         <p>[[ skeleton.description ]]</p>
                     </div>
                 </li>

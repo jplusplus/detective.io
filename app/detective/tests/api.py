@@ -549,6 +549,19 @@ class TopicApiTestCase(ApiTestCase):
         self.assertValidJSON(resp.content)
         # Parse data to verify relationship
         data = json.loads(resp.content)
+        # Since only the name is send during creation,
+        # we have to patch the new object now
+        args = {
+            'scope'      : 'detective/energy',
+            'model_id'   : data["id"],
+            'model_name' : 'energyproject',
+            'patch_data' : self.post_data_related
+        }
+        resp = self.patch_individual(**args)
+        # Are the data readable?
+        self.assertValidJSON(resp.content)
+        # Parse data to verify relationship
+        data = json.loads(resp.content)
         self.assertEqual(len(data["owner"]), len(self.post_data_related["owner"]))
         self.assertEqual(len(data["activity_in_country"]), len(self.post_data_related["activity_in_country"]))
 
@@ -683,7 +696,7 @@ class TopicApiTestCase(ApiTestCase):
         # date are subject to special process with patch method.
         new_date  = datetime(2011, 4, 1, 0, 0, 0, 0)
         data = {
-            'founded': new_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+            'founded': new_date.strftime('%Y-%m-%dT%H:%M:%S.%f'),
         }
         args = {
             'scope'      : 'detective/energy',
@@ -695,7 +708,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpOK(resp)
         self.assertValidJSONResponse(resp)
         updated_jpp = Organization.objects.get(name=self.jpp.name)
-        self.assertEqual(timezone.make_naive(updated_jpp.founded), new_date)
+        self.assertEqual(timezone.make_naive(updated_jpp.founded), timezone.make_naive(new_date))
 
     def test_patch_individual_date_staff_with_null(self):
         """
@@ -717,10 +730,10 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpOK(resp)
         self.assertValidJSONResponse(resp)
         updated_jpp = Organization.objects.get(name=self.jpp.name)
-        self.assertEqual(updated_jpp.founded, None)
+        self.assertTrue(updated_jpp.founded in [None, ''])
 
     def test_patch_individual_website_staff(self):
-        jpp_url  = 'http://jplusplus.org'
+        jpp_url  = 'http://jplusplus.org/'
         data = {
             'website_url': jpp_url,
         }
@@ -737,7 +750,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertEqual(updated_jpp.website_url, jpp_url)
 
     def test_patch_individual_website_staff_with_null(self):
-        jpp_url  = 'http://jplusplus.org'
+        jpp_url  = 'http://jplusplus.org/'
         data = {
             'website_url': None,
         }
@@ -751,10 +764,10 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpOK(resp)
         self.assertValidJSONResponse(resp)
         updated_jpp = Organization.objects.get(name=self.jpp.name)
-        self.assertEqual(updated_jpp.website_url, None)
+        self.assertTrue(updated_jpp.website_url in ['', None])
 
     def test_patch_individual_website_unauthenticated(self):
-        jpp_url  = 'http://jplusplus.org'
+        jpp_url  = 'http://jplusplus.org/'
         data = {
             'website_url': jpp_url,
         }
@@ -769,7 +782,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpUnauthorized(resp)
 
     def test_patch_individual_website_contributor(self):
-        jpp_url  = 'http://www.jplusplus.org'
+        jpp_url  = 'http://www.jplusplus.org/'
         data = {
             'website_url': jpp_url,
         }
@@ -787,7 +800,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertEqual(updated_jpp.website_url, jpp_url)
 
     def test_patch_individual_website_lambda(self):
-        jpp_url  = 'http://bam.jplusplus.org'
+        jpp_url  = 'http://bam.jplusplus.org/'
         data = {
             'website_url': jpp_url,
         }
@@ -803,7 +816,7 @@ class TopicApiTestCase(ApiTestCase):
 
 
     def test_patch_individual_not_found(self):
-        jpp_url  = 'http://jplusplus.org'
+        jpp_url  = 'http://jplusplus.org/'
         data = {
             'website_url': jpp_url,
         }
@@ -814,7 +827,7 @@ class TopicApiTestCase(ApiTestCase):
             'patch_data' : data,
         }
         resp = self.patch_individual(**args)
-        self.assertEqual(resp.status_code in [302, 404], True)
+        self.assertTrue(resp.status_code in [302, 404])
 
     def test_patch_with_composite_relations(self):
         """

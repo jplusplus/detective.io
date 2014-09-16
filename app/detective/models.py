@@ -431,6 +431,7 @@ class TopicSkeleton(models.Model):
     schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
     ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
     target_plans    = models.CharField(max_length=60)
+    tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
 
     def selected_plans(self):
         plans = re.sub('[\[\]]', '', self.target_plans)

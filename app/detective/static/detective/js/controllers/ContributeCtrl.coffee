@@ -197,7 +197,7 @@ class window.ContributeCtrl
                         # ignore duplicated. Prevents duplicated relationships (#521)
                         if not _.findWhere(value_to_return, {id: val[pc].id})?
                             # Create a new object that only contains an id
-                            value_to_return[pc] = id: val[pc].id
+                            value_to_return.push(id: val[pc].id)
                 else if value_to_return == "" or value_to_return == undefined or _.isEmpty(value_to_return)
                     # Empty input must be null
                     value_to_return = null

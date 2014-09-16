@@ -1,12 +1,16 @@
-<div class="modal-header">
-    <h3 class="modal-title">
-        Add sources about <strong>[[ field_value ]]</strong>
-    </h3>
-</div>
-<div class="modal-body">
-    <ul class="field-sources">
+<form name="form"
+      class="form-horizontal"
+      ng-submit="submit(form)"
+      novalidate>
+    <div class="modal-header">
+        <h3 class="modal-title">
+            Add sources about <strong>[[ field_value ]]</strong>
+        </h3>
+    </div>
+    <div class="modal-body">
         <!-- previously created sources -->
-        <li ng-repeat="source in fields.field_sources | filter:isFieldSource">
+        <div class="form-group"
+             ng-repeat="source in fields.field_sources | filter:isFieldSource">
             <div class='input-group'>
                 <!-- source external link -->
                 <span class="input-group-btn" ng-if="isSourceURLValid(source)">
@@ -22,8 +26,10 @@
                        autocorrect="off"
                        autocapitalize="off"
                        focus-on="source.focus"
+                       name="source[[$index]]"
+                       no-duplicates="getSourcesRefs()"
                        ng-model="source.reference"
-                       ng-blur="updateSource(source, $index, $event)"
+                       ng-blur="updateSource(source, form, $index, $event)"
                        ng-disabled="loading"
                        class="form-control"/>
 
@@ -35,43 +41,29 @@
                     </button>
                 </span>
             </div>
-        </li>
+            <!-- duplicate error handling -->
+            <span class='text-danger' ng-if="form['source' + $index].$error.nodup">Source already exists, please enter another value</span>
+        </div>
         <!-- new source form -->
-        <li>
-            <form name="form" novalidate>
-                <input type="text"
-                   name="newSource"
-                   autocorrect="off"
-                   autocapitalize="off"
-                   ng-change="addSource(form, newSource); newSource=''"
-                   ng-model="newSource"
-                   no-duplicates="getSourcesRefs(field)"
-                   ng-disabled="loading"
-                   placeholder="http://exemple.com"
-                   class="form-control pull-left" />
-                <!-- duplicate error handling -->
-                <span class='text-danger' ng-if="form.newSource.$error.nodup">Source already exists, please enter another value</span>
-            </form>
-        </li>
-    </ul>
-
-
-    <div class="form-group"
-         ng-repeat="field in form.meta.fields | filter:form.isEditable track by $index">
-
-        <label for="id_[[field.name]]">
-            [[field.verbose_name]]
-        </label>
-
-
-        <p ng-if="field.help_text" class="help-block">
-            [[field.help_text]]
-        </p>
+        <div class='form-group'>
+            <input type="text"
+               name="new_source"
+               autocorrect="off"
+               autocapitalize="off"
+               ng-change="addSource(new_source); new_source=undefined"
+               focus-on="focus_add"
+               ng-model="new_source"
+               ng-disabled="loading"
+               placeholder="http://exemple.com"
+               class="form-control" />
+        </div>
+        <!-- scam to submit sources when 'ENTER' key is pressed -->
+        <button class="hidden" type="submit">hidden</button>
     </div>
-</div>
+</form>
 <div class="modal-footer" ng-class="{ loading: loading }">
     <button class="btn btn-primary"
-            ng-click="save(true)">
+            ng-click="save(form, true)">
         <strong>Save</strong>
     </button>
     <button class="btn btn-default" ng-click="cancel()">

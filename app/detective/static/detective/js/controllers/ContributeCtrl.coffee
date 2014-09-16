@@ -316,7 +316,7 @@ class window.ContributeCtrl
             (not _.isEmpty sources) and _.some sources, (e)-> e? and e.reference?
 
         openSourcesModal: (field)=>
-            fields = @modal.open
+            @modalInstance = @modal.open
                 templateUrl: '/partial/topic.contribute.add-sources.html'
                 controller : 'addSourcesModalCtrl'
                 resolve    :
@@ -329,10 +329,13 @@ class window.ContributeCtrl
                         id: @fields.id
                     field: => field
 
-            fields.result.then (res)=>
+            @modalInstance.result.then((res)=>
+                if res?
+                    @fields.field_sources = res.field_sources
+            ).finally =>
                 @updating_sources[field.name] = no
-                console.log 'sources updated'
-                @fields.field_sources = res.field_sources
+                @modalInstance = undefined
+
 
         # True if the given field can be edit
         isEditable: (field)=>

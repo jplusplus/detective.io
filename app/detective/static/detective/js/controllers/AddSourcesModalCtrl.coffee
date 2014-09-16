@@ -15,26 +15,32 @@ class window.AddSourcesModalCtrl
 
         # Scope functions
         # Cancel button just closes the modal
-        @scope.cancel       = @close
-        @scope.save         = @save
-        @scope.updateSource = @updateSource
-        @scope.addSource    = @addSource
-        @scope.deleteSource = @deleteSource
+        @scope.cancel           = @close
+        @scope.save             = @save
+        @scope.updateSource     = @updateSource
+        @scope.addSource        = @addSource
+        @scope.deleteSource     = @deleteSource
+        @scope.getSources       = @getSources
+        @scope.getSourcesRefs   = @getSourcesRefs
+        @scope.submit           = @submit
+        @scope.isSourceURLValid = @isSourceURLValid
+        @scope.isFieldSource    = (source)=> source.field is @field.name
 
         # Description of the relationship (source, target, through model)
         @scope.fields = @fields
-        @scope.isSourceURLValid = @isSourceURLValid
-        @scope.isFieldSource = (source)=> source.field == @field.name
 
-    close: (result=@fields)=>
+    close: (result)=>
+        console.log 'AddSourcesModalCtrl.close'
         @modalInstance.close(result)
 
-    save: (close=no)=>
+
+    save: (form, close=no)=>
+        if form?
+            return unless form.$valid
         @scope.loading = yes
-        @meta.updating[@field.name] = yes
-        sources = angular.copy @fields.field_sources
-        data    =
-            field_sources: _.map sources, (v)-> _.omit v, 'focus'
+        @meta.updating[@field.name] = true
+        data  =
+            field_sources: @cleanSources()
         params  =
             id:   @meta.id
             type: @meta.type
@@ -45,18 +51,17 @@ class window.AddSourcesModalCtrl
         promise.then (data)=>
             @scope.loading = no
             @updateMasterSources()
-            @scope.$broadcast "individual:updated", data
+            @scope.focus_add = true
 
         @close(promise) if close
 
 
     getSources: (fields=@fields) => _.where fields.field_sources, field: @field.name
 
-    getSourcesRefs: (field)=> _.map @getSources(), (s)-> s.reference
+    getSourcesRefs: ()=> _.map @getSources(), (s)-> s.reference
 
-    addSource: (form, value)=>
-        return unless form.$valid
-
+    addSource: (value)=>
+        @scope.focus_add = false
         @fields.field_sources.push
             reference: value
             field: @field.name
@@ -65,14 +70,17 @@ class window.AddSourcesModalCtrl
     isSaveOrCancelBtn: (el)=>
         /^(save|cancel)/.test ($(el).attr('ng-click') or '')
 
-    updateSource: (source, $index, $event)=>
+    cleanSources: =>
+        _.map @fields.field_sources, (v)-> _.omit v, 'focus'
+
+    updateSource: (source, form, $index, $event)=>
+        return unless form.$valid
         # workaround to avoid loading when we click on save/or cancel
         return if @isSaveOrCancelBtn($event.relatedTarget)
-
         master_source = @master_sources[$index]
         has_changed   = not (source? and master_source?) or source.reference != master_source.reference
         if has_changed
-            @save()
+            @save(form)
 
     updateMasterSources: =>
         @master_sources = @getSources angular.copy @fields
@@ -91,6 +99,8 @@ class window.AddSourcesModalCtrl
         return false unless source?
         @UtilsFactory.isValidURL(source.reference)
 
+    submit: (form)=>
+        @save(form)
 
 
 angular.module('detective.controller').controller 'addSourcesModalCtrl', AddSourcesModalCtrl

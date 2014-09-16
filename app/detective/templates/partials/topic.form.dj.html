@@ -13,6 +13,7 @@
                           ng-class="{ 'skeletons__item--selected': isSelected(skeleton) }">
                         <img ng-click="selectSkeleton(skeleton)" ng-src="[[ skeleton.thumbnail.medium ]]"/>
                         <h4>[[ skeleton.title ]]</h4>
+                        <h5 ng-if="skeleton.tutorial_link"><i class="fa fa-info-circle"></i>&nbsp;<a target="_blank" ng-href="[[ skeleton.tutorial_link ]]">[[ skeleton.title ]] Tutorial</a></h5>
                         <p>[[ skeleton.description ]]</p>
                     </div>
                 </li>
@@ -108,7 +109,7 @@
                       <span ng-if="isEditing()">Enter a new picture</span>
                     </label>
                     <p class="help-block">
-                        Enter the URL of your photo.
+                        Enter the URL of your photo (max. 1MB).
                     </p>
                 </div>
                 <div class="col-sm-6">
@@ -123,9 +124,14 @@
                     You have to enter a valid URL.
                 </span>
                 <span class="col-sm-6 text-danger"
-                      ng-show="submitted && error.background_url">
+                      ng-show="submitted && (error.background_url.unavailable || error.background_url.not_an_image)">
                     Sorry, we're haven't managed to process your photo. Please try another one.
                 </span>
+                <span class="col-sm-6 text-danger"
+                      ng-show="submitted && error.background_url.oversized_file">
+                    Sorry, your file is too big and would hinder your investigation from loading smoothly. Please enter a different URL.
+                </span>
+
             </div>
 
             <!-- Topic about field -->
@@ -170,7 +176,13 @@
         <div class="panel-footer form-footer" ng-show="(isEditing() && !!saved)">
           <div class="row">
             <div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+              <i class="fa fa-check right05"></i>
               <span class="text-success">Changes saved!</span>
+              <span ng-if="topic.slug">&nbsp;Go to your investigation <a ui-sref="user-topic({
+                  username: user.username,
+                  topic: topic.slug
+                })">[[ topic.title ]]</a>
+                </span>
             </div>
           </div>
         </div>

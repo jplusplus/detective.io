@@ -249,11 +249,6 @@ class Topic(models.Model):
             utils.topic_cache.set(self, cache_key, response, 60*60*12) # cached 12 hours
         return response
 
-    def get_models_output(self):
-        # Select only some atribute
-        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
-        return [ output(m) for m in self.get_models() ]
-
     def get_relationship_search(self):
         # For an unkown reason I can't filter by "is_literal"
         # @TODO find why!
@@ -285,9 +280,10 @@ class Topic(models.Model):
         return _out + [ output(rs) for rs in terms ]
 
     def get_syntax(self):
+        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
         syntax = {
             'subject': {
-                'model':  self.get_models_output()
+                'model': [ output(m) for m in self.get_models() if not hasattr(m, "_is_composite") or not m._is_composite ]
             },
             'predicate': {
                 'relationship': self.get_relationship_search_output(),
@@ -340,17 +336,18 @@ class Topic(models.Model):
             relationship  = relationships[0]["rel_type"]
             # Query to get every result
             query = u"""
-                START st=node(*)
-                MATCH (st)<-[:`{relationship}`]-(root)<-[:`<<INSTANCE>>`]-(type)
+                START st=node({id})
+                MATCH (st){is_out}-[:`{relationship}`]-{is_in}(root)<-[:`<<INSTANCE>>`]-(type)
                 WHERE HAS(root.name)
                 AND HAS(st.name)
-                AND ID(st) = {id}
                 AND type.app_label = {app}
                 RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
             """.format(
                 relationship=relationship,
                 id=adapt(identifier),
-                app=adapt(self.app_label())
+                app=adapt(self.app_label()),
+                is_out='<' if relationships[0]['direction'] == 'out' else '',
+                is_in='>' if relationships[0]['direction'] == 'in' else ''
             )
         else:
             return {'errors': 'Unkown predicate type: %s' % predicate["name"]}
@@ -434,6 +431,7 @@ class TopicSkeleton(models.Model):
     schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
     ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
     target_plans    = models.CharField(max_length=60)
+    tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
 
     def selected_plans(self):
         plans = re.sub('[\[\]]', '', self.target_plans)

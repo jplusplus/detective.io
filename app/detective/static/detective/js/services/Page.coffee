@@ -34,4 +34,13 @@ angular.module('detective.service').factory "Page", ["ngProgressLite", "$rootSco
                 do ngProgressLite[if loading then "start" else "done"]
             # Always return the loading value
             loading
+
+        isInInvestigation: =>
+            in_investigation = no
+            if $state? and $state.current.name != ""
+                current_state = $state.$current.name
+                in_user_topic = current_state.indexOf('user-topic') != -1
+                in_investigation =  in_user_topic and $state.params.topic?
+            in_investigation
+
 ]

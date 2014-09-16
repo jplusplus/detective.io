@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .models                          import *
-from app.detective.exceptions         import UnavailableImage, NotAnImage
+from app.detective.exceptions         import UnavailableImage, NotAnImage, OversizedFile
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
                                              Subscription
@@ -35,7 +35,8 @@ import copy
 import json
 import magic
 import re
-import urllib2, os
+import urllib2
+import os
 from urlparse import urlparse
 
 # Only staff can consult QuoteRequests
@@ -71,12 +72,15 @@ class TopicAuthorization(ReadOnlyAuthorization):
     # Only authenticated user can create topics
     def create_detail(self, object_list, bundle):
         authorize = False
-        user = bundle.request.user
+        user      = bundle.request.user
+        skeleton  = TopicSkeleton.objects.get(title=bundle.data['skeleton_title'])
         if user.is_authenticated():
             profile     = user.detectiveprofileuser
-            unlimited   = profile.topics_max() < 0
+            unlimited   = profile.topics_max()   < 0
             under_limit = profile.topics_count() < profile.topics_max()
             authorize   = unlimited or under_limit
+            authorize   = authorize and (profile.plan in skeleton.target_plans)
+
         return authorize
 
     def read_list(self, object_list, bundle):
@@ -102,21 +106,19 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
         else:
             raise Unauthorized("Only logged user can retrieve skeletons")
 
-
-
 TopicValidationErrors = {
     'background': {
-        'image_unavailable': {
+        'unavailable': {
             'code': 0,
             'message': "Passed url is unreachable or cause HTTP errors."
         },
         'oversized_file': {
             'code': 1,
-            'message': "Passed url is unreachable or cause HTTP errors."
+            'message': "Retrieved file is oversized, please enter a new URL."
         },
         'not_an_image': {
             'code': 2,
-            'message': "Retrieved file is not an image, please check your URL"
+            'message': "Retrieved file is not an image, please check your URL."
         }
     }
 }
@@ -124,17 +126,19 @@ TopicValidationErrors = {
 class TopicValidation(Validation):
 
     def is_valid_background_image(self, bundle, request, errors={}):
-        def get_error_message(code):
-            errors =  TopicValidationErrors['background']
-            for error_key in errors.keys():
-                error = errors[error_key]
+        def get_error(code):
+            topic_errors =  TopicValidationErrors['background']
+            for error_key in topic_errors.keys():
+                error = topic_errors[error_key]
                 if error['code'] == code:
-                    return error['message']
-            return None
+                    return error_key, error
+            return None, None
 
         background = bundle.data.get('background', None)
         if type(background) == type(0):
-            errors['background_url'] = get_error_message(background)
+            key, error = get_error(background)
+            errors['background_url'] = {}
+            errors['background_url'][key] = error
 
 
     def is_valid_topic_title(self, bundle, request, errors={}):
@@ -288,9 +292,16 @@ class TopicResource(ModelResource):
         return bundle
 
     def download_url(self, url):
+        tmp_file = None
         def is_image(tmp):
             mimetype = magic.from_file(tmp.name, True)
             return mimetype.startswith('image')
+
+        def is_oversized(tmp, url):
+            max_size_in_bytes = 1 * 1024 ** 2 # 1MB
+            file_size = os.stat(tmp.name).st_size
+            oversized = file_size > max_size_in_bytes
+            return oversized
 
         if url == None:
             return None
@@ -301,6 +312,8 @@ class TopicResource(ModelResource):
             tmp_file.flush()
             if not is_image(tmp_file):
                 raise NotAnImage()
+            if is_oversized(tmp_file, url):
+                raise OversizedFile()
             return File(tmp_file, name)
         except urllib2.HTTPError:
             raise UnavailableImage()
@@ -339,9 +352,12 @@ class TopicResource(ModelResource):
                 try:
                     bundle.data['background'] = self.download_url(background_url)
                 except UnavailableImage:
-                    bundle.data['background'] = TopicValidationErrors['background']['image_unavailable']['code']
+                    bundle.data['background'] = TopicValidationErrors['background']['unavailable']['code']
                 except NotAnImage:
                     bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
+                except OversizedFile:
+                    bundle.data['background'] = TopicValidationErrors['background']['oversized_file']['code']
+
             elif bundle.data.get('background', None):
                 # we remove from data the previously setted background to avoid
                 # further supsicious operation errors
@@ -349,20 +365,21 @@ class TopicResource(ModelResource):
         return bundle
 
     def hydrate_about(self, bundle):
-        def should_have_credits(about, skeleton):
+        def should_have_credits(bundle, skeleton):
+            topic_about    = bundle.data.get('about', '')
+            background_url = bundle.data.get('background_url', None)
             if not skeleton:
                 return False
             credits = ( skeleton.picture_credits or '')
-            return (skeleton and not (credits.lower() in about.lower()))
+            return (not background_url) and skeleton and \
+                   (not (credits.lower() in topic_about.lower()))
 
         topic_skeleton = self.get_skeleton(bundle)
-        topic_about = bundle.data.get('about', '')
-        if should_have_credits(topic_about, topic_skeleton):
+        if should_have_credits(bundle, topic_skeleton):
+            topic_about = bundle.data.get('about', '')
             if topic_about != '':
                 topic_about = "%s<br/><br/>" % topic_about
-
-            topic_about = "%s%s" % (topic_about, topic_skeleton.picture_credits)
-        bundle.data['about'] = topic_about
+            bundle.data['about'] = "%s%s" % (topic_about, topic_skeleton.picture_credits)
         return bundle
 
     def hydrate_ontology_as_json(self, bundle):

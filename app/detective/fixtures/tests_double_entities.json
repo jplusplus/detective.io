@@ -1,0 +1,21 @@
+[
+{
+    "model": "detective.topic",
+    "pk": 5,
+    "fields": {
+        "description": "Test Double Entities.",
+        "title": "Test me",
+        "slug": "test-double-entities",
+        "ontology_as_json": "[{\"help_text\":\"An event that caused Victims\",\"fields\":[{\"type\":\"string\",\"verbose_name\":\"Name\",\"name\":\"name\"},{\"help_text\":\"The event's date\",\"type\":\"date\",\"name\":\"Date\"},{\"help_text\":\"The event's location\",\"type\":\"string\",\"verbose_name\":\"Location\",\"name\":\"address\"},{\"help_text\":\"Exact latitude of the event's location\",\"type\":\"string\",\"verbose_name\":\"Latitude\",\"name\":\"latitude\"},{\"help_text\":\"Exact longitude of the event's location\",\"type\":\"string\",\"verbose_name\":\"Longitude\",\"name\":\"longitude\"},{\"rules\":{\"is_rich\":true},\"help_text\":\"Detailed description of the event\",\"verbose_name\":\"Description\",\"name\":\"description\",\"type\":\"string\"},{\"help_text\":\"Define the type of event.\",\"type\":\"string\",\"verbose_name\":\"Type\",\"name\":\"type\"},{\"related_name\":\"was_location_of\",\"name\":\"happened\",\"rules\":{\"search_terms\":[\"occured in\",\"took place in\",\"hit in\"]},\"type\":\"relationship\",\"related_model\":\"country\",\"help_text\":\"Country where the event happened\",\"verbose_name\":\"happened in\"}],\"verbose_name\":\"Event\",\"name\":\"event\",\"verbose_name_plural\":\"Events\"},{\"help_text\":\"A Victim to be included in the body count\",\"fields\":[{\"type\":\"string\",\"verbose_name\":\"Name\",\"name\":\"name\"},{\"help_text\":\"An image of this Person\",\"type\":\"url\",\"verbose_name\":\"Image\",\"name\":\"image\"},{\"rules\":{\"is_rich\":true},\"help_text\":\"A short bio of the victim\",\"verbose_name\":\"Bio\",\"name\":\"bio\",\"type\":\"string\"},{\"help_text\":\"The person's age at the time of the incident\",\"type\":\"integer\",\"verbose_name\":\"Age\",\"name\":\"age\"},{\"related_name\":\"harmed\",\"name\":\"dead\",\"rules\":{\"search_terms\":[\"was involved in\",\"was affected at\",\"was hurt at\",\"was injured in\",\"was killed at\"]},\"fields\":[{\"type\":\"date\",\"verbose_name\":\"Date\",\"name\":\"date\"},{\"type\":\"string\",\"verbose_name\":\"Injury\",\"name\":\"cause\",\"verbose_name_plural\":\"Injuries\"},{\"type\":\"boolean\",\"verbose_name\":\"Dead due to event?\",\"name\":\"death\"}],\"related_model\":\"event\",\"type\":\"relationship\",\"help_text\":\"Victims of an event.\",\"verbose_name\":\"was harmed at\"},{\"related_name\":\"has_family_ties_with\",\"name\":\"relatives\",\"rules\":{\"search_terms\":[\"has family ties with\"]},\"type\":\"relationship\",\"related_model\":\"victim\",\"help_text\":\"A victim can have relatives amongst the victims\",\"verbose_name\":\"is related to\"}],\"verbose_name\":\"Victim\",\"name\":\"victim\",\"verbose_name_plural\":\"Victims\"},{\"help_text\":\"A territory with an ISO alpha-3 code\",\"fields\":[{\"type\":\"string\",\"verbose_name\":\"Name\",\"name\":\"name\"},{\"help_text\":\"ISO 3166-1 alpha-3 as defined by the International Organization for Standardization.\",\"type\":\"string\",\"verbose_name\":\"ISO alpha-3 code\",\"name\":\"isoa3\"}],\"verbose_name\":\"Country\",\"name\":\"country\",\"verbose_name_plural\":\"Countries\"}]",
+        "ontology_as_owl": null,
+        "ontology_as_mod": "testdoubleentities",
+        "about": "",
+        "background": "",
+        "public": true,
+        "featured": true,
+        "author": 100000
+    }
+}
+]
+
+

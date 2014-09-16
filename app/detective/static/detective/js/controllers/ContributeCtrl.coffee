@@ -127,11 +127,18 @@ class window.ContributeCtrl
                     related_to: @related_to ? null
                 # It's not a new individual now
                 @isNew = no
+            # Looks for duplicated entities in fields. Mark them as duplicated. Prevents duplicated relationships (#521)
+            for name, value of @fields
+                if value? and typeof(value) is "object" and name isnt "field_sources" and name.indexOf("$") != 0
+                    exist = {}
+                    for entity in value
+                        entity._duplicated = exist[entity.id]? and exist[entity.id]
+                        exist[entity.id] = true
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
                 changes = @getChanges()
                 # Looks for the differences and update the db if needed
-                @update(changes) unless _.isEmpty(changes)
+                @update(changes) if not _.isEmpty(changes) and not @data_are_updating
 
         getSimilars: (event, args)=>
             # Only load similar individual if the new one is the current instance
@@ -169,36 +176,35 @@ class window.ContributeCtrl
                             # Field no more loading
                             delete @updating[rel]
 
-
-
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
             # Function to remove nested resources without id
             clean   = (val, name="")->
                 # copy the current value
                 val = angular.copy val
+                value_to_return = val
                 if val instanceof Date
                     # remove timezone offset
                     val.setHours(val.getHours() - val.getTimezoneOffset() / 60)
                     # Convert date object to string
-                    val = val.toJSON()
+                    value_to_return = val.toJSON()
                 else if typeof(val) is "object" and name isnt "field_sources"
                     # Fetch each nested value
+                    value_to_return = []
                     for pc of val
-                        # Remove the nested values without id
-                        unless val[pc].id?
-                            delete val[pc]
-                            # Apply splice only on array
-                            val.splice(pc) if val instanceof Array
-                            # Go to the next value
-                            continue
-                        # Create a new object that only contains an id
-                        val[pc] = id: val[pc].id
-
-                else if val == "" or val == undefined
+                        # ignore the nested values without id
+                        continue unless val[pc].id?
+                        # ignore duplicated. Prevents duplicated relationships (#521)
+                        if not _.findWhere(value_to_return, {id: val[pc].id})?
+                            # Create a new object that only contains an id
+                            value_to_return.push(id: val[pc].id)
+                else if typeof(val) is "boolean"
+                    value_to_return = val or false
+                else if value_to_return == "" or value_to_return == undefined or _.isEmpty(value_to_return)
                     # Empty input must be null
-                    val = null
-                val
+                    value_to_return = null
+                return value_to_return
+
             for prop of now
                 val = clean(now[prop], prop)
                 # Remove resource methods
@@ -207,7 +213,7 @@ class window.ContributeCtrl
                     # Previous and new value are different
                     unless angular.equals clean(prev[prop], prop), val
                         changes[prop] = val
-            changes
+            return changes
 
         # Generates the permalink to this individual
         permalink: =>
@@ -229,6 +235,7 @@ class window.ContributeCtrl
 
         # Event when fields changed
         update: (data)=>
+            @data_are_updating = true
             params = type: @type, id: @fields.id
             # Notice that the field is loading
             @updating = _.extend @updating, data
@@ -236,6 +243,7 @@ class window.ContributeCtrl
             @Individual.update params, data, (res)=>
                 # Record master
                 @master = _.extend @master, res
+                @data_are_updating = false
                 # Notices that we stop to load the field
                 @updating = _.omit(@updating, _.keys(data))
                 # Prevent communications between forms
@@ -527,8 +535,13 @@ class window.ContributeCtrl
             @scope.scrollIdx = @scope.loadIndividual type.toLowerCase(), related.id,  individual
 
     relatedState: (related)=>
+        ###
+        Return the visual state of the field.
+        - `input`  for editable fields,
+        - `linked` for field which represent an Individal but isn't duplicated. The field will be shown as an uneditable field.
+        ###
         switch true
-            when related instanceof @Individual or related.id? then 'linked'
+            when related instanceof @Individual or (related.id? and not related._duplicated) then 'linked'
             else 'input'
 
     askForNew: (related)=>

@@ -300,11 +300,6 @@ LOGGING = {
         },
         'null': {
             'class': 'django.utils.log.NullHandler',
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
         }
     },
     'loggers': {
@@ -312,7 +307,7 @@ LOGGING = {
             'handlers': ['console'],
         },
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['console'],
             'level': 'ERROR',
             'propagate': False,
         },
@@ -320,14 +315,19 @@ LOGGING = {
             'handlers': ['console'],
         },
         'app.detective': {
-            'handlers': ['mail_admins', 'console'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'rq.worker': {
-            'handlers': ['mail_admins', 'console'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'sentry.errors': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
         },
     }
 }

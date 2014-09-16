@@ -3,7 +3,7 @@
 <div class="home__tour" home-tour tracker="tracker">
 
     <ul class="list-unstyled home__tour__tracker hidden-xs">
-        <li ng-repeat="screen in ['tour', 'quote 0', 'quote 1', 'quote 2', 'get ready', 'pricing']">
+        <li ng-repeat="screen in ['tour', 'features', 'quote 0', 'quote 1', 'quote 2', 'get ready', 'pricing']">
             <a ng-click="scrollTo($index)" class="home__tour__tracker__screen" ng-class="$index == tracker ? 'home__tour__tracker__screen--active' : ''">
                 <span class="sr-only">Go to [[screen]]</span>
             </a>
@@ -34,7 +34,7 @@
     </div>
 
 
-    <div class="home__tour__features home__tour__screen bg-light">
+    <div class="home__tour__features home__tour__screen bg-light" data-level="1">
         <div class="container">
             <div class="home__tour__features__content">
                 <p>
@@ -61,7 +61,7 @@
                     </div>
                 </div>
             </div>
-            <div class="home__tour__quotes__single home__tour__quotes__single--n0" data-level="1">
+            <div class="home__tour__quotes__single home__tour__quotes__single--n0" data-level="2">
                 <h3 class="home__tour__quotes__single__title">
                     "Like putting a thousand-piece puzzle together"
                 </h3>
@@ -70,7 +70,7 @@
                 </p>
             </div>
 
-            <div class="home__tour__quotes__single home__tour__quotes__single--n1" data-level="2">
+            <div class="home__tour__quotes__single home__tour__quotes__single--n1" data-level="3">
                 <h3 class="home__tour__quotes__single__title">
                     "All my knowledge in one place"
                 </h3>
@@ -79,7 +79,7 @@
                 </p>
             </div>
 
-            <div class="home__tour__quotes__single home__tour__quotes__single--n2" data-level="3">
+            <div class="home__tour__quotes__single home__tour__quotes__single--n2" data-level="4">
                 <h3 class="home__tour__quotes__single__title">
                     "Collaboration made easy"
                 </h3>
@@ -91,7 +91,7 @@
     </div>
 
 
-    <div class="home__tour__get-ready home__tour__screen" data-level="4">
+    <div class="home__tour__get-ready home__tour__screen" data-level="5">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
@@ -114,7 +114,7 @@
         </div>
     </div>
 
-    <div class="home__tour__pricing  home__tour__screen pull-footer" data-level="5">
+    <div class="home__tour__pricing  home__tour__screen pull-footer" data-level="6">
         <div ng-include="'/partial/plans.table.html'"></div>
     </div>
 

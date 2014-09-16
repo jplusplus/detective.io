@@ -27,7 +27,7 @@
         </script>
     </head>
     <body ng-cloak  ng-class="{ 'is-home': $state.is('home.tour'), 'show-aside': Page.showAside  }">
-        <div plan-overfill-displayer class="plan-overfill-message hidden"></div>
+        <div plan-overfill-displayer></div>
         <div http-error-displayer></div>
         {% load cache %}
         {% cache 3600 fullpage %}

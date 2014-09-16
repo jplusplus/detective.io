@@ -1,20 +1,29 @@
 .plan-overfill-message {
-	background-color : rgba(255, 231, 94, 1);
+	background-color : rgba(255, 231, 94, .8);
 	width            : 50%;
 	min-width        : 300px;
 	margin           : 0 auto;
 	padding          : 5px 20px;
 	margin-bottom    : 20px;
-	// position         : absolute;
-	// left             : 50%;
-	// transform        : translate(-50%, 0);
-    // z-index          : 70;
+	position         : absolute;
+	left             : 50%;
+    z-index          : 70;
+	.translate(-50%, 0);
 	a {
 		color: #fff;
 	}
-	&.attention {
-		background-color : rgba(165, 107, 107, 1);
+	&--attention & {
+		background-color : rgba(165, 107, 107, .8);
 		color            : white;
+	}
+	&__close {
+		&:after {
+			content  : "x";
+			position : absolute;
+			top      : 0px;
+			right    : 10px;
+			cursor   : pointer;
+		}
 	}
 	&__title {
 		font-weight : bold;

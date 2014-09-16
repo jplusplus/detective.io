@@ -22,17 +22,19 @@
 						<strong>[[property.verbose_name]]</strong>
 					</td>
 					<td>
+
 						<span ng-bind="get(property.name, true) | date:'longDate'" ng-if="property.type == 'DateTimeField'"></span>
-						<span ng-if="!isString(property) && property.type != 'DateTimeField'">
-							<span ng-if="property.type != 'BooleanField'" ng-switch on="isRich(property)">
+						<span ng-bind="get(property.name, true) | linky:'_blank'"  ng-if="property.type == 'URLField'"></span>
+						<span ng-bind="get(property.name, true)"                   ng-if="property.type == 'IntegerField'"></span>
+						<span ng-if="property.type == 'CharField'">
+							<span ng-switch on="isRich(property)">
 								<span ng-switch-when="true" ng-bind-html="getTrusted(property.name)"></span>
-								<span ng-switch-default ng-bind="get(property.name, true) | linky:'_blank'"></span>
-							</span>
-							<span ng-if="property.type == 'BooleanField'">
-								<i class='fa' ng-class='{"fa-square-o": !get(property.name, true), "fa-check-square-o": get(property.name, true)}'></i>
+								<span ng-switch-default ng-bind="get(property.name, true)"></span>
 							</span>
 						</span>
-						<span ng-if="isString(property) && property.name != 'imageURL'" ng-bind-html="get(property.name, true) | linky:'_blank'"></span>
+						<span ng-if="property.type == 'BooleanField'">
+							<i class='fa' ng-class='{"fa-square-o": !get(property.name, true), "fa-check-square-o": get(property.name, true)}'></i>
+						</span>
 					</td>
 				</tr>
 			</table>

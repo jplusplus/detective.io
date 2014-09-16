@@ -16,6 +16,7 @@ from django.db.models.loading import get_model
 from optparse import make_option
 from app.detective.models import Topic
 from app.detective import utils
+import traceback
 
 class Command(BaseCommand):
     help = "Detect orphans in the graph."    
@@ -41,8 +42,8 @@ class Command(BaseCommand):
                         for field in fields:
                             if field["related_model"] and field["direction"] == "out" and "through" in field["rules"]:
                                 ids= []
-                                for Model in Model.objects.all():
-                                    ids.extend([_.id for _ in Model.node.relationships.all()])
+                                for entity in Model.objects.all():
+                                    ids.extend([_.id for _ in entity.node.relationships.all()])
                                 Properties = field["rules"]["through"]
                                 for info in Properties.objects.all():
                                     if info._relationship not in ids:
@@ -53,7 +54,7 @@ class Command(BaseCommand):
                                             self.stdout.write("\tremoving %s" % (info))
                                             info.delete()
                     except Exception as e:
-                        self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))
+                        self.stderr.write("\tError with fields of %s (%s)" % (entity, e))
                 self.stdout.write("\tfound %d orphans" % (orphans_count))
             except Exception as e:
                 self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))

@@ -469,6 +469,7 @@ class IndividualResource(ModelResource):
         return self.create_response(request, object_list)
 
     def patch_sources(self, sources, node):
+        if sources == None: sources = []
         def arr_no_dict_dup(in_arr):
             out_arr = []
             for el in in_arr:
@@ -549,16 +550,19 @@ class IndividualResource(ModelResource):
                                 attr.add(related)
                     # removing unused relationship
                     rel_type = self.get_model_field(field).rel_type
+                    ids_of_related_nodes = [rel["id"] for rel in rels]
                     for relationship in node.node.relationships.all(types=[rel_type]):
-                        if relationship.end.id not in [rel["id"] for rel in rels]:
+                        end_points = [relationship.start.id, relationship.end.id]
+                        if not any(ep in ids_of_related_nodes for ep in end_points):
                             relation_id = relationship.id
                             relationship.delete()
-                            try:
-                                property = though.objects.get(_relationship=relation_id)
-                            except ObjectDoesNotExist:
-                                pass
-                            else:
-                                property.delete()
+                            if though is not None:
+                                try:
+                                    property = though.objects.get(_relationship=relation_id)
+                                except ObjectDoesNotExist:
+                                    pass
+                                else:
+                                    property.delete()
 
                 # It's a literal value and not the ID
                 elif field != 'id':
@@ -624,25 +628,27 @@ class IndividualResource(ModelResource):
                     rules  = request.current_topic.get_rules()
                     # Model that manages properties
                     though = rules.model( self.get_model() ).field(kwargs["field"]).get("through")
-                    # Get the properties for this relationship
-                    try:
-                        properties = though.objects.get(_relationship=ids[0])
-                        # Get the module for this model
-                        module = self.dummy_class_to_ressource(though)
-                        # Instanciate the resource
-                        resource = import_class(module)()
-                        # Create a bundle with this resource
-                        bundle = resource.build_bundle(obj=properties, request=request)
-                        bundle = resource.full_dehydrate(bundle, for_list=True)
-                        # We ask for relationship properties
-                        return resource.create_response(request, bundle)
-                    except though.DoesNotExist:
-                        endnodes = [ int(pk), int(end) ]
-                        # We ask for relationship properties
-                        return self.create_response(request, {
-                            "_relationship": ids[0],
-                            "_endnodes": endnodes
-                        })
+                    if though:
+                        # Get the properties for this relationship
+                        try:
+                            properties = though.objects.get(_relationship=ids[0])
+                        except though.DoesNotExist:
+                            endnodes = [ int(pk), int(end) ]
+                            # We ask for relationship properties
+                            return self.create_response(request, {
+                                "_relationship": ids[0],
+                                "_endnodes": endnodes
+                            })
+                        else:
+                            # Get the module for this model
+                            module = self.dummy_class_to_ressource(though)
+                            # Instanciate the resource
+                            resource = import_class(module)()
+                            # Create a bundle with this resource
+                            bundle = resource.build_bundle(obj=properties, request=request)
+                            bundle = resource.full_dehydrate(bundle, for_list=True)
+                            # We ask for relationship properties
+                            return resource.create_response(request, bundle)
                 else:
                     # No relationship
                     return self.create_response(request, { "_relationship": None })

@@ -462,17 +462,19 @@ class IndividualResource(ModelResource):
                 # Only literal values have a _property attribute
                 if hasattr(field, "_property"):
                     try:
-                        if hasattr(field._property, "validators"):
+                        try:
+                            # Get a single field validator
+                            formfield = field._property.formfield()
+                            # Validate and clean data
+                            cleaned_data[field_name] = formfield.clean(data[field_name])
+                        except TypeError:
+                            validators = getattr(field._property, "validators", [])
+                            # This field has several validators
                             for validator in field._property.validators:
                                 # Process validation with every validator
                                 validator(data[field_name])
                             # @warning: this will validate the data for
                             # array of values but not clean them
-                            cleaned_data[field_name] = data[field_name]
-                        else:
-                            # Get a single field validator
-                            formfield = field._property.formfield()
-                            # Validate and clean data
                             cleaned_data[field_name] = data[field_name]
                     except ValidationError as e:
                         # Raise the same error the field name as key
@@ -524,8 +526,11 @@ class IndividualResource(ModelResource):
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
         # Current model
         model = self.get_model()
-        # Get the node's data using the rest API
-        node = connection.nodes.get(pk)
+        try:
+            # Get the node's data using the rest API
+            node = connection.nodes.get(pk)
+        # Node not found
+        except client.NotFoundError: raise Http404("Not found.")
         # Load every relationship only when we need to update a relationship
         node_rels = None
         # Parse only body string
@@ -597,9 +602,11 @@ class IndividualResource(ModelResource):
             # Or a literal value
             # (integer, date, url, email, etc)
             else:
+                # Remove the values
+                if field_value in [None, '']: node.delete(field_name)
                 # We simply update the node property
                 # (the value is already validated)
-                node.set(field_name, field_value)
+                else: node.set(field_name, field_value)
         # And returns cleaned data
         return self.create_response(request, data)
 

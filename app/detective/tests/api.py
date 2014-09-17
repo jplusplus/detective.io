@@ -3,6 +3,7 @@
 from app.detective.models                import Topic, TopicSkeleton, PLANS_CHOICES
 from app.detective.topics.common.message import SaltMixin
 from app.detective.topics.energy.models  import Organization, EnergyProject, Person, Country
+from app.detective                       import utils
 from datetime                            import datetime
 from django.conf                         import settings
 from django.contrib.auth.models          import User, Group
@@ -904,8 +905,28 @@ class TopicApiTestCase(ApiTestCase):
         self.assertNotIn("quantity_(in_milligrams).", relation_pamd.keys() , relation_pamd)
         self.assertTrue(int(relation_pamd["_relationship"]) > 0            , relation_pamd)
         self.assertTrue(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
+        # check if orphans exist. It shouldn't !
+        def check_if_orphans_exist():
+            orphans_count = 0
+            for Model in topic.get_models():
+                fields = utils.get_model_fields(Model)
+                for field in fields:
+                    if field["rel_type"] and field["direction"] == "out" and "through" in field["rules"]:
+                        ids= []
+                        for entity in Model.objects.all():
+                            ids.extend([_.id for _ in entity.node.relationships.all()])
+                        Properties = field["rules"]["through"]
+                        for info in Properties.objects.all():
+                            if info._relationship not in ids:
+                                orphans_count += 1
+            self.assertEqual(orphans_count, 0)
+        # remove one molecule
+        molb.delete()
+        check_if_orphans_exist()
+        pilulea.delete()
+        check_if_orphans_exist()
 
-    def test_patch_with_composite_relations_again(self):
+    def test_patch_relations(self):
         """
 
         Test if I can link one entity to many entities without overwritting previous relations

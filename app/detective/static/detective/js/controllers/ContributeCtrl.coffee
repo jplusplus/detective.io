@@ -132,7 +132,7 @@ class window.ContributeCtrl
                 if value? and typeof(value) is "object" and name isnt "field_sources" and name.indexOf("$") != 0
                     exist = {}
                     for entity in value
-                        entity._duplicated = exist[entity.id]? and exist[entity.id]
+                        entity.$duplicated = exist[entity.id]? and exist[entity.id]
                         exist[entity.id] = true
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
@@ -348,6 +348,7 @@ class window.ContributeCtrl
 
         # Toggle the close attribute
         close: => @isClosed = not @isClosed
+
         # Get invisible field with this individual
         invisibleFields: (meta)=>
             fields = []
@@ -355,7 +356,9 @@ class window.ContributeCtrl
                 for f in @meta.fields
                     fields.push(f) if @scope.isVisibleAdditional(@)(f)
             fields
+
         showField: (field)=> @moreFields.push field
+
         isSaved: => @fields.id? and _.isEmpty( @getChanges() )
 
         unfocusField: =>
@@ -541,7 +544,7 @@ class window.ContributeCtrl
         - `linked` for field which represent an Individal but isn't duplicated. The field will be shown as an uneditable field.
         ###
         switch true
-            when related instanceof @Individual or (related.id? and not related._duplicated) then 'linked'
+            when related instanceof @Individual or (related.id? and not related.$duplicated) then 'linked'
             else 'input'
 
     askForNew: (related)=>

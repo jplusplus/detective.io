@@ -410,7 +410,7 @@ class SummaryResource(Resource):
             response = dict(
                 status = "enqueued")
             # check if a job already exist
-            for job in django_rq.get_queue().jobs:
+            for job in django_rq.get_queue('high').jobs:
                 if job.meta["cache_key"] == cache_key:
                     response["token"] = job.id
                     logger.debug("job_already_exist")

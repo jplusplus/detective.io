@@ -25,3 +25,5 @@ script:
 - coverage run --source=app.detective ./manage.py test detective --pythonpath=. --traceback
 after_success:
 - coveralls
+services:
+  - redis-server

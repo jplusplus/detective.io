@@ -213,7 +213,7 @@ class window.ContributeCtrl
                 val = clean(now[prop], prop)
                 # Remove resource methods
                 # and angular properties (that start with $)
-                if typeof(val) isnt "function" and prop.indexOf("$") != 0
+                if typeof(val) isnt "function" and prop.indexOf("$") != 0 and prop isnt 'field_sources'
                     # Previous and new value are different
                     unless angular.equals clean(prev[prop], prop), val
                         changes[prop] = val

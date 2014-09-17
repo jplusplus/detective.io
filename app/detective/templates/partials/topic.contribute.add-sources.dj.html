@@ -1,6 +1,6 @@
 <form name="form"
       class="form-horizontal"
-      ng-submit="submit(form)"
+      ng-submit="save(form)"
       novalidate>
     <div class="modal-header">
         <h3 class="modal-title">
@@ -10,7 +10,7 @@
     <div class="modal-body">
         <!-- previously created sources -->
         <div class="form-group"
-             ng-repeat="source in fields.field_sources | filter:isFieldSource">
+             ng-repeat="source in getSources()">
             <div class='input-group'>
                 <!-- source external link -->
                 <span class="input-group-btn" ng-if="isSourceURLValid(source)">
@@ -25,7 +25,7 @@
                 <input type="text"
                        autocorrect="off"
                        autocapitalize="off"
-                       focus-on="source.focus"
+                       focus-on="focused === source.reference && !loading"
                        name="source[[$index]]"
                        no-duplicates="getSourcesRefs()"
                        ng-model="source.reference"
@@ -36,6 +36,7 @@
                 <!-- source delete button -->
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-default delete-source-btn"
+                        ng-disabled="loading"
                         ng-click="deleteSource(source)">
                         <i class="fa fa-trash-o"></i>
                     </button>
@@ -51,7 +52,7 @@
                autocorrect="off"
                autocapitalize="off"
                ng-change="addSource(new_source); new_source=undefined"
-               focus-on="focus_add"
+               focus-on="!focused && !loading"
                ng-model="new_source"
                ng-disabled="loading"
                placeholder="http://exemple.com"

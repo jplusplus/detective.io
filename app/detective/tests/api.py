@@ -974,6 +974,57 @@ class TopicApiTestCase(ApiTestCase):
         self.assertTrue(int(relation_b["_relationship"]) > 0 , relation_b)
         self.assertTrue(relation_b["_endnodes"]              , [event_a.id, victim_b.id])
 
+    def test_export_csv(self):
+        from django_rq import get_worker
+        export_resp1 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
+        self.assertValidJSONResponse(export_resp1)
+        export_resp1 = json.loads(export_resp1.content)
+        self.assertEqual(export_resp1["status"], "enqueued", export_resp1)
+        export_resp2 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
+        export_resp2 = json.loads(export_resp2.content)
+        # we have the same token
+        self.assertEqual(export_resp1["token"], export_resp2["token"], export_resp2)
+        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/" % (export_resp2["token"]))
+        self.assertValidJSONResponse(job_resp)
+        job_resp     = json.loads(job_resp.content)
+        # processes all jobs then stop
+        get_worker("default", "high").work(burst=True)
+        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=1" % (export_resp2["token"]))
+        job_resp     = json.loads(job_resp.content)
+        self.assertEqual(job_resp["status"], "finished", job_resp)
+        result1      = json.loads(job_resp["result"])
+        self.assertIsNotNone(result1["file_name"], job_resp)
+        self.assertNotEqual(result1["file_name"], "")
+        # ask again to check if it's the same file (thanks to the cache)
+        export_resp1 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
+        export_resp1 = json.loads(export_resp1.content)
+        get_worker("default", "high").work(burst=True)
+        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=1" % (export_resp1["token"]))
+        job_resp     = json.loads(job_resp.content)
+        result2      = json.loads(job_resp["result"])
+        self.assertEqual(result1["file_name"], result2["file_name"])
+        # update an item and check if the file name change
+        data = {
+            'website_url': 'http://jpioupiou.org',
+        }
+        args = {
+            'scope'      : 'detective/energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        self.patch_individual(**args)
+        export_resp3 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
+        export_resp3 = json.loads(export_resp3.content)
+        self.assertNotEqual(export_resp1["token"], export_resp3["token"])
+        get_worker("default", "high").work(burst=True)
+        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=2" % (export_resp3["token"]))
+        job_resp     = json.loads(job_resp.content)
+        result3      = json.loads(job_resp["result"])
+        self.assertIsNotNone(result3["file_name"], job_resp)
+        self.assertNotEqual(result3["file_name"], "")
+        self.assertNotEqual(result1["file_name"], result3["file_name"])
+
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')
         # Parse data to check the number of result

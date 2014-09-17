@@ -470,6 +470,7 @@ class IndividualResource(ModelResource):
 
     def patch_sources(self, sources, node):
         if sources == None: sources = []
+
         def arr_no_dict_dup(in_arr):
             out_arr = []
             for el in in_arr:
@@ -483,15 +484,24 @@ class IndividualResource(ModelResource):
                     out_arr.append(el)
             return out_arr
 
-        # remove source duplicates
-        all_filtered_sources_data = arr_no_dict_dup(sources)
-        # remove empty references
-        all_filtered_sources_data = filter(lambda el: el['reference'] not in [None, ''], sources)
+        # remove empty references and duplicates
+        sources = filter(lambda x: x['reference'] not in [None, ''], arr_no_dict_dup(sources))
 
-        # dumb patching: remove all old field_sources and put the new ones
-        [ source.delete() for source in  FieldSource.objects.filter(individual=node.id)]
-        for source_data in all_filtered_sources_data:
-            FieldSource.objects.create(individual=node.id, **source_data)
+        old_sources = map(lambda x: {'field':x.field, 'reference':x.reference}, FieldSource.objects.filter(individual=node.id))
+
+        # filter sources we need to add
+        sources_to_add = filter(lambda x: x not in old_sources, sources)
+
+        # filter sources we need to delete
+        sources_to_delete = filter(lambda x: x not in sources, old_sources)
+
+        # delete what we need
+        for source in sources_to_delete:
+            FieldSource.objects.filter(individual=node.id, **source).delete()
+
+        # add what we need
+        for source in sources_to_add:
+            FieldSource.objects.create(individual=node.id, **source)
 
     def get_patch(self, request, **kwargs):
         self.method_check(request, allowed=['post'])

@@ -4,7 +4,6 @@ angular.module('detective.directive').directive 'focusOn', ($timeout) ->
         getTrigger = ->
             scope.$eval attrs.focusOn
         scope.$watch getTrigger, (value)->
-            console.log 'focus-on trigger value changed !', value
             if value is true
                 $timeout ->
                     $(element[0]).focus()

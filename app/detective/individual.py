@@ -594,7 +594,12 @@ class IndividualResource(ModelResource):
                 # Start a transaction to batch insert/delete values
                 with connection.transaction(commit=False) as tx:
                     # Then create the new relationships (using nodes instances)
-                    [ node.relationships.create(rel_type, n) for n in new_rels_node ]
+                    # Outcoming relationship
+                    if field.direction == 'out':
+                        [ connection.relationships.create(node, rel_type, n) for n in new_rels_node ]
+                    # Incoming relationship
+                    elif field.direction == 'in':
+                        [ connection.relationships.create(n, rel_type, node) for n in new_rels_node ]
                     # Then delete the old relationships (using relationships instance)
                     [ rel.delete() for rel in old_rels ]
                 # Commit change when every field was treated

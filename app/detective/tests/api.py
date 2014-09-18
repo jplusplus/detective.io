@@ -910,7 +910,7 @@ class TopicApiTestCase(ApiTestCase):
             for Model in topic.get_models():
                 fields = utils.get_model_fields(Model)
                 for field in fields:
-                    if field["rel_type"] and field["direction"] == "out" and "through" in field["rules"]:
+                    if field["rel_type"] and "through" in field["rules"]:
                         ids= []
                         for entity in Model.objects.all():
                             ids.extend([_.id for _ in entity.node.relationships.all()])

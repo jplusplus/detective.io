@@ -1,14 +1,12 @@
 class window.AddSourcesModalCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$q', '$modalInstance', 'Individual', 'UtilsFactory', "fields", "field", "meta"]
-    constructor: (@scope, @q, @modalInstance, @Individual, @UtilsFactory,  @fields, @field, @meta)->
+    @$inject: ['$scope', '$q', '$filter', '$modalInstance', 'Individual', 'UtilsFactory', "fields", "field", "meta"]
+    constructor: (@scope, @q, @filter, @modalInstance, @Individual, @UtilsFactory,  @fields, @field, @meta)->
         @fields = angular.copy @fields
         @updateMasterSources()
         # Scope variables
         @scope.loading    = no
         @scope.individual = @Individual
-        # workout to focus last field of sources form
-        @scope.field_value = @fields[field.name]
         # Description of the model's fields
         @scope.meta = @meta
 
@@ -19,6 +17,7 @@ class window.AddSourcesModalCtrl
         @scope.updateSource     = @updateSource
         @scope.addSource        = @addSource
         @scope.deleteSource     = @deleteSource
+        @scope.getFieldValue    = @getFieldValue
         @scope.getSources       = @getSources
         @scope.getSourcesRefs   = @getSourcesRefs
         @scope.isSourceURLValid = @isSourceURLValid
@@ -51,6 +50,27 @@ class window.AddSourcesModalCtrl
             @meta.updating[@field.name] = false
 
         @close(promise) if close
+
+    isFieldRich: (field)=>
+        field.rules.is_rich or no
+
+    getFieldValue: ()=>
+        field_value = @fields[@field.name]
+        # field type switch
+        switch @field.type
+            when 'CharField'
+                if @isFieldRich(@field)
+                    field_value = @field.verbose_name
+            when 'DateTimeField'
+                format  = "shortDate"
+                field_value =  @filter("date")(field_value, format)
+            when 'Relationship'
+                field_value = @field.verbose_name
+
+        unless field_value?
+            field_value = @field.verbose_name
+
+        field_value
 
 
     getSources: (fields=@fields) => _.where fields.field_sources, field: @field.name

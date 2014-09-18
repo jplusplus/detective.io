@@ -189,4 +189,14 @@ class UserAdmin(UserAdmin):
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 
+from django.http import HttpResponse
+from django.core import serializers
+
+def export_as_json(modeladmin, request, queryset):
+    response = HttpResponse(content_type="application/json")
+    serializers.serialize("json", queryset, stream=response)
+    return response
+
+admin.site.add_action(export_as_json, 'export_selected')
+
 # EOF

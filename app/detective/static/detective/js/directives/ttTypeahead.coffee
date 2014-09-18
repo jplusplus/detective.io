@@ -32,21 +32,87 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 html
 
     scope:
-        model      : "=ttModel"
-        individual : "&ttIndividual"
-        topic      : "&ttTopic"
-        create     : "&ttCreate"
-        submit     : "&ttSubmit"
-        endpoint   : "&ttEndpoint"
-        remoteUrl  : "&ttRemoteUrl"
-        prefetchUrl: "&ttPrefetchUrl"
-        transform  : "&ttTransform"
-        valueKey   : "@"
-        value      : '=?'
-        limit      : "@"
-        change     : "&"
+        model                 : "=ttModel"
+        individual            : "&ttIndividual"
+        topic                 : "&ttTopic"
+        create                : "&ttCreate"
+        submit                : "&ttSubmit"
+        endpoint              : "&ttEndpoint"
+        remoteUrl             : "&ttRemoteUrl"
+        prefetchUrl           : "&ttPrefetchUrl"
+        disableEmptySelection : "&ttDisableEmptySelection"
+        emptyResultsSelected  : "&ttEmptyResultsSelected"
+        transform             : "&ttTransform"
+        valueKey              : "@"
+        value                 : '=?'
+        limit                 : "@"
+        change                : "&"
+
+    # Allowed empty attributes:
+    # - ttPrependSearchIcon
+    # -
 
     link: (scope, element, attrs) ->
+        wrapper = undefined
+
+        shouldPrependSearchIcon = ->
+            _.has(attrs, 'ttPrependSearchIcon')
+
+        shouldDisableEmptySelection = ->
+            scope.disableEmptySelection()
+
+        hasEmptyCallback = ->
+            _.has(attrs, 'ttEmptyResultsSelected')
+
+        getEmptyResultDiv = ->
+            if shouldDisableEmptySelection()
+                div = [
+                    "<div>",
+                        "<div class='tt-suggestion tt-suggestion__line'>",
+                            "Please choose an existing entity.",
+                        "</div>",
+                    "</div>"
+                ]
+            else
+                div = [
+                    "<div class='tt-suggestion'>",
+                        "<div class='tt-suggestion__line tt-suggestion__line--with-empty-results'>",
+                            "<div class='tt-suggestion__line__figure'>",
+                                "<i class='fa fa-plus'></i>",
+                            "</div>",
+                            "The entity you just typed in is new in the base.<br/>",
+                            "Do you want to create it?",
+                        "</div>",
+                    "</div>"
+                ]
+            div.join ""
+
+        getSearchIcon = ->
+            (wrapper or element.parent()).find('.tt-search-icon i')
+
+        appendSearchIcon = (ttElement)->
+            prepend = shouldPrependSearchIcon()
+            wrapper = ttElement
+            if not wrapper.find('.tt-search-icon').length
+                search_icon = $("""
+                    <span class='tt-search-icon'>
+                        <i class='fa fa-search'></i>
+                    </span>
+                """)
+                wrapper.toggleClass('twitter-typeahead--prepend-icon', prepend)
+                wrapper.append search_icon
+
+        # handle loading states
+        setLoading = ->
+            search_icon = getSearchIcon()
+            search_icon.removeClass('fa-search')
+            search_icon.addClass('fa-circle-o-notch fa-spin')
+
+        setLoaded = ->
+            search_icon = getSearchIcon()
+            search_icon.removeClass('fa-circle-o-notch fa-spin')
+            search_icon.addClass('fa-search')
+
         # Helper to save the search response
         responseFilter = (response) ->
             if scope.transform()?
@@ -57,12 +123,19 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             lastDataset = objects
             objects
 
+        onRequestCompleted = (xhr, status)->
+            setLoaded()
+            data = xhr.responseJSON
+            if data? and not data.objects.length
+                scope.empty_val = element.val()
+
+
         # Set a default value
         element.val scope.model.name if scope.model?
         element.val scope.value if scope.value?
 
         scope.$watch 'value', (val, old)->
-            element.typeahead('val', val)
+            element.typeahead('val', val) if val
         , yes
 
         start = =>
@@ -96,6 +169,10 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 remote :
                     url : remoteUrl
                     filter : responseFilter
+                    ajax:
+                        beforeSend: setLoading
+                        complete: onRequestCompleted
+
 
             bh.storage = null # Hack to disable localStorage caching
             do bh.initialize
@@ -105,17 +182,20 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 hint : yes
                 highlight : yes
 
-            element.typeahead options,
+            # typeahead initialization
+            typeahead = element.typeahead options,
                 displayKey : (scope.valueKey or "name")
                 name : 'suggestions-' + itopic.replace '/', '-'
                 source : do bh.ttAdapter
                 templates :
+
+                    empty: getEmptyResultDiv()
                     suggestion : (template.compile [
                         '<div>',
                             '<div class="tt-suggestion__line" ng-class="{\'tt-suggestion__line--with-model\': getModel()}">',
                                 '[[name||label]]',
                                 '<div class="tt-suggestion__line__model" ng-show="getModel()">',
-                                    '<div class="tt-suggestion__line__model__figure" ng-style="{ background: getFigureBg()}">',
+                                    '<div class="tt-suggestion__line__figure" ng-style="{ background: getFigureBg()}">',
                                         '<i ng-show="isList()" class="fa fa-list"></i>',
                                     '</div>',
                                     '[[getModelVerbose()]]',
@@ -123,6 +203,10 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                             '</div>',
                         '</div>'
                     ].join "").render
+
+            # when typeahead is initialized we can add search/loading indicator
+            appendSearchIcon(typeahead.parent())
+
 
             # Unbind all events
             (((element.off "keyup").off "change").off "typeahead:selected").off "typeahead:uservalue"
@@ -137,15 +221,22 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
 
             # Watch select event
             element.on "typeahead:selected", (input, individual)->
-                unless _.isEmpty attrs.ttModel
+                if not _.isEmpty(attrs.ttModel)
                     scope.$apply =>
                         # workaround to have same types between individual and
                         # scope.model (source, destionation), if destination
                         # is undefined, the angularJS deep copy will not work.
                         unless scope.model?
                             scope.model = {}
-                        angular.copy individual, scope.model
-                do scope.change if scope.change?
+
+                        if hasEmptyCallback() and not individual
+                            angular.copy {name: scope.empty_val}, scope.model
+                            scope.empty_val = undefined
+                            do scope.emptyResultsSelected
+                        else
+                            angular.copy individual, scope.model
+                            do scope.change
+
 
             # Watch user value event
             element.on "typeahead:uservalue", ()->
@@ -167,6 +258,8 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 ev = "typeahead:" + (if datum then "selected" else "uservalue")
                 # Trigger this even
                 element.trigger ev, datum
+
+            # Loading events
 
         scope.$watch =>
             do scope.topic

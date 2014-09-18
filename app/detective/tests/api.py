@@ -240,7 +240,6 @@ class ApiTestCase(ResourceTestCase):
             'author': topic.author
         }
 
-
 class TopicApiTestCase(ApiTestCase):
 
     def setUp(self):
@@ -924,6 +923,9 @@ class TopicApiTestCase(ApiTestCase):
         molb.delete()
         check_if_orphans_exist()
         pilulea.delete()
+        mola.delete()
+        molc.delete()
+        mold_wo_infos.delete()
         check_if_orphans_exist()
 
     def test_patch_relations(self):
@@ -1024,6 +1026,34 @@ class TopicApiTestCase(ApiTestCase):
         self.assertIsNotNone(result3["file_name"], job_resp)
         self.assertNotEqual(result3["file_name"], "")
         self.assertNotEqual(result1["file_name"], result3["file_name"])
+
+    def test_topic_entities_count(self):
+        topic = Topic.objects.get(slug='test-pillen')
+        # get models
+        models   = topic.get_models_module()
+        # get models
+        PillMoleculesContainedMoleculeProperties = models.PillMoleculesContainedMoleculeProperties
+        Molecule                                 = models.Molecule
+        Pill                                     = models.Pill
+        # create entities
+        pilulea       = Pill    .objects.create(name='pilule A')
+        mola          = Molecule.objects.create(name="molecule A")
+        relation_args = {
+            "_endnodes"                 : [pilulea.id, mola.id],
+            "_relationship"             : 2,
+            "quantity_(in_milligrams)." : "12"
+        }
+        PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
+        self.assertEqual(topic.entities_count(), 2)
+        pilulea.molecules_contained.add(mola)
+        self.assertEqual(topic.entities_count(), 2)
+        molb          = Molecule.objects.create(name="molecule B")
+        self.assertEqual(topic.entities_count(), 3)
+        molb.delete()
+        self.assertEqual(topic.entities_count(), 2)
+        mola.delete()
+        pilulea.delete()
+        self.assertEqual(topic.entities_count(), 0)
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')

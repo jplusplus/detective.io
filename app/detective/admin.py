@@ -144,10 +144,15 @@ admin.site.register(Topic, TopicAdmin)
 class TopicSkeletonForm(forms.ModelForm):
     target_plans = forms.MultipleChoiceField(choices=PLANS_CHOICES)
 
+    def __init__(self, *args, **kwargs):
+        super(TopicSkeletonForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+        if instance:
+            self.initial['target_plans'] = instance.selected_plans()
 
 class TopicSkeletonAdmin(admin.ModelAdmin):
     form = TopicSkeletonForm
-    list_display = ("title","picture", "picture_credits","ontology", "target_plans")
+    list_display = ("title","picture","description", "picture_credits", "target_plans")
 
 admin.site.register(TopicSkeleton, TopicSkeletonAdmin)
 

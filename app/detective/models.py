@@ -434,8 +434,11 @@ class TopicSkeleton(models.Model):
     tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
 
     def selected_plans(self):
-        plans = re.sub('[\[\]]', '', self.target_plans)
-        return plans.split(',')
+        selected_plans = []
+        for plan in PLANS_CHOICES:
+            if plan[0] in self.target_plans:
+                selected_plans.append(plan[0])
+        return selected_plans
 
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")

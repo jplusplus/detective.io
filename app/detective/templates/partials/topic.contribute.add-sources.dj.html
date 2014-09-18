@@ -1,6 +1,5 @@
 <form name="form"
       class="form-horizontal"
-      ng-submit="save(form)"
       novalidate>
     <div class="modal-header">
         <h3 class="modal-title">
@@ -29,7 +28,6 @@
                        name="source[[$index]]"
                        no-duplicates="getSourcesRefs()"
                        ng-model="source.reference"
-                       ng-blur="updateSource(source, form, $index, $event)"
                        ng-disabled="loading"
                        class="form-control"/>
 
@@ -37,7 +35,7 @@
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-default delete-source-btn"
                         ng-disabled="loading"
-                        ng-click="deleteSource(source)">
+                        ng-click="deleteSource(form, source)">
                         <i class="fa fa-trash-o"></i>
                     </button>
                 </span>
@@ -58,8 +56,6 @@
                placeholder="http://exemple.com"
                class="form-control" />
         </div>
-        <!-- scam to submit sources when 'ENTER' key is pressed -->
-        <button class="hidden" type="submit">hidden</button>
     </div>
 </form>
 <div class="modal-footer" ng-class="{ loading: loading }">

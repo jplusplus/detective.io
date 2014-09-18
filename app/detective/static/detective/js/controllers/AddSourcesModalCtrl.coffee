@@ -28,7 +28,6 @@ class window.AddSourcesModalCtrl
     close: (result=@fields)=>
         @modalInstance.close(result)
 
-
     save: (form, close=no)=>
         # if form is passed to the save function it has to be valid.
         return unless form.$valid if form?
@@ -84,31 +83,32 @@ class window.AddSourcesModalCtrl
 
         @scope.focused = value
 
-    isSaveOrCancelBtn: (el)=>
-        /^(save|cancel)/.test ($(el).attr('ng-click') or '')
 
     cleanSources: =>
         _.map @fields.field_sources, (v)-> _.omit v, 'focus'
 
-    updateSource: (source, form, $index, $event)=>
-        # if we're already saving we don't need to update sources
-        return if @scope.loading
-        return unless form.$valid
-        # workaround to avoid loading when we click on save/or cancel
-        return if @isSaveOrCancelBtn($event.relatedTarget)
-        master_source = @master_sources[$index]
-        has_changed   = not (source? and master_source?) or source.reference != master_source.reference
-        @save(form) if has_changed
+    # isSaveOrCancelBtn: (el)=>
+    #     /^(save|cancel)/.test ($(el).attr('ng-click') or '')
+
+    # updateSource: (source, form, $index, $event)=>
+    #     # if we're already saving we don't need to update sources
+    #     return if @scope.loading
+    #     return unless form.$valid
+    #     # workaround to avoid loading when we click on save/or cancel
+    #     return if @isSaveOrCancelBtn($event.relatedTarget)
+    #     master_source = @master_sources[$index]
+    #     has_changed   = not (source? and master_source?) or source.reference != master_source.reference
+    #     @save(form) if has_changed
 
     updateMasterSources: =>
         @master_sources = @getSources angular.copy @fields
 
-    deleteSource: (source, $event)=>
+    deleteSource: (form, source, $event)=>
         @fields.field_sources = _.reject @fields.field_sources, _.matches
                 field: source.field
                 reference: source.reference
         @scope.focused = undefined
-        @save()
+        # @save(form)
 
     hasSources: =>
         sources = @getSources()

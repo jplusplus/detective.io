@@ -174,6 +174,7 @@ class window.ContributeCtrl
                         for rel in relationships
                             # The field may not exists yet in the database
                             @master[rel] = @master[rel] ? []
+                            @fields[rel] = @fields[rel] ? []
 
                             if individual[rel]?
                                 # Update the master too in order

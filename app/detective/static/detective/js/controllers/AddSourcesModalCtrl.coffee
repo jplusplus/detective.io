@@ -83,7 +83,6 @@ class window.AddSourcesModalCtrl
 
         @scope.focused = value
 
-
     cleanSources: =>
         _.map @fields.field_sources, (v)-> _.omit v, 'focus'
 

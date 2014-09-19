@@ -12,6 +12,7 @@ from django.core.urlresolvers           import reverse
 from django.db.models.query             import QuerySet
 from django.http                        import Http404
 from neo4jrestclient                    import client
+from neo4jrestclient.request            import TransactionException
 from neo4django.db                      import connection
 from neo4django.db.models.properties    import DateProperty
 from neo4django.db.models.relationships import MultipleNodes
@@ -106,7 +107,6 @@ class FieldSourceResource(ModelResource):
 
 class IndividualResource(ModelResource):
 
-
     field_sources = fields.ToManyField(
         FieldSourceResource,
         attribute=lambda bundle: FieldSource.objects.filter(individual=bundle.obj.id),
@@ -117,8 +117,6 @@ class IndividualResource(ModelResource):
 
     def __init__(self, api_name=None):
         super(IndividualResource, self).__init__(api_name)
-        # Register relationships fields automaticly
-        self.generate_to_many_fields(True)
         # By default, tastypie detects detail mode globally: it means that
         # even into an embeded resource (through a relationship), Tastypie will
         # serialize it as if we are in it's detail view.
@@ -127,6 +125,19 @@ class IndividualResource(ModelResource):
             if field_object.use_in == 'detail':
                 # We use a custom method
                 field_object.use_in = self.use_in
+
+    def prepend_urls(self):
+        params = (self._meta.resource_name, trailing_slash())
+        return [
+            url(r"^(?P<resource_name>%s)/search%s$" % params, self.wrap_view('get_search'), name="api_get_search"),
+            url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
+            url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/graph%s$" % params, self.wrap_view('get_graph'), name="api_get_graph"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships/(?P<field>\w[\w-]*)%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships_field"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships/(?P<field>\w[\w-]*)/(?P<end>\w[\w-]*)%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships_field_end"),
+        ]
 
     def apply_sorting(self, obj_list, options=None):
         options_copy = options.copy()
@@ -160,17 +171,19 @@ class IndividualResource(ModelResource):
     def get_model(self):
         return self.get_queryset().model
 
-    def get_model_fields(self, name=None):
+    def get_model_fields(self, name=None, model=None):
+        if model is None: model = self.get_model()
         if name is None:
             # Find fields of the queryset's model
-            return self.get_model()._meta.fields
+            return model._meta.fields
         else:
-            fields = [f for f in self.get_model()._meta.fields if f.name == name]
+            fields = [f for f in model._meta.fields if f.name == name]
             return fields[0] if len(fields) else None
 
-    def get_model_field(self, name):
+    def get_model_field(self, name, model=None):
+        if model is None: model = self.get_model()
         target = None
-        for field in self.get_model_fields():
+        for field in self.get_model_fields(model=model):
             if field.name == name:
                 target = field
         return target
@@ -225,28 +238,6 @@ class IndividualResource(ModelResource):
         # Use in detail
         return self.get_resource_uri(bundle) == bundle.request.path
 
-    def get_detail(self, request, **kwargs):
-        # Register relationships fields automaticly with full detail
-        self.generate_to_many_fields(True)
-        return super(IndividualResource, self).get_detail(request, **kwargs)
-
-    def get_list(self, request, **kwargs):
-        # Register relationships fields automaticly with full detail
-        self.generate_to_many_fields(False)
-        return super(IndividualResource, self).get_list(request, **kwargs)
-
-    def alter_detail_data_to_serialize(self, request, bundle):
-        # Show additional field following the model's rules
-        rules = request.current_topic.get_rules().model(self.get_model()).all()
-        # All additional relationships
-        for key in rules:
-            # Filter rules to keep only Neomatch instance.
-            # Neomatch is a class to create programmaticly a search related to
-            # this node.
-            if isinstance(rules[key], Neomatch):
-                bundle.data[key] = rules[key].query(bundle.obj.id)
-        return bundle
-
     def dehydrate(self, bundle):
         # Show additional field following the model's rules
         rules = bundle.request.current_topic.get_rules().model( self.get_model() )
@@ -261,21 +252,8 @@ class IndividualResource(ModelResource):
             transform = transform(bundle.data)
 
         bundle.data["_transform"] = transform or getattr(bundle.data, 'name', None)
-        # Control that every relationship fields are list
-        # and that we didn't send hidden field
+
         for field in bundle.data:
-            # Find the model's field
-            modelField = getattr(bundle.obj, field, False)
-            # The current field is a relationship
-            if modelField and hasattr(modelField, "_rel"):
-                # Wrong type given, relationship field must ouput a list
-                if type(bundle.data[field]) is not list:
-                    # We remove the field from the ouput
-                    bundle.data[field] = []
-            # The field is a list of literal values
-            elif type(modelField) in (list, tuple):
-                # For tuple serialization
-                bundle.data[field] = modelField
             # Get the output transformation for this field
             transform = rules.field(field).get("transform")
             # This is just a string
@@ -320,19 +298,78 @@ class IndividualResource(ModelResource):
         # Return a new bundle
         return self.build_bundle(obj=model._neo4j_instance(node), data=obj, request=request)
 
-    def prepend_urls(self):
-        params = (self._meta.resource_name, trailing_slash())
-        return [
-            url(r"^(?P<resource_name>%s)/search%s$" % params, self.wrap_view('get_search'), name="api_get_search"),
-            url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
-            url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/graph%s$" % params, self.wrap_view('get_graph'), name="api_get_graph"),
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships"),
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships/(?P<field>\w[\w-]*)%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships_field"),
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships/(?P<field>\w[\w-]*)/(?P<end>\w[\w-]*)%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships_field_end"),
-        ]
+    def obj_get(self, **kwargs):
+        pk      = kwargs["pk"]
+        bundle  = kwargs["bundle"]
+        request = bundle.request
+        # Current model
+        model = self.get_model()
 
+        # Get the node's data using the rest API
+        try: node = connection.nodes.get(pk)
+        # Node not found
+        except client.NotFoundError: raise Http404("Not found.")
+        # Create a model istance from the node
+        return model._neo4j_instance(node)
+
+    def get_detail(self, request, **kwargs):
+
+        basic_bundle = self.build_bundle(request=request)
+        kwargs["bundle"] = basic_bundle
+
+        obj = self.obj_get(**kwargs)
+        bundle = self.build_bundle(obj=obj, request=request)
+        bundle = self.full_dehydrate(bundle)
+        bundle = self.alter_detail_data_to_serialize(request, bundle, True)
+
+        return self.create_response(request, bundle)
+
+    def alter_detail_data_to_serialize(self, request, bundle, nested=False):
+        model = self.get_model()
+        # Get relationships fields
+        fields = [ f for f in model._meta.fields if f.get_internal_type() == 'Relationship']
+        node_rels = bundle.obj.node.relationships.all()
+        # If the nested parameter is True, this set
+        node_to_retreive = set()
+        # Resolve relationships manualy
+        for field in fields:
+            # Get relationships for this fields
+            field_rels = [ rel for rel in node_rels[:] if rel.type == field._type ]
+            # Get node ids for those relationships
+            field_oposites = [ graph.opposite(rel, bundle.obj.id) for rel in field_rels ]
+            # Save the list into properities
+            bundle.data[field.name] = field_oposites
+            # Nested mode to true: we need to retreive every node
+            if nested: node_to_retreive = set(list(node_to_retreive) + field_oposites)
+        # There is node to extract for the graph
+        if len(node_to_retreive):
+            # Build the query to get all node in one request
+            query = "start n=node(%s) RETURN ID(n), n" % ",".join(map(str, node_to_retreive))
+            # Get all nodes as raw values to avoid unintended request to the graph
+            nodes = connection.query(query, returns=(int, dict))
+            # Helper lambda to retreive a node
+            retreive_node = lambda idx: next(n[1]["data"] for n in nodes if n[0] == idx)
+            # Populate the relationships field with there node instance
+            for field in fields:
+                # Retreive the list of ids
+                for i, idx in enumerate(bundle.data[field.name]):
+                    rel_node = retreive_node(idx)
+                    # Save the id which is not a node property
+                    rel_node["id"] = idx
+                    # Update value
+                    bundle.data[field.name][i] = self.validate(rel_node, field.target_model)
+
+
+        # Show additional field following the model's rules
+        rules = request.current_topic.get_rules().model(self.get_model()).all()
+        # All additional relationships
+        for key in rules:
+            # Filter rules to keep only Neomatch instance.
+            # Neomatch is a class to create programmaticly a search related to
+            # this node.
+            if isinstance(rules[key], Neomatch):
+                bundle.data[key] = rules[key].query(bundle.obj.id)
+        return bundle
 
     def get_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
@@ -454,10 +491,11 @@ class IndividualResource(ModelResource):
             FieldSource.objects.create(individual=node.id, **source)
 
 
-    def validate(self, data):
+    def validate(self, data, model=None):
+        if model is None: model = self.get_model()
         cleaned_data = {}
         for field_name in data:
-            field = self.get_model_field(field_name)
+            field = self.get_model_field(field_name, model)
             if field is not None:
                 # Only literal values have a _property attribute
                 if hasattr(field, "_property"):
@@ -495,13 +533,13 @@ class IndividualResource(ModelResource):
                             if rel.isnumeric():
                                 # We can add the value to the list.
                                 # We take care of casting it to integer.
-                                cleaned_data[field_name].append( dict(id=int(rel)) )
+                                cleaned_data[field_name].append( int(rel) )
                             else:
                                 raise ValidationError({field_name: error})
                         # This is an integer, we're just passing
                         elif type(rel) is int:
                             # We can add the value to the list
-                            cleaned_data[field_name].append(dict(id=rel))
+                            cleaned_data[field_name].append(rel)
                         # This is an object
                         elif type(rel) is dict:
                             # The given object as no ID
@@ -509,9 +547,10 @@ class IndividualResource(ModelResource):
                                 raise ValidationError({field_name: error})
                             else:
                                 # Add and cast the value
-                                cleaned_data[field_name].append( dict(id=int(rel["id"])) )
-                # The type of the value was unkown
-                else: raise ValidationError({field_name: "Must be a list of ID."})
+                                cleaned_data[field_name].append( int(rel["id"]) )
+                # Treat id
+                elif field.name == "id": cleaned_data[field_name] = int(data[field_name])
+
         return cleaned_data
 
     def get_patch(self, request, **kwargs):
@@ -526,9 +565,8 @@ class IndividualResource(ModelResource):
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
         # Current model
         model = self.get_model()
-        try:
-            # Get the node's data using the rest API
-            node = connection.nodes.get(pk)
+        # Get the node's data using the rest API
+        try: node = connection.nodes.get(pk)
         # Node not found
         except client.NotFoundError: raise Http404("Not found.")
         # Load every relationship only when we need to update a relationship
@@ -560,7 +598,7 @@ class IndividualResource(ModelResource):
             # The value can be a list of ID for relationship
             if field.get_internal_type() is 'Relationship':
                 # Pluck id from the list
-                field_ids = [ value["id"] for value in field_value ]
+                field_ids = [ value for value in field_value ]
                 # Prefetch all relationship
                 if node_rels is None: node_rels = node.relationships.all()
                 # Get relationship name

@@ -44,6 +44,9 @@
 					autocorrect="off"
                     autocapitalize="off"
 					tt-typeahead
+					tt-prepend-search-icon
+					tt-disable-empty-selection="!field.rules.is_editable"
+					tt-empty-results-selected="setNewIndividual({name: f.name}, field.related_model, individual, field.name, $index)"
 					tt-individual="field.related_model"
 					tt-topic="modelTopic(field.related_model)"
 					tt-model="individual.fields[field.name][$index]"
@@ -79,23 +82,6 @@
 				<p>This relationship already exists.</p>
 			</div>
 		</div>
-		<div class="ask-for-new" ng-show="askForNew(f) && relatedState(f) == 'input'">
-			<div class="pan" ng-if="field.rules.is_editable">
-				<h4>Heads Up!</h4>
-				<p>The entity you just typed in is new in the base.</p>
-				<div class="tr">
-					<button class="btn btn-default btn-sm"
-	   				   type="button"
-					   ng-click="setNewIndividual({name: f.name}, field.related_model, individual, field.name, $index)">
-						Create <strong>[[f.name]]</strong>
-					</button>
-				</div>
-			</div>
-			<div class="pan" ng-if="!field.rules.is_editable">
-				Please choose an existing entity.
-			</div>
-		</div>
-
 	</div>
 
 	<div ng-if="isAllowedOneMore(individual.fields[field.name])" class="top05">

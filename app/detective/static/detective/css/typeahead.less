@@ -25,6 +25,21 @@ html body {
             color:@input-color-placeholder;
         }
 
+        .tt-search-icon {
+            position: absolute;
+            right: 8px;
+            top: 4px;
+        }
+
+        &--prepend-icon {
+            .tt-input {
+                padding-left: 30px;
+            }
+            .tt-search-icon {
+                left: 8px;
+                right: auto;
+            }
+        }
     }
 
     .tt-dropdown-menu {
@@ -47,29 +62,36 @@ html body {
         &__line {
             position:relative;
 
-            &--with-model {
+            &--with-model, &--with-empty-results {
                 padding-left: 40px + 6px ;
             }
 
             &__model {
                 font-size:90%;
                 color:fade(#000, 60);
+            }
+            &__figure {
+                background:none;
+                border:1px solid fade(#000, 10);
+                border-radius: @border-radius-small;
+                height:38px;
+                width:38px;
+                position:absolute;
+                left: 2px;
+                top: 2px;
+                line-height:38px;
+                text-align:center;
+                font-size: 20px;
+                color: white;
 
-                &__figure {
-                    background:none;
-                    border:1px solid fade(#000, 10);
-                    border-radius: @border-radius-small;
-                    height:38px;
-                    width:38px;
-                    position:absolute;
-                    left: 2px;
-                    top: 2px;
-                    line-height:38px;
-                    text-align:center;
-                    font-size: 20px;
-                    color: white;
+            }
+            &--with-empty-results {
+                font-size:90%;
+                .tt-suggestion__line__figure {
+                    color: black;
                 }
             }
+
         }
     }
 

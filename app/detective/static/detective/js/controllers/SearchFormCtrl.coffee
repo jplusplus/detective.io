@@ -64,6 +64,13 @@ class window.SearchFormCtrl
             if objects.length > 0
                 @QueryFactory.selectIndividual objects[0], @topic.link
 
+    goToContribute: =>
+        state_params =
+            topic: @TopicsFactory.topic.slug
+            username: @TopicsFactory.topic.author.username
+
+        @state.go 'user-topic-contribute', state_params
+
 
 
 angular.module('detective.controller').controller 'SearchFormCtrl', SearchFormCtrl

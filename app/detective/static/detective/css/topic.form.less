@@ -14,10 +14,15 @@
                 min-height : 300px;
                 width      : 350px;
                 margin     : auto;
+
                 img {
                     .transition(all .35s);
                     cursor:pointer;
                     .opacity(.5);
+                    &:hover {
+                        .opacity(1);
+
+                    }
                     &:before {
                         background: #DDD;
                         content: " ";
@@ -39,6 +44,25 @@
                         &:after {
                             .opacity(0);
                         }
+                    }
+                }
+
+                &--teaser {
+                    p, h3, h4, h5 {
+                        .opacity(0.4);
+                    }
+                    img {
+                        .opacity(0.20);
+                    }
+                    html body &__teasing-text {
+                        top: 100px;
+                        position: absolute;
+                        width: 350px;
+                        padding: 0;
+                        cursor: pointer;
+                        text-align: center;
+                        .opacity(0.85);
+                        color: constrast(@brand-secondary);
                     }
                 }
 

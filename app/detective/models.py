@@ -432,6 +432,7 @@ class TopicSkeleton(models.Model):
     ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
     target_plans    = models.CharField(max_length=60)
     tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
+    enable_teasing  = models.BooleanField(default=False, help_text='Show this skeleton as a teasing skeleton for free user')
 
     def selected_plans(self):
         selected_plans = []

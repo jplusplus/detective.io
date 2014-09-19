@@ -172,6 +172,10 @@ class window.ContributeCtrl
                     @Individual.get type: @type, id: @fields.id, (individual)=>
                         # Reload the relationships fields
                         for rel in relationships
+                            # The field may not exists yet in the database
+                            @master[rel] = @master[rel] ? []
+                            @fields[rel] = @fields[rel] ? []
+
                             if individual[rel]?
                                 # Update the master too in order
                                 # to avoid new reloading

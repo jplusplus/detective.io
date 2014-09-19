@@ -28,6 +28,10 @@
     "underscore": "1.7.0",
     "textAngular": "1.2.0",
     "rangy": "~1.2.3",
-    "ScrollMagic": "~1.0.9"
+    "ScrollMagic": "~1.0.9",
+    "ng-embedly": "https://github.com/Paulloz/ng-embedly.git"
+  },
+  "resolutions": {
+    "angular": "1.2.25"
   }
 }

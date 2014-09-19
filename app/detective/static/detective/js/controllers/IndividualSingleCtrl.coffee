@@ -15,9 +15,11 @@ class window.IndividualSingleCtrl
             @scope.get(f.name, def) != null and f.name != 'name'
         @scope.hasValues      = (f)=> @scope.get(f.name, []).length > 0
         @scope.isString       = (t)=> ["CharField", "URLField"].indexOf(t) > -1
+        @scope.isUrl          = (t)=> t is "URLField"
         @scope.isRelationship = (d)=> ["Relationship", "ExtendedRelationship"].indexOf(d.type) > -1
         @scope.isBoolean      = (t)=> ["BooleanField"].indexOf(t) > -1
         @scope.isRich         = (field)=> field.rules.is_rich or no
+        @scope.isOEmbed       = (field)=> field.rules.is_oembed or no
         @scope.scrollTo       = @scrollTo
         @scope.singleUrl      = @singleUrl
         @scope.strToColor     = @filter("strToColor")

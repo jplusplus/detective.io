@@ -42,7 +42,6 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.user = @User
 
         @Page.title "Create a new investigation"
-        @Page.loading no
         @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
 
     # nav & scope methods

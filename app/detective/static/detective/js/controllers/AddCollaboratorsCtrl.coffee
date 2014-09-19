@@ -2,7 +2,6 @@ class window.AddCollaboratorsCtrl
     # Injects dependancies
     @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic']
     constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic)->
-        @Page.loading no
         @Page.title "Add new collaborators"
         @scope.topic = @topic
         # Transform search result

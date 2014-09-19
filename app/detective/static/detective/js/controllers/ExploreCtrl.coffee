@@ -4,7 +4,6 @@ class window.ExploreCtrl
 
     constructor: (@scope, @stateParams, @Summary, @location, @timeout, @filter, @Page, @QueryFactory, topic)->
         @scope.getTypeCount = @getTypeCount
-        @Page.loading no
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────

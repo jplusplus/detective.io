@@ -86,9 +86,6 @@ class window.UserCtrl
                 username : User.username
             @scope.subscribe = @subscribe
 
-        @Page.loading no
-
-
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
     # ──────────────────────────────────────────────────────────────────────────

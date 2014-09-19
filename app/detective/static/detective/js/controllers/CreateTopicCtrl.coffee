@@ -32,8 +32,10 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.goToPlans = @goToPlans
         @scope.selectSkeleton = @selectSkeleton
         @scope.isSelected = @isSelected
+        @scope.isTeaserSkeleton = @isTeaserSkeleton
         @scope.hasSelectedSkeleton = @hasSelectedSkeleton
         @scope.shouldShowForm = @hasSelectedSkeleton
+
         if @userMaxReached()
             @scope.max_reached = true
             @scope.plan_name  = @User.profile.plan
@@ -49,8 +51,15 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @state.go 'plans'
 
     selectSkeleton: (skeleton)=>
-        @scope.selected_skeleton = skeleton
-        @scope.$broadcast @EVENTS.skeleton.selected
+        unless @isTeaserSkeleton(skeleton)
+            @scope.selected_skeleton = skeleton
+            @rootScope.$broadcast @EVENTS.skeleton.selected
+        else
+            @goToPlans()
+
+    isTeaserSkeleton: (skeleton)=>
+        has_free_plan = @User.profile.plan is 'free'
+        has_free_plan and skeleton.enable_teasing
 
     isSelected: (skeleton)=>
         return false unless @scope.selected_skeleton?

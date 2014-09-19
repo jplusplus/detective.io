@@ -11,7 +11,10 @@
                 <li ng-repeat="skeleton in skeletons">
                   <div class="skeleton-wrapper col-sm-4 col-xs-6">
                       <div class="skeletons__item"
-                            ng-class="{ 'skeletons__item--selected': isSelected(skeleton) }">
+                            ng-class="{
+                              'skeletons__item--selected': isSelected(skeleton),
+                              'skeletons__item--teaser':   isTeaserSkeleton(skeleton)
+                            }">
                           <img ng-click="selectSkeleton(skeleton)" ng-src="[[ skeleton.thumbnail.medium ]]"/>
                           <h4>[[ skeleton.title ]]</h4>
                           <h5 ng-if="skeleton.tutorial_link"><i class="fa fa-info-circle"></i>&nbsp;<a target="_blank" ng-href="[[ skeleton.tutorial_link ]]">[[ skeleton.title ]] Tutorial</a></h5>

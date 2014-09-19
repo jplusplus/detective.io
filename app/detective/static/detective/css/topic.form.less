@@ -41,9 +41,6 @@
                 &--selected {
                     img {
                         .opacity(1);
-                        &:after {
-                            .opacity(0);
-                        }
                     }
                 }
 
@@ -53,6 +50,9 @@
                     }
                     img {
                         .opacity(0.20);
+                        &:hover {
+                            .opacity(0.20);
+                        }
                     }
                     html body &__teasing-text {
                         top: 100px;

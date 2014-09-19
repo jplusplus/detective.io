@@ -152,7 +152,7 @@ class TopicSkeletonForm(forms.ModelForm):
 
 class TopicSkeletonAdmin(admin.ModelAdmin):
     form = TopicSkeletonForm
-    list_display = ("title","picture","description", "picture_credits", "target_plans")
+    list_display = ("title","picture","description_stripped", "picture_credits", "target_plans")
 
 admin.site.register(TopicSkeleton, TopicSkeletonAdmin)
 

@@ -9,6 +9,7 @@ from django.core.paginator      import Paginator
 from django.db                  import models
 from django.db.models           import signals
 from django.utils.text          import slugify
+from django.utils.html          import strip_tags
 
 from jsonfield                  import JSONField
 from neo4django.db              import connection
@@ -433,6 +434,10 @@ class TopicSkeleton(models.Model):
     target_plans    = models.CharField(max_length=60)
     tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
     enable_teasing  = models.BooleanField(default=False, help_text='Show this skeleton as a teasing skeleton for free user')
+
+    def description_stripped(self):
+        return strip_tags(self.description)
+
 
     def selected_plans(self):
         selected_plans = []

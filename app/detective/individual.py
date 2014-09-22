@@ -649,10 +649,16 @@ class IndividualResource(ModelResource):
             # (integer, date, url, email, etc)
             else:
                 # Remove the values
-                if field_value in [None, '']: node.delete(field_name)
+                if field_value in [None, '']:
+                    # The field may not exists (yet)
+                    try:
+                        node.delete(field_name)
+                    # It's OK, it just means we don't have to remove it
+                    except client.NotFoundError: pass
                 # We simply update the node property
                 # (the value is already validated)
                 else: node.set(field_name, field_value)
+
         # And returns cleaned data
         return self.create_response(request, data)
 

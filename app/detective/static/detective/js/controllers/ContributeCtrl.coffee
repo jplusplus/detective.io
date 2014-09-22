@@ -333,7 +333,7 @@ class window.ContributeCtrl
 
             @modalInstance.result.then((res)=>
                 if res?
-                    @fields.field_sources = res.field_sources
+                    @fields.field_sources = res
             ).finally =>
                 @updating_sources[field.name] = no
                 @modalInstance = undefined

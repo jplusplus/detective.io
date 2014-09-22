@@ -35,7 +35,7 @@
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-default delete-source-btn"
                         ng-disabled="loading"
-                        ng-click="deleteSource(form, source)">
+                        ng-click="deleteSource(source)">
                         <i class="fa fa-trash-o"></i>
                     </button>
                 </span>
@@ -62,8 +62,5 @@
     <button class="btn btn-primary"
             ng-click="save(form, true)">
         <strong>Save</strong>
-    </button>
-    <button class="btn btn-default" ng-click="cancel()">
-        Cancel
     </button>
 </div>

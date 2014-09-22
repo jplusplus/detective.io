@@ -45,10 +45,11 @@ class window.AddSourcesModalCtrl
 
         promise.then (data)=>
             @updateMasterSources()
+
             @scope.loading = no
             @meta.updating[@field.name] = false
 
-        @close(promise) if close
+            @close(@fields.field_sources) if close
 
     isFieldRich: (field)=>
         field.rules.is_rich or no
@@ -86,28 +87,14 @@ class window.AddSourcesModalCtrl
     cleanSources: =>
         _.map @fields.field_sources, (v)-> _.omit v, 'focus'
 
-    # isSaveOrCancelBtn: (el)=>
-    #     /^(save|cancel)/.test ($(el).attr('ng-click') or '')
-
-    # updateSource: (source, form, $index, $event)=>
-    #     # if we're already saving we don't need to update sources
-    #     return if @scope.loading
-    #     return unless form.$valid
-    #     # workaround to avoid loading when we click on save/or cancel
-    #     return if @isSaveOrCancelBtn($event.relatedTarget)
-    #     master_source = @master_sources[$index]
-    #     has_changed   = not (source? and master_source?) or source.reference != master_source.reference
-    #     @save(form) if has_changed
-
     updateMasterSources: =>
         @master_sources = @getSources angular.copy @fields
 
-    deleteSource: (form, source, $event)=>
+    deleteSource: (source, $event)=>
         @fields.field_sources = _.reject @fields.field_sources, _.matches
                 field: source.field
                 reference: source.reference
         @scope.focused = undefined
-        # @save(form)
 
     hasSources: =>
         sources = @getSources()
@@ -116,6 +103,5 @@ class window.AddSourcesModalCtrl
     isSourceURLValid: (source)=>
         return false unless source?
         @UtilsFactory.isValidURL(source.reference)
-
 
 angular.module('detective.controller').controller 'addSourcesModalCtrl', AddSourcesModalCtrl

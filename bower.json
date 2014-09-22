@@ -29,7 +29,7 @@
     "textAngular": "1.2.0",
     "rangy": "~1.2.3",
     "ScrollMagic": "~1.0.9",
-    "ng-embedly": "https://github.com/Paulloz/ng-embedly.git"
+    "ng-embedly": "~0.1.0"
   },
   "resolutions": {
     "angular": "1.2.25"

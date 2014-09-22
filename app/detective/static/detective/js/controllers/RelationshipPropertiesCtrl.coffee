@@ -30,7 +30,7 @@ class window.RelationshipPropertiesCtrl
                 # If it's a new field, we have to send the data again
                 # since the creation method from this API only
                 # accept the name from the data.
-                @Individual.update(params, @scope.individual.fields).then (data)->
+                @Individual.update params, @scope.individual.fields, (data)->
                     # Broadcast the individual with updated data
                     @scope.$broadcast ev, data
             # Directly broadcast data when this is an update

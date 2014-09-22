@@ -500,8 +500,13 @@ class IndividualResource(ModelResource):
         for field_name in data:
             field = self.get_model_field(field_name, model)
             if field is not None:
+                # Boolean field must be validate manually
+                if field.get_internal_type() == 'BooleanField':
+                    if type(data[field_name]) is not bool:
+                        raise ValidationError({field_name: 'Must be a boolean value'})
+                    cleaned_data[field_name] = data[field_name]
                 # Only literal values have a _property attribute
-                if hasattr(field, "_property"):
+                elif hasattr(field, "_property"):
                     try:
                         try:
                             # Get a single field validator

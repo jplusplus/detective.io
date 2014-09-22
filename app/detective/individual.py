@@ -3,6 +3,7 @@
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, get_model_fields
+from app.detective.utils                import get_model_fields as utils_get_model_fields
 from app.detective.topics.common.models import FieldSource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
@@ -584,6 +585,8 @@ class IndividualResource(ModelResource):
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
         # Current model
         model = self.get_model()
+        # Fields
+        fields = { x['name'] : x for x in utils_get_model_fields(model) }
         # Get the node's data using the rest API
         try: node = connection.nodes.get(pk)
         # Node not found

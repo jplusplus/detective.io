@@ -22,4 +22,5 @@ angular.module('detective', [
     'ngSanitize'
     'ui.router'
     'textAngular'
+    'angulartics', 'angulartics.google.analytics'
 ])

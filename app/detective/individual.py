@@ -254,8 +254,11 @@ class IndividualResource(ModelResource):
         bundle.data["_transform"] = transform or getattr(bundle.data, 'name', None)
 
         for field in bundle.data:
+            # Convert tuple to array for better serialization
+            if type( getattr(bundle.obj, field, None) ) is tuple:
+                bundle.data[field] = list( getattr(bundle.obj, field) )
             # Get the output transformation for this field
-            transform = rules.field(field).get("transform")
+            transform = rules.field(field).get("transform", None)
             # This is just a string
             # For complex formating use http://docs.python.org/2/library/string.html#formatspec
             if type(transform) is str:

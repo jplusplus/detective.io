@@ -360,7 +360,7 @@ class IndividualResource(ModelResource):
                     # Save the id which is not a node property
                     rel_node["id"] = idx
                     # Update value
-                    bundle.data[field.name][i] = self.validate(rel_node, field.target_model)
+                    bundle.data[field.name][i] = self.validate(rel_node, field.target_model, allow_missing=True)
 
 
         # Show additional field following the model's rules
@@ -494,7 +494,7 @@ class IndividualResource(ModelResource):
             FieldSource.objects.create(individual=node.id, **source)
 
 
-    def validate(self, data, model=None):
+    def validate(self, data, model=None, allow_missing=False):
         if model is None: model = self.get_model()
         cleaned_data = {}
         for field_name in data:
@@ -504,6 +504,10 @@ class IndividualResource(ModelResource):
                 if field.get_internal_type() == 'BooleanField':
                     if type(data[field_name]) is not bool:
                         raise ValidationError({field_name: 'Must be a boolean value'})
+                        if not allow_missing:
+                            raise ValidationError({field_name: 'Must be a boolean value'})
+                        # Skip this field
+                        else: continue
                     cleaned_data[field_name] = data[field_name]
                 # Only literal values have a _property attribute
                 elif hasattr(field, "_property"):
@@ -524,7 +528,7 @@ class IndividualResource(ModelResource):
                             cleaned_data[field_name] = data[field_name]
                     except ValidationError as e:
                         # Raise the same error the field name as key
-                        raise ValidationError({field_name: e.messages})
+                        if not allow_missing: raise ValidationError({field_name: e.messages})
                 # The given value is a relationship
                 elif hasattr(field, "target_model") and type(data[field_name]) is list:
                     # The validation method will collect targets ID
@@ -542,7 +546,7 @@ class IndividualResource(ModelResource):
                                 # We can add the value to the list.
                                 # We take care of casting it to integer.
                                 cleaned_data[field_name].append( int(rel) )
-                            else:
+                            elif not allow_missing:
                                 raise ValidationError({field_name: error})
                         # This is an integer, we're just passing
                         elif type(rel) is int:
@@ -553,7 +557,7 @@ class IndividualResource(ModelResource):
                             # The given object as no ID
                             if "id" not in rel:
                                 raise ValidationError({field_name: error})
-                            else:
+                            elif not allow_missing:
                                 # Add and cast the value
                                 cleaned_data[field_name].append( int(rel["id"]) )
                 # Treat id

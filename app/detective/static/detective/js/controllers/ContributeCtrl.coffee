@@ -91,10 +91,11 @@ class window.ContributeCtrl
             # List of additional visible fields
             @moreFields = []
             @similars   = []
-            # Is that model a searchable individual ?
+            # Is that model a searchable individual?
+            # Is that model created during a lookup (related to another one)?
             # Load similar individual to avoid duplicates
             # AFTER the individual is created.
-            scope.$on("individual:created", @getSimilars) if fields.name?
+            scope.$on("individual:created", @getSimilars) if fields.name? and not related_to?
             # We may have to refresh this individual
             scope.$on("individual:created", @shouldRefresh)
             # Class attributes from parameters

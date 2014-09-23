@@ -12,7 +12,8 @@
 							</h3>
 						</a>
 					</div>
-				<li ng-repeat="topic in topics" class="col-sm-4">
+				<li ng-repeat="topic in topics" class="col-sm-4"
+					ng-class="{loading: loading}">
 					<div class="dashboard__topics__item">
 						<img ng-src="[[topic.thumbnail.medium]]" class="dashboard__topics__item__bg" />
 						<h4 class="dashboard__topics__item__title">
@@ -35,6 +36,13 @@
 								<i class="fa fa-cog"></i>
 								Settings
 							</a>
+							<span ng-if="!user.owns(topic)">
+								<i class="fa fa-warning"></i>&nbsp;
+								<a ng-click="openLeaveModal(topic)">
+								   Leave investigation
+								</a>
+							</span>
+
 							<a class="btn btn-default btn-sm" ui-sref="user-topic-invite({topic: topic.slug, username: topic.author.username})">
 								<i class="fa fa-users"></i>
 								Add collaborators

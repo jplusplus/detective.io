@@ -35,9 +35,10 @@ class window.DashboardCtrl
             resolve:
                 topic: -> topic
 
-        @modalInstance.result.then =>
-            @loadPage().then (topics)=>
-                @scope.topics = topics
+        @modalInstance.result.then (quitted) =>
+            if quitted
+                @loadPage().then (topics)=>
+                    @scope.topics = topics
 
     loadPage: (page=@page)=>
         @scope.loading = true

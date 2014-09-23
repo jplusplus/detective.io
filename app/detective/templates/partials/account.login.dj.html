@@ -25,6 +25,9 @@
       <div class="alert alert-danger" ng-if="error">[[error]]</div>
     </div>
     <div class="tr panel-footer">
+      <span class="pull-left">
+        You're new here? <a ui-sref="signup">Request an account</a>
+      </span>
       <button type="submit"
               ng-click="login()"
               class="btn btn-primary">Log in</button>

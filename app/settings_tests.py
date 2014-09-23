@@ -32,10 +32,12 @@ NEO4DJANGO_DEBUG_GREMLIN = False
 
 CACHES = {
     'default': {
-        # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'detective-tests',
     }
 }
+
+from django.core.cache import cache
+cache.clear()
 
 # EOF

@@ -4,8 +4,6 @@ class window.ContributeCtrl
 
     constructor: (@scope, @modal, @state, @stateParams, @filter, @timeout, @location, @Individual, @Summary, @Page, @User, topic, @forms, @UtilsFactory)->
         @Page.title "Contribute"
-        # Global loading mode
-        Page.loading false
         # ──────────────────────────────────────────────────────────────────────
         # Methods and attributes available within the scope
         # ──────────────────────────────────────────────────────────────────────
@@ -49,6 +47,7 @@ class window.ContributeCtrl
         @scope.Individual   = @Individual
         @scope.stateParams  = @stateParams
         @scope.UtilsFactory = @UtilsFactory
+        @scope.modal        = @modal
         # Prepare future individual
         @initNewIndividual()
         # Individual list
@@ -83,6 +82,8 @@ class window.ContributeCtrl
             @loading    = false
             # List of field that are updating
             @updating   = {}
+            # List of field sources that are updating
+            @updating_sources = {}
             # Avoid object references
             fields      = angular.copy fields
             # Copy of the database's fields
@@ -100,6 +101,7 @@ class window.ContributeCtrl
             # ──────────────────────────────────────────────────────────────────
             @Individual   = scope.Individual
             @UtilsFactory = scope.UtilsFactory
+            @modal        = scope.modal
             @meta         = scope.forms[type] or {}
             @related_to   = related_to
             @scope        = scope
@@ -132,7 +134,7 @@ class window.ContributeCtrl
                 if value? and typeof(value) is "object" and name isnt "field_sources" and name.indexOf("$") != 0
                     exist = {}
                     for entity in value
-                        entity._duplicated = exist[entity.id]? and exist[entity.id]
+                        entity.$duplicated = exist[entity.id]? and exist[entity.id]
                         exist[entity.id] = true
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
@@ -168,6 +170,10 @@ class window.ContributeCtrl
                     @Individual.get type: @type, id: @fields.id, (individual)=>
                         # Reload the relationships fields
                         for rel in relationships
+                            # The field may not exists yet in the database
+                            @master[rel] = @master[rel] ? []
+                            @fields[rel] = @fields[rel] ? []
+
                             if individual[rel]?
                                 # Update the master too in order
                                 # to avoid new reloading
@@ -209,7 +215,7 @@ class window.ContributeCtrl
                 val = clean(now[prop], prop)
                 # Remove resource methods
                 # and angular properties (that start with $)
-                if typeof(val) isnt "function" and prop.indexOf("$") != 0
+                if typeof(val) isnt "function" and prop.indexOf("$") != 0 and prop isnt 'field_sources'
                     # Previous and new value are different
                     unless angular.equals clean(prev[prop], prop), val
                         changes[prop] = val
@@ -282,24 +288,6 @@ class window.ContributeCtrl
                     @error_traceback = data.traceback if data.traceback?
                 )
 
-        getSources: (field)=> _.where @fields.field_sources, field: field.name
-
-        getSourcesRefs: (field)=> _.map @getSources(field), (s)-> s.reference
-
-        addSource: (field, value)=>
-            @fields.field_sources.push
-                reference: value
-                field: field.name
-
-        deleteSource:(source, $event)=>
-            $event.preventDefault() if $event?
-            @fields.field_sources = _.reject @fields.field_sources, (e)->
-                e.field == source.field and e.reference == source.reference
-
-        hasSources: (field)->
-            sources = @getSources field
-            (not _.isEmpty sources) and _.some sources, (e)-> e? and e.reference?
-
         # Load an individual using its id
         load: (id, related_to=null)=>
             @loading    = true
@@ -322,6 +310,34 @@ class window.ContributeCtrl
                         @isClosed  = true
                         @isRemoved = false
                         @isNotFound = true
+
+        getSources: (field)=> _.where @fields.field_sources, field: field.name
+
+        hasSources: (field)=>
+            sources = @getSources(field)
+            (not _.isEmpty sources) and _.some sources, (e)-> e? and e.reference?
+
+        openSourcesModal: (field)=>
+            @modalInstance = @modal.open
+                templateUrl: '/partial/topic.contribute.add-sources.html'
+                controller : 'addSourcesModalCtrl'
+                resolve    :
+                    # Load the properties of this field
+                    fields: => @fields
+                    # Invididual type
+                    meta: =>
+                        updating: @updating_sources
+                        type: @type
+                        id: @fields.id
+                    field: => field
+
+            @modalInstance.result.then((res)=>
+                if res?
+                    @fields.field_sources = res
+            ).finally =>
+                @updating_sources[field.name] = no
+                @modalInstance = undefined
+
 
         # True if the given field can be edit
         isEditable: (field)=>
@@ -348,6 +364,7 @@ class window.ContributeCtrl
 
         # Toggle the close attribute
         close: => @isClosed = not @isClosed
+
         # Get invisible field with this individual
         invisibleFields: (meta)=>
             fields = []
@@ -355,7 +372,9 @@ class window.ContributeCtrl
                 for f in @meta.fields
                     fields.push(f) if @scope.isVisibleAdditional(@)(f)
             fields
+
         showField: (field)=> @moreFields.push field
+
         isSaved: => @fields.id? and _.isEmpty( @getChanges() )
 
         unfocusField: =>
@@ -373,9 +392,7 @@ class window.ContributeCtrl
             if @isFieldFocused field
                 @focusedField.source = !@focusedField.source
 
-        isSourceURLValid: (source)=>
-            return false unless source?
-            @UtilsFactory.isValidURL(source.reference)
+
 
     # ──────────────────────────────────────────────────────────────────────────
     # Class methods
@@ -520,7 +537,6 @@ class window.ContributeCtrl
         # Remove the instance when closing the modal
         @relationshipProperties.result.then disable, disable
 
-
     removeRelated: (individual, key, index)=>
         if individual.fields[key][index]?
             delete individual.fields[key][index]
@@ -541,7 +557,7 @@ class window.ContributeCtrl
         - `linked` for field which represent an Individal but isn't duplicated. The field will be shown as an uneditable field.
         ###
         switch true
-            when related instanceof @Individual or (related.id? and not related._duplicated) then 'linked'
+            when related instanceof @Individual or (related.id? and not related.$duplicated) then 'linked'
             else 'input'
 
     askForNew: (related)=>

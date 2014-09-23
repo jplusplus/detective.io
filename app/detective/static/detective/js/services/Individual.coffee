@@ -1,10 +1,42 @@
 angular.module('detective.service').factory("Individual", [ '$resource', '$http', '$stateParams', ($resource, $http, $stateParams)->
+    # Set default value for the common individual parameters following the
+    # current state params.
     defaultsParams =
         # Use the current topic parameter as default topic
         topic: -> $stateParams.topic or "common"
         username: -> $stateParams.username or "detective"
 
+    # This function aims to transforms an array of relationships target ids
+    # into an array of object. It ensure a seamsless transition to the new
+    # structure of the relationships fields.
+    #
+    # For exemple, the old nodes looked like that:
+    # {
+    #   "id": 12,
+    #   "partners": [ {id: 1}, {id: 2} ]
+    # }
+    #
+    # The new nodes look like that (but are transform to like the old ones):
+    # {
+    #   "id": 12,
+    #   "partners": [ 1, 2 ]
+    # }
+    #
+    legacyRelationshipSupport = $http.defaults.transformResponse.concat([(data, headersGetter) ->
+        for field, value of data
+            # This legacy function only transform array fields
+            if angular.isArray value
+                data[field] = _.map value, (val)->
+                    # Convert number value to "{id: xxxx}"
+                    if angular.isNumber val then id: val else val
+        data
+    ])
+
     $resource '/api/:username/:topic/v1/:type/:id/', defaultsParams,
+        get:
+            method : 'GET'
+            isArray: no
+            transformResponse: legacyRelationshipSupport
         query:
             method : 'GET'
             isArray: yes
@@ -15,6 +47,7 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
             url:'/api/:username/:topic/v1/:type/?'
             method : 'POST'
             isArray: no
+            transformResponse: legacyRelationshipSupport
         bulk:
             url:'/api/:username/:topic/v1/:type/summary/bulk_upload/?'
             method : 'POST'
@@ -44,6 +77,7 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
             url:'/api/:username/:topic/v1/:type/:id/patch/?'
             method : 'POST'
             isArray: no
+            transformResponse: legacyRelationshipSupport
         graph:
             url:'/api/:username/:topic/v1/:type/:id/graph'
             method: 'GET'

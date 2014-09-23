@@ -1,7 +1,7 @@
 <div class="input-group" ng-init="opened = false">
 	<div class='field__datepicker__overlay' ng-click="opened = false" ng-class="{'hidden':!opened}"></div>
 	<span class="input-group-btn">
-		<a class='btn btn-default' ng-click="opened = !!!opened">
+		<a class='btn btn-default' no-click-propagation ng-click="opened=!!!opened">
 			<i class="gray-darker fa fa-calendar"></i>
 		</a>
 	</span>

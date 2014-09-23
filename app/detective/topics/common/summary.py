@@ -311,6 +311,8 @@ class SummaryResource(Resource):
         limit     = int(request.GET.get('limit', 20))
         offset    = int(request.GET.get('offset', 0))
         query     = json.loads(request.GET.get('q', 'null'))
+        if query == None:
+            return []
         try:
             object_list = self.topic.rdf_search(query, limit, offset)
         except InvalidPage:
@@ -408,7 +410,7 @@ class SummaryResource(Resource):
             response = dict(
                 status = "enqueued")
             # check if a job already exist
-            for job in django_rq.get_queue().jobs:
+            for job in django_rq.get_queue('high').jobs:
                 if job.meta["cache_key"] == cache_key:
                     response["token"] = job.id
                     logger.debug("job_already_exist")

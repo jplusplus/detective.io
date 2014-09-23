@@ -40,9 +40,9 @@
                        autocorrect="off"
                        autocapitalize="off"
                        placeholder="[[search.topic.search_placeholder]]"
-                       tt-submit="search.goToTopic()"
                        tt-typeahead
                        tt-model="search.selectedIndividual"
+                       tt-empty-results-selected="search.goToContribute()"
                        tt-individual="'summary'"
                        tt-topic="search.topic.author.username + '/' + search.topic.slug"
                        tt-endpoint="'human'"
@@ -51,7 +51,6 @@
                        limit="10"
                        class="form-control"
                        id="input-search" />
-                <span ng-click="search.showResults()" class="fa fa-search topic-search__input__submit-btn"></span>
             </span>
         </div>
 

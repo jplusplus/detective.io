@@ -3,6 +3,7 @@
 from app.detective.models                import Topic, TopicSkeleton, PLANS_CHOICES
 from app.detective.topics.common.message import SaltMixin
 from app.detective.topics.energy.models  import Organization, EnergyProject, Person, Country
+from app.detective                       import utils
 from datetime                            import datetime
 from django.conf                         import settings
 from django.contrib.auth.models          import User, Group
@@ -238,7 +239,6 @@ class ApiTestCase(ResourceTestCase):
             'featured': topic.featured,
             'author': topic.author
         }
-
 
 class TopicApiTestCase(ApiTestCase):
 
@@ -548,6 +548,19 @@ class TopicApiTestCase(ApiTestCase):
         self.assertValidJSON(resp.content)
         # Parse data to verify relationship
         data = json.loads(resp.content)
+        # Since only the name is send during creation,
+        # we have to patch the new object now
+        args = {
+            'scope'      : 'detective/energy',
+            'model_id'   : data["id"],
+            'model_name' : 'energyproject',
+            'patch_data' : self.post_data_related
+        }
+        resp = self.patch_individual(**args)
+        # Are the data readable?
+        self.assertValidJSON(resp.content)
+        # Parse data to verify relationship
+        data = json.loads(resp.content)
         self.assertEqual(len(data["owner"]), len(self.post_data_related["owner"]))
         self.assertEqual(len(data["activity_in_country"]), len(self.post_data_related["activity_in_country"]))
 
@@ -682,7 +695,7 @@ class TopicApiTestCase(ApiTestCase):
         # date are subject to special process with patch method.
         new_date  = datetime(2011, 4, 1, 0, 0, 0, 0)
         data = {
-            'founded': new_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+            'founded': new_date.strftime('%Y-%m-%dT%H:%M:%S.%f'),
         }
         args = {
             'scope'      : 'detective/energy',
@@ -694,7 +707,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpOK(resp)
         self.assertValidJSONResponse(resp)
         updated_jpp = Organization.objects.get(name=self.jpp.name)
-        self.assertEqual(timezone.make_naive(updated_jpp.founded), new_date)
+        self.assertEqual(timezone.make_naive(updated_jpp.founded), timezone.make_naive(new_date))
 
     def test_patch_individual_date_staff_with_null(self):
         """
@@ -716,10 +729,10 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpOK(resp)
         self.assertValidJSONResponse(resp)
         updated_jpp = Organization.objects.get(name=self.jpp.name)
-        self.assertEqual(updated_jpp.founded, None)
+        self.assertTrue(updated_jpp.founded in [None, ''])
 
     def test_patch_individual_website_staff(self):
-        jpp_url  = 'http://jplusplus.org'
+        jpp_url  = 'http://jplusplus.org/'
         data = {
             'website_url': jpp_url,
         }
@@ -736,7 +749,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertEqual(updated_jpp.website_url, jpp_url)
 
     def test_patch_individual_website_staff_with_null(self):
-        jpp_url  = 'http://jplusplus.org'
+        jpp_url  = 'http://jplusplus.org/'
         data = {
             'website_url': None,
         }
@@ -750,10 +763,10 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpOK(resp)
         self.assertValidJSONResponse(resp)
         updated_jpp = Organization.objects.get(name=self.jpp.name)
-        self.assertEqual(updated_jpp.website_url, None)
+        self.assertTrue(updated_jpp.website_url in ['', None])
 
     def test_patch_individual_website_unauthenticated(self):
-        jpp_url  = 'http://jplusplus.org'
+        jpp_url  = 'http://jplusplus.org/'
         data = {
             'website_url': jpp_url,
         }
@@ -768,7 +781,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpUnauthorized(resp)
 
     def test_patch_individual_website_contributor(self):
-        jpp_url  = 'http://www.jplusplus.org'
+        jpp_url  = 'http://www.jplusplus.org/'
         data = {
             'website_url': jpp_url,
         }
@@ -786,7 +799,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertEqual(updated_jpp.website_url, jpp_url)
 
     def test_patch_individual_website_lambda(self):
-        jpp_url  = 'http://bam.jplusplus.org'
+        jpp_url  = 'http://bam.jplusplus.org/'
         data = {
             'website_url': jpp_url,
         }
@@ -802,7 +815,7 @@ class TopicApiTestCase(ApiTestCase):
 
 
     def test_patch_individual_not_found(self):
-        jpp_url  = 'http://jplusplus.org'
+        jpp_url  = 'http://jplusplus.org/'
         data = {
             'website_url': jpp_url,
         }
@@ -813,7 +826,7 @@ class TopicApiTestCase(ApiTestCase):
             'patch_data' : data,
         }
         resp = self.patch_individual(**args)
-        self.assertEqual(resp.status_code in [302, 404], True)
+        self.assertTrue(resp.status_code in [302, 404])
 
     def test_patch_with_composite_relations(self):
         """
@@ -904,8 +917,31 @@ class TopicApiTestCase(ApiTestCase):
         self.assertNotIn("quantity_(in_milligrams).", relation_pamd.keys() , relation_pamd)
         self.assertTrue(int(relation_pamd["_relationship"]) > 0            , relation_pamd)
         self.assertTrue(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
+        # check if orphans exist. It shouldn't !
+        def check_if_orphans_exist():
+            orphans_count = 0
+            for Model in topic.get_models():
+                fields = utils.get_model_fields(Model)
+                for field in fields:
+                    if field["rel_type"] and "through" in field["rules"]:
+                        ids= []
+                        for entity in Model.objects.all():
+                            ids.extend([_.id for _ in entity.node.relationships.all()])
+                        Properties = field["rules"]["through"]
+                        for info in Properties.objects.all():
+                            if info._relationship not in ids:
+                                orphans_count += 1
+            self.assertEqual(orphans_count, 0)
+        # remove one molecule
+        molb.delete()
+        check_if_orphans_exist()
+        pilulea.delete()
+        mola.delete()
+        molc.delete()
+        mold_wo_infos.delete()
+        check_if_orphans_exist()
 
-    def test_patch_with_composite_relations_again(self):
+    def test_patch_relations(self):
         """
 
         Test if I can link one entity to many entities without overwritting previous relations
@@ -952,6 +988,85 @@ class TopicApiTestCase(ApiTestCase):
         relation_b = get_relationship_reference(event_a.id, victim_b.id)
         self.assertTrue(int(relation_b["_relationship"]) > 0 , relation_b)
         self.assertTrue(relation_b["_endnodes"]              , [event_a.id, victim_b.id])
+
+    def test_export_csv(self):
+        from django_rq import get_worker
+        export_resp1 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
+        self.assertValidJSONResponse(export_resp1)
+        export_resp1 = json.loads(export_resp1.content)
+        self.assertEqual(export_resp1["status"], "enqueued", export_resp1)
+        export_resp2 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
+        export_resp2 = json.loads(export_resp2.content)
+        # we have the same token
+        self.assertEqual(export_resp1["token"], export_resp2["token"], export_resp2)
+        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/" % (export_resp2["token"]))
+        self.assertValidJSONResponse(job_resp)
+        job_resp     = json.loads(job_resp.content)
+        # processes all jobs then stop
+        get_worker("default", "high").work(burst=True)
+        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=1" % (export_resp2["token"]))
+        job_resp     = json.loads(job_resp.content)
+        self.assertEqual(job_resp["status"], "finished", job_resp)
+        result1      = json.loads(job_resp["result"])
+        self.assertIsNotNone(result1["file_name"], job_resp)
+        self.assertNotEqual(result1["file_name"], "")
+        # ask again to check if it's the same file (thanks to the cache)
+        export_resp1 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
+        export_resp1 = json.loads(export_resp1.content)
+        get_worker("default", "high").work(burst=True)
+        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=1" % (export_resp1["token"]))
+        job_resp     = json.loads(job_resp.content)
+        result2      = json.loads(job_resp["result"])
+        self.assertEqual(result1["file_name"], result2["file_name"])
+        # update an item and check if the file name change
+        data = {
+            'website_url': 'http://jpioupiou.org',
+        }
+        args = {
+            'scope'      : 'detective/energy',
+            'model_id'   : self.jpp.id,
+            'model_name' : 'organization',
+            'patch_data' : data
+        }
+        self.patch_individual(**args)
+        export_resp3 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
+        export_resp3 = json.loads(export_resp3.content)
+        self.assertNotEqual(export_resp1["token"], export_resp3["token"])
+        get_worker("default", "high").work(burst=True)
+        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=2" % (export_resp3["token"]))
+        job_resp     = json.loads(job_resp.content)
+        result3      = json.loads(job_resp["result"])
+        self.assertIsNotNone(result3["file_name"], job_resp)
+        self.assertNotEqual(result3["file_name"], "")
+        self.assertNotEqual(result1["file_name"], result3["file_name"])
+
+    def test_topic_entities_count(self):
+        topic = Topic.objects.get(slug='test-pillen')
+        # get models
+        models   = topic.get_models_module()
+        # get models
+        PillMoleculesContainedMoleculeProperties = models.PillMoleculesContainedMoleculeProperties
+        Molecule                                 = models.Molecule
+        Pill                                     = models.Pill
+        # create entities
+        pilulea       = Pill    .objects.create(name='pilule A')
+        mola          = Molecule.objects.create(name="molecule A")
+        relation_args = {
+            "_endnodes"                 : [pilulea.id, mola.id],
+            "_relationship"             : 2,
+            "quantity_(in_milligrams)." : "12"
+        }
+        PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
+        self.assertEqual(topic.entities_count(), 2)
+        pilulea.molecules_contained.add(mola)
+        self.assertEqual(topic.entities_count(), 2)
+        molb          = Molecule.objects.create(name="molecule B")
+        self.assertEqual(topic.entities_count(), 3)
+        molb.delete()
+        self.assertEqual(topic.entities_count(), 2)
+        mola.delete()
+        pilulea.delete()
+        self.assertEqual(topic.entities_count(), 0)
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')

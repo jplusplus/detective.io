@@ -175,71 +175,24 @@
 					<div class="add-source col-sm-3">
 						<div class="add-source-wrapper">
 							<button class="btn btn-primary add-source-toggle"
-								    ng-init="focusAdd=false"
-									ng-class="{active: individual.isSourceFormOpened(field)}"
-							        ng-click="individual.toggleSourceForm(field); field.focusAdd=!field.focusAdd">
-								<i class="fa-book fa right05"></i>
-								<span ng-if="individual.hasSources(field)">
+									ng-disabled="individual.updating_sources[field.name]"
+							        ng-click="individual.openSourcesModal(field)">
+
+							    <span class="right05">
+							    	<i ng-if="individual.updating_sources[field.name]"
+							    	   class="fa fa-circle-o-notch fa-spin"></i>
+									<i ng-if="!individual.updating_sources[field.name]"
+									   class="fa-book fa right05"></i>
+								</span>
+								<span ng-if="hasSources(field)">
 									Edit sources
 								</span>
-								<span ng-if="!individual.hasSources(field)">
+								<span ng-if="!hasSources(field)">
 									Add sources
 								</span>
-							</button>
-							<div class="add-source-form" ng-show="individual.isSourceFormOpened(field)">
-								<ul class="field-sources">
-									<!-- previously created sources -->
-									<li ng-repeat="source in individual.fields.field_sources | filter:{field:field.name}">
-										<div class='input-group'>
-											<!-- source external link -->
-											<span class="input-group-btn" ng-if="individual.isSourceURLValid(source)">
-												<a target="_blank"
-												   ng-click="$event.stopPropagation()"
-												   ng-href="[[source.reference]]"
-												   class="btn btn-default">
-													<i class="fa fa-external-link"></i>
-												</a>
-											</span>
-											<!-- source input -->
-											<input type="text"
-												   autocorrect="off"
-												   autocapitalize="off"
-												   placeholder="http://exemple.com"
-												   ng-model="source.reference"
-												   change-on-blur
-												   class="form-control"/>
 
-											<!-- source delete button -->
-										    <span class="input-group-btn">
-												<button type="button" class="btn btn-default delete-source-btn"
-												    ng-click="field.focusAdd=true; individual.deleteSource(source)">
-													<i class="fa fa-trash-o"></i>
-												</button>
-											</span>
-										</div>
-									</li>
-									<!-- new source form -->
-									<li>
-										<form name="form"
-											   ng-submit="form.$valid && individual.addSource(field, newSource); newSource=form.$valid ? '' : newSource" novalidate>
-											<input type="text"
-											   name='newSource'
-											   autocorrect="off"
-											   autocapitalize="off"
-											   focus-on="field.focusAdd"
-											   ng-blur="field.focusAdd=false"
-											   ng-model="newSource"
-											   no-duplicates="individual.getSourcesRefs(field)"
-											   placeholder="http://exemple.com"
-											   class="form-control pull-left" />
-											<!-- duplicate error handling -->
-											<span class='text-danger' ng-if="form.newSource.$error.nodup">Source already exists, please enter another value</span>
-										</form>
-									</li>
-								</ul>
-							</div>
+							</button>
 						</div>
-						<div class="add-source-overlay" ng-click="individual.focusedField.source = false" ng-show="individual.isSourceFormOpened(field)"></div>
 					</div>
 
 

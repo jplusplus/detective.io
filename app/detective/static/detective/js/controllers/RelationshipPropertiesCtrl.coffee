@@ -23,7 +23,18 @@ class window.RelationshipPropertiesCtrl
         # Broadcast a signal when the individual is saved
         promise.then (data)=>
             ev = if action is "save" then "individual:created" else "individual:updated"
-            @scope.$broadcast ev, data
+            # We may need a second request
+            if action is "save"
+                # Add the id of the new node to the parameter
+                params.id = data.id
+                # If it's a new field, we have to send the data again
+                # since the creation method from this API only
+                # accept the name from the data.
+                @Individual.update params, @scope.individual.fields, (data)->
+                    # Broadcast the individual with updated data
+                    @scope.$broadcast ev, data
+            # Directly broadcast data when this is an update
+            else @scope.$broadcast ev, data
         # Close the modal
         @close(promise)
 

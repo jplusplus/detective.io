@@ -1,18 +1,4 @@
 <div class="dashboard container">
-	<ul class="dashboard__paginator pagination pull-right">
-		<li ng-if="hasPrevious()">
-			<a ng-click="previousPage()">
-				<i class="fa fa-caret-left"></i>
-				&nbsp;Previous
-			</a>
-		</li>
-		<li ng-if="hasNext()">
-			<a ng-click="nextPage()">
-				Next&nbsp;
-				<i class="fa fa-caret-right"></i>
-			</a>
-		</li>
-	</ul>
 	<div ui-view autoscroll>
 		<h2><i class="fa fa-dashboard"></i> Dashboard</h2>
 		<div class="clearfix">
@@ -59,4 +45,18 @@
 			</ul>
 		</div>
 	</div>
+	<ul class="dashboard__paginator pagination pull-right">
+		<li ng-if="hasPrevious()">
+			<a ng-click="previousPage()">
+				<i class="fa fa-caret-left"></i>
+				&nbsp;Previous
+			</a>
+		</li>
+		<li ng-if="hasNext()">
+			<a ng-click="nextPage()">
+				Next&nbsp;
+				<i class="fa fa-caret-right"></i>
+			</a>
+		</li>
+	</ul>
 </div>

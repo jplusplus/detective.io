@@ -30,20 +30,23 @@
 							by <a ui-sref="user(topic.author)">[[topic.author.username]]</a>
 						</p>
 						<p class="dashboard__topics__item__btns">
-							<a class="btn btn-default btn-sm"
+							<a class="btn btn-default"
 								ng-if="user.owns(topic)"
 								ui-sref="user-topic-edit({topic: topic.slug, username: topic.author.username})">
 								<i class="fa fa-cog"></i>
 								Settings
 							</a>
-							<span ng-if="!user.owns(topic)">
-								<i class="fa fa-warning"></i>&nbsp;
-								<a ng-click="openLeaveModal(topic)">
-								   Leave investigation
-								</a>
-							</span>
+							<a class="btn btn-default"
+								ng-click="openLeaveModal(topic)"
+								ng-if="!user.owns(topic)">
+								<span class="text-danger">
+									<i class="fa fa-warning"></i>
+									   Leave investigation
+									</a>
+								</span>
+							</a>
 
-							<a class="btn btn-default btn-sm" ui-sref="user-topic-invite({topic: topic.slug, username: topic.author.username})">
+							<a class="btn btn-default" ui-sref="user-topic-invite({topic: topic.slug, username: topic.author.username})">
 								<i class="fa fa-users"></i>
 								Add collaborators
 							</a>

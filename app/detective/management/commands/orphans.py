@@ -40,14 +40,14 @@ class Command(BaseCommand):
                     try:
                         fields = utils.get_model_fields(Model)
                         for field in fields:
-                            if field["related_model"] and field["direction"] == "out" and "through" in field["rules"]:
+                            if field["rel_type"] and field["direction"] == "out" and "through" in field["rules"]:
                                 ids= []
                                 for entity in Model.objects.all():
                                     ids.extend([_.id for _ in entity.node.relationships.all()])
                                 Properties = field["rules"]["through"]
                                 for info in Properties.objects.all():
                                     if info._relationship not in ids:
-                                        self.stdout.write("\t%s is an orphelin property of the model %s. The relation doesn't exist no more." % (info._NodeModel__node, Model.__class__.__name__))
+                                        self.stdout.write("\t%s is an orphelin property of the model %s." % (info._NodeModel__node, Model))
                                         orphans_count += 1
                                         total_orphans_count += 1
                                         if options["fix"]:
@@ -55,7 +55,8 @@ class Command(BaseCommand):
                                             info.delete()
                     except Exception as e:
                         self.stderr.write("\tError with fields of %s (%s)" % (entity, e))
-                self.stdout.write("\tfound %d orphans" % (orphans_count))
+                if orphans_count > 0:
+                    self.stdout.write("\tfound %d orphans" % (orphans_count))
             except Exception as e:
                 self.stderr.write("\tError with model %s (%s)" % (Model.__class__.__name__, e))
         self.stdout.write("TOTAL: found %d orphans" % (total_orphans_count))

@@ -144,10 +144,15 @@ admin.site.register(Topic, TopicAdmin)
 class TopicSkeletonForm(forms.ModelForm):
     target_plans = forms.MultipleChoiceField(choices=PLANS_CHOICES)
 
+    def __init__(self, *args, **kwargs):
+        super(TopicSkeletonForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+        if instance:
+            self.initial['target_plans'] = instance.selected_plans()
 
 class TopicSkeletonAdmin(admin.ModelAdmin):
     form = TopicSkeletonForm
-    list_display = ("title","picture", "picture_credits","ontology", "target_plans")
+    list_display = ("title","picture","description_stripped", "picture_credits", "target_plans")
 
 admin.site.register(TopicSkeleton, TopicSkeletonAdmin)
 
@@ -188,5 +193,15 @@ class UserAdmin(UserAdmin):
 # Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+
+from django.http import HttpResponse
+from django.core import serializers
+
+def export_as_json(modeladmin, request, queryset):
+    response = HttpResponse(content_type="application/json")
+    serializers.serialize("json", queryset, stream=response)
+    return response
+
+admin.site.add_action(export_as_json, 'export_selected')
 
 # EOF

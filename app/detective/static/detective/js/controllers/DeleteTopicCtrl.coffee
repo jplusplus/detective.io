@@ -1,9 +1,8 @@
 class window.DeleteTopicCtrl
     @$inject: ['$scope', '$state', '$timeout', 'TopicsFactory', 'Page', 'topic']
 
-    REDIRECT_SUCCESS_TIMEOUT: 3000
+    REDIRECT_SUCCESS_TIMEOUT: 1700
     constructor: (@scope, @state, @timeout, @TopicsFactory, @Page, @topic)->
-        @Page.loading no
         @scope.deleted = no
         @Page.title "Deleting #{@topic.title}"
         @scope.topic = @topic

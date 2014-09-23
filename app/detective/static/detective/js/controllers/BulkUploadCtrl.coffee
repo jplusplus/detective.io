@@ -4,7 +4,6 @@ class window.BulkUploadCtrl
 
     constructor: (@scope, @http, @stateParams, @location, @Page, @Individual, @timeout, @Common, @User)->
         @Page.title "Bulk Upload", no
-        @Page.loading no
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────

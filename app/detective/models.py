@@ -9,6 +9,7 @@ from django.core.paginator      import Paginator
 from django.db                  import models
 from django.db.models           import signals
 from django.utils.text          import slugify
+from django.utils.html          import strip_tags
 
 from jsonfield                  import JSONField
 from neo4django.db              import connection
@@ -432,10 +433,18 @@ class TopicSkeleton(models.Model):
     ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
     target_plans    = models.CharField(max_length=60)
     tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
+    enable_teasing  = models.BooleanField(default=False, help_text='Show this skeleton as a teasing skeleton for free user')
+
+    def description_stripped(self):
+        return strip_tags(self.description)
+
 
     def selected_plans(self):
-        plans = re.sub('[\[\]]', '', self.target_plans)
-        return plans.split(',')
+        selected_plans = []
+        for plan in PLANS_CHOICES:
+            if plan[0] in self.target_plans:
+                selected_plans.append(plan[0])
+        return selected_plans
 
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
@@ -639,6 +648,15 @@ def update_topic_cache(*args, **kwargs):
 
 def remove_topic_cache(*args, **kwargs):
     utils.topic_cache.delete_version(kwargs.get('instance'))
+
+def delete_entity(*args, **kwargs):
+    fields = utils.get_model_fields(kwargs.get('instance').__class__)
+    for field in fields:
+        if field["rel_type"] and "through" in field["rules"]:
+            Properties = field["rules"]["through"]
+            for info in Properties.objects.all():
+                info.delete()
+    update_topic_cache(*args, **kwargs)
 
 signals.post_delete.connect(remove_permissions , sender=Topic)
 signals.post_save.connect(user_created         , sender=User)

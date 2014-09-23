@@ -102,7 +102,10 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
         user = bundle.request.user
         if user.is_authenticated():
             plan = user.detectiveprofileuser.plan
-            return object_list.filter(target_plans__contains=plan)
+            q_filter = Q(target_plans__contains=plan)
+            if plan == 'free':
+                q_filter = q_filter | Q(enable_teasing=True)
+            return object_list.filter(q_filter)
         else:
             raise Unauthorized("Only logged user can retrieve skeletons")
 

@@ -21,7 +21,6 @@ class window.LoginCtrl
         @scope.login   = @login
         @scope.logout  = @logout
         # Page settings
-        @Page.loading no
         @Page.title "Log in", false
 
     # ──────────────────────────────────────────────────────────────────────────

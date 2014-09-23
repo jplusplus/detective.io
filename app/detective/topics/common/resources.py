@@ -15,12 +15,13 @@ from django.core.files                import File
 from django.core.files.temp           import NamedTemporaryFile
 from django.db                        import IntegrityError
 from django.db.models                 import Q
-from django.http                      import Http404, HttpResponse
+from django.http                      import Http404, HttpResponse, HttpResponseForbidden
 from django.template                  import Context
 from django.template.loader           import get_template
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from easy_thumbnails.files            import get_thumbnailer
 from tastypie                         import fields, http
+from tastypie.authentication          import SessionAuthentication, BasicAuthentication, MultiAuthentication
 from tastypie.authorization           import ReadOnlyAuthorization, Authorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
@@ -174,6 +175,8 @@ class TopicResource(ModelResource):
     class Meta:
         always_return_data = True
         authorization      = TopicAuthorization()
+        authentication     = MultiAuthentication(BasicAuthentication(), SessionAuthentication())
+
         validation         = TopicValidation()
         queryset           = Topic.objects.all().prefetch_related('author')
         filtering          = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
@@ -182,6 +185,7 @@ class TopicResource(ModelResource):
         params = (self._meta.resource_name, trailing_slash())
         return [
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/invite%s$" % params, self.wrap_view('invite'), name="api_invite"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/leave%s$"  % params, self.wrap_view('leave'),  name="api_leave"),
         ]
 
     def invite(self, request, **kwargs):
@@ -257,6 +261,24 @@ class TopicResource(ModelResource):
         msg.send()
 
         return HttpResponse("Invitation sent!")
+
+    # opposite of invite: a user want to leave a topic
+    def leave(self,  request, **kwargs):
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        topic = Topic.objects.get(id=kwargs["pk"])
+        user  = request.user
+        contributors = topic.get_contributor_group()
+        potential_user = contributors.user_set.filter(pk=user.pk)
+        if potential_user.exists():
+            # remove user from contributor group
+            contributors.user_set.remove(request.user)
+            return HttpResponse(u"You successfuly left {topic} contributors.".format(
+                topic=topic.title))
+        else:
+            return HttpResponseForbidden("You are not a contributor of this topic.")
 
     def dehydrate(self, bundle):
         # Get the model's rules manager

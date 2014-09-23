@@ -65,7 +65,7 @@
 
 			<a scroll-to="600" ng-if="scrollIdx == $index"></a>
 
-			<div class="head panel-heading">
+			<div class="head panel-heading individual__heading">
 				<div class="btns">
 					<span ng-if="individual.hasSrefOptions()" >
 						<a class="left10" ng-click="seeDetails(individual)">See in detail</a>
@@ -80,7 +80,7 @@
 						<i class="fa fa-minus"></i>
 					</button>
 				</div>
-				<h3>
+				<h3 class="individual__heading__title">
 					<div class="pull-left">
 						<div color-tag ref="individual.type" />
 					</div>
@@ -94,7 +94,9 @@
 						</a>
 					</span>
 				</h3>
-				<h4>[[individual.meta.verbose_name]]</h4>
+				<h4 class="individual__heading__type">
+					[[individual.meta.verbose_name]]
+				</h4>
 			</div>
 
 			<div class="alert alert-danger errors" ng-if="individual.error_message">

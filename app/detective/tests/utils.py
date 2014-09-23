@@ -33,6 +33,9 @@ from app.detective.utils  import topic_cache, get_leafs_and_edges
 import json
 
 class TopicCachierTestCase(TestCase):
+
+    fixtures = ['app/detective/fixtures/default_topics.json',]
+
     def setUp(self):
         ontology_str = """
         [
@@ -78,7 +81,6 @@ class TopicCachierTestCase(TestCase):
         rev = topic_cache.version(topic)
         self.assertIsNotNone(rev, 0)
 
-
     def test_topic_update(self):
         # if we update a topic, its revision number should be incremented
         topic = self.create_topic()
@@ -90,8 +92,9 @@ class TopicCachierTestCase(TestCase):
 
     def test_topic_delete(self):
         topic = self.create_topic()
+        rev = topic_cache.version(topic)
         topic.delete()
-        self.assertEqual(topic_cache.version(topic), 0)
+        self.assertEqual(topic_cache.version(topic), rev+1)
 
     def test_topic_model_create(self):
         topic = self.create_topic()
@@ -158,6 +161,4 @@ class TopicCachierTestCase(TestCase):
         self.assertEqual(new_leafs, cached_leafs)
         self.assertGreater(len(new_leafs[1]), len(leafs[1]))
 
-
-
-
+# EOF

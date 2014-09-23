@@ -662,7 +662,7 @@ signals.post_delete.connect(remove_permissions , sender=Topic)
 signals.post_save.connect(user_created         , sender=User)
 signals.post_save.connect(update_topic_cache   , sender=Topic)
 signals.post_save.connect(update_permissions   , sender=Topic)
-signals.pre_delete.connect(remove_topic_cache  , sender=Topic)
+signals.pre_delete.connect(update_topic_cache  , sender=Topic)
 signals.post_delete.connect(remove_permissions , sender=Topic)
 
 # EOF

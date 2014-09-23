@@ -481,10 +481,6 @@ class TopicCachier(object):
         else:
             cache.incr(cache_key)
 
-    def delete_version(self, topic):
-        cache_key = self.__version_key(topic)
-        cache.delete(cache_key)
-
     def get(self, topic, suffix_key):
         rev       = self.version(topic)
         cache_key = self.__get_key(topic, suffix_key)

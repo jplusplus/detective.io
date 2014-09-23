@@ -1,12 +1,14 @@
 <div id="create-topic" class="container topic-form topic-form--[[formMode()]]">
     <div class="topic-form__header">
         <div ng-if="isEditing()">
-            <h2><i class="fa fa-cog">&nbsp;Settings</i></h2>
-            <label>Selected data scheme: [[ topic.skeleton_title || "Custom" ]]</label>
+            <h2><i class="fa fa-cog"></i>&nbsp;Settings</h2>
+            <div class="lead">
+              Selected data scheme: <strong>[[ topic.skeleton_title || "Custom" ]]</strong>
+            </div>
         </div>
         <div ng-if="isCreating()">
-            <h2><i class="fa fa-plus">&nbsp;Create a new investigation</i></h2>
-            <p>What are you investigating on? Pick a scheme from the list</p>
+            <h2><i class="fa fa-plus"></i>&nbsp;Create a new investigation</h2>
+            <p class="lead">What are you investigating on? Pick a scheme from the list</p>
             <ul class="list-unstyled row skeletons">
                 <li ng-repeat="skeleton in skeletons | orderBy:'enable_teasing' ">
                   <div class="skeleton-wrapper col-sm-4 col-xs-6">
@@ -22,8 +24,13 @@
                              Only available for paid plans
                           </h4>
 
+                          <div ng-if="skeleton.tutorial_link" class="pull-right skeletons__item__tutorial">
+                            <a target="_blank" ng-href="[[ skeleton.tutorial_link ]]">Tutorial</a>
+                            <i class="fa fa-youtube-play"></i>
+                          </div>
+
                           <h4>[[ skeleton.title ]]</h4>
-                          <h5 ng-if="skeleton.tutorial_link"><i class="fa fa-info-circle"></i>&nbsp;<a target="_blank" ng-href="[[ skeleton.tutorial_link ]]">[[ skeleton.title ]] Tutorial</a></h5>
+
                           <div ng-if="skeleton.description" ng-bind-html="skeleton.description"></div>
                       </div>
                   </div>
@@ -113,11 +120,21 @@
                 </div>
                 <div class="col-sm-6">
                   <span class="text-disabled" ng-if="!!!topic.background">None</span>
-                  <img ng-if="topic.background"
-                     title="Cover picture of [[ topic.title ]]"
-                     ng-src="[[topic.thumbnail.medium]]"/>
+                  <div class="thumbnail pull-left"  ng-if="topic.background">
+                    <img title="Cover picture of [[ topic.title ]]"
+                         ng-src="[[topic.thumbnail.medium]]"/>
+                    <div class="caption">
+                      <a ng-click="deleteTopicBackground()">
+                        <i class="fa fa-trash"></i>
+                        Remove this picture
+                      </a>
+                      <a target="blank" class="pull-right" href="[[topic.background]]">
+                        <i class="fa fa-external-link"></i>
+                      </a>
+                    </div>
+                  </div>
                 </div>
-                <a ng-if="topic.background" class="col-sm-1" ng-click="deleteTopicBackground()">Remove this picture&nbsp;<i class="fa fa-close"></i></a>
+
             </div>
             <div class="row form-group">
                 <div class="col-sm-3 form-label top05">

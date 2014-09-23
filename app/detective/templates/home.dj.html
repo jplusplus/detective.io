@@ -10,44 +10,9 @@
 {% endblock %}
 
 {% block extrajs %}
-
-    {% compress js %}
-        <script type="text/javascript" src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/chroma-js/index.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/kartograph.js/index.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/raphael/raphael-min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/jquery.scrollTo/jquery.scrollTo.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/js-md5/js/md5.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/modernizr/modernizr.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/typeahead.js/dist/bloodhound.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/typeahead.js/dist/typeahead.bundle.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/underscore/underscore.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/d3/d3.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/nanoscroller/bin/javascripts/jquery.nanoscroller.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angular/angular.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angular-cookies/angular-cookies.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angular-elastic/elastic.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angular-nanoscroller/scrollable.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angular-resource/angular-resource.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angular-sanitize/angular-sanitize.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angular-truncate/src/truncate.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angular-ui-router/release/angular-ui-router.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/FileSaver/FileSaver.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/ng-file-upload/angular-file-upload.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/ngprogress-lite/ngprogress-lite.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/textAngular/textAngular.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/rangy/rangy-core.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/gsap/src/minified/TweenMax.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/ScrollMagic/js/jquery.scrollmagic.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angulartics/dist/angulartics.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'components/angulartics/dist/angulartics-ga.min.js' %}"></script>
-    {% endcompress %}
-
     {% compress js %}
         <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>
     {% endcompress %}
-
     <span class='topic__single__graph__worker'>
         {% compress js %}
             <script type="text/coffeescript" src="{% static 'detective/js/workers/topic.single.graph.coffee' %}"></script>

@@ -85,7 +85,13 @@
 				}
 			}
 		}
-
+		// overriding loading style to fit list element width/height
+		li.loading {
+			&:before {
+				left: 15px;
+				right: 15px;
+				bottom: 20px;
+			}
+		}
 	}
-
 }

@@ -35,9 +35,11 @@
 							</a>
 						</h4>
 						<p ng-if="user.owns(topic)">
-							<i class="fa fa-star"></i>&nbsp;Owned by you
+                            <i class="fa fa-cube"></i>&nbsp;
+                            Owned by you
 						</p>
 						<p ng-if="!user.owns(topic)">
+                            <i class="fa fa-cubes"></i>&nbsp;
 							by <a ui-sref="user(topic.author)">[[topic.author.username]]</a>
 						</p>
 						<p class="dashboard__topics__item__btns">

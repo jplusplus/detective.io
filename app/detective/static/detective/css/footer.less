@@ -45,10 +45,27 @@ footer {
         .logos {
             li {
                 line-height:70px;
+                position:relative;
+
                 img {
                     height:57px;
                     display: inline-block;
                 }
+
+                a {
+                    border-left:0;
+                    border-right:1px @body-bg solid;
+                }
+
+            }
+
+            &__label {
+                line-height: 1em;
+                position:absolute;
+                right:100%;
+                top:50%;
+                text-align: right;
+                .translate(0, -50%);
             }
         }
 

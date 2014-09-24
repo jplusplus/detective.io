@@ -368,7 +368,7 @@ class SummaryResource(Resource):
         leafs, edges  = get_leafs_and_edges(
             topic     = self.topic,
             depth     = depth,
-            root_node = "*")
+            root_node = "0")
         self.log_throttled_access(request)
         return self.create_response(request, {'leafs': leafs, 'edges' : edges})
 

@@ -254,7 +254,7 @@ def get_model_nodes():
     get_model_nodes.buffer = connection.cypher(query).to_dicts()
     return get_model_nodes.buffer
 
-def get_leafs_and_edges(topic, depth, root_node="*"):
+def get_leafs_and_edges(topic, depth, root_node="0"):
     def _get_leafs_and_edges(topic, depth, root_node):
         from neo4django.db import connection
         leafs = {}
@@ -262,17 +262,27 @@ def get_leafs_and_edges(topic, depth, root_node="*"):
         leafs_related = []
         ###
         # First we retrieve every leaf in the graph
-        query = """
-            START root=node({root})
-            MATCH p = (root)-[*1..{depth}]-(leaf)<-[:`<<INSTANCE>>`]-(type)
-            WHERE HAS(leaf.name)
-            AND type.app_label = '{app_label}'
-            AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
-            RETURN leaf, ID(leaf) as id_leaf, type
-        """.format(root=root_node, depth=depth, app_label=topic.app_label())
+        if root_node == "0":
+            query = """
+                START root = node({root})
+                MATCH root-[`<<TYPE>>`]->(type)--> leaf
+                WHERE type.app_label = '{app_label}'
+                AND not(has(leaf._relationship))
+                RETURN leaf, ID(leaf) as id_leaf, type
+            """.format(root=root_node, depth=depth, app_label=topic.app_label())
+        else:
+            query = """
+                START root=node({root})
+                MATCH p = (root)-[*1..{depth}]-(leaf)<-[:`<<INSTANCE>>`]-(type)
+                WHERE HAS(leaf.name)
+                AND type.app_label = '{app_label}'
+                AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
+                RETURN leaf, ID(leaf) as id_leaf, type
+            """.format(root=root_node, depth=depth, app_label=topic.app_label())
+        print query
         rows = connection.cypher(query).to_dicts()
 
-        if root_node != "*":
+        if root_node != "0":
             # We need to retrieve the root in another request
             # TODO : enhance that
             query = """

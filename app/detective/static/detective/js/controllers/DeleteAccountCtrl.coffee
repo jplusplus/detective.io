@@ -10,7 +10,7 @@ class window.DeleteAccountCtrl
         @scope.check_password = undefined
         # Scope nethods
         @scope.checkPassword = @checkPassword
-        @scope.cuddleCuddle  = @cuddleCuddle
+        @scope.goToDasbhoard  = @goToDasbhoard
 
 
     openConfirmModal: =>
@@ -51,7 +51,7 @@ class window.DeleteAccountCtrl
                     @state.go 'home'
                 , @REDIRECT_SUCCESS_TIMEOUT)
 
-    cuddleCuddle: =>
+    goToDasbhoard: =>
         @state.go 'home.dashboard'
 
 angular.module('detective.controller').controller 'deleteAccountCtrl', DeleteAccountCtrl

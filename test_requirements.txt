@@ -22,3 +22,4 @@ requests==2.2.0
 rq==0.3.13
 times==0.6.2
 unidecode==0.04.16
+bleach==1.4

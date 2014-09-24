@@ -680,13 +680,13 @@ class IndividualResource(ModelResource):
                 else:
                     if field_name in fields:
                         if 'is_rich' in fields[field_name]['rules'] and fields[field_name]['rules']['is_rich']:
-                            field_value = bleach.clean(field_value,
-                                                       tags=("br", "blockquote", "ul", "ol", "li", "b", "i", "u", "a"),
-                                                       attributes={
-                                                           '*': ("class",),
-                                                           'a': ("href",)
-                                                       })
-                            data[field_name] = field_value
+                            data[field_name] = field_value = bleach.clean(field_value,
+                                                                          tags=("br", "blockquote", "ul", "ol",
+                                                                                "li", "b", "i", "u", "a", "p"),
+                                                                          attributes={
+                                                                              '*': ("class",),
+                                                                              'a': ("href", "target")
+                                                                          })
                     node.set(field_name, field_value)
 
         # And returns cleaned data

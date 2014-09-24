@@ -11,7 +11,7 @@ angular.module('detective.directive').directive "changeOnBlur", ->
                 =>
                     do input.val
             ) elm.find 'input[type="hidden"]'
-            elm = elm.find '.ta-editor'
+            elm = elm.find '.ta-bind'
             eventOff = ['input', 'keydown', 'keyup', 'change']
 
         eventOn = eventOn || 'change'

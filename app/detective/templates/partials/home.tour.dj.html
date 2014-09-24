@@ -3,7 +3,7 @@
 <div class="home__tour" home-tour tracker="tracker">
 
     <ul class="list-unstyled home__tour__tracker hidden-xs">
-        <li ng-repeat="screen in ['tour', 'features', 'feature 0', 'feature 1', 'feature 2', 'feature 3', 'feature 4', 'feature 5', 'get ready', 'pricing']">
+        <li ng-repeat="screen in ['tour', 'features', 'feature 0', 'feature 1', 'feature 2', 'feature 3', 'feature 4', 'feature 5', 'quotes', 'get ready', 'pricing']">
             <a ng-click="scrollTo($index)" class="home__tour__tracker__screen" ng-class="$index == tracker ? 'home__tour__tracker__screen--active' : ''">
                 <span class="sr-only">Go to [[screen]]</span>
             </a>
@@ -123,8 +123,43 @@
         </div>
     </div>
 
+    <div class="home__tour__quotes home__tour__screen" data-level="8">
+        <div class="container">
+            <h2>What our users say</h2>
 
-    <div class="home__tour__get-ready home__tour__screen" data-level="8">
+            <div class="row">
+                <div class="home__tour__quotes__single col-sm-4">
+                    <h4 class="home__tour__quotes__single__title">
+                        « Like putting a thousand-piece puzzle together »
+                    </h4>
+                    <p class="home__tour__quotes____singe__desc text-muted">
+                        <a href="https://www.linkedin.com/pub/verena-porsch/48/105/245" target="_blank">Verena Porsch</a> consults NGOs. She used detective.io to expose agreements between textile companies and subcontracting factories, and linked it back to accidents. Thousands of brands and companies came together in her investigation, The Origin of Clothes.
+                    </p>
+                </div>
+
+                <div class="home__tour__quotes__single col-sm-4">
+                    <h4 class="home__tour__quotes__single__title">
+                        « All my knowledge in one place »
+                    </h4>
+                    <p class="home__tour__quotes____singe__desc text-muted">
+                        <a href="https://www.linkedin.com/pub/adeline-agut/29/36a/955/en" target="_blank">Adeline Agut</a> is a consultant for water issues. She used Detective.io to organize her data on innovative water projects in developing countries. She can now reach into her own knowledge base at any time, on any device.
+                    </p>
+                </div>
+
+                <div class="home__tour__quotes__single col-sm-4">
+                    <h4 class="home__tour__quotes__single__title">
+                        « Collaboration made easy »
+                    </h4>
+                    <p class="home__tour__quotes____singe__desc text-muted">
+                        <a href="https://twitter.com/alphoenix" target="_blank">Alexandre Léchenet</a> is an investigative journalist. He used Detective.io to store data on a transnational investigation. Because it's easy to use, he could invite colleagues from all over Europe to collaborate.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="home__tour__get-ready home__tour__screen" data-level="9">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">

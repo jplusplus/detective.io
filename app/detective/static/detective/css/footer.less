@@ -28,6 +28,7 @@ footer {
                 line-height:70px;
                 border-left:1px @body-bg solid;
                 color:mix(@link-color, @color);
+                overflow: visible;
                 .transition(0.7s);
 
                 &:hover {
@@ -38,6 +39,16 @@ footer {
 
             .last a {
                 border-right:1px @body-bg solid;
+            }
+        }
+
+        .logos {
+            li {
+                line-height:70px;
+                img {
+                    height:57px;
+                    display: inline-block;
+                }
             }
         }
 

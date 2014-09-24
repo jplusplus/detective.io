@@ -1,0 +1,53 @@
+<div class="account-delete container">
+    <div class="panel panel-default" ng-show="!deleted">
+        <form name="form"
+              ng-submit="checkPassword(form)"
+              novalidate>
+
+            <div class="panel-body">
+                <h2>Delete account</h2>
+                <p>
+                    When you delete your account, all the investigations you created
+                    will be destroyed. The data you contributed to other investigations
+                    will remains.<br/>
+                    Be caferful, <strong>there is no undoing</strong> when you delete
+                    your account!
+                </p>
+                <div class="row form-group">
+                    <label class="col-sm-12" for="delete_check_password">
+                        Type your password to confirm
+                    </label>
+                    <div class="col-sm-12">
+                        <input type="password"
+                               class="form-control"
+                               name="check_password"
+                               id="delete_check_password"
+                               ng-model="check_password"
+                               ng-change="submitted=false"
+                               required>
+                        <span class="text text-danger" ng-show="submitted && error.incorrect_password">
+                            Your password is incorrect
+                        </span>
+                        <span class="text text-danger" ng-show="submitted && form.check_password.$error.required">
+                            You have to enter your password in order to delete your account
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="panel-footer">
+                <button class="btn btn-primary pull-right" type="submit">
+                    Delete my account
+                </button>
+                <button class="btn btn-default" ng-click="confortUser()">
+                    I changed my mind, take me to a safe place
+                </button>
+                <div class="clearfix"></div>
+            </div>
+
+        </form>
+    </div>
+    <div ng-show="deleted" class="alert alert-success">
+        Your topic has been successfully deleted ! We will redirect you to your dashboard.
+    </div>
+</div>

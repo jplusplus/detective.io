@@ -207,7 +207,7 @@ class window.ContributeCtrl
                             value_to_return.push(id: val[pc].id)
                 else if typeof(val) is "boolean"
                     value_to_return = val or false
-                else if value_to_return == "" or value_to_return == undefined or _.isEmpty(value_to_return)
+                else if value_to_return == "" or not value_to_return?
                     # Empty input must be null
                     value_to_return = null
                 return value_to_return

@@ -24,6 +24,7 @@
 					   tt-model="collaborator"
 					   ng-model="collaborator_name"
 					   tt-typeahead
+					   tt-disable-empty-results
 					   tt-transform="prepareSearch(objects)"
 					   tt-prefetch-url="'/api/detective/common/v1/user/?username__icontains=%QUERY'"
 					   tt-remote-url="'/api/detective/common/v1/user/?username__icontains=%QUERY'"

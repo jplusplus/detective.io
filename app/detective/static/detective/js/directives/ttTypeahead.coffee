@@ -40,7 +40,8 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         endpoint              : "&ttEndpoint"
         remoteUrl             : "&ttRemoteUrl"
         prefetchUrl           : "&ttPrefetchUrl"
-        disableEmptySelection : "&ttDisableEmptySelection"
+        disableEmptyResults   : "&ttDisableEmptyResults"
+        disableEntityCreation : "&ttDisableEntityCreation"
         emptyResultsSelected  : "&ttEmptyResultsSelected"
         transform             : "&ttTransform"
         valueKey              : "@"
@@ -48,9 +49,6 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         limit                 : "@"
         change                : "&"
 
-    # Allowed empty attributes:
-    # - ttPrependSearchIcon
-    # -
 
     link: (scope, element, attrs) ->
         wrapper = undefined
@@ -58,14 +56,26 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         shouldPrependSearchIcon = ->
             _.has(attrs, 'ttPrependSearchIcon')
 
-        shouldDisableEmptySelection = ->
-            scope.disableEmptySelection()
+        shouldDisableEmptyResults = ->
+            _.has(attrs, 'ttDisableEmptyResults')
+
+        shouldDisableEntityCreation = ->
+            disabled = false
+            if _.has(attrs, 'ttDisableEntityCreation')
+                # if attribute is empty (<div tt-disable-entity-creation>) we
+                # should simply disable entity creation
+                if _.isEmpty(attrs['ttDisableEntityCreation'])
+                    disabled = true
+                # otherwise  we should evaluation this attribute value
+                else
+                    disabled = scope.disableEntityCreation()
+            disabled
 
         hasEmptyCallback = ->
             _.has(attrs, 'ttEmptyResultsSelected')
 
         getEmptyResultDiv = ->
-            if shouldDisableEmptySelection()
+            if shouldDisableEntityCreation()
                 div = [
                     "<div>",
                         "<div class='tt-suggestion tt-suggestion__line'>",
@@ -182,14 +192,12 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 hint : yes
                 highlight : yes
 
-            # typeahead initialization
-            typeahead = element.typeahead options,
+
+            typeahead_params =
                 displayKey : (scope.valueKey or "name")
                 name : 'suggestions-' + itopic.replace '/', '-'
                 source : do bh.ttAdapter
                 templates :
-
-                    empty: getEmptyResultDiv()
                     suggestion : (template.compile [
                         '<div>',
                             '<div class="tt-suggestion__line" ng-class="{\'tt-suggestion__line--with-model\': getModel()}">',
@@ -203,6 +211,13 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                             '</div>',
                         '</div>'
                     ].join "").render
+
+            unless shouldDisableEmptyResults()
+                typeahead_params.templates['empty'] = getEmptyResultDiv()
+
+            # typeahead initialization
+            typeahead = element.typeahead options, typeahead_params
+
 
             # when typeahead is initialized we can add search/loading indicator
             appendSearchIcon(typeahead.parent())

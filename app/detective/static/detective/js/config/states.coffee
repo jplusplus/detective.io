@@ -71,6 +71,12 @@ angular.module('detective.config').config [
                 controller: UserCtrl
                 templateUrl: '/partial/account.reset-password.confirm.html'
             )
+            .state('account-delete'
+                url: "/account/delete/"
+                controller: DeleteAccountCtrl
+                templateUrl: '/partial/account.delete.html'
+                auth: true
+            )
             .state('login',
                 url: "/login/?nextState&nextParams"
                 auth: false # authenticated users cannot access this page

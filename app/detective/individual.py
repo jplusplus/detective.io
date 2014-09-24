@@ -678,14 +678,15 @@ class IndividualResource(ModelResource):
                 # We simply update the node property
                 # (the value is already validated)
                 else:
-                    if 'is_rich' in fields[field_name]['rules'] and fields[field_name]['rules']['is_rich']:
-                        field_value = bleach.clean(field_value,
-                                                   tags=("br", "blockquote", "ul", "ol", "li", "b", "i", "u", "a"),
-                                                   attributes={
-                                                       '*': ("class",),
-                                                       'a': ("href",)
-                                                   })
-                        data[field_name] = field_value
+                    if field_name in fields:
+                        if 'is_rich' in fields[field_name]['rules'] and fields[field_name]['rules']['is_rich']:
+                            field_value = bleach.clean(field_value,
+                                                       tags=("br", "blockquote", "ul", "ol", "li", "b", "i", "u", "a"),
+                                                       attributes={
+                                                           '*': ("class",),
+                                                           'a': ("href",)
+                                                       })
+                            data[field_name] = field_value
                     node.set(field_name, field_value)
 
         # And returns cleaned data

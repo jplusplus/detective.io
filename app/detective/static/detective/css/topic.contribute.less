@@ -32,14 +32,23 @@
         }
     }
 
-    .individual__heading__title,
-    .individual__heading__type {
-        padding-left:50px;
-        position:relative;
-        .color-tag {
-            position:absolute;
-            left:0;
-            right:0;
+    .individual__heading {
+
+        &__btns {
+            position:relative;
+            z-index:100;
+        }
+
+        &__title,
+        &__type {
+            z-index:50;
+            padding-left:50px;
+            position:relative;
+            .color-tag {
+                position:absolute;
+                left:0;
+                right:0;
+            }
         }
     }
 }

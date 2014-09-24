@@ -6,15 +6,15 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
         post: (scope, element)->
             #  An event is fired to scroll to a given level
             scope.$on "tour:scrollTo", (ev, index)->
-                if index > 1 and index <= 4
+                if index > 1 and index <= FEATURE_COUNT
                     controller.scrollTo scenes[index].startPosition() + scenes[index].duration()
                 else
                     controller.scrollTo scenes[index].startPosition() + 1
             # Constants
-            QUOTE_DURATION = 300
-            QUOTE_COUNT = 3
-            QUOTE_SHOW = opacity: 1, marginTop: 0
-            QUOTE_HIDE = opacity: 0, marginTop: 50
+            FEATURE_DURATION = 300
+            FEATURE_COUNT = 6
+            FEATURE_SHOW = opacity: 1, marginTop: 0
+            FEATURE_HIDE = opacity: 0, marginTop: 50
             # Entering closure function
             enter = (index)->->
                 # Enter into an angular digest
@@ -23,13 +23,13 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
                     angular.extend scope, tracker: index
             # Entering close for quote
             enterQuote = (index)->->
-                $(".home__tour__quotes__iphone__wrapper").animate
+                $(".home__tour__feature-list__iphone__wrapper").animate
                     # 290 is the size of each step in this wrapper
                     scrollLeft: 290*index
             # Leaving closure function
             leave = (index)->->
                 # Hide the selected quote
-                TweenMax.fromTo(".home__tour__quotes__single:eq(#{index})", 0.5, QUOTE_SHOW, QUOTE_HIDE)
+                TweenMax.fromTo(".home__tour__feature-list__single:eq(#{index})", 0.5, FEATURE_SHOW, FEATURE_HIDE)
             # Init scrollmagic controller
             controller = new ScrollMagic()
             # Activate scrolling animation
@@ -59,21 +59,21 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
 
             new ScrollScene()
                 .triggerHook(0)
-                .triggerElement(".home__tour__quotes")
-                .duration(QUOTE_DURATION * (QUOTE_COUNT-1) )
-                .setPin(".home__tour__quotes", pinnedClass: "home__tour__screen--pined")
+                .triggerElement(".home__tour__feature-list")
+                .duration(FEATURE_DURATION * (FEATURE_COUNT-1) )
+                .setPin(".home__tour__feature-list", pinnedClass: "home__tour__screen--pined")
                 .addTo(controller)
 
             # Cascading quote appearance
-            for n in [0.. QUOTE_COUNT - 1]
+            for n in [0.. FEATURE_COUNT - 1]
                 # Create a scene
                 scenes.push new ScrollScene()
                     .triggerHook(0)
-                    .triggerElement(".home__tour__quotes")
-                    .duration(QUOTE_DURATION)
-                    .offset((n-1) * QUOTE_DURATION)
+                    .triggerElement(".home__tour__feature-list")
+                    .duration(FEATURE_DURATION)
+                    .offset((n-1) * FEATURE_DURATION)
                     .setTween(
-                        TweenMax.to(".home__tour__quotes__single:eq(#{n})", 0.5, QUOTE_SHOW)
+                        TweenMax.to(".home__tour__feature-list__single:eq(#{n})", 0.5, FEATURE_SHOW)
                     )
                     .addTo(controller)
                     .on("enter", enter 2+n)
@@ -91,7 +91,7 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
                     TweenMax.fromTo ".home__tour__get-ready__ipad", 1, {top:  100}, {top:  -400}
                 )
                 .addTo(controller)
-                .on("enter", enter QUOTE_COUNT+2)
+                .on("enter", enter FEATURE_COUNT+2)
 
             # ──────────────────────────────────────────────────────────────────────
             # Pricing screen
@@ -100,6 +100,6 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
                 .triggerHook(0.5)
                 .triggerElement(".home__tour__pricing")
                 .addTo(controller)
-                .on("enter", enter QUOTE_COUNT+3)
+                .on("enter", enter FEATURE_COUNT+3)
 
 ]

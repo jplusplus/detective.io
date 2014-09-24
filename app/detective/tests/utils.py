@@ -157,7 +157,7 @@ class TopicCachierTestCase(TestCase):
         p3 = Person.objects.create(first_name='test', name='test', employed_by=c1)
 
         new_leafs = get_leafs_and_edges(topic=topic, depth=3)
-        cached_leafs = topic_cache.get(topic, 'leafs_and_nodes_%s_%s' % (3, '*'))
+        cached_leafs = topic_cache.get(topic, 'leafs_and_nodes_%s_%s' % (3, '0'))
         self.assertEqual(new_leafs, cached_leafs)
         self.assertGreater(len(new_leafs[1]), len(leafs[1]))
 

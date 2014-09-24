@@ -279,7 +279,6 @@ def get_leafs_and_edges(topic, depth, root_node="0"):
                 AND length(filter(r in relationships(p) : type(r) = "<<INSTANCE>>")) = 1
                 RETURN leaf, ID(leaf) as id_leaf, type
             """.format(root=root_node, depth=depth, app_label=topic.app_label())
-        print query
         rows = connection.cypher(query).to_dicts()
 
         if root_node != "0":

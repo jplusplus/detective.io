@@ -80,7 +80,6 @@ class TopicAuthorization(ReadOnlyAuthorization):
             under_limit = profile.topics_count() < profile.topics_max()
             authorize   = unlimited or under_limit
             authorize   = authorize and (profile.plan in skeleton.target_plans)
-
         return authorize
 
     def read_list(self, object_list, bundle):
@@ -102,10 +101,13 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
         user = bundle.request.user
         if user.is_authenticated():
             plan = user.detectiveprofileuser.plan
-            q_filter = Q(target_plans__contains=plan)
-            if plan == 'free':
-                q_filter = q_filter | Q(enable_teasing=True)
-            return object_list.filter(q_filter)
+            # no filter for superuser
+            if not user.is_superuser:
+                q_filter = Q(target_plans__contains=plan)
+                if plan == 'free':
+                    q_filter = q_filter | Q(enable_teasing=True)
+                object_list = object_list.filter(q_filter)
+            return object_list
         else:
             raise Unauthorized("Only logged user can retrieve skeletons")
 

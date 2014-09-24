@@ -40,7 +40,18 @@ footer {
                 border-right:1px @body-bg solid;
             }
         }
+
+        @media (max-width: @screen-xs-max) {
+            ul, li {
+                a {
+                    padding:0 10px;
+                    height:40px;
+                    line-height:40px;
+                }
+            }
+        }
     }
+
     .credits {
         @bg: lighten(@brand-secondary, 20%);
         @color: contrast(@bg);

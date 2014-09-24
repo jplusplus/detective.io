@@ -685,6 +685,7 @@ class IndividualResource(ModelResource):
                                                        '*': ("class",),
                                                        'a': ("href",)
                                                    })
+                        data[field_name] = field_value
                     node.set(field_name, field_value)
 
         # And returns cleaned data

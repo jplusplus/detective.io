@@ -241,6 +241,7 @@ class window.ContributeCtrl
             @Individual.update params, data, (res)=>
                 # Record master
                 @master = _.extend @master, res
+                @fields = _.extend @fields, res
                 @data_are_updating = false
                 # Notices that we stop to load the field
                 @updating = _.omit(@updating, _.keys(data))

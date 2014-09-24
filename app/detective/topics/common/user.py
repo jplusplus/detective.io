@@ -54,7 +54,7 @@ class UserAuthorization(ReadOnlyAuthorization):
     def delete_detail(self, object_list, bundle):
         authorized = False
         if bundle.request:
-            authorized = ((bundle.obj.user == bundle.request.user) or bundle.request.user.is_staff)
+            authorized = ((bundle.obj == bundle.request.user) or bundle.request.user.is_staff)
         return authorized
 
 class ProfileResource(ModelResource):
@@ -80,7 +80,7 @@ class UserResource(ModelResource):
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
-        allowed_methods    = ['get', 'post']
+        allowed_methods    = ['get', 'post', 'delete']
         always_return_data = True
         fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password', 'profile']
         filtering          = {'id': ALL, 'username': ALL, 'email': ALL}
@@ -148,6 +148,7 @@ class UserResource(ModelResource):
             return self.create_response(request, {
                 'success': False,
                 'error_message': 'Incorrect password or username.',
+                'error_code': 'incorrect_password_or_email'
             })
 
     def dehydrate(self, bundle):

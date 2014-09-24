@@ -1395,3 +1395,18 @@ class UserApiTestCase(ApiTestCase):
         }
         resp = self.signup_user(user_data)
         self.assertHttpBadRequest(resp)
+
+    def test_user_delete_account_success(self):
+        # create user
+        user = User.objects.create(
+            is_active=True, username='heyhoy', email='test@me.com')
+        user.set_password('tomboy')
+        user.save()
+        response = self.api_client.delete(
+            "/api/detective/common/v1/user/{pk}/".format(pk=user.pk),
+            authentication=self.login(username='heyhoy', password='tomboy')
+        )
+        self.assertTrue(response.status_code in [200, 204])
+        self.assertFalse(
+            User.objects.filter(username='heyhoy', email='test@me.com').exists()
+        )

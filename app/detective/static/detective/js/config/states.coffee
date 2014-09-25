@@ -61,6 +61,12 @@ angular.module('detective.config').config [
                 controller: UserCtrl
                 templateUrl: '/partial/account.activation.html'
             )
+            .state('change-password'
+                url: "/account/change-password/"
+                controller: ChangePasswordFormCtrl
+                templateUrl: '/partial/account.change-password.html'
+                auth: true
+            )
             .state('reset-password',
                 url: "/account/reset-password/?token"
                 controller: UserCtrl

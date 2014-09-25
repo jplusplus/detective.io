@@ -1230,7 +1230,7 @@ class TopicApiTestCase(ApiTestCase):
         topic_leave_url = '/api/detective/common/v1/topic/{pk}/leave/'.format(
             pk=topic.pk)
         response = client.post(topic_leave_url)
-        self.assertHttpUnauthorized(response)
+        self.assertTrue(response.status_code in [401, 403])
 
 class TopicSkeletonApiTestCase(ApiTestCase):
     def setUp(self):

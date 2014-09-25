@@ -16,7 +16,6 @@ angular.module("detective.directive").directive 'checkPassword', [
                 # get model value
                 Auth.login(params).then (response)->
                     formCtrl.$pending[attrs.name] = false
-                    console.log 'setting the validated input to false: ', formCtrl.$pending
                     modelCtrl.$setValidity 'incorrect_password', response.data.success
 
             elem.on "blur", checkPassword

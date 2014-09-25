@@ -3,7 +3,6 @@ class LeaveTopicModalCtrl
     constructor: (@scope, @modalInstance, @TopicsFactory, @topic)->
         @quitted = false
         @loading = false
-        console.log 'LeaveTopicModalCtrl : ', @topic
 
     close: (result=@quitted)=>
         @modalInstance.close(result)

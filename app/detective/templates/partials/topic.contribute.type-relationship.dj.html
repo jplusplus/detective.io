@@ -37,7 +37,7 @@
 
 	<div ng-repeat="f in individual.fields[field.name]">
 		<div class="input-group multiple">
-			<span ng-if="relatedState(f) == 'input'">
+			<span ng-if="['input', 'duplicated'].indexOf(relatedState(f, individual.fields[field.name], $index)) >= 0">
 				<input
 					type="search"
 					placeholder="Search..."
@@ -52,7 +52,7 @@
 					tt-model="individual.fields[field.name][$index]"
 					ng-disabled="individual.loading" />
 			</span>
-			<span class="form-control disabled" ng-if="relatedState(f) != 'input'">
+			<span class="form-control disabled" ng-if="['input', 'duplicated'].indexOf(relatedState(f, individual.fields[field.name], $index)) < 0">
 				[[f|individualPreview:"no preview available"]]
 				<span ng-hide="f.id">
 					(not saved yet)
@@ -64,20 +64,20 @@
 					<i class="gray-darker fa fa-times"></i>
 				</span>
 
-				<span class="btn btn-default" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable && !f.$duplicated">
+				<span class="btn btn-default" ng-click="editRelated(individual, field.name, $index, field.related_model)" ng-if="f.id && field.rules.is_editable && relatedState(f, individual.fields[field.name], $index) != 'duplicated'">
 					<i class="gray-darker fa fa-edit"></i>
 				</span>
 
 				<button class="btn btn-default left10"
 				        tooltip="Add information about this relationship"
-						ng-if="field.rules.has_properties && f.id && !f.$duplicated"
+						ng-if="field.rules.has_properties && f.id && relatedState(f, individual.fields[field.name], $index) != 'duplicated'"
 						ng-click="addInfo(individual, field.name, f)">
 					Add info
 				</button>
 			</span>
 		</div>
 
-		<div class="ask-for-duplicated-relationship" ng-show="f.$duplicated">
+		<div class="ask-for-duplicated-relationship" ng-show="relatedState(f, individual.fields[field.name], $index) == 'duplicated'">
 			<div class="pan" ng-if="field.rules.is_editable">
 				<p>This relationship already exists.</p>
 			</div>

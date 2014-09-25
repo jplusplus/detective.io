@@ -69,7 +69,6 @@ class window.ContributeCtrl
         @scope.$watch "scrollIdx", (v)=>
             @timeout (=> @scope.scrollIdx = -1), 1200
 
-
     # ──────────────────────────────────────────────────────────────────────────
     # IndividualForm embeded class
     # ──────────────────────────────────────────────────────────────────────────
@@ -116,7 +115,6 @@ class window.ContributeCtrl
             # ──────────────────────────────────────────────────────────────────
             # The data changed
             @scope.$watch (=>@fields), @onChange, true
-
             do @unfocusField
 
         onChange: (current)=>
@@ -130,13 +128,6 @@ class window.ContributeCtrl
                     related_to: @related_to ? null
                 # It's not a new individual now
                 @isNew = no
-            # Looks for duplicated entities in fields. Mark them as duplicated. Prevents duplicated relationships (#521)
-            for name, value of @fields
-                if value? and typeof(value) is "object" and name isnt "field_sources" and name.indexOf("$") != 0
-                    exist = {}
-                    for entity in value
-                        entity.$duplicated = exist[entity.id]? and exist[entity.id]
-                        exist[entity.id] = true
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
                 changes = @getChanges()
@@ -551,15 +542,25 @@ class window.ContributeCtrl
             # Load it (if needed)
             @scope.scrollIdx = @scope.loadIndividual type.toLowerCase(), related.id,  individual
 
-    relatedState: (related)=>
+    relatedState: (related, all_fields, index)=>
         ###
         Return the visual state of the field.
         - `input`  for editable fields,
         - `linked` for field which represent an Individal but isn't duplicated. The field will be shown as an uneditable field.
+        - `duplicated` for field which represent an Individal and is duplicated.
         ###
-        switch true
-            when related instanceof @Individual or (related.id? and not related.$duplicated) then 'linked'
-            else 'input'
+        # Looks for duplicated entities in fields. Mark them as duplicated. Prevents duplicated relationships (#521)
+        if all_fields? and index?
+            duplicated = _.some(all_fields, (entity, i)-> return related.id == entity.id and index > i)
+        else
+            duplicated = false
+        # return the state
+        if related instanceof @Individual or (related.id? and not duplicated)
+            return 'linked'
+        else if related.id? and duplicated
+            return "duplicated"
+        else
+            return 'input'
 
     askForNew: (related)=>
         related? and not related instanceof @Individual or

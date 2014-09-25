@@ -2,16 +2,20 @@ angular.module("detective.directive").directive 'checkPassword', [
     'Auth', 'User'
     (Auth, User)->
         restrict: 'A'
-        require: 'ngModel'
-        link: (scope, elem, attr, ctrl)->
+        require: [ '?^form', 'ngModel' ]
+        link: (scope, elem, attr, ctrls)->
+            formCtrl  = ctrls[0]
+            modelCtrl = ctrls[1]
             checkPassword = ->
+                formCtrl.$pending = true
                 params =
                     username: User.username
-                    password: ctrl.$viewValue
+                    password: modelCtrl.$viewValue
 
                 # get model value
                 Auth.login(params).then (response)->
-                    ctrl.$setValidity 'incorrect_password', response.data.success
+                    formCtrl.$pending = false
+                    modelCtrl.$setValidity 'incorrect_password', response.data.success
 
             elem.on "blur", checkPassword
 ]

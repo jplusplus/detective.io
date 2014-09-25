@@ -1,41 +1,49 @@
 class window.DeleteAccountCtrl
-    @$inject: [ '$rootScope', '$scope', '$state', '$timeout', '$modal', '$http', 'Auth', 'User', 'Page', 'constants.events' ]
+    @$inject: [ '$rootScope', '$scope', '$state', '$timeout', '$modal', '$http', 'User', 'Page', 'constants.events' ]
 
-    REDIRECT_SUCCESS_TIMEOUT: 1000
+    REDIRECT_SUCCESS_TIMEOUT: 1800
 
-    constructor: (@rootScope, @scope, @state, @timeout, @modal, @http, @Auth, @User, Page, @EVENTS)->
+    constructor: (@rootScope, @scope, @state, @timeout, @modal, @http, @User, Page, @EVENTS)->
         Page.title 'Remove your account'
         # Scope variables
         @scope.submitted = false
         @scope.check_password = undefined
         # Scope nethods
-        @scope.checkPassword = @checkPassword
-        @scope.goToDasbhoard  = @goToDasbhoard
+        @scope.deleteAccount = @submit
+        @scope.goToDasbhoard = @goToDasbhoard
 
+        @scope.shouldShowIncorrectPassword = (form_field)=>
+            required_error  = form_field.$error.required
+            incorrect_error = form_field.$error.incorrect_password
+            @scope.submitted and not required_error and incorrect_error
 
-    openConfirmModal: =>
-        modalInstance = @modal.open
+        @scope.shouldShowRequiredPassword = (form_field)=>
+            @scope.submitted and form_field.$error.required
+
+    openConfirmModal: (form)=>
+        @pending_listener() if @pending_listener?
+        @scope.submitted = true
+        return unless form.$valid
+        @modalInstance = @modal.open
             templateUrl: '/partial/account.delete.confirm-modal.html'
             controller: 'confirmAccountDeleteModalCtrl as modal'
 
-        modalInstance.result.then (confirmed)=>
+        @modalInstance.result.then (confirmed)=>
             @deleteAccount() if confirmed is true
+            @modalInstance = undefined
 
-    checkPassword: (form)=>
-        return unless form.$valid
-        @scope.submitted = true
-        params =
-            username: @User.username
-            password: @scope.check_password
-
-        @Auth.login(params).then (response)=>
-            data = response.data
-            if data.success
-                @openConfirmModal()
-            else
-                incorrect_password = data.error_code is 'incorrect_password_or_email'
-                @scope.error =
-                    incorrect_password: incorrect_password
+    submit: (form)=>
+        # if form is currently validing we wait for its $pending
+        # value to be false
+        if form.$pending['check_password']
+            @pending_listener = @scope.$watch(->
+                form.$pending['check_password']
+            , (is_pending)=>
+                if is_pending is false
+                    @openConfirmModal(form)
+            , true)
+        else
+            @openConfirmModal(form)
 
     deleteAccount: =>
         @http.delete("/api/detective/common/v1/user/#{@User.id}/").then (response)=>

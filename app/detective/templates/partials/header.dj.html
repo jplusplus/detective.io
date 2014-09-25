@@ -6,29 +6,31 @@
     </a>
 
     <div ng-controller="UserCtrl" class="header__user">
-		<div ng-show="user.is_logged" class="header__user__signed-in">
+        <div ng-show="user.is_logged" class="header__user__signed-in">
             <a class="header__user__signed-in__add"
                ng-show="shouldShowAddEntity()"
                title="Add data to this topic"
                href="[[topic.link]]/contribute">
                 <i class="fa fa-plus right05"></i>Add data
             </a>
-			<a href="/[[user.username]]" class="header__user__signed-in__profil" title="Your profile">
+            <a href="/[[user.username]]" class="header__user__signed-in__profil" title="Your profile">
                 <i class="fa fa-user"></i>
                 <span class="sr-only">Your profile</span>
             </a>
-			<a ng-click="logout()" class="header__user__signed-in__sign-out" title="Sign out">
+            <a ng-click="logout()" class="header__user__signed-in__sign-out" title="Sign out">
                 <i class="fa fa-sign-out"></i>
                 <span class="sr-only">Sign out</span>
             </a>
-		</div>
+        </div>
         <div ng-hide="user.is_logged" class="header__user__sign-in">
-            <a ui-sref="login(loginParams())" title="Login">
-                <i class="fa fa-sign-in"></i>
-                <span class="sr-only">Login</span>
+            <a ui-sref="login(loginParams())" class="btn btn-default" title="Login">
+                Log in
+            </a>
+            <a ui-sref="signup(loginParams())" class="btn btn-primary" title="Login">
+                Sign up
             </a>
         </div>
-	</div>
+    </div>
 
     <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl as search">
         <div class="btn-group ng-hide" ng-show="shouldShowTopicSearch() || false">

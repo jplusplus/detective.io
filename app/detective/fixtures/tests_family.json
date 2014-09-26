@@ -1,0 +1,19 @@
+[
+    {
+        "model": "detective.topic",
+        "pk": 6,
+        "fields": {
+            "description": "Family",
+            "title": "Test me",
+            "slug": "test-family",
+            "ontology_as_json": "[{\"verbose_name\":\"Person\",\"help_text\":\"A physical Person\",\"fields\":[{\"type\":\"string\",\"name\":\"name\"},{\"help_text\":\"As defined in passport\",\"related_model\":\"country\",\"rules\":{\"search_terms\":[\"comes from\",\"has the passport of\",\"is a national of\"]},\"name\":\"nationality\",\"type\":\"relationship\",\"verbose_name\":\"has nationality of\",\"related_name\":\"has_citizen_named\"},{\"type\":\"string\",\"help_text\":\"A short bio\",\"verbose_name\":\"Bio\",\"rules\":{\"is_rich\":true},\"name\":\"bio\"},{\"help_text\":\"A Person can be married to another Person.\",\"related_model\":\"person\",\"rules\":{\"search_terms\":[\"is the spouse of\",\"is the husband of\",\"is the wife of\"]},\"name\":\"spouse\",\"type\":\"relationship\",\"verbose_name\":\"is married to\",\"related_name\":\"has_spouse_named\",\"fields\":[{\"type\":\"date\",\"verbose_name\":\"from\",\"name\":\"from\"},{\"type\":\"date\",\"verbose_name\":\"to\",\"name\":\"to\"}]},{\"help_text\":\"A Person can have children.\",\"related_model\":\"person\",\"rules\":{\"search_terms\":[\"is the father of\",\"is the mother of\"]},\"name\":\"parent\",\"type\":\"relationship\",\"verbose_name\":\"is a parent of\",\"related_name\":\"is_a_child_of\"}],\"verbose_name_plural\":\"Persons\",\"name\":\"person\"},{\"verbose_name\":\"Country\",\"help_text\":\"A territory with an ISO alpha-3 code\",\"fields\":[{\"type\":\"string\",\"verbose_name\":\"Name\",\"name\":\"name\"},{\"type\":\"string\",\"help_text\":\"ISO 3166-1 alpha-3 as defined by the International Organization for Standardization.\",\"verbose_name\":\"ISO alpha-3 code\",\"name\":\"isoa3\"}],\"verbose_name_plural\":\"Countries\",\"name\":\"country\"}]",
+            "ontology_as_owl": null,
+            "ontology_as_mod": "testfamily",
+            "about": "",
+            "background": "",
+            "public": true,
+            "featured": true,
+            "author": 100000
+        }
+    }
+]

@@ -29,6 +29,7 @@ class ApiTestCase(ResourceTestCase):
                 'app/detective/fixtures/tests_topics.json',
                 'app/detective/fixtures/tests_pillen.json',
                 'app/detective/fixtures/tests_double_entities.json',
+                'app/detective/fixtures/tests_family.json',
                 'app/detective/fixtures/search_terms.json',]
 
     def setUp(self):
@@ -988,6 +989,43 @@ class TopicApiTestCase(ApiTestCase):
         relation_b = get_relationship_reference(event_a.id, victim_b.id)
         self.assertTrue(int(relation_b["_relationship"]) > 0 , relation_b)
         self.assertTrue(relation_b["_endnodes"]              , [event_a.id, victim_b.id])
+
+    def test_patch_relations_with_same_model(self):
+        """
+
+        Test if I can link two entity of the same model
+        Depends of fixtures/tests_family.json
+
+        """
+        # def get_relationship_reference(event_id, victim_id):
+        #     resp = self.api_client.get('/api/detective/test-double-entities/v1/event/%d/relationships/harmed/%d/' % (event_id, victim_id), follow=True, format='json')
+        #     self.assertValidJSONResponse(resp)
+        #     resp = json.loads(resp.content)
+        #     return resp
+
+        def patch_two_persons(person_id, parent_ids=[]):
+            patch_args = dict(
+                scope      = 'detective/test-family',
+                model_name = 'person',
+                model_id   = person_id,
+                patch_data = {"parent" : [{"id":parent_id} for parent_id in parent_ids]})
+            resp = self.patch_individual(**patch_args)
+            self.assertValidJSONResponse(resp)
+
+        topic  = Topic.objects.get(slug='test-family')
+        # get models
+        models = topic.get_models_module()
+        Person = models.Person
+        # create entities
+        person_a  = Person.objects.create(name='person A')
+        person_b  = Person.objects.create(name='person B')
+        # start to patch
+        patch_two_persons(person_a.id, [person_b.id])
+        resp = self.api_client.get('/api/detective/test-family/v1/person/%d/' % (person_a.id), follow=True, format='json')
+        resp = json.loads(resp.content)
+        print resp
+        self.assertTrue(len(resp["parent"])        == 1)
+        self.assertTrue(len(resp["is_a_child_of"]) == 0)
 
     def test_export_csv(self):
         from django_rq import get_worker

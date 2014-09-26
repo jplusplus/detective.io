@@ -13,20 +13,34 @@
                href="[[topic.link]]/contribute">
                 <i class="fa fa-plus right05"></i>Add data
             </a>
-            <a href="/[[user.username]]" class="header__user__signed-in__profil" title="Your profile">
+
+            <a class="header__user__user-menu__icon" title="Settings & Profile"
+               ng-click="toggleUserMenu()">
                 <i class="fa fa-user"></i>
-                <span class="sr-only">Your profile</span>
             </a>
-            <a ng-click="logout()" class="header__user__signed-in__sign-out" title="Sign out">
-                <i class="fa fa-sign-out"></i>
-                <span class="sr-only">Sign out</span>
-            </a>
+            <ul class="header__user__user-menu__items"
+                ng-show="userMenuOpened"
+                click-outside="closeUserMenu($event)">
+                <li class="header__user__user-menu__items__item">
+                  <a href="/[[user.username]]" ui-sref="user.me({username: user.username})">My profile</a>
+                </li>
+
+                <li class="header__user__user-menu__items__item">
+                  <a href="/[[user.username]]" ui-sref="user.settings({username: user.username})">Settings</a>
+                </li>
+
+                <li class="header__user__user-menu__items__item--divider"></li>
+                <li class="header__user__user-menu__items__item">
+                  <a ng-click="logout()" title="Sign out">Sign out</a>
+                </li>
+            </ul>
+
         </div>
         <div ng-hide="user.is_logged" class="header__user__sign-in">
             <a ui-sref="login(loginParams())" class="btn btn-default" title="Login">
                 Log in
             </a>
-            <a ui-sref="signup(loginParams())" class="btn btn-primary" title="Login">
+            <a ui-sref="signup(loginParams())" class="btn btn-primary" title="Sign up">
                 Sign up
             </a>
         </div>

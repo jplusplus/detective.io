@@ -1,7 +1,9 @@
 class window.HeaderCtrl
-    @$inject: ['$scope', '$state', 'Common', 'TopicsFactory', '$location']
+    @$inject: ['$scope', '$state', 'Common', 'User', 'TopicsFactory', '$location']
 
-    constructor: (@scope, @state, @Common, @TopicsFactory, @location)->
+    constructor: (@scope, @state, @Common, User, @TopicsFactory, @location)->
+        @scope.user = User
+        @scope.userMenuOpened = false
         # Watch current topic
         @scope.$watch (=>@TopicsFactory.topic), (topic)=> @scope.topic = topic
         # Watch URL change to determine the login destination
@@ -21,6 +23,9 @@ class window.HeaderCtrl
             in_wrong_state = @isInEmptyState() or @isInInvite() or @isInHome()
             in_topic and not in_wrong_state
 
+        @scope.toggleUserMenu = @toggleUserMenu
+        @scope.closeUserMenu  = @closeUserMenu
+
     isInTopic: =>
         topic = @TopicsFactory.topic
         topic? and not _.isEmpty(topic)
@@ -34,6 +39,19 @@ class window.HeaderCtrl
 
     isInHome: =>
         ((@state.current.name or '').match(/^home/) or []).length > 0
+
+    toggleUserMenu: =>
+        @scope.userMenuOpened = not @scope.userMenuOpened
+
+    closeUserMenu: (evt)=>
+        clickedOnToggle = (e)=>
+            boundClick = $(e.target).attr('ng-click') or
+                         $(e.target).parent().attr('ng-click')
+            boundClick is 'toggleUserMenu()'
+
+        if not clickedOnToggle(evt)
+            @scope.userMenuOpened = false
+
 
 
 angular.module('detective.controller').controller 'headerCtrl', HeaderCtrl

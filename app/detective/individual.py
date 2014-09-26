@@ -336,7 +336,7 @@ class IndividualResource(ModelResource):
         for field in fields:
             # Get relationships for this fields
             field_rels = [ rel for rel in node_rels[:] if rel.type == field._type]
-            # Filter relations to get only the well oriented relations
+            # Filter relationship to keep only the well oriented relationships
             related_field = [f for f in model_fields if "rel_type" in f and f["rel_type"] == field._type and "name" in f and f["name"] == field._BoundRelationship__attname]
             if related_field:
                 assert len(related_field) == 1, related_field

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, get_model_fields
 from app.detective.topics.common.models import FieldSource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
@@ -316,15 +316,12 @@ class IndividualResource(ModelResource):
         return model._neo4j_instance(node)
 
     def get_detail(self, request, **kwargs):
-
         basic_bundle = self.build_bundle(request=request)
         kwargs["bundle"] = basic_bundle
-
-        obj = self.obj_get(**kwargs)
+        obj    = self.obj_get(**kwargs)
         bundle = self.build_bundle(obj=obj, request=request)
         bundle = self.full_dehydrate(bundle)
         bundle = self.alter_detail_data_to_serialize(request, bundle, True)
-
         return self.create_response(request, bundle)
 
     def alter_detail_data_to_serialize(self, request, bundle, nested=False):
@@ -335,9 +332,21 @@ class IndividualResource(ModelResource):
         # If the nested parameter is True, this set
         node_to_retreive = set()
         # Resolve relationships manualy
+        model_fields = get_model_fields(model)
         for field in fields:
             # Get relationships for this fields
-            field_rels = [ rel for rel in node_rels[:] if rel.type == field._type ]
+            field_rels = [ rel for rel in node_rels[:] if rel.type == field._type]
+            # Filter relationships to keep only the well oriented relationships
+            # get the related field informations
+            related_field = [f for f in model_fields if "rel_type" in f and f["rel_type"] == field._type and "name" in f and f["name"] == field._BoundRelationship__attname]
+            if related_field:
+                # Note (edouard): check some assertions in case I forgot something
+                assert len(related_field) == 1, related_field
+                assert related_field[0]["direction"]
+                # choose the end point to check
+                end_point_side = "start" if related_field[0]["direction"] == "out" else "end"
+                # filter the relationship
+                field_rels = [rel for rel in field_rels if getattr(rel, end_point_side).id == bundle.obj.id]
             # Get node ids for those relationships
             field_oposites = [ graph.opposite(rel, bundle.obj.id) for rel in field_rels ]
             # Save the list into properities
@@ -361,8 +370,6 @@ class IndividualResource(ModelResource):
                     rel_node["id"] = idx
                     # Update value
                     bundle.data[field.name][i] = self.validate(rel_node, field.target_model, allow_missing=True)
-
-
         # Show additional field following the model's rules
         rules = request.current_topic.get_rules().model(self.get_model()).all()
         # All additional relationships

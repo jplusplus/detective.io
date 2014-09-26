@@ -1,28 +1,25 @@
-class window.DeleteAccountCtrl
-    @$inject: [ '$rootScope', '$scope', '$state', '$timeout', '$modal', '$http', 'User', 'Page', 'constants.events' ]
+class window.DeleteAccountFormCtrl
+    @$inject: [ '$rootScope', '$scope', '$state', '$timeout', '$modal', '$http', 'User', 'constants.events' ]
 
     REDIRECT_SUCCESS_TIMEOUT: 1800
 
-    constructor: (@rootScope, @scope, @state, @timeout, @modal, @http, @User, Page, @EVENTS)->
-        Page.title 'Remove your account'
+    constructor: (@rootScope, @scope, @state, @timeout, @modal, @http, @User, @EVENTS)->
+        console.log 'DeleteAccountFormCtrl'
         # Scope variables
-        @scope.submitted = false
-        @scope.check_password = undefined
-        # Scope nethods
-        @scope.deleteAccount = @submit
-        @scope.goToDasbhoard = @goToDasbhoard
+        @submitted = false
+        @check_password = undefined
 
-        @scope.shouldShowIncorrectPassword = (form_field)=>
-            required_error  = form_field.$error.required
-            incorrect_error = form_field.$error.incorrect_password
-            @scope.submitted and not required_error and incorrect_error
+    shouldShowIncorrectPassword: (form_field)=>
+        required_error  = form_field.$error.required
+        incorrect_error = form_field.$error.incorrect_password
+        @submitted and not required_error and incorrect_error
 
-        @scope.shouldShowRequiredPassword = (form_field)=>
-            @scope.submitted and form_field.$error.required
+    shouldShowRequiredPassword:(form_field)=>
+        @submitted and form_field.$error.required
 
     openConfirmModal: (form)=>
         @pending_listener() if @pending_listener?
-        @scope.submitted = true
+        @submitted = true
         return unless form.$valid
         @modalInstance = @modal.open
             templateUrl: '/partial/account.delete.confirm-modal.html'
@@ -46,9 +43,11 @@ class window.DeleteAccountCtrl
             @openConfirmModal(form)
 
     deleteAccount: =>
+        @loading = true
         @http.delete("/api/detective/common/v1/user/#{@User.id}/").then (response)=>
             if response.status in [200, 204]
-                @scope.deleted = true
+                @loading = false
+                @deleted = true
                 @User.set
                     is_logged  : false
                     is_staff   : false
@@ -62,4 +61,4 @@ class window.DeleteAccountCtrl
     goToDasbhoard: =>
         @state.go 'home.dashboard'
 
-angular.module('detective.controller').controller 'deleteAccountCtrl', DeleteAccountCtrl
+angular.module('detective.controller').controller 'deleteAccountFormCtrl', DeleteAccountFormCtrl

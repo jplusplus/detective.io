@@ -61,12 +61,6 @@ angular.module('detective.config').config [
                 controller: UserCtrl
                 templateUrl: '/partial/account.activation.html'
             )
-            .state('change-password'
-                url: "/account/change-password/"
-                controller: ChangePasswordFormCtrl
-                templateUrl: '/partial/account.change-password.html'
-                auth: true
-            )
             .state('reset-password',
                 url: "/account/reset-password/?token"
                 controller: UserCtrl
@@ -76,12 +70,6 @@ angular.module('detective.config').config [
                 url: "/account/reset-password-confirm/?token"
                 controller: UserCtrl
                 templateUrl: '/partial/account.reset-password.confirm.html'
-            )
-            .state('account-delete'
-                url: "/account/delete/"
-                controller: DeleteAccountCtrl
-                templateUrl: '/partial/account.delete.html'
-                auth: true
             )
             .state('login',
                 url: "/login/?nextState&nextParams"
@@ -136,6 +124,13 @@ angular.module('detective.config').config [
                 templateUrl: "/partial/account.html"
                 resolve: UserCtrl.resolve
                 default: 'user'
+            )
+            .state('user.settings',
+                auth: true
+                controller: SettingsCtrl
+                url: 'settings/'
+                templateUrl: '/partial/account.settings.html'
+                default: 'home'
             )
             # ------------------
             # Topic-related URLs

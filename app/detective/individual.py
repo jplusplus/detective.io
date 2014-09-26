@@ -336,12 +336,16 @@ class IndividualResource(ModelResource):
         for field in fields:
             # Get relationships for this fields
             field_rels = [ rel for rel in node_rels[:] if rel.type == field._type]
-            # Filter relationship to keep only the well oriented relationships
+            # Filter relationships to keep only the well oriented relationships
+            # get the related field informations
             related_field = [f for f in model_fields if "rel_type" in f and f["rel_type"] == field._type and "name" in f and f["name"] == field._BoundRelationship__attname]
             if related_field:
+                # Note (edouard): check some assertions in case I forgot something
                 assert len(related_field) == 1, related_field
                 assert related_field[0]["direction"]
+                # choose the end point to check
                 end_point_side = "start" if related_field[0]["direction"] == "out" else "end"
+                # filter the relationship
                 field_rels = [rel for rel in field_rels if getattr(rel, end_point_side).id == bundle.obj.id]
             # Get node ids for those relationships
             field_oposites = [ graph.opposite(rel, bundle.obj.id) for rel in field_rels ]

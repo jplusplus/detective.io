@@ -26,13 +26,13 @@
             <i class="fa fa-square-o"                    ng-hide="form.username.$valid"></i>
           </span>
         </div>
-        <p class="text-danger top05" ng-show="usernameSubmitted && form.username.$error.unique">
+        <p class="alert alert-danger top05" ng-show="usernameSubmitted && form.username.$error.unique">
           This username is already taken.
         </p>
-        <p class="text-danger" ng-show="usernameSubmitted && form.username.$error.required">
+        <p class="alert alert-danger" ng-show="usernameSubmitted && form.username.$error.required">
           You have to enter a username.
         </p>
-        <p class="text-danger" ng-show="usernameSubmitted && form.username.$error.pattern">
+        <p class="alert alert-danger" ng-show="usernameSubmitted && form.username.$error.pattern">
           Nice touch, but you can only use numbers, letters, and -, _ or . here.
         </p>
 
@@ -56,10 +56,10 @@
             <i class="fa fa-square-o" ng-hide="form.email.$valid"></i>
           </span>
         </div>
-        <p class="text-danger top05" ng-show="emailSubmitted && form.email.$error.unique">
+        <p class="alert alert-danger top05" ng-show="emailSubmitted && form.email.$error.unique">
           This email is already in use.
         </p>
-        <p class="text-danger" ng-show="emailSubmitted && form.email.$error.required">
+        <p class="alert alert-danger top05" ng-show="emailSubmitted && form.email.$error.required">
           You have to enter an email.
         </p>
       </div>
@@ -85,7 +85,7 @@
         <p class="text-muted top05">
           At least 6 characters.
         </p>
-        <p class="text-danger" ng-show="passwordSubmitted && form.password.$error.required">
+        <p class="alert alert-danger" ng-show="passwordSubmitted && form.password.$error.required">
           You have to enter a password.
         </p>
       </div>
@@ -108,10 +108,10 @@
             <i class="fa fa-square-o" ng-hide="form.password2.$valid"></i>
           </span>
         </div>
-        <p class="text-danger top05" ng-show="form.password2.$error.match">
+        <p class="alert alert-danger top05" ng-show="form.password2.$error.match">
           Passwords don't match.
         </p>
-        <p class="text-danger" ng-show="password2Submitted && form.password2.$error.required">
+        <p class="alert alert-danger top05" ng-show="password2Submitted && form.password2.$error.required">
           You have to repeat your password.
         </p>
       </div>
@@ -124,11 +124,11 @@
                  ng-model="terms"
                  id="inputTermsCheck">
         </label>
-        <p class="text-danger" ng-show="termsSubmitted && form.terms.$error.required">
+        <p class="alert alert-danger" ng-show="termsSubmitted && form.terms.$error.required">
             You have to agree to the <a ui-sref="page({slug:'terms'})" target="_blank" rel="nofollow" title="Terms">Terms</a> to use Detective.io
         </p>
       </div>
-      <div class="alert alert-danger" ng-if="error">
+      <div class="alert alert-danger top05" ng-if="error">
         [[error]]
       </div>
     </fieldset>

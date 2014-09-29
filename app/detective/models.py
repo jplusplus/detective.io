@@ -646,9 +646,6 @@ def update_topic_cache(*args, **kwargs):
             # previously stored information related to this topic
             utils.topic_cache.incr_version(topic)
 
-def remove_topic_cache(*args, **kwargs):
-    utils.topic_cache.delete_version(kwargs.get('instance'))
-
 def delete_entity(*args, **kwargs):
     fields = utils.get_model_fields(kwargs.get('instance').__class__)
     for field in fields:
@@ -658,11 +655,10 @@ def delete_entity(*args, **kwargs):
                 info.delete()
     update_topic_cache(*args, **kwargs)
 
-signals.post_delete.connect(remove_permissions , sender=Topic)
 signals.post_save.connect(user_created         , sender=User)
 signals.post_save.connect(update_topic_cache   , sender=Topic)
 signals.post_save.connect(update_permissions   , sender=Topic)
-signals.pre_delete.connect(update_topic_cache  , sender=Topic)
+signals.post_delete.connect(update_topic_cache , sender=Topic)
 signals.post_delete.connect(remove_permissions , sender=Topic)
 
 # EOF

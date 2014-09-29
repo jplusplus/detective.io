@@ -2,18 +2,18 @@
 
     <h3 ng-if="!modal.quitted">Are you sure to leave <strong>[[ modal.topic.title ]]</strong>?</h3>
 
-    <h3 ng-if="modal.quitted" class="text-success">
-        You're not a [[ modal.topic.title ]] contributor anymore
-    </h3>
+    <h4 ng-if="modal.quitted" class="text-success">
+        You're not a <strong>[[ modal.topic.title ]]</strong> contributor anymore.
+    </h4>
 </div>
 <div class="modal-footer"
      ng-class="{loading: modal.loading}">
     <button class="btn btn-primary" ng-click="modal.leave()" ng-if="!modal.quitted">
-        <strong>Yep, I'm sure</strong>
+        <strong>Yes, I'm sure</strong>
     </button>
     <button class="btn btn-default" ng-click="modal.close()">
         <span ng-if="!modal.quitted">
-            Nope, get me outa here
+            No, take me to a safe place
         </span>
         <span ng-if="modal.quitted">
             Close

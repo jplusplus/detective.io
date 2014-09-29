@@ -127,7 +127,7 @@ angular.module('detective.config').config [
             )
             .state('user.settings',
                 auth: true
-                controller: SettingsCtrl
+                controller: AccountSettingsCtrl
                 url: 'settings/'
                 templateUrl: '/partial/account.settings.html'
                 default: 'home'

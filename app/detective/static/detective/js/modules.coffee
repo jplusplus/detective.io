@@ -22,6 +22,7 @@ angular.module('detective', [
     'ngSanitize'
     'ui.router'
     'textAngular'
-    'angulartics', 'angulartics.google.analytics'
+    'angulartics',
+    'angulartics.google.analytics'
     'ng-embedly'
 ])

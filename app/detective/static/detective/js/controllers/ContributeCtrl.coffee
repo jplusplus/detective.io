@@ -29,6 +29,7 @@ class window.ContributeCtrl
         @scope.isRich              = @isRich
         @scope.focusField          = @focusField
         @scope.unfocusField        = @unfocusField
+        @scope.toggleHtmlMode      = @toggleHtmlMode
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -47,6 +48,7 @@ class window.ContributeCtrl
         @scope.Individual   = @Individual
         @scope.stateParams  = @stateParams
         @scope.UtilsFactory = @UtilsFactory
+        @scope.timeout      = @timeout
         @scope.modal        = @modal
         # Prepare future individual
         @initNewIndividual()
@@ -66,8 +68,7 @@ class window.ContributeCtrl
 
         # When we update scrollIdx, reset its value after
         # a short delay to allow scroll again
-        @scope.$watch "scrollIdx", (v)=>
-            @timeout (=> @scope.scrollIdx = -1), 1200
+        @scope.$watch "scrollIdx", => @timeout (=> @scope.scrollIdx = -1), 1200
 
     # ──────────────────────────────────────────────────────────────────────────
     # IndividualForm embeded class
@@ -233,26 +234,49 @@ class window.ContributeCtrl
 
         # Event when fields changed
         update: (data)=>
-            @data_are_updating = true
-            params = type: @type, id: @fields.id
-            # Notice that the field is loading
-            @updating = _.extend @updating, data
-            # Patch the current individual
-            @Individual.update params, data, (res)=>
-                # Record master
-                @master = _.extend @master, res
-                @fields = _.extend @fields, res
-                @data_are_updating = false
-                # Notices that we stop to load the field
-                @updating = _.omit(@updating, _.keys(data))
-                # Prevent communications between forms
-                @updating = angular.copy @updating
-                # Propagation
-                @scope.$broadcast "individual:updated", @fields
-            , (error)=>
-                if error.status == 404
-                    @isClosed   = true
-                    @isRemoved  = true
+            # Dear future me,
+            #
+            # if you don't understand why I'm using a timeout here, I have to be
+            # honest: I'm not sure to understand it neither.
+            # In fact, it results of a series of hacks that didn't really work.
+            # As you can see bellow, we are setting two variables to be aware of
+            # the loading status of this field. During this state, we take care
+            # of disabling every inputs inside the current line. It results on a
+            # very tricky problem: in some situations, a button (like 'Add
+            # source') might be disabled at the very moment where we disabled it
+            # because of loading.
+            #
+            # For this reason, the simplier way you found to avoid interweaving
+            # between events (blur and click, for instance) was to use a small
+            # timeout here. It's not pretty, it's not perfect, but it works.
+            # Plus, it's seamless for the user.
+            #
+            # Hoping you're not upset about what you did,
+            #
+            # xx
+            @scope.timeout =>
+                @data_are_updating = true
+                params = type: @type, id: @fields.id
+                # Notice that the field is loading
+                @updating = _.extend @updating, data
+                # Patch the current individual
+                @Individual.update params, data, (res)=>
+                    # Record master
+                    @master = _.extend @master, res
+                    @fields = _.extend @fields, res
+                    @data_are_updating = false
+                    # Notices that we stop to load the field
+                    @updating = _.omit(@updating, _.keys(data))
+                    # Prevent communications between forms
+                    @updating = angular.copy @updating
+                    # Propagation
+                    @scope.$broadcast "individual:updated", @fields
+                , (error)=>
+                    if error.status == 404
+                        @isClosed   = true
+                        @isRemoved  = true
+            # This timeout is completely arbitrary.
+            , 300
 
         # Save the current individual form
         save: =>
@@ -606,6 +630,8 @@ class window.ContributeCtrl
 
     isRich: (field) =>
         field.rules.is_rich or no
+
+    toggleHtmlMode: (ev)=> @scope.htmlMode = not @scope.htmlMode
 
 
 angular.module('detective.controller').controller 'contributeCtrl', ContributeCtrl

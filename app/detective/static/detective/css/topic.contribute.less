@@ -32,7 +32,13 @@
         }
     }
 
-    .individual__heading {
+
+}
+
+
+.individual {
+
+    &__heading {
 
         &__btns {
             position:relative;
@@ -44,10 +50,38 @@
             z-index:50;
             padding-left:50px;
             position:relative;
+
             .color-tag {
                 position:absolute;
                 left:0;
                 right:0;
+            }
+        }
+    }
+
+    // Indivudal form
+    &__form {
+
+        // On row in the form (one by field)
+        &__row {
+
+            // We the input stands
+            &__input {
+
+                // Special class for rich text field
+                &__rich-text {
+
+                    // Button to change rich-text mode
+                    &__toggler {
+                        float:right;
+                    }
+
+                    &--html-mode &__toggler {
+                        margin-bottom:5px;
+                        text-align: right;
+                        float:none;
+                    }
+                }
             }
         }
     }

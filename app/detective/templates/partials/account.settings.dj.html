@@ -26,7 +26,8 @@
                              name="current_password"
                              check-password
                              ng-model="passCtrl.current_password"
-                             id="inputCurrentPassword">
+                             id="inputCurrentPassword"
+                             placeholder="Your old password">
                         <span class="input-group-addon">
                             <i class="fa fa-check-square-o text-success" ng-show="passForm.current_password.$valid"></i>
                             <i class="fa fa-square-o" ng-hide="passForm.current_password.$valid"></i>
@@ -51,7 +52,8 @@
                              ng-model="passCtrl.new_password"
                              ng-change="passCtrl.submitted=false"
                              ng-minlength="6"
-                             id="inputNewPassword">
+                             id="inputNewPassword"
+                             placeholder="Your new password">
                         <span class="input-group-addon">
                             <i class="fa fa-check-square-o text-success" ng-show="passForm.new_password.$valid"></i>
                             <i class="fa fa-square-o" ng-hide="passForm.new_password.$valid"></i>
@@ -76,7 +78,7 @@
                              ng-change="passCtrl.submitted=false"
                              match with="passCtrl.new_password"
                              id="inputNewPassword2"
-                             placeholder="Your account's email">
+                             placeholder="Your new password">
                         <span class="input-group-addon">
                             <i class="fa fa-check-square-o text-success" ng-show="passForm.new_password2.$valid"></i>
                             <i class="fa fa-square-o" ng-hide="passForm.new_password2.$valid"></i>

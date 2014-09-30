@@ -263,7 +263,13 @@ class window.ContributeCtrl
                 @Individual.update params, data, (res)=>
                     # Record master
                     @master = _.extend @master, res
-                    @fields = _.extend @fields, res
+
+                    # Ugly but we should refresh all rich text fields from response
+                    _.each res, (value, key) =>
+                        if key[0] isnt '$'
+                            _.each @meta.fields, (f) =>
+                                @fields[key] = value if (f.name is key) and f.rules.is_rich
+
                     @data_are_updating = false
                     # Notices that we stop to load the field
                     @updating = _.omit(@updating, _.keys(data))

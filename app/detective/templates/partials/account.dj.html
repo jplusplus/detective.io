@@ -49,7 +49,8 @@
     </div>
 
     <div class="row">
-        <div ng-if="shouldShowTopics" class="account__topics col-sm-6 col-sm-push-3 panel panel-default">
+        <div ng-if="shouldShowTopics" class="account__topics col-sm-6 col-sm-push-3 panel panel-default"
+             ng-class='{ loading: loading  }'>
             <span ng-if="topics.length">
                 <div class="panel-body">
                     <h3>Investigations</h3>

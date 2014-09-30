@@ -68,6 +68,13 @@ class JobsTestCase(TestCase):
                     ("55963,MDMA*HCI,120,"),
                     ("55950,Piperonal,,\"<b>Piperonal</b><span>, also known as&#160;</span><b>heliotropin</b><span>, is an&#160;</span><a href=\"\"http://en.wikipedia.org/wiki/Organic_compound\"\" title=\"\"Organic compound\"\">organic compound</a><span>&#160;that is commonly found in fragrances and flavors. The molecule is structurally related to&#160;</span><a href=\"\"http://en.wikipedia.org/wiki/Benzaldehyde\"\" title=\"\"Benzaldehyde\"\">benzaldehyde</a><span>&#160;and&#160;</span><a href=\"\"http://en.wikipedia.org/wiki/Vanillin\"\" title=\"\"Vanillin\"\">vanillin</a><span>. It exists as a white or colorless solid. It has a floral odor commonly described as being similar to that of vanillin and&#160;</span><a href=\"\"http://en.wikipedia.org/wiki/Cherry\"\" title=\"\"Cherry\"\">cherry</a><span>. It is used as flavoring, e.g. in&#160;</span><a href=\"\"http://en.wikipedia.org/wiki/Perfume\"\" title=\"\"Perfume\"\">perfumes</a><span>&#160;or chocolate.</span>\"")
                 )
+            ),
+            (
+                "composition.csv", (
+                    ("Pill_id,molecules_contained,Molecule_id"),
+                    ("57713,,57714"),
+                    ("57457,,57230"),
+                )
             )
         )
         # run the job without job runner

@@ -116,7 +116,7 @@ class SummaryResource(Resource):
         except Topic.DoesNotExist:
             raise Http404()
 
-    def summary_schema(self, bundle, request):
+    def summary_jsonschema(self, bundle, request):
         return schema.ontology
 
     def summary_countries(self, bundle, request):

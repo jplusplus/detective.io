@@ -1,14 +1,11 @@
 class window.HeaderCtrl
     @$inject: ['$scope', '$state', 'Common', 'User', 'TopicsFactory', '$location']
 
-    constructor: (@scope, @state, @Common, User, @TopicsFactory, @location)->
-        @scope.user = User
+    constructor: (@scope, @state, @Common, @User, @TopicsFactory, @location)->
+        @scope.user = @User
         @scope.userMenuOpened = false
         # Watch current topic
         @scope.$watch (=>@TopicsFactory.topic), (topic)=> @scope.topic = topic
-        # Watch URL change to determine the login destination
-        @scope.$watch (=>@location.url()), (url)=>
-            @scope.nextLogin = url if url isnt "/login"
 
         @scope.loginParams = =>
             nextState: @state.current.default or @state.current.name
@@ -25,6 +22,8 @@ class window.HeaderCtrl
 
         @scope.toggleUserMenu = @toggleUserMenu
         @scope.closeUserMenu  = @closeUserMenu
+        @scope.goToMyProfile  = @goToMyProfile
+        @scope.goToMySettings = @goToMySettings
 
     isInTopic: =>
         topic = @TopicsFactory.topic
@@ -43,14 +42,26 @@ class window.HeaderCtrl
     toggleUserMenu: =>
         @scope.userMenuOpened = not @scope.userMenuOpened
 
-    closeUserMenu: (evt)=>
+    goToMyProfile: =>
+        @closeUserMenu()
+        @state.go "user.me", {username: @User.username}
+
+    goToMySettings: =>
+        @closeUserMenu()
+        @state.go "user.settings", {username: @User.username}
+
+
+    closeUserMenu: (evt=false)=>
         clickedOnToggle = (e)=>
             boundClick = $(e.target).attr('ng-click') or
                          $(e.target).parent().attr('ng-click')
             boundClick is 'toggleUserMenu()'
 
-        if not clickedOnToggle(evt)
+        if evt and not clickedOnToggle(evt)
             @scope.userMenuOpened = false
+        else if not evt
+            @scope.userMenuOpened = false
+
 
 
 

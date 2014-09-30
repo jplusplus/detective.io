@@ -14,19 +14,22 @@
                 <i class="fa fa-plus right05"></i>Add data
             </a>
 
-            <a class="header__user__user-menu__icon" title="Settings & Profile"
+            <a class="header__user__user-menu" title="Settings & Profile"
                ng-click="toggleUserMenu()">
-                <i class="fa fa-user"></i>
+                <img class="header__user__user-menu__avatar" title="Avatar provided by Gravatar"  ng-src="[[ user.profile.avatar ]]" />
+                <span class="header__user__user-menu__username">[[ user.username ]]</span>
+                <i class="header__user__user-menu__open-indicator fa fa-caret-down" ng-class="{ 'fa-caret-up': userMenuOpened }"></i>
             </a>
+
             <ul class="header__user__user-menu__items"
                 ng-show="userMenuOpened"
                 click-outside="closeUserMenu($event)">
                 <li class="header__user__user-menu__items__item">
-                  <a href="/[[user.username]]" ui-sref="user.me({username: user.username})">My profile</a>
+                  <a ng-click="goToMyProfile()">My profile</a>
                 </li>
 
                 <li class="header__user__user-menu__items__item">
-                  <a href="/[[user.username]]" ui-sref="user.settings({username: user.username})">Settings</a>
+                  <a ng-click="goToMySettings()">Settings</a>
                 </li>
 
                 <li class="header__user__user-menu__items__item--divider"></li>

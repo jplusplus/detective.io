@@ -26,7 +26,6 @@ class window.UserProfileCtrl
 
     constructor: (@scope, @Common, @Page, $state, @q, @http, @user, @userGroups, topics)->
         @Page.title @user.username, no
-
         @topics_page = 1
 
         # ──────────────────────────────────────────────────────────────────────
@@ -35,7 +34,6 @@ class window.UserProfileCtrl
         # Is this our profile page?
         @scope.isMe = $state.is 'user.me'
         #
-        @scope.shouldShowTopics = true
         # User info
         @scope.user =
             name : "#{@user.first_name} #{@user.last_name}"
@@ -47,6 +45,7 @@ class window.UserProfileCtrl
 
         # All topics the user has access to
         @scope.topics = topics
+        @scope.shouldShowTopics = true
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods

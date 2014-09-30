@@ -85,8 +85,13 @@
         <p class="text-muted top05">
           At least 6 characters.
         </p>
-        <p class="alert alert-danger" ng-show="passwordSubmitted && form.password.$error.required">
-          You have to enter a password.
+        <p class="alert alert-danger" ng-show="passwordSubmitted && (form.password.$error.required || form.password.$error.minlength)">
+          <span ng-show="form.password.$error.minlength">
+            This password is too short.
+          </span>
+          <span ng-hide="form.password.$error.minlength">
+            You have to enter a password.
+          </span>
         </p>
       </div>
 
@@ -108,12 +113,14 @@
             <i class="fa fa-square-o" ng-hide="form.password2.$valid"></i>
           </span>
         </div>
-        <p class="alert alert-danger top05" ng-show="form.password2.$error.match">
-          Passwords don't match.
-        </p>
-        <p class="alert alert-danger top05" ng-show="password2Submitted && form.password2.$error.required">
-          You have to repeat your password.
-        </p>
+        <div ng-if="form.password.$valid">
+          <p class="alert alert-danger top05" ng-show="form.password2.$error.match">
+            Passwords don't match.
+          </p>
+          <p class="alert alert-danger top05" ng-show="password2Submitted && form.password2.$error.required">
+            You have to repeat your password.
+          </p>
+        </div>
       </div>
       <div class="form-group">
         <label for="inputTermsCheck">I have read and agree to the <a ui-sref="page({slug:'terms'})" target="_blank" rel="nofollow" title="Terms">Terms of Use</a>

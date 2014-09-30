@@ -25,7 +25,7 @@ class window.AddSourcesModalCtrl
         # Description of the relationship (source, target, through model)
         @scope.fields = @fields
 
-    close: (result=@fields)=>
+    close: (result=@fields.field_sources)=>
         @modalInstance.close(result)
 
     save: (form, close=no)=>

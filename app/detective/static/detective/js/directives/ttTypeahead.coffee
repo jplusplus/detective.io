@@ -40,6 +40,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         endpoint              : "&ttEndpoint"
         remoteUrl             : "&ttRemoteUrl"
         prefetchUrl           : "&ttPrefetchUrl"
+        disableLoadingIcon    : "&ttDisableLoadingIcon"
         disableEmptyResults   : "&ttDisableEmptyResults"
         disableEntityCreation : "&ttDisableEntityCreation"
         emptyResultsSelected  : "&ttEmptyResultsSelected"
@@ -114,6 +115,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
 
         # handle loading states
         setLoading = ->
+            return if scope.disableLoadingIcon()
             search_icon = getSearchIcon()
             search_icon.removeClass('fa-search')
             search_icon.addClass('fa-circle-o-notch fa-spin')

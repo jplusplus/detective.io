@@ -13,8 +13,9 @@
 from django.test                      import TestCase
 from app.detective.models             import Topic
 from app.detective.topics.common.jobs import process_bulk_parsing_and_save_as_model
+from tastypie.test                    import ResourceTestCase
 
-class JobsTestCase(TestCase):
+class JobsTestCase(ResourceTestCase):
     fixtures = [
         'app/detective/fixtures/default_topics.json',
         'app/detective/fixtures/tests_pillen.json'
@@ -72,13 +73,21 @@ class JobsTestCase(TestCase):
             (
                 "composition.csv", (
                     ("Pill_id,molecules_contained,Molecule_id"),
-                    ("57713,,57714"),
-                    ("57457,,57230"),
+                    ("57713,1,57714"),
+                    ("57457,2,57230"),
+                )
+            ),
+            (
+                "molecules_contained.csv", (
+                    ("Pill_Molecules_Contained_Molecule_Properties_id,quantity (in milligrams)."),
+                    ("1,250"),
+                    ("2,9"),
                 )
             )
         )
         # run the job without job runner
         response = process_bulk_parsing_and_save_as_model(topic, files)
+        print response
         # check
         models   = topic.get_models_module()
         Pill     = models.Pill
@@ -90,4 +99,5 @@ class JobsTestCase(TestCase):
         self.assertEquals(Molecule.objects.all().count()         , next((len(file[1])-1 for file in files if file[0] == "molecules.csv")))
         Pill.objects.all().delete()
         Molecule.objects.all().delete()
+
 # EOF

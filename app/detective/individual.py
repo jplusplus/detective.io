@@ -336,13 +336,12 @@ class IndividualResource(ModelResource):
         # If the nested parameter is True, this set
         node_to_retreive = set()
         # Resolve relationships manualy
-        model_fields = get_model_fields(model)
         for field in fields:
             # Get relationships for this fields
             field_rels = [ rel for rel in node_rels[:] if rel.type == field._type]
             # Filter relationships to keep only the well oriented relationships
             # get the related field informations
-            related_field = [f for f in model_fields if "rel_type" in f and f["rel_type"] == field._type and "name" in f and f["name"] == field._BoundRelationship__attname]
+            related_field = [f for f in get_model_fields(model) if "rel_type" in f and f["rel_type"] == field._type and "name" in f and f["name"] == field._BoundRelationship__attname]
             if related_field:
                 # Note (edouard): check some assertions in case I forgot something
                 assert len(related_field) == 1, related_field

@@ -177,20 +177,21 @@ def get_topic_from_request(request):
 def get_model_fields(model, order_by='name'):
     from app.detective           import register
     from django.db.models.fields import FieldDoesNotExist
-    fields       = []
     models_rules = register.topics_rules().model(model)
-    # Create field object
-    for f in model._meta.fields:
+    if hasattr(model, '__fields_order__'):
+        _len = len(model._meta.fields)
+        model_fileds = sorted(model._meta.fields, key=lambda x: model.__fields_order__.index(x.name) if x.name in model.__fields_order__ else _len)
+    else:
+        model_fileds = sorted(model._meta.fields, key=lambda el: getattr(el, order_by))
+    for f in model_fileds:
         # Ignores field terminating by + or begining by _
         if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):
-
             try:
                 # Get the rules related to this model
                 field_rules = models_rules.field(f.name).all()
             except FieldDoesNotExist:
                 # No rules
                 field_rules = []
-
             field_type = f.get_internal_type()
             # Find related model for relation
             if field_type.lower() == "relationship":
@@ -207,14 +208,11 @@ def get_model_fields(model, order_by='name'):
                 related_model = target_model.__name__
             else:
                 related_model = None
-
             verbose_name = getattr(f, "verbose_name", None)
-
             if verbose_name is None:
                 # Use the name as verbose_name fallback
                 verbose_name = pretty_name(f.name).lower()
-
-            field = {
+            yield {
                 'name'         : f.name,
                 'type'         : field_type,
                 'direction'    : getattr(f, "direction", ""),
@@ -225,16 +223,6 @@ def get_model_fields(model, order_by='name'):
                 'model'        : model.__name__,
                 'rules'        : field_rules
             }
-            fields.append(field)
-
-    if hasattr(model, '__fields_order__'):
-        _len = len(fields)
-        fields = sorted(fields, key=lambda x: model.__fields_order__.index(x['name']) if x['name'] in model.__fields_order__ else _len)
-    else:
-        get_key=lambda el: el[order_by]
-        fields = sorted(fields, key=get_key)
-
-    return fields
 
 def get_model_nodes():
     from neo4django.db import connection

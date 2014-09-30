@@ -1023,8 +1023,8 @@ class TopicApiTestCase(ApiTestCase):
         patch_two_persons(person_a.id, [person_b.id])
         resp = self.api_client.get('/api/detective/test-family/v1/person/%d/' % (person_a.id), follow=True, format='json')
         resp = json.loads(resp.content)
-        self.assertTrue(len(resp["parent"])        == 1)
-        self.assertTrue(len(resp["is_a_child_of"]) == 0)
+        self.assertTrue(len(resp["parent"])        == 1, len(resp["parent"]))
+        self.assertTrue(len(resp["is_a_child_of"]) == 0, len(resp["is_a_child_of"]))
         person_a.delete()
         person_b.delete()
 

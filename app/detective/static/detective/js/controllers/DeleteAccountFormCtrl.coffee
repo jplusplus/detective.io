@@ -4,7 +4,6 @@ class window.DeleteAccountFormCtrl
     REDIRECT_SUCCESS_TIMEOUT: 1800
 
     constructor: (@rootScope, @scope, @state, @timeout, @modal, @http, @User, @EVENTS)->
-        console.log 'DeleteAccountFormCtrl'
         # Scope variables
         @submitted = false
         @check_password = undefined

@@ -1,7 +1,6 @@
 class window.ChangePasswordFormCtrl
     @$inject: ['$scope', '$state', '$http', '$timeout',  'User', 'Page']
     constructor: (@scope, @state, @http, @timeout, @User, @Page)->
-        console.log 'ChangePasswordFormCtrl'
         @showPasswordChanged = no
         @new_password = undefined
 

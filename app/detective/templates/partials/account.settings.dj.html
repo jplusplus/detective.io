@@ -34,7 +34,7 @@
                     </div>
                     <div class="alert alert-danger"
                          ng-show="passCtrl.submitted && passForm.current_password.$error.required">
-                      Please fill this field to change your password
+                      Please use this field to change your password
                     </div>
                     <div class="alert alert-danger"
                          ng-show="passCtrl.submitted && passForm.current_password.$error.incorrect_password">
@@ -61,7 +61,7 @@
                       At least 6 characters.
                     </p>
                     <div class="alert alert-danger" ng-show="passCtrl.submitted && passForm.new_password.$error.required">
-                      Please fill this field to change your password
+                      Please use this field to change your password
                     </div>
                 </div>
 
@@ -95,7 +95,7 @@
                 </div>
                 <div class="alert alert-success"
                    ng-show="passCtrl.showPasswordChanged">
-                    <p>You password has successfuly been changed.</p>
+                    <p>You password has successfully been changed.</p>
                 </div>
             </fieldset>
             <button type="submit" class="btn btn-default pull-right">Change my password</button>
@@ -115,10 +115,10 @@
         </div>
         <div class="panel-body">
             <p>
-                When you delete your account, all the investigations you created
+                When you delete your account, all investigations you created
                 will be destroyed. The data you contributed to other investigations
-                will remains.<br/>
-                Be caferful, <strong>there is no undoing</strong> when you delete
+                will remain.<br/>
+                Be careful, <strong>there is no way back</strong> when you delete
                 your account!
             </p>
             <fieldset ng-disabled="loading">

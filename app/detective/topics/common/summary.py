@@ -4,6 +4,7 @@ from app.detective.models       import Topic, SearchTerm
 from app.detective.neomatch     import Neomatch
 from app.detective.register     import topics_rules
 from app.detective.utils        import get_leafs_and_edges, get_topic_from_request
+from app.detective.parser       import schema
 from difflib                    import SequenceMatcher
 from django.core.paginator      import Paginator, InvalidPage
 from django.core.urlresolvers   import resolve
@@ -114,6 +115,9 @@ class SummaryResource(Resource):
                 return Topic.objects.get(ontology_as_mod=self._meta.urlconf_namespace)
         except Topic.DoesNotExist:
             raise Http404()
+
+    def summary_schema(self, bundle, request):
+        return schema.ontology
 
     def summary_countries(self, bundle, request):
         app_label = self.topic.app_label()

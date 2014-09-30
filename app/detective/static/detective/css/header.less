@@ -85,6 +85,7 @@
             padding-left: 10px;
             padding-right: 10px;
             height: @header-height;
+
             &__avatar {
                 .border-radius(50%);
                 height: @header-height - 10px;
@@ -106,25 +107,31 @@
 
             &__items {
                 @items-width: 150px;
+                @item-height: 35px;
                 position: absolute;
                 width: @items-width;
                 right: 0px;
-                .list-unstyled();
-                @item-height: 35px;
                 background: @header-bg;
                 text-align: left;
+                .list-unstyled();
+                .box-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));
+                border: 1px solid @header-border-color;
+                border-top:0;
+
                 &__item {
                     height: @item-height;
                     line-height:  @item-height;
                     padding-left: 15px;
+
                     &:hover {
                         background:@brand-primary;
                         a {
                             color: contrast(@brand-primary);
                         }
                     }
+
                     &--divider {
-                        border: 1px solid @header-border-color;
+                        border-top: 1px solid @header-border-color;
                     }
                 }
 

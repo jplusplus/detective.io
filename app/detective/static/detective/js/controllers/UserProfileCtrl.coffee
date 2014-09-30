@@ -11,16 +11,13 @@ class window.UserProfileCtrl
         user: UserCtrl.resolve.user
 
         userGroups: ['$http', '$q', 'user', ($http, $q, user)->
-            console.log 'resolving usergroups', user
             deferred = $q.defer()
             loadGroups($http, user, 1).then (results)->
-                console.log 'recieved results', results
                 deferred.resolve results
             deferred.promise
         ]
 
         topics: [ 'userGroups', (userGroups)->
-            console.log 'resolving topics: ', userGroups
             getTopics userGroups
         ]
 

@@ -16,7 +16,7 @@
 
             <a class="header__user__user-menu" title="Settings & Profile"
                ng-click="toggleUserMenu()">
-                <img class="header__user__user-menu__avatar" title="Avatar provided by Gravatar"  ng-src="[[ user.profile.avatar ]]" />
+                <img class="header__user__user-menu__avatar" ng-src="[[ user.profile.avatar ]]" />
                 <span class="header__user__user-menu__username">[[ user.username ]]</span>
                 <i class="header__user__user-menu__open-indicator fa fa-caret-down" ng-class="{ 'fa-caret-up': userMenuOpened }"></i>
             </a>

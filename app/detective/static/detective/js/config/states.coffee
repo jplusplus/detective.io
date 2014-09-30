@@ -111,19 +111,22 @@ angular.module('detective.config').config [
                         else
                             $state.go 'user.notme', { username: $stateParams.username }
                 ]
+
             )
             .state('user.notme',
-                controller: ProfileCtrl
+                controller: UserProfileCtrl
+                url: ''
                 templateUrl: "/partial/account.html"
-                resolve: UserCtrl.resolve
                 default: 'user'
+                resolve: UserProfileCtrl.resolve
             )
             .state('user.me',
+                url: ''
                 auth: true
-                controller: ProfileCtrl
+                controller: UserProfileCtrl
                 templateUrl: "/partial/account.html"
-                resolve: UserCtrl.resolve
                 default: 'user'
+                resolve: UserProfileCtrl.resolve
             )
             .state('user.settings',
                 auth: true

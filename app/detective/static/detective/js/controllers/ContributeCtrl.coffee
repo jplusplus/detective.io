@@ -97,7 +97,7 @@ class window.ContributeCtrl
             # AFTER the individual is created.
             scope.$on("individual:created", @getSimilars) if fields.name? and not related_to?
             # We may have to refresh this individual
-            scope.$on("individual:created", @shouldRefresh)
+            scope.$on("individual:updated", @shouldRefresh)
             # Class attributes from parameters
             # ──────────────────────────────────────────────────────────────────
             @Individual   = scope.Individual
@@ -149,31 +149,37 @@ class window.ContributeCtrl
                 # Similar entries
                 @similars = d
 
-        shouldRefresh: (event, args)=>
-            # Refresh only related individual
-            if args.related_to? and args.individual.id is @fields.id
-                # Get relationships field
-                relationships = _.where @meta.fields, type: "Relationship"
-                relationships = _.pluck relationships, "name"
-                # Does this individual have relationships fields?
-                if relationships.length
-                    # Set loading state to the relationships fields
-                    @updating[rel] = yes for rel in relationships
-                    # Load the individual
-                    @Individual.get type: @type, id: @fields.id, (individual)=>
-                        # Reload the relationships fields
-                        for rel in relationships
-                            # The field may not exists yet in the database
-                            @master[rel] = @master[rel] ? []
-                            @fields[rel] = @fields[rel] ? []
+        shouldRefresh: (event, updated_individual, updated_fields, updated_meta)=>
+            # List of relationship field to update
+            relationships = []
+            # Get relationships field to update
+            _.each updated_fields, (name)=>
+                related_meta = _.findWhere updated_meta.fields, name: name
+                # Model related to the updated field is the current one
+                if related_meta.related_model is @meta.model
+                    # Get the field of the same relationship type
+                    rel = _.findWhere @meta.fields, rel_type: related_meta.rel_type
+                    # Save its name
+                    relationships.push rel.name
+            # Does this individual have relationships fields?
+            if relationships.length
+                # Set loading state to the relationships fields
+                @updating[rel] = yes for rel in relationships
+                # Load the individual
+                @Individual.get type: @type, id: @fields.id, (individual)=>
+                    # Reload the relationships fields
+                    for rel in relationships
+                        # The field may not exists yet in the database
+                        @master[rel] = @master[rel] ? []
+                        @fields[rel] = @fields[rel] ? []
 
-                            if individual[rel]?
-                                # Update the master too in order
-                                # to avoid new reloading
-                                angular.extend @master[rel], individual[rel]
-                                angular.extend @fields[rel], individual[rel]
-                            # Field no more loading
-                            delete @updating[rel]
+                        if individual[rel]?
+                            # Update the master too in order
+                            # to avoid new reloading
+                            @master[rel] = individual[rel]
+                            @fields[rel] = individual[rel]
+                        # Field no more loading
+                        delete @updating[rel]
 
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
@@ -276,7 +282,7 @@ class window.ContributeCtrl
                     # Prevent communications between forms
                     @updating = angular.copy @updating
                     # Propagation
-                    @scope.$broadcast "individual:updated", @fields
+                    @scope.$broadcast "individual:updated", @fields, _.keys(data), @meta
                 , (error)=>
                     if error.status == 404
                         @isClosed   = true

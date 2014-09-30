@@ -1149,7 +1149,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpOK(resp)
         updated_topic = Topic.objects.get(slug='test-topic')
         models_list = updated_topic.get_models()
-        self.assertTrue(len(models_list) > 0)
+        self.assertTrue(len(list(models_list)) > 0)
 
     def test_topic_patch_empty_background(self):
         # Use Case: we want to patch a topic with an empty background to remove

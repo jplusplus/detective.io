@@ -2,6 +2,7 @@ from jsonschema import FormatChecker
 from jsonschema.exceptions import ValidationError
 import copy
 
+
 def is_modelname(ontology):
 	names = [ model["name"] for model in ontology ]
 	def ontology_has_name(name):
@@ -26,14 +27,21 @@ field = {
 		"type": {
 			"type": "string",
 			"enum": [
-				"boolean",
-				"datetime",
 				"float",
-				"integer",
 				"relationship",
 				"string",
+				"char",
 				"url",
-				"date"
+				"int",
+				"integer",
+				"intarray",
+				"integerarray",
+				"datetimestamp",
+				"datetime",
+				"date",
+				"time",
+				"boolean",
+				"bool"
 			]
 		},
 		"help_text": {

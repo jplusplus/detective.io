@@ -188,7 +188,7 @@ def process_bulk_parsing_and_save_as_model(topic, files):
     class RelationDoesntExist         (Error): pass
 
     try:
-        assert type(files) in (tuple, list)
+        assert type(files) in (tuple, list), type(files)
         assert len(files) > 0, "You need to upload at least one file."
         assert type(files[0]) in (tuple, list)
         assert len(files[0]) == 2
@@ -276,10 +276,11 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                             # FIXME: job can be accessed somewhere else (i.e detective/topics/common/jobs.py:JobResource)
                             # Concurrent access are not secure here.
                             # For now we refresh the job just before saving it.
-                            job.refresh()
-                            job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
-                            job.meta["file_reading"] = file_name
-                            job.save()
+                            if job:
+                                job.refresh()
+                                job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
+                                job.meta["file_reading"] = file_name
+                                job.save()
                         except Exception as e:
                             errors.append(
                                 WarningValidationError(
@@ -320,10 +321,11 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                         getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
                         inserted_relations += 1
                         file_reading_progression += 1
-                        job.refresh()
-                        job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
-                        job.meta["file_reading"] = file_name
-                        job.save()
+                        if job:
+                            job.refresh()
+                            job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
+                            job.meta["file_reading"] = file_name
+                            job.save()
                     except KeyError as e:
                         errors.append(
                             WarningKeyUnknown(
@@ -360,16 +362,18 @@ def process_bulk_parsing_and_save_as_model(topic, files):
         # Save everything
         saved = 0
         logger.debug("BulkUpload: saving %d objects" % (len(id_mapping)))
-        job.refresh()
-        job.meta["objects_to_save"] = len(id_mapping)
+        if job:
+            job.refresh()
+            job.meta["objects_to_save"] = len(id_mapping)
         for item in id_mapping.values():
             item.save()
             saved += 1
-            job.refresh()
-            job.meta["saving_progression"] = saved
-            job.save()
-        job.refresh()
-        if "track" in job.meta:
+            if job:
+                job.refresh()
+                job.meta["saving_progression"] = saved
+                job.save()
+        if job: job.refresh()
+        if job and "track" in job.meta:
             from django.core.mail import send_mail
             user = User.objects.get(pk=job.meta["user"])
             send_mail("upload finished", "your upload just finished", settings.DEFAULT_FROM_EMAIL, (user.email,))

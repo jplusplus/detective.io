@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, get_model_fields
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, get_model_fields, topic_cache
 from app.detective.utils                import get_model_fields as utils_get_model_fields
 from app.detective.topics.common.models import FieldSource
 from app.detective.models               import Topic
@@ -300,6 +300,8 @@ class IndividualResource(ModelResource):
         # Create an object to build the bundle
         obj = node.properties
         obj["id"] = node.id
+        # update the cache
+        topic_cache.incr_version(request.current_topic)
         # Return a new bundle
         return self.build_bundle(obj=model._neo4j_instance(node), data=obj, request=request)
 
@@ -688,7 +690,8 @@ class IndividualResource(ModelResource):
                                                                               'a': ("href", "target")
                                                                           })
                     node.set(field_name, field_value)
-
+        # update the cache
+        topic_cache.incr_version(request.current_topic)
         # And returns cleaned data
         return self.create_response(request, data)
 

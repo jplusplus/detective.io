@@ -113,17 +113,24 @@ angular.module('detective.config').config [
                 ]
             )
             .state('user.notme',
-                controller: ProfileCtrl
+                controller: UserProfileCtrl
                 templateUrl: "/partial/account.html"
-                resolve: UserCtrl.resolve
                 default: 'user'
+                resolve: UserProfileCtrl.resolve
             )
             .state('user.me',
                 auth: true
-                controller: ProfileCtrl
+                controller: UserProfileCtrl
                 templateUrl: "/partial/account.html"
-                resolve: UserCtrl.resolve
                 default: 'user'
+                resolve: UserProfileCtrl.resolve
+            )
+            .state('user.settings',
+                auth: true
+                controller: AccountSettingsCtrl
+                url: 'settings/'
+                templateUrl: '/partial/account.settings.html'
+                default: 'home'
             )
             # ------------------
             # Topic-related URLs

@@ -26,6 +26,9 @@
 				// right:10px;
 				bottom:10px;
 				margin:0;
+				.btn {
+					font-size: 12px;
+				}
 			}
 
 			a:not(.btn) {
@@ -85,7 +88,35 @@
 				}
 			}
 		}
-
+		// overriding loading style to fit list element width/height
+		li.loading {
+			&:before {
+				left: 15px;
+				right: 15px;
+				bottom: 20px;
+			}
+		}
+	}
+	// overriding pagination style
+	.pagination {
+		margin-bottom: 0;
 	}
 
+    &__profile-actions {
+		ul {
+			margin-bottom: 0;
+		}
+		&__action {
+			a {
+				.fa {
+					width: 20px;
+					text-align: center;
+				}
+				&:not(.text-danger) {
+					color: @text-color;
+				}
+				text-decoration: none;
+			}
+		}
+	}
 }

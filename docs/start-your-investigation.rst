@@ -414,3 +414,7 @@ This table provides a description of field rules.
     * - through
       - string
       - This rule specifies the model used to describe a relationship.
+
+    * - is_oembed
+      - boolean
+      - Set to "true" if this field links to content which is supposed to be directly embedded.

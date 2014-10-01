@@ -6,29 +6,48 @@
     </a>
 
     <div ng-controller="UserCtrl" class="header__user">
-		<div ng-show="user.is_logged" class="header__user__signed-in">
+        <div ng-show="user.is_logged" class="header__user__signed-in">
             <a class="header__user__signed-in__add"
                ng-show="shouldShowAddEntity()"
                title="Add data to this topic"
                href="[[topic.link]]/contribute">
                 <i class="fa fa-plus right05"></i>Add data
             </a>
-			<a href="/[[user.username]]" class="header__user__signed-in__profil" title="Your profile">
-                <i class="fa fa-user"></i>
-                <span class="sr-only">Your profile</span>
+
+            <a class="header__user__user-menu" title="Settings & Profile"
+               ng-click="toggleUserMenu()">
+                <img class="header__user__user-menu__avatar" ng-src="[[ user.profile.avatar ]]" />
+                <span class="header__user__user-menu__username">[[ user.username ]]</span>
+                <i class="header__user__user-menu__open-indicator fa fa-caret-down" ng-class="{ 'fa-caret-up': userMenuOpened }"></i>
             </a>
-			<a ng-click="logout()" class="header__user__signed-in__sign-out" title="Sign out">
-                <i class="fa fa-sign-out"></i>
-                <span class="sr-only">Sign out</span>
-            </a>
-		</div>
+
+            <ul class="header__user__user-menu__items"
+                ng-show="userMenuOpened"
+                click-outside="closeUserMenu($event)">
+                <li class="header__user__user-menu__items__item">
+                  <a ng-click="goToMyProfile()">My profile</a>
+                </li>
+
+                <li class="header__user__user-menu__items__item">
+                  <a ng-click="goToMySettings()">Settings</a>
+                </li>
+
+                <li class="header__user__user-menu__items__item--divider"></li>
+                <li class="header__user__user-menu__items__item">
+                  <a ng-click="logout()" title="Sign out">Sign out</a>
+                </li>
+            </ul>
+
+        </div>
         <div ng-hide="user.is_logged" class="header__user__sign-in">
-            <a ui-sref="login(loginParams())" title="Login">
-                <i class="fa fa-sign-in"></i>
-                <span class="sr-only">Login</span>
+            <a ui-sref="login(loginParams())" class="btn btn-default" title="Login">
+                Log in
+            </a>
+            <a ui-sref="signup(loginParams())" class="btn btn-primary" title="Sign up">
+                Sign up
             </a>
         </div>
-	</div>
+    </div>
 
     <form class="topic-search hidden-xs" role="search" ng-controller="SearchFormCtrl as search">
         <div class="btn-group ng-hide" ng-show="shouldShowTopicSearch() || false">
@@ -42,6 +61,7 @@
                        placeholder="[[search.topic.search_placeholder]]"
                        tt-typeahead
                        tt-model="search.selectedIndividual"
+                       tt-disable-entity-creation="!shouldShowAddEntity()"
                        tt-empty-results-selected="search.goToContribute()"
                        tt-individual="'summary'"
                        tt-topic="search.topic.author.username + '/' + search.topic.slug"

@@ -1,3 +1,5 @@
+
+
 html body .panel {
     color:@gray-darker;
     .border-radius(2px);
@@ -21,6 +23,40 @@ html body .panel {
         }
     }
 
+    &-centered {
+        width:500px;
+        margin-left:auto;
+        margin-right:auto;
+
+        @media(max-width: @screen-xs-max){ // for mobile
+            width: 100%;
+        }
+    }
+    .panel-shadow(@color){
+        @outside-border-color: fade(@color, 50%);
+        .box-shadow( ~"0 1px 0 @{color} inset, 0px 1px 2px @{outside-border-color}" );
+    }
+    &-danger {
+        border: 0;
+        .panel-shadow(@brand-danger);
+        .panel-heading {
+            color: white;
+            background-color: @brand-danger;
+        }
+        .panel-footer {
+            border-top: 0;
+        }
+        .btn-danger {
+            color: white;
+        }
+    }
+    &-warning {
+        border: 0;
+        .panel-shadow(@brand-warning);
+        .btn-warning {
+            color: @gray;
+        }
+    }
     &.panel-bg {
 
         &.panel-primary {

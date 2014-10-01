@@ -1227,6 +1227,50 @@ class TopicApiTestCase(ApiTestCase):
         self.assertEqual(updated_topic.title, data['title'])
         self.assertIsNotNone(updated_topic.background)
 
+    def test_topic_leave_success(self):
+        topic = Topic.objects.get(slug='test-topic')
+        topic_leave_url = '/api/detective/common/v1/topic/{pk}/leave/'.format(pk=topic.pk)
+        ontology_as_mod = topic.ontology_as_mod
+
+        contributors = topic.get_contributor_group()
+        user = self.contrib_user
+        # we first add this user to contributors
+        user.groups.add(contributors)
+        response = self.api_client.post(topic_leave_url,
+            authentication=self.get_contrib_credentials()
+        )
+        self.assertTrue(response.status_code in [200, 204])
+        permissions = user.get_all_permissions()
+        # check that permissions doesnt contains a 'test-topic' specific permission
+        self.assertTrue(
+            all( not perm.startswith(ontology_as_mod) for perm in permissions)
+        )
+
+    def test_topic_leave_forbidden(self):
+        topic = Topic.objects.get(slug='test-topic')
+        topic_leave_url = '/api/detective/common/v1/topic/{pk}/leave/'.format(
+            pk=topic.pk)
+
+        group = topic.get_contributor_group()
+        user = self.contrib_user
+        if group in user.groups.all():
+            user.groups.remove(group)
+
+        response = self.api_client.post(topic_leave_url,
+            authentication=self.get_contrib_credentials()
+        )
+        self.assertHttpForbidden(response)
+
+    def test_topic_leave_unauthorized(self):
+        client = self.api_client
+        client.client.logout()
+
+        topic = Topic.objects.get(slug='test-topic')
+        topic_leave_url = '/api/detective/common/v1/topic/{pk}/leave/'.format(
+            pk=topic.pk)
+        response = client.post(topic_leave_url)
+        self.assertTrue(response.status_code in [401, 403])
+
 class TopicSkeletonApiTestCase(ApiTestCase):
     def setUp(self):
         super(TopicSkeletonApiTestCase, self).setUp()
@@ -1350,7 +1394,6 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         resp = self.create_topic(credentials=credentials, data={'title': 'Title 5'})
         self.assertHttpUnauthorized(resp)
 
-
     def test_upload_over_1mb_image(self):
         background_url = "http://upload.wikimedia.org/wikipedia/commons/2/22/Turkish_Van_Cat.jpg"
         topic_data = {
@@ -1391,3 +1434,18 @@ class UserApiTestCase(ApiTestCase):
         }
         resp = self.signup_user(user_data)
         self.assertHttpBadRequest(resp)
+
+    def test_user_delete_account_success(self):
+        # create user
+        user = User.objects.create(
+            is_active=True, username='heyhoy', email='test@me.com')
+        user.set_password('tomboy')
+        user.save()
+        response = self.api_client.delete(
+            "/api/detective/common/v1/user/{pk}/".format(pk=user.pk),
+            authentication=self.login(username='heyhoy', password='tomboy')
+        )
+        self.assertTrue(response.status_code in [200, 204])
+        self.assertFalse(
+            User.objects.filter(username='heyhoy', email='test@me.com').exists()
+        )

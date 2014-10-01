@@ -3,6 +3,7 @@
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, get_model_fields
+from app.detective.utils                import get_model_fields as utils_get_model_fields
 from app.detective.topics.common.models import FieldSource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
@@ -28,6 +29,7 @@ from datetime                           import datetime
 import json
 import re
 import logging
+import bleach
 
 logger = logging.getLogger(__name__)
 
@@ -510,13 +512,14 @@ class IndividualResource(ModelResource):
                 # Boolean field must be validate manually
                 if field.get_internal_type() == 'BooleanField':
                     if type(data[field_name]) is not bool:
+                        raise ValidationError({field_name: 'Must be a boolean value'})
                         if not allow_missing:
                             raise ValidationError({field_name: 'Must be a boolean value'})
                         # Skip this field
                         else: continue
                     cleaned_data[field_name] = data[field_name]
                 # Only literal values have a _property attribute
-                if hasattr(field, "_property"):
+                elif hasattr(field, "_property"):
                     try:
                         try:
                             # Get a single field validator
@@ -583,6 +586,8 @@ class IndividualResource(ModelResource):
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
         # Current model
         model = self.get_model()
+        # Fields
+        fields = { x['name'] : x for x in utils_get_model_fields(model) }
         # Get the node's data using the rest API
         try: node = connection.nodes.get(pk)
         # Node not found
@@ -672,7 +677,17 @@ class IndividualResource(ModelResource):
                     except client.NotFoundError: pass
                 # We simply update the node property
                 # (the value is already validated)
-                else: node.set(field_name, field_value)
+                else:
+                    if field_name in fields:
+                        if 'is_rich' in fields[field_name]['rules'] and fields[field_name]['rules']['is_rich']:
+                            data[field_name] = field_value = bleach.clean(field_value,
+                                                                          tags=("br", "blockquote", "ul", "ol",
+                                                                                "li", "b", "i", "u", "a", "p"),
+                                                                          attributes={
+                                                                              '*': ("class",),
+                                                                              'a': ("href", "target")
+                                                                          })
+                    node.set(field_name, field_value)
 
         # And returns cleaned data
         return self.create_response(request, data)

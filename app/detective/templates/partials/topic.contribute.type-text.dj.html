@@ -1,9 +1,29 @@
 <span ng-switch on="isRich(field)">
 	<span ng-switch-when="true">
-		<div text-angular
-			 ng-model="individual.fields[field.name]"
-			 change-on-blur
-			 id="id_[[field.name]]"></div>
+		<div class="individual__form__row__input__rich-text"
+			 ng-class="{'individual__form__row__input__rich-text--html-mode': htmlMode }">
+
+			<div class="individual__form__row__input__rich-text__toggler">
+				<button class="btn btn-default"
+				        ng-class="{active: htmlMode}"
+				        ng-click="toggleHtmlMode()">
+					<i class="fa fa-code"></i> Toggle HTML
+				</button>
+			</div>
+
+			<div text-angular
+				 ng-if="!htmlMode"
+				 ng-model="individual.fields[field.name]"
+				 change-on-blur
+				 id="id_[[field.name]]"></div>
+
+			<textarea class="form-control"
+				      ng-if="htmlMode"
+					  change-on-blur
+					  rows="5"
+				 	  msd-elastic
+					  ng-model="individual.fields[field.name]"></textarea>
+		</div>
 	</span>
 
 	<span ng-switch-default>
@@ -21,6 +41,7 @@
 			<textarea rows="5"
 			          id="id_[[field.name]]"
 					  change-on-blur
+					  msd-elastic
 			          ng-model="individual.fields[field.name]"
 			          class="form-control"></textarea>
 		</div>

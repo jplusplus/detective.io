@@ -93,7 +93,7 @@ class JobsTestCase(ResourceTestCase):
         Pill     = models.Pill
         Molecule = models.Molecule
         self.assertEquals(len(response.get("errors"))            , 0)
-        self.assertEquals(response.get("inserted").get("objects"), sum( (len(file[1])-1 for file in files if file[0] in ["pillen.csv", "molecules.csv"])))
+        self.assertEquals(response.get("inserted").get("objects"), sum( (len(file[1])-1 for file in files if file[0] in ["pillen.csv", "molecules.csv", "molecules_contained.csv"])))
         self.assertEquals(response.get("inserted").get("links")  , sum( (len(file[1])-1 for file in files if file[0] in ["composition.csv"])))
         self.assertEquals(Pill.objects.all().count()             , next((len(file[1])-1 for file in files if file[0] == "pillen.csv")))
         self.assertEquals(Molecule.objects.all().count()         , next((len(file[1])-1 for file in files if file[0] == "molecules.csv")))

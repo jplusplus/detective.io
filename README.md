@@ -5,7 +5,7 @@
 [License](https://github.com/jplusplus/detective.io/blob/master/LICENSE) •
 [Test coverage](https://coveralls.io/r/jplusplus/detective.io) •
 [Documentation](http://docs.detective.io/en/latest/) •
-*Version 1.8.0 Alligator*
+*Version 1.9.0 Baboon*
 
 ## Installation
 

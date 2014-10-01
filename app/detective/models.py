@@ -450,7 +450,7 @@ class TopicDataSet(models.Model):
     picture = models.ImageField(upload_to="topics-dataset/pictures", null=True, blank=True, help_text='Picture for this dataset')
     target_plans = models.CharField(max_length=60)
     target_skeletons = models.ManyToManyField(TopicSkeleton, related_name="datasets")
-    zip_file = models.FileField(upload_to="topics-dataset/zips", help_text='The actual dataset')
+    zip_file = models.FileField(upload_to="topics-dataset/zips", help_text='The actual dataset', null=True, blank=True)
 
     def description_stripped(self):
         return strip_tags(self.description)

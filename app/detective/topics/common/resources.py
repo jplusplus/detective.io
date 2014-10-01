@@ -3,7 +3,7 @@ from .models                          import *
 from app.detective.exceptions         import UnavailableImage, NotAnImage, OversizedFile
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
-                                             Subscription
+                                             Subscription, TopicDataSet
 from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
 from app.detective.topics.common.user import UserResource
 from django.conf                      import settings
@@ -479,6 +479,25 @@ class TopicSkeletonResource(ModelResource):
             bundle.data['thumbnail'] = None
 
         return bundle
+
+class TopicSkeletonNestedResource(ModelResource):
+    class Meta:
+        authorization = TopicSkeletonAuthorization()
+        queryset = TopicSkeleton.objects.all()
+        filtering = { 'id' : ALL }
+        fields = ("id",)
+
+class TopicDataSetResource(ModelResource):
+    skeletons = fields.ToManyField(TopicSkeletonNestedResource, 'target_skeletons', full=True)
+    plans = fields.ListField(attribute='selected_plans')
+
+    class Meta:
+        authorization = TopicSkeletonAuthorization()
+        queryset = TopicDataSet.objects.all()
+        excludes = ["zip_file", "target_skeletons", "target_plans"]
+        filtering = {
+            'skeletons' : ALL_WITH_RELATIONS
+        }
 
 class ArticleResource(ModelResource):
     topic = fields.ToOneField(TopicResource, 'topic', full=True)

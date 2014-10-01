@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.cache import get_cache
 from django.utils.cache import get_cache_key
+import re
 
 class FetchFromCacheMiddleware(object):
     """
@@ -34,6 +35,12 @@ class FetchFromCacheMiddleware(object):
         if not request.method in ('GET', 'HEAD') or not self._should_update_cache(request):
             request._cache_update_cache = False
             return None # Don't bother checking the cache.
+
+        for regex in getattr(settings, 'CACHE_BYPASS_URLS', []):
+            request_url = request.get_full_path()
+            if re.match(regex, request_url):
+                request._cache_update_cache = False
+                return None
 
         # try and get the cached GET response
         cache_key = get_cache_key(request, self.key_prefix, 'GET', cache=self.cache)

@@ -1030,54 +1030,27 @@ class TopicApiTestCase(ApiTestCase):
 
     def test_export_csv(self):
         from django_rq import get_worker
-        export_resp1 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
-        self.assertValidJSONResponse(export_resp1)
-        export_resp1 = json.loads(export_resp1.content)
-        self.assertEqual(export_resp1["status"], "enqueued", export_resp1)
-        export_resp2 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
-        export_resp2 = json.loads(export_resp2.content)
-        # we have the same token
-        self.assertEqual(export_resp1["token"], export_resp2["token"], export_resp2)
-        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/" % (export_resp2["token"]))
-        self.assertValidJSONResponse(job_resp)
-        job_resp     = json.loads(job_resp.content)
-        # processes all jobs then stop
-        get_worker("default", "high").work(burst=True)
-        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=1" % (export_resp2["token"]))
-        job_resp     = json.loads(job_resp.content)
-        self.assertEqual(job_resp["status"], "finished", job_resp)
-        result1      = json.loads(job_resp["result"])
-        self.assertIsNotNone(result1["file_name"], job_resp)
-        self.assertNotEqual(result1["file_name"], "")
-        # ask again to check if it's the same file (thanks to the cache)
-        export_resp1 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
-        export_resp1 = json.loads(export_resp1.content)
-        get_worker("default", "high").work(burst=True)
-        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=1" % (export_resp1["token"]))
-        job_resp     = json.loads(job_resp.content)
-        result2      = json.loads(job_resp["result"])
-        self.assertEqual(result1["file_name"], result2["file_name"])
-        # update an item and check if the file name change
-        data = {
-            'website_url': 'http://jpioupiou.org',
-        }
-        args = {
-            'scope'      : 'detective/energy',
-            'model_id'   : self.jpp.id,
-            'model_name' : 'organization',
-            'patch_data' : data
-        }
-        self.patch_individual(**args)
-        export_resp3 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
-        export_resp3 = json.loads(export_resp3.content)
-        self.assertNotEqual(export_resp1["token"], export_resp3["token"])
-        get_worker("default", "high").work(burst=True)
-        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=2" % (export_resp3["token"]))
-        job_resp     = json.loads(job_resp.content)
-        result3      = json.loads(job_resp["result"])
-        self.assertIsNotNone(result3["file_name"], job_resp)
-        self.assertNotEqual(result3["file_name"], "")
-        self.assertNotEqual(result1["file_name"], result3["file_name"])
+
+        def ask_for_an_export():
+            export_resp = json.loads(self.api_client.get('/api/detective/test-pillen/v1/summary/export/', format='json').content)
+            self.assertEqual    ( export_resp["status"], "enqueued", export_resp)
+            self.assertIsNotNone( export_resp["token"]             , export_resp)
+            get_worker("default", "high").work(burst=True)
+            # ask the job
+            job_response = json.loads(self.api_client.get("/api/detective/common/v1/jobs/%s/" % (export_resp["token"])).content)
+            job_result   = json.loads(job_response["result"])
+            self.assertIsNotNone(job_result["file_name"], job_result)
+            return job_result["file_name"], export_resp["token"]
+
+        topic    = Topic.objects.get(slug='test-pillen')
+        models   = topic.get_models_module()
+        # get models
+        Pill                                     = models.Pill
+        file_name1, token1 = ask_for_an_export()
+        Pill.objects.create(name="new pill")
+        file_name2, token2 = ask_for_an_export()
+        self.assertNotEqual(file_name1, file_name2)
+        self.assertNotEqual(token1, token2)
 
     def test_topic_entities_count(self):
         topic = Topic.objects.get(slug='test-pillen')

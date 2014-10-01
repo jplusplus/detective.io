@@ -441,6 +441,30 @@ class TopicSkeleton(models.Model):
                 selected_plans.append(plan[0])
         return selected_plans
 
+    def __str__(self):
+        return self.title
+
+class TopicDataSet(models.Model):
+    title = models.CharField(max_length=250, help_text="Title of the dataset")
+    description = HTMLField(null=True, blank=True, help_text="A small description of the dataset")
+    picture = models.ImageField(upload_to="topics-dataset/pictures", null=True, blank=True, help_text='Picture for this dataset')
+    target_plans = models.CharField(max_length=60)
+    target_skeletons = models.ManyToManyField(TopicSkeleton)
+    zip_file = models.FileField(upload_to="topics-dataset/zips", help_text='The actual dataset')
+
+    def description_stripped(self):
+        return strip_tags(self.description)
+
+    def selected_skeletons(self):
+        return self.target_skeletons.join(', ')
+
+    def selected_plans(self):
+        selected_plans = []
+        for plan in PLANS_CHOICES:
+            if plan[0] in self.target_plans:
+                selected_plans.append(plan[0])
+        return selected_plans
+
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
     title      = models.CharField(max_length=250, help_text="Title of your article.")

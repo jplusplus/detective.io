@@ -192,7 +192,13 @@ class TopicDataSetForm(forms.ModelForm):
 
 class TopicDataSetAdmin(admin.ModelAdmin):
     form = TopicDataSetForm
-    list_display = ("title", "description_stripped", "target_plans", "selected_skeletons")
+    list_display = ("title", "description_stripped", "_plans", "_skeletons")
+
+    def _skeletons(self, instance):
+        return ', '.join(instance.selected_skeletons())
+
+    def _plans(self, instance):
+        return ', '.join(instance.selected_plans())
 
 admin.site.register(TopicDataSet, TopicDataSetAdmin)
 

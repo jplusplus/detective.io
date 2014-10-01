@@ -456,7 +456,7 @@ class TopicDataSet(models.Model):
         return strip_tags(self.description)
 
     def selected_skeletons(self):
-        return self.target_skeletons.join(', ')
+        return [x.__str__() for x in self.target_skeletons.all()]
 
     def selected_plans(self):
         selected_plans = []

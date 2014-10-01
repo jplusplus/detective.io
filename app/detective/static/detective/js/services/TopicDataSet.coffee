@@ -7,13 +7,17 @@ angular.module('detective.service').factory("TopicDataSet", [
                 method : 'GET'
                 isArray: yes
                 transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
-                    data.objects
+                    _.map data.objects, (e) ->
+                        e.skeletons = _.pluck e.skeletons, 'id'
+                        e
                 ])
             cachedGet:
                 method : 'GET'
                 isArray: yes
                 transformResponse: $http.defaults.transformResponse.concat([(data, headersGetter) ->
-                    data.objects
+                    _.map data.objects, (e) ->
+                        e.skeletons = _.pluck e.skeletons, 'id'
+                        e
                 ])
                 cache  : yes
         }

@@ -1,7 +1,9 @@
 from app.detective              import utils
 from app.detective.exceptions   import UnavailableImage
 from app.detective.permissions  import create_permissions, remove_permissions
+from app.detective.parser       import schema
 
+from django                     import forms
 from django.conf                import settings
 from django.contrib.auth.models import User, Group
 from django.core.cache          import cache
@@ -12,6 +14,8 @@ from django.utils.text          import slugify
 from django.utils.html          import strip_tags
 
 from jsonfield                  import JSONField
+from jsonschema                 import validate
+from jsonschema.exceptions      import ValidationError
 from neo4django.db              import connection
 from psycopg2.extensions        import adapt
 from tinymce.models             import HTMLField
@@ -70,6 +74,15 @@ class QuoteRequest(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.name, self.email,)
 
+def validate_ontology_as_json(value):
+    try:
+        # For retro-compatibility, we do not validate object-like ontologies
+        if type(value) is list:
+            # First, validate the ontology format
+            validate(value, schema.ontology, format_checker=schema.checker(value))
+    except ValidationError, e:
+        raise forms.ValidationError(e.message)
+
 class Topic(models.Model):
     background_upload_to='topics'
     class Meta:
@@ -89,7 +102,7 @@ class Topic(models.Model):
     contributor_group = models.ForeignKey(Group, help_text="", null=True, blank=True)
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
     ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
-    ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
+    ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True, validators=[validate_ontology_as_json])
 
     def __unicode__(self):
         return self.title

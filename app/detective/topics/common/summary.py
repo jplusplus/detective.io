@@ -11,6 +11,7 @@ from tastypie.exceptions    import ImmediateHttpResponse
 from tastypie.resources     import Resource
 from tastypie.serializers   import Serializer
 from .jobs                  import process_bulk_parsing_and_save_as_model, render_csv_zip_file
+from app.detective.parser   import schema
 import app.detective.utils  as utils
 import json
 import re
@@ -106,6 +107,9 @@ class SummaryResource(Resource):
                 return Topic.objects.get(ontology_as_mod=self._meta.urlconf_namespace)
         except Topic.DoesNotExist:
             raise Http404()
+
+    def summary_jsonschema(self, bundle, request):
+        return schema.ontology
 
     def summary_countries(self, bundle, request):
         app_label = self.topic.app_label()

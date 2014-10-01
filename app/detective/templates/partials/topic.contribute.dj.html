@@ -43,7 +43,7 @@
 	</div>
 
 	<div class="container tr top20">
-		<a class="btn btn-default btn-large" ng-click="showKickStart = true"  ng-hide="showKickStart || !individuals.length">
+		<a class="btn btn-default btn-large" ng-click="showKickStart = !showKickStart"  ng-class="{'active': showKickStart || !individuals.length}">
 			<i class="fa fa-plus right10"></i>
 			Add a new entity
 		</a>
@@ -65,8 +65,8 @@
 
 			<a scroll-to="600" ng-if="scrollIdx == $index"></a>
 
-			<div class="head panel-heading">
-				<div class="btns">
+			<div class="head panel-heading individual__heading">
+				<div class="btns individual__heading__btns">
 					<span ng-if="individual.hasSrefOptions()" >
 						<a class="left10" ng-click="seeDetails(individual)">See in detail</a>
 						<button class="btn btn-danger left10"
@@ -80,7 +80,7 @@
 						<i class="fa fa-minus"></i>
 					</button>
 				</div>
-				<h3>
+				<h3 class="individual__heading__title">
 					<div class="pull-left">
 						<div color-tag ref="individual.type" />
 					</div>
@@ -94,10 +94,12 @@
 						</a>
 					</span>
 				</h3>
-				<h4>[[individual.meta.verbose_name]]</h4>
+				<h4 class="individual__heading__type">
+					[[individual.meta.verbose_name]]
+				</h4>
 			</div>
 
-			<div class="alert alert-danger errors" ng-if="individual.error_message">
+			<div class="alert alert-danger errors individual__errors" ng-if="individual.error_message">
 				[[individual.error_message]]
 				<div ng-if="individual.error_traceback" class="pull-right">
 					<button class="btn btn-xs btn-default" ng-click="individual.show_traceback = !individual.show_traceback" href="">
@@ -134,7 +136,7 @@
 				<div class="clearfix"></div>
 			</div>
 
-			<div class="form-horizontal panel-body">
+			<div class="form-horizontal individual__form panel-body">
 
 				<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">
 					<strong>Entities with similar name already exist!</strong>
@@ -146,14 +148,14 @@
 					</span>
 				</div>
 
-				<div class="row field form-group"
+				<div class="row field form-group individual__form__row"
 					 ng-class="{loading: individual.updating[field.name] && !individual.loading, 'is-active': individual.isFieldFocused(field) }"
 				     ng-show="isAllowedType(field.type) && individual.isVisible(field) && individual.isEditable(field)"
 					 ng-repeat="field in individual.meta.fields track by $index"
 					 ng-click='focusField(individual, field)'
 					 click-outside='unfocusField()'>
 
-					<div class="col-sm-3 form-label top05">
+					<div class="col-sm-3 form-label top05 individual__form__row__label">
 						<label for="id_[[field.name]]">
 							[[field.verbose_name]]
 						</label>
@@ -162,7 +164,7 @@
 						</p>
 					</div>
 
-					<div class="col-sm-6">
+					<div class="col-sm-6 individual__form__row__input">
 						<!-- Each type has its own input -->
 						<div ng-if="field.type == 'Relationship'" ng-include="'/partial/topic.contribute.type-relationship.html'"></div>
 						<div ng-if="field.type == 'URLField'" ng-include="'/partial/topic.contribute.type-url.html'"></div>
@@ -172,7 +174,7 @@
 						<div ng-if="field.type == 'BooleanField'" ng-include="'/partial/topic.contribute.type-boolean.html'"></div>
 					</div>
 
-					<div class="add-source col-sm-3">
+					<div class="add-source col-sm-3 individual__form__row__source-btn">
 						<div class="add-source-wrapper">
 							<button class="btn btn-primary add-source-toggle"
 									ng-disabled="individual.updating_sources[field.name]"

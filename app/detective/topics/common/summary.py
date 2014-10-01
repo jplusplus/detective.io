@@ -368,7 +368,7 @@ class SummaryResource(Resource):
         leafs, edges  = get_leafs_and_edges(
             topic     = self.topic,
             depth     = depth,
-            root_node = "*")
+            root_node = "0")
         self.log_throttled_access(request)
         return self.create_response(request, {'leafs': leafs, 'edges' : edges})
 
@@ -385,9 +385,6 @@ class SummaryResource(Resource):
         # enqueue the parsing job
         queue = django_rq.get_queue('default', default_timeout=7200)
         job   = queue.enqueue(process_bulk_parsing_and_save_as_model, self.topic, files)
-        # job.meta["topic_app_label"] = self.topic.app_label()
-        # job.meta["topic_slug"]      = self.topic.slug
-        # job.save()
         # return a quick response
         self.log_throttled_access(request)
         return {

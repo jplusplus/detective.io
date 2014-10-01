@@ -15,12 +15,13 @@ from django.core.files                import File
 from django.core.files.temp           import NamedTemporaryFile
 from django.db                        import IntegrityError
 from django.db.models                 import Q
-from django.http                      import Http404, HttpResponse
+from django.http                      import Http404, HttpResponse, HttpResponseForbidden
 from django.template                  import Context
 from django.template.loader           import get_template
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from easy_thumbnails.files            import get_thumbnailer
 from tastypie                         import fields, http
+from tastypie.authentication          import SessionAuthentication, BasicAuthentication, MultiAuthentication, Authentication
 from tastypie.authorization           import ReadOnlyAuthorization, Authorization
 from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
@@ -38,6 +39,23 @@ import re
 import urllib2
 import os
 from urlparse import urlparse
+
+TopicValidationErrors = {
+    'background': {
+        'unavailable': {
+            'code': 0,
+            'message': "Passed url is unreachable or cause HTTP errors."
+        },
+        'oversized_file': {
+            'code': 1,
+            'message': "Retrieved file is oversized, please enter a new URL."
+        },
+        'not_an_image': {
+            'code': 2,
+            'message': "Retrieved file is not an image, please check your URL."
+        }
+    }
+}
 
 # Only staff can consult QuoteRequests
 class QuoteRequestAuthorization(ReadOnlyAuthorization):
@@ -60,71 +78,20 @@ class QuoteRequestResource(ModelResource):
         queryset      = QuoteRequest.objects.all()
 
 
-class TopicAuthorization(ReadOnlyAuthorization):
-    def update_detail(self, object_list, bundle):
-        user         = bundle.request.user
-        contributors = bundle.obj.get_contributor_group().name
-        is_author    = user.is_authenticated() and bundle.obj.author == user
-        # Only authenticated user can update there own topic or people from the
-        # contributor group
-        return is_author or user.groups.filter(name=contributors).exists()
-
-    # Only authenticated user can create topics
-    def create_detail(self, object_list, bundle):
-        authorize = False
-        user      = bundle.request.user
-        skeleton  = TopicSkeleton.objects.get(title=bundle.data['skeleton_title'])
-        if user.is_authenticated():
-            profile     = user.detectiveprofileuser
-            unlimited   = profile.topics_max()   < 0
-            under_limit = profile.topics_count() < profile.topics_max()
-            authorize   = unlimited or under_limit
-            authorize   = authorize and (profile.plan in skeleton.target_plans)
-
-        return authorize
-
-    def read_list(self, object_list, bundle):
-        if bundle.request.user and bundle.request.user.is_staff:
-            return object_list
-        else:
-            if bundle.request.user:
-                read_perms = [perm.split('.')[0] for perm in bundle.request.user.get_all_permissions() if perm.endswith(".contribute_read")]
-                q_filter = Q(public=True) | Q(author__id=bundle.request.user.id) | Q(ontology_as_mod__in=read_perms)
-            else:
-                q_filter = Q(public=True)
-            return object_list.filter(q_filter)
-
-    def delete_detail(self, obj_list, bundle):
-        return bundle.request.user == bundle.obj.author
-
 class TopicSkeletonAuthorization(ReadOnlyAuthorization):
     def read_list(self, object_list, bundle):
         user = bundle.request.user
         if user.is_authenticated():
             plan = user.detectiveprofileuser.plan
-            q_filter = Q(target_plans__contains=plan)
-            if plan == 'free':
-                q_filter = q_filter | Q(enable_teasing=True)
-            return object_list.filter(q_filter)
+            # no filter for superuser
+            if not user.is_superuser:
+                q_filter = Q(target_plans__contains=plan)
+                if plan == 'free':
+                    q_filter = q_filter | Q(enable_teasing=True)
+                object_list = object_list.filter(q_filter)
+            return object_list
         else:
             raise Unauthorized("Only logged user can retrieve skeletons")
-
-TopicValidationErrors = {
-    'background': {
-        'unavailable': {
-            'code': 0,
-            'message': "Passed url is unreachable or cause HTTP errors."
-        },
-        'oversized_file': {
-            'code': 1,
-            'message': "Retrieved file is oversized, please enter a new URL."
-        },
-        'not_an_image': {
-            'code': 2,
-            'message': "Retrieved file is not an image, please check your URL."
-        }
-    }
-}
 
 class TopicValidation(Validation):
 
@@ -155,7 +122,6 @@ class TopicValidation(Validation):
                     u"please chose another title"
                 ).format(title=title)
 
-
     # Ways of improvements: use FormValidation instead of Validation and
     # relies on model validation instead of this API validation.
     def is_valid(self, bundle, request=None):
@@ -163,6 +129,67 @@ class TopicValidation(Validation):
         self.is_valid_background_image(bundle, request, errors)
         self.is_valid_topic_title(bundle, request, errors)
         return errors
+
+
+class TopicAuthorization(ReadOnlyAuthorization):
+
+    def update_detail(self, object_list, bundle):
+        user         = bundle.request.user
+        contributors = bundle.obj.get_contributor_group().name
+        is_author    = user.is_authenticated() and bundle.obj.author == user
+        # Only authenticated user can update there own topic or people from the
+        # contributor group
+        return is_author or user.groups.filter(name=contributors).exists()
+
+    # Only authenticated user can create topics
+    def create_detail(self, object_list, bundle):
+        authorize = False
+        user      = bundle.request.user
+        skeleton  = TopicSkeleton.objects.get(title=bundle.data['skeleton_title'])
+        if user.is_authenticated():
+            profile     = user.detectiveprofileuser
+            unlimited   = profile.topics_max()   < 0
+            under_limit = profile.topics_count() < profile.topics_max()
+            authorize   = unlimited or under_limit
+            authorize   = authorize and (profile.plan in skeleton.target_plans)
+        return authorize
+
+    def get_read_permissions(self, user):
+        return [perm.split('.')[0] for perm in user.get_all_permissions() if perm.endswith(".contribute_read")]
+
+    def read_list(self, object_list, bundle):
+        user = bundle.request.user
+        if user.is_authenticated() and user.is_staff:
+            result_list =  object_list
+        else:
+            if user.is_authenticated():
+                read_perms = self.get_read_permissions(user)
+                q_filter = Q(public=True) | Q(author__id=user.id) | Q(ontology_as_mod__in=read_perms)
+            else:
+                q_filter = Q(public=True)
+            result_list =  object_list.filter(q_filter)
+        return result_list
+
+    def read_detail(self, object_list, bundle):
+        authorized = False
+        user = bundle.request.user
+        obj  = bundle.obj
+        if user.is_authenticated() and user.is_staff:
+            authorized = True
+        else:
+            if user.is_authenticated():
+                read_perms = self.get_read_permissions(user)
+                has_read_perms = obj.ontology_as_mod in read_perms
+                is_author  = obj.author == user
+                authorized = obj.public or has_read_perms or is_author
+            else:
+                authorized = obj.public
+
+        return authorized
+
+    def delete_detail(self, obj_list, bundle):
+        return bundle.request.user == bundle.obj.author
+
 
 class TopicResource(ModelResource):
     author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
@@ -172,6 +199,8 @@ class TopicResource(ModelResource):
     class Meta:
         always_return_data = True
         authorization      = TopicAuthorization()
+        authentication     = MultiAuthentication(Authentication(), BasicAuthentication(), SessionAuthentication())
+
         validation         = TopicValidation()
         queryset           = Topic.objects.all().prefetch_related('author')
         filtering          = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
@@ -180,6 +209,7 @@ class TopicResource(ModelResource):
         params = (self._meta.resource_name, trailing_slash())
         return [
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/invite%s$" % params, self.wrap_view('invite'), name="api_invite"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/leave%s$"  % params, self.wrap_view('leave'),  name="api_leave"),
         ]
 
     def invite(self, request, **kwargs):
@@ -255,6 +285,24 @@ class TopicResource(ModelResource):
         msg.send()
 
         return HttpResponse("Invitation sent!")
+
+    # opposite of invite: a user want to leave a topic
+    def leave(self,  request, **kwargs):
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        topic = Topic.objects.get(id=kwargs["pk"])
+        user  = request.user
+        contributors = topic.get_contributor_group()
+        potential_user = contributors.user_set.filter(pk=user.pk)
+        if potential_user.exists():
+            # remove user from contributor group
+            contributors.user_set.remove(request.user)
+            return HttpResponse(u"You successfuly left {topic} contributors.".format(
+                topic=topic.title))
+        else:
+            return HttpResponseForbidden("You are not a contributor of this topic.")
 
     def dehydrate(self, bundle):
         # Get the model's rules manager

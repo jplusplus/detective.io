@@ -4,7 +4,7 @@ angular.module('detective.config').config ['$provide', ($provide) =>
         taOptions.toolbar = [
             ['quote', 'ul', 'ol']
             ['bold', 'italics', 'underline']
-            ['insertLink', 'unlink']
+            ['insertLink']
         ]
         taOptions
     ]

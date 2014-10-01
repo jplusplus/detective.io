@@ -1,0 +1,166 @@
+<!--
+    deleteAccountFormCtrl must encapsulate changePasswordFormCtrl to hide
+    change password form pannel when account has been deleted
+-->
+<div class="account-settings container"
+     ng-controller="deleteAccountFormCtrl as accountCtrl">
+    <h1 ng-hide="accountCtrl.deleted">Settings</h1>
+
+
+    <form class="change-password-form panel panel-default top30 black"
+          name="passForm"
+          novalidate
+          ng-controller="changePasswordFormCtrl as passCtrl"
+          ng-class="{loading:passCtrl.loading}"
+          ng-submit="passCtrl.changePassword(passForm)"
+          ng-hide="accountCtrl.deleted">
+        <div class="panel-heading">
+            <h3>Change your password</h3>
+        </div>
+        <div class="panel-body">
+            <fieldset ng-disabled="loading">
+                <div class="form-group">
+                    <label for="inputCurrentPassword">Enter your current password</label>
+                    <div class="input-group">
+                        <input required type="password"class="form-control"
+                             name="current_password"
+                             check-password
+                             ng-model="passCtrl.current_password"
+                             id="inputCurrentPassword"
+                             placeholder="Your old password">
+                        <span class="input-group-addon">
+                            <i class="fa fa-check-square-o text-success" ng-show="passForm.current_password.$valid"></i>
+                            <i class="fa fa-square-o" ng-hide="passForm.current_password.$valid"></i>
+                        </span>
+                    </div>
+                    <div class="alert alert-danger"
+                         ng-show="passCtrl.submitted && passForm.current_password.$error.required">
+                      Please use this field to change your password
+                    </div>
+                    <div class="alert alert-danger"
+                         ng-show="passCtrl.submitted && passForm.current_password.$error.incorrect_password">
+                      Your password is incorrect. If you don't remember it you can <a ui-sref="reset-password">reset it</a>.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputNewPassword">Enter your new password</label>
+                    <div class="input-group">
+                        <input required
+                             type="password"
+                             class="form-control"
+                             name="new_password"
+                             ng-model="passCtrl.new_password"
+                             ng-change="passCtrl.submitted=false"
+                             ng-minlength="6"
+                             id="inputNewPassword"
+                             placeholder="Your new password">
+                        <span class="input-group-addon">
+                            <i class="fa fa-check-square-o text-success" ng-show="passForm.new_password.$valid"></i>
+                            <i class="fa fa-square-o" ng-hide="passForm.new_password.$valid"></i>
+                        </span>
+                    </div>
+                    <p class="text-muted top05">
+                      At least 6 characters.
+                    </p>
+                    <div class="alert alert-danger" ng-show="passCtrl.submitted && passForm.new_password.$error.required">
+                      Please use this field to change your password
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputNewPassword2">Repeat your new password</label>
+                    <div class="input-group">
+                        <input required
+                             type="password"
+                             class="form-control"
+                             name="new_password2"
+                             ng-model="passCtrl.new_password2"
+                             ng-change="passCtrl.submitted=false"
+                             match with="passCtrl.new_password"
+                             id="inputNewPassword2"
+                             placeholder="Your new password">
+                        <span class="input-group-addon">
+                            <i class="fa fa-check-square-o text-success" ng-show="passForm.new_password2.$valid"></i>
+                            <i class="fa fa-square-o" ng-hide="passForm.new_password2.$valid"></i>
+                        </span>
+                    </div>
+                    <div class="alert alert-danger top10" ng-show="submitted && passForm.new_password2.$error.required">
+                      Please fill this field to change your password
+                    </div>
+                    <div class="alert alert-danger top10" ng-show="submitted && passForm.new_password2.$error.match">
+                      The passwords you entered don't match
+                    </div>
+                </div>
+
+                <div class="alert alert-danger" ng-if="error">
+                    [[passCtrl.error]]
+                </div>
+                <div class="alert alert-success"
+                   ng-show="passCtrl.showPasswordChanged">
+                    <p>You password has successfully been changed.</p>
+                </div>
+            </fieldset>
+            <button type="submit" class="btn btn-default pull-right">Change my password</button>
+            <div class="clearfix"></div>
+        </div>
+    </form>
+
+    <!-- Delete account form -->
+    <form class="panel panel-danger top30 black"
+          name="accountForm"
+          novalidate
+          ng-class="{loading:accountCtrl.loading}"
+          ng-hide="accountCtrl.deleted"
+          ng-submit="accountCtrl.submit(accountForm)">
+        <div class="panel-heading">
+            <h3>Delete account</h3>
+        </div>
+        <div class="panel-body">
+            <p>
+                When you delete your account, all investigations you created
+                will be destroyed. The data you contributed to other investigations
+                will remain.<br/>
+                Be careful, <strong>there is no way back</strong> when you delete
+                your account!
+            </p>
+            <fieldset ng-disabled="loading">
+                <div class="form-group">
+                    <label for="delete_check_password">
+                        Type your password to confirm
+                    </label>
+                    <div class="input-group">
+                        <input type="password"
+                               check-password
+                               class="form-control"
+                               name="check_password"
+                               id="delete_check_password"
+                               ng-model="accountCtrl.check_password"
+                               ng-change="accountCtrl.submitted=false"
+                               required>
+                            <span class="input-group-addon">
+                                <i class="fa fa-check-square-o text-success" ng-show="accountForm.check_password.$valid"></i>
+                                <i class="fa fa-square-o" ng-hide="accountForm.check_password.$valid"></i>
+                            </span>
+                    </div>
+                    <div class="alert alert-danger top10"
+                         ng-show="accountCtrl.shouldShowIncorrectPassword(accountForm.check_password)">
+                        Your password is incorrect
+                    </div>
+                    <div class="alert alert-danger top10"
+                         ng-show="accountCtrl.shouldShowRequiredPassword(accountForm.check_password)">
+                        You have to enter your password in order to delete your account
+                    </div>
+                </div>
+            </fieldset>
+            <button class="btn btn-danger pull-right" type="submit">
+                Delete my account
+            </button>
+            <div class="clearfix"></div>
+        </div>
+    </form>
+    <div ng-show="accountCtrl.deleted" class="panel panel-centered panel-success top30">
+        <div class="panel-heading">
+            Your account has been successfully deleted
+        </div>
+    </div>
+</div>

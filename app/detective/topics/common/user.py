@@ -54,7 +54,7 @@ class UserAuthorization(ReadOnlyAuthorization):
     def delete_detail(self, object_list, bundle):
         authorized = False
         if bundle.request:
-            authorized = ((bundle.obj.user == bundle.request.user) or bundle.request.user.is_staff)
+            authorized = ((bundle.obj == bundle.request.user) or bundle.request.user.is_staff)
         return authorized
 
 class ProfileResource(ModelResource):
@@ -80,7 +80,7 @@ class UserResource(ModelResource):
     class Meta:
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
-        allowed_methods    = ['get', 'post']
+        allowed_methods    = ['get', 'post', 'delete']
         always_return_data = True
         fields             = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password', 'profile']
         filtering          = {'id': ALL, 'username': ALL, 'email': ALL}
@@ -97,6 +97,7 @@ class UserResource(ModelResource):
             url(r'^(?P<resource_name>%s)/me%s$'                       % params, self.wrap_view('me'),                     name='api_user_me'),
             url(r'^(?P<resource_name>%s)/signup%s$'                   % params, self.wrap_view('signup'),                 name='api_signup'),
             url(r'^(?P<resource_name>%s)/activate%s$'                 % params, self.wrap_view('activate'),               name='api_activate'),
+            url(r'^(?P<resource_name>%s)/change_password%s$'          % params, self.wrap_view('change_password'),        name='api_change_password'),
             url(r'^(?P<resource_name>%s)/reset_password%s$'           % params, self.wrap_view('reset_password'),         name='api_reset_password'),
             url(r'^(?P<resource_name>%s)/reset_password_confirm%s$'   % params, self.wrap_view('reset_password_confirm'), name='api_reset_password_confirm'),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/groups%s$" % params, self.wrap_view('get_groups'),             name="api_get_groups"),
@@ -148,6 +149,7 @@ class UserResource(ModelResource):
             return self.create_response(request, {
                 'success': False,
                 'error_message': 'Incorrect password or username.',
+                'error_code': 'incorrect_password_or_email'
             })
 
     def dehydrate(self, bundle):
@@ -324,6 +326,24 @@ class UserResource(ModelResource):
             return self.create_response(request, { 'success': True })
         except signing.BadSignature:
             return http.HttpForbidden('Wrong signature, your token may had expired (valid for 48 hours).')
+        except MalformedRequestError as e:
+            return http.HttpBadRequest(e)
+
+    def change_password(self, request, **kwargs):
+        self.method_check(request, ['post'])
+        self.is_authenticated(request)
+        data  = self.deserialize(
+                    request,
+                    request.body,
+                    format=request.META.get('CONTENT_TYPE', 'application/json')
+                )
+        try:
+            self.validate_request(data, ['new_password'])
+            new_password = data['new_password']
+            user         = request.user
+            user.set_password(new_password)
+            user.save()
+            return self.create_response(request, {'success': True})
         except MalformedRequestError as e:
             return http.HttpBadRequest(e)
 

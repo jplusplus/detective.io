@@ -7,7 +7,7 @@
     padding:0;
     height:@header-height;
     background:@header-bg;
-    border-bottom:1px solid #DDD;
+    border-bottom:1px solid @header-border-color;
     color:contract(@header-bg);
 
     .box-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));
@@ -46,7 +46,6 @@
         text-align: center;
         line-height: @header-height;
         color:black;
-        border-left:#DDD solid 1px;
 
         a {
             color:inherit;
@@ -58,16 +57,10 @@
         }
 
         &__sign-in {
-            width: @header-height;
+            padding-right: 5px;
         }
 
         &__signed-in {
-
-            &__profil, &__sign-out {
-                display: inline-block;
-                width: @header-height;
-                height: @header-height;
-            }
 
             &__add {
                 display: inline-block;
@@ -82,6 +75,65 @@
 
             &__profil, &__sign-out {
                 border-left:#DDD solid 1px;
+            }
+        }
+        &__user-menu {
+            border-left:#DDD solid 1px;
+            display: inline-block;
+
+            padding-left: 10px;
+            padding-right: 10px;
+            height: @header-height;
+
+            &__avatar {
+                .border-radius(50%);
+                height: @header-height - 10px;
+                width:  @header-height - 10px;
+                background: #ddd;
+                margin-right: 5px;
+                margin-bottom: 5px;
+            }
+            i.fa {
+                font-size: 12px;
+            }
+
+            &__username {
+                font-weight: bold;
+            }
+            &__open-indicator {
+                font-size: inherit;
+            }
+
+            &__items {
+                @items-width: 150px;
+                @item-height: 35px;
+                position: absolute;
+                width: @items-width;
+                right: 0px;
+                background: @header-bg;
+                text-align: left;
+                .list-unstyled();
+                .box-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));
+                border: 1px solid @header-border-color;
+                border-top:0;
+
+                &__item {
+                    height: @item-height;
+                    line-height:  @item-height;
+                    padding-left: 15px;
+
+                    &:hover {
+                        background:@brand-primary;
+                        a {
+                            color: contrast(@brand-primary);
+                        }
+                    }
+
+                    &--divider {
+                        border-top: 1px solid @header-border-color;
+                    }
+                }
+
             }
         }
     }

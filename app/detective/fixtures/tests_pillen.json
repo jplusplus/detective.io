@@ -4,7 +4,7 @@
     "pk": 4,
     "fields": {
         "description": "Test Pillen.",
-        "title": "Test me",
+        "title": "Test pillen",
         "slug": "test-pillen",
         "ontology_as_json": "[ {\"fields\":[ {\"verbose_name\":\"Name\",\"name\":\"name\",\"type\":\"string\"}, {\"verbose_name\":\"Logo\",\"name\":\"logo\",\"type\":\"string\"}, {\"verbose_name\":\"Picture front\",\"name\":\"image\",\"type\":\"url\"}, {\"verbose_name\":\"Picture back\",\"name\":\"image_back\",\"type\":\"url\"}, {\"verbose_name\":\"Break notch\",\"help_text\":\"DE:Bruchrille\",\"name\":\"break_notch\",\"type\":\"boolean\"}, {\"verbose_name\":\"Color\",\"help_text\":\"DE:Farbe\",\"name\":\"color\",\"type\":\"string\"}, {\"verbose_name\":\"Weight (in milligrams)\",\"help_text\":\"DE:Gewicht. Note: please use dots to separate decimals\",\"name\":\"weight\",\"type\":\"string\"}, {\"verbose_name\":\"Diameter (in millimeters)\",\"help_text\":\"DE:Durchmesser. Note: please use dots to separate decimals\",\"name\":\"diameter\",\"type\":\"string\"}, {\"verbose_name\":\"Thickness (in millimeters)\",\"help_text\":\"DE:Dicke. Note: please use dots to separate decimals\",\"name\":\"thickness\",\"type\":\"string\"}, {\"verbose_name\":\"Place\",\"help_text\":\"DE:Ort\",\"name\":\"place\",\"type\":\"string\"}, {\"verbose_name\":\"Date\",\"help_text\":\"DE:Datum\",\"name\":\"date\",\"type\":\"date\"}, {\"verbose_name\":\"More infos\",\"help_text\":\"DE:Mehr infos. Please, insert a valid URL.\",\"name\":\"more_infos\",\"type\":\"url\"}, {\"verbose_name\":\"Molecules contained\",\"related_name\":\"pills_that_contain_this_molecule\",\"fields\":[ {\"type\":\"string\",\"help_text\":\"Note: please use dots to separate decimals\",\"name\":\"quantity (in milligrams).\" }],\"help_text\":\"All molecules this pills contains\",\"name\":\"molecules_contained\",\"type\":\"relationship\",\"related_model\":\"molecule\" }],\"verbose_name\":\"Pill\",\"name\":\"pill\",\"verbose_name_plural\":\"Pills\"}, {\"fields\":[ {\"verbose_name\":\"Name\",\"name\":\"name\",\"type\":\"string\"}, {\"verbose_name\":\"Toxicity threshold\",\"help_text\":\"Max threshold for one pill. If the threshold is exceeded, a warning can be display.\",\"name\":\"toxicity_threshold\",\"type\":\"string\"}, {\"verbose_name\":\"Description\",\"name\":\"description\",\"type\":\"string\",\"rules\":{\"is_rich\":true } }],\"verbose_name\":\"Molecule\",\"help_text\":\"DE:Molek\u00fcl\",\"name\":\"molecule\",\"verbose_name_plural\":\"Molecules\"}]",
         "ontology_as_owl": null,
@@ -17,5 +17,3 @@
     }
 }
 ]
-
-

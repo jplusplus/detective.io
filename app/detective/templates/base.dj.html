@@ -19,6 +19,7 @@
         {% endfor %}
 
         <meta name="viewport" content="width=device-width">
+
         <link rel="icon" type="image/png" href="{% static 'detective/img/favicon.ico' %}">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <link href='https://fonts.googleapis.com/css?family=Noto+Sans:400,700|Fira+Sans:300,500,700&amp;subset=latin,latin-ext' rel='stylesheet' type='text/css'>
@@ -66,12 +67,13 @@
             <script type="text/javascript" src="{% static 'components/FileSaver/FileSaver.js' %}"></script>
             <script type="text/javascript" src="{% static 'components/ng-file-upload/angular-file-upload.min.js' %}"></script>
             <script type="text/javascript" src="{% static 'components/ngprogress-lite/ngprogress-lite.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'components/textAngular/textAngular.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'components/textAngular/dist/textAngular.min.js' %}"></script>
             <script type="text/javascript" src="{% static 'components/rangy/rangy-core.js' %}"></script>
             <script type="text/javascript" src="{% static 'components/gsap/src/minified/TweenMax.min.js' %}"></script>
             <script type="text/javascript" src="{% static 'components/ScrollMagic/js/jquery.scrollmagic.min.js' %}"></script>
             <script type="text/javascript" src="{% static 'components/angulartics/dist/angulartics.min.js' %}"></script>
             <script type="text/javascript" src="{% static 'components/angulartics/dist/angulartics-ga.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'components/ng-embedly/ng-embedly.js' %}"></script>
         {% endcompress %}
     </head>
     <body ng-cloak  ng-class="{ 'is-home': $state.is('home.tour'), 'show-aside': Page.showAside  }">

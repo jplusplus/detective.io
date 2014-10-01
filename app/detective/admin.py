@@ -98,6 +98,7 @@ class TopicAdmin(admin.ModelAdmin):
     list_display        = ("title", "link", "public","app_label")
     list_filter         = ("public","featured","author")
     readonly_fields     = ('entities_count',)
+    actions             = ['duplicate']
     suit_form_tabs      = (
         ('general', 'General'),
         ('advanced', 'Advanced Settings'),
@@ -137,9 +138,32 @@ class TopicAdmin(admin.ModelAdmin):
             self.inlines = []
         return super(TopicAdmin, self).get_form(request, obj, **kwargs)
 
+    def duplicate(self, request, queryset):
+        import re
+        for topic in queryset:
+            exist    = True
+            new_slug  = topic.slug
+            new_title = topic.title
+            while exist:
+                match = re.search("-new-(\d+)$", new_slug)
+                if match:
+                    old_id     = match.group(1)
+                    new_slug   = new_slug.rstrip(old_id)
+                    new_slug  += unicode(int(old_id) + 1)
+                    new_title  = new_title.rstrip(old_id)
+                    new_title += unicode(int(old_id) + 1)
+                else:
+                    new_slug  += "-new-1"
+                    new_title += " 1"
+                exist = Topic.objects.filter(slug=new_slug).exists()
+            topic.pk              = None
+            topic.title           = new_title
+            topic.slug            = new_slug
+            topic.ontology_as_mod = None
+            topic.save()
+    duplicate.short_description = "Duplicate the topic without nodes"
 
 admin.site.register(Topic, TopicAdmin)
-
 
 class TopicSkeletonForm(forms.ModelForm):
     target_plans = forms.MultipleChoiceField(choices=PLANS_CHOICES)

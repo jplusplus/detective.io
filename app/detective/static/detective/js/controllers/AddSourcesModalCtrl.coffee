@@ -3,6 +3,7 @@ class window.AddSourcesModalCtrl
     @$inject: ['$scope', '$q', '$filter', '$modalInstance', 'Individual', 'UtilsFactory', "fields", "field", "meta"]
     constructor: (@scope, @q, @filter, @modalInstance, @Individual, @UtilsFactory,  @fields, @field, @meta)->
         @fields = angular.copy @fields
+        @fields.field_sources = [] if not @fields.field_sources?
         @updateMasterSources()
         # Scope variables
         @scope.loading    = no
@@ -25,7 +26,7 @@ class window.AddSourcesModalCtrl
         # Description of the relationship (source, target, through model)
         @scope.fields = @fields
 
-    close: (result=@fields)=>
+    close: (result=@fields.field_sources)=>
         @modalInstance.close(result)
 
     save: (form, close=no)=>

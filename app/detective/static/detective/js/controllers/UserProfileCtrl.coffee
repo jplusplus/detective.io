@@ -1,17 +1,32 @@
-class window.ProfileCtrl
+# shared function between UserProfileCtrl & its resolve
+getTopics = (groups)-> _.pluck groups.objects, 'topic'
+
+loadGroups = ($http, user, page)->
+    ($http.get "/api/detective/common/v1/user/#{user.id}/groups/?page=#{page}").then (response)->
+        response.data
+
+class window.UserProfileCtrl
+
+    @resolve:
+        user: UserCtrl.resolve.user
+
+        userGroups: ['$http', '$q', 'user', ($http, $q, user)->
+            deferred = $q.defer()
+            loadGroups($http, user, 1).then (results)->
+                deferred.resolve results
+            deferred.promise
+        ]
+
+        topics: [ 'userGroups', (userGroups)->
+            getTopics userGroups
+        ]
+
     # Injects dependencies
-    @$inject: ['$scope', 'Common', 'Page', 'user', '$state', '$q', '$http']
+    @$inject: ['$scope', 'Common', 'Page', '$state', '$q', '$http', 'user', 'userGroups', 'topics']
 
-    constructor: (@scope, @Common, @Page, @user, $state, @q, @http)->
+    constructor: (@scope, @Common, @Page, $state, @q, @http, @user, @userGroups, topics)->
         @Page.title @user.username, no
-        @Page.loading yes
-
         @topics_page = 1
-        @userGroups =
-            objects : []
-            meta :
-                limit : 0
-                total_count : 0
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
@@ -19,7 +34,6 @@ class window.ProfileCtrl
         # Is this our profile page?
         @scope.isMe = $state.is 'user.me'
         #
-        @scope.shouldShowTopics = true
         # User info
         @scope.user =
             name : "#{@user.first_name} #{@user.last_name}"
@@ -28,12 +42,10 @@ class window.ProfileCtrl
             location : @user.profile.location
             organization : @user.profile.organization
             url : @user.profile.url
-        # All topics the user has access to
-        @scope.topics = do @getTopics
 
-        (do @loadPage).then (topics) =>
-            @scope.topics = topics
-            @Page.loading no
+        # All topics the user has access to
+        @scope.topics = topics
+        @scope.shouldShowTopics = true
 
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
@@ -52,10 +64,6 @@ class window.ProfileCtrl
             organization : no
             url : no
 
-    # Concatenates @userTopics's objects with @userGroups's topics
-    getTopics: =>
-        _.pluck @userGroups.objects, 'topic'
-
     hasNextGroups: (p=@topics_page)=> @userGroups.meta.total_count > (@userGroups.meta.limit * p)
     hasNext: (p=@topics_page)=> @hasNextGroups(p)
     hasPrevious: (p=@topics_page)=> p > 1
@@ -66,13 +74,15 @@ class window.ProfileCtrl
     previousPage: => @loadPage(@topics_page-1).then (topics)=> @scope.topics = topics
 
     loadPage: (page=@topics_page) =>
+        @scope.loading = true
         @topics_page = page
         deferred = do @q.defer
         (@q.all [
-            @loadUserGroups(page)
+            loadGroups(@http, @user, page)
         ]).then (results) =>
             @userGroups = results[0]
-            deferred.resolve do @getTopics
+            @scope.loading = false
+            deferred.resolve(getTopics(@userGroups))
         deferred.promise
 
     loadUserTopics: (page) =>
@@ -81,10 +91,6 @@ class window.ProfileCtrl
             author__id: @user.id
             offset: (page-1)*20
         (@Common.get params).$promise
-
-    loadUserGroups: (page) =>
-        (@http.get "/api/detective/common/v1/user/#{@user.id}/groups/?page=#{page}").then (response) ->
-            response.data
 
     canShowTopic: (topic) =>
         topic.public or @User.hasReadPermission topic.ontology_as_mod
@@ -109,4 +115,4 @@ class window.ProfileCtrl
             url : "/api/detective/common/v1/profile/#{@user.profile.id}/"
             data : data
 
-angular.module('detective.controller').controller 'profileCtrl', ProfileCtrl
+angular.module('detective.controller').controller 'userProfileCtrl', UserProfileCtrl

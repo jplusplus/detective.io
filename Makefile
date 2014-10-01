@@ -22,7 +22,7 @@ endif
 
 all: install startdb run
 
-run: clean
+run: clean startdb
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py rqworker high default low &
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading 0.0.0.0:$(PORT)
 
@@ -109,9 +109,7 @@ test:
 	make startdb
 	./manage.py syncdb -v 0 --noinput  --traceback --pythonpath=. --settings=app.settings_tests
 	# Launch test with coverage
-	-python -W ignore::DeprecationWarning $(COVERAGE) run --source=app.detective ./manage.py test $(TEST) --pythonpath=. --settings=app.settings_tests --traceback
-	# Send report to coveralls
-	coveralls
+	-python -W ignore::DeprecationWarning manage.py test $(TEST) --pythonpath=. --settings=app.settings_tests --traceback
 	# Stop database in order to restore it
 	make stopdb
 	# Remove temporary databases

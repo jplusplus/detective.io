@@ -3,7 +3,7 @@
 <div class="home__tour" home-tour tracker="tracker">
 
     <ul class="list-unstyled home__tour__tracker hidden-xs">
-        <li ng-repeat="screen in ['tour', 'features', 'quote 0', 'quote 1', 'quote 2', 'get ready', 'pricing']">
+        <li ng-repeat="screen in ['tour', 'features', 'feature 0', 'feature 1', 'feature 2', 'feature 3', 'feature 4', 'feature 5', 'quotes', 'get ready', 'pricing']">
             <a ng-click="scrollTo($index)" class="home__tour__tracker__screen" ng-class="$index == tracker ? 'home__tour__tracker__screen--active' : ''">
                 <span class="sr-only">Go to [[screen]]</span>
             </a>
@@ -38,8 +38,8 @@
         <div class="container">
             <div class="home__tour__features__content">
                 <p>
-                    Detective.io makes it easy to organize information.<br /> 
-                    Because it structures your research, you can explore 
+                    Detective.io makes it easy to organize information.<br />
+                    Because it structures your research, you can explore
                     connections in your collected data in seconds.
                 </p>
                 <p>
@@ -49,49 +49,117 @@
         </div>
     </div>
 
-    <div class="home__tour__quotes home__tour__screen">
+    <div class="home__tour__feature-list home__tour__screen">
         <div class="container">
-            <div class="home__tour__quotes__iphone hidden-sm hidden-xs">
-                <img src="{% static 'detective/img/tour-iphone.svg' %}" class="home__tour__quotes__iphone__img" />
-                <div class="home__tour__quotes__iphone__wrapper">
-                    <div class="home__tour__quotes__iphone__screens">
-                        <img src="{% static 'detective/img/tour/quote-0.png' %}" class="home__tour__quotes__iphone__screens__single" />
-                        <img src="{% static 'detective/img/tour/quote-1.png' %}" class="home__tour__quotes__iphone__screens__single" />
-                        <img src="{% static 'detective/img/tour/quote-2.png' %}" class="home__tour__quotes__iphone__screens__single" />
+            <div class="home__tour__feature-list__iphone hidden-sm hidden-xs">
+                <img src="{% static 'detective/img/tour-iphone.svg' %}" class="home__tour__feature-list__iphone__img" />
+                <div class="home__tour__feature-list__iphone__wrapper">
+                    <div class="home__tour__feature-list__iphone__screens">
+                        <img src="{% static 'detective/img/tour/features__create-new.png' %}" class="home__tour__feature-list__iphone__screens__single" />
+                        <img src="{% static 'detective/img/tour/features__save-time.png' %}" class="home__tour__feature-list__iphone__screens__single" />
+                        <img src="{% static 'detective/img/tour/features__add-collaborators.png' %}" class="home__tour__feature-list__iphone__screens__single" />
+                        <img src="{% static 'detective/img/tour/features__its-structured.png' %}" class="home__tour__feature-list__iphone__screens__single" />
+                        <img src="{% static 'detective/img/tour/features__source.png' %}" class="home__tour__feature-list__iphone__screens__single" />
+                        <img src="{% static 'detective/img/tour/features__bulk-upload.png' %}" class="home__tour__feature-list__iphone__screens__single" />
                     </div>
                 </div>
             </div>
-            <div class="home__tour__quotes__single home__tour__quotes__single--n0" data-level="2">
-                <h3 class="home__tour__quotes__single__title">
-                    "Like putting a thousand-piece puzzle together"
+
+
+            <div class="home__tour__feature-list__single" data-level="2">
+                <h3 class="home__tour__feature-list__single__title">
+                    Get started in seconds.
                 </h3>
-                <p class="home__tour__quotes____singe__desc lead">
-                    <a href="https://www.linkedin.com/pub/verena-porsch/48/105/245" target="_blank">Verena Porsch</a> consults NGOs. She used detective.io to expose agreements between textile companies and subcontracting factories, and linked it back to accidents. Thousands of brands and companies came together in her investigation, The Origin of Clothes.
+                <p class="home__tour__feature-list__singe__desc lead">
+                    Need to untangle a web of companies? Keep track of a long-running issue with too many data points to write them down? Detective.io lets you organize all your information on a topic. Effortlessly.
                 </p>
             </div>
 
-            <div class="home__tour__quotes__single home__tour__quotes__single--n1" data-level="3">
-                <h3 class="home__tour__quotes__single__title">
-                    "All my knowledge in one place"
+            <div class="home__tour__feature-list__single" data-level="3">
+                <h3 class="home__tour__feature-list__single__title">
+                   Save time and capitalize on archived knowledge.
                 </h3>
-                <p class="home__tour__quotes____singe__desc lead">
-                    <a href="https://www.linkedin.com/pub/adeline-agut/29/36a/955/en" target="_blank">Adeline Agut</a> is a consultant for water issues. She used Detective.io to organize her data on innovative water projects in developing countries. She can now reach into her own knowledge base at any time, on any device.
+                <p class="home__tour__feature-list__singe__desc lead">
+                    Remember how it feels to search for a piece of information you wrote down weeks ago? This will be over with Detective.io
                 </p>
             </div>
 
-            <div class="home__tour__quotes__single home__tour__quotes__single--n2" data-level="4">
-                <h3 class="home__tour__quotes__single__title">
-                    "Collaboration made easy"
+            <div class="home__tour__feature-list__single" data-level="4">
+                <h3 class="home__tour__feature-list__single__title">
+                    Collaborate with anyone.
                 </h3>
-                <p class="home__tour__quotes____singe__desc lead">
-                    <a href="https://twitter.com/alphoenix" target="_blank">Alexandre Léchenet</a> is an investigative journalist. He used Detective.io to store data on a transnational investigation. Because it's easy to use, he could invite colleagues from all over Europe to collaborate.
+                <p class="home__tour__feature-list__singe__desc lead">
+                    Add people to your investigation. Even the non tech-savvy will understand the workflow and contribute intuitively.
                 </p>
+            </div>
+
+            <div class="home__tour__feature-list__single" data-level="5">
+                <h3 class="home__tour__feature-list__single__title">
+                    It's structured!
+                </h3>
+                <p class="home__tour__feature-list__singe__desc lead">
+                    All information on Detective.io is machine-readable (use CSV export or the API). Structuring your data helps you see trends and patterns. And you don't have to read through your whole archive.
+                </p>
+            </div>
+
+            <div class="home__tour__feature-list__single" data-level="6">
+                <h3 class="home__tour__feature-list__single__title">
+                    Source everything.
+                </h3>
+                <p class="home__tour__feature-list__singe__desc lead">
+                    Every single data point can be sourced. Because, y'know, being sued for libel really sucks.
+                </p>
+            </div>
+
+            <div class="home__tour__feature-list__single" data-level="7">
+                <h3 class="home__tour__feature-list__single__title">
+                    Import your data.
+                </h3>
+                <p class="home__tour__feature-list__singe__desc lead">
+                    With our paid plans, you can import your data in bulk, so that you don't have to start from scratch.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="home__tour__quotes home__tour__screen" data-level="8">
+        <div class="container">
+            <h2>What our users say</h2>
+
+            <div class="row">
+                <div class="home__tour__quotes__single col-sm-4">
+                    <h4 class="home__tour__quotes__single__title">
+                        “Like putting a thousand-piece puzzle together”
+                    </h4>
+                    <p class="home__tour__quotes____singe__desc text-muted">
+                        <a href="https://www.linkedin.com/pub/verena-porsch/48/105/245" target="_blank">Verena Porsch</a> consults NGOs. She used detective.io to expose agreements between textile companies and subcontracting factories, and linked it back to accidents. Thousands of brands and companies came together in her investigation, The Origin of Clothes.
+                    </p>
+                </div>
+
+                <div class="home__tour__quotes__single col-sm-4">
+                    <h4 class="home__tour__quotes__single__title">
+                        “All my knowledge in one place”
+                    </h4>
+                    <p class="home__tour__quotes____singe__desc text-muted">
+                        <a href="https://www.linkedin.com/pub/adeline-agut/29/36a/955/en" target="_blank">Adeline Agut</a> is a consultant for water issues. She used Detective.io to organize her data on innovative water projects in developing countries. She can now reach into her own knowledge base at any time, on any device.
+                    </p>
+                </div>
+
+                <div class="home__tour__quotes__single col-sm-4">
+                    <h4 class="home__tour__quotes__single__title">
+                        “Collaboration made easy”
+                    </h4>
+                    <p class="home__tour__quotes____singe__desc text-muted">
+                        <a href="https://twitter.com/alphoenix" target="_blank">Alexandre Léchenet</a> is an investigative journalist. He used Detective.io to store data on a transnational investigation. Because it's easy to use, he could invite colleagues from all over Europe to collaborate.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
 
-    <div class="home__tour__get-ready home__tour__screen" data-level="5">
+    <div class="home__tour__get-ready home__tour__screen" data-level="9">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
@@ -114,7 +182,7 @@
         </div>
     </div>
 
-    <div class="home__tour__pricing  home__tour__screen pull-footer" data-level="6">
+    <div class="home__tour__pricing  home__tour__screen pull-footer" data-level="10">
         <div ng-include="'/partial/plans.table.html'"></div>
     </div>
 

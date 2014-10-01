@@ -29,6 +29,7 @@ class window.ContributeCtrl
         @scope.isRich              = @isRich
         @scope.focusField          = @focusField
         @scope.unfocusField        = @unfocusField
+        @scope.toggleHtmlMode      = @toggleHtmlMode
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────
@@ -47,6 +48,7 @@ class window.ContributeCtrl
         @scope.Individual   = @Individual
         @scope.stateParams  = @stateParams
         @scope.UtilsFactory = @UtilsFactory
+        @scope.timeout      = @timeout
         @scope.modal        = @modal
         # Prepare future individual
         @initNewIndividual()
@@ -66,9 +68,7 @@ class window.ContributeCtrl
 
         # When we update scrollIdx, reset its value after
         # a short delay to allow scroll again
-        @scope.$watch "scrollIdx", (v)=>
-            @timeout (=> @scope.scrollIdx = -1), 1200
-
+        @scope.$watch "scrollIdx", => @timeout (=> @scope.scrollIdx = -1), 1200
 
     # ──────────────────────────────────────────────────────────────────────────
     # IndividualForm embeded class
@@ -91,12 +91,13 @@ class window.ContributeCtrl
             # List of additional visible fields
             @moreFields = []
             @similars   = []
-            # Is that model a searchable individual ?
+            # Is that model a searchable individual?
+            # Is that model created during a lookup (related to another one)?
             # Load similar individual to avoid duplicates
             # AFTER the individual is created.
-            scope.$on("individual:created", @getSimilars) if fields.name?
+            scope.$on("individual:created", @getSimilars) if fields.name? and not related_to?
             # We may have to refresh this individual
-            scope.$on("individual:created", @shouldRefresh)
+            scope.$on("individual:updated", @shouldRefresh)
             # Class attributes from parameters
             # ──────────────────────────────────────────────────────────────────
             @Individual   = scope.Individual
@@ -115,7 +116,6 @@ class window.ContributeCtrl
             # ──────────────────────────────────────────────────────────────────
             # The data changed
             @scope.$watch (=>@fields), @onChange, true
-
             do @unfocusField
 
         onChange: (current)=>
@@ -129,13 +129,6 @@ class window.ContributeCtrl
                     related_to: @related_to ? null
                 # It's not a new individual now
                 @isNew = no
-            # Looks for duplicated entities in fields. Mark them as duplicated. Prevents duplicated relationships (#521)
-            for name, value of @fields
-                if value? and typeof(value) is "object" and name isnt "field_sources" and name.indexOf("$") != 0
-                    exist = {}
-                    for entity in value
-                        entity.$duplicated = exist[entity.id]? and exist[entity.id]
-                        exist[entity.id] = true
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
                 changes = @getChanges()
@@ -156,31 +149,37 @@ class window.ContributeCtrl
                 # Similar entries
                 @similars = d
 
-        shouldRefresh: (event, args)=>
-            # Refresh only related individual
-            if args.related_to? and args.individual.id is @fields.id
-                # Get relationships field
-                relationships = _.where @meta.fields, type: "Relationship"
-                relationships = _.pluck relationships, "name"
-                # Does this individual have relationships fields?
-                if relationships.length
-                    # Set loading state to the relationships fields
-                    @updating[rel] = yes for rel in relationships
-                    # Load the individual
-                    @Individual.get type: @type, id: @fields.id, (individual)=>
-                        # Reload the relationships fields
-                        for rel in relationships
-                            # The field may not exists yet in the database
-                            @master[rel] = @master[rel] ? []
-                            @fields[rel] = @fields[rel] ? []
+        shouldRefresh: (event, updated_individual, updated_fields, updated_meta)=>
+            # List of relationship field to update
+            relationships = []
+            # Get relationships field to update
+            _.each updated_fields, (name)=>
+                related_meta = _.findWhere updated_meta.fields, name: name
+                # Model related to the updated field is the current one
+                if related_meta.related_model is @meta.model
+                    # Get the field of the same relationship type
+                    rel = _.findWhere @meta.fields, rel_type: related_meta.rel_type
+                    # Save its name
+                    relationships.push rel.name
+            # Does this individual have relationships fields?
+            if relationships.length
+                # Set loading state to the relationships fields
+                @updating[rel] = yes for rel in relationships
+                # Load the individual
+                @Individual.get type: @type, id: @fields.id, (individual)=>
+                    # Reload the relationships fields
+                    for rel in relationships
+                        # The field may not exists yet in the database
+                        @master[rel] = @master[rel] ? []
+                        @fields[rel] = @fields[rel] ? []
 
-                            if individual[rel]?
-                                # Update the master too in order
-                                # to avoid new reloading
-                                angular.extend @master[rel], individual[rel]
-                                angular.extend @fields[rel], individual[rel]
-                            # Field no more loading
-                            delete @updating[rel]
+                        if individual[rel]?
+                            # Update the master too in order
+                            # to avoid new reloading
+                            @master[rel] = individual[rel]
+                            @fields[rel] = individual[rel]
+                        # Field no more loading
+                        delete @updating[rel]
 
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
@@ -241,25 +240,55 @@ class window.ContributeCtrl
 
         # Event when fields changed
         update: (data)=>
-            @data_are_updating = true
-            params = type: @type, id: @fields.id
-            # Notice that the field is loading
-            @updating = _.extend @updating, data
-            # Patch the current individual
-            @Individual.update params, data, (res)=>
-                # Record master
-                @master = _.extend @master, res
-                @data_are_updating = false
-                # Notices that we stop to load the field
-                @updating = _.omit(@updating, _.keys(data))
-                # Prevent communications between forms
-                @updating = angular.copy @updating
-                # Propagation
-                @scope.$broadcast "individual:updated", @fields
-            , (error)=>
-                if error.status == 404
-                    @isClosed   = true
-                    @isRemoved  = true
+            # Dear future me,
+            #
+            # if you don't understand why I'm using a timeout here, I have to be
+            # honest: I'm not sure to understand it neither.
+            # In fact, it results of a series of hacks that didn't really work.
+            # As you can see bellow, we are setting two variables to be aware of
+            # the loading status of this field. During this state, we take care
+            # of disabling every inputs inside the current line. It results on a
+            # very tricky problem: in some situations, a button (like 'Add
+            # source') might be disabled at the very moment where we disabled it
+            # because of loading.
+            #
+            # For this reason, the simplier way you found to avoid interweaving
+            # between events (blur and click, for instance) was to use a small
+            # timeout here. It's not pretty, it's not perfect, but it works.
+            # Plus, it's seamless for the user.
+            #
+            # Hoping you're not upset about what you did,
+            #
+            # xx
+            @scope.timeout =>
+                @data_are_updating = true
+                params = type: @type, id: @fields.id
+                # Notice that the field is loading
+                @updating = _.extend @updating, data
+                # Patch the current individual
+                @Individual.update params, data, (res)=>
+                    # Record master
+                    @master = _.extend @master, res
+
+                    # Ugly but we should refresh all rich text fields from response
+                    _.each res, (value, key) =>
+                        if key[0] isnt '$'
+                            _.each @meta.fields, (f) =>
+                                @fields[key] = value if (f.name is key) and f.rules.is_rich
+
+                    @data_are_updating = false
+                    # Notices that we stop to load the field
+                    @updating = _.omit(@updating, _.keys(data))
+                    # Prevent communications between forms
+                    @updating = angular.copy @updating
+                    # Propagation
+                    @scope.$broadcast "individual:updated", @fields, _.keys(data), @meta
+                , (error)=>
+                    if error.status == 404
+                        @isClosed   = true
+                        @isRemoved  = true
+            # This timeout is completely arbitrary.
+            , 300
 
         # Save the current individual form
         save: =>
@@ -550,15 +579,25 @@ class window.ContributeCtrl
             # Load it (if needed)
             @scope.scrollIdx = @scope.loadIndividual type.toLowerCase(), related.id,  individual
 
-    relatedState: (related)=>
+    relatedState: (related, all_fields, index)=>
         ###
         Return the visual state of the field.
         - `input`  for editable fields,
         - `linked` for field which represent an Individal but isn't duplicated. The field will be shown as an uneditable field.
+        - `duplicated` for field which represent an Individal and is duplicated.
         ###
-        switch true
-            when related instanceof @Individual or (related.id? and not related.$duplicated) then 'linked'
-            else 'input'
+        # Looks for duplicated entities in fields. Mark them as duplicated. Prevents duplicated relationships (#521)
+        if all_fields? and index?
+            duplicated = _.some(all_fields, (entity, i)-> return related.id == entity.id and index > i)
+        else
+            duplicated = false
+        # return the state
+        if related instanceof @Individual or (related.id? and not duplicated)
+            return 'linked'
+        else if related.id? and duplicated
+            return "duplicated"
+        else
+            return 'input'
 
     askForNew: (related)=>
         related? and not related instanceof @Individual or
@@ -603,6 +642,8 @@ class window.ContributeCtrl
 
     isRich: (field) =>
         field.rules.is_rich or no
+
+    toggleHtmlMode: (ev)=> @scope.htmlMode = not @scope.htmlMode
 
 
 angular.module('detective.controller').controller 'contributeCtrl', ContributeCtrl

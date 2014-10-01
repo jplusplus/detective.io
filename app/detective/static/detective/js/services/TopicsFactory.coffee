@@ -17,6 +17,7 @@ angular.module('detective.service').factory 'TopicsFactory', [
             put:  Topic.put
             delete: Topic.delete
             update: Topic.update
+            leave: Topic.leave
 
 
             reset: =>

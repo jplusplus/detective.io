@@ -1,18 +1,19 @@
 class window.DashboardCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$q', '$http', 'Common', 'Page', 'User', 'userGroups']
-    constructor: (@scope, @q, @http, @Common, @Page, @User, @userGroups)->
+    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'userGroups']
+    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @userGroups)->
         @Page.title "Dashboard"
         # Start to page 1, obviously
         @page = 1
         # Get the user's topics
         @scope.topics = @getTopics()
+        @scope.user = @User
         # Scope methods
         @scope.hasNext = @hasNext
         @scope.hasPrevious = @hasPrevious
         @scope.nextPage = @nextPage
         @scope.previousPage = @previousPage
-        @scope.user = @User
+        @scope.openLeaveModal = @openLeaveModal
 
     # Concatenates @userTopics's objects with @userGroups's topics
     getTopics: =>
@@ -27,7 +28,20 @@ class window.DashboardCtrl
     # Load previous page
     previousPage: => @loadPage(@page-1).then (topics)=> @scope.topics = topics
 
+    openLeaveModal: (topic)=>
+        @modalInstance = @modal.open
+            templateUrl: '/partial/topic.leave-modal.html'
+            controller : 'leaveTopicModalCtrl as modal'
+            resolve:
+                topic: -> topic
+
+        @modalInstance.result.then (quitted) =>
+            if quitted
+                @loadPage().then (topics)=>
+                    @scope.topics = topics
+
     loadPage: (page=@page)=>
+        @scope.loading = true
         @page = page
         deferred = @q.defer()
         # Load the value at the same time
@@ -36,6 +50,7 @@ class window.DashboardCtrl
         # Get the 3 resolve promises
         ]).then (results)=>
             @userGroups = results[0]
+            @scope.loading = false
             deferred.resolve @getTopics()
         # Returns a promises
         deferred.promise

@@ -649,7 +649,7 @@ def update_topic_cache(*args, **kwargs):
 def delete_entity(*args, **kwargs):
     fields = utils.get_model_fields(kwargs.get('instance').__class__)
     for field in fields:
-        if field["rel_type"] and "through" in field["rules"]:
+        if field["rel_type"] and "through" in field["rules"] and field["rules"]["through"] != None:
             Properties = field["rules"]["through"]
             for info in Properties.objects.all():
                 info.delete()

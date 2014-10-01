@@ -52,3 +52,4 @@ times==0.6.2
 unidecode==0.04.16
 wsgiref==0.1.2
 bleach==1.4
+jsonschema==2.4.0

@@ -41,17 +41,24 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
     constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @timeout, @location, @User, skeletons, datasets)->
         super
         @setCreatingMode()
+
         @scope.skeletons = skeletons
         @scope.selected_skeleton = {}
+
         @scope.all_datasets = datasets
+        @scope.datasets = []
         @scope.selected_dataset = {}
+
         @scope.topic = {}
+
         @scope.goToPlans = @goToPlans
         @scope.selectSkeleton = @selectSkeleton
         @scope.isSelected = @isSelected
         @scope.isTeaserSkeleton = @isTeaserSkeleton
         @scope.hasSelectedSkeleton = @hasSelectedSkeleton
-        @scope.shouldShowForm = @hasSelectedSkeleton
+        @scope.hasSelectedDataSet = @hasSelectedDataSet
+        @scope.shouldShowDataSets = @hasSelectedSkeleton
+        @scope.shouldShowForm = (do @hasSelectedSkeleton) and (do @hasSelectedDataset)
 
         if @userMaxReached()
             @scope.max_reached = true
@@ -85,6 +92,9 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
     hasSelectedSkeleton: =>
         @scope.selected_skeleton? and @scope.selected_skeleton.id?
 
+    hasSelectedDataSet: =>
+        @scope.selected_dataset? and @scope.selected_dataset.id?
+
     onSkeletonSelected: =>
         # safe init
         @scope.topic = @scope.topic or {}
@@ -92,8 +102,10 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         # to this new topic in API.
         @scope.topic.topic_skeleton = @scope.selected_skeleton.id
         @scope.topic.about = @scope.selected_skeleton.picture_credits
+        # Filter datasets
+        @scope.datasets = do @getFilteredDataSets
         # Angular scroll
-        @location.search({scrollTo: 'topic-form'})
+        @location.search({scrollTo: 'topic-datasets'})
         @timeout(=>
                 @rootScope.$broadcast @EVENTS.trigger.scroll
             , 250
@@ -121,6 +133,12 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
             if response.status is 401
                 @scope.error = "Your not authorized to perform this action."
         )
+
+    getFilteredDataSets: =>
+        if (not @scope.selected_skeleton?) or (not @scope.selected_skeleton.id?)
+            []
+        else
+            _.filter @scope.all_datasets, (e) => @scope.selected_skeleton.id in e.skeletons
 
 
 angular.module('detective.controller').controller 'createTopicCtrl', CreateTopicCtrl

@@ -15,7 +15,7 @@
                   <div class="skeleton-wrapper col-sm-4 col-xs-6">
                       <div class="skeletons__item"
                             ng-class="{
-                              'skeletons__item--selected': isSelected(skeleton),
+                              'skeletons__item--selected': isSkeletonSelected(skeleton),
                               'skeletons__item--teaser':   isTeaserSkeleton(skeleton)
                             }">
                           <img ng-click="selectSkeleton(skeleton)" ng-src="[[ skeleton.thumbnail.medium ]]"/>
@@ -59,8 +59,8 @@
             <ul class="list-unstyled row skeletons">
               <li ng-repeat="dataset in datasets">
                 <div class="skeleton-wrapper col-sm-4 col-xs-6">
-                  <div class="skeletons__item">
-                    <img ng-src="[[ dataset.thumbnail.medium ]]"/>
+                  <div class="skeletons__item" ng-class="{ 'skeletons__item--selected': isDataSetSelected(dataset) }">
+                    <img ng-click="selectDataSet(dataset)" ng-src="[[ dataset.thumbnail.medium ]]"/>
                     <h4>[[ dataset.title ]]</h4>
                     <div ng-if="dataset.description" ng-bind-html="dataset.description"></div>
                   </div>

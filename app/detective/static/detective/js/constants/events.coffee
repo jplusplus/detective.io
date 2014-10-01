@@ -15,6 +15,8 @@ angular.module('detective.constants').constant 'constants.events',
     # topic creation related events
     skeleton:
         selected: 'skeleton:selected'
+    dataset:
+        selected: 'dataset:selected'
     # generic events
     trigger:
         scroll: 'trigger:scroll'

@@ -36,7 +36,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
 
     @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location', 'User', 'skeletons', 'datasets']
 
-    # Note: The 4 first parameters need to stay in that order if we want the
+    # Note: The 5 first parameters need to stay in that order if we want the
     # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
     constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @timeout, @location, @User, skeletons, datasets)->
         super
@@ -53,12 +53,14 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
 
         @scope.goToPlans = @goToPlans
         @scope.selectSkeleton = @selectSkeleton
-        @scope.isSelected = @isSelected
+        @scope.selectDataSet = @selectDataSet
+        @scope.isSkeletonSelected = @isSkeletonSelected
+        @scope.isDataSetSelected = @isDataSetSelected
         @scope.isTeaserSkeleton = @isTeaserSkeleton
         @scope.hasSelectedSkeleton = @hasSelectedSkeleton
         @scope.hasSelectedDataSet = @hasSelectedDataSet
         @scope.shouldShowDataSets = @hasSelectedSkeleton
-        @scope.shouldShowForm = (do @hasSelectedSkeleton) and (do @hasSelectedDataset)
+        @scope.shouldShowForm = => (do @hasSelectedSkeleton) and (do @hasSelectedDataSet)
 
         if @userMaxReached()
             @scope.max_reached = true
@@ -68,7 +70,9 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.user = @User
 
         @Page.title "Create a new investigation"
+
         @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
+        @scope.$on @EVENTS.dataset.selected, @onDataSetSelected
 
     # nav & scope methods
     goToPlans: =>
@@ -81,13 +85,21 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         else
             @goToPlans()
 
+    selectDataSet: (dataset) =>
+        @scope.selected_dataset = dataset
+        @rootScope.$broadcast @EVENTS.dataset.selected
+
     isTeaserSkeleton: (skeleton)=>
         has_free_plan = @User.profile.plan is 'free'
         has_free_plan and skeleton.enable_teasing
 
-    isSelected: (skeleton)=>
+    isSkeletonSelected: (skeleton)=>
         return false unless @scope.selected_skeleton?
         skeleton.id == @scope.selected_skeleton.id
+
+    isDataSetSelected: (dataset) =>
+        return no unless @scope.selected_dataset? and @scope.selected_dataset.id?
+        dataset.id is @scope.selected_dataset.id
 
     hasSelectedSkeleton: =>
         @scope.selected_skeleton? and @scope.selected_skeleton.id?
@@ -106,6 +118,15 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.datasets = do @getFilteredDataSets
         # Angular scroll
         @location.search({scrollTo: 'topic-datasets'})
+        @timeout(=>
+                @rootScope.$broadcast @EVENTS.trigger.scroll
+            , 250
+        )
+
+    onDataSetSelected: =>
+        @scope.topic.dataset = @scope.selected_dataset.id
+        # Angular scroll
+        @location.search({scrollTo: 'topic-form'})
         @timeout(=>
                 @rootScope.$broadcast @EVENTS.trigger.scroll
             , 250

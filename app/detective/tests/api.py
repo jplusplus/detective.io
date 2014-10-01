@@ -1047,10 +1047,11 @@ class TopicApiTestCase(ApiTestCase):
         # get models
         Pill                                     = models.Pill
         file_name1, token1 = ask_for_an_export()
-        Pill.objects.create(name="new pill")
+        pill = Pill.objects.create(name="new pill")
         file_name2, token2 = ask_for_an_export()
         self.assertNotEqual(file_name1, file_name2)
         self.assertNotEqual(token1, token2)
+        pill.delete()
 
     def test_topic_entities_count(self):
         topic = Topic.objects.get(slug='test-pillen')

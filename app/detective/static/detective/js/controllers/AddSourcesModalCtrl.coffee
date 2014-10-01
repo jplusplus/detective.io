@@ -3,6 +3,7 @@ class window.AddSourcesModalCtrl
     @$inject: ['$scope', '$q', '$filter', '$modalInstance', 'Individual', 'UtilsFactory', "fields", "field", "meta"]
     constructor: (@scope, @q, @filter, @modalInstance, @Individual, @UtilsFactory,  @fields, @field, @meta)->
         @fields = angular.copy @fields
+        @fields.field_sources = [] if not @fields.field_sources?
         @updateMasterSources()
         # Scope variables
         @scope.loading    = no

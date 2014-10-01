@@ -499,6 +499,21 @@ class TopicDataSetResource(ModelResource):
             'skeletons' : ALL_WITH_RELATIONS
         }
 
+    def dehydrate(self, bundle):
+        try:
+            thumbnailer     = get_thumbnailer(bundle.obj.picture)
+            thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
+            thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
+            bundle.data['thumbnail'] = {
+                'small' : thumbnailSmall.url,
+                'medium': thumbnailMedium.url
+            }
+        # No image available
+        except InvalidImageFormatError:
+            bundle.data['thumbnail'] = None
+
+        return bundle
+
 class ArticleResource(ModelResource):
     topic = fields.ToOneField(TopicResource, 'topic', full=True)
     class Meta:

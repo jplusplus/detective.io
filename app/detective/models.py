@@ -76,8 +76,10 @@ class QuoteRequest(models.Model):
 
 def validate_ontology_as_json(value):
     try:
-        # First, validate the ontology format
-        validate(value, schema.ontology, format_checker=schema.checker(value))
+        # For retro-compatibility, we do not validate object-like ontologies
+        if type(value) is list:
+            # First, validate the ontology format
+            validate(value, schema.ontology, format_checker=schema.checker(value))
     except ValidationError, e:
         raise forms.ValidationError(e.message)
 

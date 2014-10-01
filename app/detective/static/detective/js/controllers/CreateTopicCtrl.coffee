@@ -18,16 +18,33 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
                 deferred.resolve(data)
             # Return a deffered object
             deferred.promise
+        datasets: ['$q', 'Page', 'TopicDataSet', ($q, Page, TopicDataSet) ->
+            deferred = do $q.defer
+            notFound = ->
+                do deferred.reject
+                $state.go "404"
+                deferred
+            forbidden = ->
+                do deferred.reject
+                $state.go "403"
+                deferred
+            Page.loading yes
+            TopicDataSet.get (data) =>
+                deferred.resolve data
+            deferred.promise
+        ]
 
-    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location', 'User', 'skeletons']
+    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location', 'User', 'skeletons', 'datasets']
 
     # Note: The 4 first parameters need to stay in that order if we want the
     # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
-    constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @timeout, @location, @User, skeletons)->
+    constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @timeout, @location, @User, skeletons, datasets)->
         super
         @setCreatingMode()
         @scope.skeletons = skeletons
         @scope.selected_skeleton = {}
+        @scope.all_datasets = datasets
+        @scope.selected_dataset = {}
         @scope.topic = {}
         @scope.goToPlans = @goToPlans
         @scope.selectSkeleton = @selectSkeleton

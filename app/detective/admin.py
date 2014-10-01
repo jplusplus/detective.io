@@ -76,7 +76,7 @@ class SearchTermInline(admin.TabularInline):
                 model_name    = getattr(model._meta, "verbose_name").title()
                 subset        = []
                 # Retreive every relationship field for this model
-                for field in utils.get_model_fields(model):
+                for field in utils.iterate_model_fields(model):
                     if field["type"] != 'AutoField':
                         choice   = [ field["name"], field["verbose_name"].title(), ]
                         # Add ... at the end ot the relationship field

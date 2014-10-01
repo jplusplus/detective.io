@@ -75,8 +75,7 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
     def get_columns(model):
         edges   = dict()
         columns = []
-        fields  = utils.get_model_fields(model)
-        for field in fields:
+        for field in utils.iterate_model_fields(model):
             if field['type'] != 'Relationship':
                 if field['name'] not in ['id']:
                     columns.append(field['name'])
@@ -311,7 +310,7 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                     model_from       = model_from,
                     model_to         = model_to,
                     relation_name    = relation_name,
-                    fields_available = [field['name'] for field in utils.get_model_fields(all_models[model_from])],
+                    fields_available = [field['name'] for field in utils.iterate_model_fields(all_models[model_from])],
                     error            = str(e))
             for row in csv_reader:
                 id_from = row[0]

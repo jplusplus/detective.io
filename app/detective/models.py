@@ -265,7 +265,7 @@ class Topic(models.Model):
         def syntax_output(m) : return {'name': m.__name__, 'label': m._meta.verbose_name.title()}
         def output(m)        : return {'name': m.name, 'label': m.label, 'subject': m.subject}
         def iterate_fields(model, is_relationship):
-            for field in [f for f in utils.get_model_fields(model) if (f['type'].lower() == 'relationship') == is_relationship]:
+            for field in [f for f in utils.iterate_model_fields(model) if (f['type'].lower() == 'relationship') == is_relationship]:
                 if "search_terms" in field["rules"]:
                     yield [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
         def output_terms(terms, is_relationship):
@@ -324,7 +324,7 @@ class Topic(models.Model):
             )
         # If the received identifier describe a literal value
         elif self.is_registered_relationship(predicate["name"]):
-            fields        = utils.get_model_fields( all_models[predicate["subject"]] )
+            fields        = utils.iterate_model_fields( all_models[predicate["subject"]] )
             # Get the field name into the database
             relationships = [ field for field in fields if field["name"] == predicate["name"] ]
             # We didn't find the predicate
@@ -525,7 +525,7 @@ class SearchTerm(models.Model):
             topic_models = self.topic.get_models()
             for model in topic_models:
                 # Retreive every relationship field for this model
-                for f in utils.get_model_fields(model):
+                for f in utils.iterate_model_fields(model):
                     if f["name"] == self.name:
                         field = f
             field["rules"]["through"] = None # Yes, this is ugly but this field is creating Pickling errors.
@@ -642,7 +642,7 @@ def update_topic_cache(*args, **kwargs):
             utils.topic_cache.incr_version(topic)
 
 def delete_entity(*args, **kwargs):
-    fields = utils.get_model_fields(kwargs.get('instance').__class__)
+    fields = utils.iterate_model_fields(kwargs.get('instance').__class__)
     for field in fields:
         if field["rel_type"] and "through" in field["rules"] and field["rules"]["through"] != None:
             Properties = field["rules"]["through"]

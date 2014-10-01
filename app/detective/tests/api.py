@@ -922,8 +922,7 @@ class TopicApiTestCase(ApiTestCase):
         def check_if_orphans_exist():
             orphans_count = 0
             for Model in topic.get_models():
-                fields = utils.get_model_fields(Model)
-                for field in fields:
+                for field in utils.iterate_model_fields(Model):
                     if field["rel_type"] and "through" in field["rules"]:
                         ids= []
                         for entity in Model.objects.all():

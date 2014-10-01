@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, get_model_fields, topic_cache
-from app.detective.utils                import get_model_fields as utils_get_model_fields
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache
 from app.detective.topics.common.models import FieldSource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
@@ -341,7 +340,7 @@ class IndividualResource(ModelResource):
             field_rels = [ rel for rel in node_rels[:] if rel.type == field._type]
             # Filter relationships to keep only the well oriented relationships
             # get the related field informations
-            related_field = [f for f in get_model_fields(model) if "rel_type" in f and f["rel_type"] == field._type and "name" in f and f["name"] == field._BoundRelationship__attname]
+            related_field = [f for f in iterate_model_fields(model) if "rel_type" in f and f["rel_type"] == field._type and "name" in f and f["name"] == field._BoundRelationship__attname]
             if related_field:
                 # Note (edouard): check some assertions in case I forgot something
                 assert len(related_field) == 1, related_field
@@ -585,10 +584,6 @@ class IndividualResource(ModelResource):
         bundle = self.build_bundle(request=request)
         # User allowed to update this model
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
-        # Current model
-        model = self.get_model()
-        # Fields
-        fields = { x['name'] : x for x in utils_get_model_fields(model) }
         # Get the node's data using the rest API
         try: node = connection.nodes.get(pk)
         # Node not found
@@ -679,6 +674,10 @@ class IndividualResource(ModelResource):
                 # We simply update the node property
                 # (the value is already validated)
                 else:
+                    # Current model
+                    model = self.get_model()
+                    # Fields
+                    fields = { x['name'] : x for x in iterate_model_fields(model) }
                     if field_name in fields:
                         if 'is_rich' in fields[field_name]['rules'] and fields[field_name]['rules']['is_rich']:
                             data[field_name] = field_value = bleach.clean(field_value,

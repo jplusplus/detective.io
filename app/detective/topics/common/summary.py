@@ -163,7 +163,7 @@ class SummaryResource(Resource):
         for model in self.topic.get_models():
             name                = model.__name__.lower()
             rules               = rulesManager.model(model).all()
-            fields              = list(utils.get_model_fields(model))
+            fields              = utils.get_model_fields(model)
             verbose_name        = getattr(model._meta, "verbose_name", name)
             verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s")
 

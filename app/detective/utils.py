@@ -175,6 +175,9 @@ def get_topic_from_request(request):
     return getattr(request, 'current_topic', None)
 
 def get_model_fields(model, order_by='name'):
+    return list(iterate_model_fields(model, order_by))
+
+def iterate_model_fields(model, order_by='name'):
     from app.detective           import register
     from django.db.models.fields import FieldDoesNotExist
     models_rules = register.topics_rules().model(model)
@@ -307,7 +310,7 @@ def get_leafs_and_edges(topic, depth, root_node="0"):
             except KeyError:
                 pass
         # filter edges with relations in ontology
-        models_fields         = itertools.chain(*map(get_model_fields, topic.get_models()))
+        models_fields         = itertools.chain(*map(iterate_model_fields, topic.get_models()))
         relations_in_ontology = set(map(lambda _: _.get("rel_type"), models_fields))
         edges                 = [e for e in edges if e[1] in relations_in_ontology]
         # filter leafts without relations

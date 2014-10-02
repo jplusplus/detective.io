@@ -82,9 +82,6 @@ class IndividualAuthorization(DjangoAuthorization):
 
     def delete_list(self, object_list, bundle):
         return False
-        # if not self.check_contribution_permission(object_list, bundle, 'delete'):
-        #     raise Unauthorized("Sorry, only staff or contributors can delete resource.")
-        # return True
 
 class IndividualMeta:
     list_allowed_methods   = ['get', 'post', 'put']

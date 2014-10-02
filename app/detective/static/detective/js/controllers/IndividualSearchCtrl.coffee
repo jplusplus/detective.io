@@ -40,8 +40,8 @@ class window.IndividualSearchCtrl extends window.IndividualListCtrl
 
     # Manage research here
     getVerbose: =>
-        @scope.verbose_name = "entity for this query"
-        @scope.verbose_name_plural = "entities for this query"
+        @scope.verbose_name = "Entity for this query"
+        @scope.verbose_name_plural = "Entities for this query"
         @Page.title @scope.verbose_name_plural
 
     # Define search parameter using route's params

@@ -14,6 +14,7 @@ class window.IndividualListCtrl
         @scope.nearestPages    = @nearestPages
         @scope.goToPage        = @goToPage
         @scope.singleUrl       = @singleUrl
+        @scope.editUrl         = @editUrl
         @scope.isLoading       = @isLoading
         @scope.csvExport       = @csvExport
         # ──────────────────────────────────────────────────────────────────────
@@ -86,6 +87,11 @@ class window.IndividualListCtrl
     singleUrl: (individual)=>
         type = (@scope.type or individual.model).toLowerCase()
         "/#{@scope.username}/#{@scope.topic}/#{type}/#{individual.id}"
+
+    editUrl: (individual)=>
+        type = (@scope.type or individual.model).toLowerCase()
+        "/#{@scope.username}/#{@scope.topic}/contribute/?type=#{type}&id=#{individual.id}"
+
     # Pages list
     pages: =>
         # No page yet

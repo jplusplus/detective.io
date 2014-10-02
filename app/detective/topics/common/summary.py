@@ -426,13 +426,14 @@ class SummaryResource(Resource):
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 
     def search(self, terms):
-        if type(terms) is str:
-            terms = terms.explode(",")
+        if type(terms) in [str, unicode]:
+            terms = [terms]
         matches = []
         for term in terms:
             term = unicode(term).lower()
             term = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', term).strip()
             matches.append("LOWER(node.name) =~ '.*(%s).*'" % term)
+        print matches
         # Query to get every result
         query = """
             START root=node(0)

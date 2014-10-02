@@ -224,7 +224,7 @@ class SummaryResource(Resource):
         else:
             query = """
                 START root=node(0)
-                MATCH (node)-[r:`<<INSTANCE>>`]->(type)<-[`<<TYPE>>`]-(root)
+                MATCH (node)<-[r:`<<INSTANCE>>`]-(type)<-[`<<TYPE>>`]-(root)
                 WHERE HAS(node.name)
                 AND HAS(node._author)
                 AND HAS(type.model_name)

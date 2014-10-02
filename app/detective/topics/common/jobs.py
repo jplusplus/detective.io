@@ -8,7 +8,7 @@
 # License : GNU GENERAL PUBLIC LICENSE v3
 # -----------------------------------------------------------------------------
 # Creation : 20-Jan-2014
-# Last mod : 30-Jul-2014
+# Last mod : 02-Oct-2014
 # -----------------------------------------------------------------------------
 from tastypie.resources         import Resource
 from django.core.exceptions     import ObjectDoesNotExist
@@ -296,11 +296,14 @@ def process_bulk_parsing_and_save_as_model(topic, files):
         logger.debug("BulkUpload: creating relations")
         for file_name, file in relations:
             # create a csv reader
-            csv_reader    = utils.open_csv(file)
-            csv_header    = csv_reader.next()
-            relation_name = utils.to_underscores(csv_header[1])
-            model_from    = utils.to_class_name(csv_header[0].replace("_id", ""))
-            model_to      = utils.to_class_name(csv_header[2].replace("_id", ""))
+            csv_reader      = utils.open_csv(file)
+            csv_header      = csv_reader.next()
+            relation_name   = utils.to_underscores(csv_header[1])
+            model_from      = utils.to_class_name(csv_header[0].replace("_id", ""))
+            model_to        = utils.to_class_name(csv_header[2].replace("_id", ""))
+            properties_name = csv_header[3:]
+            # retrieve ModelProperties from related model
+            ModelProperties = topic.get_rules().model(all_models[model_from]).field(relation_name).get("through")
             # check that the relation actually exists between the two objects
             try:
                 getattr(all_models[model_from], relation_name)
@@ -313,11 +316,43 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                     fields_available = [field['name'] for field in utils.iterate_model_fields(all_models[model_from])],
                     error            = str(e))
             for row in csv_reader:
-                id_from = row[0]
-                id_to   = row[2]
+                id_from    = row[0]
+                id_to      = row[2]
+                properties = row[3:]
                 if id_to and id_from:
                     try:
-                        getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
+                        instance_from = id_mapping[(model_from, id_from)]
+                        instance_to   = id_mapping[(model_to, id_to)]
+                        getattr(instance_from, relation_name).add(instance_to)
+                        # add properties if needed
+                        if ModelProperties and properties_name and properties:
+                            # save the relationship to create an id
+                            instance_from.save()
+                            # retrieve this id
+                            relation_id = next(rel.id for rel in instance_from.node.relationships.outgoing() if rel.end.id == instance_to.id)
+                            # properties of the relationship
+                            relation_args = {
+                                "_endnodes"     : [id_mapping[(model_from, id_from)].id, instance_to.id],
+                                "_relationship" : relation_id,
+                            }
+                            # Pairwise the properties with their names 
+                            relation_args.update(zip(properties_name, properties))
+                            try:
+                                ModelProperties.objects.create(**relation_args)
+                            except TypeError as e:
+                                errors.append(
+                                    AttributeDoesntExist(
+                                        file             = file_name,
+                                        line             = csv_reader.line_num,
+                                        model_from       = model_from,
+                                        id_from          = id_from,
+                                        model_to         = model_to,
+                                        id_to            = id_to,
+                                        relation_args    = relation_args,
+                                        error            = str(e)
+                                    )
+                        )
+                        # update the job
                         inserted_relations += 1
                         file_reading_progression += 1
                         if job:

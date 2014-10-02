@@ -2,6 +2,7 @@ from app.detective              import utils
 from app.detective.exceptions   import UnavailableImage
 from app.detective.permissions  import create_permissions, remove_permissions
 from app.detective.parser       import schema
+from app.detective.topics.common.jobs import unzip_and_process_bulk_parsing_and_save_as_model
 
 from django                     import forms
 from django.conf                import settings
@@ -28,6 +29,8 @@ import random
 import re
 import string
 import urllib2
+import django_rq
+import base64
 
 # -----------------------------------------------------------------------------
 #
@@ -680,9 +683,14 @@ def apply_dataset(*args, **kwargs):
     assert kwargs.get('instance') # We need an instance...
     if kwargs.get('created', False): # We apply the dataset only on creation
         instance = kwargs.get('instance')
-        dataset = instance.get('dataset', None)
+        dataset = getattr(instance, 'dataset', None)
         if dataset != None:
-            # Should call bulk upload
+            if dataset.zip_file != None and dataset.zip_file != "":
+                dataset.zip_file.open('r')
+                # enqueue the parsing job
+                queue = django_rq.get_queue('default', default_timeout=7200)
+                job   = queue.enqueue(unzip_and_process_bulk_parsing_and_save_as_model, instance, base64.b64encode(dataset.zip_file.read()))
+                dataset.zip_file.close()
             instance.dataset = None
             instance.save()
 

@@ -204,7 +204,7 @@ def process_bulk_parsing_and_save_as_model(topic, files):
             csv_reader = utils.open_csv(file)
             header     = csv_reader.next()
             assert len(header) > 1, "{file_name} header should have at least 2 columns"
-            assert header[0].endswith("_id"), "{file_name} : First column should begin with a header like <model_name>_id".format(file_name=file_name)
+            assert header[0].endswith("_id"), "{file_name} : First column should begin with a header like <model_name>_id. Actually {first_col}".format(file_name=file_name, first_col=header[0])
             if len(header) >=3 and header[0].endswith("_id") and header[2].endswith("_id"):
                 # this is a relationship file
                 relations.append((file_name, file))
@@ -251,7 +251,8 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                                     value = int(value)
                                 # TODO: cast float
                                 if "Date" in column_type:
-                                    value = datetime.datetime(*map(int, re.split('[^\d]', value)[:-1])).replace(tzinfo=utc)
+                                    value = datetime.datetime(*map(int, re.split('[^\d]', value)[:3])).replace(tzinfo=utc)
+
                             except Exception as e:
                                 e = WarningCastingValueFail(
                                     column_name = column,

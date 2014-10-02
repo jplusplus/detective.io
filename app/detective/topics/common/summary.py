@@ -2,6 +2,7 @@
 from .errors                import ForbiddenError, UnauthorizedError
 from app.detective.models   import Topic, SearchTerm
 from app.detective.neomatch import Neomatch
+from app.detective          import graph
 from difflib                import SequenceMatcher
 from django.core.paginator  import Paginator, InvalidPage
 from django.http            import Http404, HttpResponse
@@ -222,14 +223,14 @@ class SummaryResource(Resource):
             }
         else:
             query = """
-                START root=node(*)
-                MATCH (type)-[`<<INSTANCE>>`]->(root)
-                WHERE HAS(root.name)
-                AND HAS(root._author)
+                START root=node(0)
+                MATCH (node)-[r:`<<INSTANCE>>`]->(type)<-[`<<TYPE>>`]-(root)
+                WHERE HAS(node.name)
+                AND HAS(node._author)
                 AND HAS(type.model_name)
-                AND %s IN root._author
+                AND %s IN node._author
                 AND type.app_label = '%s'
-                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+                RETURN DISTINCT ID(root) as id, node.name as name, type.model_name as model
             """ % ( int(request.user.id), app_label )
 
             matches      = connection.cypher(query).to_dicts()
@@ -430,13 +431,14 @@ class SummaryResource(Resource):
         match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()
         # Query to get every result
         query = """
-            START root=node(*)
-            MATCH (root)<-[r:`<<INSTANCE>>`]-(type)
-            WHERE HAS(root.name)
-            AND LOWER(root.name) =~ '.*(%s).*'
+            START root=node(0)
+            MATCH (node)<-[r:`<<INSTANCE>>`]-(type)<-[`<<TYPE>>`]-(root)
+            WHERE HAS(node.name)
+            AND LOWER(node.name) =~ '.*(%s).*'
             AND type.app_label = '%s'
-            RETURN ID(root) as id, root.name as name, type.model_name as model
+            RETURN ID(node) as id, node.name as name, type.model_name as model
         """ % (match, self.topic.app_label() )
+
         return connection.cypher(query).to_dicts()
 
     def ngrams(self, input):

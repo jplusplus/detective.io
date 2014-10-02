@@ -8,13 +8,14 @@
 # License : GNU GENERAL PUBLIC LICENSE v3
 # -----------------------------------------------------------------------------
 # Creation : 30-Sep-2014
-# Last mod : 30-Sep-2014
+# Last mod : 02-Oct-2014
 # -----------------------------------------------------------------------------
-from django.test                      import TestCase
 from app.detective.models             import Topic
 from app.detective.topics.common.jobs import process_bulk_parsing_and_save_as_model
+from tastypie.test                    import ResourceTestCase
+import json
 
-class JobsTestCase(TestCase):
+class JobsTestCase(ResourceTestCase):
     fixtures = [
         'app/detective/fixtures/default_topics.json',
         'app/detective/fixtures/tests_pillen.json'
@@ -71,11 +72,11 @@ class JobsTestCase(TestCase):
             ),
             (
                 "composition.csv", (
-                    ("Pill_id,molecules_contained,Molecule_id"),
-                    ("57713,,57714"),
-                    ("57457,,57230"),
+                    ("Pill_id,molecules_contained,Molecule_id,quantity_(in_milligrams)."),
+                    ("57713,,57714,250"),
+                    ("57457,,57230,9"),
                 )
-            )
+            ),
         )
         # run the job without job runner
         response = process_bulk_parsing_and_save_as_model(topic, files)
@@ -83,11 +84,24 @@ class JobsTestCase(TestCase):
         models   = topic.get_models_module()
         Pill     = models.Pill
         Molecule = models.Molecule
-        self.assertEquals(len(response.get("errors"))            , 0)
+        self.assertEquals(len(response.get("errors"))            , 0, response)
         self.assertEquals(response.get("inserted").get("objects"), sum( (len(file[1])-1 for file in files if file[0] in ["pillen.csv", "molecules.csv"])))
+        self.assertEquals(response.get("inserted").get("objects"), topic.entities_count())
         self.assertEquals(response.get("inserted").get("links")  , sum( (len(file[1])-1 for file in files if file[0] in ["composition.csv"])))
         self.assertEquals(Pill.objects.all().count()             , next((len(file[1])-1 for file in files if file[0] == "pillen.csv")))
         self.assertEquals(Molecule.objects.all().count()         , next((len(file[1])-1 for file in files if file[0] == "molecules.csv")))
+        def get_relationship_reference(pilule_id, mol_id):
+            resp = self.api_client.get('/api/detective/test-pillen/v1/pill/%d/relationships/molecules_contained/%d/' % (pilule_id, mol_id), follow=True, format='json')
+            self.assertValidJSONResponse(resp)
+            resp = json.loads(resp.content)
+            return resp
+        two_items_related = (Pill.objects.get(name="Peer").id, Molecule.objects.get(name="bidule").id)
+        relation          = get_relationship_reference(*two_items_related)
+        self.assertTrue   (int(relation["_relationship"])       > 0)
+        self.assertEquals (relation["_endnodes"]                , list(two_items_related))
+        self.assertIn     ("quantity_(in_milligrams)."          , relation.keys())
+        self.assertEquals (relation["quantity_(in_milligrams)."], "250")
         Pill.objects.all().delete()
         Molecule.objects.all().delete()
+
 # EOF

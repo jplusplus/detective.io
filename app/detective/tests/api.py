@@ -908,22 +908,21 @@ class TopicApiTestCase(ApiTestCase):
         self.assertIn("quantity_(in_milligrams).", relation_pamb.keys()    , relation_pamb)
         self.assertEqual(relation_pamb["quantity_(in_milligrams)."], "20"  , relation_pamb)
         self.assertTrue(int(relation_pamb["_relationship"]) > 0            , relation_pamb)
-        self.assertTrue(relation_pamb["_endnodes"], [pilulea.id, molb.id])
+        self.assertEquals(relation_pamb["_endnodes"], [pilulea.id, molb.id])
         # pila-molc
         self.assertIn("quantity_(in_milligrams).", relation_pamc.keys()    , relation_pamc)
         self.assertEqual(relation_pamc["quantity_(in_milligrams)."], "30"  , relation_pamc)
         self.assertTrue(int(relation_pamc["_relationship"]) > 0            , relation_pamc)
-        self.assertTrue(relation_pamc["_endnodes"], [pilulea.id, molc.id])
+        self.assertEquals(relation_pamc["_endnodes"], [pilulea.id, molc.id])
         # pila-mold
         self.assertNotIn("quantity_(in_milligrams).", relation_pamd.keys() , relation_pamd)
         self.assertTrue(int(relation_pamd["_relationship"]) > 0            , relation_pamd)
-        self.assertTrue(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
+        self.assertEquals(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
         # check if orphans exist. It shouldn't !
         def check_if_orphans_exist():
             orphans_count = 0
             for Model in topic.get_models():
-                fields = utils.get_model_fields(Model)
-                for field in fields:
+                for field in utils.iterate_model_fields(Model):
                     if field["rel_type"] and "through" in field["rules"]:
                         ids= []
                         for entity in Model.objects.all():
@@ -1023,8 +1022,8 @@ class TopicApiTestCase(ApiTestCase):
         patch_two_persons(person_a.id, [person_b.id])
         resp = self.api_client.get('/api/detective/test-family/v1/person/%d/' % (person_a.id), follow=True, format='json')
         resp = json.loads(resp.content)
-        self.assertTrue(len(resp["parent"])        == 1)
-        self.assertTrue(len(resp["is_a_child_of"]) == 0)
+        self.assertTrue(len(resp["parent"])        == 1, len(resp["parent"]))
+        self.assertTrue(len(resp["is_a_child_of"]) == 0, len(resp["is_a_child_of"]))
         person_a.delete()
         person_b.delete()
 
@@ -1149,7 +1148,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpOK(resp)
         updated_topic = Topic.objects.get(slug='test-topic')
         models_list = updated_topic.get_models()
-        self.assertTrue(len(models_list) > 0)
+        self.assertTrue(len(list(models_list)) > 0)
 
     def test_topic_patch_empty_background(self):
         # Use Case: we want to patch a topic with an empty background to remove

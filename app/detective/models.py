@@ -154,17 +154,15 @@ class Topic(models.Model):
         return getattr(self.get_module(), "models", {})
 
     def get_models(self):
-        """ return a list of Model """
+        """ return a generator of Model """
         # FIXME : Very heavy method. Should maybe return an iterator
         # We have to load the topic's model
         models_module = self.get_models_module()
-        models_list   = []
         for i in dir(models_module):
             klass = getattr(models_module, i)
             # Collect every Django's model subclass
             if inspect.isclass(klass) and issubclass(klass, models.Model):
-                models_list.append(klass)
-        return models_list
+                yield klass
 
     def clean(self):
         models.Model.clean(self)
@@ -263,45 +261,29 @@ class Topic(models.Model):
             utils.topic_cache.set(self, cache_key, response, 60*60*12) # cached 12 hours
         return response
 
-    def get_relationship_search(self):
-        # For an unkown reason I can't filter by "is_literal"
-        # @TODO find why!
-        return [ st for st in SearchTerm.objects.filter(topic=self).prefetch_related('topic') if not st.is_literal ]
-
-    def get_relationship_search_output(self):
-        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
-        terms  = self.get_relationship_search()
-        _out = []
-        for model in self.get_models():
-            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() == 'relationship']:
-                _out += [{'name': field['name'], 'label': field['verbose_name'], 'subject': model._meta.object_name}]
-                if "search_terms" in field["rules"]:
-                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
-        return _out + [ output(rs) for rs in terms ]
-
-    def get_literal_search(self):
-        # For an unkown reason I can't filter by "is_literal"
-        return [ st for st in SearchTerm.objects.filter(topic=self).prefetch_related('topic') if st.is_literal ]
-
-    def get_literal_search_output(self):
-        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
-        terms  = self.get_literal_search()
-        _out = []
-        for model in self.get_models():
-            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() != 'relationship']:
-                if "search_terms" in field["rules"]:
-                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
-        return _out + [ output(rs) for rs in terms ]
-
     def get_syntax(self):
-        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
-        syntax = {
+        def syntax_output(m) : return {'name': m.__name__, 'label': m._meta.verbose_name.title()}
+        def output(m)        : return {'name': m.name, 'label': m.label, 'subject': m.subject}
+        def iterate_fields(model, is_relationship):
+            for field in [f for f in utils.iterate_model_fields(model) if (f['type'].lower() == 'relationship') == is_relationship]:
+                if "search_terms" in field["rules"]:
+                    yield [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
+        def output_terms(terms, is_relationship):
+            _out = []
+            for model in self.get_models():
+                _out = list(iterate_fields(model, is_relationship))
+            return _out + [ output(rs) for rs in terms ]
+
+        relationship_terms  = (st for st in SearchTerm.objects.filter(topic=self).prefetch_related('topic') if not st.is_literal)
+        literal_terms       = (st for st in SearchTerm.objects.filter(topic=self).prefetch_related('topic') if st.is_literal)
+        # output
+        syntax  = {
             'subject': {
-                'model': [ output(m) for m in self.get_models() if not hasattr(m, "_is_composite") or not m._is_composite ]
+                'model': [ syntax_output(m) for m in self.get_models() if not hasattr(m, "_is_composite") or not m._is_composite ]
             },
             'predicate': {
-                'relationship': self.get_relationship_search_output(),
-                'literal'     : self.get_literal_search_output()
+                'relationship': list(output_terms(relationship_terms, True )),
+                'literal'     : list(output_terms(literal_terms     , False))
             }
         }
         return syntax
@@ -342,7 +324,7 @@ class Topic(models.Model):
             )
         # If the received identifier describe a literal value
         elif self.is_registered_relationship(predicate["name"]):
-            fields        = utils.get_model_fields( all_models[predicate["subject"]] )
+            fields        = utils.iterate_model_fields( all_models[predicate["subject"]] )
             # Get the field name into the database
             relationships = [ field for field in fields if field["name"] == predicate["name"] ]
             # We didn't find the predicate
@@ -543,7 +525,7 @@ class SearchTerm(models.Model):
             topic_models = self.topic.get_models()
             for model in topic_models:
                 # Retreive every relationship field for this model
-                for f in utils.get_model_fields(model):
+                for f in utils.iterate_model_fields(model):
                     if f["name"] == self.name:
                         field = f
             field["rules"]["through"] = None # Yes, this is ugly but this field is creating Pickling errors.
@@ -660,7 +642,7 @@ def update_topic_cache(*args, **kwargs):
             utils.topic_cache.incr_version(topic)
 
 def delete_entity(*args, **kwargs):
-    fields = utils.get_model_fields(kwargs.get('instance').__class__)
+    fields = utils.iterate_model_fields(kwargs.get('instance').__class__)
     for field in fields:
         if field["rel_type"] and "through" in field["rules"] and field["rules"]["through"] != None:
             Properties = field["rules"]["through"]

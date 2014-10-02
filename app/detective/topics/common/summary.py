@@ -320,8 +320,7 @@ class SummaryResource(Resource):
     def summary_human(self, bundle, request):
         self.method_check(request, allowed=['get'])
 
-        if not "q" in request.GET:
-            raise Exception("Missing 'q' parameter")
+        if not "q" in request.GET: raise Exception("Missing 'q' parameter")
 
         query        = request.GET["q"]
         query        = query.strip()
@@ -426,19 +425,23 @@ class SummaryResource(Resource):
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 
-    def search(self, query):
-        match = unicode(query).lower()
-        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()
+    def search(self, terms):
+        if type(terms) is str:
+            terms = terms.explode(",")
+        matches = []
+        for term in terms:
+            term = unicode(term).lower()
+            term = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', term).strip()
+            matches.append("LOWER(node.name) =~ '.*(%s).*'" % term)
         # Query to get every result
         query = """
             START root=node(0)
             MATCH (node)<-[r:`<<INSTANCE>>`]-(type)<-[`<<TYPE>>`]-(root)
             WHERE HAS(node.name)
-            AND LOWER(node.name) =~ '.*(%s).*'
+            AND (%s)
             AND type.app_label = '%s'
             RETURN ID(node) as id, node.name as name, type.model_name as model
-        """ % (match, self.topic.app_label() )
-
+        """ % ( " OR ".join(matches), self.topic.app_label() )
         return connection.cypher(query).to_dicts()
 
     def ngrams(self, input):
@@ -527,7 +530,7 @@ class SummaryResource(Resource):
         subjects        = []
         objects         = []
         propositions    = []
-        searched_tokens = set()
+        to_search       = set()
         # Picks candidates for subjects and predicates
         for idx, match in enumerate(matches):
             subjects     += match["models"]
@@ -539,19 +542,16 @@ class SummaryResource(Resource):
             if token.startswith('"') and token.endswith('"'):
                 # Remove the quote from the token
                 token = token.replace('"', '')
-                # Store the token as an object
-                objects += self.search(token)[:5]
+                # We may search this term
+                to_search.add(token)
             # Or if the previous word is a preposition
             elif is_object(match, query, token):
-                if token not in searched_tokens and len(token) > 2:
-                    # Looks for entities into the database
-                    entities = self.search(token)[:5]
-                    # Do not search this token again
-                    searched_tokens.add(token)
-                    # We found some result
-                    if len(entities): objects += entities
+                if token not in to_search and len(token) > 2:
+                    # We may search this term
+                    to_search.add(token)
 
-
+        # Search all terms at once
+        objects += self.search(to_search)
         # Only keep predicates that concern our subjects
         subject_names = set([subject['name'] for subject in subjects])
         predicates = filter(lambda predicate: predicate['subject'] in subject_names, predicates)

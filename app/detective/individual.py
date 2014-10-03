@@ -4,8 +4,10 @@ from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache
 from app.detective.topics.common.models import FieldSource
+from app.detective.topics.common.user   import UserResource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
+from django.contrib.auth.models         import User
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
@@ -130,6 +132,7 @@ class IndividualResource(ModelResource):
             url(r"^(?P<resource_name>%s)/search%s$" % params, self.wrap_view('get_search'), name="api_get_search"),
             url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/authors%s$" % params, self.wrap_view('get_authors'), name="api_get_authors"),
             url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/graph%s$" % params, self.wrap_view('get_graph'), name="api_get_graph"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships"),
@@ -689,6 +692,32 @@ class IndividualResource(ModelResource):
         topic_cache.incr_version(request.current_topic)
         # And returns cleaned data
         return self.create_response(request, data)
+
+
+    def get_authors(self, request, **kwargs):
+        pk = kwargs["pk"]
+        # This should be a POST request
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+        # User must be authentication
+        self.is_authenticated(request)
+        bundle = self.build_bundle(request=request)
+        # User allowed to update this model
+        self.authorized_read_detail(self.get_object_list(bundle.request), bundle)
+        # Get the node's data using the rest API
+        try: node = connection.nodes.get(pk)
+        # Node not found
+        except client.NotFoundError: raise Http404("Not found.")
+        # Get the authors ids
+        authors_ids = node.properties.get("_author", [])
+        # Find them in the database
+        authors = User.objects.filter(id__in=authors_ids)
+        resource = UserResource()
+        # Create a bundle with each resources
+        bundles = [resource.build_bundle(obj=a, request=request) for a in authors]
+        data = [resource.full_dehydrate(bundle) for bundle in bundles]
+        # We ask for relationship properties
+        return resource.create_response(request, data)
 
     def get_relationships(self, request, **kwargs):
         # Extract node id from given node uri

@@ -65,6 +65,27 @@
 						</ul>
 					</div>
 				</div>
+
+				<div ng-show="authors && authors.length">
+					<h3>Authors</h3>
+					<div class="panel panel-default">
+						<ul class="list-unstyled">
+							<li ng-repeat="author in authors" class="clearfix padding10">
+								<img ng-src="[[author.profile.avatar]]" width="35" height="35" class="img-circle pull-left right10" />
+								<a ui-sref="user({username: author.username})">
+									[[author.username]]
+									<span class="text-muted pull-right">
+										<ng-pluralize count="author.profile.topics_count"
+											when="{'0': '0 topic',
+										    	   '1': '{} topic',
+										       'other': '{} topics'}">
+										</ng-pluralize>
+									</span>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
 			</div>
 
 			<div class="col-md-8 col-md-pull-4">

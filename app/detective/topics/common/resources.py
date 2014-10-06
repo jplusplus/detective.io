@@ -498,7 +498,8 @@ class TopicResource(ModelResource):
         return bundle
 
     def hydrate_dataset(self, bundle):
-        bundle.data['dataset'] = TopicDataSet.objects.get(pk=bundle.data['dataset'])
+        if 'dataset' in bundle.data:
+            bundle.data['dataset'] = TopicDataSet.objects.get(pk=bundle.data['dataset'])
         return bundle
 
     def full_hydrate(self, bundle):

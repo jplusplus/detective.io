@@ -228,20 +228,27 @@ def process_bulk_parsing_and_save_as_model(topic, files):
             for field in fields:
                 fields_types[field['name']] = field['type']
             field_names = [field['name'] for field in fields]
-            columns = []
+            columns        = []
             for column in header[1:]:
                 column = utils.to_underscores(column)
-                if column is not '':
+                if not column in field_names and not column.endswith("__sources__"):
+                    raise ColumnUnknow(file=file_name, column=column, model=entity, attributes_available=field_names)
+                    break
+                if column.endswith("__sources__"):
+                    column_type = "__sources__"
+                    column = column[:-len("__sources__")]
                     if not column in field_names:
                         raise ColumnUnknow(file=file_name, column=column, model=entity, attributes_available=field_names)
                         break
-                    column_type = fields_types[column]
-                    columns.append((column, column_type))
+                else:
+                    column_type = fields_types.get(column, None)
+                columns.append((column, column_type))
             else:
                 # here, we know that all columns are valid
                 for row in csv_reader:
-                    data = {}
-                    id   = row[0]
+                    data      = {}
+                    sources   = {}
+                    entity_id = row[0]
                     for i, (column, column_type) in enumerate(columns):
                         value = str(row[i+1]).decode('utf-8')
                         # cast value if needed
@@ -265,17 +272,26 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                                 )
                                 errors.append(e)
                                 break
-                            data[column] = value
+                            if column_type == "__sources__":
+                                sources[column] = value
+                            else:
+                                data[column] = value
                     else:
                         # instanciate a model
                         try:
                             item = all_models[entity].objects.create(**data)
                             # map the object with the ID defined in the .csv
-                            id_mapping[(entity, id)] = item
-                            file_reading_progression += 1
+                            id_mapping[(entity, entity_id)] = item
+                            # create sources
+                            from app.detective.topics.common.models import FieldSource
+                            for sourced_field, reference in sources.items():
+                                for ref in reference.split("||"):
+                                    # [{u'field': u'debut_date', u'reference': u'http://staging.detective.io/admin/'}]
+                                    FieldSource.objects.create(individual=item.id, field=sourced_field, reference=ref)
                             # FIXME: job can be accessed somewhere else (i.e detective/topics/common/jobs.py:JobResource)
                             # Concurrent access are not secure here.
                             # For now we refresh the job just before saving it.
+                            file_reading_progression += 1
                             if job:
                                 job.refresh()
                                 job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100

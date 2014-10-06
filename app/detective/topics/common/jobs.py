@@ -319,7 +319,7 @@ def process_bulk_parsing_and_save_as_model(topic, files):
             for row in csv_reader:
                 id_from    = row[0]
                 id_to      = row[2]
-                properties = row[3:]
+                properties = row[3:].decode('utf-8')
                 if id_to and id_from:
                     try:
                         instance_from = id_mapping[(model_from, id_from)]

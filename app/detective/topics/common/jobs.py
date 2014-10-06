@@ -10,21 +10,22 @@
 # Creation : 20-Jan-2014
 # Last mod : 02-Oct-2014
 # -----------------------------------------------------------------------------
-from tastypie.resources         import Resource
-from django.core.exceptions     import ObjectDoesNotExist
-from tastypie                   import fields
-from rq.job                     import Job
-from django.contrib.auth.models import User
-from rq                         import get_current_job
-from rq.exceptions              import NoSuchJobError
-from django.utils.timezone      import utc
-from neo4django.db              import connection
-from django.conf                import settings
-from django.core.paginator      import InvalidPage
-from django.core.files.storage  import default_storage
-from django.core.files.base     import ContentFile
-from cStringIO                  import StringIO
-import app.detective.utils      as utils
+from tastypie.resources                 import Resource
+from django.core.exceptions             import ObjectDoesNotExist
+from tastypie                           import fields
+from rq.job                             import Job
+from django.contrib.auth.models         import User
+from rq                                 import get_current_job
+from rq.exceptions                      import NoSuchJobError
+from django.utils.timezone              import utc
+from neo4django.db                      import connection
+from django.conf                        import settings
+from django.core.paginator              import InvalidPage
+from django.core.files.storage          import default_storage
+from django.core.files.base             import ContentFile
+from cStringIO                          import StringIO
+from app.detective.topics.common.models import FieldSource
+import app.detective.utils              as utils
 import django_rq
 import json
 import time
@@ -283,10 +284,8 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                             # map the object with the ID defined in the .csv
                             id_mapping[(entity, entity_id)] = item
                             # create sources
-                            from app.detective.topics.common.models import FieldSource
                             for sourced_field, reference in sources.items():
                                 for ref in reference.split("||"):
-                                    # [{u'field': u'debut_date', u'reference': u'http://staging.detective.io/admin/'}]
                                     FieldSource.objects.create(individual=item.id, field=sourced_field, reference=ref)
                             # FIXME: job can be accessed somewhere else (i.e detective/topics/common/jobs.py:JobResource)
                             # Concurrent access are not secure here.

@@ -18,23 +18,49 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
                 deferred.resolve(data)
             # Return a deffered object
             deferred.promise
+        datasets: ['$q', 'Page', 'TopicDataSet', ($q, Page, TopicDataSet) ->
+            deferred = do $q.defer
+            notFound = ->
+                do deferred.reject
+                $state.go "404"
+                deferred
+            forbidden = ->
+                do deferred.reject
+                $state.go "403"
+                deferred
+            Page.loading yes
+            TopicDataSet.get (data) =>
+                deferred.resolve data
+            deferred.promise
+        ]
 
-    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location', 'User', 'skeletons']
+    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location', 'User', 'skeletons', 'datasets']
 
-    # Note: The 4 first parameters need to stay in that order if we want the
+    # Note: The 5 first parameters need to stay in that order if we want the
     # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
-    constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @timeout, @location, @User, skeletons)->
+    constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @timeout, @location, @User, skeletons, datasets)->
         super
         @setCreatingMode()
+
         @scope.skeletons = skeletons
         @scope.selected_skeleton = {}
+
+        @scope.all_datasets = datasets
+        @scope.datasets = []
+        @scope.selected_dataset = {}
+
         @scope.topic = {}
+
         @scope.goToPlans = @goToPlans
         @scope.selectSkeleton = @selectSkeleton
-        @scope.isSelected = @isSelected
+        @scope.selectDataSet = @selectDataSet
+        @scope.isSkeletonSelected = @isSkeletonSelected
+        @scope.isDataSetSelected = @isDataSetSelected
         @scope.isTeaserSkeleton = @isTeaserSkeleton
         @scope.hasSelectedSkeleton = @hasSelectedSkeleton
-        @scope.shouldShowForm = @hasSelectedSkeleton
+        @scope.hasSelectedDataSet = @hasSelectedDataSet
+        @scope.shouldShowDataSets = @hasSelectedSkeleton
+        @scope.shouldShowForm = => (do @hasSelectedSkeleton) and (do @hasSelectedDataSet)
 
         if @userMaxReached()
             @scope.max_reached = true
@@ -44,7 +70,9 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.user = @User
 
         @Page.title "Create a new investigation"
+
         @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
+        @scope.$on @EVENTS.dataset.selected, @onDataSetSelected
 
     # nav & scope methods
     goToPlans: =>
@@ -57,16 +85,27 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         else
             @goToPlans()
 
+    selectDataSet: (dataset) =>
+        @scope.selected_dataset = dataset
+        @rootScope.$broadcast @EVENTS.dataset.selected
+
     isTeaserSkeleton: (skeleton)=>
         has_free_plan = @User.profile.plan is 'free'
         has_free_plan and skeleton.enable_teasing
 
-    isSelected: (skeleton)=>
+    isSkeletonSelected: (skeleton)=>
         return false unless @scope.selected_skeleton?
         skeleton.id == @scope.selected_skeleton.id
 
+    isDataSetSelected: (dataset) =>
+        return no unless @scope.selected_dataset? and @scope.selected_dataset.id?
+        dataset.id is @scope.selected_dataset.id
+
     hasSelectedSkeleton: =>
         @scope.selected_skeleton? and @scope.selected_skeleton.id?
+
+    hasSelectedDataSet: =>
+        @scope.selected_dataset? and @scope.selected_dataset.id?
 
     onSkeletonSelected: =>
         # safe init
@@ -75,6 +114,17 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         # to this new topic in API.
         @scope.topic.topic_skeleton = @scope.selected_skeleton.id
         @scope.topic.about = @scope.selected_skeleton.picture_credits
+        # Filter datasets
+        @scope.datasets = do @getFilteredDataSets
+        # Angular scroll
+        @location.search({scrollTo: 'topic-datasets'})
+        @timeout(=>
+                @rootScope.$broadcast @EVENTS.trigger.scroll
+            , 250
+        )
+
+    onDataSetSelected: =>
+        @scope.topic.dataset = @scope.selected_dataset.id
         # Angular scroll
         @location.search({scrollTo: 'topic-form'})
         @timeout(=>
@@ -104,6 +154,12 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
             if response.status is 401
                 @scope.error = "Your not authorized to perform this action."
         )
+
+    getFilteredDataSets: =>
+        if (not @scope.selected_skeleton?) or (not @scope.selected_skeleton.id?)
+            []
+        else
+            _.filter @scope.all_datasets, (e) => @scope.selected_skeleton.id in e.skeletons
 
 
 angular.module('detective.controller').controller 'createTopicCtrl', CreateTopicCtrl

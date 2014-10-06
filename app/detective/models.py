@@ -2,7 +2,6 @@ from app.detective              import utils
 from app.detective.exceptions   import UnavailableImage
 from app.detective.permissions  import create_permissions, remove_permissions
 from app.detective.parser       import schema
-from app.detective.topics.common.jobs import unzip_and_process_bulk_parsing_and_save_as_model
 
 from django                     import forms
 from django.conf                import settings
@@ -686,6 +685,7 @@ def apply_dataset(*args, **kwargs):
         dataset = getattr(instance, 'dataset', None)
         if dataset != None:
             if dataset.zip_file != None and dataset.zip_file != "":
+                from app.detective.topics.common.jobs import unzip_and_process_bulk_parsing_and_save_as_model
                 dataset.zip_file.open('r')
                 # enqueue the parsing job
                 queue = django_rq.get_queue('default', default_timeout=7200)

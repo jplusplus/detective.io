@@ -433,16 +433,18 @@ class SummaryResource(Resource):
             term = unicode(term).lower()
             term = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', term).strip()
             matches.append("LOWER(node.name) =~ '.*(%s).*'" % term)
-        print matches
         # Query to get every result
         query = """
             START root=node(0)
             MATCH (node)<-[r:`<<INSTANCE>>`]-(type)<-[`<<TYPE>>`]-(root)
-            WHERE HAS(node.name)
-            AND (%s)
+            WHERE HAS(node.name) """
+        if matches:
+            query += """
+            AND (%s) """ % ( " OR ".join(matches))
+        query += """
             AND type.app_label = '%s'
             RETURN ID(node) as id, node.name as name, type.model_name as model
-        """ % ( " OR ".join(matches), self.topic.app_label() )
+        """ % (self.topic.app_label())
         return connection.cypher(query).to_dicts()
 
     def ngrams(self, input):

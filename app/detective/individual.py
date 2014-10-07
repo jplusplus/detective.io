@@ -99,7 +99,7 @@ class FieldSourceResource(ModelResource):
     class Meta:
         queryset = FieldSource.objects.all()
         resource_name = 'auth/user'
-        excludes = ['individual', 'id']
+        excludes = ['individual',]
 
     def dehydrate(self, bundle):
         del bundle.data["resource_uri"]
@@ -467,41 +467,34 @@ class IndividualResource(ModelResource):
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
 
-    def patch_sources(self, sources, node):
-        if sources == None: sources = []
+    def patch_sources(self, sources_data, node):
+        # import time
+        # start_time = time.time()
+        if sources_data == None: sources_data = []
 
-        def arr_no_dict_dup(in_arr):
-            out_arr = []
-            for el in in_arr:
-                existing = len(
-                        filter(
-                            lambda t: t['field'] == el['field'] and el['reference'] == t['reference'],
-                            out_arr
-                        )
-                    ) > 0
-                if not existing:
-                    out_arr.append(el)
-            return out_arr
 
-        # remove empty references and duplicates
-        sources = filter(lambda x: x['reference'] not in [None, ''], arr_no_dict_dup(sources))
+        l_source_with_id    = lambda src: src.get('id') != None
+        l_source_without_id = lambda src: not l_source_with_id(src)
 
-        old_sources = map(lambda x: {'field':x.field, 'reference':x.reference}, FieldSource.objects.filter(individual=node.id))
+        sources_with_id    = filter(l_source_with_id, sources_data)
+        sources_without_id = filter(l_source_without_id, sources_data)
 
-        # filter sources we need to add
-        sources_to_add = filter(lambda x: x not in old_sources, sources)
+        sources_data_ids   = [src.get('id') for src in sources_data]
 
-        # filter sources we need to delete
-        sources_to_delete = filter(lambda x: x not in sources, old_sources)
+        individual_sources = FieldSource.objects.filter(individual=node.id)
 
-        # delete what we need
-        for source in sources_to_delete:
-            FieldSource.objects.filter(individual=node.id, **source).delete()
+        # existing sources to update
+        for ext_source in sources_with_id:
+            individual_sources.filter(id=ext_source['id'])\
+                             .update(reference=ext_source['reference'])
 
-        # add what we need
-        for source in sources_to_add:
-            FieldSource.objects.create(individual=node.id, **source)
+        # sources to create
+        for new_source in sources_without_id:
+            individual_sources.create(**new_source)
 
+        # sources to delete
+        individual_sources.exclude(pk__in=sources_data_ids).delete()
+        # print "Took %f to patch sources" % (time.time() - start_time)
 
     def validate(self, data, model=None, allow_missing=False):
         if model is None: model = self.get_model()

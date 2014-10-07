@@ -7,7 +7,7 @@
 from django.test                import TestCase
 from django.contrib.auth.models import User
 from app.detective.models       import Topic
-from app.detective.utils        import findwhere
+from app.detective.utils        import where
 
 class CommonTestCase(TestCase):
     fixtures = [ 'app/detective/fixtures/default_skeletons.json', ]
@@ -46,7 +46,7 @@ class CommonTestCase(TestCase):
             {'c': 2, 'test': 'notok'}
         ]
 
-        els = findwhere(arr, {'test': 'ok'})
+        els = where(arr, {'test': 'ok'})
         self.assertTrue(arr[0] in els)
         self.assertTrue(arr[1] in els)
 

@@ -61,8 +61,7 @@
                        placeholder="[[search.topic.search_placeholder]]"
                        tt-typeahead
                        tt-model="search.selectedIndividual"
-                       tt-disable-entity-creation="!shouldShowAddEntity()"
-                       tt-empty-results-selected="search.goToContribute()"
+                       tt-disable-entity-creation="true"
                        tt-individual="'summary'"
                        tt-topic="search.topic.author.username + '/' + search.topic.slug"
                        tt-endpoint="'human'"

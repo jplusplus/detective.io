@@ -54,7 +54,7 @@ class Search(object):
         """
             For now, a proposition follow the form
             <subject> <predicat> <object>
-            Where a <subject>, is an "Named entity" or a Model
+            Where a <subject>, is a "Named entity" or a Model
             a <predicat> is a relationship type
             and an <object> is a "Named entity" or a Model.
             Later, as follow RDF standard, an <object> could be any data.
@@ -69,8 +69,6 @@ class Search(object):
             subjects     += match["models"]
             predicates   += match["relationships"] + match["literals"]
             token         = match["token"]
-            # True when the current token is the last of the series
-            is_last_token = query.endswith(token)
             # Objects are detected when they start and end by double quotes
             if token.startswith('"') and token.endswith('"'):
                 # Remove the quote from the token

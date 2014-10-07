@@ -28,6 +28,8 @@ import random
 import re
 import string
 import urllib2
+import django_rq
+import base64
 
 # -----------------------------------------------------------------------------
 #
@@ -83,6 +85,52 @@ def validate_ontology_as_json(value):
     except ValidationError, e:
         raise forms.ValidationError(e.message)
 
+class TopicSkeleton(models.Model):
+    title           = models.CharField(max_length=250, help_text="Title of the skeleton")
+    description     = HTMLField(null=True, blank=True, help_text="A small description of the skeleton")
+    picture         = models.ImageField(upload_to="topics-skeletons", null=True, blank=True, help_text='The default picture for this skeleton')
+    picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
+    schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
+    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
+    target_plans    = models.CharField(max_length=60)
+    tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
+    enable_teasing  = models.BooleanField(default=False, help_text='Show this skeleton as a teasing skeleton for free user')
+
+    def description_stripped(self):
+        return strip_tags(self.description)
+
+
+    def selected_plans(self):
+        selected_plans = []
+        for plan in PLANS_CHOICES:
+            if plan[0] in self.target_plans:
+                selected_plans.append(plan[0])
+        return selected_plans
+
+    def __str__(self):
+        return self.title
+
+class TopicDataSet(models.Model):
+    title = models.CharField(max_length=250, help_text="Title of the dataset")
+    description = HTMLField(null=True, blank=True, help_text="A small description of the dataset")
+    picture = models.ImageField(upload_to="topics-dataset/pictures", null=True, blank=True, help_text='Picture for this dataset')
+    target_plans = models.CharField(max_length=60)
+    target_skeletons = models.ManyToManyField(TopicSkeleton, related_name="datasets")
+    zip_file = models.FileField(upload_to="topics-dataset/zips", help_text='The actual dataset', null=True, blank=True)
+
+    def description_stripped(self):
+        return strip_tags(self.description)
+
+    def selected_skeletons(self):
+        return [x.__str__() for x in self.target_skeletons.all()]
+
+    def selected_plans(self):
+        selected_plans = []
+        for plan in PLANS_CHOICES:
+            if plan[0] in self.target_plans:
+                selected_plans.append(plan[0])
+        return selected_plans
+
 class Topic(models.Model):
     background_upload_to='topics'
     class Meta:
@@ -103,6 +151,8 @@ class Topic(models.Model):
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
     ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
     ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True, validators=[validate_ontology_as_json])
+
+    dataset = models.ForeignKey(TopicDataSet, blank=True, null=True)
 
     def __unicode__(self):
         return self.title
@@ -419,28 +469,6 @@ class TopicToken(models.Model):
                 pass
         super(TopicToken, self).save()
 
-class TopicSkeleton(models.Model):
-    title           = models.CharField(max_length=250, help_text="Title of the skeleton")
-    description     = HTMLField(null=True, blank=True, help_text="A small description of the skeleton")
-    picture         = models.ImageField(upload_to="topics-skeletons", null=True, blank=True, help_text='The default picture for this skeleton')
-    picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
-    schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
-    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
-    target_plans    = models.CharField(max_length=60)
-    tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
-    enable_teasing  = models.BooleanField(default=False, help_text='Show this skeleton as a teasing skeleton for free user')
-
-    def description_stripped(self):
-        return strip_tags(self.description)
-
-
-    def selected_plans(self):
-        selected_plans = []
-        for plan in PLANS_CHOICES:
-            if plan[0] in self.target_plans:
-                selected_plans.append(plan[0])
-        return selected_plans
-
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
     title      = models.CharField(max_length=250, help_text="Title of your article.")
@@ -650,9 +678,26 @@ def delete_entity(*args, **kwargs):
                 info.delete()
     update_topic_cache(*args, **kwargs)
 
+def apply_dataset(*args, **kwargs):
+    assert kwargs.get('instance') # We need an instance...
+    if kwargs.get('created', False): # We apply the dataset only on creation
+        instance = kwargs.get('instance')
+        dataset = getattr(instance, 'dataset', None)
+        if dataset != None:
+            if dataset.zip_file != None and dataset.zip_file != "":
+                from app.detective.topics.common.jobs import unzip_and_process_bulk_parsing_and_save_as_model
+                dataset.zip_file.open('r')
+                # enqueue the parsing job
+                queue = django_rq.get_queue('default', default_timeout=7200)
+                job   = queue.enqueue(unzip_and_process_bulk_parsing_and_save_as_model, instance, base64.b64encode(dataset.zip_file.read()))
+                dataset.zip_file.close()
+            instance.dataset = None
+            instance.save()
+
 signals.post_save.connect(user_created         , sender=User)
 signals.post_save.connect(update_topic_cache   , sender=Topic)
 signals.post_save.connect(update_permissions   , sender=Topic)
+signals.post_save.connect(apply_dataset        , sender=Topic)
 signals.post_delete.connect(update_topic_cache , sender=Topic)
 signals.post_delete.connect(remove_permissions , sender=Topic)
 

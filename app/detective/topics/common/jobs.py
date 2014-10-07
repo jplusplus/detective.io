@@ -34,6 +34,9 @@ import logging
 import re
 import zipfile
 import csv
+import tempfile
+import os
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -149,12 +152,52 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
 #    JOB - BULK UPLOAD
 #
 # -----------------------------------------------------------------------------
-def process_bulk_parsing_and_save_as_model(topic, files):
+def unzip_and_process_bulk_parsing_and_save_as_model(topic, zip_content):
+    start_time = time.time()
+
+    try:
+        (fd, zip_file) = tempfile.mkstemp()
+        with open(zip_file, 'w') as tmp:
+            tmp.write(base64.b64decode(zip_content))
+
+        # Create a tempdir
+        extraction_dir = tempfile.mkdtemp()
+
+        # We extract everything in the tempdir
+        with zipfile.ZipFile(zip_file, 'r') as opened_zip_file:
+            opened_zip_file.extractall(extraction_dir)
+        os.close(fd)
+
+        # Get all lines from all .csv in big nested arrays
+        opened_files = [open(os.path.join(extraction_dir, f), 'r') for f in os.listdir(extraction_dir)]
+        files = [(opened_file.name, opened_file.readlines()) for opened_file in opened_files]
+
+        # Close and delete every tmp file / dir
+        for opened_file in opened_files:
+            opened_file.close()
+            os.remove(os.path.join(extraction_dir, opened_file.name))
+        os.rmdir(extraction_dir)
+        os.remove(zip_file)
+
+        # Process!
+        process_bulk_parsing_and_save_as_model(topic, files, start_time)
+    except Exception as e:
+        import traceback
+        logger.error(traceback.format_exc())
+        if e.__dict__:
+            message = str(e.__dict__)
+        else:
+            message = e.message
+        return {
+            "errors" : [{e.__class__.__name__ : message}]
+        }
+
+def process_bulk_parsing_and_save_as_model(topic, files, start_time=None):
     """
     Job which parses uploaded content, validates and saves them as model
     """
 
-    start_time               = time.time()
+    start_time               = start_time != None and start_time or time.time()
     entities                 = {}
     relations                = []
     errors                   = []

@@ -18,6 +18,19 @@ logger = logging.getLogger(__name__)
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
 
+def findwhere(coll, cond_dict):
+    def get_el_val(el, k):
+        if callable(k):
+            return k(el)
+        else:
+            if type(el) is type({}):
+                return el.get(k)
+
+    l_find   = lambda el: all(
+        v() == get_el_val(el, k) if callable(v) else get_el_val(el, k) == v for k,v in cond_dict.items()
+    )
+    return filter(l_find, coll)
+
 def create_node_model(name, fields=None, app_label='', module='', options=None):
     """
     Create specified model

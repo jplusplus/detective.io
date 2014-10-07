@@ -2,7 +2,7 @@
 from .errors                import ForbiddenError, UnauthorizedError
 from app.detective.models   import Topic, SearchTerm
 from app.detective.neomatch import Neomatch
-from app.detective          import graph
+from app.detective          import graph, search
 from difflib                import SequenceMatcher
 from django.core.paginator  import Paginator, InvalidPage
 from django.http            import Http404, HttpResponse
@@ -426,26 +426,7 @@ class SummaryResource(Resource):
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 
     def search(self, terms):
-        if type(terms) in [str, unicode]:
-            terms = [terms]
-        matches = []
-        for term in terms:
-            term = unicode(term).lower()
-            term = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', term).strip()
-            matches.append("LOWER(node.name) =~ '.*(%s).*'" % term)
-        # Query to get every result
-        query = """
-            START root=node(0)
-            MATCH (node)<-[r:`<<INSTANCE>>`]-(type)<-[`<<TYPE>>`]-(root)
-            WHERE HAS(node.name) """
-        if matches:
-            query += """
-            AND (%s) """ % ( " OR ".join(matches))
-        query += """
-            AND type.app_label = '%s'
-            RETURN ID(node) as id, node.name as name, type.model_name as model
-        """ % (self.topic.app_label())
-        return connection.cypher(query).to_dicts()
+        return search.by_name(terms, self.topic.app_label())
 
     def ngrams(self, input):
         input = input.split(' ')

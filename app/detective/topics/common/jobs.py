@@ -458,6 +458,7 @@ def process_bulk_parsing_and_save_as_model(topic, files, start_time=None):
         if job:
             job.refresh()
             job.meta["objects_to_save"] = len(id_mapping)
+            job.save()
         for item in id_mapping.values():
             item.save()
             saved += 1

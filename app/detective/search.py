@@ -32,28 +32,6 @@ class Search(object):
         return connection.cypher(query).to_dicts()
 
 
-    def ngrams(self, input):
-        input = input.split(' ')
-        output = []
-        end = len(input)
-        for n in range(1, end+1):
-            for i in range(len(input)-n+1):
-                output.append(input[i:i+n])
-        return output
-
-    def get_close_labels(self, token, lst, ratio=0.6):
-        """
-            Look for the given token into the list using labels
-        """
-        matches = []
-        for item in lst:
-            cpr = item["label"]
-            relevance = SequenceMatcher(None, token, cpr).ratio()
-            if relevance >= ratio:
-                item["relevance"] = relevance
-                matches.append(item)
-        return matches
-
     def find_matches(self, query):
         # Group ngram by following string
         ngrams  = [' '.join(x) for x in self.ngrams(query) ]
@@ -81,39 +59,6 @@ class Search(object):
             and an <object> is a "Named entity" or a Model.
             Later, as follow RDF standard, an <object> could be any data.
         """
-        def remove_duplicates(lst):
-            seen = set()
-            new_list = []
-            for item in lst:
-                if type(item) is dict:
-                    # Create a hash of the dictionary
-                    obj = hash(frozenset(item.items()))
-                else:
-                    obj = hash(item)
-                if obj not in seen:
-                    seen.add(obj)
-                    new_list.append(item)
-            return new_list
-
-        def is_preposition(token=""):
-            return unicode(token).lower() in ["aboard", "about", "above", "across", "after", "against",
-            "along", "amid", "among", "anti", "around", "as", "at", "before", "behind", "below",
-            "beneath", "beside", "besides", "between", "beyond", "but", "by", "concerning",
-            "considering",  "despite", "down", "during", "except", "excepting", "excluding",
-            "following", "for", "from", "in", "inside", "into", "like", "minus", "near", "of",
-            "off", "on", "onto", "opposite", "outside", "over", "past", "per", "plus", "regarding",
-            "round", "save", "since", "than", "through", "to", "toward", "towards", "under",
-            "underneath", "unlike", "until", "up", "upon", "versus", "via", "with", "within", "without"]
-
-        def previous_word(sentence="", base=""):
-            if base == "" or sentence == "": return ""
-            parts = sentence.split(base)
-            return parts[0].strip().split(" ")[-1] if len(parts) else None
-
-        def is_object(match, query, token):
-            previous = previous_word(query, token)
-            return is_preposition(previous) or previous.isdigit() or token.isnumeric() or token == query
-
         predicates      = []
         subjects        = []
         objects         = []
@@ -133,7 +78,7 @@ class Search(object):
                 # We may search this term
                 to_search.add(token)
             # Or if the previous word is a preposition
-            elif is_object(match, query, token):
+            elif self.is_object(match, query, token):
                 if token not in to_search and len(token) > 2:
                     # We may search this term
                     to_search.add(token)
@@ -156,9 +101,9 @@ class Search(object):
         if not len(objects): objects = [""]
 
         # Generate proposition using RDF's parts
-        for subject in remove_duplicates(subjects):
-            for predicate in remove_duplicates(predicates):
-                for obj in remove_duplicates(objects):
+        for subject in self.remove_duplicates(subjects):
+            for predicate in self.remove_duplicates(predicates):
+                for obj in self.remove_duplicates(objects):
                     pred_sub = predicate.get("subject", None)
                     # If the predicate has a subject
                     # and it matches to the current one
@@ -190,7 +135,7 @@ class Search(object):
                         })
 
         # It might be a classic search
-        for obj in [ obj for obj in remove_duplicates(objects) if 'id' in obj ]:
+        for obj in [ obj for obj in self.remove_duplicates(objects) if 'id' in obj ]:
             # Build the label
             label = obj.get("name", None)
             propositions.append({
@@ -213,3 +158,64 @@ class Search(object):
             syntax = self.topic.get_syntax()
             self.syntax = syntax
         return self.syntax
+
+    @staticmethod
+    def ngrams(input):
+        input = input.split(' ')
+        output = []
+        end = len(input)
+        for n in range(1, end+1):
+            for i in range(len(input)-n+1):
+                output.append(input[i:i+n])
+        return output
+
+    @staticmethod
+    def remove_duplicates(lst):
+        seen = set()
+        new_list = []
+        for item in lst:
+            if type(item) is dict:
+                # Create a hash of the dictionary
+                obj = hash(frozenset(item.items()))
+            else:
+                obj = hash(item)
+            if obj not in seen:
+                seen.add(obj)
+                new_list.append(item)
+        return new_list
+
+    @staticmethod
+    def is_preposition(token=""):
+        return unicode(token).lower() in ["aboard", "about", "above", "across", "after", "against",
+        "along", "amid", "among", "anti", "around", "as", "at", "before", "behind", "below",
+        "beneath", "beside", "besides", "between", "beyond", "but", "by", "concerning",
+        "considering",  "despite", "down", "during", "except", "excepting", "excluding",
+        "following", "for", "from", "in", "inside", "into", "like", "minus", "near", "of",
+        "off", "on", "onto", "opposite", "outside", "over", "past", "per", "plus", "regarding",
+        "round", "save", "since", "than", "through", "to", "toward", "towards", "under",
+        "underneath", "unlike", "until", "up", "upon", "versus", "via", "with", "within", "without"]
+
+    @staticmethod
+    def previous_word(sentence="", base=""):
+        if base == "" or sentence == "": return ""
+        parts = sentence.split(base)
+        return parts[0].strip().split(" ")[-1] if len(parts) else None
+
+    @staticmethod
+    def is_object(match, query, token):
+        previous = Search.previous_word(query, token)
+        return Search.is_preposition(previous) or previous.isdigit() or token.isnumeric() or token == query
+
+    @staticmethod
+    def get_close_labels(token, lst, ratio=0.6):
+        """
+            Look for the given token into the list using labels
+        """
+        matches = []
+        for item in lst:
+            cpr = item["label"]
+            relevance = SequenceMatcher(None, token, cpr).ratio()
+            if relevance >= ratio:
+                item["relevance"] = relevance
+                matches.append(item)
+        return matches

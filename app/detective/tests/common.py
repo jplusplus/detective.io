@@ -39,7 +39,7 @@ class CommonTestCase(TestCase):
         self.delete_user(user)
         self.assertFalse(Topic.objects.filter(author=user).exists())
 
-    def test_findwhere(self):
+    def test_where(self):
         arr = [
             {'a': 0, 'test': 'ok'},
             {'b': 1, 'test': 'ok'},
@@ -49,6 +49,16 @@ class CommonTestCase(TestCase):
         els = where(arr, {'test': 'ok'})
         self.assertTrue(arr[0] in els)
         self.assertTrue(arr[1] in els)
+
+    def test_findwhere(self):
+        arr = [
+            {'a': 0, 'test': 'ok'},
+            {'b': 1, 'test': 'ok'},
+            {'c': 2, 'test': 'notok'}
+        ]
+
+        res = findwhere(arr, {'test': 'ok'})
+        self.assertTrue(res == arr[0])
 
 
 

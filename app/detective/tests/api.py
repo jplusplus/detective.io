@@ -908,22 +908,21 @@ class TopicApiTestCase(ApiTestCase):
         self.assertIn("quantity_(in_milligrams).", relation_pamb.keys()    , relation_pamb)
         self.assertEqual(relation_pamb["quantity_(in_milligrams)."], "20"  , relation_pamb)
         self.assertTrue(int(relation_pamb["_relationship"]) > 0            , relation_pamb)
-        self.assertTrue(relation_pamb["_endnodes"], [pilulea.id, molb.id])
+        self.assertEquals(relation_pamb["_endnodes"], [pilulea.id, molb.id])
         # pila-molc
         self.assertIn("quantity_(in_milligrams).", relation_pamc.keys()    , relation_pamc)
         self.assertEqual(relation_pamc["quantity_(in_milligrams)."], "30"  , relation_pamc)
         self.assertTrue(int(relation_pamc["_relationship"]) > 0            , relation_pamc)
-        self.assertTrue(relation_pamc["_endnodes"], [pilulea.id, molc.id])
+        self.assertEquals(relation_pamc["_endnodes"], [pilulea.id, molc.id])
         # pila-mold
         self.assertNotIn("quantity_(in_milligrams).", relation_pamd.keys() , relation_pamd)
         self.assertTrue(int(relation_pamd["_relationship"]) > 0            , relation_pamd)
-        self.assertTrue(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
+        self.assertEquals(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
         # check if orphans exist. It shouldn't !
         def check_if_orphans_exist():
             orphans_count = 0
             for Model in topic.get_models():
-                fields = utils.get_model_fields(Model)
-                for field in fields:
+                for field in utils.iterate_model_fields(Model):
                     if field["rel_type"] and "through" in field["rules"]:
                         ids= []
                         for entity in Model.objects.all():
@@ -1023,61 +1022,35 @@ class TopicApiTestCase(ApiTestCase):
         patch_two_persons(person_a.id, [person_b.id])
         resp = self.api_client.get('/api/detective/test-family/v1/person/%d/' % (person_a.id), follow=True, format='json')
         resp = json.loads(resp.content)
-        self.assertTrue(len(resp["parent"])        == 1)
-        self.assertTrue(len(resp["is_a_child_of"]) == 0)
+        self.assertTrue(len(resp["parent"])        == 1, len(resp["parent"]))
+        self.assertTrue(len(resp["is_a_child_of"]) == 0, len(resp["is_a_child_of"]))
         person_a.delete()
         person_b.delete()
 
     def test_export_csv(self):
         from django_rq import get_worker
-        export_resp1 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
-        self.assertValidJSONResponse(export_resp1)
-        export_resp1 = json.loads(export_resp1.content)
-        self.assertEqual(export_resp1["status"], "enqueued", export_resp1)
-        export_resp2 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
-        export_resp2 = json.loads(export_resp2.content)
-        # we have the same token
-        self.assertEqual(export_resp1["token"], export_resp2["token"], export_resp2)
-        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/" % (export_resp2["token"]))
-        self.assertValidJSONResponse(job_resp)
-        job_resp     = json.loads(job_resp.content)
-        # processes all jobs then stop
-        get_worker("default", "high").work(burst=True)
-        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=1" % (export_resp2["token"]))
-        job_resp     = json.loads(job_resp.content)
-        self.assertEqual(job_resp["status"], "finished", job_resp)
-        result1      = json.loads(job_resp["result"])
-        self.assertIsNotNone(result1["file_name"], job_resp)
-        self.assertNotEqual(result1["file_name"], "")
-        # ask again to check if it's the same file (thanks to the cache)
-        export_resp1 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
-        export_resp1 = json.loads(export_resp1.content)
-        get_worker("default", "high").work(burst=True)
-        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=1" % (export_resp1["token"]))
-        job_resp     = json.loads(job_resp.content)
-        result2      = json.loads(job_resp["result"])
-        self.assertEqual(result1["file_name"], result2["file_name"])
-        # update an item and check if the file name change
-        data = {
-            'website_url': 'http://jpioupiou.org',
-        }
-        args = {
-            'scope'      : 'detective/energy',
-            'model_id'   : self.jpp.id,
-            'model_name' : 'organization',
-            'patch_data' : data
-        }
-        self.patch_individual(**args)
-        export_resp3 = self.api_client.get('/api/detective/energy/v1/summary/export/', format='json')
-        export_resp3 = json.loads(export_resp3.content)
-        self.assertNotEqual(export_resp1["token"], export_resp3["token"])
-        get_worker("default", "high").work(burst=True)
-        job_resp     = self.api_client.get("/api/detective/common/v1/jobs/%s/?timestamp=2" % (export_resp3["token"]))
-        job_resp     = json.loads(job_resp.content)
-        result3      = json.loads(job_resp["result"])
-        self.assertIsNotNone(result3["file_name"], job_resp)
-        self.assertNotEqual(result3["file_name"], "")
-        self.assertNotEqual(result1["file_name"], result3["file_name"])
+
+        def ask_for_an_export():
+            export_resp = json.loads(self.api_client.get('/api/detective/test-pillen/v1/summary/export/', format='json').content)
+            self.assertEqual    ( export_resp["status"], "enqueued", export_resp)
+            self.assertIsNotNone( export_resp["token"]             , export_resp)
+            get_worker("default", "high").work(burst=True)
+            # ask the job
+            job_response = json.loads(self.api_client.get("/api/detective/common/v1/jobs/%s/" % (export_resp["token"])).content)
+            job_result   = json.loads(job_response["result"])
+            self.assertIsNotNone(job_result["file_name"], job_result)
+            return job_result["file_name"], export_resp["token"]
+
+        topic    = Topic.objects.get(slug='test-pillen')
+        models   = topic.get_models_module()
+        # get models
+        Pill                                     = models.Pill
+        file_name1, token1 = ask_for_an_export()
+        pill = Pill.objects.create(name="new pill")
+        file_name2, token2 = ask_for_an_export()
+        self.assertNotEqual(file_name1, file_name2)
+        self.assertNotEqual(token1, token2)
+        pill.delete()
 
     def test_topic_entities_count(self):
         topic = Topic.objects.get(slug='test-pillen')
@@ -1175,7 +1148,7 @@ class TopicApiTestCase(ApiTestCase):
         self.assertHttpOK(resp)
         updated_topic = Topic.objects.get(slug='test-topic')
         models_list = updated_topic.get_models()
-        self.assertTrue(len(models_list) > 0)
+        self.assertTrue(len(list(models_list)) > 0)
 
     def test_topic_patch_empty_background(self):
         # Use Case: we want to patch a topic with an empty background to remove

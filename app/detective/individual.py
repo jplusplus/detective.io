@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, get_model_fields
-from app.detective.utils                import get_model_fields as utils_get_model_fields
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache
 from app.detective.topics.common.models import FieldSource
+from app.detective.topics.common.user   import UserResource
 from app.detective.models               import Topic
 from django.conf.urls                   import url
+from django.contrib.auth.models         import User
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
@@ -83,9 +84,6 @@ class IndividualAuthorization(DjangoAuthorization):
 
     def delete_list(self, object_list, bundle):
         return False
-        # if not self.check_contribution_permission(object_list, bundle, 'delete'):
-        #     raise Unauthorized("Sorry, only staff or contributors can delete resource.")
-        # return True
 
 class IndividualMeta:
     list_allowed_methods   = ['get', 'post', 'put']
@@ -134,6 +132,7 @@ class IndividualResource(ModelResource):
             url(r"^(?P<resource_name>%s)/search%s$" % params, self.wrap_view('get_search'), name="api_get_search"),
             url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/authors%s$" % params, self.wrap_view('get_authors'), name="api_get_authors"),
             url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/graph%s$" % params, self.wrap_view('get_graph'), name="api_get_graph"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/relationships%s$" % params, self.wrap_view('get_relationships'), name="api_get_relationships"),
@@ -300,6 +299,8 @@ class IndividualResource(ModelResource):
         # Create an object to build the bundle
         obj = node.properties
         obj["id"] = node.id
+        # update the cache
+        topic_cache.incr_version(request.current_topic)
         # Return a new bundle
         return self.build_bundle(obj=model._neo4j_instance(node), data=obj, request=request)
 
@@ -334,13 +335,12 @@ class IndividualResource(ModelResource):
         # If the nested parameter is True, this set
         node_to_retreive = set()
         # Resolve relationships manualy
-        model_fields = get_model_fields(model)
         for field in fields:
             # Get relationships for this fields
             field_rels = [ rel for rel in node_rels[:] if rel.type == field._type]
             # Filter relationships to keep only the well oriented relationships
             # get the related field informations
-            related_field = [f for f in model_fields if "rel_type" in f and f["rel_type"] == field._type and "name" in f and f["name"] == field._BoundRelationship__attname]
+            related_field = [f for f in iterate_model_fields(model) if "rel_type" in f and f["rel_type"] == field._type and "name" in f and f["name"] == field._BoundRelationship__attname]
             if related_field:
                 # Note (edouard): check some assertions in case I forgot something
                 assert len(related_field) == 1, related_field
@@ -584,10 +584,6 @@ class IndividualResource(ModelResource):
         bundle = self.build_bundle(request=request)
         # User allowed to update this model
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
-        # Current model
-        model = self.get_model()
-        # Fields
-        fields = { x['name'] : x for x in utils_get_model_fields(model) }
         # Get the node's data using the rest API
         try: node = connection.nodes.get(pk)
         # Node not found
@@ -678,6 +674,10 @@ class IndividualResource(ModelResource):
                 # We simply update the node property
                 # (the value is already validated)
                 else:
+                    # Current model
+                    model = self.get_model()
+                    # Fields
+                    fields = { x['name'] : x for x in iterate_model_fields(model) }
                     if field_name in fields:
                         if 'is_rich' in fields[field_name]['rules'] and fields[field_name]['rules']['is_rich']:
                             data[field_name] = field_value = bleach.clean(field_value,
@@ -688,9 +688,36 @@ class IndividualResource(ModelResource):
                                                                               'a': ("href", "target")
                                                                           })
                     node.set(field_name, field_value)
-
+        # update the cache
+        topic_cache.incr_version(request.current_topic)
         # And returns cleaned data
         return self.create_response(request, data)
+
+
+    def get_authors(self, request, **kwargs):
+        pk = kwargs["pk"]
+        # This should be a POST request
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+        # User must be authentication
+        self.is_authenticated(request)
+        bundle = self.build_bundle(request=request)
+        # User allowed to update this model
+        self.authorized_read_detail(self.get_object_list(bundle.request), bundle)
+        # Get the node's data using the rest API
+        try: node = connection.nodes.get(pk)
+        # Node not found
+        except client.NotFoundError: raise Http404("Not found.")
+        # Get the authors ids
+        authors_ids = node.properties.get("_author", [])
+        # Find them in the database
+        authors = User.objects.filter(id__in=authors_ids).select_related("profile")
+        resource = UserResource()
+        # Create a bundle with each resources
+        bundles = [resource.build_bundle(obj=a, request=request) for a in authors]
+        data = [resource.full_dehydrate(bundle) for bundle in bundles]
+        # We ask for relationship properties
+        return resource.create_response(request, data)
 
     def get_relationships(self, request, **kwargs):
         # Extract node id from given node uri

@@ -47,7 +47,7 @@ class TopicRegistor(object):
         # We cant import this early to avoid bi-directional dependancies
         from app.detective.utils import import_class
         models = self.topic_models(topic)
-
+        treated_models = []
         # Set "is_searchable" to true on every model with a name
         for model in models:
             # If the current model has a name
@@ -57,11 +57,18 @@ class TopicRegistor(object):
                 fields_len = len(field_names)
                 # Put the highest priority to that name
                 rules.model(model).field('name').add(priority=fields_len)
+                rules.model(model).add(is_searchable=True)
             # This model isn't searchable
             else: rules.model(model).add(is_searchable=False)
-        # Check now that each "Relationship"
-        # match with a searchable model
-        for model in models:
+            # since we use a generator for topics models we need to convert it
+            # to a list to perform a 2nd loop.
+            treated_models.append(model)
+
+        # we need to pass a first time on every models to have the proper rules
+        # and a second for their RelationShip fields
+        for model in treated_models:
+            # Check now that each "Relationship"
+            # match with a searchable model
             for field in model._meta.fields:
                 # Find related model for relation
                 if hasattr(field, "target_model"):
@@ -92,8 +99,9 @@ class TopicRegistor(object):
                 models = topic.get_models()
                 cache.set(cache_key, topic, 10)
             else:
+                topic = cache.get(cache_key)
                 # Get all registered models
-                models = cache.get(cache_key).get_models()
+                models = topic.get_models()
         return models
 
 def topics_rules():

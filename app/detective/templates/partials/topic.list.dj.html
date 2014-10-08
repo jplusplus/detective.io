@@ -2,95 +2,120 @@
 
 <div id="individual-list">
 
-	<div class="panel">
-		<div class="container">
-
-			<form class="form-inline pull-right left10 top20" role="search" ng-if="!query">
-				<input  type="search"
-					    placeholder="Search..."
-					 	tt-typeahead
-						tt-individual="type"
-						tt-model="selectedIndividual"
-						limit="10"
-					   	class="form-control"
-					   	id="input-search" />
-		    </form>
-
-			<button class='btn btn-default pull-right left10 top20' ng-click="csvExport()" ng-if="individuals.meta.total_count > 0">
-				<i class="fa fa-download"></i> Export as CSV
-			</button>
-			<div class='individual-list__export-overlay fade in out' ng-show='exporting_csv'>
-				<p class='text-center lead'>
-					<span class="bold">Hang tight, we're preparing the latest data for you!</span>
-					<br />
-					<img src="{% static 'detective/img/spinner.svg' %}" />
-					<br />
-					Taking too long? <a ng-click="exporting_csv=false">Close</a> and come back later - your files will be ready.
-				</p>
-			</div>
-
-		    <h2 ng-if="!individuals || individuals.meta.total_count == 0" class="bottom20">
-				Sorry, no results for this query.
-			</h2>
-			<h2  ng-if="individuals.meta.total_count > 0">
-				[[verbose_name_plural]]<br />
-				<small class="text-muted">
-					[[individuals.objects.length]] of [[individuals.meta.total_count]]
-					-
-					Page [[page]]
-				</small>
-			</h2>
-		</div>
+	<div class="container">
+	    <h2 class="bottom20">
+			[[verbose_name_plural]]<br />
+		</h2>
 	</div>
 
 	<div  class="container">
 
-		<div ng-class="{'row': query}">
+		<div class='individual-list__export-overlay fade in out' ng-show='exporting_csv'>
+			<p class='text-center lead'>
+				<span class="bold">Hang tight, we're preparing the latest data for you!</span>
+				<br />
+				<img src="{% static 'detective/img/spinner.svg' %}" />
+				<br />
+				Taking too long? <a ng-click="exporting_csv=false">Close</a> and come back later - your files will be ready.
+			</p>
+		</div>
 
-			<form class="top10 col-md-3" ng-if="query" ng-submit="search()">
-				<div class="well query">
-					<select class="form-control bottom10"
-							 ng-options="m.name as m.label for (key, m) in syntax.subject.model"
-							 ng-model="query.subject.name">
-					</select>
-					<select class="form-control bottom10"
-							 ng-options="p.name as p.label for p in syntax.predicates | filter:currentSubject"
-							 ng-model="query.predicate.name">
-					</select>
-					<input class="form-control"
-						 	tt-typeahead
-							tt-topic="username + '/' + topic"
-							tt-individual="'summary'"
-							tt-model="query.object"
-							value="query.object.name" />
-					<div class="text-right top10">
-						<input type="submit" value="Search" class="btn btn-primary" />
+		<form class="panel panel-default" ng-if="query" ng-submit="search()">
+			<div class="panel-body">
+				<div class="row">
+					<div class="col-md-4 col-sm-3">
+						<select class="form-control bottom10"
+								 ng-options="m.name as m.label for (key, m) in syntax.subject.model"
+								 ng-model="query.subject.name">
+						</select>
+					</div>
+					<div class="col-sm-4">
+						<select class="form-control bottom10"
+								 ng-options="p.name as p.label for p in syntax.predicates | filter:currentSubject"
+								 ng-model="query.predicate.name">
+						</select>
+					</div>
+					<div class="col-sm-3">
+						<input class="form-control"
+							 	tt-typeahead
+								tt-topic="username + '/' + topic"
+								tt-individual="'summary'"
+								tt-model="query.object"
+								value="query.object.name" />
+					</div>
+					<div class="col-md-1 col-sm-2">
+						<input type="submit" value="Search" class="btn btn-primary btn-block" />
 					</div>
 				</div>
-			</form>
+			</div>
+		</form>
 
-			<ul class="list-unstyled row top10" ng-class="{'col-md-9': query}" ng-if="individuals.objects.length">
-				<li ng-repeat="individual in individuals.objects">
-
-		            <div class="clearfix" ng-if="$index%2 == 0"></div>
-
-					<div class="col-sm-6">
-						<div class="panel panel-default individual">
-							<div class="thumb">
-								<img ng-src="[[individual.image]]" ng-if="individual.image" />
-							</div>
-							<div class="panel-heading">
-								<h4>
-									<a ng-href="[[singleUrl(individual)]]">
-										[[individual|individualPreview:"unknown"]]
-									</a>
-								</h4>
-							</div>
-						</div>
-					</div>
-				</li>
-			</ul>
+		<div ng-if="individuals.objects.length == 0">
+			<div class="text-center lead top50 bottom50">
+				No result. <a href="/[[username]]/[[topic]]/contribute">Add data</a>?
+			</div>
 		</div>
+
+		<div class="panel panel-default" ng-if="individuals.objects.length">
+			<!-- Default panel contents -->
+			<div class="panel-heading" ng-if="individuals.meta.total_count > 0">
+				<div class="row">
+					<div class="col-xs-4 text-muted">
+						[[individuals.objects.length]] of [[individuals.meta.total_count]]
+						-
+						<strong>Page [[page]]</strong>
+					</div>
+
+					<div class="col-xs-8">
+						<form class="form-inline pull-right left10" role="search" ng-if="!query">
+							<input  type="search"
+								    placeholder="Search..."
+								 	tt-typeahead
+									tt-individual="type"
+									tt-model="selectedIndividual"
+									limit="10"
+								   	class="form-control"
+								   	id="input-search" />
+					    </form>
+
+						<button class='btn btn-default pull-right left10' ng-click="csvExport()" ng-if="individuals.meta.total_count > 0">
+							<i class="fa fa-download"></i> Export as CSV
+						</button>
+					</div>
+
+				</div>
+			</div>
+			<!-- Table -->
+			<table class="table">
+				<tr ng-repeat="individual in individuals.objects">
+					<td style="min-width: 80%">
+						<strong>
+							<a ng-href="[[singleUrl(individual)]]">
+								[[individual|individualPreview:"unknown"]]
+							</a>
+						</strong>
+						<br />
+						<span class="text-muted" ng-bind-html="individual.description"></span>
+					</td>
+					<td>
+						<ul class="list-inline nowrap text-right">
+							<li>
+								<a ng-href="[[singleUrl(individual)]]" tooltip="See this entity">
+									<i class="fa fa-eye"></i>
+								</a>
+							</li>
+							<li>
+								<a ng-href="[[editUrl(individual)]]" ng-if="user.hasChangePermission(topic.ontology_as_mod)" tooltip="Edit this entity">
+									<i class="fa fa-edit"></i>
+								</a>
+							</li>
+						</ul>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+
 		<div class="tr" ng-if="hasPreviousPage() || hasNextPage()">
 			<ul class="pagination top0">
 

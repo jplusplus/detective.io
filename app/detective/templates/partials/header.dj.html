@@ -40,11 +40,11 @@
 
         </div>
         <div ng-hide="user.is_logged" class="header__user__sign-in">
-            <a ui-sref="login(loginParams())" class="btn btn-default" title="Login">
-                Log in
-            </a>
             <a ui-sref="signup(loginParams())" class="btn btn-primary" title="Sign up">
                 Sign up
+            </a>
+            <a ui-sref="login(loginParams())" class="btn btn-default" title="Login">
+                Log in
             </a>
         </div>
     </div>
@@ -61,8 +61,7 @@
                        placeholder="[[search.topic.search_placeholder]]"
                        tt-typeahead
                        tt-model="search.selectedIndividual"
-                       tt-disable-entity-creation="!shouldShowAddEntity()"
-                       tt-empty-results-selected="search.goToContribute()"
+                       tt-disable-entity-creation="true"
                        tt-individual="'summary'"
                        tt-topic="search.topic.author.username + '/' + search.topic.slug"
                        tt-endpoint="'human'"

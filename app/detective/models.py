@@ -1,7 +1,9 @@
 from app.detective              import utils
 from app.detective.exceptions   import UnavailableImage
 from app.detective.permissions  import create_permissions, remove_permissions
+from app.detective.parser       import schema
 
+from django                     import forms
 from django.conf                import settings
 from django.contrib.auth.models import User, Group
 from django.core.cache          import cache
@@ -12,6 +14,8 @@ from django.utils.text          import slugify
 from django.utils.html          import strip_tags
 
 from jsonfield                  import JSONField
+from jsonschema                 import validate
+from jsonschema.exceptions      import ValidationError
 from neo4django.db              import connection
 from psycopg2.extensions        import adapt
 from tinymce.models             import HTMLField
@@ -24,6 +28,8 @@ import random
 import re
 import string
 import urllib2
+import django_rq
+import base64
 
 # -----------------------------------------------------------------------------
 #
@@ -70,6 +76,61 @@ class QuoteRequest(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.name, self.email,)
 
+def validate_ontology_as_json(value):
+    try:
+        # For retro-compatibility, we do not validate object-like ontologies
+        if type(value) is list:
+            # First, validate the ontology format
+            validate(value, schema.ontology, format_checker=schema.checker(value))
+    except ValidationError, e:
+        raise forms.ValidationError(e.message)
+
+class TopicSkeleton(models.Model):
+    title           = models.CharField(max_length=250, help_text="Title of the skeleton")
+    description     = HTMLField(null=True, blank=True, help_text="A small description of the skeleton")
+    picture         = models.ImageField(upload_to="topics-skeletons", null=True, blank=True, help_text='The default picture for this skeleton')
+    picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
+    schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
+    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
+    target_plans    = models.CharField(max_length=60)
+    tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
+    enable_teasing  = models.BooleanField(default=False, help_text='Show this skeleton as a teasing skeleton for free user')
+
+    def description_stripped(self):
+        return strip_tags(self.description)
+
+
+    def selected_plans(self):
+        selected_plans = []
+        for plan in PLANS_CHOICES:
+            if plan[0] in self.target_plans:
+                selected_plans.append(plan[0])
+        return selected_plans
+
+    def __str__(self):
+        return self.title
+
+class TopicDataSet(models.Model):
+    title = models.CharField(max_length=250, help_text="Title of the dataset")
+    description = HTMLField(null=True, blank=True, help_text="A small description of the dataset")
+    picture = models.ImageField(upload_to="topics-dataset/pictures", null=True, blank=True, help_text='Picture for this dataset')
+    target_plans = models.CharField(max_length=60)
+    target_skeletons = models.ManyToManyField(TopicSkeleton, related_name="datasets")
+    zip_file = models.FileField(upload_to="topics-dataset/zips", help_text='The actual dataset', null=True, blank=True)
+
+    def description_stripped(self):
+        return strip_tags(self.description)
+
+    def selected_skeletons(self):
+        return [x.__str__() for x in self.target_skeletons.all()]
+
+    def selected_plans(self):
+        selected_plans = []
+        for plan in PLANS_CHOICES:
+            if plan[0] in self.target_plans:
+                selected_plans.append(plan[0])
+        return selected_plans
+
 class Topic(models.Model):
     background_upload_to='topics'
     class Meta:
@@ -89,7 +150,9 @@ class Topic(models.Model):
     contributor_group = models.ForeignKey(Group, help_text="", null=True, blank=True)
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
     ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
-    ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
+    ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True, validators=[validate_ontology_as_json])
+
+    dataset = models.ForeignKey(TopicDataSet, blank=True, null=True)
 
     def __unicode__(self):
         return self.title
@@ -141,17 +204,15 @@ class Topic(models.Model):
         return getattr(self.get_module(), "models", {})
 
     def get_models(self):
-        """ return a list of Model """
+        """ return a generator of Model """
         # FIXME : Very heavy method. Should maybe return an iterator
         # We have to load the topic's model
         models_module = self.get_models_module()
-        models_list   = []
         for i in dir(models_module):
             klass = getattr(models_module, i)
             # Collect every Django's model subclass
             if inspect.isclass(klass) and issubclass(klass, models.Model):
-                models_list.append(klass)
-        return models_list
+                yield klass
 
     def clean(self):
         models.Model.clean(self)
@@ -250,45 +311,29 @@ class Topic(models.Model):
             utils.topic_cache.set(self, cache_key, response, 60*60*12) # cached 12 hours
         return response
 
-    def get_relationship_search(self):
-        # For an unkown reason I can't filter by "is_literal"
-        # @TODO find why!
-        return [ st for st in SearchTerm.objects.filter(topic=self).prefetch_related('topic') if not st.is_literal ]
-
-    def get_relationship_search_output(self):
-        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
-        terms  = self.get_relationship_search()
-        _out = []
-        for model in self.get_models():
-            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() == 'relationship']:
-                _out += [{'name': field['name'], 'label': field['verbose_name'], 'subject': model._meta.object_name}]
-                if "search_terms" in field["rules"]:
-                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
-        return _out + [ output(rs) for rs in terms ]
-
-    def get_literal_search(self):
-        # For an unkown reason I can't filter by "is_literal"
-        return [ st for st in SearchTerm.objects.filter(topic=self).prefetch_related('topic') if st.is_literal ]
-
-    def get_literal_search_output(self):
-        output = lambda m: {'name': m.name, 'label': m.label, 'subject': m.subject}
-        terms  = self.get_literal_search()
-        _out = []
-        for model in self.get_models():
-            for field in [f for f in utils.get_model_fields(model) if f['type'].lower() != 'relationship']:
-                if "search_terms" in field["rules"]:
-                    _out += [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
-        return _out + [ output(rs) for rs in terms ]
-
     def get_syntax(self):
-        output = lambda m: {'name': m.__name__, 'label': m._meta.verbose_name.title()}
-        syntax = {
+        def syntax_output(m) : return {'name': m.__name__, 'label': m._meta.verbose_name.title()}
+        def output(m)        : return {'name': m.name, 'label': m.label, 'subject': m.subject}
+        def iterate_fields(model, is_relationship):
+            for field in [f for f in utils.iterate_model_fields(model) if (f['type'].lower() == 'relationship') == is_relationship]:
+                if "search_terms" in field["rules"]:
+                    yield [{'name': field['name'], 'label': st, 'subject': model._meta.object_name} for st in field["rules"]["search_terms"]]
+        def output_terms(terms, is_relationship):
+            _out = []
+            for model in self.get_models():
+                _out = list(iterate_fields(model, is_relationship))
+            return _out + [ output(rs) for rs in terms ]
+
+        relationship_terms  = (st for st in SearchTerm.objects.filter(topic=self).prefetch_related('topic') if not st.is_literal)
+        literal_terms       = (st for st in SearchTerm.objects.filter(topic=self).prefetch_related('topic') if st.is_literal)
+        # output
+        syntax  = {
             'subject': {
-                'model': [ output(m) for m in self.get_models() if not hasattr(m, "_is_composite") or not m._is_composite ]
+                'model': [ syntax_output(m) for m in self.get_models() if not hasattr(m, "_is_composite") or not m._is_composite ]
             },
             'predicate': {
-                'relationship': self.get_relationship_search_output(),
-                'literal'     : self.get_literal_search_output()
+                'relationship': list(output_terms(relationship_terms, True )),
+                'literal'     : list(output_terms(literal_terms     , False))
             }
         }
         return syntax
@@ -329,7 +374,7 @@ class Topic(models.Model):
             )
         # If the received identifier describe a literal value
         elif self.is_registered_relationship(predicate["name"]):
-            fields        = utils.get_model_fields( all_models[predicate["subject"]] )
+            fields        = utils.iterate_model_fields( all_models[predicate["subject"]] )
             # Get the field name into the database
             relationships = [ field for field in fields if field["name"] == predicate["name"] ]
             # We didn't find the predicate
@@ -424,28 +469,6 @@ class TopicToken(models.Model):
                 pass
         super(TopicToken, self).save()
 
-class TopicSkeleton(models.Model):
-    title           = models.CharField(max_length=250, help_text="Title of the skeleton")
-    description     = HTMLField(null=True, blank=True, help_text="A small description of the skeleton")
-    picture         = models.ImageField(upload_to="topics-skeletons", null=True, blank=True, help_text='The default picture for this skeleton')
-    picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
-    schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
-    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
-    target_plans    = models.CharField(max_length=60)
-    tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
-    enable_teasing  = models.BooleanField(default=False, help_text='Show this skeleton as a teasing skeleton for free user')
-
-    def description_stripped(self):
-        return strip_tags(self.description)
-
-
-    def selected_plans(self):
-        selected_plans = []
-        for plan in PLANS_CHOICES:
-            if plan[0] in self.target_plans:
-                selected_plans.append(plan[0])
-        return selected_plans
-
 class Article(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this article is related to.")
     title      = models.CharField(max_length=250, help_text="Title of your article.")
@@ -530,7 +553,7 @@ class SearchTerm(models.Model):
             topic_models = self.topic.get_models()
             for model in topic_models:
                 # Retreive every relationship field for this model
-                for f in utils.get_model_fields(model):
+                for f in utils.iterate_model_fields(model):
                     if f["name"] == self.name:
                         field = f
             field["rules"]["through"] = None # Yes, this is ugly but this field is creating Pickling errors.
@@ -647,7 +670,7 @@ def update_topic_cache(*args, **kwargs):
             utils.topic_cache.incr_version(topic)
 
 def delete_entity(*args, **kwargs):
-    fields = utils.get_model_fields(kwargs.get('instance').__class__)
+    fields = utils.iterate_model_fields(kwargs.get('instance').__class__)
     for field in fields:
         if field["rel_type"] and "through" in field["rules"] and field["rules"]["through"] != None:
             Properties = field["rules"]["through"]
@@ -655,9 +678,26 @@ def delete_entity(*args, **kwargs):
                 info.delete()
     update_topic_cache(*args, **kwargs)
 
+def apply_dataset(*args, **kwargs):
+    assert kwargs.get('instance') # We need an instance...
+    if kwargs.get('created', False): # We apply the dataset only on creation
+        instance = kwargs.get('instance')
+        dataset = getattr(instance, 'dataset', None)
+        if dataset != None:
+            if dataset.zip_file != None and dataset.zip_file != "":
+                from app.detective.topics.common.jobs import unzip_and_process_bulk_parsing_and_save_as_model
+                dataset.zip_file.open('r')
+                # enqueue the parsing job
+                queue = django_rq.get_queue('default', default_timeout=7200)
+                job   = queue.enqueue(unzip_and_process_bulk_parsing_and_save_as_model, instance, base64.b64encode(dataset.zip_file.read()))
+                dataset.zip_file.close()
+            instance.dataset = None
+            instance.save()
+
 signals.post_save.connect(user_created         , sender=User)
 signals.post_save.connect(update_topic_cache   , sender=Topic)
 signals.post_save.connect(update_permissions   , sender=Topic)
+signals.post_save.connect(apply_dataset        , sender=Topic)
 signals.post_delete.connect(update_topic_cache , sender=Topic)
 signals.post_delete.connect(remove_permissions , sender=Topic)
 

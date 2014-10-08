@@ -3,7 +3,7 @@ from .models                          import *
 from app.detective.exceptions         import UnavailableImage, NotAnImage, OversizedFile
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
-                                             Subscription
+                                             Subscription, TopicDataSet
 from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
 from app.detective.topics.common.user import UserResource
 from django.conf                      import settings
@@ -92,6 +92,60 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
             return object_list
         else:
             raise Unauthorized("Only logged user can retrieve skeletons")
+
+class TopicSkeletonResource(ModelResource):
+    class Meta:
+        authorization = TopicSkeletonAuthorization()
+        queryset = TopicSkeleton.objects.all()
+
+    def dehydrate(self, bundle):
+        try:
+            thumbnailer     = get_thumbnailer(bundle.obj.picture)
+            thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
+            thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
+            bundle.data['thumbnail'] = {
+                'small' : thumbnailSmall.url,
+                'medium': thumbnailMedium.url
+            }
+        # No image available
+        except InvalidImageFormatError:
+            bundle.data['thumbnail'] = None
+
+        return bundle
+
+class TopicSkeletonNestedResource(ModelResource):
+    class Meta:
+        authorization = TopicSkeletonAuthorization()
+        queryset = TopicSkeleton.objects.all()
+        filtering = { 'id' : ALL }
+        fields = ("id",)
+
+class TopicDataSetResource(ModelResource):
+    skeletons = fields.ToManyField(TopicSkeletonNestedResource, 'target_skeletons', full=True)
+    plans = fields.ListField(attribute='selected_plans')
+
+    class Meta:
+        authorization = TopicSkeletonAuthorization()
+        queryset = TopicDataSet.objects.all()
+        excludes = ["zip_file", "target_skeletons", "target_plans"]
+        filtering = {
+            'skeletons' : ALL_WITH_RELATIONS
+        }
+
+    def dehydrate(self, bundle):
+        try:
+            thumbnailer     = get_thumbnailer(bundle.obj.picture)
+            thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
+            thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
+            bundle.data['thumbnail'] = {
+                'small' : thumbnailSmall.url,
+                'medium': thumbnailMedium.url
+            }
+        # No image available
+        except InvalidImageFormatError:
+            bundle.data['thumbnail'] = None
+
+        return bundle
 
 class TopicValidation(Validation):
 
@@ -195,6 +249,7 @@ class TopicResource(ModelResource):
     author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path',  readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
+    dataset = fields.ToOneField(TopicDataSetResource, 'dataset', full=False, null=True)
 
     class Meta:
         always_return_data = True
@@ -442,6 +497,14 @@ class TopicResource(ModelResource):
             self.clean_bundle_key('ontology_as_json', bundle)
         return bundle
 
+    def hydrate_dataset(self, bundle):
+        if 'dataset' in bundle.data:
+            try:
+                bundle.data['dataset'] = TopicDataSet.objects.get(pk=bundle.data['dataset'])
+            except TopicDataSet.DoesNotExist:
+                bundle.data['dataset'] = None
+        return bundle
+
     def full_hydrate(self, bundle):
         bundle = super(TopicResource, self).full_hydrate(bundle)
         bundle = self.clean_bundle(bundle)
@@ -457,27 +520,6 @@ class TopicResource(ModelResource):
         # we remove useless (for topic's model class) keys from bundle
         self.clean_bundle_key('background_url', bundle)
         self.clean_bundle_key('topic_skeleton', bundle)
-        return bundle
-
-
-class TopicSkeletonResource(ModelResource):
-    class Meta:
-        authorization = TopicSkeletonAuthorization()
-        queryset = TopicSkeleton.objects.all()
-
-    def dehydrate(self, bundle):
-        try:
-            thumbnailer     = get_thumbnailer(bundle.obj.picture)
-            thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
-            thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
-            bundle.data['thumbnail'] = {
-                'small' : thumbnailSmall.url,
-                'medium': thumbnailMedium.url
-            }
-        # No image available
-        except InvalidImageFormatError:
-            bundle.data['thumbnail'] = None
-
         return bundle
 
 class ArticleResource(ModelResource):

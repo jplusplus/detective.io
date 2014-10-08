@@ -38,8 +38,7 @@ class Command(BaseCommand):
             try:
                 for Model in topic.get_models():
                     try:
-                        fields = utils.get_model_fields(Model)
-                        for field in fields:
+                        for field in utils.iterate_model_fields(Model):
                             if field["rel_type"] and field["direction"] == "out" and "through" in field["rules"]:
                                 ids= []
                                 for entity in Model.objects.all():

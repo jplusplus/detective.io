@@ -2,35 +2,34 @@
     <div class="row">
         <div class="col-sm-8">
             <h2 ng-init="Page.title('About')">About Detective.io</h2>
-            <h3>What is Detective.io?</h3>
-            <p>Detective.io is a platform to store and mine all the data you have on a precise topic. You first design the ontology, then upload it to Detective.io, which creates an input interface and a front-end automatically. The front-end lets you display all the information and search it using the powerful graph search.</p>
-            <h3>What the heck is an ontology?</h3>
-            <p>It's a way to describe a topic. Think of it as all the sentences you can think of that link two entities in a certain area. Let's take the example of the ontology that describes a fast food restaurant:
-                <ul>
-
-                    <li>An employee produces burgers.</li>
-
-                    <li>An employee works in the kitchen.</li>
-
-                    <li>A customer buys burgers.</li>
-
-                </ul>
-                All these statements have the same structure: a subject (employee, customer), a predicate (produces, works, buys) and an object (burgers, the kitchen). Predicates represent relationships and subjects and objects are called classes. Each relationship or class can then have properties (an employee can have a contract type and a salary, for instance). The ontology is the sum of the classes, the relationships and their properties.
-            </p>
-            <h3>So, it's like <em>Freebase</em>?</h3>
-            <p>No. Detective.io is a graph database and makes use of concepts from the semantic web. But Detective.io is very different from Freebase in a key way: It focuses on specific investigations. If you mention the "British Government" in an investigation on development projects in Equatorial Africa, you don't mean the same thing as "British Government" in an investigation on London's politicians. It's impossible to represent the whole knowledge in a single database, were it only because concepts don't have the same meaning in different situations.</p>
-            <h3>Is this the semantic web of linked data?</h3>
-            <p>In a way, yes. Detective.io structures all the data you give it and uses OWL as an ontology language. But Detective.io's ontologies are not (yet) fully compatible with other services, such as DBpedia.</p>
-            <h3>Why did you build it?</h3>
+            
+            <h3>Why did you build Detective.io?</h3>
+            
             <p>We were working on an investigation about innovative energy projects in developing countries thanks to a grant from the European Journalism Center. We couldn't find a database that would let us store all our data, so we built one and made it reusable.</p>
+            
             <h3>Who is behind Detective.io?</h3>
+            
             <p><a target="_blank" href="http://paris.jplusplus.org">Journalism++ SAS</a>. We are a company specialized in data-driven journalism and are fully independent.</p>
+            
             <h3>What about privacy?</h3>
+            
             <p>In the European Union, collecting data about individuals is strictly regulated by <a target="_blank" href="http://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=CELEX:31995L0046:en:HTML">Directive 95/46/EC</a>. It provides large exemptions for journalists, but you should always make sure that you're operating within the limits set by the laws of your own jurisdiction when using Detective.io.</p>
-            <h3>Can I use it myself?</h3>
-            <p>Detective.io has no point-and-click interface to create new investigations yet. You can download the source code and install Detective.io on your own server. You can also <a href="mailto:contact@detective.io">contact us</a> if you need a helping hand.</p>
-            <h3>This network analysis thing is great. Where can I get more?</h3>
-            <p>If you like books, read <a target="_blank" href="http://www.amazon.com/dp/0452284392">Linked</a> by Albert-Laszlo Barabasi. If you prefer websites, another entry-level read is the great series <a target="_blank" href="http://www.scottbot.net/HIAL/?tag=networks-demystified">Networks Demystified</a> by Scott b. Weingart.</p>
+            
+            <h3>Who owns the data inserted into Detective.io?</h3>
+
+            <p>As you can read in our <a href="https://www.detective.io/page/terms/">Terms</a>, the data belongs to the user who owns (who created) the investigation.</p>
+            
+            <h3>Can I embed the network visualization?</h3>
+            
+            <p>Not yet. This feature is planned. To make it happen faster, you can <a href="mailto:contact@detective.io"></a>contact us</a> to fund us or help out on <a href="https://github.com/jplusplus/detective.io/" target="_blank">Github</a>.</p>
+            
+            <h3>Can I choose a specific of visualisation (network or map)?</h3>
+            
+            <p>The network visualization is available when you click “Explore” on the homepage of your investigation. The map is available at the bottom of the homepage of your investigation. We are planning to add more visualization types. To make it happen faster, you can <a href="mailto:contact@detective.io"></a>contact us</a> to fund us or help out on <a href="https://github.com/jplusplus/detective.io/" target="_blank">Github</a>.</p>
+            
+            <h3>Countries don’t show up on my map</h3>
+            
+            <p>Countries only show up on the map if you give them their proper ISO alpha-3 code (e.g USA for the United States of America, FRA for France etc.) The <a href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3" target="_blank">full list is available at Wikipedia</a>.</p>
 
         </div>
     </div>

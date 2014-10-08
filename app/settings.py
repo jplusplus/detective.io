@@ -115,6 +115,10 @@ TEMPLATE_LOADERS = (
 )
 
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
+CACHE_BYPASS_URLS               = (
+    r"/api/(?P<user>[\w\-\.]+)/(?P<topic>[\w\-]+)/v1/summary/graph/",
+    r"/api/(?P<user>[\w\-\.]+)/(?P<topic>[\w\-]+)/v1/summary/export/"
+)
 
 MIDDLEWARE_CLASSES = [
     'corsheaders.middleware.CorsMiddleware',

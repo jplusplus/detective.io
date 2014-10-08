@@ -35,14 +35,25 @@
             </ul>
         </div>
 
+        <div class="main-aside__investigations-list" ng-if="user.is_logged && lasts.length">
+            <h4>Your last investigations</h4>
 
-        <div class="main-aside__featured-investigations">
-            <h4>Featured investigations</h4>
-
-            <div class="main-aside__featured-investigations__topic" ng-repeat="topic in featured" title="[[topic.title]]">
+            <div class="main-aside__investigations-list__topic" ng-repeat="group in lasts" ng-init="topic = group.topic" title="[[topic.title]]">
                 <a ng-href="[[topic.link]]" class="fg"></a>
                 <img ng-src="[[topic.thumbnail.medium]]" width="100%" class="bg" />
-                <a ng-href="[[topic.link]]"  class="main-aside__featured-investigations__topic__title">
+                <a ng-href="[[topic.link]]"  class="main-aside__investigations-list__topic__title">
+                    [[topic.title|characters:30]]
+                </a>
+            </div>
+        </div>
+
+        <div class="main-aside__investigations-list">
+            <h4>Featured investigations</h4>
+
+            <div class="main-aside__investigations-list__topic" ng-repeat="topic in featured" title="[[topic.title]]">
+                <a ng-href="[[topic.link]]" class="fg"></a>
+                <img ng-src="[[topic.thumbnail.medium]]" width="100%" class="bg" />
+                <a ng-href="[[topic.link]]"  class="main-aside__investigations-list__topic__title">
                     [[topic.title|characters:30]]
                 </a>
             </div>

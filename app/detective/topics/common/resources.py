@@ -120,12 +120,27 @@ class TopicSkeletonNestedResource(ModelResource):
         filtering = { 'id' : ALL }
         fields = ("id",)
 
+
+class TopicDataSetAuthorization(TopicSkeletonAuthorization):
+    def read_list(self, object_list, bundle):
+        user = bundle.request.user
+        if user.is_authenticated():
+            plan = user.detectiveprofileuser.plan
+            # no filter for superuser
+            if not user.is_superuser:
+                q_filter = Q(target_plans__contains=plan)
+                object_list = object_list.filter(q_filter)
+            return object_list
+        else:
+            raise Unauthorized("Only logged user can retrieve skeletons")
+
+
 class TopicDataSetResource(ModelResource):
     skeletons = fields.ToManyField(TopicSkeletonNestedResource, 'target_skeletons', full=True)
     plans = fields.ListField(attribute='selected_plans')
 
     class Meta:
-        authorization = TopicSkeletonAuthorization()
+        authorization = TopicDataSetAuthorization()
         queryset = TopicDataSet.objects.all()
         excludes = ["zip_file", "target_skeletons", "target_plans"]
         filtering = {

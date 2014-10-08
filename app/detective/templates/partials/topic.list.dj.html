@@ -107,7 +107,7 @@
 								</a>
 							</li>
 							<li>
-								<a ng-href="[[editUrl(individual)]]" tooltip="Edit this entity">
+								<a ng-href="[[editUrl(individual)]]" ng-if="user.hasChangePermission(topic.ontology_as_mod)" tooltip="Edit this entity">
 									<i class="fa fa-edit"></i>
 								</a>
 							</li>

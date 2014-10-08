@@ -45,32 +45,4 @@ class window.SearchFormCtrl
     getQuery: =>
         angular.fromJson @location.search().q
 
-    isTopic: (slug, username)=>
-        return false unless @topic?
-        (@topic.slug is slug) and @topic.author.username is username
-
-    goToTopic: =>
-        # Change only if the query is empty
-        if @human_query is ""
-            # Update the location path
-            @location.path @topic.link
-
-    showResults: =>
-        @Page.loading true
-        @QueryFactory.humanSearch(@human_query, @topic).then (results)=>
-            return unless results.data.objects
-            objects = results.data.objects
-            @Page.loading false
-            if objects.length > 0
-                @QueryFactory.selectIndividual objects[0], @topic.link
-
-    goToContribute: =>
-        state_params =
-            topic: @TopicsFactory.topic.slug
-            username: @TopicsFactory.topic.author.username
-
-        @state.go 'user-topic-contribute', state_params
-
-
-
 angular.module('detective.controller').controller 'SearchFormCtrl', SearchFormCtrl

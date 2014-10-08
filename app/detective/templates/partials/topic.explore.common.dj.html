@@ -47,6 +47,7 @@
         <div class="container">
             <div class="top50 bottom40">
                 <div class="row">
+                    <!-- Search bar on topic home page -->
                     <form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl as search">
                         <input type="search"
                                 autocorrect="off"
@@ -54,6 +55,7 @@
                                 placeholder="[[ search.topic.search_placeholder ]]"
                                 tt-typeahead
                                 tt-individual="'summary'"
+                                tt-disable-entity-creation="true"
                                 tt-topic="search.topic.author.username + '/' + search.topic.slug"
                                 tt-model="search.selectedIndividual"
                                 tt-endpoint="'human'"

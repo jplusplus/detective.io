@@ -107,7 +107,7 @@ test:
 	mv lib/neo4j/data/graph.db lib/neo4j/data/graph.db.backup || true
 	# Start a brand new database
 	make startdb
-	./manage.py syncdb -v 0 --noinput  --traceback --pythonpath=. --settings=app.settings_tests
+	-python manage.py syncdb -v 0 --noinput  --traceback --pythonpath=. --settings=app.settings_tests
 	# Launch test with coverage
 	-python -W ignore::DeprecationWarning manage.py test $(TEST) --pythonpath=. --settings=app.settings_tests --traceback
 	# Stop database in order to restore it

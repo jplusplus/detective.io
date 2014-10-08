@@ -8,23 +8,24 @@
 # License : GNU GENERAL PUBLIC LICENSE v3
 # -----------------------------------------------------------------------------
 # Creation : 20-Jan-2014
-# Last mod : 30-Jul-2014
+# Last mod : 02-Oct-2014
 # -----------------------------------------------------------------------------
-from tastypie.resources         import Resource
-from django.core.exceptions     import ObjectDoesNotExist
-from tastypie                   import fields
-from rq.job                     import Job
-from django.contrib.auth.models import User
-from rq                         import get_current_job
-from rq.exceptions              import NoSuchJobError
-from django.utils.timezone      import utc
-from neo4django.db              import connection
-from django.conf                import settings
-from django.core.paginator      import InvalidPage
-from django.core.files.storage  import default_storage
-from django.core.files.base     import ContentFile
-from cStringIO                  import StringIO
-import app.detective.utils      as utils
+from tastypie.resources                 import Resource
+from django.core.exceptions             import ObjectDoesNotExist
+from tastypie                           import fields
+from rq.job                             import Job
+from django.contrib.auth.models         import User
+from rq                                 import get_current_job
+from rq.exceptions                      import NoSuchJobError
+from django.utils.timezone              import utc
+from neo4django.db                      import connection
+from django.conf                        import settings
+from django.core.paginator              import InvalidPage
+from django.core.files.storage          import default_storage
+from django.core.files.base             import ContentFile
+from cStringIO                          import StringIO
+from app.detective.topics.common.models import FieldSource
+import app.detective.utils              as utils
 import django_rq
 import json
 import time
@@ -33,6 +34,9 @@ import logging
 import re
 import zipfile
 import csv
+import tempfile
+import os
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -75,8 +79,7 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
     def get_columns(model):
         edges   = dict()
         columns = []
-        fields  = utils.get_model_fields(model)
-        for field in fields:
+        for field in utils.iterate_model_fields(model):
             if field['type'] != 'Relationship':
                 if field['name'] not in ['id']:
                     columns.append(field['name'])
@@ -149,12 +152,52 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
 #    JOB - BULK UPLOAD
 #
 # -----------------------------------------------------------------------------
-def process_bulk_parsing_and_save_as_model(topic, files):
+def unzip_and_process_bulk_parsing_and_save_as_model(topic, zip_content):
+    start_time = time.time()
+
+    try:
+        (fd, zip_file) = tempfile.mkstemp()
+        with open(zip_file, 'w') as tmp:
+            tmp.write(base64.b64decode(zip_content))
+
+        # Create a tempdir
+        extraction_dir = tempfile.mkdtemp()
+
+        # We extract everything in the tempdir
+        with zipfile.ZipFile(zip_file, 'r') as opened_zip_file:
+            opened_zip_file.extractall(extraction_dir)
+        os.close(fd)
+
+        # Get all lines from all .csv in big nested arrays
+        opened_files = [open(os.path.join(extraction_dir, f), 'r') for f in os.listdir(extraction_dir)]
+        files = [(opened_file.name, opened_file.readlines()) for opened_file in opened_files]
+
+        # Close and delete every tmp file / dir
+        for opened_file in opened_files:
+            opened_file.close()
+            os.remove(os.path.join(extraction_dir, opened_file.name))
+        os.rmdir(extraction_dir)
+        os.remove(zip_file)
+
+        # Process!
+        process_bulk_parsing_and_save_as_model(topic, files, start_time)
+    except Exception as e:
+        import traceback
+        logger.error(traceback.format_exc())
+        if e.__dict__:
+            message = str(e.__dict__)
+        else:
+            message = e.message
+        return {
+            "errors" : [{e.__class__.__name__ : message}]
+        }
+
+def process_bulk_parsing_and_save_as_model(topic, files, start_time=None):
     """
     Job which parses uploaded content, validates and saves them as model
     """
 
-    start_time               = time.time()
+    start_time               = start_time != None and start_time or time.time()
     entities                 = {}
     relations                = []
     errors                   = []
@@ -205,7 +248,7 @@ def process_bulk_parsing_and_save_as_model(topic, files):
             csv_reader = utils.open_csv(file)
             header     = csv_reader.next()
             assert len(header) > 1, "{file_name} header should have at least 2 columns"
-            assert header[0].endswith("_id"), "{file_name} : First column should begin with a header like <model_name>_id".format(file_name=file_name)
+            assert header[0].endswith("_id"), "{file_name} : First column should begin with a header like <model_name>_id. Actually {first_col}".format(file_name=file_name, first_col=header[0])
             if len(header) >=3 and header[0].endswith("_id") and header[2].endswith("_id"):
                 # this is a relationship file
                 relations.append((file_name, file))
@@ -229,20 +272,27 @@ def process_bulk_parsing_and_save_as_model(topic, files):
             for field in fields:
                 fields_types[field['name']] = field['type']
             field_names = [field['name'] for field in fields]
-            columns = []
+            columns        = []
             for column in header[1:]:
                 column = utils.to_underscores(column)
-                if column is not '':
+                if not column in field_names and not column.endswith("__sources__"):
+                    raise ColumnUnknow(file=file_name, column=column, model=entity, attributes_available=field_names)
+                    break
+                if column.endswith("__sources__"):
+                    column_type = "__sources__"
+                    column = column[:-len("__sources__")]
                     if not column in field_names:
                         raise ColumnUnknow(file=file_name, column=column, model=entity, attributes_available=field_names)
                         break
-                    column_type = fields_types[column]
-                    columns.append((column, column_type))
+                else:
+                    column_type = fields_types.get(column, None)
+                columns.append((column, column_type))
             else:
                 # here, we know that all columns are valid
                 for row in csv_reader:
-                    data = {}
-                    id   = row[0]
+                    data      = {}
+                    sources   = {}
+                    entity_id = row[0]
                     for i, (column, column_type) in enumerate(columns):
                         value = str(row[i+1]).decode('utf-8')
                         # cast value if needed
@@ -252,7 +302,8 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                                     value = int(value)
                                 # TODO: cast float
                                 if "Date" in column_type:
-                                    value = datetime.datetime(*map(int, re.split('[^\d]', value)[:-1])).replace(tzinfo=utc)
+                                    value = datetime.datetime(*map(int, re.split('[^\d]', value)[:3])).replace(tzinfo=utc)
+
                             except Exception as e:
                                 e = WarningCastingValueFail(
                                     column_name = column,
@@ -265,17 +316,24 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                                 )
                                 errors.append(e)
                                 break
-                            data[column] = value
+                            if column_type == "__sources__":
+                                sources[column] = value
+                            else:
+                                data[column] = value
                     else:
                         # instanciate a model
                         try:
                             item = all_models[entity].objects.create(**data)
                             # map the object with the ID defined in the .csv
-                            id_mapping[(entity, id)] = item
-                            file_reading_progression += 1
+                            id_mapping[(entity, entity_id)] = item
+                            # create sources
+                            for sourced_field, reference in sources.items():
+                                for ref in reference.split("||"):
+                                    FieldSource.objects.create(individual=item.id, field=sourced_field, reference=ref)
                             # FIXME: job can be accessed somewhere else (i.e detective/topics/common/jobs.py:JobResource)
                             # Concurrent access are not secure here.
                             # For now we refresh the job just before saving it.
+                            file_reading_progression += 1
                             if job:
                                 job.refresh()
                                 job.meta["file_reading_progression"] = (float(file_reading_progression) / float(nb_lines)) * 100
@@ -297,11 +355,14 @@ def process_bulk_parsing_and_save_as_model(topic, files):
         logger.debug("BulkUpload: creating relations")
         for file_name, file in relations:
             # create a csv reader
-            csv_reader    = utils.open_csv(file)
-            csv_header    = csv_reader.next()
-            relation_name = utils.to_underscores(csv_header[1])
-            model_from    = utils.to_class_name(csv_header[0].replace("_id", ""))
-            model_to      = utils.to_class_name(csv_header[2].replace("_id", ""))
+            csv_reader      = utils.open_csv(file)
+            csv_header      = csv_reader.next()
+            relation_name   = utils.to_underscores(csv_header[1])
+            model_from      = utils.to_class_name(csv_header[0].replace("_id", ""))
+            model_to        = utils.to_class_name(csv_header[2].replace("_id", ""))
+            properties_name = csv_header[3:]
+            # retrieve ModelProperties from related model
+            ModelProperties = topic.get_rules().model(all_models[model_from]).field(relation_name).get("through")
             # check that the relation actually exists between the two objects
             try:
                 getattr(all_models[model_from], relation_name)
@@ -311,14 +372,46 @@ def process_bulk_parsing_and_save_as_model(topic, files):
                     model_from       = model_from,
                     model_to         = model_to,
                     relation_name    = relation_name,
-                    fields_available = [field['name'] for field in utils.get_model_fields(all_models[model_from])],
+                    fields_available = [field['name'] for field in utils.iterate_model_fields(all_models[model_from])],
                     error            = str(e))
             for row in csv_reader:
-                id_from = row[0]
-                id_to   = row[2]
+                id_from    = row[0]
+                id_to      = row[2]
+                properties = [p.decode('utf-8') for p in row[3:]]
                 if id_to and id_from:
                     try:
-                        getattr(id_mapping[(model_from, id_from)], relation_name).add(id_mapping[(model_to, id_to)])
+                        instance_from = id_mapping[(model_from, id_from)]
+                        instance_to   = id_mapping[(model_to, id_to)]
+                        getattr(instance_from, relation_name).add(instance_to)
+                        # add properties if needed
+                        if ModelProperties and properties_name and properties:
+                            # save the relationship to create an id
+                            instance_from.save()
+                            # retrieve this id
+                            relation_id = next(rel.id for rel in instance_from.node.relationships.outgoing() if rel.end.id == instance_to.id)
+                            # properties of the relationship
+                            relation_args = {
+                                "_endnodes"     : [id_mapping[(model_from, id_from)].id, instance_to.id],
+                                "_relationship" : relation_id,
+                            }
+                            # Pairwise the properties with their names 
+                            relation_args.update(zip(properties_name, properties))
+                            try:
+                                ModelProperties.objects.create(**relation_args)
+                            except TypeError as e:
+                                errors.append(
+                                    AttributeDoesntExist(
+                                        file             = file_name,
+                                        line             = csv_reader.line_num,
+                                        model_from       = model_from,
+                                        id_from          = id_from,
+                                        model_to         = model_to,
+                                        id_to            = id_to,
+                                        relation_args    = relation_args,
+                                        error            = str(e)
+                                    )
+                        )
+                        # update the job
                         inserted_relations += 1
                         file_reading_progression += 1
                         if job:
@@ -365,6 +458,7 @@ def process_bulk_parsing_and_save_as_model(topic, files):
         if job:
             job.refresh()
             job.meta["objects_to_save"] = len(id_mapping)
+            job.save()
         for item in id_mapping.values():
             item.save()
             saved += 1

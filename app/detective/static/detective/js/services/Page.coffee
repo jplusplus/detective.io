@@ -18,9 +18,9 @@ angular.module('detective.service').factory "Page", ["ngProgressLite", "$rootSco
         # ──────────────────────────────────────────────────────────────────────────
         constructor: ->
             # Hide sidebar when route change
-            $rootScope.$on "$stateChangeSuccess", => @showAside = no
+            $rootScope.$on "$stateChangeStart", => @showAside = no
         # Show or not the main aside menu
-        showAside: yes
+        showAside: no
         # Page title
         title: (newTitle, titleCase=true)->
             if newTitle?

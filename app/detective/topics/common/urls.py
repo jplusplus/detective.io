@@ -1,5 +1,6 @@
 from .resources       import QuoteRequestResource, TopicResource, \
-                             TopicSkeletonResource, ArticleResource, SubscriptionResource
+                             TopicSkeletonResource, ArticleResource, \
+                             SubscriptionResource, TopicDataSetResource
 from .summary         import SummaryResource
 from .user            import UserResource, ProfileResource
 from .cypher          import CypherResource
@@ -11,6 +12,7 @@ api = NamespacedApi(api_name='v1', urlconf_namespace='common')
 api.register(QuoteRequestResource())
 api.register(TopicResource())
 api.register(TopicSkeletonResource())
+api.register(TopicDataSetResource())
 api.register(SummaryResource())
 api.register(CypherResource())
 api.register(ProfileResource())

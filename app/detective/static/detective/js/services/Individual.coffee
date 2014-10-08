@@ -3,8 +3,10 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
     # current state params.
     defaultsParams =
         # Use the current topic parameter as default topic
-        topic: -> $stateParams.topic or "common"
+        topic:    -> $stateParams.topic or "common"
         username: -> $stateParams.username or "detective"
+        type:     -> $stateParams.type
+        id:       -> $stateParams.id
 
     # This function aims to transforms an array of relationships target ids
     # into an array of object. It ensure a seamsless transition to the new
@@ -66,6 +68,10 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
                 delete headers['Content-Type']
 
                 fd
+        authors:
+            url:'/api/:username/:topic/v1/:type/:id/authors/?'
+            method: 'GET'
+            isArray: yes
         relationships:
             url:'/api/:username/:topic/v1/:type/:id/relationships/:field/:target/?'
             method: 'GET'

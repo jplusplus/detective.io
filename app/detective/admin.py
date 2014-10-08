@@ -2,6 +2,7 @@ from app.detective              import utils
 from app.detective.models       import QuoteRequest
 from app.detective.models       import Topic
 from app.detective.models       import TopicSkeleton
+from app.detective.models       import TopicDataSet
 from app.detective.models       import TopicToken
 from app.detective.models       import SearchTerm
 from app.detective.models       import Article
@@ -76,7 +77,7 @@ class SearchTermInline(admin.TabularInline):
                 model_name    = getattr(model._meta, "verbose_name").title()
                 subset        = []
                 # Retreive every relationship field for this model
-                for field in utils.get_model_fields(model):
+                for field in utils.iterate_model_fields(model):
                     if field["type"] != 'AutoField':
                         choice   = [ field["name"], field["verbose_name"].title(), ]
                         # Add ... at the end ot the relationship field
@@ -179,6 +180,27 @@ class TopicSkeletonAdmin(admin.ModelAdmin):
     list_display = ("title","picture","description_stripped", "picture_credits", "target_plans")
 
 admin.site.register(TopicSkeleton, TopicSkeletonAdmin)
+
+class TopicDataSetForm(forms.ModelForm):
+    target_plans = forms.MultipleChoiceField(choices=PLANS_CHOICES)
+
+    def __init__(self, *args, **kwargs):
+        super(TopicDataSetForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+        if instance:
+            self.initial['target_plans'] = instance.selected_plans()
+
+class TopicDataSetAdmin(admin.ModelAdmin):
+    form = TopicDataSetForm
+    list_display = ("title", "description_stripped", "_plans", "_skeletons")
+
+    def _skeletons(self, instance):
+        return ', '.join(instance.selected_skeletons())
+
+    def _plans(self, instance):
+        return ', '.join(instance.selected_plans())
+
+admin.site.register(TopicDataSet, TopicDataSetAdmin)
 
 class ArticleAdmin(admin.ModelAdmin):
     save_on_top         = True

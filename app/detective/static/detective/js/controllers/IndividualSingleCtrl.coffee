@@ -47,7 +47,8 @@ class window.IndividualSingleCtrl
         @scope.meta       = @forms[ @scope.type.toLowerCase() ]
         @scope.topicmeta  = @topic
         @scope.mailReportLink = @getMailReportLink
-
+        # Get individual authors
+        @scope.authors    = @Individual.authors()
         # Load graph data
         graph_params =
             topic   : @scope.topic

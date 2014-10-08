@@ -7,6 +7,7 @@
             </div>
         </div>
         <div ng-if="isCreating()">
+          <div>
             <h2><i class="fa fa-plus"></i>&nbsp;Create a new investigation</h2>
             <p class="lead">What are you investigating on? Pick a scheme from the list</p>
             <ul class="list-unstyled row skeletons">
@@ -14,7 +15,7 @@
                   <div class="skeleton-wrapper col-sm-4 col-xs-6">
                       <div class="skeletons__item"
                             ng-class="{
-                              'skeletons__item--selected': isSelected(skeleton),
+                              'skeletons__item--selected': isSkeletonSelected(skeleton),
                               'skeletons__item--teaser':   isTeaserSkeleton(skeleton)
                             }">
                           <img ng-click="selectSkeleton(skeleton)" ng-src="[[ skeleton.thumbnail.medium ]]"/>
@@ -51,7 +52,37 @@
                   </div>
                 </li>
             </ul>
-        </div>
+          </div>
+          <div ng-if="shouldShowDataSets()" id="topic-datasets">
+            <h2><i class="fa fa-plus"></i>&nbsp;Populate your investigation</h2>
+            <p class="lead">Choose public data sets to add to your investigation, or start from scratch.</p>
+            <ul class="list-unstyled row skeletons">
+              <li ng-repeat="dataset in datasets">
+                <div class="skeleton-wrapper col-sm-4 col-xs-6">
+                  <div class="skeletons__item" ng-class="{ 'skeletons__item--selected': isDataSetSelected(dataset) }">
+                    <img ng-click="selectDataSet(dataset)" ng-src="[[ dataset.thumbnail.medium ]]"/>
+                    <h4>[[ dataset.title ]]</h4>
+                    <div ng-if="dataset.description" ng-bind-html="dataset.description"></div>
+                  </div>
+                </div>
+                <div ng-if="($index + 1) % 3 == 0" class="col-sm-12 hidden-xs hidden-sm hidden-md"></div>
+                <div ng-if="($index + 1) % 2 == 0" class="col-sm-12 hidden-lg"></div>
+              </li>
+              <li class="skeleton-wrapper">
+                <div class="col-sm-4 col-xs-6">
+                  <div class="skeletons__item skeletons__item--new-skeleton" ng-click="goToPlans()">
+                    <div class="skeletons__item skeletons__item--new-skeleton__box">
+                      <p>
+                        Need live data streams?
+                        <br />
+                        Check out our paid plans!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
     </div>
 
     <div ng-if="shouldShowForm()"

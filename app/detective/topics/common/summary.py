@@ -1,29 +1,23 @@
 # -*- coding: utf-8 -*-
-from .errors                    import ForbiddenError, UnauthorizedError
-from app.detective.models       import Topic, SearchTerm
-from app.detective.neomatch     import Neomatch
-from app.detective.register     import topics_rules
-from app.detective.utils        import get_leafs_and_edges, get_topic_from_request
-from difflib                    import SequenceMatcher
-from django.core.paginator      import Paginator, InvalidPage
-from django.core.urlresolvers   import resolve
-from django.http                import Http404, HttpResponse
-from neo4django.db              import connection
-from tastypie                   import http
-from tastypie.exceptions        import ImmediateHttpResponse
-from tastypie.resources         import Resource
-from tastypie.serializers       import Serializer
-from .jobs                      import process_bulk_parsing_and_save_as_model, render_csv_zip_file
-from django.core.cache          import cache
-import app.detective.utils      as utils
-from django.contrib.auth.models import User
+from .errors                import ForbiddenError, UnauthorizedError
+from app.detective.models   import Topic, SearchTerm
+from app.detective.neomatch import Neomatch
+from app.detective          import graph
+from difflib                import SequenceMatcher
+from django.core.paginator  import Paginator, InvalidPage
+from django.http            import Http404, HttpResponse
+from neo4django.db          import connection
+from tastypie               import http
+from tastypie.exceptions    import ImmediateHttpResponse
+from tastypie.resources     import Resource
+from tastypie.serializers   import Serializer
+from .jobs                  import process_bulk_parsing_and_save_as_model, render_csv_zip_file
+from app.detective.parser   import schema
+import app.detective.utils  as utils
 import json
 import re
-import datetime
 import logging
 import django_rq
-import zipfile
-import time
 import inspect
 import hashlib
 
@@ -106,7 +100,7 @@ class SummaryResource(Resource):
     def get_topic_or_404(self, request=None):
         try:
             if request is not None:
-                topic = get_topic_from_request(request)
+                topic = utils.get_topic_from_request(request)
                 if topic == None:
                     raise Topic.DoesNotExist()
                 return topic
@@ -114,6 +108,9 @@ class SummaryResource(Resource):
                 return Topic.objects.get(ontology_as_mod=self._meta.urlconf_namespace)
         except Topic.DoesNotExist:
             raise Http404()
+
+    def summary_jsonschema(self, bundle, request):
+        return schema.ontology
 
     def summary_countries(self, bundle, request):
         app_label = self.topic.app_label()
@@ -226,14 +223,14 @@ class SummaryResource(Resource):
             }
         else:
             query = """
-                START root=node(*)
-                MATCH (type)-[`<<INSTANCE>>`]->(root)
-                WHERE HAS(root.name)
-                AND HAS(root._author)
+                START root=node(0)
+                MATCH (node)<-[r:`<<INSTANCE>>`]-(type)<-[`<<TYPE>>`]-(root)
+                WHERE HAS(node.name)
+                AND HAS(node._author)
                 AND HAS(type.model_name)
-                AND %s IN root._author
+                AND %s IN node._author
                 AND type.app_label = '%s'
-                RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
+                RETURN DISTINCT ID(root) as id, node.name as name, type.model_name as model
             """ % ( int(request.user.id), app_label )
 
             matches      = connection.cypher(query).to_dicts()
@@ -323,8 +320,7 @@ class SummaryResource(Resource):
     def summary_human(self, bundle, request):
         self.method_check(request, allowed=['get'])
 
-        if not "q" in request.GET:
-            raise Exception("Missing 'q' parameter")
+        if not "q" in request.GET: raise Exception("Missing 'q' parameter")
 
         query        = request.GET["q"]
         query        = query.strip()
@@ -365,7 +361,7 @@ class SummaryResource(Resource):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
         depth     = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
-        leafs, edges  = get_leafs_and_edges(
+        leafs, edges  = utils.get_leafs_and_edges(
             topic     = self.topic,
             depth     = depth,
             root_node = "0")
@@ -429,18 +425,26 @@ class SummaryResource(Resource):
 
     def summary_syntax(self, bundle, request): return self.get_syntax(bundle, request)
 
-    def search(self, query):
-        match = unicode(query).lower()
-        match = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', match).strip()
+    def search(self, terms):
+        if type(terms) in [str, unicode]:
+            terms = [terms]
+        matches = []
+        for term in terms:
+            term = unicode(term).lower()
+            term = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', term).strip()
+            matches.append("LOWER(node.name) =~ '.*(%s).*'" % term)
         # Query to get every result
         query = """
-            START root=node(*)
-            MATCH (root)<-[r:`<<INSTANCE>>`]-(type)
-            WHERE HAS(root.name)
-            AND LOWER(root.name) =~ '.*(%s).*'
+            START root=node(0)
+            MATCH (node)<-[r:`<<INSTANCE>>`]-(type)<-[`<<TYPE>>`]-(root)
+            WHERE HAS(node.name) """
+        if matches:
+            query += """
+            AND (%s) """ % ( " OR ".join(matches))
+        query += """
             AND type.app_label = '%s'
-            RETURN ID(root) as id, root.name as name, type.model_name as model
-        """ % (match, self.topic.app_label() )
+            RETURN ID(node) as id, node.name as name, type.model_name as model
+        """ % (self.topic.app_label())
         return connection.cypher(query).to_dicts()
 
     def ngrams(self, input):
@@ -529,7 +533,7 @@ class SummaryResource(Resource):
         subjects        = []
         objects         = []
         propositions    = []
-        searched_tokens = set()
+        to_search       = set()
         # Picks candidates for subjects and predicates
         for idx, match in enumerate(matches):
             subjects     += match["models"]
@@ -541,19 +545,16 @@ class SummaryResource(Resource):
             if token.startswith('"') and token.endswith('"'):
                 # Remove the quote from the token
                 token = token.replace('"', '')
-                # Store the token as an object
-                objects += self.search(token)[:5]
+                # We may search this term
+                to_search.add(token)
             # Or if the previous word is a preposition
             elif is_object(match, query, token):
-                if token not in searched_tokens and len(token) > 2:
-                    # Looks for entities into the database
-                    entities = self.search(token)[:5]
-                    # Do not search this token again
-                    searched_tokens.add(token)
-                    # We found some result
-                    if len(entities): objects += entities
+                if token not in to_search and len(token) > 2:
+                    # We may search this term
+                    to_search.add(token)
 
-
+        # Search all terms at once
+        objects += self.search(to_search)
         # Only keep predicates that concern our subjects
         subject_names = set([subject['name'] for subject in subjects])
         predicates = filter(lambda predicate: predicate['subject'] in subject_names, predicates)

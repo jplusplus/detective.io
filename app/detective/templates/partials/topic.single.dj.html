@@ -74,13 +74,6 @@
 								<img ng-src="[[author.profile.avatar]]" width="35" height="35" class="img-circle pull-left right10" />
 								<a ui-sref="user({username: author.username})">
 									[[author.username]]
-									<span class="text-muted pull-right">
-										<ng-pluralize count="author.profile.topics_count"
-											when="{'0': '0 investigation',
-										    	   '1': '{} investigation',
-										       'other': '{} investigations'}">
-										</ng-pluralize>
-									</span>
 								</a>
 							</li>
 						</ul>

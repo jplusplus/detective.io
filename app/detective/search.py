@@ -59,11 +59,11 @@ class Search(object):
             and an <object> is a "Named entity" or a Model.
             Later, as follow RDF standard, an <object> could be any data.
         """
-        predicates      = []
-        subjects        = []
-        objects         = []
-        propositions    = []
-        to_search       = set()
+        predicates   = []
+        subjects     = []
+        objects      = []
+        propositions = []
+        to_search    = set()
         # Picks candidates for subjects and predicates
         for idx, match in enumerate(matches):
             subjects     += match["models"]
@@ -81,8 +81,10 @@ class Search(object):
                     # We may search this term
                     to_search.add(token)
 
-        # Search all terms at once
-        objects += self.by_name(to_search)
+        # There is node to look for
+        if len(to_search):
+            # Search all terms at once
+            objects += self.by_name(to_search)
         # Only keep predicates that concern our subjects
         subject_names = set([subject['name'] for subject in subjects])
         predicates = filter(lambda predicate: predicate['subject'] in subject_names, predicates)
@@ -156,6 +158,17 @@ class Search(object):
             syntax = self.topic.get_syntax()
             self.syntax = syntax
         return self.syntax
+
+        query = """
+            START root=node(0)
+            MATCH target-[r:`%s`]->(edge)<-[`<<INSTANCE>>`]-(type)<-[`<<TYPE>>`]-(root)
+            WHERE type.app_label = "%s"
+            RETURN COUNT(target) AS ct, edge
+            ORDER BY ct DESC
+            LIMIT 5
+        """ % ( rel, self.topic.app_label() )
+
+        return query
 
     @staticmethod
     def ngrams(input):

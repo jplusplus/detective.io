@@ -13,7 +13,7 @@ See also the [full installation guide](http://docs.detective.io/en/latest/instal
 
 **1. Prerequisite**
 ```bash
-sudo apt-get install build-essential git-core python python-pip python-dev libmemcached-dev libpq-dev
+sudo apt-get install build-essential git-core python python-pip python-dev libmemcached-dev libpq-dev libxslt1-dev libxml2-dev libxml2
 sudo pip install virtualenv
 ```
 

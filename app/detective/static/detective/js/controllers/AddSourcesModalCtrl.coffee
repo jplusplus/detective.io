@@ -4,6 +4,7 @@ class window.AddSourcesModalCtrl
     constructor: (@scope, @q, @filter, @modalInstance, @Individual, @UtilsFactory,  @fields, @field, @meta)->
         @fields  = angular.copy @fields
         @sources = @fields.field_sources or []
+        @master_sources = angular.copy @sources
         # @updateMasterSources()
         # Scope variables
         @scope.loading    = {}
@@ -65,11 +66,21 @@ class window.AddSourcesModalCtrl
     getSourceParams: (source)=>
         _.extend @getIndividualParams(), { source_id: source.id }
 
+    hasChanged: (source)=>
+        master_source = _.findWhere @master_sources, {id: source.id }
+        master_source.reference != source.reference
+
+    recordChanges: (source)=>
+        _.findWhere(@master_sources, {id: source.id }).reference = source.reference
+
     updateSource: (source)=>
-        @scope.loading[source.id] = true
-        @Individual.updateSource(@getSourceParams(source), source, =>
-            @scope.loading[source.id] = false
-        )
+        if @hasChanged(source)
+            @scope.loading[source.id] = true
+            @Individual.updateSource(@getSourceParams(source), source, =>
+                @scope.loading[source.id] = false
+                @recordChanges(source)
+
+            )
     deleteSource: (source)=>
         @scope.loading[source.id] = true
 

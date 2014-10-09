@@ -134,7 +134,8 @@ class IndividualResource(ModelResource):
             url(r"^(?P<resource_name>%s)/search%s$" % params, self.wrap_view('get_search'), name="api_get_search"),
             url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch/sources%s$" % params, self.wrap_view('get_patch_sources'), name="api_get_patch_sources"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch/sources%s$" % params, self.wrap_view('get_patch_source'), name="api_get_create_source"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch/sources/(?P<source_pk>[0-9]*)%s$" % params, self.wrap_view('get_patch_source'), name="api_get_patch_source"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/authors%s$" % params, self.wrap_view('get_authors'), name="api_get_authors"),
             url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/graph%s$" % params, self.wrap_view('get_graph'), name="api_get_graph"),
@@ -563,7 +564,7 @@ class IndividualResource(ModelResource):
         data = body.copy()
         # Received per-field sources
         if "field_sources" in data:
-            # field_sources must not be treated here, see patch_sources method
+            # field_sources must not be treated here, see patch_source method
             field_sources = data.pop("field_sources")
         # Validate data.
         # If it fails, it will raise a ValidationError
@@ -658,78 +659,58 @@ class IndividualResource(ModelResource):
         # And returns cleaned data
         return self.create_response(request, data)
 
-    def get_patch_sources(self, request, **kwargs):
-        import time
-        start_time = time.time()
+    def get_patch_source(self, request, **kwargs):
+        # import time
+        # start_time = time.time()
 
         def delete_source(source_id):
-            delete_query = """
-                START n=node({idx})
-                DELETE n""".format(idx=source_id)
+            node = connection.nodes.get(source_id)
+            rels = node.relationships.all()
+            [ rel.delete() for rel in rels ]
+            deleted = node.delete()
+            return None
 
-            connection.query(delete_query)
+        def update_source(individual, source_id, data):
+            res = {}
+            src_node = connection.nodes.get(source_id)
+            src_node['reference'] = data['reference']
+            res = data
+            return res
 
-        def delete_sources(sources_ids):
-            if len(sources_ids) > 0:
-                with connection.transaction(commit=False) as tx:
-                    [ delete_source(src_id) for src_id in source_ids ]
-                tx.commit()
+        def create_source(individual, data):
+            res = {}
+            with connection.transaction(commit=False) as tx:
+                # took from neo4django.db.base.NodeModel._save_node_model
+                type_hier_props = [{'app_label': t._meta.app_label,
+                                    'model_name': t.__name__} for t in FieldSource._concrete_type_chain()]
+                type_hier_props = list(reversed(type_hier_props))
+                #get all the names of all types, including abstract, for indexing
+                type_names_to_index = [t._type_name() for t in FieldSource.mro()
+                                       if (issubclass(t, NodeModel) and t is not NodeModel)]
+                create_groovy = '''
+                node = Neo4Django.createNodeWithTypes(types)
+                Neo4Django.indexNodeAsTypes(node, indexName, typesToIndex)
+                results = node
+                '''
+                data.update({'individual': individual.id})
+                node = connection.gremlin_tx(create_groovy, types=type_hier_props,
+                                              indexName=FieldSource.index_name(),
+                                              typesToIndex=type_names_to_index)
+                for field, val in data.items():
+                    node.set(field, val)
+                    data.update({'id': node.id})
+                    res = data
 
-        def edit_sources(individual, data):
-            edited_source = []
+            tx.commit()
+            # remove added individual
+            if res.get('individual'):
+                del res['individual']
 
-            l_source_id = lambda src: src.get('id') if src else None
-            sources_to_delete = []
-            sources_to_create = filter(lambda src: l_source_id(src) == None, data)
-            sources_to_update = filter(lambda src: l_source_id(src) != None, data)
-
-            for src_data in sources_to_update:
-                src_id = l_source_id(src_data)
-                # if we have an empty value we will delete this
-                # source later
-                if src_data['reference'] in ['', None]:
-                    sources_to_delete.append(src_id)
-                else:
-                    src_node = connection.nodes.get(src_id)
-                    src_node['reference'] =  src_data['reference']
-                    edited_source.append(src_data)
-
-            if len(sources_to_create) > 0:
-
-                with connection.transaction(commit=False) as tx:
-                    # took from neo4django.db.base.NodeModel._save_node_model
-                    type_hier_props = [{'app_label': t._meta.app_label,
-                                        'model_name': t.__name__} for t in FieldSource._concrete_type_chain()]
-                    type_hier_props = list(reversed(type_hier_props))
-                    #get all the names of all types, including abstract, for indexing
-                    type_names_to_index = [t._type_name() for t in FieldSource.mro()
-                                           if (issubclass(t, NodeModel) and t is not NodeModel)]
-                    create_groovy = '''
-                    node = Neo4Django.createNodeWithTypes(types)
-                    Neo4Django.indexNodeAsTypes(node, indexName, typesToIndex)
-                    results = node
-                    '''
-                    for new_source in sources_to_create:
-                        new_source.update({'individual': individual.id})
-                        node = connection.gremlin_tx(create_groovy, types=type_hier_props,
-                                                      indexName=FieldSource.index_name(),
-                                                      typesToIndex=type_names_to_index)
-                        for field, val in new_source.items():
-                            node.set(field, val)
-
-                        new_source.update({'id': node.id})
-                        edited_source.append(new_source)
-                tx.commit()
-
-
-            # transaction for every updates
-            delete_sources(sources_to_delete)
-
-            return edited_source
-
+            return res
 
         pk = kwargs["pk"]
         individual = None
+        source_id = kwargs.get('source_pk')
         # This should be a POST request
         self.method_check(request, allowed=['post', 'delete'])
         self.throttle_check(request)
@@ -743,19 +724,22 @@ class IndividualResource(ModelResource):
         # Node not found
         except client.NotFoundError: raise Http404("Not found.")
 
-        data = json.loads(request.body) if type(request.body) is str else request.body
-        # ensure that if we receive a single source to patch we treat it as an array
-        if type(data) == type({}): data = [ data ]
-
+        source = None
         if request.method == 'POST':
-            # edit pased sources
-            data = edit_sources(individual, data)
+            body = json.loads(request.body)
+            data = body.copy()
+            if source_id != None:
+                if data.get('reference') in ['', None]:
+                    source = delete_source(source_id)
+                else:
+                    source = update_source(individual, source_id, data)
+            else:
+                source = create_source(individual, data)
         elif request.method == 'DELETE':
-            # delete passed source (no question asked)
-            data = delete_sources(map(l_source_id, data))
+            delete_source(source_id)
 
-        print "Took %f to patch sources" % (time.time() - start_time)
-        return self.create_response(request, data)
+        # print "Took %f to patch sources" % (time.time() - start_time)
+        return self.create_response(request, source)
 
     def get_authors(self, request, **kwargs):
         pk = kwargs["pk"]

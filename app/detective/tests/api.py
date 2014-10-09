@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective.models                import Topic, TopicSkeleton, PLANS_CHOICES
 from app.detective.topics.common.message import SaltMixin
+from app.detective.topics.common.models  import FieldSource
 from app.detective.topics.energy.models  import Organization, EnergyProject, Person, Country
 from app.detective                       import utils
 from datetime                            import datetime
@@ -219,6 +220,19 @@ class ApiTestCase(ResourceTestCase):
             auth = self.get_super_credentials()
         url = '/api/%s/v1/%s/%d/patch/' % (scope, model_name, model_id)
         return self.api_client.post(url, format='json', data=patch_data, authentication=auth)
+
+    def patch_individual_sources(self, scope, model_name, model_id, field, sources,
+            method='post', auth=None, skip_auth=False):
+        if not skip_auth and not auth:
+            auth = self.get_super_credentials()
+        url = '/api/%s/v1/%s/%d/patch/sources/' % (scope, model_name, model_id)
+        resp = None
+        if method == 'post':
+            resp = self.api_client.post(url, format='json', data=sources, authentication=auth)
+        elif method == 'delete':
+            resp = self.api_client.delete(url, format='json', data=sources, authentication=auth)
+        return resp
+
 
     def check_permissions(self, permissions=None, user=None):
         user_permissions = list(user.get_all_permissions())
@@ -1026,6 +1040,78 @@ class TopicApiTestCase(ApiTestCase):
         self.assertTrue(len(resp["is_a_child_of"]) == 0, len(resp["is_a_child_of"]))
         person_a.delete()
         person_b.delete()
+
+    def test_patch_individual_new_sources(self):
+        topic  = Topic.objects.get(slug='test-topic')
+        Person = topic.get_models_module().Person
+
+        def patch_sources(individual_id, field, sources):
+            patch_data = dict(
+                scope      = 'detective/test-family',
+                model_name = 'person',
+                model_id   = individual_id,
+            )
+            return self.patch_individual_sources(field=field, sources=sources, **patch_data)
+
+        """
+        Test that the patching of field sources with new sources works properly
+        """
+        p1 = Person.objects.create(name='My person')
+
+        s1 = { 'field': 'name', 'reference': 'source A' }
+        s2 = { 'field': 'name', 'reference': 'source B' }
+
+        resp = patch_sources(p1.pk, 'name', [ s1, s2 ])
+        self.assertHttpOK(resp)
+        count = FieldSource.objects.filter(individual=p1.pk, field='name').count()
+        self.assertEqual(count, 2)
+
+    def test_patch_individual_existing_sources(self):
+        topic  = Topic.objects.get(slug='test-topic')
+        Person = topic.get_models_module().Person
+
+        def patch_sources(individual_id, field, sources):
+            patch_data = dict(
+                scope      = 'detective/test-family',
+                model_name = 'person',
+                model_id   = individual_id,
+            )
+            return self.patch_individual_sources(field=field, sources=sources, **patch_data)
+
+        """
+        Test that the patching of field sources with new sources works properly
+        """
+        p1 = Person.objects.create(name='My person')
+        s1 = FieldSource.objects.create(field='name', individual=p1.pk, reference='source A')
+        s2 = FieldSource.objects.create(field='name', individual=p1.pk, reference='source B')
+
+        s1_patch = {
+            'id': s1.pk,
+            'field': 'name',
+            'reference': 'EDITED source A'
+        }
+        s2_patch = {
+            'id': s2.pk,
+            'field': 'name',
+            'reference': 'EDITED source B'
+        }
+        new_source = {
+            'field': 'name',
+            'reference': 'new_ref'
+        }
+
+        resp = patch_sources(p1.pk, 'name', [ s1_patch, s2_patch, new_source ])
+        self.assertHttpOK(resp)
+
+        s1_updated = FieldSource.objects.get(pk=s1.pk)
+        s2_updated = FieldSource.objects.get(pk=s2.pk)
+
+        self.assertEqual(s1_updated.reference, s1_patch['reference'])
+        self.assertEqual(s2_updated.reference, s2_patch['reference'])
+        self.assertTrue(
+            FieldSource.objects.filter(
+                field='name', reference=new_source['reference']).exists()
+        )
 
     def test_export_csv(self):
         from django_rq import get_worker

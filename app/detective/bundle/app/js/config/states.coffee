@@ -185,6 +185,15 @@ angular.module('detective.config').config [
                 auth: true
                 owner: true
             )
+            .state('user-topic-edit-ontology',
+                url: "/:username/:topic/edit-ontology/"
+                controller: EditTopicOntologyCtrl
+                templateUrl: '/partial/topic.edit-ontology.html'
+                resolve:
+                    topic: UserTopicCtrl.resolve.topic
+                auth: true
+                owner: true
+            )
             .state('user-topic-delete',
                 url: "/:username/:topic/delete/"
                 controller: DeleteTopicCtrl

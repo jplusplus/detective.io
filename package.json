@@ -1,6 +1,6 @@
 {
   "name": "detective",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "dependencies": {
     "bower": "latest",
     "coffee-script": "1.6.2",

@@ -1,6 +1,6 @@
 {
   "name": "detective",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "dependencies": {
     "angular": "1.2.16",
     "angular-cookies": "1.2.16",
@@ -30,6 +30,6 @@
     "rangy": "~1.2.3",
     "ScrollMagic": "~1.0.9",
     "angulartics": "~0.16.5",
-    "ng-embedly": "~0.1.0"
+    "ng-embedly": "~0.1.1"
   }
 }

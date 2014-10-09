@@ -6,6 +6,7 @@ from app.detective.utils                import import_class, to_underscores, get
 from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserResource
 from app.detective.models               import Topic
+from django.conf                        import settings
 from django.conf.urls                   import url
 from django.contrib.auth.models         import User
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
@@ -16,7 +17,8 @@ from django.http                        import Http404
 from neo4jrestclient                    import client
 from neo4jrestclient.request            import TransactionException
 from neo4django.db                      import connection
-from neo4django.db.models.properties    import DateProperty
+from neo4django.db.models               import NodeModel
+from neo4django.db.models.properties    import DateProperty, BoundProperty
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
 from tastypie.authentication            import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
@@ -99,7 +101,7 @@ class FieldSourceResource(ModelResource):
     class Meta:
         queryset = FieldSource.objects.all()
         resource_name = 'auth/user'
-        excludes = ['individual', 'id']
+        excludes = ['individual',]
 
     def dehydrate(self, bundle):
         del bundle.data["resource_uri"]
@@ -132,6 +134,8 @@ class IndividualResource(ModelResource):
             url(r"^(?P<resource_name>%s)/search%s$" % params, self.wrap_view('get_search'), name="api_get_search"),
             url(r"^(?P<resource_name>%s)/mine%s$" % params, self.wrap_view('get_mine'), name="api_get_mine"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch%s$" % params, self.wrap_view('get_patch'), name="api_get_patch"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch/sources%s$" % params, self.wrap_view('get_patch_source'), name="api_get_create_source"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/patch/sources/(?P<source_pk>[0-9]*)%s$" % params, self.wrap_view('get_patch_source'), name="api_get_patch_source"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/authors%s$" % params, self.wrap_view('get_authors'), name="api_get_authors"),
             url(r"^(?P<resource_name>%s)/bulk_upload%s$" % params, self.wrap_view('bulk_upload'), name="api_bulk_upload"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/graph%s$" % params, self.wrap_view('get_graph'), name="api_get_graph"),
@@ -467,42 +471,6 @@ class IndividualResource(ModelResource):
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
 
-    def patch_sources(self, sources, node):
-        if sources == None: sources = []
-
-        def arr_no_dict_dup(in_arr):
-            out_arr = []
-            for el in in_arr:
-                existing = len(
-                        filter(
-                            lambda t: t['field'] == el['field'] and el['reference'] == t['reference'],
-                            out_arr
-                        )
-                    ) > 0
-                if not existing:
-                    out_arr.append(el)
-            return out_arr
-
-        # remove empty references and duplicates
-        sources = filter(lambda x: x['reference'] not in [None, ''], arr_no_dict_dup(sources))
-
-        old_sources = map(lambda x: {'field':x.field, 'reference':x.reference}, FieldSource.objects.filter(individual=node.id))
-
-        # filter sources we need to add
-        sources_to_add = filter(lambda x: x not in old_sources, sources)
-
-        # filter sources we need to delete
-        sources_to_delete = filter(lambda x: x not in sources, old_sources)
-
-        # delete what we need
-        for source in sources_to_delete:
-            FieldSource.objects.filter(individual=node.id, **source).delete()
-
-        # add what we need
-        for source in sources_to_add:
-            FieldSource.objects.create(individual=node.id, **source)
-
-
     def validate(self, data, model=None, allow_missing=False):
         if model is None: model = self.get_model()
         cleaned_data = {}
@@ -596,10 +564,8 @@ class IndividualResource(ModelResource):
         data = body.copy()
         # Received per-field sources
         if "field_sources" in data:
-            # Extract them from the data to patch
+            # field_sources must not be treated here, see patch_source method
             field_sources = data.pop("field_sources")
-            # And thread them into a separate method
-            self.patch_sources(field_sources, node)
         # Validate data.
         # If it fails, it will raise a ValidationError
         data = self.validate(data)
@@ -693,6 +659,90 @@ class IndividualResource(ModelResource):
         # And returns cleaned data
         return self.create_response(request, data)
 
+    def get_patch_source(self, request, **kwargs):
+        import time
+        start_time = time.time()
+
+        def delete_source(source_id):
+            node = connection.nodes.get(source_id)
+            rels = node.relationships.all()
+            [ rel.delete() for rel in rels ]
+            deleted = node.delete()
+            return None
+
+        def update_source(individual, source_id, data):
+            res = {}
+            src_node = connection.nodes.get(source_id)
+            src_node['reference'] = data['reference']
+            res = data
+            return res
+
+        def create_source(individual, data):
+            res = {}
+            # took from neo4django.db.base.NodeModel._save_node_model
+            type_hier_props = [{'app_label': t._meta.app_label,
+                                'model_name': t.__name__} for t in FieldSource._concrete_type_chain()]
+            type_hier_props = list(reversed(type_hier_props))
+            #get all the names of all types, including abstract, for indexing
+            type_names_to_index = [t._type_name() for t in FieldSource.mro()
+                                   if (issubclass(t, NodeModel) and t is not NodeModel)]
+            create_groovy = '''
+            node = Neo4Django.createNodeWithTypes(types)
+            Neo4Django.indexNodeAsTypes(node, indexName, typesToIndex)
+            node.field = field
+            node.individual = individual
+            node.reference = reference
+            results = node
+            '''
+            data.update({'individual': individual.id})
+            node = connection.gremlin_tx(create_groovy, types=type_hier_props,
+                                          indexName=FieldSource.index_name(),
+                                          typesToIndex=type_names_to_index, **data)
+
+            # for field, val in data.items():
+            #     node.set(field, val)
+
+            res['id'] = node.id
+            res.update(data)
+
+            # tx.commit()
+            # remove added individual
+            if res.get('individual'):
+                del res['individual']
+            return res
+
+        pk = kwargs["pk"]
+        individual = None
+        source_id = kwargs.get('source_pk')
+        # This should be a POST request
+        self.method_check(request, allowed=['post', 'delete'])
+        self.throttle_check(request)
+        # User must be authentication
+        self.is_authenticated(request)
+        bundle = self.build_bundle(request=request)
+        # User allowed to update this model
+        self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
+        # Get the node's data using the rest API
+        try: individual = connection.nodes.get(pk)
+        # Node not found
+        except client.NotFoundError: raise Http404("Not found.")
+
+        source = None
+        if request.method == 'POST':
+            body = json.loads(request.body)
+            data = body.copy()
+            if source_id != None:
+                if data.get('reference') in ['', None]:
+                    source = delete_source(source_id)
+                else:
+                    source = update_source(individual, source_id, data)
+            else:
+                source = create_source(individual, data)
+        elif request.method == 'DELETE':
+            delete_source(source_id)
+
+        print "Took %f to patch sources" % (time.time() - start_time)
+        return self.create_response(request, source)
 
     def get_authors(self, request, **kwargs):
         pk = kwargs["pk"]

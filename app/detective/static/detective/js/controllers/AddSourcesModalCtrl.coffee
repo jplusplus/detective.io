@@ -2,14 +2,16 @@ class window.AddSourcesModalCtrl
     # Injects dependencies
     @$inject: ['$scope', '$q', '$filter', '$modalInstance', 'Individual', 'UtilsFactory', "fields", "field", "meta"]
     constructor: (@scope, @q, @filter, @modalInstance, @Individual, @UtilsFactory,  @fields, @field, @meta)->
-        @fields = angular.copy @fields
-        @fields.field_sources = [] if not @fields.field_sources?
-        @updateMasterSources()
+        @fields  = angular.copy @fields
+        @sources = @fields.field_sources or []
+        @master_sources = angular.copy @sources
+        # @updateMasterSources()
         # Scope variables
-        @scope.loading    = no
+        @scope.loading    = {}
         @scope.individual = @Individual
         # Description of the model's fields
         @scope.meta = @meta
+        @scope.focus_new = true
 
         # Scope functions
         # Cancel button just closes the modal
@@ -23,34 +25,18 @@ class window.AddSourcesModalCtrl
         @scope.getSourcesRefs   = @getSourcesRefs
         @scope.isSourceURLValid = @isSourceURLValid
 
+        @scope.isLoading = => _.some(@scope.loading)
+
         # Description of the relationship (source, target, through model)
         @scope.fields = @fields
 
-    close: (result=@fields.field_sources)=>
+    close: (result=@sources)=>
         @modalInstance.close(result)
 
     save: (form, close=no)=>
         # if form is passed to the save function it has to be valid.
         return unless form.$valid if form?
-        @scope.focused = undefined
-        @scope.loading = yes
-        @meta.updating[@field.name] = true
-        data  =
-            field_sources: @cleanSources()
-        params  =
-            id:   @meta.id
-            type: @meta.type
-
-        # Update individual sources
-        promise = @Individual.update(params, data).$promise
-
-        promise.then (data)=>
-            @updateMasterSources()
-
-            @scope.loading = no
-            @meta.updating[@field.name] = false
-
-            @close(@fields.field_sources) if close
+        @close(@sources) if close
 
     isFieldRich: (field)=>
         field.rules.is_rich or no
@@ -73,29 +59,61 @@ class window.AddSourcesModalCtrl
 
         field_value
 
+    getIndividualParams: =>
+        id: @meta.id
+        type: @meta.type
 
-    getSources: (fields=@fields) => _.where fields.field_sources, field: @field.name
+    getSourceParams: (source)=>
+        _.extend @getIndividualParams(), { source_id: source.id }
 
-    getSourcesRefs: ()=> _.map @getSources(), (s)-> s.reference
+    hasChanged: (source)=>
+        master_source = _.findWhere @master_sources, {id: source.id }
+        master_source.reference != source.reference
 
-    addSource: (value)=>
-        @fields.field_sources.push
-            reference: value
+    recordChanges: (source)=>
+        _.findWhere(@master_sources, {id: source.id }).reference = source.reference
+
+    updateSource: (source)=>
+        if @hasChanged(source)
+            @scope.loading[source.id] = true
+            @Individual.updateSource(@getSourceParams(source), source, =>
+                @scope.loading[source.id] = false
+                @recordChanges(source)
+
+            )
+    deleteSource: (source)=>
+        @scope.loading[source.id] = true
+
+        @Individual.deleteSource(@getSourceParams(source), =>
+                @scope.loading[source.id] = false
+                @sources = _.reject @sources, _.matches
+                    field: source.field
+                    reference: source.reference
+                @scope.focused = undefined
+            , =>
+                @scope.loading[source.id] = false
+        )
+
+    addSource: (source_text, form_text)=>
+        new_source =
+            reference: source_text
             field: @field.name
 
-        @scope.focused = value
+        @scope.loading['global'] = true
+        @Individual.createSource(@getIndividualParams(), new_source, (source)=>
+                @sources.push source
+                @scope.focus_new = true
+                @scope.loading['global'] = false
+            , =>
+                @scope.loading['global'] = false
+        )
 
-    cleanSources: =>
-        _.map @fields.field_sources, (v)-> _.omit v, 'focus'
+    getSources: => _.where @sources, field: @field.name
 
-    updateMasterSources: =>
-        @master_sources = @getSources angular.copy @fields
+    getSourcesRefs: => _.map @getSources(), (s)-> s.reference
 
-    deleteSource: (source, $event)=>
-        @fields.field_sources = _.reject @fields.field_sources, _.matches
-                field: source.field
-                reference: source.reference
-        @scope.focused = undefined
+    # updateMasterSources: =>
+    #     @master_sources = @getSources angular.copy @fields
 
     hasSources: =>
         sources = @getSources()
@@ -104,5 +122,7 @@ class window.AddSourcesModalCtrl
     isSourceURLValid: (source)=>
         return false unless source?
         @UtilsFactory.isValidURL(source.reference)
+
+
 
 angular.module('detective.controller').controller 'addSourcesModalCtrl', AddSourcesModalCtrl

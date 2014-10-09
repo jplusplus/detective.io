@@ -4,7 +4,7 @@ from neo4django.db import models
 class FieldSource(models.NodeModel):
     # binding to entity
     individual = models.IntegerProperty()
-    # actual source value 
+    # actual source value
     reference  = models.StringProperty()
     field      = models.StringProperty()
 

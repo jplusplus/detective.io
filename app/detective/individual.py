@@ -660,8 +660,8 @@ class IndividualResource(ModelResource):
         return self.create_response(request, data)
 
     def get_patch_source(self, request, **kwargs):
-        # import time
-        # start_time = time.time()
+        import time
+        start_time = time.time()
 
         def delete_source(source_id):
             node = connection.nodes.get(source_id)
@@ -679,33 +679,36 @@ class IndividualResource(ModelResource):
 
         def create_source(individual, data):
             res = {}
-            with connection.transaction(commit=False) as tx:
-                # took from neo4django.db.base.NodeModel._save_node_model
-                type_hier_props = [{'app_label': t._meta.app_label,
-                                    'model_name': t.__name__} for t in FieldSource._concrete_type_chain()]
-                type_hier_props = list(reversed(type_hier_props))
-                #get all the names of all types, including abstract, for indexing
-                type_names_to_index = [t._type_name() for t in FieldSource.mro()
-                                       if (issubclass(t, NodeModel) and t is not NodeModel)]
-                create_groovy = '''
-                node = Neo4Django.createNodeWithTypes(types)
-                Neo4Django.indexNodeAsTypes(node, indexName, typesToIndex)
-                results = node
-                '''
-                data.update({'individual': individual.id})
-                node = connection.gremlin_tx(create_groovy, types=type_hier_props,
-                                              indexName=FieldSource.index_name(),
-                                              typesToIndex=type_names_to_index)
-                for field, val in data.items():
-                    node.set(field, val)
-                    data.update({'id': node.id})
-                    res = data
+            # took from neo4django.db.base.NodeModel._save_node_model
+            type_hier_props = [{'app_label': t._meta.app_label,
+                                'model_name': t.__name__} for t in FieldSource._concrete_type_chain()]
+            type_hier_props = list(reversed(type_hier_props))
+            #get all the names of all types, including abstract, for indexing
+            type_names_to_index = [t._type_name() for t in FieldSource.mro()
+                                   if (issubclass(t, NodeModel) and t is not NodeModel)]
+            create_groovy = '''
+            node = Neo4Django.createNodeWithTypes(types)
+            Neo4Django.indexNodeAsTypes(node, indexName, typesToIndex)
+            node.field = field
+            node.individual = individual
+            node.reference = reference
+            results = node
+            '''
+            data.update({'individual': individual.id})
+            node = connection.gremlin_tx(create_groovy, types=type_hier_props,
+                                          indexName=FieldSource.index_name(),
+                                          typesToIndex=type_names_to_index, **data)
 
-            tx.commit()
+            # for field, val in data.items():
+            #     node.set(field, val)
+
+            res['id'] = node.id
+            res.update(data)
+
+            # tx.commit()
             # remove added individual
             if res.get('individual'):
                 del res['individual']
-
             return res
 
         pk = kwargs["pk"]
@@ -738,7 +741,7 @@ class IndividualResource(ModelResource):
         elif request.method == 'DELETE':
             delete_source(source_id)
 
-        # print "Took %f to patch sources" % (time.time() - start_time)
+        print "Took %f to patch sources" % (time.time() - start_time)
         return self.create_response(request, source)
 
     def get_authors(self, request, **kwargs):

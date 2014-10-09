@@ -7,7 +7,7 @@
 from django.test                import TestCase
 from django.contrib.auth.models import User
 from app.detective.models       import Topic
-from app.detective.utils        import where
+from app.detective.utils        import where, findwhere
 
 class CommonTestCase(TestCase):
     fixtures = [ 'app/detective/fixtures/default_skeletons.json', ]

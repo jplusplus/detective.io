@@ -677,11 +677,11 @@ class IndividualResource(ModelResource):
 
         def edit_sources(individual, data):
             edited_source = []
-            l_source_id = lambda src: src.get('id') if src else None
 
+            l_source_id = lambda src: src.get('id') if src else None
             sources_to_delete = []
-            sources_to_update = filter(lambda src: l_source_id(src) != None, data)
             sources_to_create = filter(lambda src: l_source_id(src) == None, data)
+            sources_to_update = filter(lambda src: l_source_id(src) != None, data)
 
             for src_data in sources_to_update:
                 src_id = l_source_id(src_data)
@@ -694,29 +694,24 @@ class IndividualResource(ModelResource):
                     src_node['reference'] =  src_data['reference']
                     edited_source.append(src_data)
 
-
             if len(sources_to_create) > 0:
+
                 with connection.transaction(commit=False) as tx:
+                    # took from neo4django.db.base.NodeModel._save_node_model
                     type_hier_props = [{'app_label': t._meta.app_label,
                                         'model_name': t.__name__} for t in FieldSource._concrete_type_chain()]
                     type_hier_props = list(reversed(type_hier_props))
                     #get all the names of all types, including abstract, for indexing
                     type_names_to_index = [t._type_name() for t in FieldSource.mro()
                                            if (issubclass(t, NodeModel) and t is not NodeModel)]
-
-
+                    create_groovy = '''
+                    node = Neo4Django.createNodeWithTypes(types)
+                    Neo4Django.indexNodeAsTypes(node, indexName, typesToIndex)
+                    results = node
+                    '''
                     for new_source in sources_to_create:
                         new_source.update({'individual': individual.id})
-                        # node = connection.nodes.create(**new_source)
-                        # connection.relationships.create(source_model_node, '<<INSTANCE>>', node)
-
-                        # took from neo4django.db.base.NodeModel._save_node_model
-                        script = '''
-                        node = Neo4Django.createNodeWithTypes(types)
-                        Neo4Django.indexNodeAsTypes(node, indexName, typesToIndex)
-                        results = node
-                        '''
-                        node = connection.gremlin_tx(script, types=type_hier_props,
+                        node = connection.gremlin_tx(create_groovy, types=type_hier_props,
                                                       indexName=FieldSource.index_name(),
                                                       typesToIndex=type_names_to_index)
                         for field, val in new_source.items():
@@ -726,10 +721,10 @@ class IndividualResource(ModelResource):
                         edited_source.append(new_source)
                 tx.commit()
 
-            print "edited refs: %s" % map(lambda s: s['reference'], edited_source)
 
             # transaction for every updates
             delete_sources(sources_to_delete)
+
             return edited_source
 
 

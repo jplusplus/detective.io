@@ -1063,8 +1063,13 @@ class TopicApiTestCase(ApiTestCase):
 
         resp = patch_sources(p1.pk, 'name', [ s1, s2 ])
         self.assertHttpOK(resp)
-        count = FieldSource.objects.filter(individual=p1.pk, field='name').count()
-        self.assertEqual(count, 2)
+        self.assertTrue(
+            FieldSource.objects.filter(individual=p1.pk, field='name', reference=s1['reference']).exists()
+        )
+        self.assertTrue(
+            FieldSource.objects.filter(individual=p1.pk, field='name', reference=s2['reference']).exists()
+        )
+
 
     def test_patch_individual_existing_sources(self):
         topic  = Topic.objects.get(slug='test-topic')

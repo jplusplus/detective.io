@@ -364,15 +364,20 @@ class TopicNestedResource(ModelResource):
         self.is_authenticated(request)
         self.throttle_check(request)
 
+        body = json.loads(request.body)
+        collaborator = body.get("collaborator", None)
+        if collaborator != None:
+            collaborator = User.objects.get(pk=collaborator)
+
         topic = Topic.objects.get(id=kwargs["pk"])
-        user  = request.user
+        user  = collaborator or request.user
         contributors = topic.get_contributor_group()
         potential_user = contributors.user_set.filter(pk=user.pk)
         if potential_user.exists():
             # remove user from contributor group
-            contributors.user_set.remove(request.user)
-            return HttpResponse(u"You successfuly left {topic} contributors.".format(
-                topic=topic.title))
+            contributors.user_set.remove(user)
+            return HttpResponse(u"{username} successfuly left {topic} contributors.".format(
+                username=user.username, topic=topic.title))
         else:
             return HttpResponseForbidden("You are not a contributor of this topic.")
 

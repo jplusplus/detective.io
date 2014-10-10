@@ -281,6 +281,7 @@ class TopicNestedResource(ModelResource):
         return [
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/invite%s$" % params, self.wrap_view('invite'), name="api_invite"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/leave%s$"  % params, self.wrap_view('leave'),  name="api_leave"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/collaborators%s$"  % params, self.wrap_view('list_collaborators'),  name="api_list_collaborators"),
         ]
 
     def invite(self, request, **kwargs):
@@ -374,6 +375,22 @@ class TopicNestedResource(ModelResource):
                 topic=topic.title))
         else:
             return HttpResponseForbidden("You are not a contributor of this topic.")
+
+    def list_collaborators(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        topic = Topic.objects.get(id=kwargs['pk'])
+        contributors = topic.get_contributor_group()
+
+        ur = UserResource()
+        bundles = []
+        for user in contributors.user_set.all():
+            bundle = ur.build_bundle(obj=user, request=request)
+            bundles.append(ur.full_dehydrate(bundle, for_list=True))
+
+        return self.create_response(request, bundles)
 
     def dehydrate(self, bundle):
         # Get the model's rules manager

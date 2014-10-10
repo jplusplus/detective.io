@@ -1,7 +1,7 @@
 class window.AddCollaboratorsCtrl
     # Injects dependancies
     @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic', 'collaborators', 'User']
-    constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic, @collaborators, @User)->
+    constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic, collaborators, @User)->
         @Page.title "Add new collaborators"
         @scope.topic = @topic
         # Transform search result
@@ -28,13 +28,14 @@ class window.AddCollaboratorsCtrl
                 # Success notification
                 @scope.invited = collaborator
                 @scope.collaborator_name = ""
+                do @updateCollaborators
             # Error
             , => @scope.loading = no)
 
         ##
         # Collaborators
         @collaborator_loading = []
-        @scope.collaborators = @collaborators
+        @scope.collaborators = collaborators
         @scope.orderCollaborators = @orderCollaborators
         @scope.isYou = @isYou
         @scope.isOwner = @isOwner
@@ -71,6 +72,13 @@ class window.AddCollaboratorsCtrl
             @scope.loading = yes
             @Topic.leave { id : @topic.id }, { collaborator : user.id }, =>
                 @scope.loading = no
+                do @updateCollaborators
+
+    updateCollaborators: =>
+        @scope.loading = yes
+        (@Topic.collaborators { id : @topic.id }).$promise.then (data) =>
+            @scope.loading = no
+            @scope.collaborators = data
 
     @resolve:
         collaborators: ["Topic", "topic", (Topic, topic) ->

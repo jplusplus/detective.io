@@ -8,6 +8,10 @@ angular.module('detective.service').factory("Topic", [ '$resource', ($resource)-
             url :'/api/detective/common/v1/topic/:id/leave/?'
             method : 'POST'
             isArray: no
+        collaborators:
+            url: '/api/detective/common/v1/topic/:id/collaborators/?'
+            method: 'GET'
+            isArray: yes
         post:
             url: '/api/detective/common/v1/topic/?'
             method: 'POST'

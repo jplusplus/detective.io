@@ -408,7 +408,6 @@ class UserNestedResource(ModelResource):
 
             for group in page.object_list:
                 bundle = group_resource.build_bundle(obj=group, request=request)
-                bundle.user_obj = obj
                 bundle = group_resource.full_dehydrate(bundle)
                 # make sure we're not adding a not existing topic to objects
                 if bundle.data['topic']:

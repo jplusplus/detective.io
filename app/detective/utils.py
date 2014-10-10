@@ -467,9 +467,25 @@ class TopicCachier(object):
         return self.__keys()['version_number'].format(
             topic_prefix=self.__topic_prefix(topic))
 
+    def is_topic(self, topic):
+        from app.detective.models import Topic
+        return isinstance(topic, Topic)
+
+    def get_topic(self, topic_module):
+        topic = self.get(topic_module, 'topic_obj')
+        if not topic:
+            from app.detective.models import Topic
+            topic = Topic.objects.get(ontology_as_mod=topic_module)
+            self.set(topic_module, 'topic_obj', topic)
+        return topic
+
     def __topic_prefix(self, topic):
+        # topic can be a topic instance or a string representing topic.module
+        module = topic
+        if self.is_topic(topic):
+            module = topic.module
         return self.__keys()['topic_prefix'].format(
-            module=topic.module)
+            module=module)
 
     def __get_key(self, topic, suffix):
         return self.__keys()['cache_prefix'].format(

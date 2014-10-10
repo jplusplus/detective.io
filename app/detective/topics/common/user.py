@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from .errors                      import *
 from .message                     import Recover
+from app.detective.utils          import topic_cache
 from app.detective.models         import Topic, TopicToken, DetectiveProfileUser
 from django.conf                  import settings
 from django.conf.urls             import url
@@ -33,11 +34,12 @@ import re
 
 class GroupResource(ModelResource):
     def getTopic(bundle):
+        topic  = None
+        module = bundle.obj.name.split("_")[0]
         try:
-            module = bundle.obj.name.split("_")[0]
-            return Topic.objects.get(ontology_as_mod=module)
-        except Topic.DoesNotExist:
-            return None
+            topic = topic_cache.get_topic(module)
+        except Topic.DoesNotExist: pass
+        return topic
 
     topic = fields.ToOneField('app.detective.topics.common.resources.TopicResource',
                                 attribute=getTopic,

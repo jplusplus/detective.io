@@ -40,6 +40,7 @@ class window.AddCollaboratorsCtrl
         @scope.isOwner = @isOwner
         @scope.isLoading = @isLoading
         @scope.changePermission = @changePermission
+        @scope.removeCollaborator = @removeCollaborator
         #
         ##
 
@@ -64,6 +65,12 @@ class window.AddCollaboratorsCtrl
     unsetCollaboratorLoading: (user) =>
         if user.id in @collaborator_loading
             @collaborator_loading = @collaborator_loading.splice (@collaborator_loading.indexOf user.id), 1
+
+    removeCollaborator: (user) =>
+        if (confirm "Are you sure?")
+            @scope.loading = yes
+            @Topic.leave { id : @topic.id }, { collaborator : user.id }, =>
+                @scope.loading = no
 
     @resolve:
         collaborators: ["Topic", "topic", (Topic, topic) ->

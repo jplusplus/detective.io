@@ -1,7 +1,7 @@
 class window.AddCollaboratorsCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic', 'collaborators']
-    constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic, @collaborators)->
+    @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic', 'collaborators', 'User']
+    constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic, @collaborators, @User)->
         @Page.title "Add new collaborators"
         @scope.topic = @topic
         # Transform search result
@@ -31,7 +31,39 @@ class window.AddCollaboratorsCtrl
             # Error
             , => @scope.loading = no)
 
+        ##
+        # Collaborators
+        @collaborator_loading = []
+        @scope.collaborators = @collaborators
+        @scope.orderCollaborators = @orderCollaborators
+        @scope.isYou = @isYou
+        @scope.isOwner = @isOwner
+        @scope.isLoading = @isLoading
+        @scope.changePermission = @changePermission
+        #
+        ##
 
+    orderCollaborators: =>
+
+    isYou: (user) =>
+        user.id is @User.id
+
+    isOwner: (user) =>
+        user.id is @topic.author.id
+
+    isLoading: (user) =>
+        user.id in @collaborator_loading
+
+    changePermission: (user) =>
+        @setCollaboratorLoading user
+
+    setCollaboratorLoading: (user) =>
+        if user.id not in @collaborator_loading
+            @collaborator_loading.push user.id
+
+    unsetCollaboratorLoading: (user) =>
+        if user.id in @collaborator_loading
+            @collaborator_loading = @collaborator_loading.splice (@collaborator_loading.indexOf user.id), 1
 
     @resolve:
         collaborators: ["Topic", "topic", (Topic, topic) ->

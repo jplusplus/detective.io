@@ -45,7 +45,8 @@ class window.AddCollaboratorsCtrl
         #
         ##
 
-    orderCollaborators: =>
+    orderCollaborators: (user) =>
+        if user.id is @topic.author.id then 1 else 3
 
     isYou: (user) =>
         user.id is @User.id

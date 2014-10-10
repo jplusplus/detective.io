@@ -58,7 +58,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr ng-repeat="collaborator in collaborators" class="text-left" ng-class="{ loading : isLoading(collaborator) }">
+					<tr ng-repeat="collaborator in collaborators | filter:orderCollaborators" class="text-left" ng-class="{ loading : isLoading(collaborator) }">
 						<td>[[ $index + 1 ]]</td>
 						<td>
 							[[ collaborator.username ]]

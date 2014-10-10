@@ -508,6 +508,9 @@ class TopicNestedResource(ModelResource):
                     'index': idx
                 }
                 bundle.data["models"].append(model)
+                # return json for ontology_as_json field
+                if bundle.obj.ontology_as_json:
+                    bundle.data["ontology_as_json"] = bundle.obj.ontology_as_json
         _is_uploading = cache.get("{0}_is_uploading".format(bundle.data["ontology_as_mod"]))
         if _is_uploading != None and _is_uploading:
             bundle.data["is_uploading"] = True

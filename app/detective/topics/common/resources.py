@@ -5,7 +5,7 @@ from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
                                              Subscription, TopicDataSet
 from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
-from app.detective.topics.common.user import UserResource
+from app.detective.topics.common.user import UserResource, UserNestedResource
 from django.conf                      import settings
 from django.conf.urls                 import url
 from django.core.exceptions           import SuspiciousOperation
@@ -260,13 +260,14 @@ class TopicAuthorization(ReadOnlyAuthorization):
         return bundle.request.user == bundle.obj.author
 
 
-class TopicResource(ModelResource):
-    author             = fields.ToOneField(UserResource, 'author', full=True, null=True)
+class TopicNestedResource(ModelResource):
+    author             = fields.ToOneField(UserNestedResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path',  readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
     dataset = fields.ToOneField(TopicDataSetResource, 'dataset', full=False, null=True)
 
     class Meta:
+        resource_name      = 'topic'
         always_return_data = True
         authorization      = TopicAuthorization()
         authentication     = MultiAuthentication(Authentication(), BasicAuthentication(), SessionAuthentication())
@@ -521,7 +522,7 @@ class TopicResource(ModelResource):
         return bundle
 
     def full_hydrate(self, bundle):
-        bundle = super(TopicResource, self).full_hydrate(bundle)
+        bundle = super(TopicNestedResource, self).full_hydrate(bundle)
         bundle = self.clean_bundle(bundle)
         return bundle
 
@@ -536,6 +537,17 @@ class TopicResource(ModelResource):
         self.clean_bundle_key('background_url', bundle)
         self.clean_bundle_key('topic_skeleton', bundle)
         return bundle
+
+# simpler version of TopicResource, this resource doesn't use the full
+# version of User resource (UserNestedResource), this allows us to avoid
+# retrieving user profile everywhere (which can slows down a lot of request,
+# like UserNestedResource.get_groups for instance)
+class TopicResource(TopicNestedResource):
+    author = fields.ToOneField(UserResource, 'author', full=True, null=True)
+    # make this resource's meta inherit from its parent Meta (to allow filter,
+    # authorization, authentication etc.)
+    class Meta(TopicNestedResource):
+        resource_name = 'topic-simpler'
 
 class ArticleResource(ModelResource):
     topic = fields.ToOneField(TopicResource, 'topic', full=True)

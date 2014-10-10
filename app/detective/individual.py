@@ -762,7 +762,7 @@ class IndividualResource(ModelResource):
         authors_ids = node.properties.get("_author", [])
         # Find them in the database
         authors = User.objects.filter(id__in=authors_ids).select_related("profile")
-        resource = UserResource()
+        resource = UserNestedResource()
         # Create a bundle with each resources
         bundles = [resource.build_bundle(obj=a, request=request) for a in authors]
         data = [resource.full_dehydrate(bundle) for bundle in bundles]

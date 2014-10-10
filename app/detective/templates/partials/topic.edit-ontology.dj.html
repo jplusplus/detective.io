@@ -1,1 +1,12 @@
-pouet pouet
+<div ng-repeat="field in fields" ng-id="field.name" class="field">
+    [[field.verbose_name]]
+</div>
+
+<style type="text/css">
+    .field {
+        border: 1px solid black;
+        background-color: #ddddff;
+        width: 100px;
+        height: 100px;
+    }
+</style>

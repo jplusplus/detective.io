@@ -364,12 +364,16 @@ class TopicNestedResource(ModelResource):
         self.is_authenticated(request)
         self.throttle_check(request)
 
+        topic = Topic.objects.get(id=kwargs["pk"])
+
         body = json.loads(request.body)
         collaborator = body.get("collaborator", None)
         if collaborator != None:
+            # Check authorization
+            bundle = self.build_bundle(obj=topic, request=request)
+            self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
             collaborator = User.objects.get(pk=collaborator)
 
-        topic = Topic.objects.get(id=kwargs["pk"])
         user  = collaborator or request.user
         contributors = topic.get_contributor_group()
         potential_user = contributors.user_set.filter(pk=user.pk)

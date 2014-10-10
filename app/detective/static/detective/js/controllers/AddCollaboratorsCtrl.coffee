@@ -1,7 +1,7 @@
 class window.AddCollaboratorsCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic']
-    constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic)->
+    @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic', 'collaborators']
+    constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic, @collaborators)->
         @Page.title "Add new collaborators"
         @scope.topic = @topic
         # Transform search result
@@ -34,8 +34,8 @@ class window.AddCollaboratorsCtrl
 
 
     @resolve:
-        topic: ["Common", "$stateParams", (Common, $stateParams)->
-            Common.cachedGet(type: "topic", id: $stateParams.topic).$promise
+        collaborators: ["Topic", "topic", (Topic, topic) ->
+            Topic.collaborators(id: topic.id).$promise
         ]
 
 angular.module('detective.controller').controller 'addCollaboratorsCtrl', AddCollaboratorsCtrl

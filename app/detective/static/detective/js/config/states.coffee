@@ -188,6 +188,7 @@ angular.module('detective.config').config [
                 templateUrl: '/partial/topic.invite.html'
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
+                    collaborators: AddCollaboratorsCtrl.resolve.collaborators
                 auth: true
             )
             .state('user-topic-search',

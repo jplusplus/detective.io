@@ -27,6 +27,7 @@ class window.AddCollaboratorsCtrl
                 @scope.loading = no
                 # Success notification
                 @scope.invited = collaborator
+                @scope.collaborator_name = ""
             # Error
             , => @scope.loading = no)
 

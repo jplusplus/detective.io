@@ -4,7 +4,7 @@ from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache
 from app.detective.topics.common.models import FieldSource
-from app.detective.topics.common.user   import UserResource
+from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
 from django.conf                        import settings
 from django.conf.urls                   import url

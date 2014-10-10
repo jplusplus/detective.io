@@ -377,7 +377,7 @@ class UserNestedResource(ModelResource):
 
     def get_groups(self, request, **kwargs):
         # import time
-        start_time = time.time()
+        # start_time = time.time()
         self.method_check(request, allowed=['get'])
         self.is_authenticated(request)
         self.throttle_check(request)

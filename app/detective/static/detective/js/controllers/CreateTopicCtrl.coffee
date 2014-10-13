@@ -34,11 +34,11 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
             deferred.promise
         ]
 
-    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location', 'User', 'skeletons', 'datasets']
+    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location',  'skeletons', 'datasets']
 
     # Note: The 5 first parameters need to stay in that order if we want the
     # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
-    constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @timeout, @location, @User, skeletons, datasets)->
+    constructor: (@scope, @state, @TopicsFactory, @Page, @User, @EVENTS, @rootScope, @timeout, @location, skeletons, datasets)->
         super
         @setCreatingMode()
 
@@ -63,10 +63,10 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.shouldShowForm = => (do @hasSelectedSkeleton) and (do @hasSelectedDataSet)
 
         if @userMaxReached()
-            @scope.max_reached = true
-            @scope.plan_name  = @User.profile.plan
-            @scope.topics_max  = @User.profile.topics_max
-            @scope.topics_count  = @User.profile.topics_count
+            @scope.max_reached  = true
+            @scope.plan_name    = @User.profile.plan
+            @scope.topics_max   = @User.profile.topics_max
+            @scope.topics_count = @User.profile.topics_count
         @scope.user = @User
 
         @Page.title "Create a new investigation"

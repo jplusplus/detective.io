@@ -103,11 +103,8 @@
 
         <form class="panel-body"
               name="form"
-              ng-submit="submit(form)"
+              ng-submit="submit(form, topic)"
               novalidate>
-
-
-
             <!-- Topic title field -->
             <div class="row form-group">
                 <div class="col-sm-3 form-label top05">
@@ -130,6 +127,27 @@
                 <span ng-show="submitted &&  error && error.title"
                       class="text-danger col-sm-6">[[error.title]]</span>
             </div>
+            <!-- Topic private/public field -->
+            <div class="row form-group">
+                <div class="col-sm-3 form-label top05">
+                    <label for="id_topic_private">
+                        Make this invesigation private
+                    </label>
+                </div>
+                <div class="col-sm-1 top05">
+                  <input id="id_topic_private"
+                         type="checkbox"
+                         name="private"
+                         ng-disabled="loading || !canMakePrivate()"
+                         ng-model="topic_private"
+                         ng-change="topic.public = !!!topic_private">
+                </div>
+                <span ng-show="!canMakePrivate()"
+                      class="text-warning col-sm-6">
+                      Only paid plans can make private investigations.
+                      Checkout our plans
+                </span>
+            </div>
             <!-- Topic subtitle/description field -->
             <div class="row form-group">
                 <div class="col-sm-3 form-label top05">
@@ -144,6 +162,7 @@
                            ng-model="topic.description"></div>
                 </div>
             </div>
+
             <!-- Topic background field -->
             <div class="row form-group" ng-if="isEditing()">
                 <div class="col-sm-3">
@@ -165,7 +184,6 @@
                     </div>
                   </div>
                 </div>
-
             </div>
             <div class="row form-group">
                 <div class="col-sm-3 form-label top05">

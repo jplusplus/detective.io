@@ -1,18 +1,19 @@
 class window.TopicFormCtrl
-    @$inject: ['$scope', '$state', 'TopicsFactory', 'Page', 'constants.events']
+    @$inject: ['$scope', '$state', 'TopicsFactory', 'Page', 'User', 'constants.events']
 
     MODES:
         editing: 'edit'
         creating: 'create'
 
-    constructor: (@scope, @state, @TopicFactory, @Page, @EVENTS)->
+    constructor: (@scope, @state, @TopicFactory, @Page, @User, @EVENTS)->
         @form_mode = undefined
         @scope.submitted = no
         @scope.submit = @submit
         @scope.shouldShowForm = @isEditing
-        @scope.isEditing = @isEditing
-        @scope.isCreating = @isCreating
-        @scope.hideErrors = @hideErrors
+        @scope.isEditing      = @isEditing
+        @scope.isCreating     = @isCreating
+        @scope.hideErrors     = @hideErrors
+        @scope.canMakePrivate = @canMakePrivate
 
         @scope.formMode = =>
             @form_mode
@@ -51,3 +52,6 @@ class window.TopicFormCtrl
             @edit()
         if @isCreating()
             @create()
+
+    canMakePrivate: => @User.profile.plan != 'free'
+

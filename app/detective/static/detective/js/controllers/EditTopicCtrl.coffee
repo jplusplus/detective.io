@@ -1,7 +1,7 @@
 #=require TopicFormCtrl
 class window.EditTopicCtrl extends window.TopicFormCtrl
     @$inject: TopicFormCtrl.$inject.concat ['$rootScope', 'topic']
-    constructor: (@scope, @state, @TopicsFactory, @Page, @EVENTS, @rootScope, @topic)->
+    constructor: (@scope, @state, @TopicsFactory, @Page, @User, @EVENTS, @rootScope, @topic)->
         super
         @setEditingMode()
         @init   = yes
@@ -15,6 +15,7 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
             # on init
             changes = @topicChanges @scope.topic
             @scope.saved = _.isEmpty(changes) and not @init
+            # we leave the init mode
             @init = no if @init
 
         @scope.$on @EVENTS.topic.updated, (e, topic)=>

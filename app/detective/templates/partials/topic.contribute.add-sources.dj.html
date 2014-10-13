@@ -28,7 +28,7 @@
                        name="source[[$index]]"
                        no-duplicates="getSourcesRefs()"
                        ng-model="source.reference"
-                       ng-blur="updateSource(source)"
+                       ng-blur="updateSource(source, form)"
                        ng-focus="focus_new=false"
                        ng-disabled="loading[source.id]"
                        class="form-control"/>
@@ -43,14 +43,14 @@
                 </span>
             </div>
             <!-- duplicate error handling -->
-            <span class='text-danger' ng-if="form['source' + $index].$error.nodup">Source already exists, please enter another value</span>
+            <div class='alert alert-danger' ng-if="form['source' + $index].$error.nodup">Source already exists, please enter another value</div>
         </div>
       </form>
       <!-- new source form -->
       <form
         name="form_add"
         class="form-horizontal"
-        ng-submit="addSource(new_source, form_add); new_source=undefined"
+        ng-submit="addSource(new_source, form_add)"
         novalidate>
           <div class='form-group'>
               <div class="input-group">
@@ -59,10 +59,13 @@
                          autocorrect="off"
                          autocapitalize="off"
                          focus-on="focus_new"
+                         no-duplicates="getSourcesRefs()"
+                         empty-on="sources:added"
                          ng-model="new_source"
                          ng-disabled="isLoading()"
                          placeholder="http://exemple.com"
-                         class="form-control" />
+                         class="form-control"
+                         required>
                   <span class="input-group-btn">
                       <button type="submit" class="btn btn-default add-source-btn"
                           ng-disabled="isLoading()">
@@ -70,12 +73,16 @@
                       </button>
                   </span>
               </div>
+              <div class="alert alert-danger top05" ng-if="form_add_submitted && form_add.$invalid && ( form_add.new_source.$error.required === true)">
+                Please enter a value
+              </div>
+              <div class='alert alert-danger top05' ng-if="form_add.new_source.$error.nodup">Source already exists, please enter another value</div>
           </div>
       </form>
   </div>
 <div class="modal-footer" ng-class="{ loading: isloading() }">
     <button class="btn btn-primary"
-            ng-click="save(form, true)">
+            ng-click="save(new_source, true)">
         <strong>Save</strong>
     </button>
 </div>

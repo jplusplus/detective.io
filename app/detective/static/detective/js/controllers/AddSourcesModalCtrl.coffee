@@ -1,7 +1,7 @@
 class window.AddSourcesModalCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$q', '$filter', '$modalInstance', 'Individual', 'UtilsFactory', "fields", "field", "meta"]
-    constructor: (@scope, @q, @filter, @modalInstance, @Individual, @UtilsFactory,  @fields, @field, @meta)->
+    @$inject: ['$scope', '$q', '$filter', '$modalInstance', 'Individual', 'UtilsFactory',  'constants.events', "fields", "field", "meta"]
+    constructor: (@scope, @q, @filter, @modalInstance, @Individual, @UtilsFactory, @EVENTS, @fields, @field, @meta)->
         @fields  = angular.copy @fields
         @sources = @fields.field_sources or []
         @master_sources = angular.copy @sources
@@ -33,10 +33,17 @@ class window.AddSourcesModalCtrl
     close: (result=@sources)=>
         @modalInstance.close(result)
 
-    save: (form, close=no)=>
-        # if form is passed to the save function it has to be valid.
-        return unless form.$valid if form?
-        @close(@sources) if close
+    save: (new_source, close=no)=>
+        if new_source?
+            res = @addSource(new_source)
+            if res? and typeof res != typeof true
+                res.$promise.then =>
+                    @close(@sources) if close
+            else
+                @close(@sources) if close
+        else
+            # if form is passed to the save function it has to be valid.
+            @close(@sources) if close
 
     isFieldRich: (field)=>
         field.rules.is_rich or no
@@ -73,10 +80,13 @@ class window.AddSourcesModalCtrl
     recordChanges: (source)=>
         _.findWhere(@master_sources, {id: source.id }).reference = source.reference
 
-    updateSource: (source)=>
+    updateSource: (source, form)=>
+        @scope.edit_form_submitted = true
+        return unless form.$valid if form?
         if @hasChanged(source)
             @scope.loading[source.id] = true
             @Individual.updateSource(@getSourceParams(source), source, =>
+                @scope.edit_form_submitted = false
                 @scope.loading[source.id] = false
                 @recordChanges(source)
 
@@ -94,17 +104,34 @@ class window.AddSourcesModalCtrl
                 @scope.loading[source.id] = false
         )
 
-    addSource: (source_text, form_text)=>
+    addSource: (source_text, form_add)=>
+        @scope.form_add_submitted = true
+        unless form_add?
+            should_add = ['', undefined, null].indexOf(source_text) == -1 # not null values
+            should_add = should_add and @getSourcesRefs().indexOf(source_text) is -1 # not existing values
+            if should_add
+                res = @__addSource(source_text)
+            else
+                res = false
+            return res
+        else
+            # if no form is provided we return false
+            return false unless form_add.$valid
+            @scope.loading['global'] = true
+            @__addSource(source_text, form_add)
+
+    __addSource: (source_text, form_add)=>
         new_source =
             reference: source_text
             field: @field.name
-
-        @scope.loading['global'] = true
         @Individual.createSource(@getIndividualParams(), new_source, (source)=>
+                @scope.form_add_submitted = false
                 @sources.push source
-                @scope.focus_new = true
+                @scope.focus_new = false
+                @scope.$broadcast @EVENTS.sources.added
                 @scope.loading['global'] = false
             , =>
+                @scope.form_add_submitted = false
                 @scope.loading['global'] = false
         )
 

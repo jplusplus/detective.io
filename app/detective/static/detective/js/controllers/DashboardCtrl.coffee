@@ -1,7 +1,7 @@
 class window.DashboardCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'userGroups']
-    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @userGroups)->
+    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'Group', 'userGroups']
+    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @Group, @userGroups)->
         @Page.title "Dashboard"
         # Start to page 1, obviously
         @page = 1
@@ -63,16 +63,16 @@ class window.DashboardCtrl
         @Common.get(params).$promise
 
     loadUserGroups: (page)=>
-        @http.get("/api/detective/common/v1/user/#{@User.id}/groups/?page=#{page}").then (response)->
+        (@Group.collaborator { user_id : @User.id , page : page }).$promise.then (data) ->
             # Only keep data object
-            response.data
+            data
 
     @resolve:
-        userGroups: ["$http", "$q", "Auth", ($http, $q, Auth)->
+        userGroups: ["$q", "Auth", "Group", ($q, Auth, Group)->
             deferred = $q.defer()
             Auth.load().then (user)=>
-                $http.get("/api/detective/common/v1/user/#{user.id}/groups/").then (response)->
-                    deferred.resolve response.data
+                (Group.collaborator { user_id : user.id }).$promise.then (data) ->
+                    deferred.resolve data
             deferred.promise
         ]
 

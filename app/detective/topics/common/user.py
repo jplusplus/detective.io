@@ -49,6 +49,7 @@ class GroupResource(ModelResource):
     class Meta:
         excludes = ['topic',]
         queryset = Group.objects.all()
+        filtering = { 'name' : ALL }
 
 class UserAuthorization(ReadOnlyAuthorization):
     def update_detail(self, object_list, bundle):

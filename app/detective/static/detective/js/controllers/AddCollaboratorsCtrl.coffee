@@ -42,7 +42,6 @@ class window.AddCollaboratorsCtrl
         @scope.isYou = @isYou
         @scope.isOwner = @isOwner
         @scope.isAdmin = @isAdmin
-        @scope.isLoading = @isLoading
         @scope.changePermission = @changePermission
         @scope.removeCollaborator = @removeCollaborator
         #
@@ -62,9 +61,6 @@ class window.AddCollaboratorsCtrl
             if admin.id is user.id
                 return yes
         no
-
-    isLoading: (user) =>
-        user.id in @collaborator_loading
 
     changePermission: (user) =>
         (@Topic.grant_admin { id : @topic.id }, { collaborator : user , grant : not (@isAdmin user) }).$promise.then =>

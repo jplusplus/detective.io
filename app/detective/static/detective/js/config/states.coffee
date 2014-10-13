@@ -189,6 +189,7 @@ angular.module('detective.config').config [
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
                     collaborators: AddCollaboratorsCtrl.resolve.collaborators
+                    administrators: AddCollaboratorsCtrl.resolve.administrators
                 auth: true
             )
             .state('user-topic-search',

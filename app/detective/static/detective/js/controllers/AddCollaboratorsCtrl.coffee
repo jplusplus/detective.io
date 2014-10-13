@@ -1,7 +1,7 @@
 class window.AddCollaboratorsCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic', 'collaborators', 'User']
-    constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic, collaborators, @User)->
+    @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic', 'collaborators', 'administrators', 'User']
+    constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic, collaborators, @administrators, @User)->
         @Page.title "Add new collaborators"
         @scope.topic = @topic
         # Transform search result
@@ -83,7 +83,10 @@ class window.AddCollaboratorsCtrl
 
     @resolve:
         collaborators: ["Topic", "topic", (Topic, topic) ->
-            Topic.collaborators(id: topic.id).$promise
+            (Topic.collaborators id : topic.id).$promise
+        ]
+        administrators: ["Topic", "topic", (Topic, topic) ->
+            (Topic.administrators id : topic.id).$promise
         ]
 
 angular.module('detective.controller').controller 'addCollaboratorsCtrl', AddCollaboratorsCtrl

@@ -284,6 +284,7 @@ class TopicNestedResource(ModelResource):
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/leave%s$"  % params, self.wrap_view('leave'),  name="api_leave"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/collaborators%s$"  % params, self.wrap_view('list_collaborators'),  name="api_list_collaborators"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/administrators%s$"  % params, self.wrap_view('list_administrators'),  name="api_list_administrators"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/grant-admin%s$" % params, self.wrap_view('grant_admin'), name="api_grant_admin")
         ]
 
     def invite(self, request, **kwargs):
@@ -420,6 +421,29 @@ class TopicNestedResource(ModelResource):
             bundles.append(ur.full_dehydrate(bundle, for_list=True))
 
         return bundles
+
+    def grant_admin(self, request, **kwargs):
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        topic = Topic.objects.get(id=kwargs["pk"])
+        body = json.loads(request.body)
+        grant = body['grant']
+        collaborator = body['collaborator']
+
+        try:
+            collaborator = topic.get_contributor_group().user_set.get(pk=collaborator['id'])
+            admin_group = Group.objects.get(name="{topic_id}_administrator".format(topic_id=topic.ontology_as_mod))
+            if grant:
+                collaborator.groups.add(admin_group)
+                collaborator.save()
+            else:
+                admin_group.user_set.remove(collaborator)
+                admin_group.save()
+            return HttpResponse()
+        except User.DoesNotExist:
+            return Http404()
 
     def dehydrate(self, bundle):
         # Get the model's rules manager

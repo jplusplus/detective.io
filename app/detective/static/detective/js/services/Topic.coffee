@@ -16,6 +16,10 @@ angular.module('detective.service').factory("Topic", [ '$resource', ($resource)-
             url: '/api/detective/common/v1/topic/:id/administrators/?'
             method: 'GET'
             isArray: yes
+        grant_admin:
+            url: '/api/detective/common/v1/topic/:id/grant-admin/?'
+            method: 'POST'
+            isArray: no
         post:
             url: '/api/detective/common/v1/topic/?'
             method: 'POST'

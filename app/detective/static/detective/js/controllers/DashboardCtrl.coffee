@@ -45,14 +45,14 @@ class window.DashboardCtrl
         @scope.loading = true
         @page = page
         deferred = @q.defer()
-        # Load the value at the same time
-        @q.all([
-            @loadUserGroups(page),
-        # Get the 3 resolve promises
-        ]).then (results)=>
-            @userGroups = results[0]
-            @scope.loading = false
-            deferred.resolve @getTopics()
+
+        (@loadUserGroups page).then (results) =>
+            @userGroups = results
+            (@updateUserAdminGroups @userGroups, @userAdminGroups).then (adminGroups) =>
+                @userAdminGroups = adminGroups
+                @scope.loading = false
+                deferred.resolve @getTopics()
+
         # Returns a promises
         deferred.promise
 
@@ -67,6 +67,12 @@ class window.DashboardCtrl
         (@Group.collaborator { user_id : @User.id , page : page }).$promise.then (data) ->
             # Only keep data object
             data
+
+    updateUserAdminGroups: (groups, old) =>
+        for group in groups.objects
+            names = (if not names? then "" else names + ",") + (group.name.replace '_contributor', '_administrator')
+        (@Group.administrator { user_id : @User.id , name__in : names }).$promise.then (data) =>
+            _.uniq old.concat _.pluck data.objects, 'name'
 
     isAdmin: (topic) =>
         (topic.ontology_as_mod + "_administrator") in @userAdminGroups

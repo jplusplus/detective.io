@@ -1,7 +1,7 @@
 class window.DashboardCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'Group', 'userGroups']
-    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @Group, @userGroups)->
+    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'Group', 'userGroups', 'userAdminGroups']
+    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @Group, @userGroups, @userAdminGroups) ->
         @Page.title "Dashboard"
         # Start to page 1, obviously
         @page = 1
@@ -14,6 +14,7 @@ class window.DashboardCtrl
         @scope.nextPage = @nextPage
         @scope.previousPage = @previousPage
         @scope.openLeaveModal = @openLeaveModal
+        @scope.isAdmin = @isAdmin
 
     # Concatenates @userTopics's objects with @userGroups's topics
     getTopics: =>
@@ -67,12 +68,24 @@ class window.DashboardCtrl
             # Only keep data object
             data
 
+    isAdmin: (topic) =>
+        (topic.ontology_as_mod + "_administrator") in @userAdminGroups
+
     @resolve:
         userGroups: ["$q", "Auth", "Group", ($q, Auth, Group)->
             deferred = $q.defer()
             Auth.load().then (user)=>
                 (Group.collaborator { user_id : user.id }).$promise.then (data) ->
                     deferred.resolve data
+            deferred.promise
+        ]
+        userAdminGroups: ["$q", "Auth", "Group", "userGroups", ($q, Auth, Group, userGroups) ->
+            deferred = do $q.defer
+            for group in userGroups.objects
+                names = (if not names? then "" else names + ",") + (group.name.replace '_contributor', '_administrator')
+            (do Auth.load).then (user) =>
+                (Group.administrator { user_id : user.id , name__in : names }).$promise.then (data) ->
+                    deferred.resolve _.pluck data.objects, 'name'
             deferred.promise
         ]
 

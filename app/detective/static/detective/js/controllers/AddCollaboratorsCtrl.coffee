@@ -67,19 +67,8 @@ class window.AddCollaboratorsCtrl
         user.id in @collaborator_loading
 
     changePermission: (user) =>
-        @setCollaboratorLoading user
-        if @isAdmin user
-            null
-        else
-            null
-
-    setCollaboratorLoading: (user) =>
-        if user.id not in @collaborator_loading
-            @collaborator_loading.push user.id
-
-    unsetCollaboratorLoading: (user) =>
-        if user.id in @collaborator_loading
-            @collaborator_loading = @collaborator_loading.splice (@collaborator_loading.indexOf user.id), 1
+        (@Topic.grant_admin { id : @topic.id }, { collaborator : user , grant : not (@isAdmin user) }).$promise.then =>
+            do @updateCollaborators
 
     removeCollaborator: (user) =>
         if (confirm "Are you sure?")
@@ -93,6 +82,8 @@ class window.AddCollaboratorsCtrl
         (@Topic.collaborators { id : @topic.id }).$promise.then (data) =>
             @scope.loading = no
             @scope.collaborators = data
+        (@Topic.administrators { id : @topic.id }).$promise.then (data) =>
+            @administrators = data
 
     @resolve:
         collaborators: ["Topic", "topic", (Topic, topic) ->

@@ -31,6 +31,7 @@ from tastypie.validation              import Validation
 from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
+from django.contrib.auth.models       import Group
 
 import copy
 import json
@@ -282,6 +283,7 @@ class TopicNestedResource(ModelResource):
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/invite%s$" % params, self.wrap_view('invite'), name="api_invite"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/leave%s$"  % params, self.wrap_view('leave'),  name="api_leave"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/collaborators%s$"  % params, self.wrap_view('list_collaborators'),  name="api_list_collaborators"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/administrators%s$"  % params, self.wrap_view('list_administrators'),  name="api_list_administrators"),
         ]
 
     def invite(self, request, **kwargs):
@@ -390,16 +392,34 @@ class TopicNestedResource(ModelResource):
         self.is_authenticated(request)
         self.throttle_check(request)
 
-        topic = Topic.objects.get(id=kwargs['pk'])
-        contributors = topic.get_contributor_group()
+        bundles = self.get_collaborators(request, kwargs['pk'])
 
+        return self.create_response(request, bundles)
+
+    def list_administrators(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        bundles = self.get_collaborators(request, kwargs['pk'], True)
+
+        return self.create_response(request, bundles)
+
+    def get_collaborators(self, request, topic_id, admin=False):
         ur = UserResource()
+
+        topic = Topic.objects.get(id=topic_id)
+        if admin:
+            users = Group.objects.get(name="{topic_id}_administrator".format(topic_id=topic.ontology_as_mod)).user_set.all()
+        else:
+            users = topic.get_contributor_group().user_set.all()
+
         bundles = []
-        for user in contributors.user_set.all():
+        for user in users:
             bundle = ur.build_bundle(obj=user, request=request)
             bundles.append(ur.full_dehydrate(bundle, for_list=True))
 
-        return self.create_response(request, bundles)
+        return bundles
 
     def dehydrate(self, bundle):
         # Get the model's rules manager

@@ -4,8 +4,7 @@ class window.AddSourcesModalCtrl
     constructor: (@scope, @q, @filter, @modalInstance, @Individual, @UtilsFactory, @EVENTS, @fields, @field, @meta)->
         @fields  = angular.copy @fields
         @sources = @fields.field_sources or []
-        @master_sources = angular.copy @sources
-        # @updateMasterSources()
+        @updateMasterSources()
         # Scope variables
         @scope.loading    = {}
         @scope.individual = @Individual
@@ -75,10 +74,12 @@ class window.AddSourcesModalCtrl
 
     hasChanged: (source)=>
         master_source = _.findWhere @master_sources, {id: source.id }
-        master_source.reference != source.reference
+        not master_source? or master_sources? and master_source.reference != source.reference
 
     recordChanges: (source)=>
-        _.findWhere(@master_sources, {id: source.id }).reference = source.reference
+        res = _.findWhere(@master_sources, {id: source.id })
+        if res?
+            res.reference = source.reference
 
     updateSource: (source, form)=>
         @scope.edit_form_submitted = true
@@ -127,6 +128,7 @@ class window.AddSourcesModalCtrl
         @Individual.createSource(@getIndividualParams(), new_source, (source)=>
                 @scope.form_add_submitted = false
                 @sources.push source
+                @updateMasterSources()
                 @scope.focus_new = false
                 @scope.$broadcast @EVENTS.sources.added
                 @scope.loading['global'] = false
@@ -139,8 +141,8 @@ class window.AddSourcesModalCtrl
 
     getSourcesRefs: => _.map @getSources(), (s)-> s.reference
 
-    # updateMasterSources: =>
-    #     @master_sources = @getSources angular.copy @fields
+    updateMasterSources: =>
+        @master_sources = angular.copy @sources
 
     hasSources: =>
         sources = @getSources()

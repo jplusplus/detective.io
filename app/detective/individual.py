@@ -176,6 +176,23 @@ class IndividualResource(ModelResource):
     def get_model(self):
         return self.get_queryset().model
 
+    def get_topic(self, bundle=None):
+        model = self.get_model()
+        topic = None
+        # Bundle given
+        if bundle != None:
+            # The topic may be set by a middleware
+            topic = get_topic_from_request(bundle.request)
+        # No topic found
+        if topic == None:
+            # We found the topic according to the current model
+            topic = Topic.objects.get(ontology_as_mod=get_model_topic(model))
+        return topic
+
+    @property
+    def topic(self):
+        return self.get_topic()
+
     def get_model_fields(self, name=None, model=None):
         if model is None: model = self.get_model()
         if name is None:
@@ -752,8 +769,12 @@ class IndividualResource(ModelResource):
         # User must be authentication
         self.is_authenticated(request)
         bundle = self.build_bundle(request=request)
-        # User allowed to update this model
-        self.authorized_read_detail(self.get_object_list(bundle.request), bundle)
+        # Resource to returns
+        resource = UserNestedResource()
+        # User must be the author of the topic
+        if not request.user.is_staff and request.user.id != self.get_topic(bundle).author.id:
+            # Returns an empty set of authors
+            return resource.create_response(request, [])
         # Get the node's data using the rest API
         try: node = connection.nodes.get(pk)
         # Node not found
@@ -762,7 +783,6 @@ class IndividualResource(ModelResource):
         authors_ids = node.properties.get("_author", [])
         # Find them in the database
         authors = User.objects.filter(id__in=authors_ids).select_related("profile")
-        resource = UserNestedResource()
         # Create a bundle with each resources
         bundles = [resource.build_bundle(obj=a, request=request) for a in authors]
         data = [resource.full_dehydrate(bundle) for bundle in bundles]

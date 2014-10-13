@@ -68,7 +68,10 @@
 						<td>
 							<span ng-switch on="isOwner(collaborator)">
 								<strong ng-switch-when="true"><em>Owner</em></strong>
-								<span ng-switch-default>Contributor</span>
+								<span ng-switch-default ng-switch on="isAdmin(collaborator)">
+									<span ng-switch-when="true"><i class="fa fa-fire"></i> Admin</span>
+									<span ng-switch-default>Contributor</span>
+								</span>
 							</span>
 						</td>
 						<td class="text-center">

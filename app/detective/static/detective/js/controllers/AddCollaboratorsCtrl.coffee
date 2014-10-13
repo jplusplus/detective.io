@@ -35,10 +35,13 @@ class window.AddCollaboratorsCtrl
         ##
         # Collaborators
         @collaborator_loading = []
+
         @scope.collaborators = collaborators
+
         @scope.orderCollaborators = @orderCollaborators
         @scope.isYou = @isYou
         @scope.isOwner = @isOwner
+        @scope.isAdmin = @isAdmin
         @scope.isLoading = @isLoading
         @scope.changePermission = @changePermission
         @scope.removeCollaborator = @removeCollaborator
@@ -46,7 +49,7 @@ class window.AddCollaboratorsCtrl
         ##
 
     orderCollaborators: (user) =>
-        if user.id is @topic.author.id then 1 else 3
+        if user.id is @topic.author.id then 1 else (if @isAdmin user then 2 else 3)
 
     isYou: (user) =>
         user.id is @User.id
@@ -54,11 +57,21 @@ class window.AddCollaboratorsCtrl
     isOwner: (user) =>
         user.id is @topic.author.id
 
+    isAdmin: (user) =>
+        for admin in @administrators
+            if admin.id is user.id
+                return yes
+        no
+
     isLoading: (user) =>
         user.id in @collaborator_loading
 
     changePermission: (user) =>
         @setCollaboratorLoading user
+        if @isAdmin user
+            null
+        else
+            null
 
     setCollaboratorLoading: (user) =>
         if user.id not in @collaborator_loading

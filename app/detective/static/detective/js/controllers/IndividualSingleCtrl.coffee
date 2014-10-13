@@ -44,11 +44,13 @@ class window.IndividualSingleCtrl
         @scope.id         = @stateParams.id
         @scope.individual = @individual
         # Get meta information for this type
-        @scope.meta       = @forms[ @scope.type.toLowerCase() ]
-        @scope.topicmeta  = @topic
+        @scope.meta           = @forms[ @scope.type.toLowerCase() ]
+        @scope.topicmeta      = @topic
         @scope.mailReportLink = @getMailReportLink
         # Get individual authors
-        @scope.authors    = @Individual.authors()
+        @scope.authors     = @Individual.authors()
+        # Get source for the names
+        @scope.nameSources = do @getNameSources
         # Load graph data
         graph_params =
             topic   : @scope.topic
@@ -67,6 +69,10 @@ class window.IndividualSingleCtrl
 
     getSources: (field)=>
         _.where @scope.individual.field_sources, field: field.name
+
+    getNameSources: =>
+        field = _.findWhere @scope.meta.fields, name: 'name'
+        @getSources field
 
     hasSources: (field)=>
         sources = @getSources field

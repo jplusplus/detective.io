@@ -51,13 +51,5 @@ urlpatterns = patterns('',
     url(r'^tinymce/', include('tinymce.urls')),
 )
 
-if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns = patterns('',
-        (r'^public/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-        url(r'^__debug__/', include(debug_toolbar.urls)),
-    ) + urlpatterns
-
-
 # Handle 404 with the homepage
 handler404 = "app.detective.views.not_found"

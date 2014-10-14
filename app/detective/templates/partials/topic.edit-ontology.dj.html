@@ -1,33 +1,7 @@
-<div ontology-visualization class="ontology-visualization">
-    <div ng-repeat="model in models" id="model--[[model.name]]" class="model">
-        [[model.verbose_name]]
+<div class="container topic-edit-ontology">
+    <div ontology-visualization class="topic-edit-ontology__ontology-visualization">
+        <div ng-repeat="model in models" id="model--[[model.name]]" class="model">
+            [[model.verbose_name]]
+        </div>
     </div>
 </div>
-
-<style type="text/css">
-    .ontology-visualization {
-        margin:50px;
-        padding:20px;
-        border: 1px solid black;
-        background-color: #FAF7D4;
-        min-height: 400px;
-    }
-    .model {
-        border: 1px solid black;
-        background-color: #ddddff;
-        text-align: center;
-        min-width: 100px;
-        position: absolute;
-        min-height: 50px;
-        /*margin-bottom: 100px;*/
-        display: inline-block;
-		/*margin-left: 150px;*/
-    }
-    .label {
-    	background-color: white;
-    	padding:3px;
-    	border: 1px solid black;
-    	color: black;
-    	margin : 10px;
-    }
-</style>

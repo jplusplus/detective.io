@@ -396,7 +396,8 @@ class UserNestedResource(ModelResource):
         if not user or not user.is_staff:
             if user:
                 read_perms = [perm.split('.')[0] for perm in user.get_all_permissions() if perm.endswith(".contribute_read")]
-                q_filter = Q(topic__public=True) | Q(topic__ontology_as_mod__in=read_perms)
+                read_perms = [perm for vector in [[perm + '_contributor', perm + '_administrator'] for perm in read_perms] for perm in vector]
+                q_filter = Q(topic__public=True) | Q(name__in=read_perms)
             else:
                 q_filter = Q(topic__public=True)
             groups = groups.filter(q_filter)

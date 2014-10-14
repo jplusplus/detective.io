@@ -101,6 +101,24 @@
             min-height: 380px;
         }
 
+        .form-group {
+            &.disabled {
+                background: fade(@gray, 5%);
+                color: fade(@panel-default-text, 30%);
+                .help-block {
+                    color: fade(@help-block-text, 30%);
+                }
+                input {
+                    .opacity(0.4);
+                }
+                .disabled-explanation {
+                    padding-left: 15px;
+                    color: @panel-info-text;
+                }
+
+            }
+        }
+
         &.error {
             .panel-heading {
                 color: @panel-warning-text;

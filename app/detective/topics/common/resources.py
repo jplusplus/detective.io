@@ -300,6 +300,11 @@ class TopicNestedResource(ModelResource):
         # Check authorization
         bundle = self.build_bundle(obj=topic, request=request)
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
+        # Quick check on `administrator` group
+        try:
+            request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+        except Group.DoesNotExist:
+            return HttpResponseForbidden()
 
         body = json.loads(request.body)
         collaborator = body.get("collaborator", None)
@@ -378,6 +383,11 @@ class TopicNestedResource(ModelResource):
             # Check authorization
             bundle = self.build_bundle(obj=topic, request=request)
             self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
+            # Quick check on `administrator` group
+            try:
+                request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+            except Group.DoesNotExist:
+                return HttpResponseForbidden()
             collaborator = User.objects.get(pk=collaborator)
 
         user  = collaborator or request.user
@@ -429,8 +439,13 @@ class TopicNestedResource(ModelResource):
         self.method_check(request, allowed=['post'])
         self.is_authenticated(request)
         self.throttle_check(request)
-
         topic = Topic.objects.get(id=kwargs["pk"])
+        # Quick check on `administrator` group
+        try:
+            request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+        except Group.DoesNotExist:
+            return HttpResponseForbidden()
+
         body = json.loads(request.body)
         grant = body['grant']
         collaborator = body['collaborator']

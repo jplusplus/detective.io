@@ -63,8 +63,11 @@ class window.AddCollaboratorsCtrl
         no
 
     changePermission: (user) =>
-        (@Topic.grant_admin { id : @topic.id }, { collaborator : user , grant : not (@isAdmin user) }).$promise.then =>
-            do @updateCollaborators
+        if (confirm "Are you sure?")
+            @scope.loading = yes
+            (@Topic.grant_admin { id : @topic.id }, { collaborator : user , grant : not (@isAdmin user) }).$promise.then =>
+                @scope.loading = no
+                do @updateCollaborators
 
     removeCollaborator: (user) =>
         if (confirm "Are you sure?")

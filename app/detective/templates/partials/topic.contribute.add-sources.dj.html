@@ -1,16 +1,17 @@
-<form name="form"
-      class="form-horizontal"
-      novalidate>
-    <div class="modal-header">
-        <h3 class="modal-title">
-            Add sources about <strong>[[ getFieldValue() ]]</strong>
-        </h3>
-    </div>
-    <div class="modal-body">
+
+  <div class="modal-header">
+      <h3 class="modal-title">
+          Add sources about <strong>[[ getFieldValue() ]]</strong>
+      </h3>
+  </div>
+  <div class="modal-body">
+      <form name="form"
+            class="form-horizontal"
+            novalidate>
         <!-- previously created sources -->
         <div class="form-group"
-             ng-repeat="source in getSources()">
-            <div class='input-group'>
+             ng-repeat="source in getSources() | orderBy:'id'">
+            <div class='input-group' ng-class="{ loading: loading[source.id]}">
                 <!-- source external link -->
                 <span class="input-group-btn" ng-if="isSourceURLValid(source)">
                     <a target="_blank"
@@ -24,43 +25,64 @@
                 <input type="text"
                        autocorrect="off"
                        autocapitalize="off"
-                       focus-on="focused === source.reference && !loading"
                        name="source[[$index]]"
                        no-duplicates="getSourcesRefs()"
                        ng-model="source.reference"
-                       ng-disabled="loading"
+                       ng-blur="updateSource(source, form)"
+                       ng-focus="focus_new=false"
+                       ng-disabled="loading[source.id]"
                        class="form-control"/>
 
                 <!-- source delete button -->
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-default delete-source-btn"
-                        ng-disabled="loading"
+                        ng-disabled="loading[source.id]"
                         ng-click="deleteSource(source)">
                         <i class="fa fa-trash-o"></i>
                     </button>
                 </span>
             </div>
             <!-- duplicate error handling -->
-            <span class='text-danger' ng-if="form['source' + $index].$error.nodup">Source already exists, please enter another value</span>
+            <div class='alert alert-danger' ng-if="form['source' + $index].$error.nodup">Source already exists, please enter another value</div>
         </div>
-        <!-- new source form -->
-        <div class='form-group'>
-            <input type="text"
-               name="new_source"
-               autocorrect="off"
-               autocapitalize="off"
-               ng-change="addSource(new_source); new_source=undefined"
-               focus-on="!focused && !loading"
-               ng-model="new_source"
-               ng-disabled="loading"
-               placeholder="http://exemple.com"
-               class="form-control" />
-        </div>
-    </div>
-</form>
-<div class="modal-footer" ng-class="{ loading: loading }">
+      </form>
+      <!-- new source form -->
+      <form
+        name="form_add"
+        class="form-horizontal"
+        ng-submit="addSource(new_source, form_add)"
+        novalidate>
+          <div class='form-group'>
+              <div class="input-group">
+                  <input type="text"
+                         name="new_source"
+                         autocorrect="off"
+                         autocapitalize="off"
+                         focus-on="focus_new"
+                         no-duplicates="getSourcesRefs()"
+                         empty-on="sources:added"
+                         ng-model="new_source"
+                         ng-disabled="isLoading()"
+                         placeholder="http://exemple.com"
+                         class="form-control"
+                         required>
+                  <span class="input-group-btn">
+                      <button type="submit" class="btn btn-default add-source-btn"
+                          ng-disabled="isLoading()">
+                          <i class="fa fa-plus"></i>
+                      </button>
+                  </span>
+              </div>
+              <div class="alert alert-danger top05" ng-if="form_add_submitted && form_add.$invalid && ( form_add.new_source.$error.required === true)">
+                Please enter a value
+              </div>
+              <div class='alert alert-danger top05' ng-if="form_add.new_source.$error.nodup">Source already exists, please enter another value</div>
+          </div>
+      </form>
+  </div>
+<div class="modal-footer" ng-class="{ loading: isloading() }">
     <button class="btn btn-primary"
-            ng-click="save(form, true)">
+            ng-click="save(new_source, true)">
         <strong>Save</strong>
     </button>
 </div>

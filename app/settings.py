@@ -129,8 +129,6 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.cache.UpdateCacheMiddleware',
     'app.middleware.cache.FetchFromCacheMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'app.middleware.debug_toolbar.JsonAsHTML',
     'app.middleware.crossdomainxhr.XsSharing',
     # add urlmiddleware after all other middleware.
     'urlmiddleware.URLMiddleware',
@@ -203,8 +201,6 @@ INSTALLED_APPS = (
     'tinymce',
     # Redis queue backend
     "django_rq",
-    # Debug utilities
-    "debug_toolbar",
     # Internal
     'app.detective',
     'app.detective.topics.common',
@@ -335,18 +331,3 @@ LOGGING = {
         },
     }
 }
-
-if DEBUG:
-    INTERNAL_IPS = ('127.0.0.1', '0.0.0.0', '::1')
-    DEBUG_TOOLBAR_PATCH_SETTINGS = False
-    DEBUG_TOOLBAR_PANELS = (
-        'debug_toolbar.panels.timer.TimerPanel',
-        'debug_toolbar.panels.headers.HeadersPanel',
-        'debug_toolbar.panels.request.RequestPanel',
-        'debug_toolbar.panels.sql.SQLPanel',
-        'debug_toolbar.panels.cache.CachePanel',
-        'debug_toolbar.panels.signals.SignalsPanel',
-    )
-    DEBUG_TOOLBAR_CONFIG = {
-        'SHOW_TOOLBAR_CALLBACK': 'app.detective.utils.should_show_debug_toolbar'
-    }

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from .errors                      import *
 from .message                     import Recover
+from app.detective.utils          import topic_cache
 from app.detective.models         import Topic, TopicToken, DetectiveProfileUser
 from django.conf                  import settings
 from django.conf.urls             import url
@@ -26,13 +27,19 @@ import hashlib
 import random
 import re
 
+# basic dependencies between resources
+# UserNestedResource -> GroupResource -> TopicResource -> UserResource
+# TopicNestedResource -> UserNestedResource -> ProfileResource
+
+
 class GroupResource(ModelResource):
     def getTopic(bundle):
+        topic  = None
+        module = bundle.obj.name.split("_")[0]
         try:
-            module = bundle.obj.name.split("_")[0]
-            return Topic.objects.get(ontology_as_mod=module)
-        except Topic.DoesNotExist:
-            return None
+            topic = topic_cache.get_topic(module)
+        except Topic.DoesNotExist: pass
+        return topic
 
     topic = fields.ToOneField('app.detective.topics.common.resources.TopicResource',
                                 attribute=getTopic,
@@ -40,7 +47,7 @@ class GroupResource(ModelResource):
                                 null=True,
                                 full=True)
     class Meta:
-        excludes = ['topic']
+        excludes = ['topic',]
         queryset = Group.objects.all()
 
 class UserAuthorization(ReadOnlyAuthorization):
@@ -74,10 +81,12 @@ class ProfileResource(ModelResource):
         allowed_methods    = ['get', 'patch']
         fields             = ['id', 'location', 'organization', 'url', 'avatar', 'plan', 'topics_count', 'topics_max', 'nodes_max', 'nodes_count']
 
-class UserResource(ModelResource):
+
+class UserNestedResource(ModelResource):
     profile = fields.ToOneField(ProfileResource, 'detectiveprofileuser', full=True, null=True)
 
     class Meta:
+        resource_name      = 'user'
         authentication     = MultiAuthentication(Authentication(), SessionAuthentication(), BasicAuthentication())
         authorization      = UserAuthorization()
         allowed_methods    = ['get', 'post', 'delete']
@@ -252,7 +261,6 @@ class UserResource(ModelResource):
         else:
             return self.create_response(request, { 'is_logged': False, 'username': '' })
 
-
     def permissions(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
         self.is_authenticated(request)
@@ -347,7 +355,6 @@ class UserResource(ModelResource):
         except MalformedRequestError as e:
             return http.HttpBadRequest(e)
 
-
     def validate_request(self, data, fields):
         """
         Validate passed `data` based on the required `fields`.
@@ -371,7 +378,8 @@ class UserResource(ModelResource):
                 raise MalformedRequestError(message)
 
     def get_groups(self, request, **kwargs):
-        from app.detective.topics.common.resources import TopicResource
+        # import time
+        # start_time = time.time()
         self.method_check(request, allowed=['get'])
         self.is_authenticated(request)
         self.throttle_check(request)
@@ -381,13 +389,12 @@ class UserResource(ModelResource):
             obj = self.cached_obj_get(bundle=bundle, **self.remove_api_resource_names(kwargs))
         except User.DoesNotExist:
             return http.HttpNotFound("User not found")
-
+        user = bundle.request.user
         group_resource = GroupResource()
-
         groups = group_resource.obj_get_list(bundle).filter(Q(user__id=obj.id))
-        if not bundle.request.user or not bundle.request.user.is_staff:
-            if bundle.request.user:
-                read_perms = [perm.split('.')[0] for perm in bundle.request.user.get_all_permissions() if perm.endswith(".contribute_read")]
+        if not user or not user.is_staff:
+            if user:
+                read_perms = [perm.split('.')[0] for perm in user.get_all_permissions() if perm.endswith(".contribute_read")]
                 q_filter = Q(topic__public=True) | Q(topic__ontology_as_mod__in=read_perms)
             else:
                 q_filter = Q(topic__public=True)
@@ -420,5 +427,12 @@ class UserResource(ModelResource):
                 'total_count': paginator.count
             }
         }
+        response = group_resource.create_response(request, object_list)
+        # print "get_groups took %s" % (time.time() - start_time)
+        return response
 
-        return group_resource.create_response(request, object_list)
+class UserResource(UserNestedResource):
+    class Meta(UserNestedResource.Meta):
+        resource_name = 'user-simpler'
+        # we remove profile from fields
+        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'password',]

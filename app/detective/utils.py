@@ -18,6 +18,22 @@ logger = logging.getLogger(__name__)
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
 
+def where(coll, cond_dict):
+    def get_el_val(el, k):
+        if callable(k):
+            return k(el)
+        else:
+            if type(el) is type({}):
+                return el.get(k)
+
+    l_find   = lambda el: all(
+        v() == get_el_val(el, k) if callable(v) else get_el_val(el, k) == v for k,v in cond_dict.items()
+    )
+    return filter(l_find, coll)
+
+def findwhere(coll, cond_dict):
+    return where(coll, cond_dict)[0]
+
 def create_node_model(name, fields=None, app_label='', module='', options=None):
     """
     Create specified model
@@ -451,9 +467,25 @@ class TopicCachier(object):
         return self.__keys()['version_number'].format(
             topic_prefix=self.__topic_prefix(topic))
 
+    def is_topic(self, topic):
+        from app.detective.models import Topic
+        return isinstance(topic, Topic)
+
+    def get_topic(self, topic_module):
+        topic = self.get(topic_module, 'topic_obj')
+        if not topic:
+            from app.detective.models import Topic
+            topic = Topic.objects.get(ontology_as_mod=topic_module)
+            self.set(topic_module, 'topic_obj', topic)
+        return topic
+
     def __topic_prefix(self, topic):
+        # topic can be a topic instance or a string representing topic.module
+        module = topic
+        if self.is_topic(topic):
+            module = topic.module
         return self.__keys()['topic_prefix'].format(
-            module=topic.module)
+            module=module)
 
     def __get_key(self, topic, suffix):
         return self.__keys()['cache_prefix'].format(

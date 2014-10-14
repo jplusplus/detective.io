@@ -84,6 +84,18 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
             method : 'POST'
             isArray: no
             transformResponse: legacyRelationshipSupport
+        createSource:
+            url:'/api/:username/:topic/v1/:type/:id/patch/sources/:source_id/?'
+            method : 'POST'
+            isArray: no
+        updateSource:
+            url:'/api/:username/:topic/v1/:type/:id/patch/sources/:source_id/?'
+            method : 'POST'
+            isArray: no
+        deleteSource:
+            url:'/api/:username/:topic/v1/:type/:id/patch/sources/:source_id/?'
+            method : 'DELETE'
+            isArray: no
         graph:
             url:'/api/:username/:topic/v1/:type/:id/graph'
             method: 'GET'

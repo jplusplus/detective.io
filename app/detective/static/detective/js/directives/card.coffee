@@ -37,7 +37,7 @@ angular.module('detective.directive').directive "card", ['Summary', 'Individual'
         scope.isString = (f)-> ["CharField", "URLField"].indexOf(f.type) > -1
         scope.isRich = (field) -> field.rules.is_rich or no
         # This individual might have visible properties
-        scope.mightHaveProperties = -> scope.field.rules.has_properties or not scope.model.rules.is_searchable
+        scope.mightHaveProperties = -> scope.field.rules.has_properties or scope.model? and not scope.model.rules.is_searchable
         # True if the given type is literal
         isLiteral = (f)-> ["CharField", "DateTimeField", "URLField", "IntegerField", "BooleanField"].indexOf(f.type) > -1
         # Does the given property has a value within the current individual

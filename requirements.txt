@@ -6,7 +6,6 @@ dj-database-url==0.2.1
 django-appconf==0.6
 django-compressor==1.4
 django-cors-headers==0.12
-django-debug-toolbar==1.2.1
 django-filter==0.6
 django-password-reset==0.7
 django-pylibmc-sasl==0.2.4

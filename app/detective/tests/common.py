@@ -7,6 +7,7 @@
 from django.test                import TestCase
 from django.contrib.auth.models import User
 from app.detective.models       import Topic
+from app.detective.utils        import where, findwhere
 
 class CommonTestCase(TestCase):
     fixtures = [ 'app/detective/fixtures/default_skeletons.json', ]
@@ -37,5 +38,27 @@ class CommonTestCase(TestCase):
         topic = Topic.objects.create(title=u'title', author=user)
         self.delete_user(user)
         self.assertFalse(Topic.objects.filter(author=user).exists())
+
+    def test_where(self):
+        arr = [
+            {'a': 0, 'test': 'ok'},
+            {'b': 1, 'test': 'ok'},
+            {'c': 2, 'test': 'notok'}
+        ]
+
+        els = where(arr, {'test': 'ok'})
+        self.assertTrue(arr[0] in els)
+        self.assertTrue(arr[1] in els)
+
+    def test_findwhere(self):
+        arr = [
+            {'a': 0, 'test': 'ok'},
+            {'b': 1, 'test': 'ok'},
+            {'c': 2, 'test': 'notok'}
+        ]
+
+        res = findwhere(arr, {'test': 'ok'})
+        self.assertTrue(res == arr[0])
+
 
 

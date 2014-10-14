@@ -8,11 +8,6 @@
         position:relative;
         overflow:hidden;
 
-        .text-muted {
-            color:fade(#fff, 60);
-            display:block;
-        }
-
         &:before,
         &:after {
             z-index:1;
@@ -31,12 +26,46 @@
             background:fade(white, 20%);
         }
 
-        .container {
+        h2, &__heading {
             position:relative;
-            z-index:10;
+            z-index:20;
+            pointer-events: none;
         }
 
-        .network {
+        &__heading {
+
+            &__meta {
+                color:fade(#fff, 60);
+                display:block;
+                margin-left:60px;
+
+                & > a, .open-field-sources-link {
+                    color:inherit;
+                    display: inline;
+                    padding:0;
+                    pointer-events: auto;
+                    .lead();
+                }
+
+                .field-sources {
+                    position:relative;
+                    display: inline-block;
+
+                    &:before {
+                        content:"|";
+                        margin:0 10px;
+                    }
+
+                    &__popover {
+                        margin-right:0;
+                    }
+
+                }
+            }
+        }
+
+        &__network {
+            z-index:10;
             position:absolute;
             top:-80px;
             bottom:-80px;

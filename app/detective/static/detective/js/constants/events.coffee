@@ -20,3 +20,6 @@ angular.module('detective.constants').constant 'constants.events',
     # generic events
     trigger:
         scroll: 'trigger:scroll'
+
+    sources:
+        added: 'sources:added'

@@ -1,13 +1,18 @@
-<div id="create-topic" class="container topic-form topic-form--[[formMode()]]">
+<form id="create-topic" class="container topic-form topic-form--[[formMode()]]"
+      name="form" ng-submit="submit(form)" novalidate>
     <div class="topic-form__header">
         <div ng-if="isEditing()">
-            <h2><i class="fa fa-cog"></i>&nbsp;Settings</h2>
+            <h2>
+                <i class="fa fa-cog"></i>&nbsp;Settings of [[topic.title]]
+                <small>
+                  <label class="label label-info" ng-if="!topic.public">private</label>
+                </small>
+            </h2>
             <div class="lead">
-              Selected data scheme: <strong>[[ topic.skeleton_title || "Custom" ]]</strong>
+                Selected data scheme: <strong>[[ topic.skeleton_title || "Custom" ]]</strong>
             </div>
         </div>
         <div ng-if="isCreating()">
-          <div>
             <h2><i class="fa fa-plus"></i>&nbsp;Create a new investigation</h2>
             <p class="lead">What are you investigating on? Pick a scheme from the list</p>
             <ul class="list-unstyled row skeletons">
@@ -52,37 +57,37 @@
                   </div>
                 </li>
             </ul>
-          </div>
-          <div ng-if="shouldShowDataSets()" id="topic-datasets">
-            <h2><i class="fa fa-plus"></i>&nbsp;Populate your investigation</h2>
-            <p class="lead">Choose public data sets to add to your investigation, or start from scratch.</p>
-            <ul class="list-unstyled row skeletons">
-              <li ng-repeat="dataset in datasets">
-                <div class="skeleton-wrapper col-sm-4 col-xs-6">
-                  <div class="skeletons__item" ng-class="{ 'skeletons__item--selected': isDataSetSelected(dataset) }">
-                    <img ng-click="selectDataSet(dataset)" ng-src="[[ dataset.thumbnail.medium ]]"/>
-                    <h4>[[ dataset.title ]]</h4>
-                    <div ng-if="dataset.description" ng-bind-html="dataset.description"></div>
+        </div>
+        <div ng-if="shouldShowDataSets()" id="topic-datasets">
+          <h2><i class="fa fa-plus"></i>&nbsp;Populate your investigation</h2>
+          <p class="lead">Choose public data sets to add to your investigation, or start from scratch.</p>
+          <ul class="list-unstyled row skeletons">
+            <li ng-repeat="dataset in datasets">
+              <div class="skeleton-wrapper col-sm-4 col-xs-6">
+                <div class="skeletons__item" ng-class="{ 'skeletons__item--selected': isDataSetSelected(dataset) }">
+                  <img ng-click="selectDataSet(dataset)" ng-src="[[ dataset.thumbnail.medium ]]"/>
+                  <h4>[[ dataset.title ]]</h4>
+                  <div ng-if="dataset.description" ng-bind-html="dataset.description"></div>
+                </div>
+              </div>
+              <div ng-if="($index + 1) % 3 == 0" class="col-sm-12 hidden-xs hidden-sm hidden-md"></div>
+              <div ng-if="($index + 1) % 2 == 0" class="col-sm-12 hidden-lg"></div>
+            </li>
+            <li class="skeleton-wrapper">
+              <div class="col-sm-4 col-xs-6">
+                <div class="skeletons__item skeletons__item--new-skeleton" ng-click="goToPlans()">
+                  <div class="skeletons__item skeletons__item--new-skeleton__box">
+                    <p>
+                      Need live data streams?
+                      <br />
+                      Check out our paid plans!
+                    </p>
                   </div>
                 </div>
-                <div ng-if="($index + 1) % 3 == 0" class="col-sm-12 hidden-xs hidden-sm hidden-md"></div>
-                <div ng-if="($index + 1) % 2 == 0" class="col-sm-12 hidden-lg"></div>
-              </li>
-              <li class="skeleton-wrapper">
-                <div class="col-sm-4 col-xs-6">
-                  <div class="skeletons__item skeletons__item--new-skeleton" ng-click="goToPlans()">
-                    <div class="skeletons__item skeletons__item--new-skeleton__box">
-                      <p>
-                        Need live data streams?
-                        <br />
-                        Check out our paid plans!
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
+              </div>
+            </li>
+          </ul>
+        </div>
     </div>
 
     <div ng-if="shouldShowForm()"
@@ -90,7 +95,7 @@
          ng-class="{
             'error': max_reached,
             'saved': (isEditing() && !!saved),
-            'loading': loading
+            'loading': loading.main
           }"
          id="topic-form">
 
@@ -101,10 +106,28 @@
             to <a ui-sref="plans">upgrade</a>!
         </div>
 
-        <form class="panel-body"
-              name="form"
-              ng-submit="submit(form, topic)"
-              novalidate>
+        <div class="panel-body">
+            <!-- Topic public/private field. We show this checkbox only on creation.
+                 For edition we add a danger-zone at the botton of this form. -->
+            <div class="row form-group" ng-if="isCreating()"
+                 ng-class="{ disabled: !canChangePrivacy()}">
+                <div class="col-sm-3 form-label top05">
+                  <label for="id_topic_private">
+                    Make this topic private
+                  </label>
+                  <p class="help-block">
+                    Hide this investigation from the public
+                  </p>
+                </div>
+                <div class="pull-left col-padding top05">
+                    <input type="checkbox" id="id_topic_private"
+                           ng-model="topic_private" ng-change="topic.public = !topic_private"
+                           ng-disabled="!canChangePrivacy()">
+                </div>
+                <div class='col-sm-3 top05 disabled-explanation' ng-show="!canChangePrivacy()">
+                    Only <a ui-sref="plans">paid plans</a> can make private investigations.
+                </div>
+            </div>
             <!-- Topic title field -->
             <div class="row form-group">
                 <div class="col-sm-3 form-label top05">
@@ -117,7 +140,7 @@
                 <div class="col-sm-6">
                     <input id="id_topic_title"
                            name="title"
-                           ng-disabled="loading || max_reached || isEditing()"
+                           ng-disabled="loading.main || max_reached || isEditing()"
                            class="form-control"
                            ng-model="topic.title"
                            required>
@@ -126,27 +149,6 @@
                       class="text-danger col-sm-6">Enter a title.</span>
                 <span ng-show="submitted &&  error && error.title"
                       class="text-danger col-sm-6">[[error.title]]</span>
-            </div>
-            <!-- Topic private/public field -->
-            <div class="row form-group">
-                <div class="col-sm-3 form-label top05">
-                    <label for="id_topic_private">
-                        Make this invesigation private
-                    </label>
-                </div>
-                <div class="col-sm-1 top05">
-                  <input id="id_topic_private"
-                         type="checkbox"
-                         name="private"
-                         ng-disabled="loading || !canMakePrivate()"
-                         ng-model="topic_private"
-                         ng-change="topic.public = !!!topic_private">
-                </div>
-                <span ng-show="!canMakePrivate()"
-                      class="text-warning col-sm-6">
-                      Only paid plans can make private investigations.
-                      Checkout our plans
-                </span>
             </div>
             <!-- Topic subtitle/description field -->
             <div class="row form-group">
@@ -158,7 +160,7 @@
                            name="description"
                            class="short-text"
                            text-angular
-                           ta-disabled="loading || max_reached"
+                           ta-disabled="loading.main || max_reached"
                            ng-model="topic.description"></div>
                 </div>
             </div>
@@ -199,7 +201,7 @@
                     <input type="url"
                            name="background_url"
                            ng-model="topic.background_url"
-                           ng-disabled="loading || max_reached"
+                           ng-disabled="loading.main || max_reached"
                            class="form-control">
                 </div>
                 <span class="col-sm-6 text-danger"
@@ -214,9 +216,7 @@
                       ng-show="submitted && error.background_url.oversized_file">
                     Sorry, your file is too big and would hinder your investigation from loading smoothly. Please enter a different URL.
                 </span>
-
             </div>
-
             <!-- Topic about field -->
             <div class="row form-group">
                 <div class="col-sm-3 form-label top05">
@@ -229,7 +229,7 @@
                     <div text-angular
                          name="about"
                          class="long-text"
-                         ta-disabled="loading || max_reached"
+                         ta-disabled="loading.main || max_reached"
                          ng-model="topic.about"
                          id="id_topic_description"></div>
                 </div>
@@ -243,10 +243,11 @@
                                     'username': topic.author.username
                                 })">Delete investigation</a>
                     </span>
+
                     <button type="submit" class="form-footer__submit-btn btn btn-primary"
                         ng-class="{
                           'col-sm-3 col-sm-push-4': isEditing(),
-                          'col-sm-6': isCreating()
+                          'col-sm-6 col-sm-push-6': isCreating()
                         }"
                         ng-disabled="isCreating() && max_reached">
 
@@ -255,7 +256,8 @@
                     </button>
                 </div>
             </div>
-        </form>
+        </div>
+
         <div class="panel-footer form-footer" ng-show="(isEditing() && !!saved)">
           <div class="row">
             <div class="col-sm-offset-3 col-sm-9 top20 bottom20">
@@ -271,7 +273,47 @@
         </div>
     </div>
 
+    <div class="panel panel-danger top15" ng-if="isEditing()"
+         ng-class="{
+          loading: loading.privacy
+         }">
+        <div class="panel-heading">
+            Danger zone
+        </div>
+        <div class="panel-body">
+            <div class="row form-group">
+                <div class="form-label col-sm-6">
+                    <label> Make this investigation
+                        <span ng-if="isPrivate()">public</span>
+                        <span ng-if="isPublic()">private</span>
+                    </label>
+
+                    <p  class="help-block" ng-if="isPrivate()">
+                        Make this investigation visible to anyone.<br/>
+                        Even when it's public, only collaborators can add data.
+                    </p>
+                    <p class="help-block" ng-if="isPublic()">
+                        Hide this investigation from the public.
+                    </p>
+                </div>
+                <div class="col-sm-2 col-sm-push-1">
+                    <button type="button"
+                            class="btn btn-danger btn-fullwidth"
+                            ng-if="isEditing()"
+                            ng-disabled="loading.privacy || !canChangePrivacy()"
+                            ng-click="changePrivacy(form)">
+                        <i class="fa"
+                            ng-class="{
+                               'fa-unlock': isPrivate(),
+                               'fa-lock': isPublic()
+                            }">
+                        </i>&nbsp;
+                        <span ng-if="isPublic()">Make private</span>
+                        <span ng-if="isPrivate()">Open to public</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <a ui-sref="home.dashboard"><i class='fa fa-arrow-left'></i>&nbsp;Go back to your dashboard</a>
-
-
-</div>
+</form>

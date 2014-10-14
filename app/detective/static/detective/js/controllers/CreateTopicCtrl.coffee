@@ -137,16 +137,16 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         return false if profile.topics_max < 0 # unlimited plans
         profile.topics_count >= profile.topics_max
 
-    create: ()=>
-        @scope.loading = yes
+    create: (panel)=>
+        @scope.loading[panel] = yes
         @TopicsFactory.post(@scope.topic, (topic)=>
             @rootScope.$broadcast @EVENTS.topic.created
-            @scope.loading = no
+            @scope.loading[panel] = no
             @state.go 'user-topic',
                 username: topic.author.username
                 topic: topic.slug
         , (response)=>
-            @scope.loading = no
+            @scope.loading[panel] = no
             # BAD REQUEST
             if response.status is 400
                 @scope.error = response.data.topic

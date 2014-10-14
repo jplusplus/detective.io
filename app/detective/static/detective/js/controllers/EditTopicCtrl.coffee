@@ -48,17 +48,17 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
                     changes[prop] = now_val
         changes
 
-    edit: =>
-        @scope.loading = yes
+    edit: (panel)=>
+        @scope.loading[panel] = yes
         @scope.saved = no
         changes = @topicChanges @scope.topic
 
         @TopicsFactory.update({id: @scope.topic.id}, changes, (data)=>
                 @scope.$broadcast @EVENTS.topic.updated, data
                 @scope.saved = yes
-                @scope.loading = no
+                @scope.loading[panel] = no
             , (response)=>
-                @scope.loading = no
+                @scope.loading[panel] = no
                 @scope.saved = no
                 if response.status is 400
                     @scope.error = response.data.topic

@@ -216,11 +216,14 @@ class TopicAuthorization(ReadOnlyAuthorization):
         user      = bundle.request.user
         skeleton  = TopicSkeleton.objects.get(title=bundle.data['skeleton_title'])
         if user.is_authenticated():
+            public      = bundle.data.get('public', True)
             profile     = user.detectiveprofileuser
             unlimited   = profile.topics_max()   < 0
             under_limit = profile.topics_count() < profile.topics_max()
             authorize   = unlimited or under_limit
             authorize   = authorize and (profile.plan in skeleton.target_plans)
+            if not public:
+                authorize = authorize and profile.plan != 'free'
         return authorize
 
     def get_read_permissions(self, user):

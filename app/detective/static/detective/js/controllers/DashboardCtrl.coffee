@@ -1,7 +1,7 @@
 class window.DashboardCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'userGroups']
-    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @userGroups)->
+    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'Group', 'userGroups', 'userAdminGroups']
+    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @Group, @userGroups, @userAdminGroups) ->
         @Page.title "Dashboard"
         # Start to page 1, obviously
         @page = 1
@@ -14,6 +14,7 @@ class window.DashboardCtrl
         @scope.nextPage = @nextPage
         @scope.previousPage = @previousPage
         @scope.openLeaveModal = @openLeaveModal
+        @scope.isAdmin = @isAdmin
 
     # Concatenates @userTopics's objects with @userGroups's topics
     getTopics: =>
@@ -44,14 +45,14 @@ class window.DashboardCtrl
         @scope.loading = true
         @page = page
         deferred = @q.defer()
-        # Load the value at the same time
-        @q.all([
-            @loadUserGroups(page),
-        # Get the 3 resolve promises
-        ]).then (results)=>
-            @userGroups = results[0]
-            @scope.loading = false
-            deferred.resolve @getTopics()
+
+        (@loadUserGroups page).then (results) =>
+            @userGroups = results
+            (@updateUserAdminGroups @userGroups, @userAdminGroups).then (adminGroups) =>
+                @userAdminGroups = adminGroups
+                @scope.loading = false
+                deferred.resolve @getTopics()
+
         # Returns a promises
         deferred.promise
 
@@ -63,16 +64,34 @@ class window.DashboardCtrl
         @Common.get(params).$promise
 
     loadUserGroups: (page)=>
-        @http.get("/api/detective/common/v1/user/#{@User.id}/groups/?page=#{page}").then (response)->
+        (@Group.collaborator { user_id : @User.id , page : page }).$promise.then (data) ->
             # Only keep data object
-            response.data
+            data
+
+    updateUserAdminGroups: (groups, old) =>
+        for group in groups.objects
+            names = (if not names? then "" else names + ",") + (group.name.replace '_contributor', '_administrator')
+        (@Group.administrator { user_id : @User.id , name__in : names }).$promise.then (data) =>
+            _.uniq old.concat _.pluck data.objects, 'name'
+
+    isAdmin: (topic) =>
+        (topic.ontology_as_mod + "_administrator") in @userAdminGroups
 
     @resolve:
-        userGroups: ["$http", "$q", "Auth", ($http, $q, Auth)->
+        userGroups: ["$q", "Auth", "Group", ($q, Auth, Group)->
             deferred = $q.defer()
             Auth.load().then (user)=>
-                $http.get("/api/detective/common/v1/user/#{user.id}/groups/").then (response)->
-                    deferred.resolve response.data
+                (Group.collaborator { user_id : user.id }).$promise.then (data) ->
+                    deferred.resolve data
+            deferred.promise
+        ]
+        userAdminGroups: ["$q", "Auth", "Group", "userGroups", ($q, Auth, Group, userGroups) ->
+            deferred = do $q.defer
+            for group in userGroups.objects
+                names = (if not names? then "" else names + ",") + (group.name.replace '_contributor', '_administrator')
+            (do Auth.load).then (user) =>
+                (Group.administrator { user_id : user.id , name__in : names }).$promise.then (data) ->
+                    deferred.resolve _.pluck data.objects, 'name'
             deferred.promise
         ]
 

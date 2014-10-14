@@ -26,10 +26,17 @@ OPERATIONS = (
     ('read', 'Read {app_name}')
 )
 
-GROUPS = (dict(
-    name        = '{app_name}_contributor',
-    description = 'Contributors of an application, can create',
-    permissions = ('change', 'add', 'delete', 'read')),
+GROUPS = (
+    dict(
+        name        = '{app_name}_contributor',
+        description = 'Contributors of an application, can create',
+        permissions = ('change', 'add', 'delete', 'read')
+    ),
+    dict(
+        name = '{app_name}_administrator',
+        description = '',
+        permissions = ('change', 'add', 'delete', 'read')
+    )
 )
 
 def _create_groups(app_label):
@@ -51,13 +58,11 @@ def _create_groups(app_label):
             group.save()
             groups.append(group)
 
-            ###
-            # Must not be in the loop... Why is there a loop anyway?
-            topic.contributor_group = group
-            if topic.author is not None:
+        topic.contributor_group = groups[0]
+        if topic.author is not None:
+            for group in groups:
                 topic.author.groups.add(group)
-            topic.save()
-            ###
+        topic.save()
 
     except Topic.DoesNotExist:
         # do nothing, if topic doesnt exists we do not create its permissions.

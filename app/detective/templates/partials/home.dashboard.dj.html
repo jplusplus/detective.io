@@ -46,7 +46,7 @@
 								</span>
 							</a>
 
-							<a class="btn btn-default" ui-sref="user-topic-invite({topic: topic.slug, username: topic.author.username})">
+							<a class="btn btn-default" ng-if="isAdmin(topic)" ui-sref="user-topic-invite({topic: topic.slug, username: topic.author.username})">
 								<i class="fa fa-users"></i>
 								Add collaborators
 							</a>

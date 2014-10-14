@@ -31,6 +31,7 @@ from tastypie.validation              import Validation
 from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
+from django.contrib.auth.models       import Group
 
 import copy
 import json
@@ -281,6 +282,9 @@ class TopicNestedResource(ModelResource):
         return [
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/invite%s$" % params, self.wrap_view('invite'), name="api_invite"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/leave%s$"  % params, self.wrap_view('leave'),  name="api_leave"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/collaborators%s$"  % params, self.wrap_view('list_collaborators'),  name="api_list_collaborators"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/administrators%s$"  % params, self.wrap_view('list_administrators'),  name="api_list_administrators"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/grant-admin%s$" % params, self.wrap_view('grant_admin'), name="api_grant_admin")
         ]
 
     def invite(self, request, **kwargs):
@@ -364,16 +368,82 @@ class TopicNestedResource(ModelResource):
         self.throttle_check(request)
 
         topic = Topic.objects.get(id=kwargs["pk"])
-        user  = request.user
+
+        body = json.loads(request.body)
+        collaborator = body.get("collaborator", None)
+        if collaborator != None:
+            # Check authorization
+            bundle = self.build_bundle(obj=topic, request=request)
+            self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
+            collaborator = User.objects.get(pk=collaborator)
+
+        user  = collaborator or request.user
         contributors = topic.get_contributor_group()
         potential_user = contributors.user_set.filter(pk=user.pk)
         if potential_user.exists():
             # remove user from contributor group
-            contributors.user_set.remove(request.user)
-            return HttpResponse(u"You successfuly left {topic} contributors.".format(
-                topic=topic.title))
+            contributors.user_set.remove(user)
+            return HttpResponse(u"{username} successfuly left {topic} contributors.".format(
+                username=user.username, topic=topic.title))
         else:
             return HttpResponseForbidden("You are not a contributor of this topic.")
+
+    def list_collaborators(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        bundles = self.get_collaborators(request, kwargs['pk'])
+
+        return self.create_response(request, bundles)
+
+    def list_administrators(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        bundles = self.get_collaborators(request, kwargs['pk'], True)
+
+        return self.create_response(request, bundles)
+
+    def get_collaborators(self, request, topic_id, admin=False):
+        ur = UserResource()
+
+        topic = Topic.objects.get(id=topic_id)
+        if admin:
+            users = Group.objects.get(name="{topic_id}_administrator".format(topic_id=topic.ontology_as_mod)).user_set.all()
+        else:
+            users = topic.get_contributor_group().user_set.all()
+
+        bundles = []
+        for user in users:
+            bundle = ur.build_bundle(obj=user, request=request)
+            bundles.append(ur.full_dehydrate(bundle, for_list=True))
+
+        return bundles
+
+    def grant_admin(self, request, **kwargs):
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        topic = Topic.objects.get(id=kwargs["pk"])
+        body = json.loads(request.body)
+        grant = body['grant']
+        collaborator = body['collaborator']
+
+        try:
+            collaborator = topic.get_contributor_group().user_set.get(pk=collaborator['id'])
+            admin_group = Group.objects.get(name="{topic_id}_administrator".format(topic_id=topic.ontology_as_mod))
+            if grant:
+                collaborator.groups.add(admin_group)
+                collaborator.save()
+            else:
+                admin_group.user_set.remove(collaborator)
+                admin_group.save()
+            return HttpResponse()
+        except User.DoesNotExist:
+            return Http404()
 
     def dehydrate(self, bundle):
         # Get the model's rules manager

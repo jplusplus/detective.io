@@ -78,8 +78,8 @@
 							<span ng-switch on="isOwner(collaborator)">
 								<strong ng-switch-when="true">-</strong>
 								<span ng-switch-default>
-									<a href="" ng-click="changePermission(collaborator)"><i class="fa fa-lg fa-edit"></i></a>
-									<a href="" ng-click="removeCollaborator(collaborator)"><i class="fa fa-lg fa-trash"></i></a>
+									<a href="" ng-click="changePermission(collaborator)"><span ng-switch on="isAdmin(collaborator)"><span ng-switch-when="true">Remove admin status</span><span ng-switch-default>Make admin</span></span></a>
+									<a href="" ng-click="removeCollaborator(collaborator)" alt="Remove from collaborators list"><i class="fa fa-lg fa-trash"></i></a>
 								</span>
 							</span>
 						</td>

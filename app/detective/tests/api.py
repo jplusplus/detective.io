@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective.models                import Topic, TopicSkeleton, PLANS_CHOICES
 from app.detective.topics.common.message import SaltMixin
+from app.detective.topics.common.models  import FieldSource
 from app.detective.topics.energy.models  import Organization, EnergyProject, Person, Country
 from app.detective                       import utils
 from datetime                            import datetime
@@ -219,6 +220,23 @@ class ApiTestCase(ResourceTestCase):
             auth = self.get_super_credentials()
         url = '/api/%s/v1/%s/%d/patch/' % (scope, model_name, model_id)
         return self.api_client.post(url, format='json', data=patch_data, authentication=auth)
+
+    def patch_individual_source(self, scope, model_name, model_id, source=None,
+            method='post', auth=None, skip_auth=False, source_id=None):
+
+        if not skip_auth and not auth:
+            auth = self.get_super_credentials()
+        url = '/api/%s/v1/%s/%d/patch/sources/' % (scope, model_name, model_id)
+        if source_id != None:
+            url += '%d/' % source_id
+
+        resp = None
+        if method == 'post':
+            resp = self.api_client.post(url, format='json', data=source, authentication=auth)
+        elif method == 'delete':
+            resp = self.api_client.delete(url, authentication=auth)
+        return resp
+
 
     def check_permissions(self, permissions=None, user=None):
         user_permissions = list(user.get_all_permissions())
@@ -1026,6 +1044,86 @@ class TopicApiTestCase(ApiTestCase):
         self.assertTrue(len(resp["is_a_child_of"]) == 0, len(resp["is_a_child_of"]))
         person_a.delete()
         person_b.delete()
+
+    def test_patch_individual_new_source(self):
+        """
+        Test that the patching of field sources with new source works properly
+        """
+        topic  = Topic.objects.get(slug='test-topic')
+        Person = topic.get_models_module().Person
+
+        def create_source(individual_id, source):
+            patch_data = dict(
+                scope      = 'detective/test-family',
+                model_name = 'person',
+                model_id   = individual_id,
+            )
+            return self.patch_individual_source(source=source, **patch_data)
+
+        p1 = Person.objects.create(name='My person')
+
+        source = { 'field': 'name', 'reference': 'source A' }
+
+        resp = create_source(p1.pk, source)
+        self.assertHttpOK(resp)
+        self.assertTrue(
+            FieldSource.objects.filter(individual=p1.pk,
+                field=source['field'], reference=source['reference']).exists()
+        )
+
+
+    def test_patch_individual_existing_source(self):
+        """
+        Test that the patching of field source with existing source works properly
+        """
+        topic  = Topic.objects.get(slug='test-topic')
+        Person = topic.get_models_module().Person
+
+        def patch_source(individual_id, source):
+            patch_data = dict(
+                scope      = 'detective/test-family',
+                model_name = 'person',
+                model_id   = individual_id,
+            )
+            return self.patch_individual_source(source=source, source_id=source['id'], **patch_data)
+
+        p1 = Person.objects.create(name='My person')
+        source = FieldSource.objects.create(field='name', individual=p1.pk, reference='source A')
+
+        patch_data = {
+            'id': source.pk,
+            'field': 'name',
+            'reference': 'EDITED source A'
+        }
+
+        resp = patch_source(p1.pk, patch_data)
+        self.assertHttpOK(resp)
+
+        source_updated = FieldSource.objects.get(pk=source.pk)
+        self.assertEqual(source_updated.reference, patch_data['reference'])
+
+    def test_patch_individual_delete_source(self):
+        """
+        Test that the patching of field source with existing source works properly
+        """
+        topic  = Topic.objects.get(slug='test-topic')
+        Person = topic.get_models_module().Person
+
+        def delete_source(individual_id, source_id):
+            patch_data = dict(
+                scope      = 'detective/test-family',
+                model_name = 'person',
+                model_id   = individual_id,
+            )
+            return self.patch_individual_source(method='delete', source_id=source_id, **patch_data)
+
+        p1 = Person.objects.create(name='My person')
+        source = FieldSource.objects.create(field='name', individual=p1.pk, reference='source A')
+
+        resp = delete_source(p1.pk, source.pk)
+        self.assertHttpOK(resp)
+        self.assertFalse(FieldSource.objects.filter(pk=source.pk).exists())
+
 
     def test_export_csv(self):
         from django_rq import get_worker

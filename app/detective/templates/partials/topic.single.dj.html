@@ -3,14 +3,20 @@
 	<div class="front" ng-style="frontStyle(type)">
 
 		<div class="container">
-			<div class="pull-left">
+			<div class="pull-left front__heading">
 				<div class="pull-left">
 					<div color-tag ref="type"></div>
 				</div>
 				<h2 class="bottom0 top0 left60">[[individual|individualPreview:"unknown"]]</h2>
-				<a ng-href="/[[username]]/[[topic]]/[[type]]" class="lead text-muted left60">[[meta.verbose_name]]</a>
+				<div class="front__heading__meta">
+					<a ng-href="/[[username]]/[[topic]]/[[type]]">
+						[[meta.verbose_name]]
+					</a>
+					<span sources-popover sources-list="nameSources"></span>
+				</div>
 			</div>
-			<div ng-show="hasNetwork()" class="network">
+
+			<div ng-show="hasNetwork()" class="front__network">
 				<graphviz data="graphnodes" topic="topic"></graphviz>
 			</div>
 		</div>
@@ -67,6 +73,7 @@
 				</div>
 
 				<div ng-show="authors && authors.length">
+					<span class="label label-default pull-right top05" title="Only the owner of this investigation can see this list.">Not public</span>
 					<h3>Authors</h3>
 					<div class="panel panel-default">
 						<ul class="list-unstyled">

@@ -691,8 +691,6 @@ def apply_dataset(*args, **kwargs):
                 queue = django_rq.get_queue('default', default_timeout=7200)
                 job   = queue.enqueue(unzip_and_process_bulk_parsing_and_save_as_model, instance, base64.b64encode(dataset.zip_file.read()))
                 dataset.zip_file.close()
-            instance.dataset = None
-            instance.save()
 
 signals.post_save.connect(user_created         , sender=User)
 signals.post_save.connect(update_topic_cache   , sender=Topic)

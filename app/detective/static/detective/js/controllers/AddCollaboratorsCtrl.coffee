@@ -66,7 +66,7 @@ class window.AddCollaboratorsCtrl
         modal = @modal.open
             templateUrl: '/partial/common.modal.html'
             controller: ['$scope', ($scope) =>
-                $scope.title = "Change the status of 'username' on the topic 'topicname'?"
+                $scope.title = "Change the status of #{user.username} on the topic #{@topic.title}?"
                 $scope.buttons =
                     yes : "Yes"
                     no : "No"
@@ -83,7 +83,7 @@ class window.AddCollaboratorsCtrl
         modal = @modal.open
             templateUrl: '/partial/common.modal.html'
             controller: ['$scope', ($scope) =>
-                $scope.title = "Remove 'username' from the collaborators of the topic 'topicname'?"
+                $scope.title = "Remove #{user.username} from the collaborators of the topic #{@topic.title}?"
                 $scope.buttons =
                     yes : "Yes"
                     no : "No"

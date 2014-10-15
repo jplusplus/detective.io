@@ -278,9 +278,9 @@ def proxy(request, name=None):
         return new_headers
 
     if settings.STATIC_URL[0] == '/':
-        return redirect('%s%s' %(settings.STATIC_URL, name));
+        return redirect('%s%s' % (settings.STATIC_URL, name));
     else:
-        url = '%s%s' % ( name)
+        url = '%s%s' % (settings.STATIC_URL, name)
         try :
             request = urllib2.Request(url, None, build_header_dict_from_request(request))
             proxied = urllib2.urlopen(request)

@@ -270,7 +270,6 @@ def not_found(request):
 def proxy(request, name=None):
     def build_header_dict_from_request(request):
         trad = {
-            'CONTENT_TYPE'          : 'Content-Type',
             'HTTP_ACCEPT_ENCODING'  : 'Accept-Encoding',
             'HTTP_ACCEPT_LANGUAGE'  : 'Accept-Language'
         }

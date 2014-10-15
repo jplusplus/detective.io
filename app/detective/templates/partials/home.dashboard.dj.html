@@ -20,6 +20,13 @@
 							<a ui-sref="user-topic({ username: topic.author.username, topic: topic.slug })">
 								[[topic.title]]
 							</a>
+							<span class="dashboard__topics__item__visibility pull-right">
+								<i class="fa"
+								   ng-class="{
+								       'fa-unlock': topic.public,
+								       'fa-lock': !topic.public
+								   }"></i>
+							</span>
 						</h4>
 						<p ng-if="user.owns(topic)">
                             <i class="fa fa-cube"></i>&nbsp;

@@ -1,6 +1,9 @@
 .topic-edit-ontology {
+    margin : 50px;
+    .model-name{
+        font-weight: bold;
+    }
     &__ontology-visualization {
-        margin           : 50px;
         padding          : 20px;
         border           : 1px solid black;
         background-color : #FAF7D4;
@@ -14,6 +17,47 @@
             position         : absolute;
             min-height       : 50px;
             display          : inline-block;
+        }
+    }
+    // different accordions
+    &__menu {
+        &__edit-model {
+            &__model {
+                &:hover {
+                    text-decoration: underline;
+                    cursor: pointer;
+                }
+            }
+        }
+        &__edit-relationships {
+            &__relationship {
+                padding-left: 20px;
+            }
+            &__from {
+                font-size: 1.2em;
+            }
+        }
+    }
+    &__edit-model {
+        &__title {
+            font-size: 1.2em;
+            padding-bottom: 20px;
+        }
+        &__properties {
+            &__title {
+                font-size: 1.4em;
+                padding-top: 1em;
+            }
+            &__name {
+                font-size: 1.2em;
+                font-weight: bold;
+            }
+            label {
+                font-size: .8em;
+            }
+        }
+        &__actions {
+
         }
     }
 }

@@ -13,7 +13,6 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
                         if field.type == "relationship"
                             model_name = model.name
                             related_to = field.related_model
-                            console.log "relationship from #{model_name} to #{related_to}.", field
                             instance.connect
                                 source: "model--#{model_name}"
                                 target: "model--#{related_to}"
@@ -24,7 +23,7 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
                                 anchor: "Continuous"
                                 overlays:[
                                     ["PlainArrow", {location:1, width:15, length:12} ]
-                                    [ "Label", { label:"#{field.verbose_name}<br/>#{field.related_name}", location:.5, cssClass:"label", id:"label--#{field.related_name}" } ]
+                                    [ "Label", { label:"#{field.verbose_name}", location:.5, cssClass:"label", id:"label--#{field.related_name}" } ]
                                 ],
                 instance.draggable jsPlumb.getSelector(".model"),
                     drag: =>

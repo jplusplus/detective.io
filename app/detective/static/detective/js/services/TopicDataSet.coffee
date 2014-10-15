@@ -2,7 +2,7 @@ angular.module('detective.service').factory("TopicDataSet", [
     '$resource'
     '$http'
     ($resource, $http)->
-        $resource '/api/detective/common/v1/topicdataset/', {}, {
+        $resource '/api/detective/common/v1/topicdataset/?', {}, {
             get:
                 method : 'GET'
                 isArray: yes

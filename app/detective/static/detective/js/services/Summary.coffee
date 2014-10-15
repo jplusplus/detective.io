@@ -4,7 +4,7 @@ angular.module('detective.service').factory("Summary", [ '$resource', '$http', '
         topic: -> $stateParams.topic or "common"
         username: -> $stateParams.username or "detective"
 
-    $resource '/api/:username/:topic/v1/summary/:id/', defaultsParams, {
+    $resource '/api/:username/:topic/v1/summary/:id/?', defaultsParams, {
         get:
             method : 'GET'
             isArray: false

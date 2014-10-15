@@ -1,5 +1,5 @@
 angular.module('detective.service').factory("Topic", [ '$resource', ($resource)->
-    $resource '/api/detective/common/v1/topic/:id/', {}, {
+    $resource '/api/detective/common/v1/topic/:id/?', {}, {
         invite:
             url :'/api/detective/common/v1/topic/:id/invite/?'
             method : 'POST'

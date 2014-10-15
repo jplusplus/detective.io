@@ -9,6 +9,7 @@ from settings import *
 from urlparse import urlparse
 import os
 import dj_database_url
+from datetime import date, timedelta
 
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com'),
@@ -48,12 +49,45 @@ NEO4J_DATABASES = {
     }
 }
 
+# Expires 10 years in the future at 13:37 GMT
+tenyrs = date.today() + timedelta(days=365*10)
+oneweek= 3600 * 24 * 7
+
 # AWS ACCESS
 AWS_ACCESS_KEY_ID          = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY      = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME    = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_QUERYSTRING_AUTH       = False
 AWS_S3_FILE_OVERWRITE      = os.getenv('AWS_S3_FILE_OVERWRITE') == "True" and True or False
+AWS_IS_GZIPPED             = True
+
+GZIP_CONTENT_TYPES         = (
+    'text/css',
+    'text/csv',
+    'text/html',
+    'text/javascript',
+    'text/plain',
+    'text/xml',
+    'text/x-markdown',
+    'application/javascript',
+    'application/x-javascript',
+    'application/json',
+    'application/pdf',
+    'application/font-woff',
+    'application/octet-stream',
+    'font/opentype',
+    'application/xml',
+    'image/png',
+    'image/jpeg',
+    'image/pjpeg',
+    'image/svg+xml',
+    'image/gif',
+    'image/jpg',
+)
+AWS_HEADERS                = {
+    'Expires': tenyrs.strftime('%a, %d %b %Y 13:37:00 GMT'),
+    'Cache-Control': "public, max-age={week}".format(week=oneweek) # one week max-age.
+}
 
 # Enable debug for minfication
 DEBUG                      = bool(os.getenv('DEBUG', False))

@@ -1,7 +1,7 @@
 class window.AddCollaboratorsCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic', 'collaborators', 'administrators', 'User']
-    constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic, collaborators, @administrators, @User)->
+    @$inject: ['$scope', '$stateParams', '$state', 'Topic', 'Page', 'topic', 'collaborators', 'administrators', 'User', '$modal']
+    constructor: (@scope,  @stateParams, @state, @Topic, @Page, @topic, collaborators, @administrators, @User, @modal)->
         @Page.title "Add new collaborators"
         @scope.topic = @topic
         # Transform search result
@@ -63,18 +63,38 @@ class window.AddCollaboratorsCtrl
         no
 
     changePermission: (user) =>
-        if (confirm "Are you sure?")
-            @scope.loading = yes
-            (@Topic.grant_admin { id : @topic.id }, { collaborator : user , grant : not (@isAdmin user) }).$promise.then =>
-                @scope.loading = no
-                do @updateCollaborators
+        modal = @modal.open
+            templateUrl: '/partial/common.modal.html'
+            controller: ['$scope', ($scope) =>
+                $scope.title = "Change the status of 'username' on the topic 'topicname'?"
+                $scope.buttons =
+                    yes : "Yes"
+                    no : "No"
+                $scope.modal = modal
+            ]
+        modal.result.then (isYes) =>
+            if isYes
+                @scope.loading = yes
+                (@Topic.grant_admin { id : @topic.id }, { collaborator : user , grant : not (@isAdmin user) }).$promise.then =>
+                    @scope.loading = no
+                    do @updateCollaborators
 
     removeCollaborator: (user) =>
-        if (confirm "Are you sure?")
-            @scope.loading = yes
-            @Topic.leave { id : @topic.id }, { collaborator : user.id }, =>
-                @scope.loading = no
-                do @updateCollaborators
+        modal = @modal.open
+            templateUrl: '/partial/common.modal.html'
+            controller: ['$scope', ($scope) =>
+                $scope.title = "Remove 'username' from the collaborators of the topic 'topicname'?"
+                $scope.buttons =
+                    yes : "Yes"
+                    no : "No"
+                $scope.modal = modal
+            ]
+        modal.result.then (isYes) =>
+            if isYes
+                @scope.loading = yes
+                @Topic.leave { id : @topic.id }, { collaborator : user.id }, =>
+                    @scope.loading = no
+                    do @updateCollaborators
 
     updateCollaborators: =>
         @scope.loading = yes

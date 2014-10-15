@@ -272,7 +272,8 @@ def proxy(request, name=None):
     else:
         url = '%s%s' % (settings.STATIC_URL, name)
         try :
-            proxied = urllib2.urlopen(url)
+            request = urllib2.Request(url, request.data, request.headers)
+            proxied = urllib2.urlopen(request)
             status_code = proxied.code
             mimetype = proxied.headers.typeheader or mimetypes.guess_type(url)
             content = proxied.read()

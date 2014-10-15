@@ -60,6 +60,30 @@ AWS_STORAGE_BUCKET_NAME    = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_QUERYSTRING_AUTH       = False
 AWS_S3_FILE_OVERWRITE      = os.getenv('AWS_S3_FILE_OVERWRITE') == "True" and True or False
 AWS_IS_GZIPPED             = True
+
+GZIP_CONTENT_TYPES         = (
+    'text/css',
+    'text/csv',
+    'text/html',
+    'text/javascript',
+    'text/plain',
+    'text/xml',
+    'text/x-markdown',
+    'application/javascript',
+    'application/x-javascript',
+    'application/json',
+    'application/pdf',
+    'application/font-woff',
+    'application/octet-stream',
+    'font/opentype',
+    'application/xml',
+    'image/png',
+    'image/jpeg',
+    'image/pjpeg',
+    'image/svg+xml',
+    'image/gif',
+    'image/jpg',
+)
 AWS_HEADERS                = {
     'Expires': tenyrs.strftime('%a, %d %b %Y 13:37:00 GMT'),
     'Cache-Control': "max-age={week}".format(week=oneweek) # one week max-age.

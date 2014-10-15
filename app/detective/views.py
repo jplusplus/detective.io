@@ -287,7 +287,7 @@ def proxy(request, name=None):
             status_code = proxied.code
             mimetype = proxied.headers.typeheader or mimetypes.guess_type(url)
             content_type     = proxied.headers.dict['content-type']
-            content_encoding = proxied.headers.dict.get('content-encoding', 'gzip')
+            content_encoding = proxied.headers.dict.get('content-encoding')
             content  = proxied.read()
         except urllib2.HTTPError as e:
             return HttpResponse(e.msg, status=e.code, mimetype='text/plain')

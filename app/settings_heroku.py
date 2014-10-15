@@ -86,7 +86,7 @@ GZIP_CONTENT_TYPES         = (
 )
 AWS_HEADERS                = {
     'Expires': tenyrs.strftime('%a, %d %b %Y 13:37:00 GMT'),
-    'Cache-Control': "max-age={week}".format(week=oneweek) # one week max-age.
+    'Cache-Control': "public, max-age={week}".format(week=oneweek) # one week max-age.
 }
 
 # Enable debug for minfication

@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from django.http            import Http404, HttpResponse
-from django.shortcuts       import render_to_response, redirect
-from django.template        import TemplateDoesNotExist
-from django.conf            import settings
-from django.contrib.auth    import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
-from app.detective.models   import Topic, DetectiveProfileUser
-from app.detective.utils    import get_topic_model
+from django.conf                  import settings
+from django.contrib.auth          import get_user_model
+from django.core.exceptions       import ObjectDoesNotExist
+from django.http                  import Http404, HttpResponse
+from django.shortcuts             import render_to_response, redirect
+from django.template              import TemplateDoesNotExist
+from django.views.decorators.gzip import gzip_page
+from app.detective.models         import Topic, DetectiveProfileUser
+from app.detective.utils          import get_topic_model
 import logging
 import urllib2
 import mimetypes
@@ -48,6 +49,7 @@ def default_social_meta(request):
         "url": request.build_absolute_uri()
     }
 
+@gzip_page
 def home(request, social_meta_dict=None,**kwargs):
     if social_meta_dict == None:
         social_meta_dict = default_social_meta(request)
@@ -67,7 +69,6 @@ def home(request, social_meta_dict=None,**kwargs):
         response.delete_cookie("user__is_logged")
         response.delete_cookie("user__is_staff")
         response.delete_cookie("user__username")
-
     return response
 
 def entity_list(request, **kwargs):
@@ -246,6 +247,7 @@ def profile(request, **kwargs):
         logger.debug("Tried to access a non-existing model %s" % e)
         return home(request, None, **kwargs)
 
+@gzip_page
 def partial(request, partial_name=None):
     template_name = 'partials/' + partial_name + '.dj.html'
     try:
@@ -253,6 +255,7 @@ def partial(request, partial_name=None):
     except TemplateDoesNotExist:
         raise Http404
 
+@gzip_page
 def partial_explore(request, topic=None):
     template_name = 'partials/topic.explore.' + topic + '.dj.html'
     try:

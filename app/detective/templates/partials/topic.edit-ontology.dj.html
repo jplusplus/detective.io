@@ -17,30 +17,26 @@
                             <div class="form-group">
                                 <label class="col-md-6">Name</label>
                                 <div class="col-md-6">
-                                    <input type="text"
-                                           ng-model="newModel.Name"
+                                    <input type     = "text"
+                                           class    = "form-control"
+                                           ng-model = "newModel.Name"
                                            required />
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-md-6">Verbose name</label>
+                                <label class="col-md-6">Name plural</label>
                                 <div class="col-md-6">
-                                    <input type="text"
-                                           ng-model="newModel.VerboseName" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-6">Verbose name plural</label>
-                                <div class="col-md-6">
-                                    <input type="text"
-                                           ng-model="newModel.VerboseNamePlural" />
+                                    <input type     = "text"
+                                           class    = "form-control"
+                                           ng-model = "newModel.NamePlural" />
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="col-md-6">Help text</label>
                                 <div class="col-md-6">
-                                    <input type="text"
-                                           ng-model="newModel.HelpText" />
+                                    <input type     = "text"
+                                           class    = "form-control"
+                                           ng-model = "newModel.HelpText" />
                                 </div>
                             </div>
                             <div class="col-sm-2">
@@ -56,6 +52,55 @@
                     <!-- ADD RELATIONSHIP -->
                     <accordion-group heading="Add new relationship type" is-disabled="accordionShouldBeDisabled('add-relationship')">
                         Add new relationship type
+                        <form class="form-horizontal" name="newrelationshipform" novalidate>
+                            <div class="form-group">
+                                <label class="col-md-6">Name</label>
+                                <div class="col-md-6">
+                                    <input type     = "text"
+                                           class    = "form-control"
+                                           ng-model = "newRelationship.Name"
+                                           required />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-6">Reverse name</label>
+                                <div class="col-md-6">
+                                    <input type     = "text"
+                                           class    = "form-control"
+                                           ng-model = "newRelationship.ReverseName"
+                                           required />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-md-3 control-label" >Between</label>
+                                        <div class=" col-md-9">
+                                            <select ng-model="newRelationship.between" class="form-control" ng-options="model.name as model.verbose_name for model in models" required></select>
+                                            <div ng-show="!newRelationship.between">Can't be empty</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group form-group-sm">
+                                        <label class="col-md-3 control-label" >And</label>
+                                        <div class=" col-md-9">
+                                            <select ng-model="newRelationship.and" class="form-control" ng-options="model.name as model.verbose_name for model in models" required></select>
+                                            <div ng-show="!newRelationship.and">Can't be empty</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="text-right">
+                                    <button class       = "btn btn-primary" 
+                                            ng-click    = "addNewRelationship()"
+                                            ng-disabled = "newrelationshipform.$invalid">
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </accordion-group>
                     <!-- EDIT MODEL -->
                     <accordion-group heading="Edit data type" class="topic-edit-ontology__menu__edit-model" is-disabled="accordionShouldBeDisabled('edit-model')">

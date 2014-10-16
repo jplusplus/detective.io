@@ -16,6 +16,7 @@ class window.AddCollaboratorsCtrl
         @scope.$watch "collaborator", (newVal, oldVal)=>
             if typeof newVal is typeof {}
                 @scope.collaborator_name = newVal.username
+        , yes
 
         # Send an invitation to the given person
         @scope.invite = ()=>

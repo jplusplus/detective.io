@@ -7,7 +7,9 @@ class window.EditTopicOntologyCtrl
         @scope.editModel                  = @editModel
         @scope.saveModel                  = @saveModel
         @scope.cancelModel                = @cancelModel
-        @scope.removeFied                 = @removeFied
+        @scope.isModelUnchanged           = @isModelUnchanged
+        @scope.removeField                = @removeField
+        @scope.addField                   = @addField
         @scope.accordionShouldBeDisabled  = @accordionShouldBeDisabled
         # data
         @scope.models        = @topic.ontology_as_json
@@ -22,18 +24,34 @@ class window.EditTopicOntologyCtrl
         @scope.editingModel = angular.copy(model)
         console.log "editModel", model
 
-    saveModel: (model) =>
+    saveModel:  =>
         model = @scope.editingModel
+        # create the name from the verbose name if doesn't exist
+        for field in model.fields
+            if not field.name?
+                # slugify
+                field.name = field.verbose_name
+                .toLowerCase()
+                .replace(/\ /g, '-')
+                .replace(/[^\w-]+/g, '')
         idx_model_to_update = @scope.models.indexOf(_.find(@scope.models, ((m) -> model.name == m.name)))
         # update
         if idx_model_to_update > -1
             @scope.models[idx_model_to_update] = model
         @scope.editingModel = null
+        console.log "model saved", @scope.models[idx_model_to_update]
 
-    cancelModel: (model) =>
+    cancelModel: =>
         @scope.editingModel = null
 
-    removeFied: (field) =>
+    isModelUnchanged: =>
+        idx_model_to_update = @scope.models.indexOf(_.find(@scope.models, ((m) => @scope.editingModel.name == m.name)))
+        angular.equals(@scope.editingModel, @scope.models[idx_model_to_update])
+
+    addField: =>
+        @scope.editingModel.fields.push({})
+
+    removeField: (field) =>
         index = @scope.editingModel.fields.indexOf(field)
         if index > -1
             @scope.editingModel.fields.splice(index, 1) if @scope.editingModel.fields[index]?

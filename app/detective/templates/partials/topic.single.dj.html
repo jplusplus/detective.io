@@ -2,6 +2,8 @@
 
 	<div class="front" ng-style="frontStyle(type)">
 
+		<div class="front__bands"></div>
+
 		<div class="container">
 			<div class="pull-left front__heading">
 				<div class="pull-left">
@@ -10,7 +12,7 @@
 				<h2 class="bottom0 top0 left60">[[individual|individualPreview:"unknown"]]</h2>
 				<div class="front__heading__meta">
 					<a ng-href="/[[username]]/[[topic]]/[[type]]">
-						[[meta.verbose_name]]
+						<i class="fa fa-tags"></i> [[meta.verbose_name]]
 					</a>
 					<span sources-popover sources-list="nameSources"></span>
 				</div>

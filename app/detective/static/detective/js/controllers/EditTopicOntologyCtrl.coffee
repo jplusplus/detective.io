@@ -4,6 +4,7 @@ class window.EditTopicOntologyCtrl
         @Page.title "Ontology Editor", no
         return unless @topic.ontology_as_json?
         # actions
+        @scope.addNewModel                = @addNewModel
         @scope.editModel                  = @editModel
         @scope.saveModel                  = @saveModel
         @scope.cancelModel                = @cancelModel
@@ -15,10 +16,21 @@ class window.EditTopicOntologyCtrl
         @scope.models        = @topic.ontology_as_json
         @scope.relationships = {}
         @scope.fieldTypes    = ["string", "url", "integer", "integerarray", "datetimestamp", "datetime", "date", "time", "boolean", "float"]
+        @scope.newModel      = {}
         for model in @scope.models
             for field in model.fields
                 @scope.relationships[model.name] = [] unless @scope.relationships[model.name]?
                 @scope.relationships[model.name].push field if field.type == "relationship"
+
+    addNewModel: =>
+        new_model =
+            fields              : [{name:"name", verbose_name:"Name", type:"string"}]
+            name                : @scope.newModel.Name
+            verbose_name        : @scope.newModel.VerboseName
+            verbose_name_plural : @scope.newModel.VerboseNamePlural
+            help_text           : @scope.newModel.HelpText
+        @scope.models.push(new_model)
+        @scope.newModel = {}
 
     editModel: (model) =>
         @scope.editingModel = angular.copy(model)

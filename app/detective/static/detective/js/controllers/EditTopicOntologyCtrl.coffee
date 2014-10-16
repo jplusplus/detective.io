@@ -28,7 +28,7 @@ class window.EditTopicOntologyCtrl
     addNewModel: =>
         new_model =
             fields              : [{name:"name", verbose_name:"Name", type:"string"}]
-            name                : @scope.newModel.Name
+            name                : @scope.newModel.Name # TODO: slugify
             verbose_name        : @scope.newModel.Name
             verbose_name_plural : @scope.newModel.NamePlural
             help_text           : @scope.newModel.HelpText
@@ -66,6 +66,7 @@ class window.EditTopicOntologyCtrl
                 .toLowerCase()
                 .replace(/\ /g, '-')
                 .replace(/[^\w-]+/g, '')
+                # TODO : check if doesn't exist
         idx_model_to_update = @scope.models.indexOf(_.find(@scope.models, ((m) -> model.name == m.name)))
         # update
         if idx_model_to_update > -1

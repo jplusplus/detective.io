@@ -604,11 +604,13 @@ class TopicNestedResource(ModelResource):
         return bundle
 
     def hydrate_dataset(self, bundle):
-        if 'dataset' in bundle.data:
+        if 'dataset' in bundle.data and bundle.data['dataset'] != '':
             try:
                 bundle.data['dataset'] = TopicDataSet.objects.get(pk=bundle.data['dataset'])
             except TopicDataSet.DoesNotExist:
                 bundle.data['dataset'] = None
+        else:
+            self.clean_bundle_key('dataset', bundle)
         return bundle
 
     def full_hydrate(self, bundle):

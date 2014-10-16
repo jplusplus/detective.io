@@ -23,7 +23,8 @@ OPERATIONS = (
     ('add'   , 'Add an entity to {app_name}'),
     ('delete', 'Delete an entity from {app_name}'),
     ('change', 'Edit an entity of {app_name}'),
-    ('read', 'Read {app_name}')
+    ('read', 'Read {app_name}'),
+    ('administrate', 'Administrate {app_name}')
 )
 
 GROUPS = (
@@ -34,8 +35,8 @@ GROUPS = (
     ),
     dict(
         name = '{app_name}_administrator',
-        description = '',
-        permissions = ('change', 'add', 'delete', 'read')
+        description = 'Everything is in the name',
+        permissions = ('administrate',)
     )
 )
 

@@ -96,10 +96,10 @@
 							<tbody>
 							 	<tr ng-repeat="field in meta.fields|filter:isLiteral|filter:hasValue"
 					 		  		ng-init='fieldSources=getSources(field)'>
-							 		<td class="field-name" ng-if="!isMono(field)">
+							 		<td class="field-name" ng-if="!isMono(field)" width="10%">
 							 			<strong>[[field.verbose_name]]</strong>
 							 		</td>
-							 		<td ng-if="!isMono(field)">
+							 		<td ng-if="!isMono(field)" width="80%">
 							 			<span ng-bind="get(field.name) | date:'longDate'" ng-if="field.type == 'DateTimeField'"></span>
 							 			<span ng-bind="get(field.name)" ng-if="!isString(field.type) && field.type != 'DateTimeField'
 							 																	     && field.type != 'BooleanField'"></span>
@@ -118,7 +118,7 @@
 							 			<span ng-if="isBoolean(field.type)" ng-bind-html="get(field.name, false) | yesorno | titlecase">
 							 			</span>
 							 		</td>
-						 			<td ng-if="isMono(field) && get(field.name)" colspan="3">
+						 			<td ng-if="isMono(field) && get(field.name)" colspan="3" width="100%">
 						 				<div ng-if="isAddr(field) || isGeoloc(field)">
 								 			<strong>[[field.verbose_name]]</strong>
 								 			<a class="map" ng-href="https://www.google.fr/maps/?q=[[get(field.name)]]" target="_blank">
@@ -132,7 +132,7 @@
 						 					<img ng-src="[[get(field.name)]]" class="pull-left img-responsive" />
 						 				</div>
 						 			</td>
-						 			<td class="field-source text-right" ng-if="!isMono(field)">
+						 			<td class="field-source text-right" ng-if="!isMono(field)" width="10%">
 			 							<div sources-popover sources-list='fieldSources'></div>
 						 			</td>
 							 	</tr>

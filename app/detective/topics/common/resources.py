@@ -378,19 +378,22 @@ class TopicNestedResource(ModelResource):
 
         topic = Topic.objects.get(id=kwargs["pk"])
 
-        body = json.loads(request.body)
-        collaborator = body.get("collaborator", None)
-        if collaborator != None:
-            # Check authorization
-            bundle = self.build_bundle(obj=topic, request=request)
-            self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
-            # Quick check on `administrator` group
-            try:
-                if not request.user.is_superuser and not request.user.is_staff:
-                    request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
-            except Group.DoesNotExist:
-                return HttpResponseForbidden()
-            collaborator = User.objects.get(pk=collaborator)
+        try:
+            body = json.loads(request.body)
+            collaborator = body.get("collaborator", None)
+            if collaborator != None:
+                # Check authorization
+                bundle = self.build_bundle(obj=topic, request=request)
+                self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
+                # Quick check on `administrator` group
+                try:
+                    if not request.user.is_superuser and not request.user.is_staff:
+                        request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+                except Group.DoesNotExist:
+                    return HttpResponseForbidden()
+                collaborator = User.objects.get(pk=collaborator)
+        except ValueError:
+            collaborator = None
 
         user  = collaborator or request.user
         contributors = topic.get_contributor_group()

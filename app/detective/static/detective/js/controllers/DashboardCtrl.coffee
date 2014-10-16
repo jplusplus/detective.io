@@ -75,7 +75,7 @@ class window.DashboardCtrl
             _.uniq old.concat _.pluck data.objects, 'name'
 
     isAdmin: (topic) =>
-        (topic.ontology_as_mod + "_administrator") in @userAdminGroups
+        (do @User.isStaff) or ((topic.ontology_as_mod + "_administrator") in @userAdminGroups)
 
     @resolve:
         userGroups: ["$q", "Auth", "Group", ($q, Auth, Group)->

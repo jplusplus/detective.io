@@ -302,7 +302,8 @@ class TopicNestedResource(ModelResource):
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
         # Quick check on `administrator` group
         try:
-            request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+            if not request.user.is_staff and not request.user.is_superuser:
+                request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
         except Group.DoesNotExist:
             return HttpResponseForbidden()
 
@@ -385,7 +386,8 @@ class TopicNestedResource(ModelResource):
             self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
             # Quick check on `administrator` group
             try:
-                request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+                if not request.user.is_superuser and not request.user.is_staff:
+                    request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
             except Group.DoesNotExist:
                 return HttpResponseForbidden()
             collaborator = User.objects.get(pk=collaborator)

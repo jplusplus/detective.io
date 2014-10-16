@@ -191,6 +191,7 @@ angular.module('detective.config').config [
                     collaborators: AddCollaboratorsCtrl.resolve.collaborators
                     administrators: AddCollaboratorsCtrl.resolve.administrators
                 auth: true
+                admin: yes
             )
             .state('user-topic-search',
                 url: '/:username/:topic/search/?q&page'

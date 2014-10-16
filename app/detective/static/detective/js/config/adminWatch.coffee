@@ -8,8 +8,9 @@ angular.module('detective.config').run [
                 admin = current.admin
                 return unless admin?
                 if params.topic? and params.username?
-                    topic = TopicsFactory.getTopic params.topic, params.username
-                    if not (User.hasAdministratePermission topic.ontology_as_mod)
-                        do e.preventDefault
-                        $state.go "403"
+                    (TopicsFactory.getTopic params.topic, params.username).then (data) =>
+                        topic = data.ontology_as_mod
+                        if not (User.hasAdministratePermission topic)
+                            do e.preventDefault
+                            $state.go "403"
     ]

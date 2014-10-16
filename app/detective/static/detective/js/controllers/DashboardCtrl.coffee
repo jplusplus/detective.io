@@ -42,7 +42,7 @@ class window.DashboardCtrl
                     @scope.topics = topics
 
     loadPage: (page=@page)=>
-        @scope.loading = true
+        @Page.loading yes
         @page = page
         deferred = @q.defer()
 
@@ -50,7 +50,7 @@ class window.DashboardCtrl
             @userGroups = results
             (@updateUserAdminGroups @userGroups, @userAdminGroups).then (adminGroups) =>
                 @userAdminGroups = adminGroups
-                @scope.loading = false
+                @Page.loading no
                 deferred.resolve @getTopics()
 
         # Returns a promises

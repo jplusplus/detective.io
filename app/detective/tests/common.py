@@ -7,7 +7,7 @@
 from django.test                import TestCase
 from django.contrib.auth.models import User
 from app.detective.models       import Topic
-from app.detective.utils        import where, findwhere
+from app.detective.utils        import where, findwhere, without
 
 class CommonTestCase(TestCase):
     fixtures = [ 'app/detective/fixtures/default_skeletons.json', ]
@@ -59,6 +59,25 @@ class CommonTestCase(TestCase):
 
         res = findwhere(arr, {'test': 'ok'})
         self.assertTrue(res == arr[0])
+
+
+    def test_without_simple(self):
+        coll = [ 1, 2 , 3]
+        without_el = 3
+        new_coll = without(coll, without_el)
+        self.assertTrue(without not in new_coll)
+
+    def test_without_lambda(self):
+        # lambda to filter every odd number
+        coll = [1, 2, 3, 4]
+        l_odd = lambda el: el % 2 != 0
+        new_coll = without(coll, l_odd)
+        self.assertTrue(1 not in new_coll)
+        self.assertTrue(3 not in new_coll)
+
+
+
+
 
 
 

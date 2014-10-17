@@ -28,10 +28,10 @@ class window.EditTopicOntologyCtrl
     addNewModel: =>
         new_model =
             fields              : [{name:"name", verbose_name:"Name", type:"string"}]
-            name                : @scope.newModel.Name # TODO: slugify
-            verbose_name        : @scope.newModel.Name
-            verbose_name_plural : @scope.newModel.NamePlural
-            help_text           : @scope.newModel.HelpText
+            name                : @scope.newModel.name # TODO: slugify
+            verbose_name        : @scope.newModel.name
+            verbose_name_plural : @scope.newModel.namePlural
+            help_text           : @scope.newModel.helpText
         @scope.models.push(new_model)
         @scope.newModel = {}
 
@@ -39,18 +39,19 @@ class window.EditTopicOntologyCtrl
         new_relationship_field = {
             fields        : []
             help_text     : ""
-            name          : @scope.newRelationship.Name # TODO: slugify
-            verbose_name  : @scope.newRelationship.Name
-            related_name  : @scope.newRelationship.ReverseName
+            name          : @scope.newRelationship.name # TODO: slugify
+            verbose_name  : @scope.newRelationship.name
+            related_name  : @scope.newRelationship.reverseName
             related_model : @scope.newRelationship.and
-            rules         :  []
+            rules         : {search_terms: []}
             type          : "relationship"
 
         }
         console.log new_relationship_field
         idx_model_to_update = @scope.models.indexOf(_.find(@scope.models, ((m) => @scope.newRelationship.between == m.name)))
+        # update the model
         @scope.models[idx_model_to_update].fields.push(new_relationship_field)
-        new_relationship_field = {}
+        @scope.newRelationship = {}
 
     editModel: (model) =>
         @scope.editingModel = angular.copy(model)
@@ -90,7 +91,7 @@ class window.EditTopicOntologyCtrl
             @scope.editingModel.fields.splice(index, 1) if @scope.editingModel.fields[index]?
 
     accordionShouldBeDisabled: (accordion_name) =>
-        if @scope.editingModel?
+        if @scope.editingModel? and not @isModelUnchanged()
             return true
 
 angular.module('detective.controller').controller 'EditTopicOntologyCtrl', EditTopicOntologyCtrl

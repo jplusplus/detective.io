@@ -19,7 +19,7 @@
                                 <div class="col-md-6">
                                     <input type     = "text"
                                            class    = "form-control"
-                                           ng-model = "newModel.Name"
+                                           ng-model = "newModel.name"
                                            required />
                                 </div>
                             </div>
@@ -28,7 +28,7 @@
                                 <div class="col-md-6">
                                     <input type     = "text"
                                            class    = "form-control"
-                                           ng-model = "newModel.NamePlural" />
+                                           ng-model = "newModel.namePlural" />
                                 </div>
                             </div>
                             <div class="form-group">
@@ -36,10 +36,10 @@
                                 <div class="col-md-6">
                                     <input type     = "text"
                                            class    = "form-control"
-                                           ng-model = "newModel.HelpText" />
+                                           ng-model = "newModel.helpText" />
                                 </div>
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-offset-10 text-right">
                                 <button class       = "btn btn-primary" 
                                         ng-click    = "addNewModel()" 
                                         ng-disabled = "newmodelform.$invalid">
@@ -58,8 +58,9 @@
                                 <div class="col-md-6">
                                     <input type     = "text"
                                            class    = "form-control"
-                                           ng-model = "newRelationship.Name"
+                                           ng-model = "newRelationship.name"
                                            required />
+                                    <div ng-show="!newRelationship.name">Can't be empty</div>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -67,8 +68,9 @@
                                 <div class="col-md-6">
                                     <input type     = "text"
                                            class    = "form-control"
-                                           ng-model = "newRelationship.ReverseName"
+                                           ng-model = "newRelationship.reverseName"
                                            required />
+                                    <div ng-show="!newRelationship.reverseName">Can't be empty</div>
                                 </div>
                             </div>
                             <div class="row">
@@ -91,15 +93,15 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="text-right">
+                            <!-- <div class="row"> -->
+                                <div class="col-sm-offset-10 text-right">
                                     <button class       = "btn btn-primary" 
                                             ng-click    = "addNewRelationship()"
                                             ng-disabled = "newrelationshipform.$invalid">
                                         Save
                                     </button>
                                 </div>
-                            </div>
+                            <!-- </div> -->
                         </form>
                     </accordion-group>
                     <!-- EDIT MODEL -->
@@ -109,12 +111,40 @@
                         <!-- details -->
                         <div class="topic-edit-ontology__edit-model" ng-if="editingModel">
                             <form class="form-horizontal" name="modelform" novalidate>
-                                <div class="topic-edit-ontology__edit-model__header">Editing data type <div class="model-name">[[ editingModel.verbose_name ]]</div></div>
+                                <div class="topic-edit-ontology__edit-model__header">
+                                    Editing data type 
+                                    <div class="model-name">[[ editingModel.verbose_name ]]</div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-6">Name</label>
+                                    <div class="col-md-6">
+                                        <input type     = "text"
+                                               class    = "form-control"
+                                               ng-model = "editingModel.verbose_name"
+                                               required />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-6">Name plural</label>
+                                    <div class="col-md-6">
+                                        <input type     = "text"
+                                               class    = "form-control"
+                                               ng-model = "editingModel.verbose_name_plural" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-6">Help text</label>
+                                    <div class="col-md-6">
+                                        <input type     = "text"
+                                               class    = "form-control"
+                                               ng-model = "editingModel.help_text" />
+                                    </div>
+                                </div>
                                 <div class="topic-edit-ontology__edit-model__properties">
                                     <div class="topic-edit-ontology__edit-model__properties__title">Properties</div>
                                     <div ng-repeat="field in editingModel.fields" ng-if="field.type != 'relationship'">
                                         <div class="topic-edit-ontology__edit-model__properties__name">
-                                            <i class="fa fa-hand-o-right"></i> [[ field.verbose_name ]]
+                                            <i class="fa fa-minus"></i> [[ field.verbose_name ]]
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
@@ -134,7 +164,7 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group form-group-sm">
-                                                    <label class="col-md-2 col-md-offset-2" for="topic-edit-ontology__edit-model__properties__input-type">Type</label>
+                                                    <label class="col-md-2 col-md-sm-offset-10 text-right" for="topic-edit-ontology__edit-model__properties__input-type">Type</label>
                                                     <div class=" col-md-8">
                                                         <select ng-model="field.type" class="form-control input-sm" ng-options="fieldType for fieldType in fieldTypes" id="topic-edit-ontology__edit-model__properties__input-type" ng-disabled="field.name =='name'" required></select>
                                                         <div ng-show="!field.type">Can't be empty</div>

@@ -5,8 +5,11 @@ from app.detective.exceptions         import UnavailableImage, NotAnImage, Overs
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
                                              Subscription, TopicDataSet
-from app.detective.utils              import get_registered_models, get_topics_from_request
-from app.detective.utils              import without, is_valid_email
+from app.detective.utils              import get_registered_models, \
+                                             get_topics_from_requestwithout, \
+                                             is_valid_email, get_registered_models, \
+                                             get_topics_from_request, is_valid_email, \
+                                             download_urls
 from app.detective.topics.common.user import UserResource, UserNestedResource
 from django.conf                      import settings
 from django.conf.urls                 import url
@@ -38,11 +41,8 @@ from django.contrib.auth.models       import Group
 
 import copy
 import json
-import magic
 import re
-import urllib2
 import os
-from urlparse import urlparse
 
 TopicValidationErrors = {
     'background': {
@@ -530,36 +530,21 @@ class TopicNestedResource(ModelResource):
             bundle.data["is_uploading"] = True
         return bundle
 
-    def download_url(self, url):
-        tmp_file = None
-        def is_image(tmp):
-            mimetype = magic.from_file(tmp.name, True)
-            return mimetype.startswith('image')
+    def get_skeleton(self, bundle):
+        # workaround to avoid SQL lazyness, store topic skeleton in bundle obj.
+        topic_skeleton = getattr(bundle, 'skeleton', None)
+        if not topic_skeleton:
+            topic_skeleton_pk = bundle.data.get('topic_skeleton', None)
+            if topic_skeleton_pk:
+                topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton_pk)
+                setattr(bundle, 'skeleton', topic_skeleton)
+        return topic_skeleton
 
-        def is_oversized(tmp, url):
-            max_size_in_bytes = 1 * 1024 ** 2 # 1MB
-            file_size = os.stat(tmp.name).st_size
-            oversized = file_size > max_size_in_bytes
-            return oversized
-
-        if url == None:
-            return None
-        try:
-            name  = urlparse(url).path.split('/')[-1]
-            image = urllib2.urlopen(url).read()
-
-            tmp_file = NamedTemporaryFile(delete=True)
-            tmp_file.write(image)
-            tmp_file.flush()
-            if not is_image(tmp_file):
-                raise NotAnImage()
-            if is_oversized(tmp_file, url):
-                raise OversizedFile()
-            return File(tmp_file, name)
-        except urllib2.HTTPError:
-            raise UnavailableImage()
-        except urllib2.URLError:
-            raise UnavailableImage()
+    def hydrate_skeleton_title(self, bundle):
+        topic_skeleton = self.get_skeleton(bundle)
+        if topic_skeleton:
+            bundle.data['skeleton_title'] = topic_skeleton.title
+        return bundle
 
     def hydrate_author(self, bundle):
         bundle.data['author'] = bundle.request.user
@@ -576,7 +561,7 @@ class TopicNestedResource(ModelResource):
         # Back URL must exits and not be a local file
         if background_url and not is_local(background_url):
             try:
-                bundle.data['background'] = self.download_url(background_url)
+                bundle.data['background'] = download_url(background_url)
             except UnavailableImage:
                 bundle.data['background'] = TopicValidationErrors['background']['unavailable']['code']
             except NotAnImage:
@@ -587,6 +572,50 @@ class TopicNestedResource(ModelResource):
             # we remove from data the previously setted background to avoid
             # further supsicious operation errors
             self.clean_bundle_key('background', bundle)
+        if topic_skeleton and not background_url:
+            bundle.data['background'] = topic_skeleton.picture
+        else:
+            if background_url:
+                try:
+                    bundle.data['background'] = download_url(background_url)
+                except UnavailableImage:
+                    bundle.data['background'] = TopicValidationErrors['background']['unavailable']['code']
+                except NotAnImage:
+                    bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
+                except OversizedFile:
+                    bundle.data['background'] = TopicValidationErrors['background']['oversized_file']['code']
+
+            elif bundle.data.get('background', None):
+                # we remove from data the previously setted background to avoid
+                # further supsicious operation errors
+                self.clean_bundle_key('background', bundle)
+        return bundle
+
+    def hydrate_about(self, bundle):
+        def should_have_credits(bundle, skeleton):
+            topic_about    = bundle.data.get('about', '')
+            background_url = bundle.data.get('background_url', None)
+            if not skeleton:
+                return False
+            credits = ( skeleton.picture_credits or '')
+            return (not background_url) and skeleton and \
+                   (not (credits.lower() in topic_about.lower()))
+
+        topic_skeleton = self.get_skeleton(bundle)
+        if should_have_credits(bundle, topic_skeleton):
+            topic_about = bundle.data.get('about', '')
+            if topic_about != '':
+                topic_about = "%s<br/><br/>" % topic_about
+            bundle.data['about'] = "%s%s" % (topic_about, topic_skeleton.picture_credits)
+        return bundle
+
+    def hydrate_ontology_as_json(self, bundle):
+        # feed ontology_as_json attribute when needed
+        topic_skeleton = self.get_skeleton(bundle)
+        if topic_skeleton:
+            bundle.data['ontology_as_json'] = topic_skeleton.ontology
+        else:
+            self.clean_bundle_key('ontology_as_json', bundle)
         return bundle
 
     def hydrate_dataset(self, bundle):

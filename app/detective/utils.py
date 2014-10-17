@@ -1,11 +1,15 @@
-from django.core.cache      import cache
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
-from django.db.models       import signals
-from django.forms.forms     import pretty_name
-from os                     import listdir
-from os.path                import isdir, join
-from random                 import randint
+from django.core.cache        import cache
+from django.core.exceptions   import ValidationError
+from django.core.validators   import validate_email
+from django.db.models         import signals
+from django.forms.forms       import pretty_name
+from os                       import listdir
+from os.path                  import isdir, join
+from random                   import randint
+from app.detective.exceptions import UnavailableImage, NotAnImage, OversizedFile
+from urlparse                 import urlparse
+from django.core.files.temp   import NamedTemporaryFile
+from django.core.files        import File
 import importlib
 import inspect
 import itertools
@@ -13,6 +17,8 @@ import logging
 import os
 import re
 import tempfile
+import urllib2
+import magic
 logger = logging.getLogger(__name__)
 
 # for relative paths
@@ -563,8 +569,34 @@ class DumbProfiler(object):
                 delattr(self, attr)
 
 
-
-
 topic_cache   = TopicCachier()
 dumb_profiler = DumbProfiler()
-# EOF
+
+def download_url(url):
+    tmp_file = None
+    def is_image(tmp):
+        mimetype = magic.from_file(tmp.name, True)
+        return mimetype.startswith('image')
+
+    def is_oversized(tmp, url):
+        max_size_in_bytes = 1 * 1024 ** 2 # 1MB
+        file_size = os.stat(tmp.name).st_size
+        oversized = file_size > max_size_in_bytes
+        return oversized
+
+    if url == None:
+        return None
+    try:
+        name = urlparse(url).path.split('/')[-1]
+        tmp_file = NamedTemporaryFile(delete=True)
+        tmp_file.write(urllib2.urlopen(url).read())
+        tmp_file.flush()
+        if not is_image(tmp_file):
+            raise NotAnImage()
+        if is_oversized(tmp_file, url):
+            raise OversizedFile()
+        return File(tmp_file, name)
+    except urllib2.HTTPError:
+        raise UnavailableImage()
+    except urllib2.URLError:
+        raise UnavailableImage()

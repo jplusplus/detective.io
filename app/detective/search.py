@@ -97,18 +97,39 @@ class Search(object):
                 # Gets all available terms for these subjects
                 predicates += [ term for term in terms if term["subject"] == subject["name"] ]
 
+        # Object related to a given field (field name as key)
+        rel_objects = {}
         # Add a default and irrelevant object
-        if not len(objects): objects = [""]
+        if not len(objects):
+            objects = [""]
+            fields = set([ (p["name"], p["subject"], p["relevance"]) for p in predicates ])
+            fields = sorted(fields, key=lambda r: -r[2])
+            for f in fields:
+                # Extract option
+                field_name, model_name, relevance = f
+                # Find the model
+                model = getattr(self.topic.get_models_module(), model_name, None)
+                # No model found
+                if model is None: break
+                # Find the field
+                field = getattr(model, field_name, None)
+                # No field found
+                if field is None: break
+                # Find related model
+                rel_objects[field_name] = self.get_most_related(field.rel_type)
+                # Stop at the first iteration
+                break
 
         # Generate proposition using RDF's parts
         for subject in self.remove_duplicates(subjects):
             for predicate in self.remove_duplicates(predicates):
-                for obj in self.remove_duplicates(objects):
+                # Merge all object and the objects associated to that field
+                field_objects = objects + rel_objects.get(predicate["name"], [])
+                for obj in self.remove_duplicates(field_objects):
                     pred_sub = predicate.get("subject", None)
                     # If the predicate has a subject
                     # and it matches to the current one
                     if pred_sub != None and pred_sub == subject.get("name", None):
-
                         # Target Model of the predicate
                         target = SearchTerm(
                             subject=pred_sub,
@@ -150,8 +171,16 @@ class Search(object):
                 },
                 'object': obj.get("model", None)
             })
+        # Sort propositions by relevance
+        propositions = sorted(propositions, key=self.get_proposition_accurancy)
         # Remove duplicates proposition dicts
         return propositions
+
+    @staticmethod
+    def get_proposition_accurancy(prop):
+        count = prop["object"].get("cnt", 0) if type(prop["object"]) is dict else 0
+        relevance = prop["predicate"].get("relevance", 0)
+        return -(count + relevance)
 
     def get_syntax(self):
         if not hasattr(self, "syntax"):
@@ -159,16 +188,18 @@ class Search(object):
             self.syntax = syntax
         return self.syntax
 
+    def get_most_related(self, rel):
         query = """
             START root=node(0)
             MATCH target-[r:`%s`]->(edge)<-[`<<INSTANCE>>`]-(type)<-[`<<TYPE>>`]-(root)
             WHERE type.app_label = "%s"
-            RETURN COUNT(target) AS ct, edge
-            ORDER BY ct DESC
+            AND HAS(edge.name)
+            RETURN COUNT(target) as cnt, ID(edge) as id, edge.name as name, type.model_name as model
+            ORDER BY cnt DESC
             LIMIT 5
         """ % ( rel, self.topic.app_label() )
 
-        return query
+        return connection.cypher(query).to_dicts()
 
     @staticmethod
     def ngrams(input):

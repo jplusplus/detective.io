@@ -31,7 +31,6 @@ import re
 # UserNestedResource -> GroupResource -> TopicResource -> UserResource
 # TopicNestedResource -> UserNestedResource -> ProfileResource
 
-
 class GroupResource(ModelResource):
     def getTopic(bundle):
         topic  = None
@@ -379,8 +378,11 @@ class UserNestedResource(ModelResource):
                 raise MalformedRequestError(message)
 
     def get_groups(self, request, **kwargs):
+        # from app.detective.utils import dumb_profiler
         # import time
-        # start_time = time.time()
+        # dumb_profiler.dispatch_time = time.time()
+        # db_start = time.time()
+
         self.method_check(request, allowed=['get'])
         self.is_authenticated(request)
         self.throttle_check(request)
@@ -402,9 +404,13 @@ class UserNestedResource(ModelResource):
                 q_filter = Q(topic__public=True)
             groups = groups.filter(q_filter)
 
+        # dumb_profiler.db_time = time.time() - db_start
+
         limit     = int(request.GET.get('limit', 20))
         paginator = Paginator(groups, limit)
         objects   = []
+
+        # serializer_start = time.time()
 
         try:
             p    = int(request.GET.get('page', 1))
@@ -429,8 +435,9 @@ class UserNestedResource(ModelResource):
                 'total_count': paginator.count
             }
         }
+
         response = group_resource.create_response(request, object_list)
-        # print "get_groups took %s" % (time.time() - start_time)
+        # dumb_profiler.serializer_time = time.time() - serializer_start
         return response
 
 class UserResource(UserNestedResource):

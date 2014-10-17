@@ -4,7 +4,8 @@ from app.detective.exceptions         import UnavailableImage, NotAnImage, Overs
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
                                              Subscription, TopicDataSet
-from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
+from app.detective.utils              import get_registered_models, get_topics_from_request
+from app.detective.utils              import without, is_valid_email
 from app.detective.topics.common.user import UserResource, UserNestedResource
 from django.conf                      import settings
 from django.conf.urls                 import url
@@ -469,12 +470,6 @@ class TopicNestedResource(ModelResource):
             return Http404()
 
     def dehydrate(self, bundle):
-        # Get the model's rules manager
-        rulesManager = bundle.request.current_topic.get_rules()
-        # Get all registered models
-        models = get_registered_models()
-        # Filter model to the one under app.detective.topics
-        bundle.data["models"] = []
         if bundle.obj.background:
             # Create a thumbnail for this topic
             try:
@@ -491,19 +486,26 @@ class TopicNestedResource(ModelResource):
         else:
             bundle.data['thumbnail'] = None
 
-        for m in bundle.obj.get_models():
-            try:
-                idx = m.__idx__
-            except AttributeError:
-                idx = 0
-            model = {
-                'name': m.__name__,
-                'verbose_name': m._meta.verbose_name,
-                'verbose_name_plural': m._meta.verbose_name_plural,
-                'is_searchable': rulesManager.model(m).all().get("is_searchable", False),
-                'index': idx
-            }
-            bundle.data["models"].append(model)
+        if 'models' not in self._meta.excludes:
+            # Get the model's rules manager
+            rulesManager = bundle.request.current_topic.get_rules()
+            # Get all registered models
+            models = get_registered_models()
+            # Filter model to the one under app.detective.topics
+            bundle.data["models"] = []
+            for m in bundle.obj.get_models():
+                try:
+                    idx = m.__idx__
+                except AttributeError:
+                    idx = 0
+                model = {
+                    'name': m.__name__,
+                    'verbose_name': m._meta.verbose_name,
+                    'verbose_name_plural': m._meta.verbose_name_plural,
+                    'is_searchable': rulesManager.model(m).all().get("is_searchable", False),
+                    'index': idx
+                }
+                bundle.data["models"].append(model)
         return bundle
 
     def download_url(self, url):
@@ -641,8 +643,14 @@ class TopicResource(TopicNestedResource):
     author = fields.ToOneField(UserResource, 'author', full=True, null=True)
     # make this resource's meta inherit from its parent Meta (to allow filter,
     # authorization, authentication etc.)
-    class Meta(TopicNestedResource):
+    class Meta(TopicNestedResource.Meta):
         resource_name = 'topic-simpler'
+        excludes =  [
+            'models',
+            'ontology_as_json',
+            'ontology_as_owl',
+            'dataset'
+        ]
 
 class ArticleResource(ModelResource):
     topic = fields.ToOneField(TopicResource, 'topic', full=True)

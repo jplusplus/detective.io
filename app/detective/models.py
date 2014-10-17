@@ -700,7 +700,7 @@ signals.post_save.connect(apply_dataset        , sender=Topic)
 signals.post_delete.connect(update_topic_cache , sender=Topic)
 signals.post_delete.connect(remove_permissions , sender=Topic)
 
-if getattr(settings, 'ENABLE_PROFILING'):
+if getattr(settings, 'ENABLE_PROFILING', False):
     from django.core.signals import request_started, request_finished
     import time
 

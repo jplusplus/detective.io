@@ -16,3 +16,5 @@ DEBUG_TOOLBAR_PANELS = (
 )
 INSTALLED_APPS += ('debug_toolbar',)
 USE_DEBUG_TOOLBAR = True
+
+ENABLE_PROFILING = False

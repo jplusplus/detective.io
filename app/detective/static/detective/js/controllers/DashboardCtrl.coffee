@@ -1,7 +1,7 @@
 class window.DashboardCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'Group', 'userGroups', 'userAdminGroups']
-    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @Group, @userGroups, @userAdminGroups) ->
+    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'Group', 'userGroups']
+    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @Group, @userGroups) ->
         @Page.title "Dashboard"
         # Start to page 1, obviously
         @page = 1
@@ -48,10 +48,8 @@ class window.DashboardCtrl
 
         (@loadUserGroups page).then (results) =>
             @userGroups = results
-            (@updateUserAdminGroups @userGroups, @userAdminGroups).then (adminGroups) =>
-                @userAdminGroups = adminGroups
-                @Page.loading no
-                deferred.resolve @getTopics()
+            @Page.loading no
+            deferred.resolve @getTopics()
 
         # Returns a promises
         deferred.promise
@@ -68,14 +66,8 @@ class window.DashboardCtrl
             # Only keep data object
             data
 
-    updateUserAdminGroups: (groups, old) =>
-        for group in groups.objects
-            names = (if not names? then "" else names + ",") + (group.name.replace '_contributor', '_administrator')
-        (@Group.administrator { user_id : @User.id , name__in : names }).$promise.then (data) =>
-            _.uniq old.concat _.pluck data.objects, 'name'
-
     isAdmin: (topic) =>
-        (do @User.isStaff) or ((topic.ontology_as_mod + "_administrator") in @userAdminGroups)
+        (do @User.isStaff) or (@User.hasAdministratePermission topic.ontology_as_mod)
 
     @resolve:
         userGroups: ["$q", "Auth", "Group", ($q, Auth, Group)->
@@ -83,15 +75,6 @@ class window.DashboardCtrl
             Auth.load().then (user)=>
                 (Group.collaborator { user_id : user.id }).$promise.then (data) ->
                     deferred.resolve data
-            deferred.promise
-        ]
-        userAdminGroups: ["$q", "Auth", "Group", "userGroups", ($q, Auth, Group, userGroups) ->
-            deferred = do $q.defer
-            for group in userGroups.objects
-                names = (if not names? then "" else names + ",") + (group.name.replace '_contributor', '_administrator')
-            (do Auth.load).then (user) =>
-                (Group.administrator { user_id : user.id , name__in : names }).$promise.then (data) ->
-                    deferred.resolve _.pluck data.objects, 'name'
             deferred.promise
         ]
 

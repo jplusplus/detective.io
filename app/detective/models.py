@@ -692,11 +692,38 @@ def apply_dataset(*args, **kwargs):
                 job   = queue.enqueue(unzip_and_process_bulk_parsing_and_save_as_model, instance, base64.b64encode(dataset.zip_file.read()))
                 dataset.zip_file.close()
 
+
 signals.post_save.connect(user_created         , sender=User)
 signals.post_save.connect(update_topic_cache   , sender=Topic)
 signals.post_save.connect(update_permissions   , sender=Topic)
 signals.post_save.connect(apply_dataset        , sender=Topic)
 signals.post_delete.connect(update_topic_cache , sender=Topic)
 signals.post_delete.connect(remove_permissions , sender=Topic)
+
+if getattr(settings, 'ENABLE_PROFILING'):
+    from django.core.signals import request_started, request_finished
+    import time
+
+    def start(sender, **kwargs):
+        from app.detective.utils import dumb_profiler
+        dumb_profiler.started = time.time()
+
+    def finished(sender, **kwargs):
+        from app.detective.utils import dumb_profiler
+        if getattr(dumb_profiler, 'serializer_time', None):
+            total = time.time() - dumb_profiler.started
+            api_view_time = dumb_profiler.serializer_time + dumb_profiler.db_time
+            request_response_time = dumb_profiler.dispatch_time - dumb_profiler.started
+
+            print ("Database lookup               | %.4fs" % dumb_profiler.db_time)
+            print ("Serialization                 | %.4fs" % dumb_profiler.serializer_time)
+            print ("Django request/response       | %.4fs" % request_response_time)
+            print ("API view                      | %.4fs" % api_view_time)
+            print ("Total                         | %.4fs" % total)
+
+            dumb_profiler.new()
+
+    request_started.connect(start)
+    request_finished.connect(finished)
 
 # EOF

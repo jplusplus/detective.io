@@ -62,8 +62,5 @@ if settings.DEBUG:
             url(r'^__debug__/', include(debug_toolbar.urls)),
         ) + urlpatterns
 
-
-
-
 # Handle 404 with the homepage
 handler404 = "app.detective.views.not_found"

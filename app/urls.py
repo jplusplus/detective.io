@@ -56,6 +56,14 @@ if settings.DEBUG:
         (r'^public/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
     ) + urlpatterns
 
+    if getattr(settings, 'USE_DEBUG_TOOLBAR', False):
+        import debug_toolbar
+        urlpatterns = patterns('',
+            url(r'^__debug__/', include(debug_toolbar.urls)),
+        ) + urlpatterns
+
+
+
 
 # Handle 404 with the homepage
 handler404 = "app.detective.views.not_found"

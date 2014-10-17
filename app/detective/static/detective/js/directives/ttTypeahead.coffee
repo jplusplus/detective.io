@@ -197,7 +197,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
 
             typeahead_params =
                 displayKey : (scope.valueKey or "name")
-                name : 'suggestions-' + itopic.replace '/', '-'
+                name : 'suggestions-' + itopic.replace('/', '-').replace('.', '-')
                 source : do bh.ttAdapter
                 templates :
                     suggestion : (template.compile [

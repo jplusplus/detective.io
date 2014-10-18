@@ -3,28 +3,43 @@ class window.EditTopicOntologyCtrl
     constructor: (@scope, @Page, @rootScope, @topic)->
         @Page.title "Ontology Editor", no
         return unless @topic.ontology_as_json?
-        # actions
+        # actions: add a new model
         @scope.addNewModel                = @addNewModel
         @scope.addNewRelationship         = @addNewRelationship
+        # actions: edit a model
         @scope.editModel                  = @editModel
         @scope.saveModel                  = @saveModel
         @scope.cancelModel                = @cancelModel
-        @scope.isModelUnchanged           = @isModelUnchanged
-        @scope.removeField                = @removeField
-        @scope.addField                   = @addField
+        @scope.removeModelField           = @removeModelField
+        @scope.addModelField              = @addModelField
+        # actions: edit a relationship
+        @scope.editRelationship           = @editRelationship
+        @scope.saveRelationship           = @saveRelationship
+        @scope.cancelRelationship         = @cancelRelationship
+        @scope.removeRelationshipField    = @removeRelationshipField
+        @scope.addRelationshipField       = @addRelationshipField
+        # methodes
         @scope.accordionShouldBeDisabled  = @accordionShouldBeDisabled
+        @scope.isModelUnchanged           = @isModelUnchanged
         # data
-        @scope.models          = @topic.ontology_as_json
-        @scope.relationships   = {}
-        @scope.fieldTypes      = ["string", "url", "integer", "integerarray", "datetimestamp", "datetime", "date", "time", "boolean", "float"]
-        @scope.newModel        = {}
-        @scope.newRelationship = {}
-        console.log "models", @scope.models
-        for model in @scope.models
-            for field in model.fields
-                @scope.relationships[model.name] = [] unless @scope.relationships[model.name]?
-                @scope.relationships[model.name].push field if field.type == "relationship"
+        @scope.models              = @topic.ontology_as_json
+        @scope.fieldTypes          = ["string", "url", "integer", "integerarray", "datetimestamp", "datetime", "date", "time", "boolean", "float"]
+        @scope.newModel            = {}
+        @scope.newRelationship     = {}
+        @scope.editingModel        = null
+        @scope.editingRelationship = null
 
+        @scope.relationships = =>
+            relationships = {}
+            for model in @scope.models
+                for field in model.fields
+                    relationships[model.name] = [] unless relationships[model.name]?
+                    relationships[model.name].push field if field.type == "relationship"
+            return relationships
+
+    # -----------------------------------------------------------------------------
+    #    ADD A NEW MODEL
+    # -----------------------------------------------------------------------------
     addNewModel: =>
         new_model =
             fields              : [{name:"name", verbose_name:"Name", type:"string"}]
@@ -35,6 +50,9 @@ class window.EditTopicOntologyCtrl
         @scope.models.push(new_model)
         @scope.newModel = {}
 
+    # -----------------------------------------------------------------------------
+    #    ADD A NEW RELATIONSHIP
+    # -----------------------------------------------------------------------------
     addNewRelationship: =>
         new_relationship_field = {
             fields        : []
@@ -47,15 +65,16 @@ class window.EditTopicOntologyCtrl
             type          : "relationship"
 
         }
-        console.log new_relationship_field
         idx_model_to_update = @scope.models.indexOf(_.find(@scope.models, ((m) => @scope.newRelationship.between == m.name)))
         # update the model
         @scope.models[idx_model_to_update].fields.push(new_relationship_field)
         @scope.newRelationship = {}
 
+    # -----------------------------------------------------------------------------
+    #    EDIT A MODEL
+    # -----------------------------------------------------------------------------
     editModel: (model) =>
         @scope.editingModel = angular.copy(model)
-        console.log "editModel", model
 
     saveModel:  =>
         model = @scope.editingModel
@@ -73,7 +92,6 @@ class window.EditTopicOntologyCtrl
         if idx_model_to_update > -1
             @scope.models[idx_model_to_update] = model
         @scope.editingModel = null
-        console.log "model saved", @scope.models[idx_model_to_update]
 
     cancelModel: =>
         @scope.editingModel = null
@@ -82,14 +100,50 @@ class window.EditTopicOntologyCtrl
         idx_model_to_update = @scope.models.indexOf(_.find(@scope.models, ((m) => @scope.editingModel.name == m.name)))
         angular.equals(@scope.editingModel, @scope.models[idx_model_to_update])
 
-    addField: =>
+    addModelField: =>
         @scope.editingModel.fields.push({})
 
-    removeField: (field) =>
+    removeModelField: (field) =>
         index = @scope.editingModel.fields.indexOf(field)
         if index > -1
             @scope.editingModel.fields.splice(index, 1) if @scope.editingModel.fields[index]?
 
+    # -----------------------------------------------------------------------------
+    #    EDIT A RELATIONSHIP
+    # -----------------------------------------------------------------------------
+    editRelationship: (model, relationship) =>
+        @scope.editingRelationship      = angular.copy(relationship)
+        @scope.editingRelationshipModel = angular.copy(model)
+
+    getRelationshipToUpdate: =>
+        idx_model_to_update        = @scope.models.indexOf(_.find(@scope.models, ((m) => @scope.editingRelationshipModel.name == m.name)))
+        idx_relationship_to_update = @scope.models[idx_model_to_update].fields.indexOf(_.find(@scope.models[idx_model_to_update].fields, ((f) => @scope.editingRelationship.name == f.name)))
+        if idx_model_to_update > -1 and idx_relationship_to_update > -1
+            return @scope.models[idx_model_to_update].fields[idx_relationship_to_update]
+
+    saveRelationship:  =>
+        idx_model_to_update        = @scope.models.indexOf(_.find(@scope.models, ((m) => @scope.editingRelationshipModel.name == m.name)))
+        idx_relationship_to_update = @scope.models[idx_model_to_update].fields.indexOf(_.find(@scope.models[idx_model_to_update].fields, ((f) => @scope.editingRelationship.name == f.name)))
+        # update
+        if idx_model_to_update > -1 and idx_relationship_to_update > -1
+            @scope.models[idx_model_to_update].fields[idx_relationship_to_update] = @scope.editingRelationship
+        @scope.editingRelationship      = null
+        @scope.editingRelationshipModel = null
+
+    cancelRelationship: =>
+        @scope.editingRelationship      = null
+        @scope.editingRelationshipModel = null
+
+    removeRelationshipField: (field) =>
+        index = @scope.editingRelationship.fields.indexOf(field)
+        if index > -1
+            @scope.editingRelationship.fields.splice(index, 1) if @scope.editingRelationship.fields[index]?
+
+    addRelationshipField: =>
+        if not @scope.editingRelationship.fields?
+            @scope.editingRelationship.fields = []
+        @scope.editingRelationship.fields.push({})
+    
     accordionShouldBeDisabled: (accordion_name) =>
         if @scope.editingModel? and not @isModelUnchanged()
             return true

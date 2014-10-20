@@ -285,7 +285,8 @@ class IndividualResource(ModelResource):
             if field == 'image':
                 # Get thumbnails
                 try:
-                    thumbnailer = get_thumbnailer(os.path.join(settings.MEDIA_ROOT, bundle.data[field].strip('/')))
+                    bundle.data[field] = bundle.data[field] != None and bundle.data[field].strip('/') or ""
+                    thumbnailer = get_thumbnailer(os.path.join(settings.MEDIA_ROOT, bundle.data[field]))
                     thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
                     thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
                     to_add[field + '_thumbnail'] = {
@@ -293,9 +294,9 @@ class IndividualResource(ModelResource):
                         'medium': thumbnailMedium.url
                     }
                     # Prepend MEDIA_URL
-                    bundle.data[field] = settings.MEDIA_URL + bundle.data[field].strip('/')
+                    bundle.data[field] = settings.MEDIA_URL + bundle.data[field]
                 except InvalidImageFormatError:
-                    bundle.data[field + '_thumbnail'] = None
+                    to_add[field + '_thumbnail'] = None
 
             # Convert tuple to array for better serialization
             if type( getattr(bundle.obj, field, None) ) is tuple:

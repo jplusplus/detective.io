@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from django.http            import Http404, HttpResponse
-from django.shortcuts       import render_to_response, redirect
-from django.template        import TemplateDoesNotExist
-from django.conf            import settings
-from django.contrib.auth    import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
-from app.detective.models   import Topic, DetectiveProfileUser
-from app.detective.utils    import get_topic_model
+from django.conf                  import settings
+from django.contrib.auth          import get_user_model
+from django.core.exceptions       import ObjectDoesNotExist
+from django.http                  import Http404, HttpResponse
+from django.shortcuts             import render_to_response, redirect
+from django.template              import TemplateDoesNotExist
+from django.views.decorators.gzip import gzip_page
+from app.detective.models         import Topic, DetectiveProfileUser
+from app.detective.utils          import get_topic_model
 import logging
 import urllib2
 import mimetypes
@@ -48,6 +49,7 @@ def default_social_meta(request):
         "url": request.build_absolute_uri()
     }
 
+@gzip_page
 def home(request, social_meta_dict=None,**kwargs):
     if social_meta_dict == None:
         social_meta_dict = default_social_meta(request)
@@ -67,7 +69,6 @@ def home(request, social_meta_dict=None,**kwargs):
         response.delete_cookie("user__is_logged")
         response.delete_cookie("user__is_staff")
         response.delete_cookie("user__username")
-
     return response
 
 def entity_list(request, **kwargs):
@@ -246,6 +247,7 @@ def profile(request, **kwargs):
         logger.debug("Tried to access a non-existing model %s" % e)
         return home(request, None, **kwargs)
 
+@gzip_page
 def partial(request, partial_name=None):
     template_name = 'partials/' + partial_name + '.dj.html'
     try:
@@ -253,6 +255,7 @@ def partial(request, partial_name=None):
     except TemplateDoesNotExist:
         raise Http404
 
+@gzip_page
 def partial_explore(request, topic=None):
     template_name = 'partials/topic.explore.' + topic + '.dj.html'
     try:
@@ -264,16 +267,31 @@ def not_found(request):
     return redirect("/404/")
 
 def proxy(request, name=None):
+    def build_header_dict_from_request(request):
+        trad = {
+            'HTTP_ACCEPT_ENCODING'  : 'Accept-Encoding',
+            'HTTP_ACCEPT_LANGUAGE'  : 'Accept-Language'
+        }
+        new_headers = {}
+        for origin, trad in trad.items():
+            new_headers[ trad] = request.META[origin]
+        return new_headers
+
     if settings.STATIC_URL[0] == '/':
-        return redirect('%s%s' %(settings.STATIC_URL, name));
+        return redirect('%s%s' % (settings.STATIC_URL, name));
     else:
         url = '%s%s' % (settings.STATIC_URL, name)
         try :
-            proxied = urllib2.urlopen(url)
+            request = urllib2.Request(url, None, build_header_dict_from_request(request))
+            proxied = urllib2.urlopen(request)
             status_code = proxied.code
             mimetype = proxied.headers.typeheader or mimetypes.guess_type(url)
-            content = proxied.read()
+            content_type     = proxied.headers.dict['content-type']
+            content_encoding = proxied.headers.dict.get('content-encoding')
+            content  = proxied.read()
         except urllib2.HTTPError as e:
             return HttpResponse(e.msg, status=e.code, mimetype='text/plain')
         else:
-            return HttpResponse(content, status=status_code, mimetype=mimetype)
+            response = HttpResponse(content, content_type=content_type, status=status_code, mimetype=mimetype)
+            response['Content-Encoding'] = content_encoding
+            return response

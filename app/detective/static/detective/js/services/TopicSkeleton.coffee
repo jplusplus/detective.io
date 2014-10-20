@@ -2,7 +2,7 @@ angular.module('detective.service').factory("TopicSkeleton", [
     '$resource'
     '$http'
     ($resource, $http)->
-        $resource '/api/detective/common/v1/topicskeleton/', {}, {
+        $resource '/api/detective/common/v1/topicskeleton/?', {}, {
             get:
                 method : 'GET'
                 isArray: yes

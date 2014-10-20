@@ -1,10 +1,10 @@
 .field-sources {
-    @border-color: rgba(0, 0, 0, 0.15); 
+    @border-color: rgba(0, 0, 0, 0.15);
     @arrow-width: 15px;
     @padding: 10px;
     @background-color: #FFF;
     @z-index-sources-popover: 4;
-    
+
     h4 &,h5 &,h3 &,h2 &,h1 & {
         font-size : @font-size-base;
         font-weight: 200;
@@ -22,7 +22,8 @@
 
 
     &__popover {
-        // positions & sizes 
+        color: @text-color;
+        // positions & sizes
         position: absolute;
         z-index: @z-index-sources-popover;
         padding: @padding;
@@ -42,7 +43,7 @@
                 right: @padding + 5px;
                 top: 100%;
                 border-top: 0;
-                top: -@arrow-width;  
+                top: -@arrow-width;
                 border-bottom-color: @border-color;
                 &:after {
                     top: 1px;
@@ -55,7 +56,7 @@
         }
 
         &--right {
-            
+
 
             & > div.arrow {
                 border-left: 0;
@@ -98,7 +99,7 @@
         &__list {
             .list-unstyled();
             margin-bottom: 0;
-            &__item { 
+            &__item {
                 display: block;
                 margin-bottom: 5px;
             }

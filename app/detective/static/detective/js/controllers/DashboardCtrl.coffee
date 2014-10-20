@@ -1,7 +1,7 @@
 class window.DashboardCtrl
     # Injects dependancies
-    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'userGroups']
-    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @userGroups)->
+    @$inject: ['$scope', '$q', '$http', '$modal', 'Common', 'Page', 'User', 'Group', 'userGroups']
+    constructor: (@scope, @q, @http, @modal, @Common, @Page, @User, @Group, @userGroups) ->
         @Page.title "Dashboard"
         # Start to page 1, obviously
         @page = 1
@@ -14,6 +14,7 @@ class window.DashboardCtrl
         @scope.nextPage = @nextPage
         @scope.previousPage = @previousPage
         @scope.openLeaveModal = @openLeaveModal
+        @scope.isAdmin = @isAdmin
 
     # Concatenates @userTopics's objects with @userGroups's topics
     getTopics: =>
@@ -41,17 +42,15 @@ class window.DashboardCtrl
                     @scope.topics = topics
 
     loadPage: (page=@page)=>
-        @scope.loading = true
+        @Page.loading yes
         @page = page
         deferred = @q.defer()
-        # Load the value at the same time
-        @q.all([
-            @loadUserGroups(page),
-        # Get the 3 resolve promises
-        ]).then (results)=>
-            @userGroups = results[0]
-            @scope.loading = false
+
+        (@loadUserGroups page).then (results) =>
+            @userGroups = results
+            @Page.loading no
             deferred.resolve @getTopics()
+
         # Returns a promises
         deferred.promise
 
@@ -63,16 +62,19 @@ class window.DashboardCtrl
         @Common.get(params).$promise
 
     loadUserGroups: (page)=>
-        @http.get("/api/detective/common/v1/user/#{@User.id}/groups/?page=#{page}").then (response)->
+        (@Group.collaborator { user_id : @User.id , page : page }).$promise.then (data) ->
             # Only keep data object
-            response.data
+            data
+
+    isAdmin: (topic) =>
+        (do @User.isStaff) or (@User.hasAdministratePermission topic.ontology_as_mod)
 
     @resolve:
-        userGroups: ["$http", "$q", "Auth", ($http, $q, Auth)->
+        userGroups: ["$q", "Auth", "Group", ($q, Auth, Group)->
             deferred = $q.defer()
             Auth.load().then (user)=>
-                $http.get("/api/detective/common/v1/user/#{user.id}/groups/").then (response)->
-                    deferred.resolve response.data
+                (Group.collaborator { user_id : user.id }).$promise.then (data) ->
+                    deferred.resolve data
             deferred.promise
         ]
 

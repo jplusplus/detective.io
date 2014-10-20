@@ -1,5 +1,5 @@
 angular.module('detective.service').factory("Topic", [ '$resource', ($resource)->
-    $resource '/api/detective/common/v1/topic/:id/', {}, {
+    $resource '/api/detective/common/v1/topic/:id/?', {}, {
         invite:
             url :'/api/detective/common/v1/topic/:id/invite/?'
             method : 'POST'
@@ -7,6 +7,18 @@ angular.module('detective.service').factory("Topic", [ '$resource', ($resource)-
         leave:
             url :'/api/detective/common/v1/topic/:id/leave/?'
             method : 'POST'
+            isArray: no
+        collaborators:
+            url: '/api/detective/common/v1/topic/:id/collaborators/?'
+            method: 'GET'
+            isArray: yes
+        administrators:
+            url: '/api/detective/common/v1/topic/:id/administrators/?'
+            method: 'GET'
+            isArray: yes
+        grant_admin:
+            url: '/api/detective/common/v1/topic/:id/grant-admin/?'
+            method: 'POST'
             isArray: no
         post:
             url: '/api/detective/common/v1/topic/?'

@@ -18,6 +18,15 @@ logger = logging.getLogger(__name__)
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
 
+def without(coll, val):
+    def _check_not_val(el):
+        if callable(val):
+            return val(el) == True
+        else:
+            return el == val
+    l_without = lambda el: not _check_not_val(el)
+    return filter(l_without, coll)
+
 def where(coll, cond_dict):
     def get_el_val(el, k):
         if callable(k):
@@ -457,6 +466,11 @@ class TopicCachier(object):
         'default': 60 * 60 # 3600 secondes = 1h
     }
 
+    def __new__(self, *args, **kwargs):
+        if not self.__instance:
+            self.__instance = super(TopicCachier, self).__new__(self, *args, **kwargs)
+        return self.__instance
+
     def __keys(self):
         return self.__KEYS
 
@@ -532,6 +546,25 @@ class TopicCachier(object):
         rev = self.version(topic)
         cache.delete(cache_key, version=rev)
 
-topic_cache = TopicCachier()
+class DumbProfiler(object):
+    __instance = None
 
+    def __new__(self, *args, **kwargs):
+        import time
+        if not self.__instance:
+            self.__instance = super(DumbProfiler, self).__new__(self, *args, **kwargs)
+            self.__instance.time = time.time()
+        return self.__instance
+
+    def new(self):
+        class Dumb(object): pass
+        for attr in dir(self):
+            if attr not in dir(Dumb()) + ['new'] and not attr.endswith('__instance'):
+                delattr(self, attr)
+
+
+
+
+topic_cache   = TopicCachier()
+dumb_profiler = DumbProfiler()
 # EOF

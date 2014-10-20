@@ -68,6 +68,8 @@ USE_TZ = False
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = here('../media')
 
+UPLOAD_ROOT = os.path.join(MEDIA_ROOT, 'upload')
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache, without
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache, without, download_url
 from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
@@ -12,6 +12,7 @@ from django.contrib.auth.models         import User
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
+from django.core.files.storage          import default_storage
 from django.db.models.query             import QuerySet
 from django.http                        import Http404
 from neo4jrestclient                    import client
@@ -33,6 +34,7 @@ import json
 import re
 import logging
 import bleach
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -680,6 +682,18 @@ class IndividualResource(ModelResource):
                                                                               '*': ("class",),
                                                                               'a': ("href", "target")
                                                                           })
+                        if field_name == 'image' and fields[field_name]['type'] == 'URLField':
+                            try:
+                                image_file = download_url(data[field_name])
+                                path = default_storage.save(os.path.join(settings.UPLOAD_ROOT, image_file.name) , image_file)
+                                data[field_name] = field_value = path.replace(settings.MEDIA_ROOT, "")
+                                print field_value
+                            except UnavailableImage:
+                                data[field_name] = field_value = ""
+                            except NotAnImage:
+                                data[field_name] = field_value = ""
+                            except OversizedFile:
+                                data[field_name] = field_value = ""
                     node.set(field_name, field_value)
         # update the cache
         topic_cache.incr_version(request.current_topic)

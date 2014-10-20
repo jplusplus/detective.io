@@ -394,7 +394,7 @@ class UserNestedResource(ModelResource):
             return http.HttpNotFound("User not found")
         user = bundle.request.user
         group_resource = GroupResource()
-        groups = group_resource.obj_get_list(bundle).filter(Q(user__id=obj.id))
+        groups = group_resource.obj_get_list(bundle).filter(Q(user__id=obj.id)).exclude(topic__pk=None)
         if not user or not user.is_staff:
             if user:
                 read_perms = [perm.split('.')[0] for perm in user.get_all_permissions() if perm.endswith(".contribute_read")]
@@ -419,9 +419,7 @@ class UserNestedResource(ModelResource):
             for group in page.object_list:
                 bundle = group_resource.build_bundle(obj=group, request=request)
                 bundle = group_resource.full_dehydrate(bundle)
-                # make sure we're not adding a not existing topic to objects
-                if bundle.data['topic']:
-                    objects.append(bundle)
+                objects.append(bundle)
 
         except InvalidPage:
             # Allow empty page

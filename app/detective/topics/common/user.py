@@ -31,7 +31,6 @@ import re
 # UserNestedResource -> GroupResource -> TopicResource -> UserResource
 # TopicNestedResource -> UserNestedResource -> ProfileResource
 
-
 class GroupResource(ModelResource):
     def getTopic(bundle):
         topic  = None
@@ -49,6 +48,7 @@ class GroupResource(ModelResource):
     class Meta:
         excludes = ['topic',]
         queryset = Group.objects.all()
+        filtering = { 'name' : ALL }
 
 class UserAuthorization(ReadOnlyAuthorization):
     def update_detail(self, object_list, bundle):
@@ -378,8 +378,11 @@ class UserNestedResource(ModelResource):
                 raise MalformedRequestError(message)
 
     def get_groups(self, request, **kwargs):
+        # from app.detective.utils import dumb_profiler
         # import time
-        # start_time = time.time()
+        # dumb_profiler.dispatch_time = time.time()
+        # db_start = time.time()
+
         self.method_check(request, allowed=['get'])
         self.is_authenticated(request)
         self.throttle_check(request)
@@ -391,18 +394,23 @@ class UserNestedResource(ModelResource):
             return http.HttpNotFound("User not found")
         user = bundle.request.user
         group_resource = GroupResource()
-        groups = group_resource.obj_get_list(bundle).filter(Q(user__id=obj.id))
+        groups = group_resource.obj_get_list(bundle).filter(Q(user__id=obj.id)).exclude(topic__pk=None)
         if not user or not user.is_staff:
             if user:
                 read_perms = [perm.split('.')[0] for perm in user.get_all_permissions() if perm.endswith(".contribute_read")]
-                q_filter = Q(topic__public=True) | Q(topic__ontology_as_mod__in=read_perms)
+                read_perms = [perm for vector in [[perm + '_contributor', perm + '_administrator'] for perm in read_perms] for perm in vector]
+                q_filter = Q(topic__public=True) | Q(name__in=read_perms)
             else:
                 q_filter = Q(topic__public=True)
             groups = groups.filter(q_filter)
 
+        # dumb_profiler.db_time = time.time() - db_start
+
         limit     = int(request.GET.get('limit', 20))
         paginator = Paginator(groups, limit)
         objects   = []
+
+        # serializer_start = time.time()
 
         try:
             p    = int(request.GET.get('page', 1))
@@ -411,9 +419,7 @@ class UserNestedResource(ModelResource):
             for group in page.object_list:
                 bundle = group_resource.build_bundle(obj=group, request=request)
                 bundle = group_resource.full_dehydrate(bundle)
-                # make sure we're not adding a not existing topic to objects
-                if bundle.data['topic']:
-                    objects.append(bundle)
+                objects.append(bundle)
 
         except InvalidPage:
             # Allow empty page
@@ -427,8 +433,9 @@ class UserNestedResource(ModelResource):
                 'total_count': paginator.count
             }
         }
+
         response = group_resource.create_response(request, object_list)
-        # print "get_groups took %s" % (time.time() - start_time)
+        # dumb_profiler.serializer_time = time.time() - serializer_start
         return response
 
 class UserResource(UserNestedResource):

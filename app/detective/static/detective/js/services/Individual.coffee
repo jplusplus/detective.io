@@ -34,7 +34,7 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
         data
     ])
 
-    $resource '/api/:username/:topic/v1/:type/:id/', defaultsParams,
+    $resource '/api/:username/:topic/v1/:type/:id/?', defaultsParams,
         get:
             method : 'GET'
             isArray: no
@@ -97,7 +97,7 @@ angular.module('detective.service').factory("Individual", [ '$resource', '$http'
             method : 'DELETE'
             isArray: no
         graph:
-            url:'/api/:username/:topic/v1/:type/:id/graph'
+            url:'/api/:username/:topic/v1/:type/:id/graph/?'
             method: 'GET'
             isArray: no
             paramDefaults:

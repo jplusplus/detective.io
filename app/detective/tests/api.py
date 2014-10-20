@@ -1465,6 +1465,14 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         resp = self.create_topic(credentials=credentials, data={'title': 'Title 5'})
         self.assertHttpUnauthorized(resp)
 
+
+    def test_create_private_topic_unauthorized(self):
+        user = self.create_user(username='freeuser', plan=PLANS_CHOICES[0][0])
+        credentials = self.login(username=user.username, password=user.username)
+        # should fail because of the plan selection
+        resp = self.create_topic(credentials=credentials, data={'title': 'Title 5', 'public': False})
+        self.assertHttpUnauthorized(resp)
+
     def test_upload_over_1mb_image(self):
         background_url = "http://upload.wikimedia.org/wikipedia/commons/2/22/Turkish_Van_Cat.jpg"
         topic_data = {

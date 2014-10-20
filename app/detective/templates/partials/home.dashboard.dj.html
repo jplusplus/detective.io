@@ -12,14 +12,22 @@
 							</h3>
 						</a>
 					</div>
-				<li ng-repeat="topic in topics" class="col-sm-4"
-					ng-class="{loading: loading}">
+				<li ng-repeat="topic in topics" class="col-sm-4">
 					<div class="dashboard__topics__item">
 						<img ng-src="[[topic.thumbnail.medium]]" class="dashboard__topics__item__bg" />
 						<h4 class="dashboard__topics__item__title">
 							<a ui-sref="user-topic({ username: topic.author.username, topic: topic.slug })">
 								[[topic.title]]
 							</a>
+							<span class="dashboard__topics__item__visibility pull-right"
+								  tooltip-placement="bottom"
+								  tooltip="[[ topic.public ? 'public investivagtion' : 'private investigation' ]]">
+								<i class="fa"
+								   ng-class="{
+								       'fa-unlock': topic.public,
+								       'fa-lock': !topic.public
+								   }"></i>
+							</span>
 						</h4>
 						<p ng-if="user.owns(topic)">
                             <i class="fa fa-cube"></i>&nbsp;
@@ -46,9 +54,9 @@
 								</span>
 							</a>
 
-							<a class="btn btn-default" ui-sref="user-topic-invite({topic: topic.slug, username: topic.author.username})">
+							<a class="btn btn-default" ng-if="isAdmin(topic)" ui-sref="user-topic-invite({topic: topic.slug, username: topic.author.username})">
 								<i class="fa fa-users"></i>
-								Add collaborators
+								Collaborators
 							</a>
 						</p>
 					</div>

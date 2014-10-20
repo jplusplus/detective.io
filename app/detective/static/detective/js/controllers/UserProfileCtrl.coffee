@@ -1,18 +1,18 @@
 # shared function between UserProfileCtrl & its resolve
 getTopics = (groups)-> _.pluck groups.objects, 'topic'
 
-loadGroups = ($http, user, page)->
-    ($http.get "/api/detective/common/v1/user/#{user.id}/groups/?page=#{page}").then (response)->
-        response.data
+loadGroups = (Group, user, page)->
+    (Group.collaborator { user_id : user.id , page : page }).$promise.then (data)->
+        data
 
 class window.UserProfileCtrl
 
     @resolve:
         user: UserCtrl.resolve.user
 
-        userGroups: ['$http', '$q', 'user', ($http, $q, user)->
+        userGroups: ['Group', '$q', 'user', (Group, $q, user)->
             deferred = $q.defer()
-            loadGroups($http, user, 1).then (results)->
+            loadGroups(Group, user, 1).then (results)->
                 deferred.resolve results
             deferred.promise
         ]
@@ -22,9 +22,9 @@ class window.UserProfileCtrl
         ]
 
     # Injects dependencies
-    @$inject: ['$scope', 'Common', 'Page', '$state', '$q', '$http', 'user', 'userGroups', 'topics']
+    @$inject: ['$scope', 'Common', 'Page', '$state', '$q', '$http', 'user', 'Group', 'userGroups', 'topics']
 
-    constructor: (@scope, @Common, @Page, $state, @q, @http, @user, @userGroups, topics)->
+    constructor: (@scope, @Common, @Page, $state, @q, @http, @user, @Group, @userGroups, topics)->
         @Page.title @user.username, no
         @topics_page = 1
 
@@ -78,7 +78,7 @@ class window.UserProfileCtrl
         @topics_page = page
         deferred = do @q.defer
         (@q.all [
-            loadGroups(@http, @user, page)
+            loadGroups(@Group, @user, page)
         ]).then (results) =>
             @userGroups = results[0]
             @scope.loading = false

@@ -29,6 +29,9 @@ angular.module('detective.service').factory('User', ['$cookies', '$rootScope', (
     sdo.hasReadPermission = (topic) ->
         sdo.hasPermission topic, 'read'
 
+    sdo.hasAdministratePermission = (topic) ->
+        sdo.hasPermission topic, 'administrate'
+
     sdo.owns = (topic)->
         sdo.id is topic.author.id
 

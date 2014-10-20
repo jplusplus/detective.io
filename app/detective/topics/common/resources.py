@@ -4,7 +4,8 @@ from app.detective.exceptions         import UnavailableImage, NotAnImage, Overs
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
                                              Subscription, TopicDataSet
-from app.detective.utils              import get_registered_models, get_topics_from_request, is_valid_email
+from app.detective.utils              import get_registered_models, get_topics_from_request
+from app.detective.utils              import without, is_valid_email
 from app.detective.topics.common.user import UserResource, UserNestedResource
 from django.conf                      import settings
 from django.conf.urls                 import url
@@ -31,6 +32,7 @@ from tastypie.validation              import Validation
 from easy_thumbnails.files            import get_thumbnailer
 from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
+from django.contrib.auth.models       import Group
 
 import copy
 import json
@@ -216,11 +218,14 @@ class TopicAuthorization(ReadOnlyAuthorization):
         user      = bundle.request.user
         skeleton  = TopicSkeleton.objects.get(title=bundle.data['skeleton_title'])
         if user.is_authenticated():
+            public      = bundle.data.get('public', True)
             profile     = user.detectiveprofileuser
             unlimited   = profile.topics_max()   < 0
             under_limit = profile.topics_count() < profile.topics_max()
             authorize   = unlimited or under_limit
             authorize   = authorize and (profile.plan in skeleton.target_plans)
+            if not public:
+                authorize = authorize and profile.plan != 'free'
         return authorize
 
     def get_read_permissions(self, user):
@@ -281,6 +286,9 @@ class TopicNestedResource(ModelResource):
         return [
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/invite%s$" % params, self.wrap_view('invite'), name="api_invite"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/leave%s$"  % params, self.wrap_view('leave'),  name="api_leave"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/collaborators%s$"  % params, self.wrap_view('list_collaborators'),  name="api_list_collaborators"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/administrators%s$"  % params, self.wrap_view('list_administrators'),  name="api_list_administrators"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/grant-admin%s$" % params, self.wrap_view('grant_admin'), name="api_grant_admin")
         ]
 
     def invite(self, request, **kwargs):
@@ -293,6 +301,12 @@ class TopicNestedResource(ModelResource):
         # Check authorization
         bundle = self.build_bundle(obj=topic, request=request)
         self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
+        # Quick check on `administrator` group
+        try:
+            if not request.user.is_staff and not request.user.is_superuser:
+                request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+        except Group.DoesNotExist:
+            return HttpResponseForbidden()
 
         body = json.loads(request.body)
         collaborator = body.get("collaborator", None)
@@ -364,24 +378,98 @@ class TopicNestedResource(ModelResource):
         self.throttle_check(request)
 
         topic = Topic.objects.get(id=kwargs["pk"])
-        user  = request.user
+
+        try:
+            body = json.loads(request.body)
+            collaborator = body.get("collaborator", None)
+            if collaborator != None:
+                # Check authorization
+                bundle = self.build_bundle(obj=topic, request=request)
+                self.authorized_update_detail(self.get_object_list(bundle.request), bundle)
+                # Quick check on `administrator` group
+                try:
+                    if not request.user.is_superuser and not request.user.is_staff:
+                        request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+                except Group.DoesNotExist:
+                    return HttpResponseForbidden()
+                collaborator = User.objects.get(pk=collaborator)
+        except ValueError:
+            collaborator = None
+
+        user  = collaborator or request.user
         contributors = topic.get_contributor_group()
         potential_user = contributors.user_set.filter(pk=user.pk)
         if potential_user.exists():
             # remove user from contributor group
-            contributors.user_set.remove(request.user)
-            return HttpResponse(u"You successfuly left {topic} contributors.".format(
-                topic=topic.title))
+            contributors.user_set.remove(user)
+            return HttpResponse(u"{username} successfuly left {topic} contributors.".format(
+                username=user.username, topic=topic.title))
         else:
             return HttpResponseForbidden("You are not a contributor of this topic.")
 
+    def list_collaborators(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        bundles = self.get_collaborators(request, kwargs['pk'])
+
+        return self.create_response(request, bundles)
+
+    def list_administrators(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+
+        bundles = self.get_collaborators(request, kwargs['pk'], True)
+
+        return self.create_response(request, bundles)
+
+    def get_collaborators(self, request, topic_id, admin=False):
+        ur = UserResource()
+
+        topic = Topic.objects.get(id=topic_id)
+        if admin:
+            users = Group.objects.get(name="{topic_id}_administrator".format(topic_id=topic.ontology_as_mod)).user_set.all()
+        else:
+            users = topic.get_contributor_group().user_set.all()
+
+        bundles = []
+        for user in users:
+            bundle = ur.build_bundle(obj=user, request=request)
+            bundles.append(ur.full_dehydrate(bundle, for_list=True))
+
+        return bundles
+
+    def grant_admin(self, request, **kwargs):
+        self.method_check(request, allowed=['post'])
+        self.is_authenticated(request)
+        self.throttle_check(request)
+        topic = Topic.objects.get(id=kwargs["pk"])
+        # Quick check on `administrator` group
+        try:
+            request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+        except Group.DoesNotExist:
+            return HttpResponseForbidden()
+
+        body = json.loads(request.body)
+        grant = body['grant']
+        collaborator = body['collaborator']
+
+        try:
+            collaborator = topic.get_contributor_group().user_set.get(pk=collaborator['id'])
+            admin_group = Group.objects.get(name="{topic_id}_administrator".format(topic_id=topic.ontology_as_mod))
+            if grant:
+                collaborator.groups.add(admin_group)
+                collaborator.save()
+            else:
+                admin_group.user_set.remove(collaborator)
+                admin_group.save()
+            return HttpResponse()
+        except User.DoesNotExist:
+            return Http404()
+
     def dehydrate(self, bundle):
-        # Get the model's rules manager
-        rulesManager = bundle.request.current_topic.get_rules()
-        # Get all registered models
-        models = get_registered_models()
-        # Filter model to the one under app.detective.topics
-        bundle.data["models"] = []
         if bundle.obj.background:
             # Create a thumbnail for this topic
             try:
@@ -398,19 +486,26 @@ class TopicNestedResource(ModelResource):
         else:
             bundle.data['thumbnail'] = None
 
-        for m in bundle.obj.get_models():
-            try:
-                idx = m.__idx__
-            except AttributeError:
-                idx = 0
-            model = {
-                'name': m.__name__,
-                'verbose_name': m._meta.verbose_name,
-                'verbose_name_plural': m._meta.verbose_name_plural,
-                'is_searchable': rulesManager.model(m).all().get("is_searchable", False),
-                'index': idx
-            }
-            bundle.data["models"].append(model)
+        if 'models' not in self._meta.excludes:
+            # Get the model's rules manager
+            rulesManager = bundle.request.current_topic.get_rules()
+            # Get all registered models
+            models = get_registered_models()
+            # Filter model to the one under app.detective.topics
+            bundle.data["models"] = []
+            for m in bundle.obj.get_models():
+                try:
+                    idx = m.__idx__
+                except AttributeError:
+                    idx = 0
+                model = {
+                    'name': m.__name__,
+                    'verbose_name': m._meta.verbose_name,
+                    'verbose_name_plural': m._meta.verbose_name_plural,
+                    'is_searchable': rulesManager.model(m).all().get("is_searchable", False),
+                    'index': idx
+                }
+                bundle.data["models"].append(model)
         return bundle
 
     def download_url(self, url):
@@ -514,11 +609,13 @@ class TopicNestedResource(ModelResource):
         return bundle
 
     def hydrate_dataset(self, bundle):
-        if 'dataset' in bundle.data:
+        if 'dataset' in bundle.data and bundle.data['dataset'] != '':
             try:
                 bundle.data['dataset'] = TopicDataSet.objects.get(pk=bundle.data['dataset'])
             except TopicDataSet.DoesNotExist:
                 bundle.data['dataset'] = None
+        else:
+            self.clean_bundle_key('dataset', bundle)
         return bundle
 
     def full_hydrate(self, bundle):
@@ -546,8 +643,14 @@ class TopicResource(TopicNestedResource):
     author = fields.ToOneField(UserResource, 'author', full=True, null=True)
     # make this resource's meta inherit from its parent Meta (to allow filter,
     # authorization, authentication etc.)
-    class Meta(TopicNestedResource):
+    class Meta(TopicNestedResource.Meta):
         resource_name = 'topic-simpler'
+        excludes =  [
+            'models',
+            'ontology_as_json',
+            'ontology_as_owl',
+            'dataset'
+        ]
 
 class ArticleResource(ModelResource):
     topic = fields.ToOneField(TopicResource, 'topic', full=True)

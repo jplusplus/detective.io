@@ -152,7 +152,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
 
         start = =>
             # Select the individual to look for
-            individual = scope.individual().toLowerCase() or ""
+            individual = do ((do scope.individual) or "").toLowerCase
             itopic     = "detective/common"
             if scope.topic? and (do scope.topic)? and (do scope.topic) isnt '/'
                 itopic = do scope.topic
@@ -197,7 +197,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
 
             typeahead_params =
                 displayKey : (scope.valueKey or "name")
-                name : 'suggestions-' + itopic.replace '/', '-'
+                name : 'suggestions-' + itopic.replace('/', '-').replace('.', '-')
                 source : do bh.ttAdapter
                 templates :
                     suggestion : (template.compile [

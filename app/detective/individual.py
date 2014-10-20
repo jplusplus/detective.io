@@ -30,6 +30,8 @@ from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
 from datetime                           import datetime
+from easy_thumbnails.exceptions         import InvalidImageFormatError
+from easy_thumbnails.files              import get_thumbnailer
 import json
 import re
 import logging
@@ -277,7 +279,24 @@ class IndividualResource(ModelResource):
 
         bundle.data["_transform"] = transform or getattr(bundle.data, 'name', None)
 
+        to_add = dict()
         for field in bundle.data:
+            # Image field
+            if field == 'image':
+                # Get thumbnails
+                try:
+                    thumbnailer = get_thumbnailer(os.path.join(settings.MEDIA_ROOT, bundle.data[field].strip('/')))
+                    thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
+                    thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
+                    to_add[field + '_thumbnail'] = {
+                        'small' : thumbnailSmall.url,
+                        'medium': thumbnailMedium.url
+                    }
+                    # Prepend MEDIA_URL
+                    bundle.data[field] = settings.MEDIA_URL + bundle.data[field].strip('/')
+                except InvalidImageFormatError:
+                    bundle.data[field + '_thumbnail'] = None
+
             # Convert tuple to array for better serialization
             if type( getattr(bundle.obj, field, None) ) is tuple:
                 bundle.data[field] = list( getattr(bundle.obj, field) )
@@ -290,6 +309,9 @@ class IndividualResource(ModelResource):
             # We can also receive a function
             elif callable(transform):
                 bundle.data[field] = transform(bundle.data, field)
+
+        for key in to_add.keys():
+            bundle.data[key] = to_add[key]
 
         return bundle
 
@@ -687,7 +709,6 @@ class IndividualResource(ModelResource):
                                 image_file = download_url(data[field_name])
                                 path = default_storage.save(os.path.join(settings.UPLOAD_ROOT, image_file.name) , image_file)
                                 data[field_name] = field_value = path.replace(settings.MEDIA_ROOT, "")
-                                print field_value
                             except UnavailableImage:
                                 data[field_name] = field_value = ""
                             except NotAnImage:

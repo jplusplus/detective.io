@@ -910,4 +910,19 @@ class IndividualResource(ModelResource):
         self.log_throttled_access(request)
         return self.create_response(request, {'leafs': leafs, 'edges' : edges})
 
+    def remove_node_file(self, node, field_name, thumbnails=False):
+        try:
+            file_name = os.path.join(settings.MEDIA_ROOT, node.get(field_name).strip('/'))
+            default_storage.delete(file_name)
+
+            if thumbnails:
+                extension = file_name.split('.')[-1]
+                suffixes = [".300x200_q85_crop.", ".60x60_q85_crop."]
+                for suffix in suffixes:
+                    full_file_name = "{0}{1}{2}".format(file_name, suffix, extension)
+                    if default_storage.exists(full_file_name):
+                        default_storage.delete(full_file_name)
+        except:
+            pass
+
 # EOF

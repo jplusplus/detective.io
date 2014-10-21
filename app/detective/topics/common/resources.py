@@ -115,13 +115,12 @@ class TopicSkeletonResource(ModelResource):
             bundle.data["ontology"] = []
         try:
             thumbnailer     = get_thumbnailer(bundle.obj.picture)
-            thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
-            thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
-            bundle.data['picture'] =  request.build_absolute_uri(bundle.data['picture'])
-            bundle.data['thumbnail'] = {
-                'small' : request.build_absolute_uri(thumbnailSmall.url),
-                'medium': request.build_absolute_uri(thumbnailMedium.url)
-            }
+            bundle.data['thumbnail'] = dict()
+            for size in settings.THUMBNAIL_SIZES:
+                bundle.data['thumbnail'][size] = thumbnailer.get_thumbnail({
+                    'size' : settings.THUMBNAIL_SIZES[size],
+                    'crop' : True
+                })
         # No image available
         except InvalidImageFormatError:
             bundle.data['thumbnail'] = None

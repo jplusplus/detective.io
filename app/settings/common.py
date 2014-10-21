@@ -70,6 +70,11 @@ MEDIA_ROOT = here('../media')
 
 UPLOAD_ROOT = os.path.join(MEDIA_ROOT, 'upload')
 
+THUMBNAIL_SIZES = {
+    'small' : (60, 60),
+    'medium' : (300, 200)
+}
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"

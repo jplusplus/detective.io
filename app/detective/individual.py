@@ -289,11 +289,11 @@ class IndividualResource(ModelResource):
                     bundle.data[field] = bundle.data[field] != None and bundle.data[field].strip('/') or ""
                     thumbnailer = get_thumbnailer(os.path.join(settings.MEDIA_ROOT, bundle.data[field]))
                     to_add[field + '_thumbnail'] = {
-                        size : thumbnailer.get_thumbnail({
-                            'size': settings.THUMBNAIL_SIZES[size],
+                        key : thumbnailer.get_thumbnail({
+                            'size': size,
                             'crop': True
                         }).url
-                        for size in settings.THUMBNAIL_SIZES
+                        for key, size in settings.THUMBNAIL_SIZES.items()
                     }
                     # Prepend MEDIA_URL
                     bundle.data[field] = settings.MEDIA_URL + bundle.data[field]

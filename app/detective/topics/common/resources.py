@@ -116,11 +116,11 @@ class TopicSkeletonResource(ModelResource):
         try:
             thumbnailer     = get_thumbnailer(bundle.obj.picture)
             bundle.data['thumbnail'] = {
-                size : thumbnailer.get_thumbnail({
-                    'size' : settings.THUMBNAIL_SIZES[size],
+                key : thumbnailer.get_thumbnail({
+                    'size' : size,
                     'crop' : True
                 }).url
-                for size in settings.THUMBNAIL_SIZES
+                for key, size in settings.THUMBNAIL_SIZES.items()
             }
         # No image available
         except InvalidImageFormatError:
@@ -166,11 +166,11 @@ class TopicDataSetResource(ModelResource):
         try:
             thumbnailer     = get_thumbnailer(bundle.obj.picture)
             bundle.data['thumbnail'] = {
-                size : thumbnailer.get_thumbnail({
-                    'size' : settings.THUMBNAIL_SIZES[size],
+                key : thumbnailer.get_thumbnail({
+                    'size' : size,
                     'crop' : True
                 }).url
-                for size in settings.THUMBNAIL_SIZES
+                for key, size in settings.THUMBNAIL_SIZES.items()
             }
         # No image available
         except InvalidImageFormatError:
@@ -488,11 +488,11 @@ class TopicNestedResource(ModelResource):
             try:
                 thumbnailer = get_thumbnailer(bundle.obj.background)
                 bundle.data['thumbnail'] = {
-                    size : thumbnailer.get_thumbnail({
-                        'size' : settings.THUMBNAIL_SIZES[size],
+                    key : thumbnailer.get_thumbnail({
+                        'size' : size,
                         'crop' : True
                     }).url
-                    for size in settings.THUMBNAIL_SIZES
+                    for key, size in settings.THUMBNAIL_SIZES.items()
                 }
             # No image available
             except InvalidImageFormatError:

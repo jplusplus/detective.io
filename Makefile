@@ -35,7 +35,7 @@ $(VENV) :
 
 pip_install:
 	# Install pip packages
-	. $(ENV) ; pip install -r requirements.txt
+	. $(ENV) ; pip install -r requirements_dev.txt
 
 npm_install:
 	# Install npm packages

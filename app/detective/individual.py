@@ -288,12 +288,13 @@ class IndividualResource(ModelResource):
                 try:
                     bundle.data[field] = bundle.data[field] != None and bundle.data[field].strip('/') or ""
                     thumbnailer = get_thumbnailer(os.path.join(settings.MEDIA_ROOT, bundle.data[field]))
-                    to_add[field + '_thumbnail'] = dict()
-                    for size in settings.THUMBNAIL_SIZES:
-                        to_add[field + '_thumbnail'][size] = thumbnailer.get_thumbnail({
+                    to_add[field + '_thumbnail'] = {
+                        size : thumbnailer.get_thumbnail({
                             'size': settings.THUMBNAIL_SIZES[size],
                             'crop': True
-                        })
+                        }).url
+                        for size in settings.THUMBNAIL_SIZES
+                    }
                     # Prepend MEDIA_URL
                     bundle.data[field] = settings.MEDIA_URL + bundle.data[field]
                 except InvalidImageFormatError:

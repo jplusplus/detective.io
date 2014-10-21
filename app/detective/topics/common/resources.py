@@ -115,12 +115,13 @@ class TopicSkeletonResource(ModelResource):
             bundle.data["ontology"] = []
         try:
             thumbnailer     = get_thumbnailer(bundle.obj.picture)
-            bundle.data['thumbnail'] = dict()
-            for size in settings.THUMBNAIL_SIZES:
-                bundle.data['thumbnail'][size] = thumbnailer.get_thumbnail({
+            bundle.data['thumbnail'] = {
+                size : thumbnailer.get_thumbnail({
                     'size' : settings.THUMBNAIL_SIZES[size],
                     'crop' : True
-                })
+                }).url
+                for size in settings.THUMBNAIL_SIZES
+            }
         # No image available
         except InvalidImageFormatError:
             bundle.data['thumbnail'] = None
@@ -164,11 +165,12 @@ class TopicDataSetResource(ModelResource):
     def dehydrate(self, bundle):
         try:
             thumbnailer     = get_thumbnailer(bundle.obj.picture)
-            thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
-            thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
             bundle.data['thumbnail'] = {
-                'small' : thumbnailSmall.url,
-                'medium': thumbnailMedium.url
+                size : thumbnailer.get_thumbnail({
+                    'size' : settings.THUMBNAIL_SIZES[size],
+                    'crop' : True
+                }).url
+                for size in settings.THUMBNAIL_SIZES
             }
         # No image available
         except InvalidImageFormatError:
@@ -485,11 +487,12 @@ class TopicNestedResource(ModelResource):
             # Create a thumbnail for this topic
             try:
                 thumbnailer = get_thumbnailer(bundle.obj.background)
-                thumbnailSmall = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
-                thumbnailMedium = thumbnailer.get_thumbnail({'size': (300, 200), 'crop': True})
                 bundle.data['thumbnail'] = {
-                    'small' : thumbnailSmall.url,
-                    'medium': thumbnailMedium.url
+                    size : thumbnailer.get_thumbnail({
+                        'size' : settings.THUMBNAIL_SIZES[size],
+                        'crop' : True
+                    }).url
+                    for size in settings.THUMBNAIL_SIZES
                 }
             # No image available
             except InvalidImageFormatError:

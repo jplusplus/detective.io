@@ -22,7 +22,7 @@ endif
 
 all: install startdb run
 
-run: clean startdb
+run: clean startdb startredis
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py rqworker high default low &
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading 0.0.0.0:$(PORT)
 
@@ -33,9 +33,12 @@ run: clean startdb
 $(VENV) :
 	virtualenv venv --no-site-packages --distribute --prompt=Detective.io
 
-pip_install:
+pip_install_dev:
 	# Install pip packages
 	. $(ENV) ; pip install -r requirements_dev.txt
+
+pip_install:
+	. $(ENV) ; pip install -r requirements.txt
 
 npm_install:
 	# Install npm packages
@@ -58,6 +61,8 @@ statics_install:
 	rm -f $(PWD)/app/staticfiles/CACHE/img $(PWD)/app/staticfiles/CACHE/svg
 	ln -sf $(PWD)/app/detective/static/detective/img/ $(PWD)/app/staticfiles/CACHE/img
 	ln -sf $(PWD)/app/detective/static/detective/svg/ $(PWD)/app/staticfiles/CACHE/svg
+
+install_dev: $(VENV) pip_install_dev npm_install $(CUSTOM_D3) bower_install neo4j_install statics_install
 
 install: $(VENV) pip_install npm_install $(CUSTOM_D3) bower_install neo4j_install statics_install
 
@@ -87,6 +92,12 @@ fclean: clean
 ###
 # Neo4j rules
 ###
+
+startredis:
+	redis-server stop
+
+stopredis:
+	redis-server start
 
 stopdb:
 	./lib/neo4j/bin/neo4j stop || true

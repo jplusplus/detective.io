@@ -1,5 +1,6 @@
 angular.module('detective.directive').directive('ontologyVisualization', ['$timeout', ($timeout) ->
     link: (scope, elem, attrs)->
+        scope.layout_engine = "sfdp"
         relayout = =>
             jsPlumb.reset()
             for model in scope.models
@@ -22,10 +23,9 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
             jsPlumb.draggable jsPlumb.getSelector(".model"),
                 drag: =>
                     console.log("DRAG")
-
             # Liviz
             graph = """digraph ontologygraph {\n
-            graph[layout=sfdp, splines=line, overlap=prism, repulsiveforce=12, sep=5];\n
+            graph[layout=#{scope.layout_engine}, splines=line, overlap=prism, repulsiveforce=12, sep=5];\n
             node[shape=box, width=1.67, height=0.83];\n
             """
             for model in scope.models
@@ -35,15 +35,9 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
                         related_to = field.related_model
                         graph += "model#{model_name} -> model#{related_to};\n"
             graph += "}"
-            elem.find("textarea").html(graph)
-            # digraph graph {
-            #     graph[margin=1];
-            #     node[shape=box, width=1.67, height=0.83];
-            #     modelperson -> modelcompany;
-            #     modelperson -> modelcountry;
-            #     modelcompany -> modelcountry;
-            # }
-            window.w_launch()
+            scope.dot_src = graph
+            $timeout(window.w_launch)
+
         $timeout =>
             #DOM has finished rendering
             scope.$watch 'models', relayout, true

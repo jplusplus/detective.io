@@ -21,6 +21,7 @@ class window.EditTopicOntologyCtrl
         # methodes
         @scope.accordionShouldBeDisabled  = @accordionShouldBeDisabled
         @scope.isModelUnchanged           = @isModelUnchanged
+        @scope.isRelationshipUnchanged    = @isRelationshipUnchanged
         # data
         @scope.models              = @topic.ontology_as_json
         @scope.fieldTypes          = ["string", "url", "integer", "integerarray", "datetimestamp", "datetime", "date", "time", "boolean", "float"]
@@ -96,10 +97,6 @@ class window.EditTopicOntologyCtrl
     cancelModel: =>
         @scope.editingModel = null
 
-    isModelUnchanged: =>
-        idx_model_to_update = @scope.models.indexOf(_.find(@scope.models, ((m) => @scope.editingModel.name == m.name)))
-        angular.equals(@scope.editingModel, @scope.models[idx_model_to_update])
-
     addModelField: =>
         @scope.editingModel.fields.push({})
 
@@ -107,6 +104,10 @@ class window.EditTopicOntologyCtrl
         index = @scope.editingModel.fields.indexOf(field)
         if index > -1
             @scope.editingModel.fields.splice(index, 1) if @scope.editingModel.fields[index]?
+
+    isModelUnchanged: =>
+        idx_model_to_update = @scope.models.indexOf(_.find(@scope.models, ((m) => @scope.editingModel.name == m.name)))
+        angular.equals(@scope.editingModel, @scope.models[idx_model_to_update])
 
     # -----------------------------------------------------------------------------
     #    EDIT A RELATIONSHIP
@@ -143,10 +144,20 @@ class window.EditTopicOntologyCtrl
         if not @scope.editingRelationship.fields?
             @scope.editingRelationship.fields = []
         @scope.editingRelationship.fields.push({})
+
+    isRelationshipUnchanged: =>
+        idx_model_to_update        = @scope.models.indexOf(_.find(@scope.models, ((m) => @scope.editingRelationshipModel.name == m.name)))
+        idx_relationship_to_update = @scope.models[idx_model_to_update].fields.indexOf(_.find(@scope.models[idx_model_to_update].fields, ((f) => @scope.editingRelationship.name == f.name)))
+        if idx_model_to_update > -1 and idx_relationship_to_update > -1
+            angular.equals(@scope.editingRelationship, @scope.models[idx_model_to_update].fields[idx_relationship_to_update])
     
+    # -----------------------------------------------------------------------------
+    #    Utils
+    # -----------------------------------------------------------------------------
     accordionShouldBeDisabled: (accordion_name) =>
-        if @scope.editingModel? and not @isModelUnchanged()
+        if @scope.editingModel? or @scope.editingRelationship?
             return true
+
 
 angular.module('detective.controller').controller 'EditTopicOntologyCtrl', EditTopicOntologyCtrl
 

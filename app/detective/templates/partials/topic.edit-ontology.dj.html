@@ -5,8 +5,9 @@
                 <div ng-repeat="model in models" id="model[[model.name]]" class="model">
                     [[model.verbose_name]]
                 </div>
-                <div id="layout-engine" style="display: none;">sfdp</div>
+                <div id="layout-engine" style="display: none;">[[ layout_engine ]]</div>
                 <textarea id="dot-src" style="display: none;">
+                    [[ dot_src ]]
                 </textarea>
             </div>
         </div>
@@ -345,7 +346,7 @@
                                     <div class="col-sm-2 col-sm-offset-8">
                                         <button class       = "btn btn-primary" 
                                                 ng-click    = "saveRelationship(editingRelationship)" 
-                                                ng-disabled = "relationshipform.$invalid">
+                                                ng-disabled = "modelform.$invalid || isRelationshipUnchanged()">
                                             Save
                                         </button>
                                     </div>

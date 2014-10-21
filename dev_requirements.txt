@@ -1,2 +1,0 @@
-django-debug-toolbar==1.2.1
-git+git://github.com/jplusplus/django-debug-toolbar-neo4j-panel.git@HEAD#egg=neo4j_panel-dev

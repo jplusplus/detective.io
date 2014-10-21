@@ -6,6 +6,7 @@ from app.detective.utils                import import_class, to_underscores, get
 from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
+from app.detective.exceptions           import UnavailableImage, NotAnImage, OversizedFile
 from django.conf                        import settings
 from django.conf.urls                   import url
 from django.contrib.auth.models         import User

@@ -34,7 +34,7 @@ Python dependencies
     pip install virtualenv
 
 Java configuration
------------------
+------------------
 **Neo4J** run in a java environment and therefore if you want to run your own
 Neo4j database you need to install & configure java.
 

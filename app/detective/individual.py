@@ -918,8 +918,8 @@ class IndividualResource(ModelResource):
             default_storage.delete(file_name)
 
             if thumbnails:
-                extension = file_name.split('.')[-1]
-                suffixes = [".300x200_q85_crop.", ".60x60_q85_crop."]
+                extension = file_name.split('.')[-1].lower().replace('jpeg', 'jpg')
+                suffixes = [".{0}x{1}_q85_crop.".format(size[0], size[1]) for size in settings.THUMBNAIL_SIZES.values()]
                 for suffix in suffixes:
                     full_file_name = "{0}{1}{2}".format(file_name, suffix, extension)
                     if default_storage.exists(full_file_name):

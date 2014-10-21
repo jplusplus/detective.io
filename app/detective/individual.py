@@ -682,9 +682,14 @@ class IndividualResource(ModelResource):
             # Or a literal value
             # (integer, date, url, email, etc)
             else:
-                print field_name, field_value
+                # Current model
+                model = self.get_model()
+                # Fields
+                fields = { x['name'] : x for x in iterate_model_fields(model) }
                 # Remove the values
                 if field_value in [None, '']:
+                    if field_name == 'image' and fields[field_name]['type'] == 'URLField':
+                        self.remove_node_file(node, field_name, True)
                     # The field may not exists (yet)
                     try:
                         node.delete(field_name)
@@ -693,10 +698,6 @@ class IndividualResource(ModelResource):
                 # We simply update the node property
                 # (the value is already validated)
                 else:
-                    # Current model
-                    model = self.get_model()
-                    # Fields
-                    fields = { x['name'] : x for x in iterate_model_fields(model) }
                     if field_name in fields:
                         if 'is_rich' in fields[field_name]['rules'] and fields[field_name]['rules']['is_rich']:
                             data[field_name] = field_value = bleach.clean(field_value,
@@ -707,6 +708,7 @@ class IndividualResource(ModelResource):
                                                                               'a': ("href", "target")
                                                                           })
                         if field_name == 'image' and fields[field_name]['type'] == 'URLField':
+                            self.remove_node_file(node, field_name, True)
                             try:
                                 image_file = download_url(data[field_name])
                                 path = default_storage.save(os.path.join(settings.UPLOAD_ROOT, image_file.name) , image_file)

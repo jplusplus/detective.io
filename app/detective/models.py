@@ -17,7 +17,6 @@ from jsonfield                  import JSONField
 from jsonschema                 import validate
 from jsonschema.exceptions      import ValidationError
 from neo4django.db              import connection
-from psycopg2.extensions        import adapt
 from tinymce.models             import HTMLField
 
 import hashlib
@@ -366,14 +365,15 @@ class Topic(models.Model):
                 AND HAS(root.{field})
                 AND root.{field} = {value}
                 AND type.model_name = {model}
-                AND type.app_label = {app}
+                AND type.app_label = '{app}'
                 RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
             """.format(
-                field=field_name,
-                value=adapt(identifier),
-                model=adapt(subject["name"]),
-                app=adapt(self.app_label())
+                field=ield_name,
+                value=identifier,
+                model=subject["name"],
+                app=self.app_label()
             )
+            print query
         # If the received identifier describe a literal value
         elif self.is_registered_relationship(predicate["name"]):
             fields        = utils.iterate_model_fields( all_models[predicate["subject"]] )
@@ -388,15 +388,16 @@ class Topic(models.Model):
                 MATCH (st){is_out}-[:`{relationship}`]-{is_in}(root)<-[:`<<INSTANCE>>`]-(type)
                 WHERE HAS(root.name)
                 AND HAS(st.name)
-                AND type.app_label = {app}
+                AND type.app_label = '{app}'
                 RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
             """.format(
                 relationship=relationship,
-                id=adapt(identifier),
-                app=adapt(self.app_label()),
+                id=identifier,
+                app=self.app_label(),
                 is_out='<' if relationships[0]['direction'] == 'out' else '',
                 is_in='>' if relationships[0]['direction'] == 'in' else ''
             )
+            print query
         else:
             return {'errors': 'Unkown predicate type: %s' % predicate["name"]}
         return connection.cypher(query).to_dicts()

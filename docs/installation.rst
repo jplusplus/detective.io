@@ -9,13 +9,14 @@ Software dependencies
 ---------------------
 
 **Detective.io** needs a working **python 2.7** environment with **pip**, **git**, **libmemcached**.
+Its front-end relies also on **NodeJS** and **bower**.
 
 .. sourcecode:: sh
 
-    # RedHat based distribution
-    yum groupinstall "Development Tools" && yum install python python-pip python-devel git libmemcached-devel
+    # RedHat based distribution libxslt1-dev
+    yum groupinstall "Development Tools" && yum install python python-pip python-devel nodejs npm git libmemcached-devel libxml2-devel libxslt1-devel
     # OR Debian based distribution
-    apt-get install apt-get install build-essential python python-pip python-dev git libmemcached-dev
+    apt-get install build-essential python python-pip nodejs npm python-dev git libmemcached-dev libxml2-dev libxslt1-dev
 
 
 Python dependencies

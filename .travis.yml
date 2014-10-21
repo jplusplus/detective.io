@@ -19,7 +19,7 @@ before_install:
 install:
 - ./install_local_neo4j.bash $NEO4J_VERSION
 - ./lib/neo4j/bin/neo4j start
-- pip install -r test_requirements.txt
+- pip install -r requirements_tests.txt
 - pip install coveralls
 script:
 - coverage run --source=app.detective ./manage.py test detective --pythonpath=. --traceback

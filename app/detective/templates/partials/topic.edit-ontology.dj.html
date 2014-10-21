@@ -2,9 +2,12 @@
     <div class="row">
         <div class="col-md-6">
             <div ontology-visualization class="topic-edit-ontology__ontology-visualization">
-                <div ng-repeat="model in models" id="model--[[model.name]]" class="model">
+                <div ng-repeat="model in models" id="model[[model.name]]" class="model">
                     [[model.verbose_name]]
                 </div>
+                <div id="layout-engine" style="display: none;">sfdp</div>
+                <textarea id="dot-src" style="display: none;">
+                </textarea>
             </div>
         </div>
         <div class="col-md-6">

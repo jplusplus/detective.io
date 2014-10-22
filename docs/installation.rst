@@ -5,6 +5,21 @@ Installation guide
 Development mode
 ================
 
+Environnment configuration
+--------------------------
+
+We strongly recommand you to use Autoenv_ the development process and environment
+variable settings. To tell **Detective.io** to run in development mode you'll need
+to create a *.env_dev* file at project's root.
+Then fill this file with the following variables:
+
+.. sourcecode:: sh
+    export ENV_MODE="dev"
+    export DJANGO_SETTINGS_MODULE="app.settings_dev"
+
+
+
+
 Software dependencies
 ---------------------
 
@@ -68,7 +83,7 @@ rontend dependencies and setup the **Neo4j** database.
 
 .. sourcecode:: sh
 
-    make install_dev
+    make install
 
 **This command will:**
     * install development python dependencies with PIP
@@ -77,6 +92,10 @@ rontend dependencies and setup the **Neo4j** database.
     * install a Neo4j database into ``./lib``
     * setup the static files
 
+
+Load the initial data
+---------------------
+At current state, you won't be able to do so much things with your
 
 
 Setup the database

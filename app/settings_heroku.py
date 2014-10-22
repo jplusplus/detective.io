@@ -59,7 +59,7 @@ AWS_SECRET_ACCESS_KEY      = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME    = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_QUERYSTRING_AUTH       = False
 AWS_S3_FILE_OVERWRITE      = os.getenv('AWS_S3_FILE_OVERWRITE') == "True" and True or False
-AWS_IS_GZIPPED             = True
+AWS_IS_GZIPPED             = False
 
 GZIP_CONTENT_TYPES         = (
     'text/css',

@@ -78,6 +78,8 @@
                                            ng-model = "newRelationship.reverseName"
                                            required />
                                     <div ng-show="!newRelationship.reverseName">Can't be empty</div>
+                                    <div ng-show="relationshipReverseNameAlreadyExist()">Already exists</div>
+
                                 </div>
                             </div>
                             <div class="row">
@@ -149,21 +151,24 @@
                                     <div class="topic-edit-ontology__edit-model__properties__title">Properties</div>
                                     <div ng-repeat="field in editingModel.fields" ng-if="field.type != 'relationship'">
                                         <div class="topic-edit-ontology__edit-model__properties__name">
-                                            <i class="fa fa-minus"></i> [[ field.verbose_name ]]
+                                            <i class="fa fa-minus"></i> [[ field.name ]]
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label class="col-md-4" for="topic-edit-ontology__edit-model__properties__input-name">Name</label>
                                                     <div class=" col-md-8">
-                                                        <input type        = "text" 
-                                                               ng-model    = "field.verbose_name" 
+                                                        <input type        = "text"
+                                                               ng-name     = "field.name"
+                                                               ng-model    = "field.verbose_name"
                                                                class       = "form-control opic-edit-ontology__edit-model__properties__input-name" 
                                                                placeholder = "Enter name" 
-                                                               ng-disabled = "field.name =='name'" 
-                                                               focus-on    = "field.name == undefined" 
+                                                               ng-disabled = "field.name =='name' && $index==0" 
+                                                               focus-on    = "field.name == undefined"
+                                                               is-unique-in-fields-name-from="editingModel"
                                                                required />
                                                         <div ng-show="!field.verbose_name">Can't be empty</div>
+                                                        <div ng-show="modelform[[field.name]].$error.isNotUnique">Already exist</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -171,7 +176,7 @@
                                                 <div class="form-group form-group-sm">
                                                     <label class="col-md-2 col-md-sm-offset-10 text-right" for="topic-edit-ontology__edit-model__properties__input-type">Type</label>
                                                     <div class=" col-md-8">
-                                                        <select ng-model="field.type" class="form-control input-sm" ng-options="fieldType for fieldType in fieldTypes" id="topic-edit-ontology__edit-model__properties__input-type" ng-disabled="field.name =='name'" required></select>
+                                                        <select ng-model="field.type" class="form-control input-sm" ng-options="fieldType for fieldType in fieldTypes" id="topic-edit-ontology__edit-model__properties__input-type" ng-disabled="field.name =='name' && $index==0" required></select>
                                                         <div ng-show="!field.type">Can't be empty</div>
 
                                                     </div>
@@ -249,7 +254,8 @@
                                         <input type     = "text"
                                                class    = "form-control"
                                                ng-model = "editingRelationship.related_name"
-                                               required />
+                                               required
+                                               disabled /><!-- NOTE: disabled because related_name need to be unique, and there is no validation here -->
                                         <div ng-show="!editingRelationship.related_name">Can't be empty</div>
                                     </div>
                                 </div>
@@ -261,8 +267,9 @@
                                                 <select ng-model   = "editingRelationshipModel.name"
                                                         class      = "form-control"
                                                         ng-options = "model.name as model.verbose_name for model in models"
-                                                        disabled   = true
-                                                        required> </select>
+                                                        required
+                                                        disabled><!-- NOTE: disabled because it's a model property, doens't belong to relationship  -->
+                                                </select>
                                                 <div ng-show="!editingRelationshipModel.name">Can't be empty</div>
                                             </div>
                                         </div>

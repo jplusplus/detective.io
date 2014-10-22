@@ -3,28 +3,29 @@ class window.EditTopicOntologyCtrl
     constructor: (@scope, @Page, @rootScope, @topic)->
         @Page.title "Ontology Editor", no
         return unless @topic.ontology_as_json?
-        # actions: add a new model
-        @scope.addNewModel                  = @addNewModel
-        @scope.modelNameAlreadyExist        = @modelNameAlreadyExist
-        # actions: add a new relationship
-        @scope.addNewRelationship           = @addNewRelationship
-        @scope.relationshipNameAlreadyExist = @relationshipNameAlreadyExist
-        # actions: edit a model
-        @scope.editModel                    = @editModel
-        @scope.saveModel                    = @saveModel
-        @scope.cancelModel                  = @cancelModel
-        @scope.removeModelField             = @removeModelField
-        @scope.addModelField                = @addModelField
-        # actions: edit a relationship
-        @scope.editRelationship             = @editRelationship
-        @scope.saveRelationship             = @saveRelationship
-        @scope.cancelRelationship           = @cancelRelationship
-        @scope.removeRelationshipField      = @removeRelationshipField
-        @scope.addRelationshipField         = @addRelationshipField
+        # actions #1: add a new model
+        @scope.addNewModel                         = @addNewModel
+        @scope.modelNameAlreadyExist               = @modelNameAlreadyExist
+        # actions #2: add a new relationship
+        @scope.addNewRelationship                  = @addNewRelationship
+        @scope.relationshipNameAlreadyExist        = @relationshipNameAlreadyExist
+        @scope.relationshipReverseNameAlreadyExist = @relationshipReverseNameAlreadyExist
+        # actions #3: edit a model
+        @scope.editModel                           = @editModel
+        @scope.saveModel                           = @saveModel
+        @scope.cancelModel                         = @cancelModel
+        @scope.removeModelField                    = @removeModelField
+        @scope.addModelField                       = @addModelField
+        # actions #4: edit a relationship
+        @scope.editRelationship                    = @editRelationship
+        @scope.saveRelationship                    = @saveRelationship
+        @scope.cancelRelationship                  = @cancelRelationship
+        @scope.removeRelationshipField             = @removeRelationshipField
+        @scope.addRelationshipField                = @addRelationshipField
         # methodes
-        @scope.accordionShouldBeDisabled    = @accordionShouldBeDisabled
-        @scope.isModelUnchanged             = @isModelUnchanged
-        @scope.isRelationshipUnchanged      = @isRelationshipUnchanged
+        @scope.accordionShouldBeDisabled           = @accordionShouldBeDisabled
+        @scope.isModelUnchanged                    = @isModelUnchanged
+        @scope.isRelationshipUnchanged             = @isRelationshipUnchanged
         # data
         @scope.models              = @topic.ontology_as_json
         @scope.fieldTypes          = ["string", "url", "integer", "integerarray", "datetimestamp", "datetime", "date", "time", "boolean", "float"]
@@ -39,9 +40,20 @@ class window.EditTopicOntologyCtrl
                     relationships[model.name] = [] unless relationships[model.name]?
                     relationships[model.name].push field if field.type == "relationship"
             return relationships
+        # watch editingModel to update the name if doesn't exist
+        @scope.$watch("editingModel", =>
+            return unless @scope.editingModel?
+            model_base = @getModelByName(@scope.editingModel.name)
+            if @scope.editingModel.fields?
+                for field in @scope.editingModel.fields
+                    if field.name?
+                        field_base = @getFieldfromModel(field.name, model_base)
+                        if not field_base
+                            field.name = @slugify(field.verbose_name)
+        , true)
 
     # -----------------------------------------------------------------------------
-    #    ADD A NEW MODEL
+    #    #1 ADD A NEW MODEL
     # -----------------------------------------------------------------------------
     addNewModel: =>
         new_model =
@@ -62,7 +74,7 @@ class window.EditTopicOntologyCtrl
         no
 
     # -----------------------------------------------------------------------------
-    #    ADD A NEW RELATIONSHIP
+    #    #2 ADD A NEW RELATIONSHIP
     # -----------------------------------------------------------------------------
     addNewRelationship: =>
         new_relationship_field = {
@@ -86,8 +98,15 @@ class window.EditTopicOntologyCtrl
                 return yes
         return no
 
+    relationshipReverseNameAlreadyExist: =>
+        return no unless @scope.newRelationship.between? and @scope.newRelationship.reverseName?
+        for field in @getModelByName(@scope.newRelationship.between).fields
+            if field.related_name == @slugify(@scope.newRelationship.reverseName)
+                return yes
+        return no
+
     # -----------------------------------------------------------------------------
-    #    EDIT A MODEL
+    #    #3 EDIT A MODEL
     # -----------------------------------------------------------------------------
     editModel: (model) =>
         @scope.editingModel = angular.copy(model)
@@ -116,7 +135,7 @@ class window.EditTopicOntologyCtrl
         angular.equals(@scope.editingModel, @scope.models[idx_model_to_update])
 
     # -----------------------------------------------------------------------------
-    #    EDIT A RELATIONSHIP
+    #    #4 EDIT A RELATIONSHIP
     # -----------------------------------------------------------------------------
     editRelationship: (model, relationship) =>
         @scope.editingRelationship      = angular.copy(relationship)
@@ -166,6 +185,19 @@ class window.EditTopicOntologyCtrl
         if idx_model > -1
             return @scope.models[idx_model]
         return null
+
+    getFieldfromModel: (field_name, model) =>
+        for field in model.fields
+            if field.name == field_name
+                return field
+
+    # fieldNameAlreadyExist: (field_name, object) =>
+    #     return no unless field_name?
+    #     field_name = @slugify(field_name)
+    #     for field in object.fields
+    #         if field_name == field.name
+    #             return yes
+    #     return no
 
     accordionShouldBeDisabled: (accordion_name) =>
         if @scope.editingModel? or @scope.editingRelationship?

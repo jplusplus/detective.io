@@ -14,6 +14,7 @@ from django.core.mail                 import EmailMultiAlternatives
 from django.core.urlresolvers         import reverse
 from django.core.files                import File
 from django.core.files.temp           import NamedTemporaryFile
+from django.core.cache                import cache
 from django.db                        import IntegrityError
 from django.db.models                 import Q
 from django.http                      import Http404, HttpResponse, HttpResponseForbidden
@@ -506,6 +507,9 @@ class TopicNestedResource(ModelResource):
                     'index': idx
                 }
                 bundle.data["models"].append(model)
+        _is_uploading = cache.get("{0}_is_uploading".format(bundle.data["ontology_as_mod"]))
+        if _is_uploading != None and _is_uploading:
+            bundle.data["is_uploading"] = True
         return bundle
 
     def download_url(self, url):

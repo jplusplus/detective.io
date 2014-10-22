@@ -23,6 +23,7 @@ from django.conf                        import settings
 from django.core.paginator              import InvalidPage
 from django.core.files.storage          import default_storage
 from django.core.files.base             import ContentFile
+from django.core.cache                  import cache
 from cStringIO                          import StringIO
 from app.detective.topics.common.models import FieldSource
 import app.detective.utils              as utils
@@ -179,8 +180,10 @@ def unzip_and_process_bulk_parsing_and_save_as_model(topic, zip_content):
         os.rmdir(extraction_dir)
         os.remove(zip_file)
 
+        cache.set("{0}_is_uploading".format(topic.ontology_as_mod), True)
         # Process!
         process_bulk_parsing_and_save_as_model(topic, files, start_time)
+        cache.delete("{0}_is_uploading".format(topic.ontology_as_mod))
     except Exception as e:
         import traceback
         logger.error(traceback.format_exc())

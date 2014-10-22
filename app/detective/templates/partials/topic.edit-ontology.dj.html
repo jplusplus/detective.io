@@ -151,7 +151,7 @@
                                     <div class="topic-edit-ontology__edit-model__properties__title">Properties</div>
                                     <div ng-repeat="field in editingModel.fields" ng-if="field.type != 'relationship'">
                                         <div class="topic-edit-ontology__edit-model__properties__name">
-                                            <i class="fa fa-minus"></i> [[ field.name ]]
+                                            <i class="fa fa-minus"></i> [[ field.verbose_name ]] ([[ field.name ]])
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
@@ -198,7 +198,7 @@
                                         <div class="text-right" ng-if="field.name != 'name'">
                                             <button class="btn btn-danger btn-sm left10" ng-click="removeModelField(field)">
                                                 <i class="fa fa-trash-o"></i>
-                                                Delete the field [[ field.verbose_name ]]
+                                                Delete the field [[ field.name ]]
                                             </button>
                                         </div>
                                     </div>
@@ -254,8 +254,7 @@
                                         <input type     = "text"
                                                class    = "form-control"
                                                ng-model = "editingRelationship.related_name"
-                                               required
-                                               disabled /><!-- NOTE: disabled because related_name need to be unique, and there is no validation here -->
+                                               required />
                                         <div ng-show="!editingRelationship.related_name">Can't be empty</div>
                                     </div>
                                 </div>

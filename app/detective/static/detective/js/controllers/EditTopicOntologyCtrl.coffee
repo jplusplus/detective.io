@@ -44,12 +44,15 @@ class window.EditTopicOntologyCtrl
         @scope.$watch("editingModel", =>
             return unless @scope.editingModel?
             model_base = @getModelByName(@scope.editingModel.name)
-            if @scope.editingModel.fields?
-                for field in @scope.editingModel.fields
-                    if field.name?
-                        field_base = @getFieldfromModel(field.name, model_base)
-                        if not field_base
-                            field.name = @slugify(field.verbose_name)
+            already_checked = {} # prevent new model with existing name (doublon) to be skiped
+            for field in @scope.editingModel.fields
+                field_base = null
+                if field.name? and not already_checked[field.name]?
+                    field_base = @getFieldfromModel(field.name, model_base)
+                    if field_base?
+                        already_checked[field_base.name] = true
+                if not field_base?
+                    field.name = @slugify(field.verbose_name)
         , true)
 
     # -----------------------------------------------------------------------------
@@ -190,25 +193,18 @@ class window.EditTopicOntologyCtrl
         for field in model.fields
             if field.name == field_name
                 return field
-
-    # fieldNameAlreadyExist: (field_name, object) =>
-    #     return no unless field_name?
-    #     field_name = @slugify(field_name)
-    #     for field in object.fields
-    #         if field_name == field.name
-    #             return yes
-    #     return no
+        return null
 
     accordionShouldBeDisabled: (accordion_name) =>
         if @scope.editingModel? or @scope.editingRelationship?
             return true
 
     slugify: (name) =>
+        return "" unless name?
         name
             .toLowerCase()
             .replace(/\ /g, '_')
             .replace(/[^\w-]+/g, '')
-
 
 angular.module('detective.controller').controller 'EditTopicOntologyCtrl', EditTopicOntologyCtrl
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache, without
 from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
@@ -596,6 +596,7 @@ class IndividualResource(ModelResource):
         # Set new values to the node
         for field_name in data:
             field       = self.get_model_field(field_name)
+            data[field_name] = without(data[field_name], int(pk))
             field_value = data[field_name]
             # The value can be a list of ID for relationship
             if field.get_internal_type() is 'Relationship':

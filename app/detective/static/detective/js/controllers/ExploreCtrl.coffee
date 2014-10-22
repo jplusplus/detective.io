@@ -1,8 +1,8 @@
 class window.ExploreCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$stateParams', 'Summary', '$location', '$timeout', '$filter', 'Page', 'QueryFactory', 'topic']
+    @$inject: ['$scope', '$rootScope', '$stateParams', 'Summary', '$location', '$timeout', '$filter', 'Page', 'QueryFactory', 'topic']
 
-    constructor: (@scope, @stateParams, @Summary, @location, @timeout, @filter, @Page, @QueryFactory, topic)->
+    constructor: (@scope, $rootScope, @stateParams, @Summary, @location, @timeout, @filter, @Page, @QueryFactory, topic)->
         @scope.getTypeCount = @getTypeCount
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
@@ -13,6 +13,9 @@ class window.ExploreCtrl
 
         # Meta data about this topic
         @scope.meta = topic
+        if topic.is_uploading
+            # TMP, must do something better than that
+            $rootScope.$broadcast 'http:error', 'Beware, a huge data upload is in progress on this topic.'
 
         # Set page's title
         @Page.title @scope.meta.title

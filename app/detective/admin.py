@@ -96,7 +96,7 @@ admin.site.register(TopicToken, TopicTokenAdmin)
 class TopicAdmin(admin.ModelAdmin):
     save_on_top         = True
     prepopulated_fields = {'slug': ('title',)}
-    list_display        = ("title", "link", "public","app_label")
+    list_display        = ("title", "link", "public","app_label", "is_json")
     list_filter         = ("public","featured","author")
     search_fields       = ('title', 'slug', 'author__username')
     readonly_fields     = ('entities_count',)
@@ -129,6 +129,9 @@ class TopicAdmin(admin.ModelAdmin):
             'fields': ( 'entities_count',)
         }),
     )
+
+    def is_json(self, topic): return topic.ontology_as_json is not None
+    is_json.boolean = True
 
     def get_form(self, request, obj=None, **kwargs):
         if hasattr(obj, "id"):

@@ -206,7 +206,6 @@ class Topic(models.Model):
 
     def get_models(self):
         """ return a generator of Model """
-        # FIXME : Very heavy method. Should maybe return an iterator
         # We have to load the topic's model
         models_module = self.get_models_module()
         for i in dir(models_module):

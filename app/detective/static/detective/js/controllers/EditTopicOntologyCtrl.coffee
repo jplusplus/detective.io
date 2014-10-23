@@ -1,6 +1,6 @@
 class window.EditTopicOntologyCtrl
-    @$inject: ['$scope', 'Page', '$rootScope', 'topic']
-    constructor: (@scope, @Page, @rootScope, @topic)->
+    @$inject: ['$scope', 'Page', '$rootScope', 'topic', 'TopicsFactory']
+    constructor: (@scope, @Page, @rootScope, @topic, @TopicsFactory)->
         @Page.title "Ontology Editor", no
         return unless @topic.ontology_as_json?
         # actions #1: add a new model
@@ -66,6 +66,7 @@ class window.EditTopicOntologyCtrl
             verbose_name_plural : @scope.newModel.namePlural
             help_text           : @scope.newModel.helpText
         @scope.models.push(new_model)
+        @saveOntology()
         @scope.newModel = {}
 
     modelNameAlreadyExist: =>
@@ -92,6 +93,7 @@ class window.EditTopicOntologyCtrl
         }
         # update the model
         @getModelByName(@scope.newRelationship.between).fields.push(new_relationship_field)
+        @saveOntology()
         @scope.newRelationship = {}
 
     relationshipNameAlreadyExist: =>
@@ -120,6 +122,7 @@ class window.EditTopicOntologyCtrl
         # update
         if idx_model_to_update > -1
             @scope.models[idx_model_to_update] = model
+            @saveOntology()
         @scope.editingModel = null
 
     cancelModel: =>
@@ -156,6 +159,7 @@ class window.EditTopicOntologyCtrl
         # update
         if idx_model_to_update > -1 and idx_relationship_to_update > -1
             @scope.models[idx_model_to_update].fields[idx_relationship_to_update] = @scope.editingRelationship
+            @saveOntology()
         @scope.editingRelationship      = null
         @scope.editingRelationshipModel = null
 
@@ -182,6 +186,9 @@ class window.EditTopicOntologyCtrl
     # -----------------------------------------------------------------------------
     #    Utils
     # -----------------------------------------------------------------------------
+    saveOntology: =>
+        @TopicsFactory.update({id: @topic.id}, {ontology_as_json:@scope.models})
+
     getModelByName: (name) =>
         return null unless name?
         idx_model = @scope.models.indexOf(_.find(@scope.models, ((m) => name == m.name)))

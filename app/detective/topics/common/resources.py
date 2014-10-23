@@ -612,8 +612,6 @@ class TopicNestedResource(ModelResource):
         topic_skeleton = self.get_skeleton(bundle)
         if topic_skeleton:
             bundle.data['ontology_as_json'] = topic_skeleton.ontology
-        else:
-            self.clean_bundle_key('ontology_as_json', bundle)
         return bundle
 
     def hydrate_dataset(self, bundle):

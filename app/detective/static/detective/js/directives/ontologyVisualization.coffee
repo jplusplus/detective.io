@@ -1,7 +1,22 @@
 angular.module('detective.directive').directive('ontologyVisualization', ['$timeout', ($timeout) ->
     link: (scope, elem, attrs)->
-        scope.layout_engine = "sfdp"
+
         relayout = =>
+            # positioning around a circle
+            models_nui = elem.find(".model")
+            radius     = (Math.min(elem.width(), elem.height()) / 2)
+            width      = elem.width()
+            height     = elem.height()
+            angle      = 0
+            step       = (2 * Math.PI) / models_nui.length
+            models_nui.each ->
+                x = Math.round(width  / 2 + radius * Math.cos(angle) - $(this).width()  / 2)
+                y = Math.round(height / 2 + radius * Math.sin(angle) - $(this).height() / 2)
+                $(this).css
+                    left: x
+                    top : y
+                angle += step
+            # relationships
             jsPlumb.reset()
             for model in scope.models
                 for field in model.fields
@@ -23,20 +38,6 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
             jsPlumb.draggable jsPlumb.getSelector(".model"),
                 drag: =>
                     console.log("DRAG")
-            # Liviz
-            graph = """digraph ontologygraph {\n
-            graph[layout=#{scope.layout_engine}, splines=line, overlap=prism, repulsiveforce=12, sep=5];\n
-            node[shape=box, width=1.67, height=0.83];\n
-            """
-            for model in scope.models
-                for field in model.fields
-                    if field.type == "relationship"
-                        model_name = model.name
-                        related_to = field.related_model
-                        graph += "model#{model_name} -> model#{related_to};\n"
-            graph += "}"
-            scope.dot_src = graph
-            $timeout(window.w_launch)
 
         $timeout =>
             #DOM has finished rendering

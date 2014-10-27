@@ -1,5 +1,4 @@
 # Makefile -- Detective.io
-
 NEO4J_VERSION = 1.9.1
 
 VENV          = venv
@@ -119,9 +118,9 @@ test:
 	mv lib/neo4j/data/graph.db lib/neo4j/data/graph.db.backup || true
 	# Start a brand new database
 	make startdb
-	-python manage.py syncdb -v 0 --noinput  --traceback --pythonpath=. --settings=app.settings_tests
+	-python manage.py syncdb -v 0 --noinput  --traceback --pythonpath=. --settings=app.settings.testing
 	# Launch test with coverage
-	-python -W ignore::DeprecationWarning manage.py test $(TEST) --pythonpath=. --settings=app.settings_tests --traceback
+	-python -W ignore::DeprecationWarning manage.py test $(TEST) --pythonpath=. --settings=app.settings.testing --traceback
 	# Stop database in order to restore it
 	make stopdb
 	# Remove temporary databases

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # Encoding: utf-8
-
 import os
-from settings import *
+from .common import *
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 NEO4J_DATABASES['default']['OPTIONS'] = {

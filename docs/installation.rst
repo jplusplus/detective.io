@@ -15,7 +15,7 @@ Then fill this file with the following variables:
 
 .. sourcecode:: sh
     export ENV_MODE="dev"
-    export DJANGO_SETTINGS_MODULE="app.settings_dev"
+    export DJANGO_SETTINGS_MODULE="app.settings.development"
 
 
 

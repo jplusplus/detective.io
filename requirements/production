@@ -1,4 +1,4 @@
--r requirements_common.txt
+-r common
 boto==2.9.6
 distribute==0.6.31
 django-pylibmc-sasl==0.2.4

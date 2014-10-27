@@ -1,0 +1,2 @@
+-r common
+dj-database-url==0.2.1

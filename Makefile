@@ -16,14 +16,15 @@ CACHE         = $(wildcard app/staticfiles/CACHE app/media/csv-exports/)
 ifndef PORT
 	PORT = 8000
 endif
+
 ifndef TEST
 	TEST = detective
 endif
 
 ifeq ($(ENV_MODE), prod)
-	REQUIREMENTS_FILE = requirements.txt
+	REQUIREMENTS_FILE = requirements/production
 else
-	REQUIREMENTS_FILE = requirements_dev.txt
+	REQUIREMENTS_FILE = requirements/development
 endif
 
 all: install startdb run

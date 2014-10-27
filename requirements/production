@@ -1,0 +1,14 @@
+-r common
+boto==2.9.6
+distribute==0.6.31
+dj-database-url==0.2.1
+django-pylibmc-sasl==0.2.4
+django-sslify==0.2.3
+django-storages==1.1.8
+djrill==0.7.0
+gunicorn==0.17.4
+newrelic==2.22.1.20
+psycopg2==2.4.6
+pylibmc==1.3.0
+raven==5.0.0
+South==0.8.4

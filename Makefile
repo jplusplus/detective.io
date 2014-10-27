@@ -1,5 +1,4 @@
 # Makefile -- Detective.io
-
 NEO4J_VERSION = 1.9.1
 
 VENV          = venv
@@ -16,13 +15,20 @@ CACHE         = $(wildcard app/staticfiles/CACHE app/media/csv-exports/)
 ifndef PORT
 	PORT = 8000
 endif
+
 ifndef TEST
 	TEST = detective
 endif
 
+ifeq ($(ENV_MODE), prod)
+	REQUIREMENTS_FILE = requirements/production
+else
+	REQUIREMENTS_FILE = requirements/development
+endif
+
 all: install startdb run
 
-run: clean startdb
+run: clean startdb startredis
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py rqworker high default low &
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading 0.0.0.0:$(PORT)
 
@@ -34,8 +40,7 @@ $(VENV) :
 	virtualenv venv --no-site-packages --distribute --prompt=Detective.io
 
 pip_install:
-	# Install pip packages
-	. $(ENV) ; pip install -r requirements.txt
+	. $(ENV) ; pip install -r $(REQUIREMENTS_FILE)
 
 npm_install:
 	# Install npm packages
@@ -84,6 +89,13 @@ clean:
 fclean: clean
 	rm $(CUSTOM_D3)
 
+
+startredis:
+	redis-server start || true
+
+stopredis:
+	redis-server stop || true
+
 ###
 # Neo4j rules
 ###
@@ -107,9 +119,9 @@ test:
 	mv lib/neo4j/data/graph.db lib/neo4j/data/graph.db.backup || true
 	# Start a brand new database
 	make startdb
-	-python manage.py syncdb -v 0 --noinput  --traceback --pythonpath=. --settings=app.settings_tests
+	-python manage.py syncdb -v 0 --noinput  --traceback --pythonpath=. --settings=app.settings.testing
 	# Launch test with coverage
-	-python -W ignore::DeprecationWarning manage.py test $(TEST) --pythonpath=. --settings=app.settings_tests --traceback
+	-python -W ignore::DeprecationWarning manage.py test $(TEST) --pythonpath=. --settings=app.settings.testing --traceback
 	# Stop database in order to restore it
 	make stopdb
 	# Remove temporary databases

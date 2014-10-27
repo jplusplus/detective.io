@@ -5,11 +5,11 @@ Packages required:
     * boto
     * django-storages
 """
-from settings import *
+from .common  import *
 from urlparse import urlparse
+from datetime import date, timedelta
 import os
 import dj_database_url
-from datetime import date, timedelta
 
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com'),
@@ -94,8 +94,8 @@ DEBUG                      = bool(os.getenv('DEBUG', False))
 # Configure static files for S3
 STATIC_URL                 = os.getenv('STATIC_URL')
 MEDIA_URL                  = STATIC_URL
-STATIC_ROOT                = here('staticfiles')
-STATICFILES_DIRS          += (here('static'),)
+STATIC_ROOT                = here('../staticfiles')
+STATICFILES_DIRS          += (here('../static'),)
 INSTALLED_APPS            += ('storages', )
 DEFAULT_FILE_STORAGE       = 'storages.backends.s3boto.S3BotoStorage'
 THUMBNAIL_DEFAULT_STORAGE  = DEFAULT_FILE_STORAGE

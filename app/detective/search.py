@@ -102,7 +102,7 @@ class Search(object):
         # Add a default and irrelevant object
         if not len(objects):
             objects = [""]
-            fields = set([ (p["name"], p["subject"], p["relevance"]) for p in predicates ])
+            fields = set([ (p["name"], p["subject"], getattr(p, "relevance", 0) ) for p in predicates ])
             fields = sorted(fields, key=lambda r: -r[2])
             for f in fields:
                 # Extract option

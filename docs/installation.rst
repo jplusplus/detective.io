@@ -92,11 +92,6 @@ rontend dependencies and setup the **Neo4j** database.
     * setup the static files
 
 
-Load the initial data
----------------------
-At current state, you won't be able to do so much things with your
-
-
 Setup the database
 ------------------
 

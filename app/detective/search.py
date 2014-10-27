@@ -1,5 +1,6 @@
 from neo4django.db        import connection
 from app.detective.models import SearchTerm
+from app.detective.utils  import topic_cache
 from difflib              import SequenceMatcher
 import re
 
@@ -189,6 +190,13 @@ class Search(object):
         return self.syntax
 
     def get_most_related(self, rel):
+        # Cache key to save the result of this function for each topic and rel
+        cache_key = "most_related_%s" % rel
+        # Get cache value
+        most_related = topic_cache.get(self.topic, cache_key)
+        # Return cache value
+        if most_related is not None: return most_related
+        # Build query
         query = """
             START root=node(0)
             MATCH target-[r:`%s`]->(edge)<-[`<<INSTANCE>>`]-(type)<-[`<<TYPE>>`]-(root)
@@ -198,8 +206,11 @@ class Search(object):
             ORDER BY cnt DESC
             LIMIT 5
         """ % ( rel, self.topic.app_label() )
-
-        return connection.cypher(query).to_dicts()
+        # Get data from neo4j
+        most_related = connection.cypher(query).to_dicts()
+        # Cache and return result
+        topic_cache.set(self.topic, cache_key, most_related)
+        return most_related
 
     @staticmethod
     def ngrams(input):

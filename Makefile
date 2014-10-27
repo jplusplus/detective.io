@@ -89,15 +89,16 @@ clean:
 fclean: clean
 	rm $(CUSTOM_D3)
 
+
+startredis:
+	redis-server start || true
+
+stopredis:
+	redis-server stop || true
+
 ###
 # Neo4j rules
 ###
-
-startredis:
-	redis-server stop
-
-stopredis:
-	redis-server start
 
 stopdb:
 	./lib/neo4j/bin/neo4j stop || true

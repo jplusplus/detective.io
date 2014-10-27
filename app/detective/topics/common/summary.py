@@ -3,7 +3,8 @@ from .errors                import ForbiddenError, UnauthorizedError
 from app.detective.models   import Topic
 from app.detective.search   import Search
 from app.detective.neomatch import Neomatch
-from app.detective          import graph
+from app.detective.parser   import schema
+from app.detective          import graph, utils
 from django.core.paginator  import Paginator, InvalidPage
 from django.http            import Http404, HttpResponse
 from neo4django.db          import connection
@@ -12,8 +13,6 @@ from tastypie.exceptions    import ImmediateHttpResponse
 from tastypie.resources     import Resource
 from tastypie.serializers   import Serializer
 from .jobs                  import process_bulk_parsing_and_save_as_model, render_csv_zip_file
-from app.detective.parser   import schema
-import app.detective.utils  as utils
 import json
 import re
 import logging

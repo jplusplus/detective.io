@@ -11,7 +11,7 @@ TASTYPIE_FULL_DEBUG = DEBUG
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 # Custom data directory
-DATA_ROOT = here('data')
+DATA_ROOT = here('../data')
 
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com'),
@@ -67,7 +67,7 @@ USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = here('media')
+MEDIA_ROOT = here('../media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -78,7 +78,7 @@ MEDIA_URL = '/public/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = here('staticfiles')
+STATIC_ROOT = here('../staticfiles')
 
 LOGIN_URL = "/admin"
 # URL prefix for static files.
@@ -88,9 +88,9 @@ STATIC_URL = '/static/'
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Bower components
-    ('components', here('static/components') ),
-    ('custom_d3', here('static/custom_d3') ),
-    here("detective/static"),
+    ('components', here('../static/components') ),
+    ('custom_d3', here('../static/custom_d3') ),
+    here("../detective/static"),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -153,7 +153,7 @@ ROOT_URLCONF = 'app.urls'
 WSGI_APPLICATION = 'app.wsgi.application'
 
 TEMPLATE_DIRS = (
-    here('detective/templates'),
+    here('../detective/templates'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -162,7 +162,7 @@ TEMPLATE_DIRS = (
 # JS/CSS COMPRESSOR SETTINGS
 COMPRESS_PRECOMPILERS = (
     ('text/coffeescript', 'node_modules/.bin/snockets {infile} > {outfile}'),
-    ('text/less', 'node_modules/.bin/lessc --include-path="%s" {infile} {outfile}' % here('static') ),
+    ('text/less', 'node_modules/.bin/lessc --include-path="%s" {infile} {outfile}' % here('../static') ),
 )
 
 # Remove BeautifulSoup requirement

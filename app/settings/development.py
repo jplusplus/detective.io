@@ -1,4 +1,4 @@
-from settings import *
+from .common import *
 
 MIDDLEWARE_CLASSES.append( 'debug_toolbar.middleware.DebugToolbarMiddleware')
 MIDDLEWARE_CLASSES.append( 'app.middleware.debug_toolbar.JsonAsHTML')

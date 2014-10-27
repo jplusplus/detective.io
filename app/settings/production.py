@@ -5,11 +5,11 @@ Packages required:
     * boto
     * django-storages
 """
-from settings import *
+from .common  import *
 from urlparse import urlparse
+from datetime import date, timedelta
 import os
 import dj_database_url
-from datetime import date, timedelta
 
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com'),

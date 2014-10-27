@@ -16,7 +16,7 @@ framework.
 import os
 import sys
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings.production")
 
 # update python path with lib/
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))

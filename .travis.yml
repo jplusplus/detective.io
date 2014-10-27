@@ -13,7 +13,7 @@ before_install:
 - export COVERALLS_REPO_TOKEN=UDtLCy1He2SylMvJMjq1Uu9f1zVFbTim8
 - export COVERALLS_SERVICE_NAME=travis-ci
 - export DATABASE_URL=sqlite:///test.db
-- export DJANGO_SETTINGS_MODULE=app.settings_tests
+- export DJANGO_SETTINGS_MODULE=app.settings.testing
 - export NEO4J_PORT=7474
 - export NEO4J_VERSION=1.9.1
 install:

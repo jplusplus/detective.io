@@ -1,5 +1,5 @@
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 # -*- coding: utf-8 -*-
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 import os
 # for relative paths
 here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)

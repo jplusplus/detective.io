@@ -1,5 +1,4 @@
 bleach==1.4
-dj-database-url==0.2.1
 django-appconf==0.6
 django-compressor==1.4
 django-cors-headers==0.12

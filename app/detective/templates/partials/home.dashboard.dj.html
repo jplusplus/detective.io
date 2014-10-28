@@ -16,9 +16,6 @@
 					<div class="dashboard__topics__item">
 						<img ng-src="[[topic.thumbnail.medium]]" class="dashboard__topics__item__bg" />
 						<h4 class="dashboard__topics__item__title">
-							<a ui-sref="user-topic({ username: topic.author.username, topic: topic.slug })">
-								[[topic.title]]
-							</a>
 							<span class="dashboard__topics__item__visibility pull-right"
 								  tooltip-placement="bottom"
 								  tooltip="[[ topic.public ? 'public investivagtion' : 'private investigation' ]]">
@@ -28,6 +25,9 @@
 								       'fa-lock': !topic.public
 								   }"></i>
 							</span>
+							<a ui-sref="user-topic({ username: topic.author.username, topic: topic.slug })">
+								[[topic.title]]
+							</a>
 						</h4>
 						<p ng-if="user.owns(topic)">
                             <i class="fa fa-cube"></i>&nbsp;

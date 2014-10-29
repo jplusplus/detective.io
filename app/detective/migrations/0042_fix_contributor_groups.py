@@ -8,6 +8,7 @@ class Migration(DataMigration):
 
     def forwards(self, orm):
         for topic in orm.Topic.objects.all():
+            # Check that the group doesn't exist yet
             if topic.contributor_group == None:
                 try:
                     group = orm['auth.group'].objects.get(name='{0}_contributor'.format(topic.ontology_as_mod))

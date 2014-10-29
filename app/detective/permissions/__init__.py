@@ -16,8 +16,8 @@ Creates permissions for all installed topics that need permissions.
 """
 from .models                    import AppPermission
 from django.db                  import DEFAULT_DB_ALIAS, IntegrityError
-from django.db.models           import signals
 from django.contrib.auth.models import Group, Permission
+from django.conf                import settings
 
 OPERATIONS = (
     ('add'   , 'Add an entity to {app_name}'),
@@ -112,17 +112,22 @@ def create_permissions(app, app_label=None, created_models=None, verbosity=False
     Entry point for permission creation. Will be called after DB synchronisation
     for every installed app (see settings.INSTALLED_APPS)
     """
-    app_name = app.__name__
+    app_name = app if type(app) is str else app.__name__
+    print app_label
 
-    if app_label is None:
+    if app_label is None and False:
         # FIXME: why -2 ?
         app_label = app_name.split('.')[-2]
     # we check if the received signal come from a local installed application
     if app_name.startswith("app.detective.topics"):
-        for op in OPERATIONS:
-            perm_args = _get_permission_args(app_label, op)
-            _create_permission(app_label, perm_args)
-        _create_groups(app_label)
+        # Create the permission for a topic-as-module using its app_label
+        create_topic_permissions(app_label)
+
+def create_topic_permissions(app_label):
+    for op in OPERATIONS:
+        perm_args = _get_permission_args(app_label, op)
+        _create_permission(app_label, perm_args)
+    _create_groups(app_label)
 
 def remove_permissions(sender, instance, using, **kwargs):
     app_label = instance.ontology_as_mod
@@ -136,9 +141,9 @@ def remove_permissions(sender, instance, using, **kwargs):
 #    SIGNALS
 #
 # -----------------------------------------------------------------------------
-# will be trigger for each created app
-
-signals.post_syncdb.connect(create_permissions,
-    dispatch_uid="app.detective.permissions.create_permissions")
-
+# will be trigger for each created app only if south is not installed
+if 'south' not in settings.INSTALLED_APPS:
+    from django.db.models import signals
+    signals.post_syncdb.connect(create_permissions,
+        dispatch_uid="app.detective.permissions.create_permissions")
 #EOF

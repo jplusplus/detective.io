@@ -172,7 +172,6 @@ class window.ContributeCtrl
                         # The field may not exists yet in the database
                         @master[rel] = @master[rel] ? []
                         @fields[rel] = @fields[rel] ? []
-
                         if individual[rel]?
                             # Update the master too in order
                             # to avoid new reloading
@@ -269,7 +268,6 @@ class window.ContributeCtrl
                 @Individual.update params, data, (res)=>
                     # Record master
                     @master = _.extend @master, res
-
                     # Ugly but we should refresh all rich text fields from response
                     _.each res, (value, key) =>
                         if key[0] isnt '$'
@@ -605,7 +603,7 @@ class window.ContributeCtrl
 
     setNewIndividual: (fields, type, parent, parentField, index=-1)=>
         # Avoid object sharing
-        fields = angular.copy(fields)
+        fields = angular.copy fields
         # Ensure that the type isn't title-formatted
         type = type.toLowerCase()
         # Create the new entry obj

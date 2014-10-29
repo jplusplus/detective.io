@@ -596,12 +596,11 @@ class IndividualResource(ModelResource):
         # Set new values to the node
         for field_name in data:
             field       = self.get_model_field(field_name)
-            data[field_name] = without(data[field_name], int(pk))
             field_value = data[field_name]
             # The value can be a list of ID for relationship
             if field.get_internal_type() is 'Relationship':
                 # Pluck id from the list
-                field_ids = [ value for value in field_value ]
+                field_ids = [ value for value in field_value if value is not int(pk) ]
                 # Prefetch all relationship
                 if node_rels is None: node_rels = node.relationships.all()
                 # Get relationship name
@@ -648,6 +647,7 @@ class IndividualResource(ModelResource):
             # Or a literal value
             # (integer, date, url, email, etc)
             else:
+                print field_name, field_value
                 # Remove the values
                 if field_value in [None, '']:
                     # The field may not exists (yet)

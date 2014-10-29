@@ -113,11 +113,11 @@ def create_permissions(app, app_label=None, created_models=None, verbosity=False
     for every installed app (see settings.INSTALLED_APPS)
     """
     app_name = app if type(app) is str else app.__name__
-    print app_label
 
-    if app_label is None and False:
+    if app_label is None:
         # FIXME: why -2 ?
         app_label = app_name.split('.')[-2]
+
     # we check if the received signal come from a local installed application
     if app_name.startswith("app.detective.topics"):
         # Create the permission for a topic-as-module using its app_label

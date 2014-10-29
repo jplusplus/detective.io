@@ -129,9 +129,10 @@ class window.ContributeCtrl
                     related_to: @related_to ? null
                 # It's not a new individual now
                 @isNew = no
+            changes = @getChanges()
+            console.log @fields.name, @master.employs ? null
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
-                changes = @getChanges()
                 # Looks for the differences and update the db if needed
                 @update(changes) if not _.isEmpty(changes) and not @data_are_updating
 
@@ -175,7 +176,7 @@ class window.ContributeCtrl
                         if individual[rel]?
                             # Update the master too in order
                             # to avoid new reloading
-                            @master[rel] = individual[rel]
+                            @master[rel] = angular.copy(individual[rel])
                             @fields[rel] = individual[rel]
                         # Field no more loading
                         delete @updating[rel]

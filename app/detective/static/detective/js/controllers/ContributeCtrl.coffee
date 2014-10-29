@@ -130,7 +130,6 @@ class window.ContributeCtrl
                 # It's not a new individual now
                 @isNew = no
             changes = @getChanges()
-            console.log @fields.name, @master.employs ? null
             # Only if master is completed
             unless _.isEmpty(@master) or @loading
                 # Looks for the differences and update the db if needed

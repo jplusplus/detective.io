@@ -1,0 +1,128 @@
+{% extends "base.dj.html" %}
+{% load staticfiles %}
+{% load compress %}
+
+{% block extracss %}
+    {% compress css %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'components/ngprogress-lite/ngprogress-lite.css' %}">
+    {% endcompress %}
+{% endblock %}
+
+{% block extrajs %}
+
+    {% compress js %}
+        <script src="{% static 'js/modules.js' %}"></script>
+        <script src="{% static 'js/services/UtilsFactory.js' %}"></script>
+        <script src="{% static 'js/services/User.js' %}"></script>
+        <script src="{% static 'js/services/TopicsFactory.js' %}"></script>
+        <script src="{% static 'js/services/TopicSkeleton.js' %}"></script>
+        <script src="{% static 'js/services/TopicDataSet.js' %}"></script>
+        <script src="{% static 'js/services/Topic.js' %}"></script>
+        <script src="{% static 'js/services/Summary.js' %}"></script>
+        <script src="{% static 'js/services/Search.js' %}"></script>
+        <script src="{% static 'js/services/QueryFactory.js' %}"></script>
+        <script src="{% static 'js/services/Page.js' %}"></script>
+        <script src="{% static 'js/services/IndividualForm.js' %}"></script>
+        <script src="{% static 'js/services/Individual.js' %}"></script>
+        <script src="{% static 'js/services/HttpErrorInterceptor.js' %}"></script>
+        <script src="{% static 'js/services/Group.js' %}"></script>
+        <script src="{% static 'js/services/Common.js' %}"></script>
+        <script src="{% static 'js/services/AuthHttpInterceptor.js' %}"></script>
+        <script src="{% static 'js/services/Auth.js' %}"></script>
+        <script src="{% static 'js/filters/yesorno.js' %}"></script>
+        <script src="{% static 'js/filters/titlecase.js' %}"></script>
+        <script src="{% static 'js/filters/strToColor.js' %}"></script>
+        <script src="{% static 'js/filters/nl2br.js' %}"></script>
+        <script src="{% static 'js/filters/individualPreview.js' %}"></script>
+        <script src="{% static 'js/directives/unique.js' %}"></script>
+        <script src="{% static 'js/directives/ttTypeahead.js' %}"></script>
+        <script src="{% static 'js/directives/topic.single.sources.js' %}"></script>
+        <script src="{% static 'js/directives/topic.single.graph.js' %}"></script>
+        <script src="{% static 'js/directives/scrollTo.js' %}"></script>
+        <script src="{% static 'js/directives/screenHeight.js' %}"></script>
+        <script src="{% static 'js/directives/planOverfillDisplayer.js' %}"></script>
+        <script src="{% static 'js/directives/parallax.js' %}"></script>
+        <script src="{% static 'js/directives/oneRequired.js' %}"></script>
+        <script src="{% static 'js/directives/noDuplicates.js' %}"></script>
+        <script src="{% static 'js/directives/noClickPropagation.js' %}"></script>
+        <script src="{% static 'js/directives/match.js' %}"></script>
+        <script src="{% static 'js/directives/httpErrorDisplayer.js' %}"></script>
+        <script src="{% static 'js/directives/homeTour.js' %}"></script>
+        <script src="{% static 'js/directives/focusOn.js' %}"></script>
+        <script src="{% static 'js/directives/emptyOn.js' %}"></script>
+        <script src="{% static 'js/directives/countryMap.js' %}"></script>
+        <script src="{% static 'js/directives/colorTag.js' %}"></script>
+        <script src="{% static 'js/directives/clickOutside.js' %}"></script>
+        <script src="{% static 'js/directives/classOnFocus.js' %}"></script>
+        <script src="{% static 'js/directives/checkPassword.js' %}"></script>
+        <script src="{% static 'js/directives/changeOnBlur.js' %}"></script>
+        <script src="{% static 'js/directives/card.js' %}"></script>
+        <script src="{% static 'js/directives/autofill.js' %}"></script>
+        <script src="{% static 'js/controllers/UserTopicCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/UserProfileCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/UserCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/TourCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/TopicFormCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/TopicBannerCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/SearchFormCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/RelationshipPropertiesCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/PageCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/NotFoundCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/MainAsideCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/LoginCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/LeaveTopicModalCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/IndividualSingleCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/IndividualListCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/IndividualSearchCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/HeaderCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/ExploreCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/EditTopicCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/DeleteTopicCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/DeleteAccountFormCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/DashboardCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/CreateTopicCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/ContributeCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/ContactUsCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/ConfirmAccountDeleteModalCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/ChangePasswordFormCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/BulkUploadCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/ArticleCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/AddSourcesModalCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/AddCollaboratorsCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/AccountSettingsCtrl.js' %}"></script>
+        <script src="{% static 'js/constants/events.js' %}"></script>
+        <script src="{% static 'js/config/urlRouter.js' %}"></script>
+        <script src="{% static 'js/config/uiViewScroll.js' %}"></script>
+        <script src="{% static 'js/config/tooltip.js' %}"></script>
+        <script src="{% static 'js/config/textAngular.js' %}"></script>
+        <script src="{% static 'js/config/states.js' %}"></script>
+        <script src="{% static 'js/config/safeApply.js' %}"></script>
+        <script src="{% static 'js/config/rootScope.js' %}"></script>
+        <script src="{% static 'js/config/ngProgressLite.js' %}"></script>
+        <script src="{% static 'js/config/ngFormDecorator.js' %}"></script>
+        <script src="{% static 'js/config/locationScrollTo.js' %}"></script>
+        <script src="{% static 'js/config/loadWatch.js' %}"></script>
+        <script src="{% static 'js/config/interpolation.js' %}"></script>
+        <script src="{% static 'js/config/httpProvider.js' %}"></script>
+        <script src="{% static 'js/config/embedly.js' %}"></script>
+        <script src="{% static 'js/config/authWatch.js' %}"></script>
+        <script src="{% static 'js/config/adminWatch.js' %}"></script>
+    {% endcompress %}
+    <span class='topic__single__graph__worker'>
+        {% compress js %}
+            <script src="{% static 'js/workers/topic.single.graph.js' %}"></script>
+        {% endcompress %}
+    </span>
+{% endblock %}
+
+{% block content %}
+    <div class="main-aside-wrapper">
+        <div class="main-aside-pushed">
+            {% include "partials/header.dj.html" %}
+            {% include "partials/main-aside.dj.html" %}
+            <div ui-view autoscroll class="content" ng-class="{ freeze: Page.loading() }"></div>
+            {% include "partials/footer.dj.html" %}
+        </div>
+    </div>
+{% endblock %}

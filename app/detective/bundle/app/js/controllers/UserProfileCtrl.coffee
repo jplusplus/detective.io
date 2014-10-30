@@ -1,26 +1,4 @@
-# shared function between UserProfileCtrl & its resolve
-getTopics = (groups)-> _.pluck groups.objects, 'topic'
-
-loadGroups = (Group, user, page)->
-    (Group.collaborator { user_id : user.id , page : page }).$promise.then (data)->
-        data
-
 class window.UserProfileCtrl
-
-    @resolve:
-        user: UserCtrl.resolve.user
-
-        userGroups: ['Group', '$q', 'user', (Group, $q, user)->
-            deferred = $q.defer()
-            loadGroups(Group, user, 1).then (results)->
-                deferred.resolve results
-            deferred.promise
-        ]
-
-        topics: [ 'userGroups', (userGroups)->
-            getTopics userGroups
-        ]
-
     # Injects dependencies
     @$inject: ['$scope', 'Common', 'Page', '$state', '$q', '$http', 'user', 'Group', 'userGroups', 'topics']
 
@@ -64,6 +42,11 @@ class window.UserProfileCtrl
             organization : no
             url : no
 
+    getTopics: (groups)-> _.pluck groups.objects, 'topic'
+    loadGroups: (Group, user, page)->
+        (Group.collaborator { user_id : user.id , page : page }).$promise.then (data)->
+            data
+
     hasNextGroups: (p=@topics_page)=> @userGroups.meta.total_count > (@userGroups.meta.limit * p)
     hasNext: (p=@topics_page)=> @hasNextGroups(p)
     hasPrevious: (p=@topics_page)=> p > 1
@@ -78,11 +61,11 @@ class window.UserProfileCtrl
         @topics_page = page
         deferred = do @q.defer
         (@q.all [
-            loadGroups(@Group, @user, page)
+            @loadGroups(@Group, @user, page)
         ]).then (results) =>
             @userGroups = results[0]
             @scope.loading = false
-            deferred.resolve(getTopics(@userGroups))
+            deferred.resolve(@getTopics(@userGroups))
         deferred.promise
 
     loadUserTopics: (page) =>

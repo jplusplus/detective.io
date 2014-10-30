@@ -116,14 +116,34 @@ angular.module('detective.config').config [
                 controller: UserProfileCtrl
                 templateUrl: "/partial/account.html"
                 default: 'user'
-                resolve: UserProfileCtrl.resolve
+                resolve:
+                    user: UserCtrl.resolve.user
+                    userGroups: ['Group', '$q', 'user', (Group, $q, user)->
+                        deferred = $q.defer()
+                        loadGroups(Group, user, 1).then (results)->
+                            deferred.resolve results
+                        deferred.promise
+                    ]
+                    topics: [ 'userGroups', (userGroups)->
+                        UserProfileCtrl.getTopics userGroups
+                    ]
             )
             .state('user.me',
                 auth: true
                 controller: UserProfileCtrl
                 templateUrl: "/partial/account.html"
                 default: 'user'
-                resolve: UserProfileCtrl.resolve
+                resolve:
+                    user: UserCtrl.resolve.user
+                    userGroups: ['Group', '$q', 'user', (Group, $q, user)->
+                        deferred = $q.defer()
+                        loadGroups(Group, user, 1).then (results)->
+                            deferred.resolve results
+                        deferred.promise
+                    ]
+                    topics: [ 'userGroups', (userGroups)->
+                        UserProfileCtrl.getTopics userGroups
+                    ]
             )
             .state('user.settings',
                 auth: true

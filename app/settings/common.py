@@ -87,10 +87,8 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    # Bower components
-    ('components', here('../static/components') ),
     ('custom_d3', here('../static/custom_d3') ),
-    here("../detective/static"),
+    here("../detective/bundle/.build/"),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -154,15 +152,10 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 TEMPLATE_DIRS = (
     here('../detective/templates'),
+    here('../detective/bundle/app/templates'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-)
-
-# JS/CSS COMPRESSOR SETTINGS
-COMPRESS_PRECOMPILERS = (
-    ('text/coffeescript', 'node_modules/.bin/snockets {infile} > {outfile}'),
-    ('text/less', 'node_modules/.bin/lessc --include-path="%s" {infile} {outfile}' % here('../static') ),
 )
 
 # Remove BeautifulSoup requirement

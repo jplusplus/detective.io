@@ -80,7 +80,7 @@ gulp.task('inject', ['coffee'], function() {
 });
 
 
-gulp.task('default', ['coffee', 'less', 'bower', 'copy', 'inject']);
+gulp.task('default', ['coffee', 'less', 'bower', 'copy']);
 
 gulp.task('watch', ['default'], function() {
 	gulp.watch('app/css/**/*.less', ['less']);

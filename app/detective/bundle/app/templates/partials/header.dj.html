@@ -25,6 +25,10 @@
                 ng-show="userMenuOpened"
                 click-outside="closeUserMenu($event)">
                 <li class="header__user__user-menu__items__item">
+                  <a ui-sref="home.dashboard">My dashboard</a>
+                </li>
+
+                <li class="header__user__user-menu__items__item">
                   <a ng-click="goToMyProfile()">My profile</a>
                 </li>
 

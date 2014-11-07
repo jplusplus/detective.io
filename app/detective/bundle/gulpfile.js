@@ -7,6 +7,7 @@ var less         = require('gulp-less');
 var del          = require('del')
 var path         = require('path');
 var wiredep      = require('wiredep').stream;
+var livereload   = require('gulp-livereload');
 
 gulp.task('clean', function(cb) {
   del(['.build'], cb);
@@ -21,7 +22,8 @@ gulp.task('less', function () {
     	})
     	.on('error', gutil.log)
     )
-    .pipe(gulp.dest('.build/css/'));
+    .pipe(gulp.dest('.build/css/'))
+    .pipe(livereload({silent: true}));
 });
 
 gulp.task('coffee', function() {
@@ -29,7 +31,8 @@ gulp.task('coffee', function() {
     .pipe(
     	coffee({bare: true}).on('error', gutil.log)
     )
-    .pipe(gulp.dest('.build/js/'));
+    .pipe(gulp.dest('.build/js/'))
+    .pipe(livereload({silent: true}));
 });
 
 gulp.task('copy', function () {
@@ -66,7 +69,7 @@ gulp.task('inject', ['coffee'], function() {
 	// Preserve angular order
 	sources = sources.pipe(angular())
 	// Inspect template file
-  gulp.src('app/templates/*.html')
+  return gulp.src('app/templates/*.html')
   	// Inject sources from above
  		.pipe(inject(sources, {
  			addRootSlash: false,
@@ -83,7 +86,7 @@ gulp.task('inject', ['coffee'], function() {
 gulp.task('default', ['coffee', 'less', 'bower', 'copy']);
 
 gulp.task('watch', ['default'], function() {
-	gulp.watch('app/css/**/*.less', ['less']);
-	gulp.watch('app/js/**/*.coffee', ['coffee']);
-	gulp.watch('bower.json', ['bower']);
+  gulp.watch('app/css/**/*.less', ['less']);
+  gulp.watch('app/js/**/*.coffee', ['coffee']);
+  gulp.watch('bower.json', ['bower']);
 });

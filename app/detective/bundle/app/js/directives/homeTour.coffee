@@ -36,22 +36,28 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
             controller.scrollTo (newScrollPos)->
                 $("html, body").animate scrollTop: newScrollPos
 
+            scenes = []
+
             # ──────────────────────────────────────────────────────────────────────
             # First screen
             # ──────────────────────────────────────────────────────────────────────
-            new ScrollScene()
+            scene = new ScrollScene()
                 .triggerHook(0.5)
                 .duration(600)
                 .triggerElement(".home__tour__front")
                 .addTo(controller)
                 .on("enter", enter 0)
 
-            new ScrollScene()
+            scenes.push scene
+
+            scene = new ScrollScene()
                 .triggerHook(0.5)
                 .duration(600)
                 .triggerElement(".home__tour__features")
                 .addTo(controller)
                 .on("enter", enter 1)
+
+            scenes.push scene
 
             # ──────────────────────────────────────────────────────────────────────
             # Features screens
@@ -67,7 +73,7 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
             # Cascading quote appearance
             for n in [0.. FEATURE_COUNT - 1]
                 # Create a scene
-                new ScrollScene()
+                scene = new ScrollScene()
                     .triggerHook(0)
                     .triggerElement(".home__tour__feature-list")
                     .duration(FEATURE_DURATION)
@@ -79,21 +85,24 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
                     .on("enter", enter 2+n)
                     .on("enter", enterQuote n)
                     .on("leave", leave n)
+                scenes.push scene
 
 
             # ──────────────────────────────────────────────────────────────────────
             # Quotes screen
             # ──────────────────────────────────────────────────────────────────────
-            new ScrollScene()
+            scene = new ScrollScene()
                 .triggerHook(0.5)
                 .triggerElement(".home__tour__quotes")
                 .addTo(controller)
                 .on("enter", enter FEATURE_COUNT+2)
 
+            scenes.push scene
+
             # ──────────────────────────────────────────────────────────────────────
             # Get-ready screen
             # ──────────────────────────────────────────────────────────────────────
-            new ScrollScene()
+            scene = new ScrollScene()
                 .triggerElement(".home__tour__get-ready")
                 .triggerHook(0.5)
                 .duration(600*4)
@@ -103,13 +112,17 @@ angular.module('detective.directive').directive 'homeTour', ["$window", ($window
                 .addTo(controller)
                 .on("enter", enter FEATURE_COUNT+3)
 
+            scenes.push scene
+
             # ──────────────────────────────────────────────────────────────────────
             # Pricing screen
             # ──────────────────────────────────────────────────────────────────────
-            new ScrollScene()
+            scene = new ScrollScene()
                 .triggerHook(0.5)
                 .triggerElement(".home__tour__pricing")
                 .addTo(controller)
                 .on("enter", enter FEATURE_COUNT+4)
+
+            scenes.push scene
 
 ]

@@ -23,13 +23,17 @@
         position:absolute;
         left:0;
         top:0;
-        width: @header-height;
+        padding-left: 15px;
+        padding-right: 15px;
+        word-spacing: 0.2em;
         height: @header-height - 1px;
         line-height: @header-height;
         display: block;
         font-size: 20px;
         color:black;
         text-align: center;
+        text-decoration: none;
+        border-right:#DDD solid 1px;
 
         &--active, &--active:hover {
             background:@brand-primary;
@@ -139,14 +143,13 @@
     }
 
     .topic-search {
-        border-left:#DDD solid 1px;
         position:absolute;
         z-index:@zindex-header;
         top:0;
         bottom:0;
         padding-top:9px;
         padding-left:9px;
-        left:@header-height;
+        left:115px;
         right:@header-height * 2px;
 
         &__home {

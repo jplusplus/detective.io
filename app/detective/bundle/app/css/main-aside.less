@@ -46,6 +46,15 @@
        width:100%;
     }
 
+    &__overlay {
+        position: absolute;
+        left:100%;
+        width:99999999999999px;
+        top:@header-height;
+        bottom:0;
+        background:fade(@brand-secondary, 15%);
+    }
+
     .show-aside:not(.is-home) & {
         .translate(0, 0);
     }

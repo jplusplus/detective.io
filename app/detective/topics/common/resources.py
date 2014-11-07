@@ -211,7 +211,7 @@ class TopicAuthorization(ReadOnlyAuthorization):
         is_author    = user.is_authenticated() and bundle.obj.author == user
         # Only authenticated user can update there own topic or people from the
         # contributor group
-        return is_author or user.groups.filter(name=contributors).exists()
+        return user.is_staff or is_author or user.groups.filter(name=contributors).exists()
 
     # Only authenticated user can create topics
     def create_detail(self, object_list, bundle):

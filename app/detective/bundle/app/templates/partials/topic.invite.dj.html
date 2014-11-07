@@ -1,91 +1,104 @@
 <div class="container">
-	<form novalidate class="topic__invite" name="addcollaborator">
-		<h2><i class="fa fa-users"></i> Add new collaborators</h2>
-		<p class="lead text-muted">Invite people to contribute to your investigation.</p>
+	<h2><i class="fa fa-users"></i> Collaborators</h2>
+	<div class="row">
+		<div class="col-md-5">
+			<h3>Invite people to contribute</h3>
+			<form novalidate class="topic__invite" name="addcollaborator">
+				<div class="panel panel-default topic__invite__panel">
+					<img ng-src="[[topic.thumbnail.small]]" class="topic__invite__panel__bg" />
+					<div class="topic__invite__panel__preview">
+						<h4 class="topic__invite__panel__preview__title">[[topic.title|characters:40]]</h4>
+						<p ng-if="topic.author.id == user.id"  class="topic__invite__panel__preview__author">
+							<i class="fa fa-star"></i>&nbsp;Owned by you
+						</p>
+						<p ng-if="topic.author.id != user.id" class="topic__invite__panel__preview__author">
+							by <a ui-sref="user(topic.author)">[[topic.author.username]]</a>
+						</p>
+					</div>
+					<div class="topic__invite__panel__user-picker">
+						<input required
+							   type="text"
+							   class="form-control"
+							   ng-disabled="loading"
+							   autocorrect="off"
+							   autocapitalize="off"
+							   tt-model="collaborator"
+							   ng-model="collaborator_name"
+							   tt-typeahead
+							   tt-disable-loading-icon="collaborator_name.indexOf('@') > -1"
+							   tt-disable-empty-results
+							   tt-transform="prepareSearch(objects)"
+							   tt-prefetch-url="'/api/detective/common/v1/user/?username__icontains=%QUERY'"
+							   tt-remote-url="'/api/detective/common/v1/user/?username__icontains=%QUERY'"
+							   placeholder="Add new collaborator with their username or email address" />
+					</div>
+				</div>
+				<div class="topic__invite__panel text-right">
+					<a class="btn btn-link pull-left" ui-sref="home.dashboard">
+						<i class="fa fa-arrow-left"></i>&nbsp;Go back to your dashboard
+					</a>
+					<button type="submit" ng-click="invite(collaborator)" class="btn btn-primary" ng-disabled="!addcollaborator.$valid || loading">
+						Add collaborator
+					</button>
 
-		<div class="panel panel-default topic__invite__panel">
-			<img ng-src="[[topic.thumbnail.small]]" class="topic__invite__panel__bg" />
-			<div class="topic__invite__panel__preview">
-				<h4 class="topic__invite__panel__preview__title">[[topic.title|characters:40]]</h4>
-				<p ng-if="topic.author.id == user.id"  class="topic__invite__panel__preview__author">
-					<i class="fa fa-star"></i>&nbsp;Owned by you
-				</p>
-				<p ng-if="topic.author.id != user.id" class="topic__invite__panel__preview__author">
-					by <a ui-sref="user(topic.author)">[[topic.author.username]]</a>
-				</p>
-			</div>
-			<div class="topic__invite__panel__user-picker">
-				<input required
-					   type="text"
-					   class="form-control"
-					   ng-disabled="loading"
-					   autocorrect="off"
-					   autocapitalize="off"
-					   tt-model="collaborator"
-					   ng-model="collaborator_name"
-					   tt-typeahead
-					   tt-disable-loading-icon="collaborator_name.indexOf('@') > -1"
-					   tt-disable-empty-results
-					   tt-transform="prepareSearch(objects)"
-					   tt-prefetch-url="'/api/detective/common/v1/user/?username__icontains=%QUERY'"
-					   tt-remote-url="'/api/detective/common/v1/user/?username__icontains=%QUERY'"
-					   placeholder="Add new collaborator with their username or email address" />
-			</div>
+					<div class="alert alert-success top20 text-left" ng-if="invited">
+						Invitation sent to <strong>[[invited]]</strong>.
+					</div>
+				</div>
+			</form>
 		</div>
-		<div class="topic__invite__panel text-right">
-			<a class="btn btn-link pull-left" ui-sref="home.dashboard">
-				<i class="fa fa-arrow-left"></i>&nbsp;Go back to your dashboard
-			</a>
-			<button type="submit" ng-click="invite(collaborator)" class="btn btn-primary" ng-disabled="!addcollaborator.$valid || loading">
-				Add collaborator
-			</button>
-
-			<div class="alert alert-success top20 text-left" ng-if="invited">
-				Invitation sent to <strong>[[invited]]</strong>.
-			</div>
-		</div>
-		<br />
-		<div class="topic__invite__list">
-			<h2><i class="fa fa-bars"></i> List of collaborators</h2>
-			<table class="table table-hover">
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>Username</th>
-						<th>E-mail</th>
-						<th>Status</th>
-						<th class="text-center">Action</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="collaborator in collaborators | orderBy:orderCollaborators" class="text-left">
-						<td>[[ $index + 1 ]]</td>
-						<td>
-							[[ collaborator.username ]]
-							<strong ng-if="isYou(collaborator)"> (you)</strong>
-						</td>
-						<td></td>
-						<td>
-							<span ng-switch on="isOwner(collaborator)">
-								<strong ng-switch-when="true"><em>Owner</em></strong>
-								<span ng-switch-default ng-switch on="isAdmin(collaborator)">
-									<span ng-switch-when="true"><i class="fa fa-fire"></i> Admin</span>
-									<span ng-switch-default>Contributor</span>
+		<div  class="col-md-7">
+			<div class="topic__invite__list">
+				<h3>List of collaborators</h3>
+				<table class="table table-hover panel panel-default">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Username</th>
+							<th>Status</th>
+							<th class="text-center">Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="collaborator in collaborators | orderBy:orderCollaborators" class="text-left">
+							<td>[[ $index + 1 ]]</td>
+							<td>
+								[[ collaborator.username ]]
+								<strong ng-if="isYou(collaborator)"> (you)</strong>
+							</td>
+							<td>
+								<span ng-switch on="isOwner(collaborator)">
+									<strong ng-switch-when="true"><em>Owner</em></strong>
+									<span ng-switch-default ng-switch on="isAdmin(collaborator)">
+										<span ng-switch-when="true"><i class="fa fa-fire"></i> Admin</span>
+										<span ng-switch-default>Contributor</span>
+									</span>
 								</span>
-							</span>
-						</td>
-						<td class="text-center">
-							<span ng-switch on="isOwner(collaborator)">
-								<strong ng-switch-when="true">-</strong>
-								<span ng-switch-default>
-									<a href="" ng-click="changePermission(collaborator)"><span ng-switch on="isAdmin(collaborator)"><span ng-switch-when="true">Remove admin status</span><span ng-switch-default>Make admin</span></span></a>
-									<a href="" ng-click="removeCollaborator(collaborator)" alt="Remove from collaborators list"><i class="fa fa-lg fa-trash"></i></a>
+							</td>
+							<td class="text-center">
+								<span ng-switch on="isOwner(collaborator)">
+									<strong ng-switch-when="true">-</strong>
+									<span ng-switch-default class="btn-group btn-group-xs">
+										<button class="btn btn-default" ng-click="changePermission(collaborator)">
+											<span ng-switch on="isAdmin(collaborator)">
+												<span ng-switch-when="true">
+													Remove admin status
+												</span>
+												<span ng-switch-default>
+													Make admin
+												</span>
+											</span>
+										</button>
+										<button class="btn btn-default" ng-click="removeCollaborator(collaborator)" tooltip="Remove from collaborators list">
+											<i class="fa fa-lg fa-trash"></i>
+										</button>
+									</span>
 								</span>
-							</span>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
-	</form>
+	</div>
 </div>

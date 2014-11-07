@@ -98,7 +98,7 @@ class TopicAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display        = ("title", "link", "public","app_label")
     list_filter         = ("public","featured","author")
-    search_fields       = ('title', 'slug', 'author')
+    search_fields       = ('title', 'slug', 'author__username')
     readonly_fields     = ('entities_count',)
     actions             = ['duplicate']
     suit_form_tabs      = (

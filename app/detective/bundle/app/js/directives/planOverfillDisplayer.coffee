@@ -1,4 +1,4 @@
-(angular.module 'detective.directive').directive 'planOverfillDisplayer', ['$rootScope', '$timeout', 'User', ($rootScope, $timeout, User) ->
+(angular.module 'detective.directive').directive 'planOverfillDisplayer', ['$rootScope', '$timeout', ($rootScope, $timeout) ->
     restrict : 'A'
     template : "<div ng-include src='templateUrl' class='plan-overfill-message' ng-if='!hidden'></div>"
     scope    :
@@ -10,12 +10,12 @@
         scope.close = =>
             scope.hidden = true
 
-        $rootScope.$on "user:updated", =>
-            scope.plan_name       = User.profile.plan
-            scope.topics_max      = User.profile.topics_max
-            scope.topics_count    = User.profile.topics_count
-            scope.nodes_max       = User.profile.nodes_max
-            scope.max_nodes_count = Math.max.apply(null, _.values(User.profile.nodes_count))
+        $rootScope.$on "user:updated", (ev, user)=>
+            scope.plan_name       = user.profile.plan
+            scope.topics_max      = user.profile.topics_max
+            scope.topics_count    = user.profile.topics_count
+            scope.nodes_max       = user.profile.nodes_max
+            scope.max_nodes_count = Math.max.apply(null, _.values(user.profile.nodes_count))
             scope.hidden          = false
             element.removeClass("plan-overfill-message--attention")
             # Differents messages to show. Order matter.

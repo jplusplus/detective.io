@@ -51,16 +51,11 @@ neo4j_install:
 	# Install neo4j locally
 	./install_local_neo4j.bash $$NEO4J_VERSION
 
-npm_install:
-	# Install npm packages
-	npm install
-
-bower_install:
-	# Install bower packages
-	./node_modules/.bin/bower install
-
 statics_install:
 	cd app/detective/bundle; npm install; bower install; gulp
+
+watch:
+	cd app/detective/bundle; gulp watch
 
 install: $(VENV) pip_install $(CUSTOM_D3) neo4j_install statics_install
 

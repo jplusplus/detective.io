@@ -42,8 +42,8 @@ class window.UserProfileCtrl
             organization : no
             url : no
 
-    getTopics: (groups)-> _.pluck groups.objects, 'topic'
-    loadGroups: (Group, user, page)->
+    @getTopics: (groups)-> _.pluck groups.objects, 'topic'
+    @loadGroups: (Group, user, page)->
         (Group.collaborator { user_id : user.id , page : page }).$promise.then (data)->
             data
 

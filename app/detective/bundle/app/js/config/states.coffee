@@ -120,7 +120,7 @@ angular.module('detective.config').config [
                     user: UserCtrl.resolve.user
                     userGroups: ['Group', '$q', 'user', (Group, $q, user)->
                         deferred = $q.defer()
-                        loadGroups(Group, user, 1).then (results)->
+                        UserProfileCtrl.loadGroups(Group, user, 1).then (results)->
                             deferred.resolve results
                         deferred.promise
                     ]
@@ -137,7 +137,7 @@ angular.module('detective.config').config [
                     user: UserCtrl.resolve.user
                     userGroups: ['Group', '$q', 'user', (Group, $q, user)->
                         deferred = $q.defer()
-                        loadGroups(Group, user, 1).then (results)->
+                        UserProfileCtrl.loadGroups(Group, user, 1).then (results)->
                             deferred.resolve results
                         deferred.promise
                     ]

@@ -55,7 +55,7 @@ def home(request, social_meta_dict=None,**kwargs):
         social_meta_dict = default_social_meta(request)
 
     # Render template without any argument
-    response = render_to_response('home.dj.html', { 'meta': social_meta_dict } )
+    response = render_to_response('home.dj.html', { 'meta': social_meta_dict, 'debug': settings.DEBUG } )
 
     # Add a cookie containing some user information
     if request.user.is_authenticated():

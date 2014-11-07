@@ -1,4 +1,6 @@
-#=require IndividualListCtrl
+###
+# @requires IndividualListCtrl.js
+###
 class window.IndividualSearchCtrl extends window.IndividualListCtrl
     @$inject: IndividualListCtrl.$inject.concat ['QueryFactory', 'TopicsFactory']
 

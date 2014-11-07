@@ -42,29 +42,22 @@ $(VENV) :
 pip_install:
 	. $(ENV) ; pip install -r $(REQUIREMENTS_FILE)
 
-npm_install:
-	# Install npm packages
-	npm install
-
 $(CUSTOM_D3):
 	# Install a custom d3 package
 	make -C `dirname $(CUSTOM_D3)`
 
-bower_install:
-	# Install bower packages
-	./node_modules/.bin/bower install
 
 neo4j_install:
 	# Install neo4j locally
 	./install_local_neo4j.bash $$NEO4J_VERSION
 
 statics_install:
-	. $(ENV) ; python manage.py compress --force
-	rm -f $(PWD)/app/staticfiles/CACHE/img $(PWD)/app/staticfiles/CACHE/svg
-	ln -sf $(PWD)/app/detective/static/detective/img/ $(PWD)/app/staticfiles/CACHE/img
-	ln -sf $(PWD)/app/detective/static/detective/svg/ $(PWD)/app/staticfiles/CACHE/svg
+	cd app/detective/bundle; npm install; bower install; gulp
 
-install: $(VENV) pip_install npm_install $(CUSTOM_D3) bower_install neo4j_install statics_install
+watch:
+	cd app/detective/bundle; gulp watch
+
+install: $(VENV) pip_install $(CUSTOM_D3) neo4j_install statics_install
 
 ###
 # Doc generation

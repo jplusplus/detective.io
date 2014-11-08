@@ -15,7 +15,6 @@ DATA_ROOT = here('../data')
 
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com'),
-    ('Edouard Richard', 'edouard@jplusplus.org')
 )
 
 DEFAULT_FROM_EMAIL = 'Detective.io <contact@detective.io>'

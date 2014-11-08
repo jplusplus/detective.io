@@ -32,6 +32,9 @@ run: clean startdb startredis
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py rqworker high default low &
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading 0.0.0.0:$(PORT)
 
+watch:
+	cd app/detective/bundle; gulp node_modules/.bin/watch
+
 ###
 # Installation rules
 ###
@@ -52,10 +55,7 @@ neo4j_install:
 	./install_local_neo4j.bash $$NEO4J_VERSION
 
 statics_install:
-	cd app/detective/bundle; npm install; bower install; gulp
-
-watch:
-	cd app/detective/bundle; gulp watch
+	cd app/detective/bundle; npm install; bower install; node_modules/.bin/gulp
 
 install: $(VENV) pip_install $(CUSTOM_D3) neo4j_install statics_install
 

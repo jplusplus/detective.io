@@ -4,7 +4,7 @@
 
 {% block extracss %}
     {% compress css %}
-        <link rel="stylesheet" type="text/less" href="{% static 'detective/css/base.less' %}">
+        <link rel="stylesheet" type="text/less" href="{% static 'css/base.less' %}">
         <link rel="stylesheet" type="text/less" href="{% static 'components/ngprogress-lite/ngprogress-lite.css' %}">
     {% endcompress %}
 {% endblock %}
@@ -12,11 +12,11 @@
 {% block extrajs %}
 
     {% compress js %}
-        <script type="text/coffeescript" src="{% static 'detective/js/app.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'js/app.coffee' %}"></script>
     {% endcompress %}
     <span class='topic__single__graph__worker'>
         {% compress js %}
-            <script type="text/coffeescript" src="{% static 'detective/js/workers/topic.single.graph.coffee' %}"></script>
+            <script type="text/coffeescript" src="{% static 'js/workers/topic.single.graph.coffee' %}"></script>
         {% endcompress %}
     </span>
 {% endblock %}

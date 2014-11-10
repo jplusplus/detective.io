@@ -46,7 +46,7 @@ gulp.task('bower', function () {
   	// Inspect bower packages
     .pipe(wiredep({
     	// Excluded dependencies (must be added manually)
-    	exclude: [ /angulartics/ ],
+    	exclude: [ /angulartics/, /jsPlumb/ ],
     	// Remove '../' path prefix
     	ignorePath: '../',
     	// Change tag's templates to add django filter

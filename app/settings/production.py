@@ -93,7 +93,6 @@ DEBUG                      = bool(os.getenv('DEBUG', False))
 STATIC_URL                 = os.getenv('STATIC_URL')
 MEDIA_URL                  = STATIC_URL
 STATIC_ROOT                = here('../staticfiles')
-STATICFILES_DIRS          += (here('../static'),)
 INSTALLED_APPS            += ('storages', )
 DEFAULT_FILE_STORAGE       = 'storages.backends.s3boto.S3BotoStorage'
 THUMBNAIL_DEFAULT_STORAGE  = DEFAULT_FILE_STORAGE

@@ -33,12 +33,7 @@ class window.TopicFormCtrl
         unless @scope.loading
             @scope.submitted = no
 
-    assertModeInitialized: =>
-        return if @form_mode?
-        throw new Error("TopicFormCtrl children must set the form mode (create or edit)")
-
     submit: (form, panel='main')=>
-        @assertModeInitialized()
         @scope.submitted = yes
         return unless form.$valid
         if @isEditing()

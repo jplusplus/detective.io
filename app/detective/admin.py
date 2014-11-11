@@ -16,6 +16,7 @@ from django.db                  import models
 from django.db.models           import CharField
 from django.contrib.auth.admin  import UserAdmin
 from django.contrib.auth.models import User
+from suit.admin                 import SortableModelAdmin
 
 class QuoteRequestAdmin(admin.ModelAdmin):
     save_on_top   = True
@@ -179,8 +180,9 @@ class TopicSkeletonForm(forms.ModelForm):
         if instance:
             self.initial['target_plans'] = instance.selected_plans()
 
-class TopicSkeletonAdmin(admin.ModelAdmin):
+class TopicSkeletonAdmin(SortableModelAdmin):
     form = TopicSkeletonForm
+    sortable = 'order'
     list_display = ("title","picture","description_stripped", "picture_credits", "target_plans")
 
 admin.site.register(TopicSkeleton, TopicSkeletonAdmin)

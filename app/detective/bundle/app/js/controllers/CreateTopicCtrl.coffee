@@ -28,7 +28,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @Page.title "Create a new investigation"
         # Scope attributes
         @scope.skeletons         = skeletons
-        @scope.selected_skeleton = null
+        @scope.selected_skeleton = skeletons[0] # null
         @scope.topic             = {}
         @scope.user              = @User
         if @userMaxReached()
@@ -44,7 +44,10 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.shouldShowForm      = => (do @hasSelectedSkeleton) and (do @hasSelectedDataSet)
         # Scope events
         @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
-        @state.go "user-topic-create.choose-ontology" unless @scope.selected_skeleton?
+        if @scope.selected_skeleton?
+            @state.go "user-topic-create.describe"
+        else
+            @state.go "user-topic-create.choose-ontology"
 
     selectSkeleton: (skeleton)=>
         if not skeleton?

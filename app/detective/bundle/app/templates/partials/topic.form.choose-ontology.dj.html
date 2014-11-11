@@ -43,19 +43,19 @@
     </div>
 
     <div class="skeletons__overlay" ng-show="selected_skeleton"  ng-click="selectSkeleton(null)"></div>
-    <div class="skeletons__details panel panel-default" ng-show="selected_skeleton">
-      <div class="skeletons__details__front" style="background-image: url('[[selected_skeleton.thumbnail.medium]]');">
-        <h3 class="skeletons__details__front__title">[[selected_skeleton.title]]</h3>
-        <div class="lead skeletons__details__front__description" ng-bind-html="selected_skeleton.description"></div>
+    <div class="topic-form__selected-ontology skeletons__details panel panel-default" ng-show="selected_skeleton">
+      <div class="topic-form__selected-ontology__front" style="background-image: url('[[selected_skeleton.thumbnail.medium]]');">
+        <h3 class="topic-form__selected-ontology__front__title">[[selected_skeleton.title]]</h3>
+        <div class="lead topic-form__selected-ontology__front__description" ng-bind-html="selected_skeleton.description"></div>
       </div>
-      <div class="panel-body skeletons__details__body">
+      <div class="panel-body topic-form__selected-ontology__body">
         <p>This template will let you add:</p>
         <span ng-repeat="model in selected_skeleton.ontology_models">
-          <span class="skeletons__details__body__model" style="background: [[model|strToColor]]">[[model]]</span>
+          <span class="topic-form__selected-ontology__body__model" style="background: [[model|strToColor]]">[[model]]</span>
         </span>
         <p class="text-muted">And relationships between each other.</p>
       </div>
-      <div class="panel-footer skeletons__details__footer">
+      <div class="panel-footer topic-form__selected-ontology__footer">
         <button class="btn btn-primary pull-right" type="button" ui-sref="user-topic-create.describe">
           Next
         </button>

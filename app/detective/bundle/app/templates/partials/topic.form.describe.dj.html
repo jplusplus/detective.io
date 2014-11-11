@@ -1,0 +1,241 @@
+<div ng-if="isEditing()">
+    <h2>
+        <i class="fa fa-cog"></i>&nbsp;Settings of [[topic.title]]
+        <small>
+          <label class="label label-info" ng-if="!topic.public">private</label>
+        </small>
+    </h2>
+    <div class="lead">
+        Selected data scheme: <strong>[[ topic.skeleton_title || "Custom" ]]</strong>
+    </div>
+</div>
+
+<div class="form-horizontal panel panel-default"
+     ng-class="{
+        'error': max_reached,
+        'saved': (isEditing() && !!saved),
+        'loading': loading.main
+      }"
+     id="topic-form">
+
+    <div class="panel-heading" ng-if="isCreating() && max_reached">
+        <h3 class="panel-title">You've reached the limit of your plan! </h3>
+        Your <span class="bold">[[ plan_name ]]</span> plan lets you store [[ topics_max ]] topics.
+        You're now at [[ topics_count ]]. If you want to create new investigations it's time
+        to <a ui-sref="plans">upgrade</a>!
+    </div>
+
+    <div class="panel-body">
+        <!-- Topic public/private field. We show this checkbox only on creation.
+             For edition we add a danger-zone at <thead></thead> botton of this form. -->
+        <div class="row form-group" ng-if="isCreating()"
+             ng-class="{ disabled: !canChangePrivacy()}">
+            <div class="col-sm-3 form-label top05">
+              <label for="id_topic_private">
+                Make this investigation private
+              </label>
+              <p class="help-block">
+                Hide this investigation from the public
+              </p>
+            </div>
+            <div class="col-sm-6 top05">
+                <input type="checkbox" id="id_topic_private"
+                       ng-model="topic_private"
+                       ng-change="topic.public = !topic_private"
+                       ng-disabled="!canChangePrivacy()"
+                       class="pull-left top05">
+                <label class='pull-left disabled-explanation' ng-show="!canChangePrivacy()">
+                    Only <a ui-sref="plans">paid plans</a> can make private investigations.
+                </label>
+            </div>
+
+        </div>
+        <!-- Topic title field -->
+        <div class="row form-group">
+            <div class="col-sm-3 form-label top05">
+                <label for="id_topic_title">Title</label>
+                <p class="help-block" ng-if="isCreating()">
+                    Mandatory.<br/>
+                    You <b>cannot</b> change it later.
+                </p>
+            </div>
+            <div class="col-sm-6">
+                <input id="id_topic_title"
+                       name="title"
+                       ng-disabled="loading.main || max_reached || isEditing()"
+                       class="form-control"
+                       ng-model="topic.title"
+                       required>
+            </div>
+            <span ng-show="submitted &&  form.title.$error.required "
+                  class="text-danger col-sm-6">Enter a title.</span>
+            <span ng-show="submitted &&  error && error.title"
+                  class="text-danger col-sm-6">[[error.title]]</span>
+        </div>
+        <!-- Topic subtitle/description field -->
+        <div class="row form-group">
+            <div class="col-sm-3 form-label top05">
+                <label for="id_topic_description">Subtitle</label>
+            </div>
+            <div class="col-sm-6">
+                <div  id="id_topic_description"
+                       name="description"
+                       class="short-text"
+                       text-angular
+                       ta-disabled="loading.main || max_reached"
+                       ng-model="topic.description"></div>
+            </div>
+        </div>
+
+        <!-- Topic background field -->
+        <div class="row form-group" ng-if="isEditing()">
+            <div class="col-sm-3">
+              <label>Cover picture</label>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-disabled" ng-if="!!!topic.background">None</span>
+              <div class="thumbnail pull-left"  ng-if="topic.background">
+                <img title="Cover picture of [[ topic.title ]]"
+                     ng-src="[[topic.thumbnail.medium]]"/>
+                <div class="caption">
+                  <a ng-click="deleteTopicBackground()">
+                    <i class="fa fa-trash"></i>
+                    Remove this picture
+                  </a>
+                  <a target="blank" class="pull-right" href="[[topic.background]]">
+                    <i class="fa fa-external-link"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-sm-3 form-label top05">
+                <label for="id_topic_about">
+                  <span ng-if="isCreating()">Cover picture</span>
+                  <span ng-if="isEditing()">Enter a new picture</span>
+                </label>
+                <p class="help-block">
+                    Enter the URL of your photo (max. 1MB).
+                </p>
+            </div>
+            <div class="col-sm-6">
+                <input type="url"
+                       name="background_url"
+                       ng-model="topic.background_url"
+                       ng-disabled="loading.main || max_reached"
+                       class="form-control">
+            </div>
+            <span class="col-sm-6 text-danger"
+                  ng-show="submitted && form.background_url.$error.url">
+                You have to enter a valid URL.
+            </span>
+            <span class="col-sm-6 text-danger"
+                  ng-show="submitted && (error.background_url.unavailable || error.background_url.not_an_image)">
+                Sorry, we're haven't managed to process your photo. Please try another one.
+            </span>
+            <span class="col-sm-6 text-danger"
+                  ng-show="submitted && error.background_url.oversized_file">
+                Sorry, your file is too big and would hinder your investigation from loading smoothly. Please enter a different URL.
+            </span>
+        </div>
+        <!-- Topic about field -->
+        <div class="row form-group">
+            <div class="col-sm-3 form-label top05">
+                <label for="id_topic_about">About your investigation</label>
+                <p class="help-block">
+                    max. 1500 char.
+                </p>
+            </div>
+            <div class="col-sm-6">
+                <div text-angular
+                     name="about"
+                     class="long-text"
+                     ta-disabled="loading.main || max_reached"
+                     ng-model="topic.about"
+                     id="id_topic_description"></div>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="form-footer__wrapper col-sm-push-3 col-sm-6">
+                <span class="col-sm-5" ng-if="isEditing()">
+                  <i class="fa fa-warning"></i>&nbsp;
+                  <a ui-sref="user-topic-delete({
+                                'topic': topic.slug,
+                                'username': topic.author.username
+                            })">Delete investigation</a>
+                </span>
+
+                <button type="submit" class="form-footer__submit-btn btn btn-primary"
+                    ng-class="{
+                      'col-sm-3 col-sm-push-4': isEditing(),
+                      'col-sm-6 col-sm-push-6': isCreating()
+                    }"
+                    ng-disabled="isCreating() && max_reached">
+
+                    <span ng-if="isCreating()">I'm done, create the investigation</span>
+                    <span ng-if="isEditing()">Save changes</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-footer form-footer" ng-show="(isEditing() && !!saved)">
+      <div class="row">
+        <div class="col-sm-offset-3 col-sm-9 top20 bottom20">
+          <i class="fa fa-check right05"></i>
+          <span class="text-success">Changes saved!</span>
+          <span ng-if="topic.slug">&nbsp;Go to your investigation <a ui-sref="user-topic({
+              username: user.username,
+              topic: topic.slug
+            })">[[ topic.title ]]</a>
+          </span>
+        </div>
+      </div>
+    </div>
+</div>
+
+<span ng-show="!canChangePrivacy() && isEditing()">Only for <a ui-sref="plans">paid plans</a></span>
+<div class="panel panel-danger top15" ng-if="isEditing()"
+     ng-class="{
+      disabled: !canChangePrivacy(),
+      loading: loading.privacy
+     }">
+    <div class="panel-heading">
+        Danger zone
+    </div>
+    <div class="panel-body">
+        <div class="row form-group">
+            <div class="form-label col-sm-6">
+                <label> Make this investigation
+                    <span ng-if="isPrivate()">public</span>
+                    <span ng-if="isPublic()">private</span>
+                </label>
+
+                <p  class="help-block" ng-if="isPrivate()">
+                    Make this investigation visible to anyone.<br/>
+                    Even when it's public, only collaborators can add data.
+                </p>
+                <p class="help-block" ng-if="isPublic()">
+                    Hide this investigation from the public.
+                </p>
+            </div>
+            <div class="col-sm-2 col-sm-push-1">
+                <button type="button"
+                        class="btn btn-danger btn-fullwidth"
+                        ng-if="isEditing()"
+                        ng-disabled="loading.privacy || !canChangePrivacy()"
+                        ng-click="changePrivacy(form)">
+                    <i class="fa"
+                        ng-class="{
+                           'fa-unlock': isPrivate(),
+                           'fa-lock': isPublic()
+                        }">
+                    </i>&nbsp;
+                    <span ng-if="isPublic()">Make private</span>
+                    <span ng-if="isPrivate()">Open to public</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

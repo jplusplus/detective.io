@@ -1,0 +1,68 @@
+<div>
+  <p class="text-muted">
+    Think of the data structure as the foundations of your investigations. Choose a template that fits to your goal and customize it, or you can start from scratch.
+  </p>
+  <div class="skeletons panel panel-default">
+    <div class="panel-heading">
+      Choose a template for you project or start from scratch
+    </div>
+    <div class="panel-body">
+      <ul class="list-unstyled row">
+        <li ng-repeat="skeleton in skeletons | orderBy:'enable_teasing' ">
+          <div class="col-sm-3 col-xs-4">
+            <div class="skeletons__item"
+                  ng-click="selectSkeleton(skeleton)"
+                  ng-class="{
+                    'skeletons__item--selected': isSkeletonSelected(skeleton),
+                    'skeletons__item--teaser':   isTeaserSkeleton(skeleton)
+                  }">
+
+              <img class="skeletons__item__preview"
+                   ng-src="[[ skeleton.thumbnail.medium ]]"/>
+
+              <div ng-if="isTeaserSkeleton(skeleton)"
+                 ng-click="selectSkeleton(skeleton)"
+                 class="skeletons__item__teasing-text">
+                <div class="alert alert-info">
+                  Only for paid plans
+                </div>
+              </div>
+
+              <h5 class="skeletons__item__title">
+                <span class="fa-stack fa-lg" ng-hide="isTeaserSkeleton(skeleton)">
+                  <i class="fa fa-circle-thin fa-stack-2x"></i>
+                  <i class="skeletons__item__title__check fa fa-check fa-stack-1x text-primary"></i>
+                </span><br />
+                [[ skeleton.title ]]
+              </h5>
+
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="skeletons__overlay" ng-show="selected_skeleton"  ng-click="selectSkeleton(null)"></div>
+    <div class="skeletons__details panel panel-default" ng-show="selected_skeleton">
+      <div class="skeletons__details__front" style="background-image: url('[[selected_skeleton.thumbnail.medium]]');">
+        <h3 class="skeletons__details__front__title">[[selected_skeleton.title]]</h3>
+        <div class="lead skeletons__details__front__description" ng-bind-html="selected_skeleton.description"></div>
+      </div>
+      <div class="panel-body skeletons__details__body">
+        <p>This template will let you add:</p>
+        <span ng-repeat="model in selected_skeleton.ontology_models">
+          <span class="skeletons__details__body__model" style="background: [[model|strToColor]]">[[model]]</span>
+        </span>
+        <p class="text-muted">And relationships between each other.</p>
+      </div>
+      <div class="panel-footer skeletons__details__footer">
+        <button class="btn btn-primary pull-right" type="button" ui-sref="user-topic-create.describe">
+          Next
+        </button>
+        <button class="btn btn-default" type="button" ng-click="selectSkeleton(null)">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -106,6 +106,10 @@ class TopicSkeleton(models.Model):
                 selected_plans.append(plan[0])
         return selected_plans
 
+    @property
+    def ontology_models(self):
+        return [ m["verbose_name"] for m in self.ontology if "verbose_name" in m ]
+
     def __str__(self):
         return self.title
 

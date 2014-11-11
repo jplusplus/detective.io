@@ -1,0 +1,25 @@
+html .nav {
+    &.nav-pills {
+
+        li.active > a {
+            font-weight:bold;
+            color:@link-hover-color;
+            .badge {
+                background:white;
+                color:@link-hover-color;
+            }
+        }
+
+        li.disable > a, li.disable > a:hover {
+            cursor:inherit;
+            color:@text-muted;
+        }
+
+        li > a {
+            text-decoration: none;
+            .badge {
+                background:@link-color;
+            }
+        }
+    }
+}

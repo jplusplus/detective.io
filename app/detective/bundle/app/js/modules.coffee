@@ -6,9 +6,8 @@ angular.module('detective.directive',  ['ngResource', 'ngSanitize', 'ngCookies',
 angular.module('detective.filter',     ['ngResource', 'ngSanitize', 'ngCookies', 'detective.controller'])
 angular.module('detective', [
     "angularFileUpload"
-    'detective.constants'
-    "detective.controller"
     "detective.config"
+    "detective.controller"
     "detective.directive"
     "detective.filter"
     "detective.service"
@@ -17,12 +16,14 @@ angular.module('detective', [
     "sun.scrollable"
     "truncate"
     "ui.bootstrap"
+    'angulartics'
+    'angulartics.google.analytics'
+    'detective.constants'
+    'ng-embedly'
+    'ngAnimate'
     'ngCookies'
     'ngResource'
     'ngSanitize'
-    'ui.router'
     'textAngular'
-    'angulartics',
-    'angulartics.google.analytics'
-    'ng-embedly'
+    'ui.router'
 ])

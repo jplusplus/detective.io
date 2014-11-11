@@ -3,7 +3,7 @@
     <div class="form-horizontal panel panel-default"
          ng-class="{
             'error': max_reached,
-            'saved': (isEditing() && !!saved),
+            'saved': isEditing() && !!saved,
             'loading': loading.main
           }"
          id="topic-form">

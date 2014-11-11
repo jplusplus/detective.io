@@ -19,7 +19,7 @@
                 text-align      : center;
                 min-width       : 100px;
                 position        : absolute;
-                padding         : 10px;
+                padding         : 5px 10px;
                 display         : inline-block;
                 cursor          : move;
             }
@@ -27,6 +27,8 @@
 
         // different accordions
         &__menu {
+            overflow: hidden;
+            position:relative;
             background: white;
             height    : 500px;
             .box-shadow(0 0 40px 0 fade(black, 10) );
@@ -37,6 +39,39 @@
                 &__title {
                     margin:0;
                     margin-bottom:10px;
+                }
+            }
+
+            &__panel {
+                padding:20px;
+                position: absolute;
+                top:0;
+                left:30px;
+                right:0;
+                bottom:0;
+                background:white;
+                .box-shadow(0 0 40px 0 fade(black, 10) );
+                .transition(0.5s);
+
+                &.ng-hide-add,
+                &.ng-hide-remove {
+                    display:block!important;
+                }
+
+                &.ng-hide {
+                  opacity:0;
+                  .translate(100%, 0)
+                }
+
+                &__title {
+                    margin:0;
+                    margin-bottom:10px;
+                }
+
+                &__fields {
+                    &__input {
+                        padding-right:0;
+                    }
                 }
             }
 

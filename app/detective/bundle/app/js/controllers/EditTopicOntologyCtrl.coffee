@@ -26,7 +26,7 @@ class window.EditTopicOntologyCtrl
         @scope.isRelationshipUnchanged             = @isRelationshipUnchanged
         # data
         @scope.models              = @scope.selected_skeleton.ontology or []
-        @scope.fieldTypes          = ["string", "url", "integer", "integerarray", "datetimestamp", "datetime", "date", "time", "boolean", "float"]
+        @scope.fieldTypes          = ["string", "url", "integer", "float", "datetime", "boolean"]
         @scope.newModel            = {}
         @scope.newRelationship     = {}
         @scope.editingModel        = null

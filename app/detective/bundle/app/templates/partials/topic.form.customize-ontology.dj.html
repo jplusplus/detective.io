@@ -14,12 +14,13 @@
                 </div>
                 <div class="col-md-5">
                     <div class="topic-edit-ontology__workspace__menu">
+
                         <div class="topic-edit-ontology__workspace__menu__sub-menu topic-edit-ontology__workspace__menu__sub-menu--models">
                             <h4 class="topic-edit-ontology__workspace__menu__sub-menu__title">
                                 Data models
                             </h4>
                             <p class="text-muted">A data model represents a thing of the real world like a person, a company, etc.</p>
-                            <button class="btn btn-default">
+                            <button class="btn btn-default" ng-click="addModelPanel = true">
                                 <i class="fa fa-plus"></i>
                                 Add new data model
                             </button>
@@ -29,7 +30,9 @@
                                 Edit data model
                             </button>
                         </div>
+
                         <hr />
+
                         <div class="topic-edit-ontology__workspace__menu__sub-menu topic-edit-ontology__workspace__menu__sub-menu--relationships">
                             <h4 class="topic-edit-ontology__workspace__menu__sub-menu__title">
                                 Relationships
@@ -45,6 +48,77 @@
                                 Edit relationship
                             </button>
                         </div>
+
+                        <div class="topic-edit-ontology__workspace__menu__panel" ng-show="addModelPanel">
+                            <h4 class="topic-edit-ontology__workspace__menu__panel__title">
+                                Add new data model
+                            </h4>
+                            <form class="form-horizontal" name="newmodelform" novalidate>
+                                <div class="form-group">
+                                    <label>Name*</label>
+                                    <input type       = "text"
+                                           class      = "form-control"
+                                           ng-model   = "newModel.name"
+                                           placeholder="Ex: person, country, etc."
+                                           required />
+                                    <div ng-show="modelNameAlreadyExist()">Already exists</div>
+                                </div>
+                                <div class="form-group hidden">
+                                    <label>Name plural</label>
+                                    <input type     = "text"
+                                           class    = "form-control"
+                                           placeholder="Ex: persons, countries, etc."
+                                           ng-model = "newModel.namePlural" />
+                                </div>
+                                <div class="form-group hidden">
+                                    <label>Help text</label>
+                                    <input type     = "text"
+                                           class    = "form-control"
+                                           placeholder="Ex: A person that commited crimes."
+                                           ng-model = "newModel.helpText" />
+                                </div>
+                            </form>
+                            <h5>
+                                <strong>Fields</strong>
+                                <span class="text-muted pull-right">Ex: Age, Name, Date of birth...</span>
+                            </h5>
+                            <div class="well well-sm topic-edit-ontology__workspace__menu__panel__fields">
+                                <div class="row">
+                                    <div class="col-xs-5">Label</div>
+                                    <div class="col-xs-5">Type</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-5 topic-edit-ontology__workspace__menu__panel__fields__input">
+                                        <input type="text" class="form-control " />
+                                    </div>
+                                    <div class="col-xs-5 topic-edit-ontology__workspace__menu__panel__fields__input">
+                                        <select class="form-control">
+                                            <option ng-value="string">Short text</option>
+                                            <option ng-value="string">Long text</option>
+                                            <option ng-value="float">Number</option>
+                                            <option ng-value="datetime">Date</option>
+                                            <option ng-value="datetime">URL</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-2">
+                                        <a class="btn btn-default btn-block">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pull-right">
+                                <button class       = "btn btn-primary"
+                                        ng-click    = "addNewModel()"
+                                        ng-disabled = "newmodelform.$invalid">
+                                    Save
+                                </button>
+                            </div>
+                            <button class="btn btn-default" ng-click="addModelPanel = false">
+                                Cancel
+                            </button>
+                        </div>
+
 
                         <accordion close-others="true" class="hidden">
                             <!-- ADD NEW MODEL -->

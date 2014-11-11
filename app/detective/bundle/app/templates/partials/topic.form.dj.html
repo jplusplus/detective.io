@@ -7,17 +7,22 @@
       <ul class="nav nav-pills topic-form__header__tabs" role="tablist">
         <li class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.choose-ontology') }">
           <a ui-sref=".choose-ontology">
-            1. Choose a template
+            Choose a template
           </a>
         </li>
-        <li ng-show="selected_skeleton" class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.describe') }">
+        <li ng-if="selected_skeleton && selected_skeleton.blank" class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.customize-ontology') }">
+          <a ui-sref=".customize-ontology">
+            Customize your template
+          </a>
+        </li>
+        <li ng-if="selected_skeleton" class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.describe') }">
           <a ui-sref=".describe">
-            2. Describe your data collection
+            Describe your data collection
           </a>
         </li>
-        <li ng-hide="selected_skeleton" class="topic-form__header__tabs__item disable">
+        <li ng-if="!selected_skeleton" class="topic-form__header__tabs__item disable">
           <a>
-            2. Describe your data collection
+            Describe your data collection
           </a>
         </li>
       </ul>

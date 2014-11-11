@@ -109,6 +109,7 @@ class TopicSkeletonResource(ModelResource):
             thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
             thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
             bundle.data['ontology_models'] = bundle.obj.ontology_models
+            bundle.data['blank'] = not len(bundle.obj.ontology_models)
             bundle.data['thumbnail'] = {
                 'small' : thumbnailSmall.url,
                 'medium': thumbnailMedium.url

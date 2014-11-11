@@ -10,6 +10,7 @@
         margin-bottom:20px;
 
         &__tabs {
+            counter-reset: tab;
 
             &__item {
                 position:relative;
@@ -17,6 +18,10 @@
 
                 a {
                     background:mix(white, @body-bg);
+                    &:before {
+                        counter-increment: tab;
+                        content: counter(tab) ". "
+                    }
                 }
 
                 a:after {

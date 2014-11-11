@@ -170,6 +170,9 @@ angular.module('detective.config').config [
             .state('user-topic-create.choose-ontology',
                 templateUrl: '/partial/topic.form.choose-ontology.html'
             )
+            .state('user-topic-create.customize-ontology',
+                templateUrl: '/partial/topic.form.choose-ontology.html'
+            )
             .state('user-topic-create.describe',
                 templateUrl: '/partial/topic.form.describe.html',
                 controller: [ '$state', '$scope', ($state, $scope)->

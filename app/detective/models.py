@@ -94,7 +94,7 @@ class TopicSkeleton(models.Model):
     target_plans    = models.CharField(max_length=60)
     tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
     enable_teasing  = models.BooleanField(default=False, help_text='Show this skeleton as a teasing skeleton for free user')
-    order           = models.PositiveIntegerField()
+    order           = models.PositiveIntegerField(default=-1)
 
     def description_stripped(self):
         return strip_tags(self.description)

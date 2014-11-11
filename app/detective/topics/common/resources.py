@@ -99,8 +99,9 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
 class TopicSkeletonResource(ModelResource):
     class Meta:
         authorization = TopicSkeletonAuthorization()
-        queryset = TopicSkeleton.objects.all()
+        queryset = TopicSkeleton.objects.all().order_by("order")
         filtering = { 'id' : ALL, 'title': ALL }
+        ordering = ["order", "name"]
 
     def dehydrate(self, bundle):
         try:

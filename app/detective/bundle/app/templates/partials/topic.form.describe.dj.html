@@ -28,6 +28,26 @@
         </div>
 
         <div class="panel-body">
+            <!-- Topic title field -->
+            <div class="row form-group">
+                <div class="col-sm-4 form-label top05">
+                    <label for="id_topic_title">Title</label>
+                    <p class="help-block" ng-if="isCreating()">
+                        Mandatory.<br/>
+                        You <b>cannot</b> change it later.
+                    </p>
+                </div>
+                <div class="col-sm-8">
+                    <input id="id_topic_title"
+                           name="title"
+                           ng-disabled="loading.main || max_reached || isEditing()"
+                           class="form-control"
+                           ng-model="topic.title"
+                           required>
+                </div>
+                <span ng-show="submitted && form.title.$error.required " class="text-danger col-sm-8">Enter a title.</span>
+                <span ng-show="submitted && error && error.title" class="text-danger col-sm-8">[[error.title]]</span>
+            </div>
             <!-- Topic public/private field. We show this checkbox only on creation.
                  For edition we add a danger-zone at <thead></thead> botton of this form. -->
             <div class="row form-group" ng-if="isCreating()"
@@ -50,27 +70,6 @@
                         Only <a ui-sref="plans">paid plans</a> can make private investigations.
                     </label>
                 </div>
-            </div>
-
-            <!-- Topic title field -->
-            <div class="row form-group">
-                <div class="col-sm-4 form-label top05">
-                    <label for="id_topic_title">Title</label>
-                    <p class="help-block" ng-if="isCreating()">
-                        Mandatory.<br/>
-                        You <b>cannot</b> change it later.
-                    </p>
-                </div>
-                <div class="col-sm-8">
-                    <input id="id_topic_title"
-                           name="title"
-                           ng-disabled="loading.main || max_reached || isEditing()"
-                           class="form-control"
-                           ng-model="topic.title"
-                           required>
-                </div>
-                <span ng-show="submitted && form.title.$error.required " class="text-danger col-sm-8">Enter a title.</span>
-                <span ng-show="submitted && error && error.title" class="text-danger col-sm-8">[[error.title]]</span>
             </div>
             <!-- Topic subtitle/description field -->
             <div class="row form-group">

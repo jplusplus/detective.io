@@ -42,10 +42,10 @@
                  ng-class="{ disabled: !canChangePrivacy()}">
                 <div class="col-sm-4 form-label top05">
                   <label for="id_topic_private">
-                    Make this investigation private
+                    Make this data collection private
                   </label>
                   <p class="help-block">
-                    Hide this investigation from the public
+                    Hide this data collection from the public
                   </p>
                 </div>
                 <div class="col-sm-8 top05">
@@ -144,15 +144,6 @@
                 </div>
             </div>
             <div class="form-footer__wrapper text-right">
-
-                <span class="pull-left" ng-if="isEditing()">
-                  <i class="fa fa-warning"></i>&nbsp;
-                  <a ui-sref="user-topic-delete({
-                                'topic': topic.slug,
-                                'username': topic.author.username
-                            })">Delete investigation</a>
-                </span>
-
                 <button type="submit" class="form-footer__submit-btn btn btn-primary" ng-disabled="isCreating() && max_reached">
                     <span ng-if="isCreating()">I'm done, create the investigation</span>
                     <span ng-if="isEditing()">Save changes</span>
@@ -172,6 +163,73 @@
           </div>
         </div>
     </div>
+
+    <div class="panel panel-danger top15" ng-if="isEditing()"
+         ng-class="{
+          disabled: !canChangePrivacy(),
+          loading: loading.privacy
+         }">
+        <div class="panel-heading">
+            Danger zone
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="form-label col-sm-8">
+                    <label class="bottom0">
+                        Make this data collection
+                        <span ng-if="isPrivate()">public</span>
+                        <span ng-if="isPublic()">private</span>
+                    </label>
+                    <p class="help-block top0" ng-if="isPrivate()">
+                        Make this data collection visible to anyone.<br/>
+                        Even when it's public, only collaborators can add data.
+                    </p>
+                    <p class="help-block top0" ng-if="isPublic()">
+                        Hide this data collection from the public.
+                    </p>
+                </div>
+                <div class="col-sm-3 col-sm-push-1">
+                    <button type="button"
+                            class="btn btn-danger btn-block"
+                            ng-if="isEditing()"
+                            ng-disabled="loading.privacy || !canChangePrivacy()"
+                            ng-click="changePrivacy(form)">
+                        <i class="fa"
+                            ng-class="{
+                               'fa-unlock': isPrivate(),
+                               'fa-lock': isPublic()
+                            }">
+                        </i>&nbsp;
+                        <span ng-if="isPublic()">Make private</span>
+                        <span ng-if="isPrivate()">Open to public</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="form-label col-sm-8">
+                    <label class="bottom0">
+                        Delete this data collection
+                    </label>
+                    <p class="help-block top0">
+                        This is destructive action
+                    </p>
+                </div>
+                <div class="col-sm-3 col-sm-push-1">
+                    <button type="button"
+                            class="btn btn-danger btn-block"
+                            ui-sref="user-topic-delete({
+                                'topic': topic.slug,
+                                'username': topic.author.username
+                            })">
+                        <i class="fa fa-trash"></i>&nbsp;
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
   </div>
 
   <div class="col-sm-4">
@@ -189,49 +247,4 @@
       </div>
     </div>
   </div>
-</div>
-
-<span ng-show="!canChangePrivacy() && isEditing()">Only for <a ui-sref="plans">paid plans</a></span>
-<div class="panel panel-danger top15" ng-if="isEditing()"
-     ng-class="{
-      disabled: !canChangePrivacy(),
-      loading: loading.privacy
-     }">
-    <div class="panel-heading">
-        Danger zone
-    </div>
-    <div class="panel-body">
-        <div class="row form-group">
-            <div class="form-label col-sm-8">
-                <label> Make this investigation
-                    <span ng-if="isPrivate()">public</span>
-                    <span ng-if="isPublic()">private</span>
-                </label>
-
-                <p  class="help-block" ng-if="isPrivate()">
-                    Make this investigation visible to anyone.<br/>
-                    Even when it's public, only collaborators can add data.
-                </p>
-                <p class="help-block" ng-if="isPublic()">
-                    Hide this investigation from the public.
-                </p>
-            </div>
-            <div class="col-sm-2 col-sm-push-1">
-                <button type="button"
-                        class="btn btn-danger btn-fullwidth"
-                        ng-if="isEditing()"
-                        ng-disabled="loading.privacy || !canChangePrivacy()"
-                        ng-click="changePrivacy(form)">
-                    <i class="fa"
-                        ng-class="{
-                           'fa-unlock': isPrivate(),
-                           'fa-lock': isPublic()
-                        }">
-                    </i>&nbsp;
-                    <span ng-if="isPublic()">Make private</span>
-                    <span ng-if="isPrivate()">Open to public</span>
-                </button>
-            </div>
-        </div>
-    </div>
 </div>

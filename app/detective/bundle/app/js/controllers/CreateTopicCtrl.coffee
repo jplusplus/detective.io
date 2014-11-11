@@ -24,7 +24,6 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
     # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
     constructor: (@scope, @state, @TopicsFactory, @Page, @User, @EVENTS, @rootScope, @timeout, @location, skeletons)->
         super
-        @setCreatingMode()
         @Page.title "Create a new investigation"
         # Scope attributes
         @scope.skeletons         = skeletons

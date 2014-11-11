@@ -1,10 +1,6 @@
 class window.TopicFormCtrl
     @$inject: ['$scope', '$state', 'TopicsFactory', 'Page', 'User', 'constants.events']
 
-    MODES:
-        editing: 'edit'
-        creating: 'create'
-
     constructor: (@scope, @state, @TopicFactory, @Page, @User, @EVENTS)->
         @form_mode = undefined
         # handles loading for the different form panels
@@ -23,22 +19,11 @@ class window.TopicFormCtrl
         @scope.canChangePrivacy = @canChangePrivacy
         @scope.changePrivacy    = @changePrivacy
 
-        @scope.formMode = =>
-            @form_mode
-
         @scope.$watch 'topic', @onTopicUpdated, yes
 
-    isEditing: =>
-        @form_mode is @MODES.editing
+    isEditing: => @state.is("user-topic-edit")
 
-    isCreating: =>
-        @form_mode is @MODES.creating
-
-    setCreatingMode: =>
-        @form_mode = @MODES.creating
-
-    setEditingMode: =>
-        @form_mode = @MODES.editing
+    isCreating: => @state.includes("user-topic-create")
 
     onTopicUpdated: (old_val, new_val) =>
         @hideErrors()

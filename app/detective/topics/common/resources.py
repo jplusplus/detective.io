@@ -100,6 +100,7 @@ class TopicSkeletonResource(ModelResource):
     class Meta:
         authorization = TopicSkeletonAuthorization()
         queryset = TopicSkeleton.objects.all()
+        filtering = { 'id' : ALL, 'title': ALL }
 
     def dehydrate(self, bundle):
         try:
@@ -271,7 +272,7 @@ class TopicNestedResource(ModelResource):
     author             = fields.ToOneField(UserNestedResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path',  readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
-    dataset = fields.ToOneField(TopicDataSetResource, 'dataset', full=False, null=True)
+    dataset            = fields.ToOneField(TopicDataSetResource, 'dataset', full=False, null=True)
 
     class Meta:
         resource_name      = 'topic'
@@ -496,6 +497,7 @@ class TopicNestedResource(ModelResource):
             models = get_registered_models()
             # Filter model to the one under app.detective.topics
             bundle.data["models"] = []
+            bundle.data["ontology_models"] = []
             for m in bundle.obj.get_models():
                 try:
                     idx = m.__idx__
@@ -509,6 +511,9 @@ class TopicNestedResource(ModelResource):
                     'index': idx
                 }
                 bundle.data["models"].append(model)
+                # Save searchable models for this ontology
+                if model["is_searchable"]:
+                    bundle.data["ontology_models"].append(model["verbose_name"])
                 # return json for ontology_as_json field
                 if bundle.obj.ontology_as_json:
                     bundle.data["ontology_as_json"] = bundle.obj.ontology_as_json

@@ -1,7 +1,7 @@
-<form id="create-topic" class="container topic-form topic-form--[[formMode()]]"
+<form id="create-topic" class="container topic-form"
       name="form" ng-submit="submit(form)" novalidate>
 
-    <div class="topic-form__header">
+    <div class="topic-form__header" ng-show="isCreating()">
       <h2>Create a new data collection</h2>
 
       <ul class="nav nav-pills topic-form__header__tabs" role="tablist">
@@ -22,6 +22,17 @@
         </li>
       </ul>
     </div>
+
+
+    <div class="topic-form__header" ng-show="isEditing()">
+      <h2>
+        Settings of "[[topic.title]]"
+        <small>
+          <label class="label label-info" ng-if="!topic.public">private</label>
+        </small>
+      </h2>
+    </div>
+    <div ng-if="isEditing()" ng-include="'partial/topic.form.describe.html'"></div>
 
     <div ui-view></div>
 

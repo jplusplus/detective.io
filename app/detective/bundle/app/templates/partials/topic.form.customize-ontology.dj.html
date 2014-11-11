@@ -42,8 +42,8 @@
                                 </div>
                             </div>
                             <div class="col-sm-offset-10 text-right">
-                                <button class       = "btn btn-primary" 
-                                        ng-click    = "addNewModel()" 
+                                <button class       = "btn btn-primary"
+                                        ng-click    = "addNewModel()"
                                         ng-disabled = "newmodelform.$invalid">
                                     Save
                                 </button>
@@ -99,7 +99,7 @@
                                 </div>
                             </div>
                             <div class="col-sm-offset-10 text-right">
-                                <button class       = "btn btn-primary" 
+                                <button class       = "btn btn-primary"
                                         ng-click    = "addNewRelationship()"
                                         ng-disabled = "newrelationshipform.$invalid">
                                     Save
@@ -115,7 +115,7 @@
                         <div class="topic-edit-ontology__edit-model" ng-if="editingModel">
                             <form class="form-horizontal" name="modelform" novalidate>
                                 <div class="topic-edit-ontology__edit-model__header">
-                                    Editing data type 
+                                    Editing data type
                                     <div class="model-name">[[ editingModel.verbose_name ]]</div>
                                 </div>
                                 <div class="form-group">
@@ -157,9 +157,9 @@
                                                         <input type        = "text"
                                                                ng-name     = "field.name"
                                                                ng-model    = "field.verbose_name"
-                                                               class       = "form-control opic-edit-ontology__edit-model__properties__input-name" 
-                                                               placeholder = "Enter name" 
-                                                               ng-disabled = "field.name =='name' && $index==0" 
+                                                               class       = "form-control opic-edit-ontology__edit-model__properties__input-name"
+                                                               placeholder = "Enter name"
+                                                               ng-disabled = "field.name =='name' && $index==0"
                                                                focus-on    = "field.name == undefined"
                                                                is-unique-in-fields-name-from="editingModel"
                                                                required />
@@ -208,8 +208,8 @@
                                         <button class="topic-edit-ontology__edit-model__actions--cancel btn btn-default" ng-click="cancelModel(model)">Cancel</button>
                                     </div>
                                     <div class="col-sm-2 col-sm-offset-8">
-                                        <button class       = "topic-edit-ontology__edit-model__actions--save btn btn-primary" 
-                                                ng-click    = "saveModel(model)" 
+                                        <button class       = "topic-edit-ontology__edit-model__actions--save btn btn-primary"
+                                                ng-click    = "saveModel(model)"
                                                 ng-disabled = "modelform.$invalid || isModelUnchanged()">
                                             Save
                                         </button>
@@ -273,8 +273,8 @@
                                         <div class="form-group form-group-sm">
                                             <label class="col-md-3 control-label" >And</label>
                                             <div class=" col-md-9">
-                                                <select ng-model   = "editingRelationship.related_model" 
-                                                        class      = "form-control" 
+                                                <select ng-model   = "editingRelationship.related_model"
+                                                        class      = "form-control"
                                                         ng-options = "model.name as model.verbose_name for model in models"
                                                         required> </select>
                                                 <div ng-show="!editingRelationship.related_model">Can't be empty</div>
@@ -295,11 +295,11 @@
                                                 <div class="form-group">
                                                     <label class="col-md-4 input-sm" for="topic-edit-ontology__edit-relationship__properties__input-name">Name</label>
                                                     <div class=" col-md-8">
-                                                        <input type        = "text" 
+                                                        <input type        = "text"
                                                                ng-model    = "field.verbose_name"
-                                                               class       = "form-control opic-edit-ontology__edit-relationship__properties__input-name" 
-                                                               placeholder = "Enter name" 
-                                                               focus-on    = "field.name == undefined" 
+                                                               class       = "form-control opic-edit-ontology__edit-relationship__properties__input-name"
+                                                               placeholder = "Enter name"
+                                                               focus-on    = "field.name == undefined"
                                                                required />
                                                         <div ng-show="!field.verbose_name">Can't be empty</div>
                                                     </div>
@@ -349,14 +349,14 @@
                                                 ng-click = "cancelRelationship(editingRelationship)">Cancel</button>
                                     </div>
                                     <div class="col-sm-2 col-sm-offset-8">
-                                        <button class       = "btn btn-primary" 
-                                                ng-click    = "saveRelationship(editingRelationship)" 
+                                        <button class       = "btn btn-primary"
+                                                ng-click    = "saveRelationship(editingRelationship)"
                                                 ng-disabled = "modelform.$invalid || isRelationshipUnchanged()">
                                             Save
                                         </button>
                                     </div>
                                 </div>
-                            </form> 
+                            </form>
                         </div>
                     </accordion-group>
                 </accordion>

@@ -26,18 +26,33 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
                         jsPlumb.connect
                             source: "model#{model_name}"
                             target: "model#{related_to}"
-                            connector:"StateMachine",
-                            paintStyle:{lineWidth:3,strokeStyle:"#056"}
-                            hoverPaintStyle:{strokeStyle:"#dbe300"}
+                            connector:"StateMachine"
+                            paintStyle:
+                                lineWidth: 2
+                                strokeStyle: "#1B2024"
+                            hoverPaintStyle:
+                                strokeStyle:"#1B2024"
                             endpoint: "Blank"
                             anchor: "Continuous"
                             overlays:[
-                                ["PlainArrow", {location:1, width:15, length:12} ]
-                                [ "Label", { label:"#{field.verbose_name}", location:.5, cssClass:"label", id:"label--#{field.related_name}" } ]
-                            ],
+                                [
+                                    "PlainArrow", {
+                                        location:1,
+                                        width:10,
+                                        length:12
+                                    }
+                                ],
+                                [
+                                    "Label", {
+                                        label:"#{field.verbose_name}",
+                                        location:.5,
+                                        cssClass:"label",
+                                        id:"label--#{field.related_name}"
+                                    }
+                                ]
+                            ]
             jsPlumb.draggable jsPlumb.getSelector(".model"),
-                drag: =>
-                    console.log("DRAG")
+                containment: elem
 
         $timeout =>
             #DOM has finished rendering

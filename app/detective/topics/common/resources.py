@@ -104,12 +104,16 @@ class TopicSkeletonResource(ModelResource):
         ordering = ["order", "name"]
 
     def dehydrate(self, bundle):
+        bundle.data['ontology_models'] = bundle.obj.ontology_models
+        bundle.data['blank'] = not len(bundle.obj.ontology_models)
+        if type(bundle.obj.ontology) is list:
+            bundle.data["ontology"] = bundle.obj.ontology
+        else:
+            bundle.data["ontology"] = []
         try:
             thumbnailer     = get_thumbnailer(bundle.obj.picture)
             thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
             thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
-            bundle.data['ontology_models'] = bundle.obj.ontology_models
-            bundle.data['blank'] = not len(bundle.obj.ontology_models)
             bundle.data['thumbnail'] = {
                 'small' : thumbnailSmall.url,
                 'medium': thumbnailMedium.url
@@ -497,6 +501,9 @@ class TopicNestedResource(ModelResource):
             rulesManager = bundle.request.current_topic.get_rules()
             # Get all registered models
             models = get_registered_models()
+            # return json for ontology_as_json field
+            if bundle.obj.ontology_as_json:
+                bundle.data["ontology_as_json"] = bundle.obj.ontology_as_json
             # Filter model to the one under app.detective.topics
             bundle.data["models"] = []
             bundle.data["ontology_models"] = []
@@ -516,9 +523,6 @@ class TopicNestedResource(ModelResource):
                 # Save searchable models for this ontology
                 if model["is_searchable"]:
                     bundle.data["ontology_models"].append(model["verbose_name"])
-                # return json for ontology_as_json field
-                if bundle.obj.ontology_as_json:
-                    bundle.data["ontology_as_json"] = bundle.obj.ontology_as_json
         _is_uploading = cache.get("{0}_is_uploading".format(bundle.data["ontology_as_mod"]))
         if _is_uploading != None and _is_uploading:
             bundle.data["is_uploading"] = True

@@ -1,8 +1,6 @@
 class window.EditTopicOntologyCtrl
-    @$inject: ['$scope', 'Page', '$rootScope', 'topic', 'TopicsFactory']
-    constructor: (@scope, @Page, @rootScope, @topic, @TopicsFactory)->
-        @Page.title "Ontology Editor", no
-        return unless @topic.ontology_as_json?
+    @$inject: ['$scope', 'Page', '$rootScope', 'TopicsFactory']
+    constructor: (@scope, @Page, @rootScope,  @TopicsFactory)->
         # actions #1: add a new model
         @scope.addNewModel                         = @addNewModel
         @scope.modelNameAlreadyExist               = @modelNameAlreadyExist
@@ -27,13 +25,13 @@ class window.EditTopicOntologyCtrl
         @scope.isModelUnchanged                    = @isModelUnchanged
         @scope.isRelationshipUnchanged             = @isRelationshipUnchanged
         # data
-        @scope.models              = @topic.ontology_as_json
+        @scope.models              = @scope.selected_skeleton.ontology or []
         @scope.fieldTypes          = ["string", "url", "integer", "integerarray", "datetimestamp", "datetime", "date", "time", "boolean", "float"]
         @scope.newModel            = {}
         @scope.newRelationship     = {}
         @scope.editingModel        = null
         @scope.editingRelationship = null
-        @scope.relationships = =>
+        @scope.relationships       = =>
             relationships = {}
             for model in @scope.models
                 for field in model.fields
@@ -182,12 +180,12 @@ class window.EditTopicOntologyCtrl
         idx_relationship_to_update = @scope.models[idx_model_to_update].fields.indexOf(_.find(@scope.models[idx_model_to_update].fields, ((f) => @scope.editingRelationship.name == f.name)))
         if idx_model_to_update > -1 and idx_relationship_to_update > -1
             angular.equals(@scope.editingRelationship, @scope.models[idx_model_to_update].fields[idx_relationship_to_update])
-    
+
     # -----------------------------------------------------------------------------
     #    Utils
     # -----------------------------------------------------------------------------
     saveOntology: =>
-        @TopicsFactory.update({id: @topic.id}, {ontology_as_json:@scope.models})
+        # @TopicsFactory.update({id: @topic.id}, {ontology_as_json:@scope.models})
 
     getModelByName: (name) =>
         return null unless name?
@@ -213,6 +211,5 @@ class window.EditTopicOntologyCtrl
             .replace(/\ /g, '_')
             .replace(/[^\w-]+/g, '')
 
-angular.module('detective.controller').controller 'EditTopicOntologyCtrl', EditTopicOntologyCtrl
-
+angular.module('detective.controller').controller 'editTopicOntologyCtrl', EditTopicOntologyCtrl
 # EOF

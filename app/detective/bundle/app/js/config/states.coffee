@@ -171,14 +171,11 @@ angular.module('detective.config').config [
                 templateUrl: '/partial/topic.form.choose-ontology.html'
             )
             .state('user-topic-create.customize-ontology',
-                templateUrl: '/partial/topic.form.choose-ontology.html'
+                controller: EditTopicOntologyCtrl
+                templateUrl: '/partial/topic.form.customize-ontology.html'
             )
             .state('user-topic-create.describe',
-                templateUrl: '/partial/topic.form.describe.html',
-                controller: [ '$state', '$scope', ($state, $scope)->
-                    unless $scope.selected_skeleton?
-                        $state.go "user-topic-create.choose-ontology"
-                ]
+                templateUrl: '/partial/topic.form.describe.html'
             )
             # check previous comment before changing URLs order.
             .state('user-topic',
@@ -193,15 +190,6 @@ angular.module('detective.config').config [
                 url: "/:username/:topic/edit/"
                 controller: EditTopicCtrl
                 templateUrl: '/partial/topic.form.html'
-                resolve:
-                    topic: UserTopicCtrl.resolve.topic
-                auth: true
-                owner: true
-            )
-            .state('user-topic-edit-ontology',
-                url: "/:username/:topic/edit-ontology/"
-                controller: EditTopicOntologyCtrl
-                templateUrl: '/partial/topic.edit-ontology.html'
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
                 auth: true

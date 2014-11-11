@@ -1,77 +1,96 @@
 .topic-edit-ontology {
-    margin : 50px;
+
     .model-name{
         font-weight: bold;
     }
-    &__ontology-visualization {
-        padding          : 20px;
-        border           : 1px solid black;
-        background-color : #FAF7D4;
-        min-height       : 400px;
-        overflow         : hidden;
-        .model {
-            border           : 1px solid rgba(0, 0, 0, 0.16);
-            background-color : rgba(221, 221, 255, 0.64);
-            text-align       : center;
-            min-width        : 100px;
-            position         : absolute;
-            padding          : 10px;
-            display          : inline-block;
-            cursor           : move;
+
+    &__workspace {
+        overflow: hidden;
+        background:url("@{staticPath}img/grid.png") 0 0;
+
+        &__ontology-visualization {
+            margin  : 25px;
+            height  : 450px;
+            overflow: visible;
+            position: relative;
+
+            .model {
+                .panel();
+                text-align      : center;
+                min-width       : 100px;
+                position        : absolute;
+                padding         : 10px;
+                display         : inline-block;
+                cursor          : move;
+            }
         }
-    }
-    // different accordions
-    &__menu {
-        &__edit-model {
-            &__model {
-                &:hover {
-                    text-decoration: underline;
-                    cursor: pointer;
+
+        // different accordions
+        &__menu {
+            background: white;
+            height    : 500px;
+            .box-shadow(0 0 40px 0 fade(black, 10) );
+
+            &__sub-menu {
+                padding:20px;
+
+                &__title {
+                    margin:0;
+                    margin-bottom:10px;
+                }
+            }
+
+            &__edit-model {
+                &__model {
+                    &:hover {
+                        text-decoration: underline;
+                        cursor: pointer;
+                    }
+                }
+            }
+            &__edit-relationships {
+                &__relationship {
+                    padding-left: 20px;
+                    &:hover {
+                        text-decoration: underline;
+                        cursor: pointer;
+                    }
+                }
+                &__from {
+                    font-size: 1.2em;
                 }
             }
         }
-        &__edit-relationships {
-            &__relationship {
-                padding-left: 20px;
-                &:hover {
-                    text-decoration: underline;
-                    cursor: pointer;
-                }
-            }
-            &__from {
-                font-size: 1.2em;
-            }
-        }
-    }
-    &__edit-model, &__edit-relationship {
-        &__title {
-            font-size: 1.2em;
-            padding-bottom: 20px;
-        }
-        &__properties {
+        &__edit-model, &__edit-relationship {
             &__title {
-                font-size: 1.4em;
-                padding-top: 1em;
-            }
-            &__name {
                 font-size: 1.2em;
-                font-weight: bold;
+                padding-bottom: 20px;
             }
-            label {
-                font-size: .8em;
+            &__properties {
+                &__title {
+                    font-size: 1.4em;
+                    padding-top: 1em;
+                }
+                &__name {
+                    font-size: 1.2em;
+                    font-weight: bold;
+                }
+                label {
+                    font-size: .8em;
+                }
             }
-        }
-        &__add-property-btn {
-            margin-bottom: 20px;
+            &__add-property-btn {
+                margin-bottom: 20px;
+            }
         }
     }
 }
 
 ._jsPlumb_overlay.label {
-    background-color : rgba(255, 255, 255, 0.89);
+    .label();
+    .label-info();
+    .box-shadow(0 2px 2px 0 fade(black, 10) );
     padding          : 3px;
-    border           : 1px solid rgba(0, 0, 0, 0.16);
-    color            : black;
     margin           : 10px;
 }
 

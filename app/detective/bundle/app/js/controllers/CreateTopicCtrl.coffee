@@ -27,7 +27,8 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @Page.title "Create a new investigation"
         # Scope attributes
         @scope.skeletons         = skeletons
-        @scope.selected_skeleton = null
+        skeletons[1].blank = yes
+        @scope.selected_skeleton = skeletons[1] #null
         @scope.topic             = {}
         @scope.user              = @User
         if @userMaxReached()
@@ -44,8 +45,11 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         # Scope events
         @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
         # We allow skeleton preselection
-        if @scope.selected_skeleton?
+        if @scope.selected_skeleton? and not scope.selected_skeleton.blank
             @state.go "user-topic-create.describe"
+            do @onSkeletonSelected
+        else if @scope.selected_skeleton? and scope.selected_skeleton.blank
+            @state.go "user-topic-create.customize-ontology"
             do @onSkeletonSelected
         else
             @state.go "user-topic-create.choose-ontology"

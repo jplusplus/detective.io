@@ -59,13 +59,11 @@
         <p>You can choose the precise type of data that you need in you data collection.</p>
       </div>
       <div class="panel-footer topic-form__selected-ontology__footer">
-        <button class="btn btn-primary pull-right" type="button" ui-sref="user-topic-create.describe">
-          <span ng-hide="selected_skeleton.blank">
+        <button class="btn btn-primary pull-right" type="button" ui-sref="user-topic-create.describe" ng-hide="selected_skeleton.blank">
             Describe
-          </span>
-          <span ng-show="selected_skeleton.blank">
-            Customize
-          </span>
+        </button>
+        <button class="btn btn-primary pull-right" type="button" ui-sref="user-topic-create.customize-ontology" ng-show="selected_skeleton.blank">
+          Customize
         </button>
         <button class="btn btn-default" type="button" ng-click="selectSkeleton(null)">
           Cancel

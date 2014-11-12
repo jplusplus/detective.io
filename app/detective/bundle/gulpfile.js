@@ -22,8 +22,7 @@ gulp.task('less', function () {
     	})
     	.on('error', gutil.log)
     )
-    .pipe(gulp.dest('.build/css/'))
-    .pipe(livereload({silent: true}));
+    .pipe(gulp.dest('.build/css/'));
 });
 
 gulp.task('coffee', function() {
@@ -31,8 +30,7 @@ gulp.task('coffee', function() {
     .pipe(
     	coffee({bare: true}).on('error', gutil.log)
     )
-    .pipe(gulp.dest('.build/js/'))
-    .pipe(livereload({silent: true}));
+    .pipe(gulp.dest('.build/js/'));
 });
 
 gulp.task('copy', function () {
@@ -86,7 +84,10 @@ gulp.task('inject', ['coffee'], function() {
 gulp.task('default', ['coffee', 'less', 'bower', 'copy']);
 
 gulp.task('watch', ['default'], function() {
+  livereload.listen({silent: true});
   gulp.watch('app/css/**/*.less', ['less']);
   gulp.watch('app/js/**/*.coffee', ['coffee']);
+  gulp.watch('app/templates/**/*.html').on('change', livereload.changed)
+  gulp.watch('.build/**/*.{css,js}').on('change', livereload.changed)
   gulp.watch('bower.json', ['bower']);
 });

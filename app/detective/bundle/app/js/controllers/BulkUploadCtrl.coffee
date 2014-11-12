@@ -53,7 +53,7 @@ class window.BulkUploadCtrl
             if @scope.feedback and @scope.feedback.status == "enqueued" and @scope.feedback.token
                 params =
                     type : "jobs"
-                    id   : @scope.feedback.token + "/"
+                    id   : @scope.feedback.token
                 refresh_timeout = @timeout(refresh_status = =>
                     @Common.get params, (data) =>
                         # format data
@@ -110,7 +110,7 @@ class window.BulkUploadCtrl
     trackJob: =>
         params =
             type : "jobs"
-            id   : @scope.feedback.token + "/"
+            id   : @scope.feedback.token
         @Common.put params, {"track":true}, (data) =>
 
 angular.module('detective.controller').controller 'BulkUploadCtrl', BulkUploadCtrl

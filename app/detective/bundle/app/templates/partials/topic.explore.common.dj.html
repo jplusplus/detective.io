@@ -70,7 +70,7 @@
                             <span ng-if="$last && !$first"> and </span>
                             <span ng-if="!$last && !$first">, </span>
                             <a ng-href="/[[username]]/[[topic]]/[[form.name]]" ng-init="count = getTypeCount(form.name)">
-                                <strong>[[count]]</strong>
+                                [[count]]
                                 <span ng-if="count <= 1">[[form.verbose_name]]</span>
                                 <span ng-if="count > 1">[[form.verbose_name_plural]]</span>
                             </a>

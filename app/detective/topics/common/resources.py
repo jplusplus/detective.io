@@ -449,7 +449,8 @@ class TopicNestedResource(ModelResource):
         topic = Topic.objects.get(id=kwargs["pk"])
         # Quick check on `administrator` group
         try:
-            request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+            if not request.user.is_staff and not request.user.is_superuser:
+                request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
         except Group.DoesNotExist:
             return HttpResponseForbidden()
 

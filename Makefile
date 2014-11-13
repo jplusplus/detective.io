@@ -1,5 +1,4 @@
 # Makefile -- Detective.io
-
 NEO4J_VERSION = 1.9.1
 
 VENV          = venv
@@ -16,15 +15,25 @@ CACHE         = $(wildcard app/staticfiles/CACHE app/media/csv-exports/)
 ifndef PORT
 	PORT = 8000
 endif
+
 ifndef TEST
 	TEST = detective
 endif
 
+ifeq ($(ENV_MODE), prod)
+	REQUIREMENTS_FILE = requirements/production
+else
+	REQUIREMENTS_FILE = requirements/development
+endif
+
 all: install startdb run
 
-run: clean startdb
+run: clean startdb startredis
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py rqworker high default low &
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading 0.0.0.0:$(PORT)
+
+watch:
+	cd app/detective/bundle; gulp node_modules/.bin/watch
 
 ###
 # Installation rules
@@ -34,32 +43,21 @@ $(VENV) :
 	virtualenv venv --no-site-packages --distribute --prompt=Detective.io
 
 pip_install:
-	# Install pip packages
-	. $(ENV) ; pip install -r requirements.txt
-
-npm_install:
-	# Install npm packages
-	npm install
+	. $(ENV) ; pip install -r $(REQUIREMENTS_FILE)
 
 $(CUSTOM_D3):
 	# Install a custom d3 package
 	make -C `dirname $(CUSTOM_D3)`
 
-bower_install:
-	# Install bower packages
-	./node_modules/.bin/bower install
 
 neo4j_install:
 	# Install neo4j locally
 	./install_local_neo4j.bash $$NEO4J_VERSION
 
 statics_install:
-	. $(ENV) ; python manage.py compress --force
-	rm -f $(PWD)/app/staticfiles/CACHE/img $(PWD)/app/staticfiles/CACHE/svg
-	ln -sf $(PWD)/app/detective/static/detective/img/ $(PWD)/app/staticfiles/CACHE/img
-	ln -sf $(PWD)/app/detective/static/detective/svg/ $(PWD)/app/staticfiles/CACHE/svg
+	cd app/detective/bundle; npm install; bower install; node_modules/.bin/gulp
 
-install: $(VENV) pip_install npm_install $(CUSTOM_D3) bower_install neo4j_install statics_install
+install: $(VENV) pip_install $(CUSTOM_D3) neo4j_install statics_install
 
 ###
 # Doc generation
@@ -84,6 +82,13 @@ clean:
 fclean: clean
 	rm $(CUSTOM_D3)
 
+
+startredis:
+	redis-server start || true
+
+stopredis:
+	redis-server stop || true
+
 ###
 # Neo4j rules
 ###
@@ -107,9 +112,9 @@ test:
 	mv lib/neo4j/data/graph.db lib/neo4j/data/graph.db.backup || true
 	# Start a brand new database
 	make startdb
-	-python manage.py syncdb -v 0 --noinput  --traceback --pythonpath=. --settings=app.settings_tests
+	-python manage.py syncdb -v 0 --noinput  --traceback --pythonpath=. --settings=app.settings.testing
 	# Launch test with coverage
-	-python -W ignore::DeprecationWarning manage.py test $(TEST) --pythonpath=. --settings=app.settings_tests --traceback
+	-python -W ignore::DeprecationWarning manage.py test $(TEST) --pythonpath=. --settings=app.settings.testing --traceback
 	# Stop database in order to restore it
 	make stopdb
 	# Remove temporary databases

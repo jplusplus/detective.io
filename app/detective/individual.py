@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache
+from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache, without
 from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
@@ -600,7 +600,7 @@ class IndividualResource(ModelResource):
             # The value can be a list of ID for relationship
             if field.get_internal_type() is 'Relationship':
                 # Pluck id from the list
-                field_ids = [ value for value in field_value ]
+                field_ids = [ value for value in field_value if value is not int(pk) ]
                 # Prefetch all relationship
                 if node_rels is None: node_rels = node.relationships.all()
                 # Get relationship name
@@ -647,6 +647,7 @@ class IndividualResource(ModelResource):
             # Or a literal value
             # (integer, date, url, email, etc)
             else:
+                print field_name, field_value
                 # Remove the values
                 if field_value in [None, '']:
                     # The field may not exists (yet)

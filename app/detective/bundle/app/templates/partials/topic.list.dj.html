@@ -1,0 +1,151 @@
+{% load staticfiles %}
+
+<div id="individual-list">
+
+	<div class="container">
+	    <h2 class="bottom20">
+			[[verbose_name_plural]]<br />
+		</h2>
+	</div>
+
+	<div  class="container">
+
+		<div class='individual-list__export-overlay fade in out' ng-show='exporting_csv'>
+			<p class='text-center lead'>
+				<span class="bold">Hang tight, we're preparing the latest data for you!</span>
+				<br />
+				<img src="{% static 'img/spinner.svg' %}" />
+				<br />
+				Taking too long? <a ng-click="exporting_csv=false">Close</a> and come back later - your files will be ready.
+			</p>
+		</div>
+
+		<form class="panel panel-default" ng-if="query" ng-submit="search()">
+			<div class="panel-body">
+				<div class="row">
+					<div class="col-md-4 col-sm-3">
+						<select class="form-control bottom10"
+								 ng-options="m.name as m.label for (key, m) in syntax.subject.model"
+								 ng-model="query.subject.name">
+						</select>
+					</div>
+					<div class="col-sm-4">
+						<select class="form-control bottom10"
+								 ng-options="p.name as p.label for p in syntax.predicates | filter:currentSubject"
+								 ng-model="query.predicate.name">
+						</select>
+					</div>
+					<div class="col-sm-3">
+						<input class="form-control"
+							 	tt-typeahead
+								tt-topic="username + '/' + topic"
+								tt-individual="'summary'"
+								tt-model="query.object"
+								value="query.object.name" />
+					</div>
+					<div class="col-md-1 col-sm-2">
+						<input type="submit" value="Search" class="btn btn-primary btn-block" />
+					</div>
+				</div>
+			</div>
+		</form>
+
+		<div ng-if="individuals.objects.length == 0">
+			<div class="text-center lead top50 bottom50">
+				No result. <a href="/[[username]]/[[topic]]/contribute">Add data</a>?
+			</div>
+		</div>
+
+		<div class="panel panel-default" ng-if="individuals.objects.length">
+			<!-- Default panel contents -->
+			<div class="panel-heading" ng-if="individuals.meta.total_count > 0">
+				<div class="row">
+					<div class="col-xs-4 text-muted">
+						[[individuals.objects.length]] of [[individuals.meta.total_count]]
+						-
+						<strong>Page [[page]]</strong>
+					</div>
+
+					<div class="col-xs-8">
+						<form class="form-inline pull-right left10" role="search" ng-if="!query">
+							<input  type="search"
+								    placeholder="Search..."
+								 	tt-typeahead
+									tt-individual="type"
+									tt-model="selectedIndividual"
+									limit="10"
+								   	class="form-control"
+								   	id="input-search" />
+					    </form>
+
+						<button class='btn btn-default pull-right left10' ng-click="csvExport()" ng-if="individuals.meta.total_count > 0">
+							<i class="fa fa-download"></i> Export as CSV
+						</button>
+					</div>
+
+				</div>
+			</div>
+			<!-- Table -->
+			<table class="table">
+				<tr ng-repeat="individual in individuals.objects">
+					<td style="min-width: 80%">
+						<strong>
+							<a ng-href="[[singleUrl(individual)]]">
+								[[individual|individualPreview:"unknown"]]
+							</a>
+						</strong>
+						<br />
+						<span class="text-muted" ng-bind-html="individual.description"></span>
+					</td>
+					<td>
+						<ul class="list-inline nowrap text-right">
+							<li>
+								<a ng-href="[[singleUrl(individual)]]" tooltip="See this entity">
+									<i class="fa fa-eye"></i>
+								</a>
+							</li>
+							<li>
+								<a ng-href="[[editUrl(individual)]]" ng-if="user.hasChangePermission(topic.ontology_as_mod)" tooltip="Edit this entity">
+									<i class="fa fa-edit"></i>
+								</a>
+							</li>
+						</ul>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+
+		<div class="tr" ng-if="hasPreviousPage() || hasNextPage()">
+			<ul class="pagination top0">
+
+				<!-- previous -->
+				<li ng-class="{disabled: !hasPreviousPage()}">
+					<a ng-click="previousPage()">&laquo;</a>
+				</li>
+
+				<!-- first page -->
+				<li ng-class="{active: 1 == page}">
+					<a ng-click="goToPage(1)">1</a>
+				</li>
+
+				<!-- nearest pages -->
+				<li class="disabled" ng-if="nearestPages()[0] > 2"><a >...</a></li>
+				<li ng-repeat="p in nearestPages()" ng-class="{active: p == page}">
+					<a ng-click="goToPage(p)">[[p]] <span class="sr-only">(current)</span></a>
+				</li>
+				<li class="disabled" ng-if="nearestPages()[nearestPages().length - 1] && nearestPages()[nearestPages().length - 1] + 1 < pages().length "><a >...</a></li>
+				<!-- last page -->
+				<li ng-if="pages().length > 1" ng-class="{active: pages().length == page}">
+					<a ng-click="goToPage(pages().length)">[[ pages().length ]]</a>
+				</li>
+
+				<!-- next -->
+				<li ng-class="{disabled: !hasNextPage()}">
+					<a ng-click="nextPage()">&raquo;</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+</div>

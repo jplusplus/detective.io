@@ -14,6 +14,7 @@ from django.core.mail                 import EmailMultiAlternatives
 from django.core.urlresolvers         import reverse
 from django.core.files                import File
 from django.core.files.temp           import NamedTemporaryFile
+from django.core.cache                import cache
 from django.db                        import IntegrityError
 from django.db.models                 import Q
 from django.http                      import Http404, HttpResponse, HttpResponseForbidden
@@ -210,7 +211,7 @@ class TopicAuthorization(ReadOnlyAuthorization):
         is_author    = user.is_authenticated() and bundle.obj.author == user
         # Only authenticated user can update there own topic or people from the
         # contributor group
-        return is_author or user.groups.filter(name=contributors).exists()
+        return user.is_staff or is_author or user.groups.filter(name=contributors).exists()
 
     # Only authenticated user can create topics
     def create_detail(self, object_list, bundle):
@@ -448,7 +449,8 @@ class TopicNestedResource(ModelResource):
         topic = Topic.objects.get(id=kwargs["pk"])
         # Quick check on `administrator` group
         try:
-            request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
+            if not request.user.is_staff and not request.user.is_superuser:
+                request.user.groups.get(name="{0}_administrator".format(topic.ontology_as_mod))
         except Group.DoesNotExist:
             return HttpResponseForbidden()
 
@@ -506,6 +508,9 @@ class TopicNestedResource(ModelResource):
                     'index': idx
                 }
                 bundle.data["models"].append(model)
+        _is_uploading = cache.get("{0}_is_uploading".format(bundle.data["ontology_as_mod"]))
+        if _is_uploading != None and _is_uploading:
+            bundle.data["is_uploading"] = True
         return bundle
 
     def download_url(self, url):

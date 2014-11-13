@@ -1,0 +1,193 @@
+.header {
+    top:0;
+    left:0;
+    right:0;
+    position:fixed;
+    z-index:@zindex-header;
+    padding:0;
+    height:@header-height;
+    background:@header-bg;
+    border-bottom:1px solid @header-border-color;
+    color:contract(@header-bg);
+
+    .box-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));
+    .transition(@header-open-speed);
+    .opacity(100);
+
+    .is-home & {
+        .opacity(0);
+        .translate(0, -@header-height);
+    }
+
+    &__toggle-aside {
+        position:absolute;
+        left:0;
+        top:0;
+        padding-left: 15px;
+        padding-right: 15px;
+        word-spacing: 0.2em;
+        height: @header-height - 1px;
+        line-height: @header-height;
+        display: block;
+        font-size: 20px;
+        color:black;
+        text-align: center;
+        text-decoration: none;
+        border-right:#DDD solid 1px;
+
+        &--active, &--active:hover {
+            background:@brand-primary;
+            color: contrast(@brand-primary);
+        }
+    }
+
+    &__user {
+        z-index:@zindex-header+10;
+        position:absolute;
+        right:0;
+        top:0;
+        height: @header-height;
+        text-align: center;
+        line-height: @header-height;
+        color:black;
+
+        a {
+            color:inherit;
+            text-decoration:none;
+        }
+
+        i.fa {
+            font-size: 20px;
+        }
+
+        &__sign-in {
+            padding-right: 5px;
+        }
+
+        &__signed-in {
+
+            &__add {
+                display: inline-block;
+                height: @header-height;
+                width: auto;
+                padding:0 10px;
+                i.fa {
+                    position:relative;
+                    top:2px;
+                }
+            }
+
+            &__profil, &__sign-out {
+                border-left:#DDD solid 1px;
+            }
+        }
+        &__user-menu {
+            border-left:#DDD solid 1px;
+            display: inline-block;
+
+            padding-left: 10px;
+            padding-right: 10px;
+            height: @header-height;
+
+            &__avatar {
+                .border-radius(50%);
+                height: @header-height - 10px;
+                width:  @header-height - 10px;
+                background: #ddd;
+                margin-right: 5px;
+                margin-bottom: 5px;
+            }
+            i.fa {
+                font-size: 12px;
+            }
+
+            &__username {
+                font-weight: bold;
+            }
+            &__open-indicator {
+                font-size: inherit;
+            }
+
+            &__items {
+                @items-width: 150px;
+                @item-height: 35px;
+                position: absolute;
+                width: @items-width;
+                right: 0px;
+                background: @header-bg;
+                text-align: left;
+                .list-unstyled();
+                .box-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));
+                border: 1px solid @header-border-color;
+                border-top:0;
+
+                &__item {
+                    height: @item-height;
+                    line-height:  @item-height;
+                    padding-left: 15px;
+
+                    &:hover {
+                        background:@brand-primary;
+                        a {
+                            color: contrast(@brand-primary);
+                        }
+                    }
+
+                    &--divider {
+                        border-top: 1px solid @header-border-color;
+                    }
+                }
+
+            }
+        }
+    }
+
+    .topic-search {
+        position:absolute;
+        z-index:@zindex-header;
+        top:0;
+        bottom:0;
+        padding-top:9px;
+        padding-left:9px;
+        left:115px;
+        right:@header-height * 2px;
+
+        &__home {
+            width:165px;
+            overflow: hidden;
+            border-radius: @border-radius-base 0 0 @border-radius-base;
+        }
+
+        .twitter-typeahead, .input-control {
+            width:50%;
+            height: @header-height - 19px;
+            padding-top:0;
+            border-left: 0;
+            border-radius:0  @border-radius-base @border-radius-base 0;
+        }
+
+
+        .btn-group {
+            width: 100%;
+        }
+
+        .form-control,  .tt-query {
+            padding:2px 10px;
+        }
+
+        &__input {
+            position:relative;
+            .form-control {
+                display: inline-block;
+            }
+            &__submit-btn {
+                position: absolute;
+                right: 10px;
+                z-index: 4;
+                line-height: 30px;
+                cursor: pointer;
+                background-color:transparent;
+            }
+        }
+    }
+}

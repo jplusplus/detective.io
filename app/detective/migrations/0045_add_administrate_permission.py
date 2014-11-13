@@ -3,19 +3,32 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
+from app.detective.permissions import create_topic_permissions
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        for topic in orm.Topic.objects.all():
-            # Check that the group doesn't exist yet
-            if topic.contributor_group == None:
-                try:
-                    group = orm['auth.group'].objects.get(name='{0}_contributor'.format(topic.ontology_as_mod))
-                    topic.contributor_group = group
-                    topic.save()
-                except orm['auth.group'].DoesNotExist:
-                    pass
+        topics = orm.Topic.objects.all()
+        for topic in topics:
+            # Create the topic permission for the current topic
+            create_topic_permissions(topic.ontology_as_mod)
+            try:
+                # Get the admin group to add full permissions on the current topic
+                admin_group = orm['auth.group'].objects.get(name='{0}_administrator'.format(topic.ontology_as_mod))
+                if admin_group.permissions.count() != 1:
+                    if admin_group.permissions.count() > 0:
+                        admin_group.permissions.clear()
+                    # Need to get some permission to know the content-type id
+                    _perm = topic.contributor_group.permissions.all()[0]
+
+                    permission = orm['auth.permission'](name='Administrate {0}'.format(topic.ontology_as_mod),
+                                                        codename='contribute_administrate',
+                                                        content_type=_perm.content_type)
+                    permission.save()
+                    admin_group.permissions.add(permission)
+                    admin_group.save()
+            except orm['auth.group']:
+                pass
 
     def backwards(self, orm):
         pass

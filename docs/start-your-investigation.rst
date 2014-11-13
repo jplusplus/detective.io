@@ -10,7 +10,7 @@ strict syntax in JSON. This document details how to write this JSON.
 Models
 ======
 
-An ontolgy is composed of one or several models. Each model describes a family
+An ontology is composed of one or several models. Each model describes a family
 of elements that constitute the main data entities of your instance. Your model could be a Person, an Organization, a
 Country, a Case, a Document, a Law or similar. Every model has a *name*, a list of *fields*, and optional *rules*
 that allow for a finer description of the respective model's behavior.
@@ -61,13 +61,13 @@ This table provides an overview over model attributes available.
 
     * - name
       - string
-      - The name of your model. This will be used to generate a slug to access the
-        data related to your model. It will be converted to a normalized
+      - The name of your model. It will be used to generate a slug to access the
+        data related to your model. Special characters and spaces are not allowed here. It will be converted to a normalized
         string, removing special characters and spaces.
 
     * - verbose_name
       - string
-      - A human-readable name for your model. It's useful for names containing special characters or spaces.
+      - A human-readable name for your model. It's useful if you want to use special characters or spaces.
 
     * - verbose_name_plural
       - string
@@ -269,7 +269,7 @@ A field can hold the following attributes.
 
     * - name
       - string
-      - The name of your field. This will be converted to a normalized
+      - The name of your field. Special characters and spaces are not allowed here. This will be converted to a normalized
         string, removing special characters and spaces. **This attribute is
         mandatory**.
 
@@ -280,7 +280,7 @@ A field can hold the following attributes.
 
     * - verbose_name
       - string
-      - A human-readable name for your field. It is useful for names containing special characters or spaces.
+      - A human-readable name for your field. It is useful if you want to use special characters or spaces.
 
 .. _special-properties:
 
@@ -342,9 +342,9 @@ special attributes.
 
     * - related_name
       - string
-      - The name to use for the relation from the related model back to this
+      - The name to use for the relationship from the related model back to this
         model. When specified, this will automatically create a reverse field in
-        the *related_model*'s front.
+        the *related_model*'s front. No use of spaces, caps or special characters here. If underscores are used they will be transformed into spaces in the entity's front.
 
     * - fields
       - array
@@ -370,9 +370,16 @@ Just like to any model, you can add rules to your fields.
                 {
                     "name": "name",
                     "type": "string",
-                    "rules": [
-                        {}
-                    ]
+                    "rules": {
+                    }
+                },
+                {
+                    "name": "houses",
+                    "type": "relationship",
+                    "related_model": "House",
+                    "rules": {
+                        "search_terms": ["owns"]
+                    }
                 }
             ]
         }
@@ -399,7 +406,7 @@ This table provides a description of field rules.
 
     * - is_rich
       - boolean
-      - Set to "true" to unable rich text format for string field.
+      - Set to "true" to enable rich text format for string field.
 
     * - is_searchable
       - boolean
@@ -414,6 +421,10 @@ This table provides a description of field rules.
     * - through
       - string
       - This rule specifies the model used to describe a relationship.
+
+    * - search_terms
+      - array of strings
+      - This rule allows to define terms used to search this field.
 
     * - is_oembed
       - boolean

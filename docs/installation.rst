@@ -14,6 +14,7 @@ to create a *.env_dev* file at project's root.
 Then fill this file with the following variables:
 
 .. sourcecode:: sh
+
     export ENV_MODE="dev"
     export DJANGO_SETTINGS_MODULE="app.settings.development"
 
@@ -53,7 +54,9 @@ Java configuration
 Neo4j database you need to install & configure java.
 
 First you'll need to install a JDK on your system.
+
 .. sourcecode:: sh
+
     # RedHat based distribuion
     yum install java-1.7.0-openjdk
     # OR Debian based distribution
@@ -64,6 +67,7 @@ You can do that in many ways. The simplest is to edit your shell config file
 (eg: ~/.bashrc or ~/.zshrc) and add the following definition.
 
 .. sourcecode:: sh
+
     JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
 
 
@@ -78,7 +82,7 @@ Download the source code.
     cd detective.io
 
 Run the install script. It will create the virtualenv, install backend and
-rontend dependencies and setup the **Neo4j** database.
+frontend dependencies and setup the **Neo4j** database.
 
 .. sourcecode:: sh
 
@@ -120,11 +124,13 @@ Production mode
 Software Dependencies
 ---------------------
 
-Additional dependencies are required to run **Detective.io** in production mode:
+Additional dependencies are required to run **Detective.io** in production mode
+
 - PostgreSQL for "classic" relationnal tables for production purposes.
 - Memcached for the cache
 
 .. sourcecode:: sh
+
     # RedHat based distribution
     yum groupinstall "Production Tools" && yum install libpq-devel libmemcached-devel postgresql
     # OR Debian based distribution

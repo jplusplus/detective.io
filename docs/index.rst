@@ -16,6 +16,7 @@ Detective.io documentation
    installation
    start-your-investigation
    common
+   bulk-upload-data
    glossary
    faq
    about-us

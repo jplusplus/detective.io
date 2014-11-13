@@ -59,23 +59,4 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
             scope.$watch 'models', relayout, true
 
 ])
-
-# set to false the validator if the value already exist in the names of fields of the given object
-angular.module('detective.directive').directive('isUniqueInFieldsNameFrom', ->
-    require: 'ngModel',
-    restrict : "A"
-    scope:
-        isUniqueInFieldsNameFrom : "="
-    link: (scope, elem, attrs, ctrl) ->
-        ctrl.$parsers.unshift((viewValue) ->
-            if scope.isUniqueInFieldsNameFrom.fields?
-                for field in scope.isUniqueInFieldsNameFrom.fields
-                    if field.name == viewValue
-                        ctrl.$setValidity('isNotUnique', false)
-                        return viewValue
-            ctrl.$setValidity('isNotUnique', true)
-            return viewValue
-        )
-)
-
 # EOF

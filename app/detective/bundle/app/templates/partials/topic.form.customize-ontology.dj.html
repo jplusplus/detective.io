@@ -20,11 +20,11 @@
                                 Data models
                             </h4>
                             <p class="text-muted">A data model represents a thing of the real world like a person, a company, etc.</p>
-                            <button class="btn btn-default" ng-click="addModelPanel = true">
+                            <button class="btn btn-default" ng-click="addingModel = true">
                                 <i class="fa fa-plus"></i>
                                 Add new data model
                             </button>
-                            <button class="btn btn-default">
+                            <button class="btn btn-default" ng-click="editingModel = true">
                                 <i class=""></i>
                                 <i class="fa fa-edit"></i>
                                 Edit data model
@@ -49,428 +49,44 @@
                             </button>
                         </div>
 
-                        <div class="topic-edit-ontology__workspace__menu__panel" ng-show="addModelPanel">
+                        <div class="topic-edit-ontology__workspace__menu__panel" ng-show="addingModel">
                             <h4 class="topic-edit-ontology__workspace__menu__panel__title">
                                 Add new data model
                             </h4>
-                            <form class="form-horizontal" name="newmodelform" novalidate>
-                                <div class="form-group">
-                                    <label>Name*</label>
-                                    <input type       = "text"
-                                           class      = "form-control"
-                                           ng-model   = "newModel.name"
-                                           placeholder="Ex: person, country, etc."
-                                           required />
-                                    <div ng-show="modelNameAlreadyExist()">Already exists</div>
-                                </div>
-                                <div class="form-group hidden">
-                                    <label>Name plural</label>
-                                    <input type     = "text"
-                                           class    = "form-control"
-                                           placeholder="Ex: persons, countries, etc."
-                                           ng-model = "newModel.namePlural" />
-                                </div>
-                                <div class="form-group hidden">
-                                    <label>Help text</label>
-                                    <input type     = "text"
-                                           class    = "form-control"
-                                           placeholder="Ex: A person that commited crimes."
-                                           ng-model = "newModel.helpText" />
-                                </div>
-                            </form>
-                            <h5>
-                                <strong>Fields</strong>
-                                <span class="text-muted pull-right">Ex: Age, Name, Date of birth...</span>
-                            </h5>
-                            <div class="well well-sm topic-edit-ontology__workspace__menu__panel__fields">
-                                <div class="row">
-                                    <div class="col-xs-5">Label</div>
-                                    <div class="col-xs-5">Type</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-xs-5 topic-edit-ontology__workspace__menu__panel__fields__input">
-                                        <input type="text" class="form-control " />
-                                    </div>
-                                    <div class="col-xs-5 topic-edit-ontology__workspace__menu__panel__fields__input">
-                                        <select class="form-control">
-                                            <option ng-value="string">Short text</option>
-                                            <option ng-value="string">Long text</option>
-                                            <option ng-value="float">Number</option>
-                                            <option ng-value="datetime">Date</option>
-                                            <option ng-value="datetime">URL</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-xs-2">
-                                        <a class="btn btn-default btn-block">
-                                            <i class="fa fa-plus"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="pull-right">
-                                <button class       = "btn btn-primary"
-                                        ng-click    = "addNewModel()"
-                                        ng-disabled = "newmodelform.$invalid">
-                                    Save
-                                </button>
-                            </div>
-                            <button class="btn btn-default" ng-click="addModelPanel = false">
-                                Cancel
-                            </button>
+                            <div ng-if="addingModel"
+                                 model-form="newModel"
+                                 models="models"
+                                 submit="addModel(newModel)"
+                                 cancel="$parent.addingModel = false"></div>
                         </div>
-
-
-                        <accordion close-others="true" class="hidden">
-                            <!-- ADD NEW MODEL -->
-                            <accordion-group heading="Add new data type" is-disabled="accordionShouldBeDisabled('add-model')">
-                                Add new data type
-                                <form class="form-horizontal" name="newmodelform" novalidate>
-                                    <div class="form-group">
-                                        <label class="col-md-6">Name</label>
-                                        <div class="col-md-6">
-                                            <input type     = "text"
-                                                   class    = "form-control"
-                                                   ng-model = "newModel.name"
-                                                   required />
-                                            <div ng-show="!newModel.name">Can't be empty</div>
-                                            <div ng-show="modelNameAlreadyExist()">Already exists</div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-md-6">Name plural</label>
-                                        <div class="col-md-6">
-                                            <input type     = "text"
-                                                   class    = "form-control"
-                                                   ng-model = "newModel.namePlural" />
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-md-6">Help text</label>
-                                        <div class="col-md-6">
-                                            <input type     = "text"
-                                                   class    = "form-control"
-                                                   ng-model = "newModel.helpText" />
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-offset-10 text-right">
-                                        <button class       = "btn btn-primary"
-                                                ng-click    = "addNewModel()"
-                                                ng-disabled = "newmodelform.$invalid">
-                                            Save
+                        <div class="topic-edit-ontology__workspace__menu__panel" ng-show="editingModel">
+                            <h4 class="topic-edit-ontology__workspace__menu__panel__title">
+                                Edit data model
+                            </h4>
+                            <div ng-hide="selectedModel">
+                                <p>Choose the data model to edit</p>
+                                <ul class="list-unstyled">
+                                    <li ng-repeat="m in models | orderBy:'verbose_name'">
+                                        <button  class="btn btn-default bottom10" type="button" ng-click="$parent.selectedModel = m">
+                                            <i class="fa fa-edit"  style="color: [[m.name|strToColor]]"></i>
+                                            [[m.verbose_name]]
                                         </button>
-                                    </div>
-                                </form>
-
-                            </accordion-group>
-                            <!-- ADD RELATIONSHIP -->
-                            <accordion-group heading="Add new relationship type" is-disabled="accordionShouldBeDisabled('add-relationship')">
-                                Add new relationship type
-                                <form class="form-horizontal" name="newrelationshipform" novalidate>
-                                    <div class="form-group">
-                                        <label class="col-md-6">Name</label>
-                                        <div class="col-md-6">
-                                            <input type     = "text"
-                                                   class    = "form-control"
-                                                   ng-model = "newRelationship.name"
-                                                   required />
-                                            <div ng-show="relationshipNameAlreadyExist()">Already exists</div>
-                                            <div ng-show="!newRelationship.name">Can't be empty</div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-md-6">Reverse name</label>
-                                        <div class="col-md-6">
-                                            <input type     = "text"
-                                                   class    = "form-control"
-                                                   ng-model = "newRelationship.reverseName"
-                                                   required />
-                                            <div ng-show="!newRelationship.reverseName">Can't be empty</div>
-                                            <div ng-show="relationshipReverseNameAlreadyExist()">Already exists</div>
-
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group form-group-sm">
-                                                <label class="col-md-3 control-label" >Between</label>
-                                                <div class=" col-md-9">
-                                                    <select ng-model="newRelationship.between" class="form-control" ng-options="model.name as model.verbose_name for model in models" required></select>
-                                                    <div ng-show="!newRelationship.between">Can't be empty</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group form-group-sm">
-                                                <label class="col-md-3 control-label" >And</label>
-                                                <div class=" col-md-9">
-                                                    <select ng-model="newRelationship.and" class="form-control" ng-options="model.name as model.verbose_name for model in models" required></select>
-                                                    <div ng-show="!newRelationship.and">Can't be empty</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-offset-10 text-right">
-                                        <button class       = "btn btn-primary"
-                                                ng-click    = "addNewRelationship()"
-                                                ng-disabled = "newrelationshipform.$invalid">
-                                            Save
-                                        </button>
-                                    </div>
-                                </form>
-                            </accordion-group>
-                            <!-- EDIT MODEL -->
-                            <accordion-group heading="Edit data type" class="topic-edit-ontology__workspace__menu__edit-model" is-disabled="accordionShouldBeDisabled('edit-model')">
-                                <!-- list -->
-                                <div ng-repeat="model in models" class="topic-edit-ontology__workspace__menu__edit-model__model model-name" ng-click="editModel(model)" ng-if="!editingModel">[[ model.verbose_name ]]</div>
-                                <!-- details -->
-                                <div class="topic-edit-ontology__workspace__edit-model" ng-if="editingModel">
-                                    <form class="form-horizontal" name="modelform" novalidate>
-                                        <div class="topic-edit-ontology__workspace__edit-model__header">
-                                            Editing data type
-                                            <div class="model-name">[[ editingModel.verbose_name ]]</div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-md-6">Name</label>
-                                            <div class="col-md-6">
-                                                <input type     = "text"
-                                                       class    = "form-control"
-                                                       ng-model = "editingModel.verbose_name"
-                                                       required />
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-md-6">Name plural</label>
-                                            <div class="col-md-6">
-                                                <input type     = "text"
-                                                       class    = "form-control"
-                                                       ng-model = "editingModel.verbose_name_plural" />
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-md-6">Help text</label>
-                                            <div class="col-md-6">
-                                                <input type     = "text"
-                                                       class    = "form-control"
-                                                       ng-model = "editingModel.help_text" />
-                                            </div>
-                                        </div>
-                                        <div class="topic-edit-ontology__workspace__edit-model__properties">
-                                            <div class="topic-edit-ontology__workspace__edit-model__properties__title">Properties</div>
-                                            <div ng-repeat="field in editingModel.fields" ng-if="field.type != 'relationship'">
-                                                <div class="topic-edit-ontology__workspace__edit-model__properties__name">
-                                                    <i class="fa fa-minus"></i> [[ field.verbose_name ]] ([[ field.name ]])
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label class="col-md-4" for="topic-edit-ontology__workspace__edit-model__properties__input-name">Name</label>
-                                                            <div class=" col-md-8">
-                                                                <input type        = "text"
-                                                                       ng-name     = "field.name"
-                                                                       ng-model    = "field.verbose_name"
-                                                                       class       = "form-control opic-edit-ontology__edit-model__properties__input-name"
-                                                                       placeholder = "Enter name"
-                                                                       ng-disabled = "field.name =='name' && $index==0"
-                                                                       focus-on    = "field.name == undefined"
-                                                                       is-unique-in-fields-name-from="editingModel"
-                                                                       required />
-                                                                <div ng-show="!field.verbose_name">Can't be empty</div>
-                                                                <div ng-show="modelform[[field.name]].$error.isNotUnique">Already exist</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group form-group-sm">
-                                                            <label class="col-md-2 col-md-sm-offset-10 text-right" for="topic-edit-ontology__workspace__edit-model__properties__input-type">Type</label>
-                                                            <div class=" col-md-8">
-                                                                <select ng-model="field.type" class="form-control input-sm" ng-options="fieldType for fieldType in fieldTypes" id="topic-edit-ontology__workspace__edit-model__properties__input-type" ng-disabled="field.name =='name' && $index==0" required></select>
-                                                                <div ng-show="!field.type">Can't be empty</div>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group" ng-if="field.name != 'name'">
-                                                    <label class="col-md-2" for="topic-edit-ontology__workspace__edit-model__properties__input-help_text">Help text</label>
-                                                    <div class=" col-md-10">
-                                                        <input type="text" ng-model="field.help_text" class="form-control input-sm" id="topic-edit-ontology__workspace__edit-model__properties__input-help_text" placeholder="Enter help text"/>
-                                                    </div>
-                                                </div>
-                                                <label class="checkbox-inline" ng-if="field.name != 'name'">
-                                                    <input type="checkbox" ng-model="field.rules.is_oembed"> is oembedable ?
-                                                </label>
-                                                <label class="checkbox-inline" ng-if="field.type == 'string' && field.name != 'name'">
-                                                    <input type="checkbox" ng-model="field.rules.is_rich"> is rich text ?
-                                                </label>
-                                                <div class="text-right" ng-if="field.name != 'name'">
-                                                    <button class="btn btn-danger btn-sm left10" ng-click="removeModelField(field)">
-                                                        <i class="fa fa-trash-o"></i>
-                                                        Delete the field [[ field.name ]]
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <button class="btn btn-default left10 topic-edit-ontology__workspace__edit-model__add-property-btn" ng-click="addModelField()">
-                                                <i class="fa fa-plus right05"></i>
-                                                Add a new field
-                                            </button>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-sm-2">
-                                                <button class="topic-edit-ontology__workspace__edit-model__actions--cancel btn btn-default" ng-click="cancelModel(model)">Cancel</button>
-                                            </div>
-                                            <div class="col-sm-2 col-sm-offset-8">
-                                                <button class       = "topic-edit-ontology__workspace__edit-model__actions--save btn btn-primary"
-                                                        ng-click    = "saveModel(model)"
-                                                        ng-disabled = "modelform.$invalid || isModelUnchanged()">
-                                                    Save
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </form>
+                                    </li>
+                                </ul>
+                                <div class="topic-edit-ontology__workspace__menu__panel__footer">
+                                  <button class="btn btn-default" type="button" ng-click="editingModel = false">
+                                      Cancel
+                                  </button>
                                 </div>
-                            </accordion-group>
-                            <!-- EDIT RELATIONSHIP -->
-                            <accordion-group heading="Edit relationship type" class="topic-edit-ontology__workspace__menu__edit-relationships" is-disabled="accordionShouldBeDisabled('edit-relationship')">
-                                <!-- list -->
-                                <div ng-repeat="model in models" ng-if="!editingRelationship && relationships()[model.name].length > 0">
-                                    <div class="topic-edit-ontology__workspace__menu__edit-relationships__from model-name">
-                                        [[ model.verbose_name ]]
-                                    </div>
-                                    <div ng-repeat = "relationship in relationships()[model.name]"
-                                         ng-click  = "editRelationship(model, relationship)"
-                                         class     = "topic-edit-ontology__workspace__menu__edit-relationships__relationship">
-                                        [[ relationship.verbose_name ]] <span class="model-name">[[ relationship.related_model ]]</span>
-                                    </div>
-                                </div>
-                                <!-- details -->
-                                <div class="topic-edit-ontology__workspace__edit-relationship" ng-if="editingRelationship">
-                                    <form class="form-horizontal" name="relationshipform" novalidate>
-                                        <div class="form-group">
-                                            <label class="col-md-6">Name</label>
-                                            <div class="col-md-6">
-                                                <input type     = "text"
-                                                       class    = "form-control"
-                                                       ng-model = "editingRelationship.verbose_name"
-                                                       required />
-                                                <div ng-show="!editingRelationship.verbose_name">Can't be empty</div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-md-6">Reverse name</label>
-                                            <div class="col-md-6">
-                                                <input type     = "text"
-                                                       class    = "form-control"
-                                                       ng-model = "editingRelationship.related_name"
-                                                       required />
-                                                <div ng-show="!editingRelationship.related_name">Can't be empty</div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group form-group-sm">
-                                                    <label class="col-md-3 control-label" >Between</label>
-                                                    <div class=" col-md-9">
-                                                        <select ng-model   = "editingRelationshipModel.name"
-                                                                class      = "form-control"
-                                                                ng-options = "model.name as model.verbose_name for model in models"
-                                                                required
-                                                                disabled><!-- NOTE: disabled because it's a model property, doens't belong to relationship  -->
-                                                        </select>
-                                                        <div ng-show="!editingRelationshipModel.name">Can't be empty</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group form-group-sm">
-                                                    <label class="col-md-3 control-label" >And</label>
-                                                    <div class=" col-md-9">
-                                                        <select ng-model   = "editingRelationship.related_model"
-                                                                class      = "form-control"
-                                                                ng-options = "model.name as model.verbose_name for model in models"
-                                                                required> </select>
-                                                        <div ng-show="!editingRelationship.related_model">Can't be empty</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- fields -->
-                                        <div class="topic-edit-ontology__workspace__edit-relationship__properties">
-                                            <div class="topic-edit-ontology__workspace__edit-relationship__properties__title">Properties</div>
-                                            <div ng-repeat="field in editingRelationship.fields">
-                                                <div class="topic-edit-ontology__workspace__edit-relationship__properties__name">
-                                                    <i class="fa fa-minus"></i> [[ field.verbose_name ]]
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <!-- name -->
-                                                        <div class="form-group">
-                                                            <label class="col-md-4 input-sm" for="topic-edit-ontology__workspace__edit-relationship__properties__input-name">Name</label>
-                                                            <div class=" col-md-8">
-                                                                <input type        = "text"
-                                                                       ng-model    = "field.verbose_name"
-                                                                       class       = "form-control opic-edit-ontology__edit-relationship__properties__input-name"
-                                                                       placeholder = "Enter name"
-                                                                       focus-on    = "field.name == undefined"
-                                                                       required />
-                                                                <div ng-show="!field.verbose_name">Can't be empty</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <!-- type -->
-                                                        <div class="form-group form-group-sm">
-                                                            <label class="col-md-2 col-md-sm-offset-10 input-sm text-right" for="topic-edit-ontology__workspace__edit-relationship__properties__input-type">Type</label>
-                                                            <div class=" col-md-8">
-                                                                <select ng-model    = "field.type"
-                                                                        class       = "form-control input-sm"
-                                                                        ng-options  = "fieldType for fieldType in fieldTypes"
-                                                                        id          = "topic-edit-ontology__workspace__edit-relationship__properties__input-type"
-                                                                        required></select>
-                                                                <div ng-show="!field.type">Can't be empty</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!-- help text -->
-                                                <div class="form-group">
-                                                    <label class="col-md-2 input-sm" for="topic-edit-ontology__workspace__edit-relationship__properties__input-help_text">Help text</label>
-                                                    <div class=" col-md-10">
-                                                        <input type        = "text"
-                                                               ng-model    = "field.help_text"
-                                                               class       = "form-control input-sm"
-                                                               id          = "topic-edit-ontology__workspace__edit-relationship__properties__input-help_text"
-                                                               placeholder = "Enter help text"/>
-                                                    </div>
-                                                </div>
-                                                <div class="text-right">
-                                                    <button class="btn btn-danger btn-sm left10" ng-click="removeRelationshipField(field)">
-                                                        <i class="fa fa-trash-o"></i>
-                                                        Delete the field [[ field.verbose_name ]]
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <button class="btn btn-default left10 topic-edit-ontology__workspace__edit-relationship__add-property-btn" ng-click="addRelationshipField()">
-                                                <i class="fa fa-plus right05"></i>
-                                                Add a new field
-                                            </button>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-sm-2">
-                                                <button class    = "btn btn-default"
-                                                        ng-click = "cancelRelationship(editingRelationship)">Cancel</button>
-                                            </div>
-                                            <div class="col-sm-2 col-sm-offset-8">
-                                                <button class       = "btn btn-primary"
-                                                        ng-click    = "saveRelationship(editingRelationship)"
-                                                        ng-disabled = "modelform.$invalid || isRelationshipUnchanged()">
-                                                    Save
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </accordion-group>
-                        </accordion>
+                            </div>
+                            <div ng-show="selectedModel">
+                                <div ng-if="selectedModel"
+                                     model-form="selectedModel"
+                                     models="models"
+                                     submit="editModel(selectedModel, master)"
+                                     cancel="$parent.editingModel = false"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

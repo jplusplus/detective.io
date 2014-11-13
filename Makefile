@@ -33,7 +33,7 @@ run: clean startdb startredis
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading 0.0.0.0:$(PORT)
 
 watch:
-	cd app/detective/bundle; node_modules/.bin/gulp watch
+	cd app/detective/bundle; node_modules/.bingulp watch
 
 ###
 # Installation rules

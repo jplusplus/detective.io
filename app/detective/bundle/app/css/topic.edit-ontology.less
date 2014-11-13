@@ -49,6 +49,7 @@
                 left:30px;
                 right:0;
                 bottom:0;
+                overflow: auto;
                 background:white;
                 .box-shadow(0 0 40px 0 fade(black, 10) );
                 .transition(0.5s);
@@ -69,9 +70,16 @@
                 }
 
                 &__fields {
-                    &__input {
-                        padding-right:0;
+                    &__field {
+                        padding-top:5px;
+                        &__input {
+                            padding-right:0;
+                        }
                     }
+                }
+
+                &__footer {
+                    margin-bottom:20px;
                 }
             }
 

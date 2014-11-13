@@ -31,8 +31,9 @@
     "rangy": "~1.2.3",
     "ScrollMagic": "~1.0.9",
     "angulartics": "~0.16.5",
-    "ng-embedly": "~0.1.1",
-    "jsPlumb" : "1.6.4",
-    "ng-embedly": "~0.1.0"
+    "ng-embedly": "~0.1.0",
+    "jsPlumb": "1.6.4",
+    "speakingurl": "~0.17.0",
+    "angular-ui-utils": "bower-validate"
   }
 }

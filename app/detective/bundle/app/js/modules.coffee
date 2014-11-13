@@ -26,4 +26,5 @@ angular.module('detective', [
     'ngSanitize'
     'textAngular'
     'ui.router'
+    'ui.validate'
 ])

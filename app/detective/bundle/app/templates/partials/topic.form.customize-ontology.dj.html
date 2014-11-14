@@ -56,20 +56,20 @@
                             <div ng-if="addingModel"
                                  model-form="newModel"
                                  models="models"
-                                 submit="addModel(newModel)"
+                                 submit="addModel($value)"
                                  cancel="$parent.addingModel = false"></div>
                         </div>
                         <div class="topic-edit-ontology__workspace__menu__panel" ng-show="editingModel">
                             <h4 class="topic-edit-ontology__workspace__menu__panel__title">
                                 Edit data model
                             </h4>
-                            <div ng-hide="selectedModel">
+                            <div ng-hide="hasSelectedModel()">
                                 <p>Choose the data model to edit</p>
                                 <ul class="list-unstyled">
-                                    <li ng-repeat="m in models | orderBy:'verbose_name'">
-                                        <button  class="btn btn-default bottom10" type="button" ng-click="$parent.selectedModel = m">
-                                            <i class="fa fa-edit"  style="color: [[m.name|strToColor]]"></i>
-                                            [[m.verbose_name]]
+                                    <li ng-repeat="model in models | orderBy:'verbose_name' ">
+                                        <button  class="btn btn-default bottom10" type="button" ng-click="startEditingModel(model)">
+                                            <i class="fa fa-edit"  style="color: [[model.name|strToColor]]"></i>
+                                            [[model.verbose_name]]
                                         </button>
                                     </li>
                                 </ul>
@@ -79,11 +79,11 @@
                                   </button>
                                 </div>
                             </div>
-                            <div ng-show="selectedModel">
-                                <div ng-if="selectedModel"
+                            <div ng-show="hasSelectedModel()">
+                                <div ng-if="hasSelectedModel()"
                                      model-form="selectedModel"
                                      models="models"
-                                     submit="editModel(selectedModel, master)"
+                                     submit="editModel($value)"
                                      cancel="$parent.editingModel = false"></div>
                             </div>
                         </div>

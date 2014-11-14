@@ -22,7 +22,7 @@ angular.module('detective.directive').directive "modelForm", ()->
             $scope.model.name = toModelName $scope.model.verbose_name
             # Process each field
             for field in $scope.model.fields
-                continue unless field.name?
+                continue unless field.name? and $scope.isAllowedType(field)
                 # Use name as default verbose name
                 field.verbose_name = field.verbose_name or field.name
                 # Generate fields name

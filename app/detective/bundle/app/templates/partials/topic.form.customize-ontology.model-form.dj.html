@@ -1,4 +1,4 @@
-<form ng-submit="modelForm.$valid && submit({master: master})" name="modelForm" novalidate>
+<form ng-submit="modelForm.$valid && submit({'$value': model})" name="modelForm" novalidate>
   <div>
       <div>
           <label>Name*</label>

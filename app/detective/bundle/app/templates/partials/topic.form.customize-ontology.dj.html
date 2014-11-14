@@ -150,7 +150,7 @@
                         </div>
 
                         <div class="topic-edit-ontology__workspace__menu__footer">
-                            <button class="btn btn-primary" ng-if="selected_skeleton.ontology.length" type="button" ui-sref="user-topic-create.describe">
+                            <button class="btn btn-primary" ng-disabled="!selected_skeleton.ontology.length" type="button" ui-sref="user-topic-create.describe">
                                 Describe
                             </button>
                         </div>

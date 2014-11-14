@@ -24,7 +24,7 @@ angular.module('detective.directive').directive "modelForm", ()->
             # Process each field
             for field, index in $scope.model.fields
                 # Field name exists?
-                unless field.name? or field.name isnt ''
+                unless field.name? and field.name isnt ''
                     # Should we remove empty field?
                     if remove_empty_field
                         delete $scope.model.fields[index]
@@ -60,10 +60,11 @@ angular.module('detective.directive').directive "modelForm", ()->
             # Find a field with the same name?
             not _.find($scope.model.fields, (f)-> f.name.toLowerCase() is name and f isnt field)?
         # Add a field
-        $scope.addField = ->
+        $scope.addField = =>
+            verbose_name = if $scope.model.fields.length is 0 then "name" else ""
             field = angular.copy
-                name: if $scope.model.fields.length is 0 then "name" else ""
-                verbose_name: ""
+                verbose_name: verbose_name
+                name: toModelName verbose_name
                 type: "string"
             $scope.model.fields.push field
         # Remove a field
@@ -75,7 +76,7 @@ angular.module('detective.directive').directive "modelForm", ()->
         $scope.isAllowedType = (field)-> FIELD_TYPES.indexOf( do field.type.toLowerCase ) > -1
         # Shortcut to the model object
         $scope.model = angular.copy $scope.modelForm or {}
-        $scope.model = $scope.sanitizeModel no, yes
+        $scope.model = $scope.sanitizeModel yes, yes
         # Original model
         $scope.master = $scope.modelForm
         # Add default fields

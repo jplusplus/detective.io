@@ -28,8 +28,9 @@ angular.module('detective.directive').directive "relationshipForm", ()->
             $scope.relationship.fields or= []
             # Process each field
             for field, index in $scope.relationship.fields
+                continue unless field?
                 # Field name exists?
-                unless field.name? or field.name isnt ''
+                if not field.name? or field.name is ''
                     # Should we remove empty field?
                     if remove_empty_field
                         delete $scope.relationship.fields[index]

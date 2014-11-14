@@ -79,7 +79,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.topic = @scope.topic or {}
         # binding to skeleton will automaticaly bind the skeleton ontolgy
         # to this new topic in API.
-        @scope.topic.topic_skeleton = @scope.selected_skeleton.id
+        @scope.topic.ontology_as_json = @scope.selected_skeleton.ontology
         @scope.topic.about = @scope.selected_skeleton.picture_credits
 
     userMaxReached: =>

@@ -37,7 +37,6 @@ class window.EditTopicOntologyCtrl
         @scope.selectedModel       = null
         @scope.selectedRelationship= null
 
-
     addModel: (model)=>
         @scope.models.push angular.copy(model)
         # Empty given model

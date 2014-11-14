@@ -238,9 +238,12 @@
         <h3 class="topic-form__selected-ontology__front__title">[[selected_skeleton.title]]</h3>
         <div class="lead topic-form__selected-ontology__front__description" ng-bind-html="selected_skeleton.description"></div>
       </div>
-      <div class="panel-body topic-form__selected-ontology__body">
+      <div class="panel-body topic-form__selected-ontology__body" ng-show="selected_skeleton.blank">
+        <p>You can choose the precise type of data that you need in you data collection.</p>
+      </div>
+      <div class="panel-body topic-form__selected-ontology__body" ng-show="modelsNames(selected_skeleton.ontology).length">
         <p>This template will let you add:</p>
-        <span ng-repeat="model in selected_skeleton.ontology_models">
+        <span ng-repeat="model in modelsNames(selected_skeleton.ontology)">
           <span class="topic-form__selected-ontology__body__model" style="background: [[model|strToColor]]">[[model]]</span>
         </span>
         <p class="text-muted">And relationships between each other.</p>

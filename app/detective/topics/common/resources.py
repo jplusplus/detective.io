@@ -225,14 +225,12 @@ class TopicAuthorization(ReadOnlyAuthorization):
     def create_detail(self, object_list, bundle):
         authorize = False
         user      = bundle.request.user
-        skeleton  = TopicSkeleton.objects.get(title=bundle.data['skeleton_title'])
         if user.is_authenticated():
             public      = bundle.data.get('public', True)
             profile     = user.detectiveprofileuser
             unlimited   = profile.topics_max()   < 0
             under_limit = profile.topics_count() < profile.topics_max()
             authorize   = unlimited or under_limit
-            authorize   = authorize and (profile.plan in skeleton.target_plans)
             if not public:
                 authorize = authorize and profile.plan != 'free'
         return authorize
@@ -567,11 +565,6 @@ class TopicNestedResource(ModelResource):
                 setattr(bundle, 'skeleton', topic_skeleton)
         return topic_skeleton
 
-    def hydrate_skeleton_title(self, bundle):
-        topic_skeleton = self.get_skeleton(bundle)
-        if topic_skeleton:
-            bundle.data['skeleton_title'] = topic_skeleton.title
-        return bundle
 
     def hydrate_author(self, bundle):
         bundle.data['author'] = bundle.request.user
@@ -617,13 +610,6 @@ class TopicNestedResource(ModelResource):
             if topic_about != '':
                 topic_about = "%s<br/><br/>" % topic_about
             bundle.data['about'] = "%s%s" % (topic_about, topic_skeleton.picture_credits)
-        return bundle
-
-    def hydrate_ontology_as_json(self, bundle):
-        # feed ontology_as_json attribute when needed
-        topic_skeleton = self.get_skeleton(bundle)
-        if topic_skeleton:
-            bundle.data['ontology_as_json'] = topic_skeleton.ontology
         return bundle
 
     def hydrate_dataset(self, bundle):

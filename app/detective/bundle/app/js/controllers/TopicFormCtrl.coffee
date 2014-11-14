@@ -12,10 +12,10 @@ class window.TopicFormCtrl
         @scope.submit = @submit
         @scope.isPublic         = @isPublic
         @scope.isPrivate        = @isPrivate
-        @scope.shouldShowForm   = @isEditing
         @scope.isEditing        = @isEditing
         @scope.isCreating       = @isCreating
         @scope.hideErrors       = @hideErrors
+        @scope.modelsNames      = @modelsNames
         @scope.canChangePrivacy = @canChangePrivacy
         @scope.changePrivacy    = @changePrivacy
 
@@ -51,3 +51,4 @@ class window.TopicFormCtrl
         @scope.topic.public = !!!@scope.topic.public
         @submit(form, 'privacy')
 
+    modelsNames: (models)=> _.pluck models, "name"

@@ -16,22 +16,31 @@
 
             .model {
                 .panel();
-                text-align      : center;
-                min-width       : 100px;
-                position        : absolute;
-                padding         : 5px 10px;
-                display         : inline-block;
-                cursor          : move;
+                text-align: center;
+                min-width: 100px;
+                position: absolute;
+                padding: 5px 10px;
+                display: inline-block;
+                cursor: move;
             }
         }
 
-        // different accordions
         &__menu {
             overflow: hidden;
             position:relative;
             background: white;
             height    : 500px;
             .box-shadow(0 0 40px 0 fade(black, 10) );
+
+
+            &__footer {
+                .panel-footer();
+                text-align: right;
+                position:absolute;
+                bottom:0;
+                left:0;
+                right:0;
+            }
 
             &__sub-menu {
                 padding:20px;

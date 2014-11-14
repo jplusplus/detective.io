@@ -14,17 +14,17 @@
             Customize your template
           </a>
         </li>
-        <li ng-if="selected_skeleton" class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.describe') }">
-          <a ui-sref=".describe">
-            Describe your data collection
-          </a>
-        </li>
         <li ng-if="!selected_skeleton" class="topic-form__header__tabs__item disable">
           <a>
             Customize your template
           </a>
         </li>
-        <li ng-if="!selected_skeleton" class="topic-form__header__tabs__item disable">
+        <li ng-if="selected_skeleton && selected_skeleton.ontology.length" class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.describe') }">
+          <a ui-sref=".describe">
+            Describe your data collection
+          </a>
+        </li>
+        <li ng-if="!selected_skeleton || !selected_skeleton.ontology.length" class="topic-form__header__tabs__item disable">
           <a>
             Describe your data collection
           </a>

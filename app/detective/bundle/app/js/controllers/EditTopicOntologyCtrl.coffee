@@ -2,18 +2,28 @@ class window.EditTopicOntologyCtrl
     @$inject: ['$scope', 'Page', '$rootScope', 'TopicsFactory']
     constructor: (@scope, @Page, @rootScope,  @TopicsFactory)->
         # Scope methods
-        @scope.addModel            = @addModel
-        @scope.hasSelectedModel    = @hasSelectedModel
-        @scope.startEditingModel   = @startEditingModel
-        @scope.startOver           = @startOver
-        @scope.editModel           = @editModel
-        @scope.addRelationship     = @addRelationship
-        @scope.relationships       = @getAllRelationships
+        @scope.hasSelectedModel         = @hasSelectedModel
+        @scope.hasSelectedRelationship  = @hasSelectedRelationship
+        @scope.startEditingModel        = @startEditingModel
+        @scope.startEditingRelationship = @startEditingRelationship
+        @scope.startOver                = @startOver
+        @scope.editModel                = @editModel
+        @scope.editRelationship         = @editRelationship
+        @scope.addModel                 = @addModel
+        @scope.addRelationship          = @addRelationship
+        @scope.relationships            = @getAllRelationships
+        @scope.getModel                 = @getModel
         # Initialize variables
         do @startOver
         # List of current model
         @scope.models              = @scope.selected_skeleton.ontology or []
 
+    # Shortcuts
+    hasSelectedModel        : => @scope.selectedModel?
+    hasSelectedRelationship : => @scope.selectedRelationship?
+    startEditingModel       : (model)=> @scope.selectedModel = model
+    startEditingRelationship: (relationship)=> @scope.selectedRelationship = relationship
+    getModel                : (name)=> _.find @scope.models, name: name
 
     startOver: =>
         # Panels display
@@ -27,8 +37,6 @@ class window.EditTopicOntologyCtrl
         @scope.selectedModel       = null
         @scope.selectedRelationship= null
 
-    hasSelectedModel: => @scope.selectedModel?
-    startEditingModel: (model)=> @scope.selectedModel = model
 
     addModel: (model)=>
         @scope.models.push angular.copy(model)
@@ -39,7 +47,6 @@ class window.EditTopicOntologyCtrl
     editModel: (model)=>
         old_name = @scope.selectedModel.name
         new_name = model.name
-        # Edit the right model object using the saved index
         angular.extend @scope.selectedModel, model
         # The name changed?
         # We must change every relationships using the old model name.
@@ -58,6 +65,11 @@ class window.EditTopicOntologyCtrl
         model.fields.push relationship
         do @startOver
 
+    editRelationship: (relationship)=>
+        model    = @getModel relationship.model
+        angular.extend @scope.selectedRelationship, relationship
+        do @startOver
+
     getAllRelationships: =>
         relationships = {}
         for model in @scope.models
@@ -65,7 +77,6 @@ class window.EditTopicOntologyCtrl
                 relationships[model.name] = [] unless relationships[model.name]?
                 relationships[model.name].push field if field.type == "relationship"
         relationships
-
 
 
 angular.module('detective.controller').controller 'editTopicOntologyCtrl', EditTopicOntologyCtrl

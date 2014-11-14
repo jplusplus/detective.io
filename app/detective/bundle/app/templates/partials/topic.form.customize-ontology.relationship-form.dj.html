@@ -1,5 +1,5 @@
 <form ng-submit="relationshipForm.$valid && submit({'$value': sanitizeRelationship(true)})" name="relationshipForm" novalidate>
-  <div class="bottom10">
+  <div class="bottom10" ng-show="changeBounds">
       <label>Relationship between*</label>
       <div class="row">
         <div class="col-xs-5">
@@ -31,7 +31,7 @@
       </div>
   </div>
   <div class="bottom10">
-      <label>Related name</label>
+      <label>Reverse name</label>
       <input type="text"
              class="form-control"
              ng-model="relationship.related_name"

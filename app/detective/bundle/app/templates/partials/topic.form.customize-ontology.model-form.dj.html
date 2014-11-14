@@ -9,7 +9,9 @@
                  name="verbose_name"
                  placeholder="Ex: person, country, etc."
                  required />
-          <div ng-show="modelForm.verbose_name.$error.unique" class="text-danger small">This model name already exists.</div>
+          <div ng-show="modelForm.verbose_name.$error.unique" class="text-danger small">
+            This model name already exists.
+          </div>
       </div>
       <div class="hidden">
           <label>Name plural</label>

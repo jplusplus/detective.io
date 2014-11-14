@@ -6,7 +6,7 @@
         <div class="topic-edit-ontology__workspace">
             <div class="row">
                 <div class="col-md-7">
-                    <div ontology-visualization class="topic-edit-ontology__workspace__ontology-visualization">
+                    <div ontology-visualization models="models" class="topic-edit-ontology__workspace__ontology-visualization">
                         <div ng-repeat="model in models" id="model[[model.name]]" class="model">
                             [[model.verbose_name]]
                         </div>
@@ -68,10 +68,10 @@
                                 <p>Choose the data model to edit</p>
                                 <ul class="well well-sm list-unstyled">
                                     <li ng-repeat="model in models | orderBy:'verbose_name' ">
-                                        <button  class="btn btn-default" ng-class="{top05: !$first}" type="button" ng-click="startEditingModel(model)">
-                                            <i class="fa fa-edit"  style="color: [[model.name|strToColor]]"></i>
-                                            [[model.verbose_name]]
-                                        </button>
+                                        <label class="radio">
+                                            <input type="radio" name="mod" ng-model="$parent.selectedModel" ng-value="model" />
+                                            <strong>[[model.verbose_name]]</strong>
+                                        </label>
                                     </li>
                                 </ul>
                                 <div class="topic-edit-ontology__workspace__menu__panel__footer">
@@ -100,9 +100,55 @@
                             <div ng-if="addingRelationship"
                                  relationship-form="newRelationship"
                                  models="models"
+                                 change-bounds="true"
                                  submit="addRelationship($value)"
                                  cancel="startOver()"></div>
                         </div>
+
+
+                        <div class="topic-edit-ontology__workspace__menu__panel" ng-show="editingRelationship">
+                            <div ng-hide="hasSelectedRelationship()">
+                                <h4 class="topic-edit-ontology__workspace__menu__panel__title">
+                                    Edit relationship <span class="text-muted small">(1/2)</span>
+                                </h4>
+                                <p>Choose the relationship to edit</p>
+                                <div class="well well-sm ">
+                                    <ul class="list-unstyled" ng-repeat="model in models | orderBy:'verbose_name' ">
+                                        <li  ng-repeat="relationship in model.fields | filter:{type: 'relationship'}"
+                                            class="topic-edit-ontology__workspace__menu__panel__edit-relationship">
+                                            <label class="radio" ng-init="relationship.model = model.name">
+                                                <input type="radio" name="rel" ng-model="$parent.$parent.selectedRelationship" ng-value="relationship" />
+                                                <strong>[[model.verbose_name]]</strong>
+                                                <em>[[relationship.verbose_name || relationship.name]]</em>
+                                                <strong>[[getModel(relationship.related_model).verbose_name]]</strong>
+                                            </label>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="topic-edit-ontology__workspace__menu__panel__footer">
+                                  <button class="btn btn-default" type="button" ng-click="startOver()">
+                                      Cancel
+                                  </button>
+                                </div>
+                            </div>
+                            <div ng-show="hasSelectedRelationship()">
+                                <h4 class="topic-edit-ontology__workspace__menu__panel__title">
+                                    Edit relationship <span class="text-muted small">(2/2)</span>
+                                </h4>
+                                <p class="text-muted">
+                                    Editing relationship between
+                                    <strong>[[getModel(selectedRelationship.model).verbose_name]]</strong> and
+                                    <strong>[[getModel(selectedRelationship.related_model).verbose_name]]</strong>.
+                                </p>
+                                <div ng-if="hasSelectedRelationship()"
+                                     relationship-form="selectedRelationship"
+                                     models="models"
+                                     change-bounds="false"
+                                     submit="editRelationship($value)"
+                                     cancel="startOver()"></div>
+                            </div>
+                        </div>
+
 
                     </div>
                 </div>

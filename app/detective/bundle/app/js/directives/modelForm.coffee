@@ -15,9 +15,12 @@ angular.module('detective.directive').directive "modelForm", ()->
         # Transform the given string into a valid field name
         toFieldName = (verbose_name)-> getSlug verbose_name, separator: '_'
         # Sanitize the model to make it ready to be inserted
-        $scope.sanitizeModel = (remove_empty_field=no)->
-            # Generate model name
-            $scope.model.name = toModelName $scope.model.verbose_name
+        $scope.sanitizeModel = (remove_empty_field=no, populate_empty=no)->
+            if $scope.model.verbose_name?
+                # Generate model name
+                $scope.model.name = toModelName $scope.model.verbose_name
+            # Add field array
+            $scope.model.fields or= []
             # Process each field
             for field, index in $scope.model.fields
                 # Field name exists?
@@ -30,7 +33,7 @@ angular.module('detective.directive').directive "modelForm", ()->
                 # Skip unallowed types
                 continue unless $scope.isAllowedType(field)
                 # Use name as default verbose name
-                field.verbose_name = field.verbose_name or field.name
+                field.verbose_name = field.verbose_name or field.name if populate_empty
                 # Generate fields name
                 field.name = toFieldName field.verbose_name
                 # Lowercase first letter
@@ -71,7 +74,8 @@ angular.module('detective.directive').directive "modelForm", ()->
         # True if the given type is allowed
         $scope.isAllowedType = (field)-> FIELD_TYPES.indexOf( do field.type.toLowerCase ) > -1
         # Shortcut to the model object
-        $scope.model = angular.copy($scope.modelForm or {})
+        $scope.model = angular.copy $scope.modelForm or {}
+        $scope.model = $scope.sanitizeModel no, yes
         # Original model
         $scope.master = $scope.modelForm
         # Add default fields

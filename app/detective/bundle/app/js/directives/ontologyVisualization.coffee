@@ -1,4 +1,6 @@
 angular.module('detective.directive').directive('ontologyVisualization', ['$timeout', ($timeout) ->
+    scope:
+        models: "="
     link: (scope, elem, attrs)->
         relayout = =>
             $timeout =>
@@ -56,6 +58,7 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
 
         #DOM has finished rendering
         scope.$watch 'models', relayout, true
+        scope.$on "$stateChangeEnd", relayout
 
 ])
 # EOF

@@ -1,11 +1,11 @@
-<form ng-submit="modelForm.$valid && submit({'$value': model})" name="modelForm" novalidate>
+<form ng-submit="modelForm.$valid && submit({ '$value': sanitizeModel(true) })" name="modelForm" novalidate>
   <div>
       <div>
           <label>Name*</label>
           <input type="text"
                  class="form-control"
                  ng-model="model.verbose_name"
-                 ui-validate="{ unique: 'isValidModelName($value)' }"
+                 ui-validate="{ unique: 'isValidModelName($value, model)' }"
                  name="verbose_name"
                  placeholder="Ex: person, country, etc."
                  required />

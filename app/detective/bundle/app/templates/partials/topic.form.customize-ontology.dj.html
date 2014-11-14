@@ -38,11 +38,11 @@
                                 Relationships
                             </h4>
                             <p class="text-muted">A relationship represents a link between data models like a partnership, an ownership, etc.</p>
-                            <button class="btn btn-default">
+                            <button class="btn btn-default" ng-click="addingRelationship = true">
                                 <i class="fa fa-plus"></i>
                                 Add new relationship
                             </button>
-                            <button class="btn btn-default">
+                            <button class="btn btn-default" ng-click="editingRelationship = true">
                                 <i class=""></i>
                                 <i class="fa fa-edit"></i>
                                 Edit relationship
@@ -57,36 +57,53 @@
                                  model-form="newModel"
                                  models="models"
                                  submit="addModel($value)"
-                                 cancel="$parent.addingModel = false"></div>
+                                 cancel="startOver()"></div>
                         </div>
+
                         <div class="topic-edit-ontology__workspace__menu__panel" ng-show="editingModel">
-                            <h4 class="topic-edit-ontology__workspace__menu__panel__title">
-                                Edit data model
-                            </h4>
                             <div ng-hide="hasSelectedModel()">
+                                <h4 class="topic-edit-ontology__workspace__menu__panel__title">
+                                    Edit data model <span class="text-muted small">(1/2)</span>
+                                </h4>
                                 <p>Choose the data model to edit</p>
-                                <ul class="list-unstyled">
+                                <ul class="well well-sm list-unstyled">
                                     <li ng-repeat="model in models | orderBy:'verbose_name' ">
-                                        <button  class="btn btn-default bottom10" type="button" ng-click="startEditingModel(model)">
+                                        <button  class="btn btn-default" ng-class="{top05: !$first}" type="button" ng-click="startEditingModel(model)">
                                             <i class="fa fa-edit"  style="color: [[model.name|strToColor]]"></i>
                                             [[model.verbose_name]]
                                         </button>
                                     </li>
                                 </ul>
                                 <div class="topic-edit-ontology__workspace__menu__panel__footer">
-                                  <button class="btn btn-default" type="button" ng-click="editingModel = false">
+                                  <button class="btn btn-default" type="button" ng-click="startOver()">
                                       Cancel
                                   </button>
                                 </div>
                             </div>
                             <div ng-show="hasSelectedModel()">
+                                <h4 class="topic-edit-ontology__workspace__menu__panel__title">
+                                    Edit data model <span class="text-muted small">(2/2)</span>
+                                </h4>
                                 <div ng-if="hasSelectedModel()"
                                      model-form="selectedModel"
                                      models="models"
                                      submit="editModel($value)"
-                                     cancel="$parent.editingModel = false"></div>
+                                     cancel="startOver()"></div>
                             </div>
                         </div>
+
+
+                        <div class="topic-edit-ontology__workspace__menu__panel" ng-show="addingRelationship">
+                            <h4 class="topic-edit-ontology__workspace__menu__panel__title">
+                                Add new relationship
+                            </h4>
+                            <div ng-if="addingRelationship"
+                                 relationship-form="newRelationship"
+                                 models="models"
+                                 submit="addRelationship($value)"
+                                 cancel="startOver()"></div>
+                        </div>
+
                     </div>
                 </div>
             </div>

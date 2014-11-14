@@ -15,14 +15,20 @@ angular.module('detective.directive').directive "modelForm", ()->
         # Transform the given string into a valid field name
         toFieldName = (verbose_name)-> getSlug verbose_name, separator: '_'
         # Sanitize the model to make it ready to be inserted
-        sanitizeModel = ->
-            # Use name as default verbose name
-            $scope.model.verbose_name = $scope.model.verbose_name or $scope.model.name
+        $scope.sanitizeModel = (remove_empty_field=no)->
             # Generate model name
             $scope.model.name = toModelName $scope.model.verbose_name
             # Process each field
-            for field in $scope.model.fields
-                continue unless field.name? and $scope.isAllowedType(field)
+            for field, index in $scope.model.fields
+                # Field name exists?
+                unless field.name? or field.name isnt ''
+                    # Should we remove empty field?
+                    if remove_empty_field
+                        delete $scope.model.fields[index]
+                        $scope.model.fields.splice index, 1
+                    continue
+                # Skip unallowed types
+                continue unless $scope.isAllowedType(field)
                 # Use name as default verbose name
                 field.verbose_name = field.verbose_name or field.name
                 # Generate fields name
@@ -32,6 +38,8 @@ angular.module('detective.directive').directive "modelForm", ()->
                     field.name = do field.name.toLowerCase
                 else
                     field.name = field.name.substring(0, 1).toLowerCase() + field.name.substring(1)
+            # Returns the model after sanitizing
+            $scope.model
         # Validate the given value: it must be unique, no other model should have it
         $scope.isValidModelName = (verbose_name)->
             # Do not test emty value
@@ -71,5 +79,5 @@ angular.module('detective.directive').directive "modelForm", ()->
         # Field that will be added to the list
         do $scope.addField unless $scope.model.fields.length
         # Sanitize the model automaticly
-        $scope.$watch "model", sanitizeModel, yes
+        $scope.$watch "model", ( -> do $scope.sanitizeModel ), yes
     ]

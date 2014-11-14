@@ -5,28 +5,36 @@ class window.EditTopicOntologyCtrl
         @scope.addModel            = @addModel
         @scope.hasSelectedModel    = @hasSelectedModel
         @scope.startEditingModel   = @startEditingModel
+        @scope.startOver           = @startOver
         @scope.editModel           = @editModel
+        @scope.addRelationship     = @addRelationship
         @scope.relationships       = @getAllRelationships
+        # Initialize variables
+        do @startOver
+        # List of current model
+        @scope.models              = @scope.selected_skeleton.ontology or []
+
+
+    startOver: =>
         # Panels display
         @scope.addingModel         = no
         @scope.addingRelationship  = no
-        @scope.editingModel        = yes
+        @scope.editingModel        = no
         @scope.editingRelationship = no
-        # List of current model
-        @scope.models              = @scope.selected_skeleton.ontology or []
-        # New model object
+        # Edited objects
         @scope.newModel            = {}
-        @scope.selectedModel       = @scope.models[0]
+        @scope.newRelationship     = {}
+        @scope.selectedModel       = null
+        @scope.selectedRelationship= null
+
+    hasSelectedModel: => @scope.selectedModel?
+    startEditingModel: (model)=> @scope.selectedModel = model
 
     addModel: (model)=>
         @scope.models.push angular.copy(model)
         # Empty given model
         delete @scope.newModel[f] for f of @scope.newModel
-        @scope.addingModel = no
-
-    hasSelectedModel: => @scope.selectedModel?
-
-    startEditingModel: (model)=> @scope.selectedModel = model
+        do @startOver
 
     editModel: (model)=>
         old_name = @scope.selectedModel.name
@@ -43,25 +51,12 @@ class window.EditTopicOntologyCtrl
                     if field.related_model is old_name
                         # We edit the value in the model array (references won't work, dunno why)
                         field.related_model = new_name
-        # Start over
-        @scope.selectedModel      = null
-        @scope.editingModel       = no
+        do @startOver
 
-
-    addRelationship: =>
-        new_relationship_field = {
-            fields        : []
-            help_text     : ""
-            name          : @slugify(@scope.newRelationship.name)
-            verbose_name  : @scope.newRelationship.name
-            related_name  : @slugify(@scope.newRelationship.reverseName)
-            related_model : @scope.newRelationship.and
-            rules         : {search_terms: []}
-            type          : "relationship"
-        }
-        # update the model
-        @getModelByName(@scope.newRelationship.between).fields.push(new_relationship_field)
-        @scope.newRelationship = {}
+    addRelationship: (relationship)=>
+        model = _.find @scope.models, name: relationship.model
+        model.fields.push relationship
+        do @startOver
 
     getAllRelationships: =>
         relationships = {}
@@ -70,12 +65,6 @@ class window.EditTopicOntologyCtrl
                 relationships[model.name] = [] unless relationships[model.name]?
                 relationships[model.name].push field if field.type == "relationship"
         relationships
-
-    # -----------------------------------------------------------------------------
-    #    Utils
-    # -----------------------------------------------------------------------------
-    saveOntology: =>
-        # @TopicsFactory.update({id: @topic.id}, {ontology_as_json:@scope.models})
 
 
 

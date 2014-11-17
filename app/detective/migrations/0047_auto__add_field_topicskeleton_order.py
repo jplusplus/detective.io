@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'TopicSkeleton.order'
         db.add_column(u'detective_topicskeleton', 'order',
-                      self.gf('django.db.models.fields.PositiveIntegerField')(default=-1),
+                      self.gf('django.db.models.fields.PositiveIntegerField')(default=0),
                       keep_default=False)
 
 

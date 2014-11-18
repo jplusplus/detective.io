@@ -1384,7 +1384,7 @@ class TopicSkeletonApiTestCase(ApiTestCase):
                                  data={'title': u'Skeletonist'})
         self.assertHttpCreated(resp)
         created_topic = json.loads(resp.content)
-        self.assertEqual(created_topic['skeleton_title'], skeleton.title)
+        self.assertEqual(created_topic['title'], 'Skeletonist')
         self.assertIsNotNone(created_topic['ontology_as_json'])
 
     def test_topic_create_with_skeleton_with_background_url(self):

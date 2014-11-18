@@ -1384,16 +1384,8 @@ class TopicSkeletonApiTestCase(ApiTestCase):
                                  data={'title': u'Skeletonist'})
         self.assertHttpCreated(resp)
         created_topic = json.loads(resp.content)
-        self.assertEqual(created_topic['background'], skeleton.picture.url)
         self.assertEqual(created_topic['skeleton_title'], skeleton.title)
         self.assertIsNotNone(created_topic['ontology_as_json'])
-
-    def test_topic_create_with_skeleton_not_in_plan(self):
-        skeleton = TopicSkeleton.objects.get(title='Family Affairs')
-        resp = self.create_topic(skeleton=skeleton,
-                                 credentials=self.get_lambda_credentials(),
-                                 data={'title': u'Skeletonist'})
-        self.assertHttpUnauthorized(resp)
 
     def test_topic_create_with_skeleton_with_background_url(self):
         # special test for caption issue: https://github.com/jplusplus/detective.io/issues/542
@@ -1432,7 +1424,6 @@ class TopicSkeletonApiTestCase(ApiTestCase):
 
         self.assertHttpCreated(resp)
         created_topic = json.loads(resp.content)
-        self.assertEqual(created_topic['background'], skeleton.picture.url)
         self.assertIsNotNone(created_topic['ontology_as_json'])
 
         data  = { 'title': u'new title' }

@@ -1354,7 +1354,7 @@ class TopicSkeletonApiTestCase(ApiTestCase):
             credentials = self.get_contrib_credentials()
         if skeleton is None:
             skeleton = TopicSkeleton.objects.get(title='Body Count')
-        data['topic_skeleton'] = skeleton.pk
+        data['ontology_as_json'] = skeleton.ontology
         return self.api_client.post(
             '/api/detective/common/v1/topic/',
             data=data,
@@ -1387,7 +1387,6 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         self.assertEqual(created_topic['background'], skeleton.picture.url)
         self.assertEqual(created_topic['skeleton_title'], skeleton.title)
         self.assertIsNotNone(created_topic['ontology_as_json'])
-        self.assertTrue(skeleton.picture_credits in created_topic['about'])
 
     def test_topic_create_with_skeleton_not_in_plan(self):
         skeleton = TopicSkeleton.objects.get(title='Family Affairs')
@@ -1447,7 +1446,6 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         self.assertTrue(resp.status_code in [200, 202])
         updated_topic = Topic.objects.get(slug=created_topic['slug'])
         self.assertEqual(updated_topic.title, data['title'])
-        self.assertIsNotNone(updated_topic.background)
 
     def test_create_unauthorized(self):
         user = self.create_user(username='overrated', plan=PLANS_CHOICES[1][0])

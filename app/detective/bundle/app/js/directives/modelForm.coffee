@@ -23,6 +23,12 @@ angular.module('detective.directive').directive "modelForm", ()->
             $scope.model.fields or= []
             # Process each field
             for field, index in $scope.model.fields
+                # Skip unallowed types
+                continue unless $scope.isAllowedType(field)
+                # Use name as default verbose name
+                field.verbose_name = field.verbose_name or field.name if populate_empty
+                # Generate fields name
+                field.name = toFieldName field.verbose_name
                 # Field name exists?
                 unless field.name? and field.name isnt ''
                     # Should we remove empty field?
@@ -30,12 +36,6 @@ angular.module('detective.directive').directive "modelForm", ()->
                         delete $scope.model.fields[index]
                         $scope.model.fields.splice index, 1
                     continue
-                # Skip unallowed types
-                continue unless $scope.isAllowedType(field)
-                # Use name as default verbose name
-                field.verbose_name = field.verbose_name or field.name if populate_empty
-                # Generate fields name
-                field.name = toFieldName field.verbose_name
                 # Lowercase first letter
                 if field.name.length < 2
                     field.name = do field.name.toLowerCase

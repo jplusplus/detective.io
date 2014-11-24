@@ -29,6 +29,12 @@ angular.module('detective.directive').directive "relationshipForm", ()->
             # Process each field
             for field, index in $scope.relationship.fields
                 continue unless field?
+                # Skip unallowed types
+                continue unless $scope.isAllowedType(field)
+                # Use name as default verbose name
+                field.verbose_name = field.verbose_name or field.name if populate_empty
+                # Generate fields name
+                field.name = toFieldName field.verbose_name
                 # Field name exists?
                 if not field.name? or field.name is ''
                     # Should we remove empty field?
@@ -36,12 +42,6 @@ angular.module('detective.directive').directive "relationshipForm", ()->
                         delete $scope.relationship.fields[index]
                         $scope.relationship.fields.splice index, 1
                     continue
-                # Skip unallowed types
-                continue unless $scope.isAllowedType(field)
-                # Use name as default verbose name
-                field.verbose_name = field.verbose_name or field.name if populate_empty
-                # Generate fields name
-                field.name = toFieldName field.verbose_name
                 # Lowercase first letter
                 if field.name.length < 2
                     field.name = do field.name.toLowerCase

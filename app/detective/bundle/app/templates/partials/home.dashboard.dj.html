@@ -7,7 +7,7 @@
 					<div class="dashboard__topics__item dashboard__topics__item--new-item">
 						<a ui-sref="user-topic-create({username: user.username})">
 							<h3>
-								Create a new investigation
+								Create a new data collection
 							</h3>
 						</a>
 					</div>
@@ -17,7 +17,7 @@
 						<h4 class="dashboard__topics__item__title">
 							<span class="dashboard__topics__item__visibility pull-right"
 								  tooltip-placement="bottom"
-								  tooltip="[[ topic.public ? 'public investivagtion' : 'private investigation' ]]">
+								  tooltip="[[ topic.public ? 'public collection' : 'private collection' ]]">
 								<i class="fa"
 								   ng-class="{
 								       'fa-unlock': topic.public,
@@ -48,7 +48,7 @@
 								ng-if="!user.owns(topic)">
 								<span class="text-danger">
 									<i class="fa fa-warning"></i>
-									   Leave investigation
+									   Leave data collection
 									</a>
 								</span>
 							</a>

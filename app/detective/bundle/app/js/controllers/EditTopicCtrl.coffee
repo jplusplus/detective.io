@@ -10,12 +10,6 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
         @scope.saved = no
         # Scope methods
         @scope.deleteTopicBackground = @deleteTopicBackground
-        # Get the selected skeleton
-        @TopicSkeleton.get title: @topic.skeleton_title, (skeleton)=>
-            @scope.selected_skeleton =
-                title: @topic.skeleton_title or "Custom data template"
-                ontology_models: @topic.ontology_models
-            angular.extend @scope.selected_skeleton, skeleton[0]
 
         @scope.$on @EVENTS.topic.user_updated, (e, previous, next)=>
             # workaround to properly handle saved state & avoid "saved" state

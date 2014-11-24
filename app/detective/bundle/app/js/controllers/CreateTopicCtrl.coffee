@@ -40,7 +40,6 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.isSkeletonSelected  = @isSkeletonSelected
         @scope.isTeaserSkeleton    = @isTeaserSkeleton
         @scope.hasSelectedSkeleton = @hasSelectedSkeleton
-        @scope.shouldShowForm      = => (do @hasSelectedSkeleton) and (do @hasSelectedDataSet)
         # Scope events
         @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
         # We allow skeleton preselection
@@ -59,10 +58,6 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         else
             @state.go('plans')
 
-    selectDataSet: (dataset) =>
-        @scope.selected_dataset = dataset
-        @rootScope.$broadcast @EVENTS.dataset.selected
-
     isTeaserSkeleton: (skeleton)=>
         has_free_plan = @User.profile.plan is 'free'
         has_free_plan and skeleton.enable_teasing
@@ -80,7 +75,9 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         # binding to skeleton will automaticaly bind the skeleton ontolgy
         # to this new topic in API.
         @scope.topic.ontology_as_json = @scope.selected_skeleton.ontology
+        # Populate empty fields
         @scope.topic.about = @scope.selected_skeleton.picture_credits
+        @scope.topic.background_url = @scope.selected_skeleton.picture
 
     userMaxReached: =>
         profile = @User.profile
@@ -104,12 +101,6 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
             if response.status is 401
                 @scope.error = "Your not authorized to perform this action."
         )
-
-    getFilteredDataSets: =>
-        if (not @scope.selected_skeleton?) or (not @scope.selected_skeleton.id?)
-            []
-        else
-            _.filter @scope.all_datasets, (e) => @scope.selected_skeleton.id in e.skeletons
 
 
 angular.module('detective.controller').controller 'createTopicCtrl', CreateTopicCtrl

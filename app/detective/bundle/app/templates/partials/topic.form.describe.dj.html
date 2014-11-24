@@ -80,7 +80,7 @@
                   <label>Cover picture</label>
                 </div>
                 <div class="col-sm-8">
-                  <span class="text-disabled" ng-if="!!!topic.background">None</span>
+                  <span class="text-disabled" ng-if="!!!topic.background">No picture</span>
                   <div class="thumbnail pull-left"  ng-if="topic.background">
                     <img title="Cover picture of [[ topic.title ]]"
                          ng-src="[[topic.thumbnail.medium]]"/>
@@ -232,7 +232,7 @@
     </div>
   </div>
 
-  <div class="col-sm-4">
+  <div class="col-sm-4" ng-if="isCreating()">
     <div class="topic-form__selected-ontology panel panel-default" ng-show="selected_skeleton">
       <div class="topic-form__selected-ontology__front" style="background-image: url('[[selected_skeleton.thumbnail.medium]]');">
         <h3 class="topic-form__selected-ontology__front__title">[[selected_skeleton.title]]</h3>

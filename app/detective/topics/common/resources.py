@@ -104,8 +104,10 @@ class TopicSkeletonResource(ModelResource):
         ordering = ["order", "name"]
 
     def dehydrate(self, bundle):
+        request = bundle.request
         bundle.data['ontology_models'] = bundle.obj.ontology_models
         bundle.data['blank'] = not len(bundle.obj.ontology_models)
+
         if type(bundle.obj.ontology) is list:
             bundle.data["ontology"] = bundle.obj.ontology
         else:
@@ -114,9 +116,10 @@ class TopicSkeletonResource(ModelResource):
             thumbnailer     = get_thumbnailer(bundle.obj.picture)
             thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
             thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
+            bundle.data['picture'] =  request.build_absolute_uri(bundle.data['picture'])
             bundle.data['thumbnail'] = {
-                'small' : thumbnailSmall.url,
-                'medium': thumbnailMedium.url
+                'small' : request.build_absolute_uri(thumbnailSmall.url),
+                'medium': request.build_absolute_uri(thumbnailMedium.url)
             }
         # No image available
         except InvalidImageFormatError:
@@ -555,61 +558,29 @@ class TopicNestedResource(ModelResource):
         except urllib2.URLError:
             raise UnavailableImage()
 
-    def get_skeleton(self, bundle):
-        # workaround to avoid SQL lazyness, store topic skeleton in bundle obj.
-        topic_skeleton = getattr(bundle, 'skeleton', None)
-        if not topic_skeleton:
-            topic_skeleton_pk = bundle.data.get('topic_skeleton', None)
-            if topic_skeleton_pk:
-                topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton_pk)
-                setattr(bundle, 'skeleton', topic_skeleton)
-        return topic_skeleton
-
-
     def hydrate_author(self, bundle):
         bundle.data['author'] = bundle.request.user
         return bundle
 
     def hydrate_background(self, bundle):
+        request = bundle.request
         # handle background setting from topic skeleton and from background_url
         # if provided
-        topic_skeleton = self.get_skeleton(bundle)
         background_url = bundle.data.get('background_url', None)
-        if topic_skeleton and not background_url:
-            bundle.data['background'] = topic_skeleton.picture
-        else:
-            if background_url:
-                try:
-                    bundle.data['background'] = self.download_url(background_url)
-                except UnavailableImage:
-                    bundle.data['background'] = TopicValidationErrors['background']['unavailable']['code']
-                except NotAnImage:
-                    bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
-                except OversizedFile:
-                    bundle.data['background'] = TopicValidationErrors['background']['oversized_file']['code']
+        if background_url:
+            try:
+                bundle.data['background'] = self.download_url(background_url)
+            except UnavailableImage:
+                bundle.data['background'] = TopicValidationErrors['background']['unavailable']['code']
+            except NotAnImage:
+                bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
+            except OversizedFile:
+                bundle.data['background'] = TopicValidationErrors['background']['oversized_file']['code']
 
-            elif bundle.data.get('background', None):
-                # we remove from data the previously setted background to avoid
-                # further supsicious operation errors
-                self.clean_bundle_key('background', bundle)
-        return bundle
-
-    def hydrate_about(self, bundle):
-        def should_have_credits(bundle, skeleton):
-            topic_about    = bundle.data.get('about', '')
-            background_url = bundle.data.get('background_url', None)
-            if not skeleton:
-                return False
-            credits = ( skeleton.picture_credits or '')
-            return (not background_url) and skeleton and \
-                   (not (credits.lower() in topic_about.lower()))
-
-        topic_skeleton = self.get_skeleton(bundle)
-        if should_have_credits(bundle, topic_skeleton):
-            topic_about = bundle.data.get('about', '')
-            if topic_about != '':
-                topic_about = "%s<br/><br/>" % topic_about
-            bundle.data['about'] = "%s%s" % (topic_about, topic_skeleton.picture_credits)
+        elif bundle.data.get('background', None):
+            # we remove from data the previously setted background to avoid
+            # further supsicious operation errors
+            self.clean_bundle_key('background', bundle)
         return bundle
 
     def hydrate_dataset(self, bundle):
@@ -636,7 +607,6 @@ class TopicNestedResource(ModelResource):
     def clean_bundle(self, bundle):
         # we remove useless (for topic's model class) keys from bundle
         self.clean_bundle_key('background_url', bundle)
-        self.clean_bundle_key('topic_skeleton', bundle)
         return bundle
 
 # simpler version of TopicResource, this resource doesn't use the full

@@ -334,17 +334,17 @@ class TopicNestedResource(ModelResource):
                 user = User.objects.get(username=collaborator)
             # You can't invite the author of the topic
             if user == topic.author:
-                return http.HttpBadRequest("You can't invite the author of the topic.")
+                return http.HttpBadRequest("You can't invite the owner of the collection.")
             # Email options for kown user
             template = get_template("email.topic-invitation.existing-user.txt")
             to_email = user.email
-            subject = '[Detective.io] You’ve just been added to an investigation'
+            subject = '[Detective.io] You’ve just been added to a data collection'
             signup = request.build_absolute_uri( reverse("signup") )
             # Get the contributor group for this topic
             contributor_group = topic.get_contributor_group()
             # Check that the user isn't already in this group
             if user.groups.filter(name=contributor_group.name):
-                return http.HttpBadRequest("You can't invite someone twice to the same topic.")
+                return http.HttpBadRequest("You can't invite someone twice to the same collection.")
             else:
                 # Add user to the collaborator group
                 contributor_group.user_set.add(user)
@@ -355,14 +355,14 @@ class TopicNestedResource(ModelResource):
             # Send an invitation to create an account
             template = get_template("email.topic-invitation.new-user.txt")
             to_email = collaborator
-            subject = '[Detective.io] Someone needs your help on an investigation'
+            subject = '[Detective.io] Someone needs your help to collect data'
             try:
                 # Creates a topictoken
                 topicToken = TopicToken(topic=topic, email=collaborator)
                 topicToken.save()
             except IntegrityError:
                 # Can't invite the same user once!
-                return http.HttpBadRequest("You can't invite someone twice to the same topic.")
+                return http.HttpBadRequest("You can't invite someone twice to the same collection.")
             signup = request.build_absolute_uri( reverse("signup-invitation", args=[topicToken.token]) )
 
         # Creates link to the topic
@@ -415,7 +415,7 @@ class TopicNestedResource(ModelResource):
             return HttpResponse(u"{username} successfuly left {topic} contributors.".format(
                 username=user.username, topic=topic.title))
         else:
-            return HttpResponseForbidden("You are not a contributor of this topic.")
+            return HttpResponseForbidden("You are not a contributor of this collection.")
 
     def list_collaborators(self, request, **kwargs):
         self.method_check(request, allowed=['get'])

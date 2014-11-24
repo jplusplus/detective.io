@@ -11,7 +11,7 @@
         <div class="panel-heading" ng-show="isCreating() && max_reached">
             <h3 class="panel-title">You've reached the limit of your plan! </h3>
             Your <span class="bold">[[ plan_name ]]</span> plan lets you store [[ topics_max ]] topics.
-            You're now at [[ topics_count ]]. If you want to create new investigations it's time
+            You're now at [[ topics_count ]]. If you want to create new data collections it's time
             to <a ui-sref="plans">upgrade</a>!
         </div>
 
@@ -55,7 +55,7 @@
                            ng-disabled="!canChangePrivacy()"
                            class="pull-left top05">
                     <label class='pull-left disabled-explanation' ng-show="!canChangePrivacy()">
-                        Only <a ui-sref="plans">paid plans</a> can make private investigations.
+                        Only <a ui-sref="plans">paid plans</a> can make private data collections.
                     </label>
                 </div>
             </div>
@@ -123,13 +123,13 @@
                 </span>
                 <span class="col-sm-8 text-danger"
                       ng-show="submitted && error.background_url.oversized_file">
-                    Sorry, your file is too big and would hinder your investigation from loading smoothly. Please enter a different URL.
+                    Sorry, your file is too big and would hinder your data collection from loading smoothly. Please enter a different URL.
                 </span>
             </div>
             <!-- Topic about field -->
             <div class="row form-group">
                 <div class="col-sm-4 form-label top05">
-                    <label for="id_topic_about">About your investigation</label>
+                    <label for="id_topic_about">About your data collection</label>
                     <p class="help-block">
                         Less than 1500 char.
                     </p>
@@ -145,7 +145,7 @@
             </div>
             <div class="form-footer__wrapper text-right">
                 <button type="submit" class="form-footer__submit-btn btn btn-primary" ng-disabled="isCreating() && max_reached">
-                    <span ng-if="isCreating()">I'm done, create the investigation</span>
+                    <span ng-if="isCreating()">I'm done, create the data collection</span>
                     <span ng-if="isEditing()">Save changes</span>
                 </button>
             </div>

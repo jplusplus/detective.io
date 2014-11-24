@@ -287,7 +287,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'Detectiveio', u'Detective.io Documentation',
-   u'Journalism++ SAS', 'Detectiveio', 'Detective.io is a platform that hosts your investigation and lets you make powerful queries to mine it. Simply describe your field of study and detective.io builds the input interface as well as a state-of-the-art front-end.',
+   u'Journalism++ SAS', 'Detectiveio', 'Detective.io is a tool for collaborative network analysis. It lets you make powerful queries to mine your data. Simply describe your field of study and detective.io builds the input interface as well as a state-of-the-art front-end.',
    'Miscellaneous'),
 ]
 

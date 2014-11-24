@@ -24,7 +24,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
     # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
     constructor: (@scope, @state, @TopicsFactory, @Page, @User, @EVENTS, @rootScope, @timeout, @location, skeletons)->
         super
-        @Page.title "Create a new investigation"
+        @Page.title "Create a new data collection"
         # Scope attributes
         @scope.skeletons         = skeletons
         @scope.selected_skeleton = null

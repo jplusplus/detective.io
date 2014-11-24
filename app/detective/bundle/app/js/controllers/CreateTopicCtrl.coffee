@@ -28,7 +28,6 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         # Scope attributes
         @scope.skeletons         = skeletons
         @scope.selected_skeleton = null
-        @scope.selected_skeleton = skeletons[0]
         @scope.topic             = {}
         @scope.user              = @User
         if @userMaxReached()

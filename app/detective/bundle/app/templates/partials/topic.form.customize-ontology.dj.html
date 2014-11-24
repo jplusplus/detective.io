@@ -24,7 +24,7 @@
                                 <i class="fa fa-plus"></i>
                                 Add new data model
                             </button>
-                            <button class="btn btn-default" ng-click="editingModel = true">
+                            <button ng-disabled="!models.length" class="btn btn-default" ng-click="editingModel = true">
                                 <i class=""></i>
                                 <i class="fa fa-edit"></i>
                                 Edit data model
@@ -42,7 +42,7 @@
                                 <i class="fa fa-plus"></i>
                                 Add new relationship
                             </button>
-                            <button class="btn btn-default" ng-click="editingRelationship = true">
+                            <button ng-disabled="!hasRelationships()"  class="btn btn-default" ng-click="editingRelationship = true">
                                 <i class=""></i>
                                 <i class="fa fa-edit"></i>
                                 Edit relationship
@@ -114,7 +114,7 @@
                                 <p>Choose the relationship to edit</p>
                                 <div class="well well-sm ">
                                     <ul class="list-unstyled" ng-repeat="model in models | orderBy:'verbose_name' ">
-                                        <li  ng-repeat="relationship in model.fields | filter:{type: 'relationship'}"
+                                        <li ng-repeat="relationship in model.fields | filter:{type: 'relationship'}"
                                             class="topic-edit-ontology__workspace__menu__panel__edit-relationship">
                                             <label class="radio" ng-init="relationship.model = model.name">
                                                 <input type="radio" name="rel" ng-model="$parent.$parent.selectedRelationship" ng-value="relationship" />

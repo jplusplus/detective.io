@@ -13,10 +13,11 @@ class window.EditTopicOntologyCtrl
         @scope.addRelationship          = @addRelationship
         @scope.relationships            = @getAllRelationships
         @scope.getModel                 = @getModel
+        @scope.hasRelationships         = @hasRelationships
         # Initialize variables
         do @startOver
         # List of current model
-        @scope.models              = @scope.selected_skeleton.ontology or []
+        @scope.models                   = @scope.selected_skeleton.ontology or []
 
     # Shortcuts
     hasSelectedModel        : => @scope.selectedModel?
@@ -76,6 +77,10 @@ class window.EditTopicOntologyCtrl
                 relationships[model.name] = [] unless relationships[model.name]?
                 relationships[model.name].push field if field.type == "relationship"
         relationships
+
+    hasRelationships: =>
+        relationships = do @getAllRelationships
+        !! _.keys(relationships).length
 
 
 angular.module('detective.controller').controller 'editTopicOntologyCtrl', EditTopicOntologyCtrl

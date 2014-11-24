@@ -286,10 +286,10 @@ class TopicNestedResource(ModelResource):
         always_return_data = True
         authorization      = TopicAuthorization()
         authentication     = MultiAuthentication(Authentication(), BasicAuthentication(), SessionAuthentication())
-
         validation         = TopicValidation()
         queryset           = Topic.objects.all().prefetch_related('author')
         filtering          = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
+
 
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
@@ -544,9 +544,11 @@ class TopicNestedResource(ModelResource):
         if url == None:
             return None
         try:
-            name = urlparse(url).path.split('/')[-1]
+            name  = urlparse(url).path.split('/')[-1]
+            image = urllib2.urlopen(url).read()
+
             tmp_file = NamedTemporaryFile(delete=True)
-            tmp_file.write(urllib2.urlopen(url).read())
+            tmp_file.write(image)
             tmp_file.flush()
             if not is_image(tmp_file):
                 raise NotAnImage()
@@ -564,10 +566,14 @@ class TopicNestedResource(ModelResource):
 
     def hydrate_background(self, bundle):
         request = bundle.request
+        # Django is mono-threaded in DEBUG, so it is impossible to download
+        # a file served locally by Django.
+        is_local = lambda u: urlparse(u).hostname == urlparse( request.build_absolute_uri() ).hostname
         # handle background setting from topic skeleton and from background_url
         # if provided
         background_url = bundle.data.get('background_url', None)
-        if background_url:
+        # Back URL must exits and not be a local file
+        if background_url and not is_local(background_url):
             try:
                 bundle.data['background'] = self.download_url(background_url)
             except UnavailableImage:
@@ -576,7 +582,6 @@ class TopicNestedResource(ModelResource):
                 bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
             except OversizedFile:
                 bundle.data['background'] = TopicValidationErrors['background']['oversized_file']['code']
-
         elif bundle.data.get('background', None):
             # we remove from data the previously setted background to avoid
             # further supsicious operation errors

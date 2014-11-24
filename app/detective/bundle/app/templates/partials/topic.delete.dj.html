@@ -4,12 +4,12 @@
             <div class="panel-body">
                 <h2>Delete [[ topic.title ]] </h2>
                 <p>
-                    Be careful, when you delete an investigation <b>all your data</b>
+                    Be careful, when you delete a data collection <b>all your data</b>
                     and all data your collaborators have contributed will be lost.
                 </p>
                 <div class="row form-group">
                     <label class="col-sm-12" for="delete_check_title">
-                        Enter investigation title to confirm deletion
+                        Enter data collection title to confirm deletion
                     </label>
                     <div class="col-sm-12">
                         <input type="text"
@@ -24,7 +24,7 @@
                             Title doesn't match
                         </span>
                         <span class="text text-danger" ng-show="submitted && form.check_title.$error.required">
-                            You have to enter the investigation title in order to delete it
+                            You have to enter the title of the data collection in order to delete it
                         </span>
                         <span class="text-danger" ng-if="submitted && error">
                             [[ error ]]
@@ -34,13 +34,13 @@
 
             </div>
             <div class="panel-footer">
-                <button class="btn btn-danger pull-right" type="submit">I understand the risks, delete this investigation</button>
+                <button class="btn btn-danger pull-right" type="submit">I understand the risks, delete this data collection</button>
                 <div class="clearfix"></div>
             </div>
 
         </form>
     </div>
     <div ng-show="deleted" class="alert alert-success">
-        Your topic has been successfully deleted ! We will redirect you to your dashboard.
+        Your data collection has been successfully deleted ! We will redirect you to your dashboard.
     </div>
 </div>

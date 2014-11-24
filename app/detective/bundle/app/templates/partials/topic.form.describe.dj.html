@@ -10,7 +10,7 @@
 
         <div class="panel-heading" ng-show="isCreating() && max_reached">
             <h3 class="panel-title">You've reached the limit of your plan! </h3>
-            Your <span class="bold">[[ plan_name ]]</span> plan lets you store [[ topics_max ]] topics.
+            Your <span class="bold">[[ plan_name ]]</span> plan lets you store [[ topics_max ]] collections.
             You're now at [[ topics_count ]]. If you want to create new data collections it's time
             to <a ui-sref="plans">upgrade</a>!
         </div>
@@ -213,7 +213,7 @@
                         Delete this data collection
                     </label>
                     <p class="help-block top0">
-                        This is destructive action
+                        This is a destructive action
                     </p>
                 </div>
                 <div class="col-sm-3 col-sm-push-1">

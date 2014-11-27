@@ -1,38 +1,8 @@
 angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User, TopicsFactory)->
-    lastDataset = []
-    template =
-        compile: (template) ->
-            compiled = $compile(template)
-            render: (context) ->
-                $scope = $rootScope.$new yes
-                $scope = angular.extend($scope, context)
-                $scope.getModel = ->
-                    if context.model?
-                        context.model
-                    else if context.predicate? and context.predicate.name is '<<INSTANCE>>'
-                        context.object
-                    else if context.subject?
-                        context.subject.label
-                    else
-                        no
-                $scope.getModelVerbose = ->
-                    model = do $scope.getModel
-                    if model
-                        for _model in TopicsFactory.topic.models
-                            if _model.name is model
-                                return _model.verbose_name
-                    return model
-                $scope.getFigureBg = -> $filter("strToColor") $scope.getModel()
-                $scope.isList = -> !context.predicate or context.predicate.name isnt '<<INSTANCE>>'
-
-                element = compiled $scope
-                do $scope.$apply
-                html = do element.html
-                do $scope.$destroy
-                html
 
     scope:
         model                 : "=ttModel"
+        parent                : "=ttParent"
         individual            : "&ttIndividual"
         topic                 : "&ttTopic"
         create                : "&ttCreate"
@@ -50,9 +20,41 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         limit                 : "@"
         change                : "&"
 
-
     link: (scope, element, attrs) ->
+        lastDataset = []
         wrapper = undefined
+        template =
+            compile: (template) ->
+                compiled = $compile(template)
+                render: (context) ->
+                    $scope = $rootScope.$new yes
+                    $scope = angular.extend($scope, context)
+                    $scope.selfLoopWarning = ->
+                        scope.parent? and lastDataset.length is 1 and lastDataset[0].id is scope.parent.id
+                    $scope.getModel = ->
+                        if context.model?
+                            context.model
+                        else if context.predicate? and context.predicate.name is '<<INSTANCE>>'
+                            context.object
+                        else if context.subject?
+                            context.subject.label
+                        else
+                            no
+                    $scope.getModelVerbose = ->
+                        model = do $scope.getModel
+                        if model
+                            for _model in TopicsFactory.topic.models
+                                if _model.name is model
+                                    return _model.verbose_name
+                        return model
+                    $scope.getFigureBg = -> $filter("strToColor") $scope.getModel()
+                    $scope.isList = -> !context.predicate or context.predicate.name isnt '<<INSTANCE>>'
+
+                    element = compiled $scope
+                    do $scope.$apply
+                    html = do element.html
+                    do $scope.$destroy
+                    html
 
         shouldPrependSearchIcon = ->
             _.has(attrs, 'ttPrependSearchIcon')
@@ -87,16 +89,19 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             else
                 div = [
                     "<div class='tt-suggestion'>",
-                        "<div class='tt-suggestion__line tt-suggestion__line--with-empty-results'>",
+                        "<div class='tt-suggestion__line tt-suggestion__line--with-empty-results' ng-hide='selfLoopWarning()'>",
                             "<div class='tt-suggestion__line__figure'>",
                                 "<i class='fa fa-plus'></i>",
                             "</div>",
                             "The entity you just typed in is new in the base.<br/>",
                             "Do you want to create it?",
                         "</div>",
+                        "<div class='tt-suggestion tt-suggestion__line' ng-show='selfLoopWarning()'>",
+                            "You can't create self-related relationship.",
+                        "</div>",
                     "</div>"
                 ]
-            div.join ""
+            template.compile(div.join "").render
 
         getSearchIcon = ->
             (wrapper or element.parent()).find('.tt-search-icon i')
@@ -133,6 +138,9 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 objects = response.objects
             # Save latest dataset to detect unselected value
             lastDataset = objects
+            # Remove the parent from the output
+            if scope.parent?
+                objects = _.filter objects, (o)-> o.id isnt scope.parent.id 
             objects
 
         onRequestCompleted = (xhr, status)->

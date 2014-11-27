@@ -299,7 +299,9 @@ class UserNestedResource(ModelResource):
         self.method_check(request, allowed=['post'])
         data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
         try:
-            if not "email" in data: return http.HttpBadRequest('Missing email')
+            # Email required
+            if not "email" in data or data['email'] == '': 
+                return http.HttpBadRequest('Missing email')
             email   = data['email']
             user    = User.objects.get(email=email)
             recover = Recover()

@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 from .models                          import *
 from app.detective.exceptions         import UnavailableImage, NotAnImage, OversizedFile

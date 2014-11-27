@@ -90,7 +90,7 @@ class TopicSkeleton(models.Model):
     picture         = models.ImageField(upload_to="topics-skeletons", null=True, blank=True, help_text='The default picture for this skeleton')
     picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
     schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
-    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
+    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True, validators=[validate_ontology_as_json])
     target_plans    = models.CharField(max_length=60)
     tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
     enable_teasing  = models.BooleanField(default=False, help_text='Show this skeleton as a teasing skeleton for free user')
@@ -109,7 +109,8 @@ class TopicSkeleton(models.Model):
 
     @property
     def ontology_models(self):
-        return [ m["verbose_name"] for m in self.ontology if "verbose_name" in m ]
+        ontology = self.ontology or []
+        return [ m["verbose_name"] for m in ontology if "verbose_name" in m ]
 
     def __str__(self):
         return self.title

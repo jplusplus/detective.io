@@ -30,7 +30,10 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                     $scope = $rootScope.$new yes
                     $scope = angular.extend($scope, context)
                     $scope.selfLoopWarning = ->
-                        scope.parent? and lastDataset.length is 1 and lastDataset[0].id is scope.parent.id
+                        warning    = scope.parent?
+                        warning and= lastDataset.length is 1
+                        warning and= lastDataset[0].id is scope.parent.id
+                        warning and= context.query.toLowerCase() is scope.parent.name.toLowerCase()
                     $scope.getModel = ->
                         if context.model?
                             context.model

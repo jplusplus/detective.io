@@ -368,6 +368,11 @@ class UserNestedResource(ModelResource):
             message = "Malformed request. The following fields are required: %s" % ', '.join(missing_fields)
             raise MalformedRequestError(message)
 
+        if 'email' in fields:
+            email = data['email']
+            if User.objects.filter(email__iexact=email).count():
+                raise MalformedRequestError("Email must be unique.")
+
         if 'username' in fields:
             username = data['username']
             # match only a-z, A-Z, 0-9 and [@,+,-,_,.] chars

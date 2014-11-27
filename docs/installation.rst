@@ -104,7 +104,7 @@ investigations, etc.
 
 .. sourcecode:: sh
 
-    (. ./venv/bin/activate && ./manage.py syncdb && ./manage.py migrate all)
+    make sdb
 
 
 Launch

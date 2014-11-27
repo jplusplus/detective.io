@@ -59,6 +59,9 @@ statics_install:
 
 install: $(VENV) pip_install $(CUSTOM_D3) neo4j_install statics_install
 
+sdb:
+	. $(ENV) ; ./manage.py syncdb --noinput && ./manage.py migrate
+
 ###
 # Doc generation
 ###

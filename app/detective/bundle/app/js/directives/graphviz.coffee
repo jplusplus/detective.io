@@ -135,7 +135,8 @@
                 .each (datum) ->
                     (createPattern datum, d3Defs)
                     null
-                .call d3Graph.drag
+                .call d3Graph.drag 
+
             # Remove old leafs
             do (do d3Leafs.exit).remove
 

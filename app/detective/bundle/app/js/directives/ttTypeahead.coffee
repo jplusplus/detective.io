@@ -90,7 +90,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             if shouldDisableEntityCreation()
                 div = [
                     "<div class='tt-suggestion'>",
-                        "Please choose an existing entity.",
+                        "Sorry, no results found.",
                     "</div>"
                 ]
             else

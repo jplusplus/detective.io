@@ -2,15 +2,23 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
     scope:
         models: "="
     link: (scope, elem, attrs)->
-        relayout = =>
+        # Create a local instance of jsPlumb (for each directive)
+        plumb = jsPlumb.getInstance()
+        # Redraw the connections between models and move the models
+        scope.redraw = redraw = =>
+            # DOM has finished rendering
             $timeout =>
-                # positioning around a circle
+                # Remove every existing relationships
+                plumb.reset()
+                # Find every model
                 models_nui = elem.find(".model")
+                # Calculate layout sizes
                 radius     = (Math.min(elem.width(), elem.height()) / 2)
                 width      = elem.width()
                 height     = elem.height()
                 angle      = 0
-                step       = (2 * Math.PI) / models_nui.length
+                step       = (2 * Math.PI) / models_nui.length                
+                # And move the models arround the center
                 models_nui.each ->
                     x = Math.round(width  / 2 + radius * Math.cos(angle) - $(this).width()  / 2)
                     y = Math.round(height / 2 + radius * Math.sin(angle) - $(this).height() / 2)
@@ -18,16 +26,19 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
                         left: x
                         top : y
                     angle += step
-                # relationships
-                jsPlumb.reset()
+                # Look into each model
                 for model in scope.models
+                    # And each fields of the model
                     for field in model.fields
+                        # If the field describes a relationship
                         if field.type == "relationship"
                             model_name = model.name
                             related_to = field.related_model
-                            jsPlumb.connect
-                                source: "model#{model_name}"
-                                target: "model#{related_to}"
+                            # We create a new connection between 
+                            # the model_name and the related_mode
+                            plumb.connect
+                                source: elem.find("[data-identifier='#{model_name}']")
+                                target: elem.find("[data-identifier='#{related_to}']")
                                 connector:"StateMachine"
                                 paintStyle:
                                     lineWidth: 2
@@ -49,16 +60,15 @@ angular.module('detective.directive').directive('ontologyVisualization', ['$time
                                             label:"#{field.verbose_name}",
                                             location:.5,
                                             cssClass:"label",
-                                            id:"label--#{field.related_name}"
+                                            id:"label--#{field.name}"
                                         }
                                     ]
                                 ]
-                jsPlumb.draggable jsPlumb.getSelector(".model"),
+                # Make every model draggable      
+                plumb.draggable plumb.getSelector(".model"),
                     containment: elem
 
-        #DOM has finished rendering
-        scope.$watch 'models', relayout, true
-        scope.$on "$stateChangeEnd", relayout
-
+        # Redraw every time we change the models array
+        scope.$watch 'models', redraw, true
 ])
 # EOF

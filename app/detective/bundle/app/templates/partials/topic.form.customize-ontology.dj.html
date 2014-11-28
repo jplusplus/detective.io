@@ -7,7 +7,7 @@
             <div class="row">
                 <div class="col-md-7">
                     <div ontology-visualization models="models" class="topic-edit-ontology__workspace__ontology-visualization">
-                        <div ng-repeat="model in models" id="model[[model.name]]" class="model">
+                        <div ng-repeat="model in models" data-identifier="[[model.name]]" class="model">
                             [[model.verbose_name]]
                         </div>
                     </div>

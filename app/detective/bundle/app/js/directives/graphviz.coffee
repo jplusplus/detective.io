@@ -4,6 +4,7 @@
     replace : yes
     scope   :
         data : '='
+        clustering : '='
     link: (scope, element, attr) ->
         src             = (angular.element '.topic__single__graph__worker script')[0].src
         src             = src.slice ((src.indexOf window.STATIC_URL) + window.STATIC_URL.length)
@@ -23,6 +24,9 @@
         d3Labels        = null
         leafs           = []
         edges           = []
+        d3Drag          = d3Graph.drag()
+        # Fix node after draging
+        d3Drag.on "dragstart", (d)-> d3.select(@).classed("fixed", d.fixed = yes)
 
         isCurrent = (id) =>
             (parseInt $stateParams.id) is parseInt id
@@ -80,27 +84,32 @@
                         source : scope.data.leafs[edge[0]]
                         target : scope.data.leafs[edge[2]]
                         _type : edge[1]
+
+            # Clustering deactivate, skip the worker initialization
+            if not scope.clustering then return register leafs, edges
+            # Initialize a worker to cluster leafs
             worker.postMessage
                 type : 'init'
                 data :
                     current_id : $stateParams.id
                     leafs : leafs
                     edges : edges
+        
+        register = (new_leafs=[], new_edges=[])=>
+            leafs = new_leafs
+            edges = new_edges
+            for edge in edges
+                for key in ['source', 'target']
+                    edge[key] = _.findWhere leafs,
+                        _id : edge[key]._id
+            for i in [0..(Math.min leafs.length, 3)]
+                leafs[i]._shouldDisplayName = yes if leafs[i]?
+            do d3Update
 
         worker.addEventListener 'message', (event) =>
             switch event.data.type
-                when 'log' then do ->
-                    # console.debug "From worker -> #{event.data.data}"
-                when 'update' then do ->
-                    leafs = event.data.data.leafs
-                    edges = event.data.data.edges
-                    for edge in edges
-                        for key in ['source', 'target']
-                            edge[key] = _.findWhere leafs,
-                                _id : edge[key]._id
-                    for i in [0..(Math.min leafs.length, 3)]
-                        leafs[i]._shouldDisplayName = yes if leafs[i]?
-                    do d3Update
+                when 'update'
+                    register event.data.data.leafs, event.data.data.edges
 
         d3Update = =>
             do ((d3Graph.nodes leafs).links edges).start
@@ -135,8 +144,7 @@
                 .each (datum) ->
                     (createPattern datum, d3Defs)
                     null
-                .call d3Graph.drag 
-
+                .call d3Drag
             # Remove old leafs
             do (do d3Leafs.exit).remove
 

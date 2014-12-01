@@ -5,19 +5,19 @@
     scope   :
         data : '='
         clustering : '='
-    link: (scope, element, attr) ->
+    link: (scope, element, attr)->
         src             = (angular.element '.topic__single__graph__worker script')[0].src
         src             = src.slice ((src.indexOf window.STATIC_URL) + window.STATIC_URL.length)
         worker          = new Worker "/proxy/" + src
         absUrl          = do $location.absUrl
-        leafSize        = 6
+        leafSize        = 4
         svgSize         = [ element.width(), element.height() ]
         d3Svg           = ((d3.select element[0]).append 'svg')
             .attr
                 width  : svgSize[0]
                 height : svgSize[1]
         d3Defs          = d3Svg.insert 'svg:defs', 'path'
-        d3Graph         = (((do d3.layout.force).size svgSize).linkDistance 90).charge -300
+        d3Graph         = d3.layout.force().size(svgSize).charge(-300)
         aggregationType = '__aggregation_bubble'
         d3Edges         = null
         d3Leafs         = null
@@ -25,32 +25,36 @@
         leafs           = []
         edges           = []
         d3Drag          = d3Graph.drag()
+        maxNodeWeight   = 1
+        maxLinkWeight   = 1
         # Fix node after draging
-        d3Drag.on "dragstart", (d)-> d3.select(@).classed("fixed", d.fixed = yes)
+        d3Drag.on "dragstart", (d)-> d3.select(@).classed("fixed", d.fixed = yes)    
 
-        isCurrent = (id) =>
-            (parseInt $stateParams.id) is parseInt id
+        d3Grads = d3Defs.selectAll("linearGradient")
 
-        d3Edges = null
-        d3Leafs = null
-        d3Labels = null
+        d3GradsPosition = ->
+            d3Grads
+                .attr "x1", (d)-> d.source.x
+                .attr "y1", (d)-> d.source.y
+                .attr "x2", (d)-> d.target.x
+                .attr "y2", (d)-> d.target.y
 
-        leafs = []
-        edges = []
+        # Is the given id the current node
+        isCurrent = (id) => (parseInt $stateParams.id) is parseInt id
 
-        edgeUpdate = (datum) ->
-            datumX = datum.target.x - datum.source.x
-            datumY = datum.target.y - datum.source.y
+        edgeUpdate = (d)->
+            datumX = d.target.x - d.source.x
+            datumY = d.target.y - d.source.y
             datumR = Math.sqrt (datumX * datumX + datumY * datumY)
-            "M#{datum.source.x},#{datum.source.y}A#{datumR},#{datumR} 0 0,1 #{datum.target.x},#{datum.target.y}"
+            "M#{d.source.x},#{d.source.y}A#{datumR},#{datumR} 0 0,1 #{d.target.x},#{d.target.y}"
 
-        leafUpdate = (datum) -> "translate(#{datum.x}, #{datum.y})"
+        leafUpdate = (d)-> "translate(#{d.x}, #{d.y})"
 
-        createPattern = (datum, d3Defs) ->
-            _leafSize = if (isCurrent datum._id) then (leafSize * 2) else leafSize
+        createPattern = (d, d3Defs)->
+            _leafSize = if (isCurrent d._id) then (leafSize * 2) else leafSize
             pattern   = d3Defs.append 'svg:pattern'
             pattern.attr
-                id           : "pattern#{datum._id}"
+                id           : "pattern#{d._id}"
                 x            : 0
                 y            : 0
                 patternUnits : 'objectBoundingBox'
@@ -62,12 +66,6 @@
                 width  : _leafSize * 2
                 height : _leafSize * 2
             null
-
-        getTextClasses = (datum) ->
-            [
-                'name'
-                if not datum._shouldDisplayName then 'toggle-display' else ''
-            ].join ' '
 
         update = =>
             # It's useless to process if we do not have any leaf
@@ -112,85 +110,123 @@
                     register event.data.data.leafs, event.data.data.edges
 
         d3Update = =>
-            do ((d3Graph.nodes leafs).links edges).start
+            d3Graph.linkDistance(100).nodes(leafs).links(edges).start()
+            # Calculate the maximum link's weight
+            maxLinkWeight = d3.max d3Graph.links(), (d)-> d.source.weight + d.target.weight
+            # Calculate the maximum node's weight
+            maxNodeWeight = d3.max d3Graph.nodes(), (d)-> d.weight
+            # Calculate the size according the maximum node's weight value
+            opacityScale  = d3.scale.linear().range([0.2, 1]).domain([2, maxLinkWeight]) 
+            # Calculate opacity according the maximum link's weight value
+            sizeScale     = d3.scale.linear().range([leafSize, 40]).domain([1, maxNodeWeight]) 
+            # Calculate the link distance according theire weights
+            linkDistance  = (d)-> 100 + sizeScale(d.target.weight + d.source.weight)
+            # Calculate the class of the given leaf name
+            leafNameClass = (d)-> if sizeScale(d.weight) > leafSize then "leaf-name" else "leaf-name leaf-name--small"                
+            getGradID     = (d)-> "linkGrad-" + d.source._id + "-" + d.target._id                
+            getArrowID    = (d)-> "linkArrow-" + d.source._id + "-" + d.target._id                
+            sourceColor   = (d)-> $filter("strToColor")(d.source._type)
+            targetColor   = (d)-> $filter("strToColor")(d.target._type)
+            # Use a scale to calculate the distance
+            d3Graph.linkDistance(linkDistance)
 
-            (((d3Defs.append 'marker').attr
-                id : 'marker-end'
-                class: 'arrow'
-                viewBox : "0 -5 10 10"
-                refX : 15
-                refY : -1.5
-                markerWidth : leafSize
-                markerHeight : leafSize
-                orient : "auto").append 'path').attr 'd', "M0,-5L10,0L0,5"
+            d3Grads = d3Grads.data(d3Graph.links(), getGradID)
+            # stretch to fit
+            d3Grads.enter().append("linearGradient").attr("id", getGradID ).attr "gradientUnits", "userSpaceOnUse"
+            # erase any existing <stop> elements on update
+            d3Grads.html("").append("stop").attr("offset", "0%").attr "stop-color", sourceColor
+            d3Grads.append("stop").attr("offset", "100%").attr "stop-color", targetColor
+
+            
+            d3Defs.selectAll("arrow")
+                .data(d3Graph.links(), getArrowID)
+                .enter()
+                    .append('marker')
+                    .attr
+                        id : getArrowID
+                        class: 'arrow'
+                        viewBox : "0 -5 10 10"
+                        refX : 15
+                        refY : -1.5
+                        fill: (d)-> $filter("strToColor")(d.target._type)
+                        markerWidth : leafSize
+                        markerHeight : leafSize
+                        orient : "auto"
+                    .append 'path'
+                        .attr 'd', "M0,-5L10,0L0,5"
 
             # Create all new edges
-            d3Edges = (d3Svg.selectAll '.edge').data edges, (datum) ->
-                datum.source._id + '-' + datum._type + '-' + datum.target._id
-            ((do d3Edges.enter).insert 'svg:path', 'circle').attr
-                    class : 'edge'
-                    d : edgeUpdate
-                    'marker-end' : (datum) ->
-                        if datum.target._type isnt aggregationType then 'url(' + absUrl + '#marker-end)' else ''
+            d3Edges = d3Svg.selectAll('.edge').data edges, (d)->
+                d.source._id + '-' + d._type + '-' + d.target._id
+
+            d3Edges.enter()
+                .insert 'svg:path', 'circle'
+                .attr 'class', 'edge'
+                .attr 'd', edgeUpdate                
+                .attr 'marker-end', (d)-> if d.target._type isnt aggregationType then 'url(' + absUrl + '#' + getArrowID(d) + ')' else ''            
+                .style 'stroke', (d)->  "url(" + absUrl + "#" + getGradID(d) + ")"
+
             # Remove old edges
-            do (do d3Edges.exit).remove
+            d3Edges.exit().remove()
 
             # Create all new leafs
-            d3Leafs = (d3Svg.selectAll '.leaf').data leafs, (datum) -> datum._id
-            (do d3Leafs.enter).insert('svg:circle', 'text').attr('class', 'leaf').attr
-                    r : (datum) -> leafSize * ( 1 + (isCurrent datum._id) )
-                .style
-                    fill : (datum) -> if (datum._type is aggregationType) then '#fff' else ($filter "strToColor") datum._type
-                .each (datum) ->
-                    (createPattern datum, d3Defs)
-                    null
+            d3Leafs = d3Svg.selectAll('.leaf').data leafs, (d)-> d._id
+            d3Leafs.enter().insert('svg:circle', 'text')
+                .attr 'class', 'leaf'
+                .attr 'r', (d)-> sizeScale(d.weight)
+                .style 'fill', (d)-> unless d._type is aggregationType then $filter("strToColor")(d._type) 
+                .each (d)-> (createPattern d, d3Defs)                                    
                 .call d3Drag
             # Remove old leafs
-            do (do d3Leafs.exit).remove
+            d3Leafs.exit().remove()
 
             # Display name on hover
-            d3Leafs.on 'mouseenter', (datum) -> d3Svg.select(".name[data-id='#{datum._id}']").attr("class", "name")
-            d3Leafs.on 'mouseleave', (datum) -> d3Svg.select(".name[data-id='#{datum._id}']").attr("class", getTextClasses)
-            d3Leafs.on 'click', (datum) ->
+            d3Leafs.on 'mouseenter', (d)-> d3Svg.select(".leaf-name[data-id='#{d._id}']").attr("class", "leaf-name")
+            d3Leafs.on 'mouseleave', (d)-> d3Svg.select(".leaf-name[data-id='#{d._id}']").attr("class", leafNameClass)
+            d3Leafs.on 'click', (d)->
                 # Check if we're dragging the leaf
                 return if d3.event.defaultPrevented
                 # Check if we clicked on a aggregation bubble
-                if datum._type is aggregationType
+                if d._type is aggregationType
                     worker.postMessage
                         type : 'get_from_leaf'
-                        data : datum
+                        data : d
                 else
-                    $location.path "/#{$stateParams.username}/#{$stateParams.topic}/#{do datum._type.toLowerCase}/#{datum._id}"
+                    $location.path "/#{$stateParams.username}/#{$stateParams.topic}/#{do d._type.toLowerCase}/#{d._id}"
                     # We're in a d3 callback so we need to manually $apply the scope
                     do scope.$apply
 
             # Create all new labels
-            d3Labels = (d3Svg.selectAll '.name').data leafs, (datum) -> datum._id
-            (do d3Labels.enter).append('svg:text').attr
-                    dy           : (datum) -> - leafSize * ( 1 + (isCurrent datum._id) )
-                    'data-id'    : (datum) -> datum._id
-                    class        : getTextClasses
-                    'text-anchor': "middle"
-            (d3Svg.selectAll '.name').text (datum) -> datum.name
+            d3Labels = (d3Svg.selectAll '.leaf-name-wrapper').data leafs, (d)-> d._id
+            d3Labels.enter()
+                .append('svg:foreignObject')
+                    .attr "class", "leaf-name-wrapper"
+                    .attr "requiredFeatures", "http://www.w3.org/TR/SVG11/feature#Extensibility"
+                    .attr 'width', 150
+                    .attr 'height', 28
+                    .attr 'x', 150/-2                        
+                    .attr 'y', (d)-> - 28 - sizeScale(d.weight)
+                    .append "xhtml:div"
+                        .text (d)-> d.name
+                        .attr 'class', leafNameClass
+                        .attr 'data-id', (d)-> d._id
             # Remove old labels
-            do (do d3Labels.exit).remove
-            null
+            d3Labels.exit().remove()
+            do d3Graph.start
+            for i in [0..100*100] then do d3Graph.tick
+            do d3Graph.stop   
+            do d3GradsPosition
 
         d3Graph.on 'tick', =>
-            d3Leafs.each (datum) ->
-                datum.x = Math.max leafSize, (Math.min svgSize[0] - leafSize, datum.x)
-                datum.y = Math.max leafSize, (Math.min svgSize[1] - leafSize, datum.y)
+            d3Leafs.each (d)->
+                d.x = Math.max leafSize, (Math.min svgSize[0] - leafSize, d.x)
+                d.y = Math.max leafSize, (Math.min svgSize[1] - leafSize, d.y)
                 null
             d3Edges.attr 'd', edgeUpdate
             d3Leafs.attr 'transform', leafUpdate
             d3Labels.attr 'transform', leafUpdate
-            null
+            do d3GradsPosition
 
-        scope.$watch 'data', =>
-            if scope.data
-                do update
-            null
-
-        null
-
+        # Update graph when there is some data
+        scope.$watch 'data', => do update if scope.data
 ]

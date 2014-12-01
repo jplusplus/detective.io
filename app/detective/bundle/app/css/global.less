@@ -99,7 +99,7 @@ body {
     }
 
     .color-tag {
-        width:40px;
+        max-width:40px;
         height:40px;
         display:inline-block;
         position:relative;
@@ -117,6 +117,12 @@ body {
             border-top-color:fade(white, 5%);
             border-right-color:fade(black, 15%);
             border-bottom-color:fade(black, 35%);
+        }
+
+        &.small {
+            .translate(0, 2px);
+            width:20px;
+            height:20px;
         }
     }
 

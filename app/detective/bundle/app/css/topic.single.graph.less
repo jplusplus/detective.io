@@ -2,35 +2,64 @@
 
 svg {
     .leaf {
-        stroke: @brand-secondary;
-        stroke-width: 1.5px;
+        stroke: white;
+        stroke-width: 0;
         cursor: pointer;
         fill: lighten(@body-bg, 20%);
-        stroke: white;
 
         &:hover {
-            stroke-width: 2.5px;
+            stroke-width: 1.5px;
         }
     }
 
     .edge {
         fill: none;
         stroke: white;
-        stroke-width: 1px;
+        stroke-width: 1.5px;
     }
 
     .arrow {
-        fill:white;
-        stroke-width: 2px;
+        stroke-width: 0px;
     }
 
-    .name {
-        fill:white;
-        font: 14px @font-family-base;
-        pointer-events: none;
 
-        &.toggle-display {
-            display: none;
+
+    .leaf-name-wrapper {        
+        position:relative;
+        pointer-events: none;
+        text-align: center;        
+    }
+
+    .leaf-name {
+        display: inline-block;        
+        text-align: center;        
+        font: @font-family-base;
+        color:@text-color;
+        background:white;
+        padding:2px;
+        border-radius: 2px;
+        font-size:0.7em;
+        white-space: nowrap;
+
+        /*
+        position:absolute;
+        bottom:10px;
+        left:50%;
+        .translate(-50%, 0);
+
+        &:after {
+            content:"";
+            position: absolute;
+            top:100%;
+            left:50%;
+            border:10px solid transparent;
+            border-top-color:white;
+            .translate(-50%, -10%);
+        }
+        */
+
+        &--small {
+            opacity:0.5;
         }
     }
 }

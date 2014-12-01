@@ -53,8 +53,7 @@
             <div class="col-xs-5">Type</div>
         </div>
         <fieldset class="row topic-edit-ontology__workspace__menu__panel__fields__field"
-                  ng-repeat="field in relationship.fields | filter:isAllowedType"
-                  ng-disabled="field.name === 'name'">
+                  ng-repeat="field in relationship.fields | filter:isAllowedType">
             <div class="col-xs-5 topic-edit-ontology__workspace__menu__panel__fields__field__input">
                 <input type="text"
                        class="form-control"

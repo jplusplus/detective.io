@@ -81,6 +81,12 @@
                                 </div>
                             </div>
                             <div ng-show="hasSelectedModel()">
+                                <button type="button" 
+                                        class="btn btn-danger pull-right" 
+                                        title="Remove this model" 
+                                        ng-click="removeModel(selectedModel)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
                                 <h4 class="topic-edit-ontology__workspace__menu__panel__title">
                                     Edit data model <span class="text-muted small">(2/2)</span>
                                 </h4>
@@ -132,6 +138,12 @@
                                 </div>
                             </div>
                             <div ng-show="hasSelectedRelationship()">
+                                <button type="button" 
+                                        class="btn btn-danger pull-right" 
+                                        title="Remove this relationship" 
+                                        ng-click="removeRelationship(selectedRelationship)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
                                 <h4 class="topic-edit-ontology__workspace__menu__panel__title">
                                     Edit relationship <span class="text-muted small">(2/2)</span>
                                 </h4>

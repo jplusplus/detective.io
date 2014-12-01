@@ -1,6 +1,6 @@
 class window.EditTopicOntologyCtrl
-    @$inject: ['$scope', 'Page', '$rootScope', 'TopicsFactory']
-    constructor: (@scope, @Page, @rootScope,  @TopicsFactory)->
+    @$inject: ['$scope', 'Page', '$rootScope', 'TopicsFactory', '$modal']
+    constructor: (@scope, @Page, @rootScope,  @TopicsFactory, @modal)->
         # Scope methods
         @scope.hasSelectedModel         = @hasSelectedModel
         @scope.hasSelectedRelationship  = @hasSelectedRelationship
@@ -14,6 +14,8 @@ class window.EditTopicOntologyCtrl
         @scope.relationships            = @getAllRelationships
         @scope.getModel                 = @getModel
         @scope.hasRelationships         = @hasRelationships
+        @scope.removeModel              = @removeModel
+        @scope.removeRelationship       = @removeRelationship
         # Initialize variables
         do @startOver
         # List of current model
@@ -60,6 +62,22 @@ class window.EditTopicOntologyCtrl
                         field.related_model = new_name
         do @startOver
 
+    removeModel: (model)=>
+        modalInstance = @modal.open
+            templateUrl: '/partial/topic.form.customize-ontology.remove-model.html' 
+            controller: ($scope, $modalInstance)-> 
+                $scope.model = model                
+                $scope.ok = -> do $modalInstance.close
+                $scope.cancel = -> $modalInstance.dismiss 'cancel'
+        # Removing approved
+        modalInstance.result.then =>
+            # Look into the other models
+            for m, model_index in @scope.models 
+                # Remove every field related to this model
+                m.fields = _.filter m.fields, (field)-> field.related_model isnt model.name                        
+            @scope.models = _.without @scope.models, model
+            do @startOver
+
     addRelationship: (relationship)=>
         model = _.find @scope.models, name: relationship.model
         model.fields.push relationship
@@ -69,6 +87,20 @@ class window.EditTopicOntologyCtrl
         model    = @getModel relationship.model
         angular.extend @scope.selectedRelationship, relationship
         do @startOver
+
+    removeRelationship: (relationship)=>
+        modalInstance = @modal.open
+            templateUrl: '/partial/topic.form.customize-ontology.remove-relationship.html' 
+            controller: ($scope, $modalInstance)=> 
+                $scope.relationship = relationship                
+                $scope.getModel = @getModel                
+                $scope.ok = -> do $modalInstance.close
+                $scope.cancel = -> $modalInstance.dismiss 'cancel'
+        # Removing approved
+        modalInstance.result.then =>
+            model = @getModel relationship.model
+            model.fields = _.without model.fields, relationship
+            do @startOver
 
     getAllRelationships: =>
         relationships = {}

@@ -274,4 +274,8 @@ angular.module('detective.config').config [
                     forms: UserTopicCtrl.resolve.forms
                     individual: UserTopicCtrl.resolve.individual
             )
+            .state('user-topic-detail.network',
+                url: 'network'
+                templateUrl: "/partial/topic.single.network.html"
+            )
 ]

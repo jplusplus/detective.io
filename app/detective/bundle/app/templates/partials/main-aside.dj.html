@@ -27,7 +27,7 @@
                 </a>
             </li>
             <li ng-if="user.is_logged">
-                <a ui-sref="user-topic-create">
+                <a ui-sref="user-topic-create.choose-ontology({username: user.username})">
                     <i class="fa fa-fw fa-plus"></i>&nbsp;
                     New data collection
                 </a>

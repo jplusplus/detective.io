@@ -29,6 +29,10 @@
         maxLinkWeight   = 1
         # Fix node after draging
         d3Drag.on "dragstart", (d)-> d3.select(@).classed("fixed", d.fixed = yes)
+        d3Drag.on "dragend", (d)->
+            do d3Graph.start
+            for i in [0..100] then do d3Graph.tick
+            do d3Graph.stop
 
         d3Grads = d3Defs.selectAll("linearGradient")
 
@@ -84,7 +88,8 @@
                         _type : edge[1]
 
             # Clustering deactivate, skip the worker initialization
-            if not scope.clustering then return register leafs, edges
+            if not scope.clustering and scope.data.length > 70
+                return register leafs, edges
             # Initialize a worker to cluster leafs
             worker.postMessage
                 type : 'init'
@@ -152,6 +157,7 @@
                         markerWidth : leafSize
                         markerHeight : leafSize
                         orient : "auto"
+                    .style 'opacity', (d)-> opacityScale d.source.weight + d.target.weight
                     .append 'path'
                         .attr 'd', "M0,-5L10,0L0,5"
 
@@ -216,7 +222,6 @@
             do d3Graph.start
             for i in [0..100] then do d3Graph.tick
             do d3Graph.stop
-            do d3GradsPosition
 
         d3Graph.on 'tick', =>
             d3Leafs.each (d)->

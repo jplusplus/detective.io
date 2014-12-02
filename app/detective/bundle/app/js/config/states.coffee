@@ -275,7 +275,7 @@ angular.module('detective.config').config [
                     individual: UserTopicCtrl.resolve.individual
             )
             .state('user-topic-detail.network',
-                url: 'network'
+                url: 'network/'
                 templateUrl: "/partial/topic.single.network.html"
             )
 ]

@@ -1,23 +1,19 @@
 .general-graph-navigation {
-    opacity: 0;
-    transition-property: opacity;
-    transition-duration: .5s;
     position: relative;
-    z-index: 5;    
-
-    &__show {
-        opacity: 1;
-    }
+    z-index: 5;
 
     height:100%;
     background: url("@{staticPath}img/graph.png");
     color: white;
 
-    &__close-network-view {
-        position : absolute;
-        top      : 20px;
-        right    : 20px;
+    &__close-network-view,
+    &__close-network-view:hover {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color:white;
     }
+
     &__loading {
         .translate(50%, 50%);
         height     : 100%;
@@ -25,47 +21,85 @@
         left       : 0;
         right      : 0;
     }
+
+
     &__filters-box {
-        position        : absolute;
-        background-color: white;
-        display         : inline-block;
-        opacity         : .9em;
-        padding         : 5px 10px;
-        margin          : 10px;
-        border          : 1px solid #DDD;
-        white-space     : nowrap;
-        .box-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));
+        position: absolute;
+        top: 0;
+        bottom:0;
+        display: block;
+        padding: 10px 15px;
+        white-space: nowrap;
+        background:fade(@brand-secondary, 50);
 
         .checkbox {
             padding:0;
         }
 
-        label &__label {
-            margin-left: 20px;
-        }
         label.filter-names &__label {
             display: inline-block;
-            border-bottom-style: solid;
-            border-bottom-width : 4px;
         }
-        input[type=checkbox] { display:none; } /* to hide the checkbox itself */
-        input[type=checkbox] + label:before {
-            font-family: FontAwesome;
-            display: inline-block;
-            position: absolute;
 
+        /* to hide the checkbox itself */
+        input[type=checkbox] { display:none; }
+
+
+        input[type=checkbox] + label .color-tag {
+            margin-right: 5px;
+            .translate(0, 5px);
         }
-        input[type=checkbox] + label:before { content: "\f096"; } /* unchecked icon */
-        input[type=checkbox] + label:before { letter-spacing: 10px; } /* space between checkbox and label */
-        input[type=checkbox]:checked + label:before { content: "\f046"; } /* checked icon */
-        input[type=checkbox]:checked + label:before { letter-spacing: 5px; } /* allow space for check mark */
+
+         /* unchecked icon */
+        input[type=checkbox] + label {
+            opacity:0.5;
+            font-weight: bold;
+            .color-tag {
+                opacity:0.5;
+            }
+        }
+
+        /* checked icon */
+        input[type=checkbox]:checked + label {
+            opacity:1;
+            .color-tag {
+                opacity:1;
+            }
+        }
+
+        & &__all {
+            display: block;
+            border-bottom:1px solid fade(white, 30);
+            padding-bottom:5px;
+            padding-left:30px;
+            position: relative;
+
+            label:before {
+                content:"";
+                position: absolute;
+                left:0;
+                top:0;
+                width:20px;
+                height:20px;
+                .border-radius(@border-radius-small);
+                border:1px solid white;
+            }
+
+            label:after {
+                content:"";
+                position: absolute;
+                left:0;
+                top:0;
+                border:10px transparent solid;
+                border-left-color:fade(white, 25%);
+                border-top-color:fade(white, 5%);
+                border-right-color:fade(black, 15%);
+                border-bottom-color:fade(black, 35%);
+            }
+        }
     }
+
     &__graphviz {
         height : 100%;
-        
-        path.arrow {
-            fill:@text-color;
-        }
     }
 }
 

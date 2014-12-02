@@ -28,7 +28,7 @@
         maxNodeWeight   = 1
         maxLinkWeight   = 1
         # Fix node after draging
-        d3Drag.on "dragstart", (d)-> d3.select(@).classed("fixed", d.fixed = yes)    
+        d3Drag.on "dragstart", (d)-> d3.select(@).classed("fixed", d.fixed = yes)
 
         d3Grads = d3Defs.selectAll("linearGradient")
 
@@ -92,7 +92,7 @@
                     current_id : $stateParams.id
                     leafs : leafs
                     edges : edges
-        
+
         register = (new_leafs=[], new_edges=[])=>
             leafs = new_leafs
             edges = new_edges
@@ -116,15 +116,15 @@
             # Calculate the maximum node's weight
             maxNodeWeight = d3.max d3Graph.nodes(), (d)-> d.weight
             # Calculate the size according the maximum node's weight value
-            opacityScale  = d3.scale.linear().range([0.2, 1]).domain([2, maxLinkWeight]) 
+            opacityScale  = d3.scale.linear().range([0.2, 1]).domain([2, maxLinkWeight])
             # Calculate opacity according the maximum link's weight value
-            sizeScale     = d3.scale.linear().range([leafSize, 40]).domain([1, maxNodeWeight]) 
+            sizeScale     = d3.scale.linear().range([leafSize, 40]).domain([1, maxNodeWeight])
             # Calculate the link distance according theire weights
             linkDistance  = (d)-> 100 + sizeScale(d.target.weight + d.source.weight)
             # Calculate the class of the given leaf name
-            leafNameClass = (d)-> if sizeScale(d.weight) > leafSize then "leaf-name" else "leaf-name leaf-name--small"                
-            getGradID     = (d)-> "linkGrad-" + d.source._id + "-" + d.target._id                
-            getArrowID    = (d)-> "linkArrow-" + d.source._id + "-" + d.target._id                
+            leafNameClass = (d)-> if sizeScale(d.weight) > leafSize then "leaf-name" else "leaf-name leaf-name--small"
+            getGradID     = (d)-> "linkGrad-" + d.source._id + "-" + d.target._id
+            getArrowID    = (d)-> "linkArrow-" + d.source._id + "-" + d.target._id
             sourceColor   = (d)-> $filter("strToColor")(d.source._type)
             targetColor   = (d)-> $filter("strToColor")(d.target._type)
             # Use a scale to calculate the distance
@@ -137,7 +137,7 @@
             d3Grads.html("").append("stop").attr("offset", "0%").attr "stop-color", sourceColor
             d3Grads.append("stop").attr("offset", "100%").attr "stop-color", targetColor
 
-            
+
             d3Defs.selectAll("arrow")
                 .data(d3Graph.links(), getArrowID)
                 .enter()
@@ -162,9 +162,10 @@
             d3Edges.enter()
                 .insert 'svg:path', 'circle'
                 .attr 'class', 'edge'
-                .attr 'd', edgeUpdate                
-                .attr 'marker-end', (d)-> if d.target._type isnt aggregationType then 'url(' + absUrl + '#' + getArrowID(d) + ')' else ''            
+                .attr 'd', edgeUpdate
+                .attr 'marker-end', (d)-> if d.target._type isnt aggregationType then 'url(' + absUrl + '#' + getArrowID(d) + ')' else ''
                 .style 'stroke', (d)->  "url(" + absUrl + "#" + getGradID(d) + ")"
+                .style 'stroke-opacity', (d)->  opacityScale d.source.weight + d.target.weight
 
             # Remove old edges
             d3Edges.exit().remove()
@@ -174,8 +175,8 @@
             d3Leafs.enter().insert('svg:circle', 'text')
                 .attr 'class', 'leaf'
                 .attr 'r', (d)-> sizeScale(d.weight)
-                .style 'fill', (d)-> unless d._type is aggregationType then $filter("strToColor")(d._type) 
-                .each (d)-> (createPattern d, d3Defs)                                    
+                .style 'fill', (d)-> unless d._type is aggregationType then $filter("strToColor")(d._type)
+                .each (d)-> (createPattern d, d3Defs)
                 .call d3Drag
             # Remove old leafs
             d3Leafs.exit().remove()
@@ -204,7 +205,7 @@
                     .attr "requiredFeatures", "http://www.w3.org/TR/SVG11/feature#Extensibility"
                     .attr 'width', 150
                     .attr 'height', 28
-                    .attr 'x', 150/-2                        
+                    .attr 'x', 150/-2
                     .attr 'y', (d)-> - 28 - sizeScale(d.weight)
                     .append "xhtml:div"
                         .text (d)-> d.name
@@ -213,8 +214,8 @@
             # Remove old labels
             d3Labels.exit().remove()
             do d3Graph.start
-            for i in [0..100*100] then do d3Graph.tick
-            do d3Graph.stop   
+            for i in [0..100] then do d3Graph.tick
+            do d3Graph.stop
             do d3GradsPosition
 
         d3Graph.on 'tick', =>

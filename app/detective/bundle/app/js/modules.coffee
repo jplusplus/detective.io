@@ -8,6 +8,7 @@ angular.module('detective', [
     "angularFileUpload"
     "detective.config"
     "detective.controller"
+    "detective.config"
     "detective.directive"
     "detective.filter"
     "detective.service"

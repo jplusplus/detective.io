@@ -35,9 +35,9 @@
         text-decoration: none;
         border-right:#DDD solid 1px;
 
-        &--active, &--active:hover {
-            background:@brand-primary;
-            color: contrast(@brand-primary);
+        &--active, &:hover, &:active {
+            color: mix(@brand-primary, @text-color);
+            text-decoration: none;
         }
     }
 

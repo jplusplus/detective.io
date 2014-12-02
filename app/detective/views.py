@@ -40,10 +40,10 @@ def __get_entity(topic_obj, **kwargs):
 
 def default_social_meta(request):
     return {
-        "title": "Data-driven investigations - %s" % APP_TITLE,
+        "title": "Collaborative network analysis - %s" % APP_TITLE,
         "description": (
-            "{app_title} makes it easy to organize information. Because it "
-            "structures your research, you can explore connections in your "
+            "{app_title} makes it easy to explore networks. Because it "
+            "structures your research, you can analyze connections in your "
             "collected data in seconds."
         ).format(app_title=APP_TITLE),
         "url": request.build_absolute_uri()
@@ -158,7 +158,7 @@ def entity_details(request, **kwargs):
         entity_title        = __entity_title(entity)
         entity_picture      = __entity_picture(entity)
         entity_description  = __entity_description(entity)
-        generic_description = u"{title} is part of investigation {topic} by {owner}".format(
+        generic_description = u"{title} is part of the collection {topic} by {owner}".format(
             title=entity_title,
             topic=topic.title,
             owner=user.username
@@ -196,7 +196,7 @@ def topic(request, **kwargs):
 
         default_meta  = default_social_meta(request)
         generic_description = (
-            u"Part of investigation {topic_title} by {owner} on {app_title}"
+            u"Part of collection {topic_title} by {owner} on {app_title}"
         ).format(
             topic_title=topic.title,
             owner=user.username,

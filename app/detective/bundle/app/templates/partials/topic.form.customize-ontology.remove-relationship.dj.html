@@ -1,0 +1,15 @@
+<div class="modal-header">
+    <h4>
+        <strong>[[getModel(relationship.model).verbose_name]]</strong>
+	    <em>[[relationship.verbose_name || relationship.name]]</em>
+	    <strong>[[getModel(relationship.related_model).verbose_name]]</strong>
+    </h4>
+</div>
+<div class="modal-body">
+    If you delete this relationship, all the fields associated to this relationship will be deleted too. 
+    Are you sure to continue?
+</div>
+<div class="modal-footer">
+    <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-primary" ng-click="ok()">OK</button>
+</div>

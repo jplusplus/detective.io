@@ -103,27 +103,20 @@ body {
         height:40px;
         display:inline-block;
         position:relative;
+        overflow: hidden;
         .border-radius(@border-radius-small);
 
         &:after {
             position:absolute;
-            top:0;
-            left:0;
+            top:50%;
+            left:50%;
+            .translate(-50%, -50%);
             content:"";
             border:20px transparent solid;
             border-left-color:fade(white, 25%);
             border-top-color:fade(white, 5%);
             border-right-color:fade(black, 15%);
             border-bottom-color:fade(black, 35%);
-        }
-
-        &.small {
-            width:20px;
-            height:20px;
-
-            &:after {
-                border-width:10px;
-            }
         }
     }
 

@@ -33,7 +33,7 @@ run: clean startdb startredis
 	. $(ENV) ; python -W ignore::DeprecationWarning manage.py runserver --nothreading 0.0.0.0:$(PORT)
 
 watch:
-	cd app/detective/bundle; gulp node_modules/.bin/watch
+	cd app/detective/bundle; node_modules/.bin/gulp watch
 
 ###
 # Installation rules
@@ -58,6 +58,9 @@ statics_install:
 	cd app/detective/bundle; npm install; bower install; node_modules/.bin/gulp
 
 install: $(VENV) pip_install $(CUSTOM_D3) neo4j_install statics_install
+
+sdb:
+	. $(ENV) ; ./manage.py syncdb --noinput && ./manage.py migrate
 
 ###
 # Doc generation

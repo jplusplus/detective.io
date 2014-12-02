@@ -3,7 +3,7 @@
         "model": "detective.topicdataset",
         "pk": 1,
         "fields": {
-            "title": "Blank investigation",
+            "title": "Blank data collection",
             "target_plans": "[u'free', u'jane', u'hank', u'sherlock', u'enterprise']",
             "target_skeletons": [1,2,3,4,5],
             "description": "Picture: Pen and Paper - Guudmorning!",

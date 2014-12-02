@@ -1354,7 +1354,7 @@ class TopicSkeletonApiTestCase(ApiTestCase):
             credentials = self.get_contrib_credentials()
         if skeleton is None:
             skeleton = TopicSkeleton.objects.get(title='Body Count')
-        data['topic_skeleton'] = skeleton.pk
+        data['ontology_as_json'] = skeleton.ontology
         return self.api_client.post(
             '/api/detective/common/v1/topic/',
             data=data,
@@ -1384,17 +1384,8 @@ class TopicSkeletonApiTestCase(ApiTestCase):
                                  data={'title': u'Skeletonist'})
         self.assertHttpCreated(resp)
         created_topic = json.loads(resp.content)
-        self.assertEqual(created_topic['background'], skeleton.picture.url)
-        self.assertEqual(created_topic['skeleton_title'], skeleton.title)
+        self.assertEqual(created_topic['title'], 'Skeletonist')
         self.assertIsNotNone(created_topic['ontology_as_json'])
-        self.assertTrue(skeleton.picture_credits in created_topic['about'])
-
-    def test_topic_create_with_skeleton_not_in_plan(self):
-        skeleton = TopicSkeleton.objects.get(title='Family Affairs')
-        resp = self.create_topic(skeleton=skeleton,
-                                 credentials=self.get_lambda_credentials(),
-                                 data={'title': u'Skeletonist'})
-        self.assertHttpUnauthorized(resp)
 
     def test_topic_create_with_skeleton_with_background_url(self):
         # special test for caption issue: https://github.com/jplusplus/detective.io/issues/542
@@ -1433,7 +1424,6 @@ class TopicSkeletonApiTestCase(ApiTestCase):
 
         self.assertHttpCreated(resp)
         created_topic = json.loads(resp.content)
-        self.assertEqual(created_topic['background'], skeleton.picture.url)
         self.assertIsNotNone(created_topic['ontology_as_json'])
 
         data  = { 'title': u'new title' }
@@ -1447,7 +1437,6 @@ class TopicSkeletonApiTestCase(ApiTestCase):
         self.assertTrue(resp.status_code in [200, 202])
         updated_topic = Topic.objects.get(slug=created_topic['slug'])
         self.assertEqual(updated_topic.title, data['title'])
-        self.assertIsNotNone(updated_topic.background)
 
     def test_create_unauthorized(self):
         user = self.create_user(username='overrated', plan=PLANS_CHOICES[1][0])

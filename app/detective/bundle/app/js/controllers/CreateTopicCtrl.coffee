@@ -18,76 +18,45 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
                 deferred.resolve(data)
             # Return a deffered object
             deferred.promise
-        datasets: ['$q', 'Page', 'TopicDataSet', ($q, Page, TopicDataSet) ->
-            deferred = do $q.defer
-            notFound = ->
-                do deferred.reject
-                $state.go "404"
-                deferred
-            forbidden = ->
-                do deferred.reject
-                $state.go "403"
-                deferred
-            Page.loading yes
-            TopicDataSet.get (data) =>
-                deferred.resolve data
-            deferred.promise
-        ]
 
-    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location',  'skeletons', 'datasets']
-
+    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location',  'skeletons']
     # Note: The 5 first parameters need to stay in that order if we want the
     # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
-    constructor: (@scope, @state, @TopicsFactory, @Page, @User, @EVENTS, @rootScope, @timeout, @location, skeletons, datasets)->
+    constructor: (@scope, @state, @TopicsFactory, @Page, @User, @EVENTS, @rootScope, @timeout, @location, skeletons)->
         super
-        @setCreatingMode()
-
-        @scope.skeletons = skeletons
-        @scope.selected_skeleton = {}
-
-        @scope.all_datasets = datasets
-        @scope.datasets = []
-        @scope.selected_dataset = {}
-
-        @scope.topic = {}
-
-        @scope.goToPlans = @goToPlans
-        @scope.selectSkeleton = @selectSkeleton
-        @scope.selectDataSet = @selectDataSet
-        @scope.isSkeletonSelected = @isSkeletonSelected
-        @scope.isDataSetSelected = @isDataSetSelected
-        @scope.isTeaserSkeleton = @isTeaserSkeleton
-        @scope.hasSelectedSkeleton = @hasSelectedSkeleton
-        @scope.hasSelectedDataSet = @hasSelectedDataSet
-        @scope.shouldShowDataSets = @hasSelectedSkeleton
-        @scope.shouldShowForm = => (do @hasSelectedSkeleton) and (do @hasSelectedDataSet)
-
+        @Page.title "Create a new data collection"
+        # Scope attributes
+        @scope.skeletons         = skeletons
+        @scope.selected_skeleton = null
+        @scope.topic             = {}
+        @scope.user              = @User
         if @userMaxReached()
             @scope.max_reached  = true
             @scope.plan_name    = @User.profile.plan
             @scope.topics_max   = @User.profile.topics_max
             @scope.topics_count = @User.profile.topics_count
-        @scope.user = @User
-
-        @Page.title "Create a new investigation"
-
+        # Scope methods
+        @scope.selectSkeleton      = @selectSkeleton
+        @scope.isSkeletonSelected  = @isSkeletonSelected
+        @scope.isTeaserSkeleton    = @isTeaserSkeleton
+        @scope.hasSelectedSkeleton = @hasSelectedSkeleton
+        # Scope events
         @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
-        @scope.$on @EVENTS.dataset.selected, @onDataSetSelected
-
-    # nav & scope methods
-    goToPlans: =>
-        @state.go 'plans'
+        # We allow skeleton preselection
+        if @scope.selected_skeleton?
+            @state.go "user-topic-create.customize-ontology"
+            do @onSkeletonSelected
+        else
+            @state.go "user-topic-create.choose-ontology"
 
     selectSkeleton: (skeleton)=>
-        unless @isTeaserSkeleton(skeleton)
+        if not skeleton?
+            @scope.selected_skeleton = null
+        else if not @isTeaserSkeleton(skeleton)
             @scope.selected_skeleton = skeleton
             @rootScope.$broadcast @EVENTS.skeleton.selected
         else
-            @goToPlans()
-
-    selectDataSet: (dataset) =>
-        @scope.selected_dataset = dataset
-        @rootScope.$broadcast @EVENTS.dataset.selected
+            @state.go('plans')
 
     isTeaserSkeleton: (skeleton)=>
         has_free_plan = @User.profile.plan is 'free'
@@ -97,40 +66,18 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         return false unless @scope.selected_skeleton?
         skeleton.id == @scope.selected_skeleton.id
 
-    isDataSetSelected: (dataset) =>
-        return no unless @scope.selected_dataset? and @scope.selected_dataset.id?
-        dataset.id is @scope.selected_dataset.id
-
     hasSelectedSkeleton: =>
         @scope.selected_skeleton? and @scope.selected_skeleton.id?
-
-    hasSelectedDataSet: =>
-        @scope.selected_dataset? and @scope.selected_dataset.id?
 
     onSkeletonSelected: =>
         # safe init
         @scope.topic = @scope.topic or {}
         # binding to skeleton will automaticaly bind the skeleton ontolgy
         # to this new topic in API.
-        @scope.topic.topic_skeleton = @scope.selected_skeleton.id
+        @scope.topic.ontology_as_json = @scope.selected_skeleton.ontology
+        # Populate empty fields
         @scope.topic.about = @scope.selected_skeleton.picture_credits
-        # Filter datasets
-        @scope.datasets = do @getFilteredDataSets
-        # Angular scroll
-        @location.search({scrollTo: 'topic-datasets'})
-        @timeout(=>
-                @rootScope.$broadcast @EVENTS.trigger.scroll
-            , 250
-        )
-
-    onDataSetSelected: =>
-        @scope.topic.dataset = @scope.selected_dataset.id
-        # Angular scroll
-        @location.search({scrollTo: 'topic-form'})
-        @timeout(=>
-                @rootScope.$broadcast @EVENTS.trigger.scroll
-            , 250
-        )
+        @scope.topic.background_url = @scope.selected_skeleton.picture
 
     userMaxReached: =>
         profile = @User.profile
@@ -154,12 +101,6 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
             if response.status is 401
                 @scope.error = "Your not authorized to perform this action."
         )
-
-    getFilteredDataSets: =>
-        if (not @scope.selected_skeleton?) or (not @scope.selected_skeleton.id?)
-            []
-        else
-            _.filter @scope.all_datasets, (e) => @scope.selected_skeleton.id in e.skeletons
 
 
 angular.module('detective.controller').controller 'createTopicCtrl', CreateTopicCtrl

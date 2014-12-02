@@ -1,6 +1,6 @@
 <div ng-if="isOverfillingThePlan">
 	<div class="container">
-		<p>This investigation has reached the limit of its owner’s plan.</p>
+		<p>This data collection has reached the limit of its owner’s plan.</p>
 		<p>If you are the owner, you can upgrade now!</p>
 	</div>
 </div>
@@ -8,7 +8,7 @@
 
 	<div class="contribute-start panel" ng-class="{ open: showKickStart || !individuals.length }">
 		<div class="container">
-			<h2>Add a new entity to the database</h2>
+			<h2>Add data to the collection</h2>
 
 			<div ng-repeat="resource in (topicResources() | orderBy:'index') track by $index">
 				<div class="row top30">
@@ -45,7 +45,7 @@
 	<div class="container tr top20">
 		<a class="btn btn-default btn-large" ng-click="showKickStart = !showKickStart"  ng-class="{'active': showKickStart || !individuals.length}">
 			<i class="fa fa-plus right10"></i>
-			Add a new entity
+			Add a new data point
 		</a>
 		<a ng-if="user.isStaff()" class="btn btn-default btn-large" ng-href="[[username]]/[[topic]]/contribute/upload">
 			<i class="fa fa-upload right10"></i>
@@ -73,7 +73,7 @@
 						   ng-if="user.hasDeletePermission(meta.ontology_as_mod)"
 						   ng-click="individual.delete($index)">
 							<i class="fa fa-trash-o"></i>
-							Delete this entity
+							Delete this item
 						</button>
 					</span>
 					<button ng-click="individual.close()" class="btn left10">
@@ -139,7 +139,7 @@
 			<div class="form-horizontal individual__form panel-body">
 
 				<div class="alert alert-warning" ng-if="!individual.field.id && individual.similars.length">
-					<strong>Entities with similar name already exist!</strong>
+					<strong>Data points with similar name already exist!</strong>
 					Switch to
 					<span ng-repeat="similar in individual.similars">
 						<a class="alert-link" ng-click="replaceIndividual($parent.$index, similar.id)" href="">[[similar.name]]</a>

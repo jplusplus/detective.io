@@ -410,9 +410,12 @@ class IndividualResource(ModelResource):
 
         query     = request.GET.get('q', '').lower()
         query     = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', query).strip()
-        limit     = int(request.GET.get('limit', 20))
+        limit     = int( request.GET.get('limit', 20))
+        exclude   = int( request.GET.get('exclude', -1) )
         # Do the query.
         results   = self._meta.queryset.filter(name__icontains=query)
+        # Quicker than query exclude
+        results   = [r for r in results if r.id != exclude]
         paginator = Paginator(results, limit)
 
         try:

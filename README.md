@@ -5,7 +5,7 @@
 [License](https://github.com/jplusplus/detective.io/blob/master/LICENSE) •
 [Test coverage](https://coveralls.io/r/jplusplus/detective.io) •
 [Documentation](http://docs.detective.io/en/latest/) •
-*Version 1.11.1 Doge*
+*Version 1.12.0 Eagle*
 
 ## Installation
 
@@ -13,7 +13,7 @@ See also the [full installation guide](http://docs.detective.io/en/latest/instal
 
 **1. Prerequisite**
 ```bash
-sudo apt-get install build-essential git-core python python-pip python-dev libmemcached-dev
+sudo apt-get install build-essential git-core python python-pip python-dev libmemcached-dev libpq-dev libxslt1-dev libxml2-dev libxml2 libjpeg8-dev
 sudo pip install virtualenv
 ```
 

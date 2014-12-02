@@ -16,6 +16,7 @@ from django.db                  import models
 from django.db.models           import CharField
 from django.contrib.auth.admin  import UserAdmin
 from django.contrib.auth.models import User
+from suit.admin                 import SortableModelAdmin
 
 class QuoteRequestAdmin(admin.ModelAdmin):
     save_on_top   = True
@@ -96,7 +97,7 @@ admin.site.register(TopicToken, TopicTokenAdmin)
 class TopicAdmin(admin.ModelAdmin):
     save_on_top         = True
     prepopulated_fields = {'slug': ('title',)}
-    list_display        = ("title", "link", "public","app_label")
+    list_display        = ("title", "link", "public","app_label", "is_json")
     list_filter         = ("public","featured","author")
     search_fields       = ('title', 'slug', 'author__username')
     readonly_fields     = ('entities_count',)
@@ -129,6 +130,9 @@ class TopicAdmin(admin.ModelAdmin):
             'fields': ( 'entities_count',)
         }),
     )
+
+    def is_json(self, topic): return topic.ontology_as_json is not None
+    is_json.boolean = True
 
     def get_form(self, request, obj=None, **kwargs):
         if hasattr(obj, "id"):
@@ -176,8 +180,9 @@ class TopicSkeletonForm(forms.ModelForm):
         if instance:
             self.initial['target_plans'] = instance.selected_plans()
 
-class TopicSkeletonAdmin(admin.ModelAdmin):
+class TopicSkeletonAdmin(SortableModelAdmin):
     form = TopicSkeletonForm
+    sortable = 'order'
     list_display = ("title","picture","description_stripped", "picture_credits", "target_plans")
 
 admin.site.register(TopicSkeleton, TopicSkeletonAdmin)

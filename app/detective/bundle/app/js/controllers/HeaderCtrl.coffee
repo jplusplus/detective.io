@@ -7,10 +7,6 @@ class window.HeaderCtrl
         # Watch current topic
         @scope.$watch (=>@TopicsFactory.topic), (topic)=> @scope.topic = topic
 
-        @scope.loginParams = =>
-            nextState: @state.current.default or @state.current.name
-            nextParams: angular.toJson(@state.params)
-
         @scope.shouldShowAddEntity = =>
             return false unless @isInTopic()
             return @scope.user.hasAddPermission(@TopicsFactory.topic.ontology_as_mod)

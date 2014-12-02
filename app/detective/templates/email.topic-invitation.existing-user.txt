@@ -1,10 +1,10 @@
 Hi there,
 
-We’re writing from detective.io, the tool for easy data collection and analysis.
+We’re writing from Detective.io, the tool for collaborative network analysis.
 
-The user {{user.username}} has added you to the investigation "{{topic.title}}".
+The user {{user.username}} has added you to the data collection "{{topic.title}}".
 
-To explore the data already collected and start contributing to the investigation go to:
+To explore the data already collected and start contributing to the data collection go to:
 {{link}}
 
 

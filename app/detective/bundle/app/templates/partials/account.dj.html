@@ -53,7 +53,7 @@
              ng-class='{ loading: loading  }'>
             <span ng-if="topics.length">
                 <div class="panel-body">
-                    <h3>Investigations</h3>
+                    <h3>Data collections</h3>
                     <ul class="list-unstyled">
                         <li ng-repeat="topic in topics" class="account__topics__topic">
                             <a ng-href="[[topic.link]]">
@@ -87,7 +87,7 @@
                     </ul>
                 </div>
             </span>
-            <h3 ng-if="!topics.length">No open investigations</h3>
+            <h3 ng-if="!topics.length">No data collections found</h3>
         </div>
     </div>
 </div>

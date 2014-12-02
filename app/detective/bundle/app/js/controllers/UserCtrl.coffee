@@ -48,9 +48,10 @@ class window.UserCtrl
         @scope.loading = false
         @scope.logout  = @logout
         @scope.signup  = @signup
-
+        @scope.loginParams = =>
+            nextState: @state.current.default or @state.current.name
+            nextParams: angular.toJson(@state.params)
         @scope_vars = ['username', 'password', 'password2', 'email', 'terms']
-
         # add watch for scope values and set them as not submitted if value
         # changes
         angular.forEach @scope_vars, (name)=>
@@ -62,9 +63,6 @@ class window.UserCtrl
             return unless v
             angular.forEach @scope_vars, (name)=>
                 @scope["#{name}Submitted"] = true
-
-
-
         @scope.resetPassword = @resetPassword
         @scope.resetPasswordConfirm = @resetPasswordConfirm
         # Set page title with no title-case

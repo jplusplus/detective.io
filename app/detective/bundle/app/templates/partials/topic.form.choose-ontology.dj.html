@@ -1,0 +1,71 @@
+<div>
+  <p class="text-muted">
+    Think of the data structure as the foundations of your data collection. Choose a template that fits to your goal and customize it, or you can start from scratch.
+  </p>
+  <div class="skeletons panel panel-default">
+    <div class="panel-heading">
+      Choose a template for you project or start from scratch
+    </div>
+    <div class="panel-body">
+      <ul class="list-unstyled row">
+        <li ng-repeat="skeleton in skeletons | orderBy:'enable_teasing' ">
+          <div class="col-sm-3 col-xs-4">
+            <div class="skeletons__item"
+                  ng-click="selectSkeleton(skeleton)"
+                  ng-class="{
+                    'skeletons__item--selected': isSkeletonSelected(skeleton),
+                    'skeletons__item--teaser':   isTeaserSkeleton(skeleton)
+                  }">
+
+              <img class="skeletons__item__preview"
+                   ng-src="[[ skeleton.thumbnail.medium ]]"/>
+
+              <div ng-if="isTeaserSkeleton(skeleton)"
+                 ng-click="selectSkeleton(skeleton)"
+                 class="skeletons__item__teasing-text">
+                <div class="alert alert-info">
+                  Only for paid plans
+                </div>
+              </div>
+
+              <h5 class="skeletons__item__title">
+                <span class="fa-stack fa-lg" ng-hide="isTeaserSkeleton(skeleton)">
+                  <i class="fa fa-circle-thin fa-stack-2x"></i>
+                  <i class="skeletons__item__title__check fa fa-check fa-stack-1x text-primary"></i>
+                </span><br />
+                [[ skeleton.title ]]
+              </h5>
+
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="skeletons__overlay" ng-show="selected_skeleton"  ng-click="selectSkeleton(null)"></div>
+    <div class="topic-form__selected-ontology skeletons__details panel panel-default" ng-show="selected_skeleton">
+      <div class="topic-form__selected-ontology__front" style="background-image: url('[[selected_skeleton.thumbnail.medium]]');">
+        <h3 class="topic-form__selected-ontology__front__title">[[selected_skeleton.title]]</h3>
+        <div class="lead topic-form__selected-ontology__front__description" ng-bind-html="selected_skeleton.description"></div>
+      </div>
+      <div class="panel-body topic-form__selected-ontology__body" ng-show="selected_skeleton.blank">
+        <p>You can choose the precise type of data that you need in you data collection.</p>
+      </div>
+      <div class="panel-body topic-form__selected-ontology__body" ng-show="modelsNames(selected_skeleton.ontology).length">
+        <p>This template will let you add:</p>
+        <span ng-repeat="model in modelsNames(selected_skeleton.ontology)">
+          <span class="topic-form__selected-ontology__body__model" style="background: [[model|strToColor]]">[[model]]</span>
+        </span>
+        <p class="text-muted">And relationships between them.</p>
+      </div>
+      <div class="panel-footer topic-form__selected-ontology__footer">
+        <button class="btn btn-primary pull-right" type="button" ui-sref="user-topic-create.customize-ontology">
+          Customize
+        </button>
+        <button class="btn btn-default" type="button" ng-click="selectSkeleton(null)">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

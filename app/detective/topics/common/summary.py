@@ -5,6 +5,7 @@ from app.detective.search   import Search
 from app.detective.neomatch import Neomatch
 from app.detective.parser   import schema
 from app.detective          import graph, utils
+from difflib                import SequenceMatcher
 from django.core.paginator  import Paginator, InvalidPage
 from django.http            import Http404, HttpResponse
 from neo4django.db          import connection

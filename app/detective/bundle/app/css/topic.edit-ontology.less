@@ -1,0 +1,109 @@
+.topic-edit-ontology {
+
+    .model-name{
+        font-weight: bold;
+    }
+
+    &__workspace {
+        overflow: hidden;
+        background:url("@{staticPath}img/grid.png") 0 0;
+
+        &__ontology-visualization {
+            margin  : 25px;
+            height  : 450px;
+            overflow: visible;
+            position: relative;
+
+            .model {
+                .panel();
+                text-align: center;
+                min-width: 100px;
+                position: absolute;
+                padding: 5px 10px;
+                display: inline-block;
+                cursor: move;
+            }
+        }
+
+        &__menu {
+            overflow: hidden;
+            position:relative;
+            background: white;
+            height    : 500px;
+            .box-shadow(0 0 40px 0 fade(black, 10) );
+
+
+            &__footer {
+                .panel-footer();
+                z-index: 25;
+                text-align: right;
+                position:absolute;
+                bottom:0;
+                left:0;
+                right:0;
+            }
+
+            &__sub-menu {
+                padding:20px;
+
+                &__title {
+                    margin:0;
+                    margin-bottom:10px;
+                }
+            }
+
+            &__panel {
+                padding:20px;
+                position: absolute;
+                z-index: 50;
+                top:0;
+                left:0;
+                right:0;
+                bottom:0;
+                overflow: auto;
+                background:white;
+                .box-shadow(0 0 40px 0 fade(black, 10) );
+                .transition(0.5s);
+
+                &.ng-hide-add,
+                &.ng-hide-remove {
+                    display:block!important;
+                }
+
+                &.ng-hide {
+                  opacity:0;
+                  .translate(100%, 0)
+                }
+
+                &__title {
+                    margin:0;
+                    margin-bottom:10px;
+                }
+
+                &__fields {
+                    &__field {
+                        padding-top:5px;
+                        &__input {
+                            padding-right:0;
+                        }
+                    }
+                }
+
+                &__footer {
+                    margin-bottom:20px;
+                }
+            }
+
+        }
+    }
+}
+
+._jsPlumb_overlay.label {
+    .label();
+    .label-info();
+    .box-shadow(0 2px 2px 0 fade(black, 10) );
+    padding          : 3px;
+    margin           : 10px;
+}
+
+// EOF

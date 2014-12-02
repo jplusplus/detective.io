@@ -161,11 +161,21 @@ angular.module('detective.config').config [
             #   pattern wont be accessible by its URL and we will never trigger
             #   the proper state.
             .state('user-topic-create',
-                url: '/:username/create-investigation/?scrollTo'
+                url: '/:username/create/'
                 controller: CreateTopicCtrl
                 reloadOnSearch: no
                 templateUrl: '/partial/topic.form.html'
                 resolve: CreateTopicCtrl.resolve
+            )
+            .state('user-topic-create.choose-ontology',
+                templateUrl: '/partial/topic.form.choose-ontology.html'
+            )
+            .state('user-topic-create.customize-ontology',
+                controller: EditTopicOntologyCtrl
+                templateUrl: '/partial/topic.form.customize-ontology.html'
+            )
+            .state('user-topic-create.describe',
+                templateUrl: '/partial/topic.form.describe.html'
             )
             # check previous comment before changing URLs order.
             .state('user-topic',

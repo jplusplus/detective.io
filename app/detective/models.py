@@ -90,10 +90,11 @@ class TopicSkeleton(models.Model):
     picture         = models.ImageField(upload_to="topics-skeletons", null=True, blank=True, help_text='The default picture for this skeleton')
     picture_credits = models.CharField(max_length=250, help_text="Enter the proper credits for the chosen skeleton picture", null=True, blank=True)
     schema_picture  = models.ImageField(upload_to="topics-skeletons", null=True, blank=True,  help_text='A picture illustrating how data is modelized')
-    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True)
+    ontology        = JSONField(null=True, verbose_name=u'Ontology (JSON)', blank=True, validators=[validate_ontology_as_json])
     target_plans    = models.CharField(max_length=60)
     tutorial_link   = models.URLField(null=True, blank=True, help_text='A link to the tutorial video/article for this data scheme')
     enable_teasing  = models.BooleanField(default=False, help_text='Show this skeleton as a teasing skeleton for free user')
+    order           = models.PositiveIntegerField(default=0)
 
     def description_stripped(self):
         return strip_tags(self.description)
@@ -106,8 +107,16 @@ class TopicSkeleton(models.Model):
                 selected_plans.append(plan[0])
         return selected_plans
 
+    @property
+    def ontology_models(self):
+        ontology = self.ontology or []
+        return [ m["verbose_name"] for m in ontology if "verbose_name" in m ]
+
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ["order", "title"]
 
 class TopicDataSet(models.Model):
     title = models.CharField(max_length=250, help_text="Title of the dataset")
@@ -206,7 +215,6 @@ class Topic(models.Model):
 
     def get_models(self):
         """ return a generator of Model """
-        # FIXME : Very heavy method. Should maybe return an iterator
         # We have to load the topic's model
         models_module = self.get_models_module()
         for i in dir(models_module):

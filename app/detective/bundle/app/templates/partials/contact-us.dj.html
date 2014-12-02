@@ -4,12 +4,12 @@
       <fieldset class="panel panel-default" ng-class="{loading:loading}" ng-disabled="loading">
         <div class="panel-body">
           <h2>Contact us</h2>
-          <p>Tell us more about your field of investigation and we'll come back to you to discuss your project in details!</p>
+          <p>Tell us more about the field of your data collection and we'll come back to you to discuss your project in details!</p>
 
-          <h3 class="top50">About your investigation</h3>
+          <h3 class="top50">About your data collection</h3>
 
           <div class="form-group required">
-            <label for="inputDomain">Which domain do you want to investigate on?</label>
+            <label for="inputDomain">Which domain do you want to collect data on?</label>
             <textarea required msd-elastic ng-model="qr.domain" class="form-control" id="inputDomain" placeholder="Enter a description">
             </textarea>
           </div>
@@ -22,7 +22,7 @@
           </div>
 
           <div class="form-group">
-            <label for="inputDomain">How many people will work on the investigation?</label>
+            <label for="inputDomain">How many people will work on the data collection?</label>
             <select ng-model="qr.users" class="form-control" ng-options="s[0] as s[1] for s in users_sizes">
               <option value="">Choose...</option>
             </select>

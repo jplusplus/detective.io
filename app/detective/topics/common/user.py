@@ -10,7 +10,9 @@ from django.contrib.auth          import authenticate, login, logout
 from django.contrib.auth.models   import User, Group
 from django.contrib.sites.models  import RequestSite
 from django.core.paginator        import Paginator, InvalidPage
+from django.core.exceptions       import PermissionDenied
 from django.core                  import signing
+from django.db.models             import Q
 from django.db                    import IntegrityError
 from django.middleware.csrf       import _get_new_csrf_key as get_new_csrf_key
 from password_reset.views         import Reset
@@ -22,7 +24,6 @@ from tastypie.constants           import ALL, ALL_WITH_RELATIONS
 from tastypie.resources           import ModelResource
 from tastypie.validation          import Validation
 from tastypie.utils               import trailing_slash
-from django.db.models             import Q
 import hashlib
 import random
 import re
@@ -214,6 +215,8 @@ class UserNestedResource(ModelResource):
             return http.HttpCreated()
         except MalformedRequestError as e:
             return http.HttpBadRequest(e.message)
+        except PermissionDenied as e:
+            return http.HttpForbidden(e.message)
         except IntegrityError as e:
             return http.HttpForbidden("%s in request payload (JSON)" % e)
 
@@ -296,7 +299,9 @@ class UserNestedResource(ModelResource):
         self.method_check(request, allowed=['post'])
         data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
         try:
-            self.validate_request(data, ['email'])
+            # Email required
+            if not "email" in data or data['email'] == '': 
+                return http.HttpBadRequest('Missing email')
             email   = data['email']
             user    = User.objects.get(email=email)
             recover = Recover()
@@ -367,6 +372,11 @@ class UserNestedResource(ModelResource):
         if len(missing_fields) > 0:
             message = "Malformed request. The following fields are required: %s" % ', '.join(missing_fields)
             raise MalformedRequestError(message)
+
+        if 'email' in fields:
+            email = data['email']
+            if User.objects.filter(email__iexact=email).count():
+                raise PermissionDenied("Email must be unique.")
 
         if 'username' in fields:
             username = data['username']

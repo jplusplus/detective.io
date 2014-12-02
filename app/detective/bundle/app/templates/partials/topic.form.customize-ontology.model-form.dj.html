@@ -1,0 +1,86 @@
+<form ng-submit="modelForm.$valid && submit({ '$value': sanitizeModel(true) })" name="modelForm" novalidate>
+  <div>
+      <div>
+          <label>Name*</label>
+          <input type="text"
+                 class="form-control"
+                 ng-model="model.verbose_name"
+                 ui-validate="{ unique: 'isValidModelName($value, model)' }"
+                 name="verbose_name"
+                 placeholder="Ex: person, country, etc."
+                 required />
+          <div ng-show="modelForm.verbose_name.$error.unique" class="text-danger small">
+            This model name already exists.
+          </div>
+      </div>
+      <div class="hidden">
+          <label>Name plural</label>
+          <input type="text"
+                 class="form-control"
+                 placeholder="Ex: persons, countries, etc."
+                 ng-model="model.verbose_name" />
+      </div>
+      <div class="hidden">
+          <label>Help text</label>
+          <input type="text"
+                 class="form-control"
+                 placeholder="Ex: A person that commited crimes."
+                 ng-model="model.help_text" />
+      </div>
+  </div>
+  <div>
+    <h5>
+        <strong>Fields</strong>
+        <span class="text-muted pull-right">Ex: Age, Name, Date of birth...</span>
+    </h5>
+    <div class="well well-sm topic-edit-ontology__workspace__menu__panel__fields" ng-form="fieldsForm">
+        <div class="row">
+            <div class="col-xs-5">Label</div>
+            <div class="col-xs-5">Type</div>
+        </div>
+        <fieldset class="row topic-edit-ontology__workspace__menu__panel__fields__field"
+                  ng-repeat="field in model.fields | filter:isAllowedType"
+                  ng-disabled="field.name === 'name'">
+            <div class="col-xs-5 topic-edit-ontology__workspace__menu__panel__fields__field__input">
+                <input type="text"
+                       class="form-control"
+                       name="field[[$index]]"
+                       ui-validate="{ unique: 'isValidFieldName($value, field)' }"
+                       ng-model="field.verbose_name" />
+            </div>
+            <div class="col-xs-5 topic-edit-ontology__workspace__menu__panel__fields__field__input">
+                <select class="form-control" ng-model="field.type">
+                    <option value="string">Short text</option>
+                    <option value="richtext">Long text</option>
+                    <option value="float">Number</option>
+                    <option value="datetime">Date</option>
+                    <option value="url">URL</option>
+                </select>
+            </div>
+            <div class="col-xs-2">
+              <button class="btn btn-default btn-block" type="button" ng-click="removeField(field)" title="Remove this field">
+                  <i class="fa fa-trash"></i>
+              </button>
+            </div>
+            <div ng-show="fieldsForm['field' + $index].$error.unique && fieldsForm['field' + $index].$dirty" class="text-danger small col-xs-12">
+              This field name already exists.
+            </div>
+        </fieldset>
+        <div class="topic-edit-ontology__workspace__menu__panel__fields__field">
+          <a class="btn btn-default" ng-click="addField()">
+              <i class="fa fa-plus"></i> Add a new field
+          </a>
+        </div>
+    </div>
+  </div>
+  <div class="topic-edit-ontology__workspace__menu__panel__footer">
+      <div class="pull-right">
+          <button class="btn btn-primary" type="submit" ng-disabled="!modelForm.$valid">
+              Save
+          </button>
+      </div>
+      <button class="btn btn-default" type="button" ng-click="cancel()">
+          Cancel
+      </button>
+  </div>
+</form>

@@ -1,38 +1,8 @@
 angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User, TopicsFactory)->
-    lastDataset = []
-    template =
-        compile: (template) ->
-            compiled = $compile(template)
-            render: (context) ->
-                $scope = $rootScope.$new yes
-                $scope = angular.extend($scope, context)
-                $scope.getModel = ->
-                    if context.model?
-                        context.model
-                    else if context.predicate? and context.predicate.name is '<<INSTANCE>>'
-                        context.object
-                    else if context.subject?
-                        context.subject.label
-                    else
-                        no
-                $scope.getModelVerbose = ->
-                    model = do $scope.getModel
-                    if model
-                        for _model in TopicsFactory.topic.models
-                            if _model.name is model
-                                return _model.verbose_name
-                    return model
-                $scope.getFigureBg = -> $filter("strToColor") $scope.getModel()
-                $scope.isList = -> !context.predicate or context.predicate.name isnt '<<INSTANCE>>'
-
-                element = compiled $scope
-                do $scope.$apply
-                html = do element.html
-                do $scope.$destroy
-                html
 
     scope:
         model                 : "=ttModel"
+        parent                : "=ttParent"
         individual            : "&ttIndividual"
         topic                 : "&ttTopic"
         create                : "&ttCreate"
@@ -50,9 +20,50 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         limit                 : "@"
         change                : "&"
 
-
     link: (scope, element, attrs) ->
+        lastDataset = []
+        lastQuery = null
         wrapper = undefined
+        template =
+            compile: (template) ->
+                compiled = $compile(template)
+                render: (context) ->
+                    $scope = $rootScope.$new yes
+                    $scope = angular.extend($scope, context)
+                    lastQuery = context.query
+
+                    $scope.selfLoopWarning = ->
+                        warning    = scope.parent?
+                        warning and= lastDataset.length is 1
+                        warning and= lastDataset[0].id is scope.parent.id
+                        warning and= context.query.toLowerCase() is scope.parent.name.toLowerCase()
+
+                    $scope.getModel = ->
+                        if context.model?
+                            context.model
+                        else if context.predicate? and context.predicate.name is '<<INSTANCE>>'
+                            context.object
+                        else if context.subject?
+                            context.subject.label
+                        else
+                            no
+
+                    $scope.getModelVerbose = ->
+                        model = do $scope.getModel
+                        if model
+                            for _model in TopicsFactory.topic.models
+                                if _model.name is model
+                                    return _model.verbose_name
+                        return model
+
+                    $scope.getFigureBg = -> $filter("strToColor") $scope.getModel()
+                    $scope.isList = -> !context.predicate or context.predicate.name isnt '<<INSTANCE>>'
+
+                    element = compiled $scope
+                    do $scope.$apply
+                    html = do element.html
+                    do $scope.$destroy
+                    html
 
         shouldPrependSearchIcon = ->
             _.has(attrs, 'ttPrependSearchIcon')
@@ -78,25 +89,28 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
         getEmptyResultDiv = ->
             if shouldDisableEntityCreation()
                 div = [
-                    "<div>",
-                        "<div class='tt-suggestion tt-suggestion__line'>",
-                            "Please choose an existing entity.",
-                        "</div>",
+                    "<div class='tt-suggestion'>",
+                        "Sorry, no results found.",
                     "</div>"
                 ]
             else
                 div = [
-                    "<div class='tt-suggestion'>",
-                        "<div class='tt-suggestion__line tt-suggestion__line--with-empty-results'>",
-                            "<div class='tt-suggestion__line__figure'>",
-                                "<i class='fa fa-plus'></i>",
+                    "<div>",
+                        "<div class='tt-suggestion'>",
+                            "<div class='tt-suggestion__line--with-empty-results' ng-hide='selfLoopWarning()'>",
+                                "<div class='tt-suggestion__line__figure'>",
+                                    "<i class='fa fa-plus'></i>",
+                                "</div>",
+                                "The entity you just typed in is new in the base.<br/>",
+                                "Do you want to create it?",
                             "</div>",
-                            "The entity you just typed in is new in the base.<br/>",
-                            "Do you want to create it?",
+                            "<div class='tt-suggestion__line' ng-show='selfLoopWarning()'>",
+                                "You can't create self-related relationship.",
+                            "</div>",
                         "</div>",
                     "</div>"
                 ]
-            div.join ""
+            template.compile(div.join "").render
 
         getSearchIcon = ->
             (wrapper or element.parent()).find('.tt-search-icon i')
@@ -133,13 +147,12 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 objects = response.objects
             # Save latest dataset to detect unselected value
             lastDataset = objects
+            # Remove the parent from the output
+            if scope.parent?
+                objects = _.filter objects, (o)-> o.id isnt scope.parent.id 
             objects
 
-        onRequestCompleted = (xhr, status)->
-            setLoaded()
-            data = xhr.responseJSON
-            if data? and not data.objects.length
-                scope.empty_val = element.val()
+        onRequestCompleted = (xhr, status)-> setLoaded()
 
 
         # Set a default value
@@ -194,12 +207,14 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                 hint : yes
                 highlight : yes
 
-
             typeahead_params =
                 displayKey : (scope.valueKey or "name")
                 name : 'suggestions-' + itopic.replace('/', '-').replace('.', '-')
                 source : do bh.ttAdapter
                 templates :
+                    # Empty result templaye
+                    empty: unless shouldDisableEmptyResults() then getEmptyResultDiv() else null
+                    # Basic suggestion template
                     suggestion : (template.compile [
                         '<div>',
                             '<div class="tt-suggestion__line" ng-class="{\'tt-suggestion__line--with-model\': getModel()}">',
@@ -213,21 +228,16 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                             '</div>',
                         '</div>'
                     ].join "").render
-
-            unless shouldDisableEmptyResults()
-                typeahead_params.templates['empty'] = getEmptyResultDiv()
-
+            
             # typeahead initialization
             typeahead = element.typeahead options, typeahead_params
-
-
             # when typeahead is initialized we can add search/loading indicator
             appendSearchIcon(typeahead.parent())
-
-
             # Unbind all events
-            (((element.off "keyup").off "change").off "typeahead:selected").off "typeahead:uservalue"
-
+            element.off "keyup"
+            element.off "change"
+            element.off "typeahead:selected"
+            element.off "typeahead:uservalue"
             # Watch keys
             element.on "keyup", (event)->
                 # Enter is pressed
@@ -235,9 +245,9 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                     # Apply the scope change
                     scope.$apply =>
                         do scope.submit
-
             # Watch select event
-            element.on "typeahead:selected", (input, individual)->
+            element.on "typeahead:selected", (ev, individual)->
+                console.log "selected", lastQuery
                 if not _.isEmpty(attrs.ttModel)
                     scope.$apply =>
                         # workaround to have same types between individual and
@@ -245,10 +255,8 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
                         # is undefined, the angularJS deep copy will not work.
                         unless scope.model?
                             scope.model = {}
-
                         if hasEmptyCallback() and not individual
-                            angular.copy {name: scope.empty_val}, scope.model
-                            scope.empty_val = undefined
+                            angular.copy {name: lastQuery}, scope.model
                             do scope.emptyResultsSelected
                         else
                             angular.copy individual, scope.model
@@ -270,7 +278,7 @@ angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $fil
             # Watch change event
             element.on "change", (input)->
                 # Filter using the current value
-                datum = _.findWhere lastDataset, "name": element.val()
+                datum = _.findWhere lastDataset, "name": element.val()                
                 # If datum exist, use the selected event
                 ev = "typeahead:" + (if datum then "selected" else "uservalue")
                 # Trigger this even

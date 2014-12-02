@@ -1,34 +1,73 @@
 <aside class="main-aside" ng-controller="MainAsideCtrl">
-    <h1 class="main-aside__title">
-        <a ui-sref="home.tour" class="main-aside__title__caption" ng-if="!user.is_logged">
-            Home
-        </a>
-        <a ui-sref="home.dashboard" class="main-aside__title__caption" ng-if="user.is_logged">
-            Dashboard
-        </a>
-        <a class="main-aside__title__toggle-aside visible-xs" ng-click="Page.showAside = !Page.showAside">
-            <i class="fa fa-bars"></i>
-        </a>
-    </h1>
     <div scrollable class="main-aside__wrapper">
 
-        <div class="main-aside__current-topic" ng-if="topicsFactory.topic.slug">
-            <h3>
+        <ul class="list-unstyled main-aside__menu" ng-controller="UserCtrl">
+            <li ng-if="!user.is_logged">
+                <a ui-sref="home.tour">
+                    <i class="fa fa-fw fa-home"></i>&nbsp;
+                    Home
+                </a>
+            </li>
+            <li ng-if="!user.is_logged">
+                <a ui-sref="signup(loginParams())">
+                    <i class="fa fa-fw fa-pencil-square-o"></i>&nbsp;
+                    Sign up
+                </a>
+            </li>
+            <li ng-if="!user.is_logged">
+                <a ui-sref="login(loginParams())">
+                    <i class="fa fa-fw fa-sign-in"></i>&nbsp;
+                    Log in
+                </a>
+            </li>
+            <li ng-if="user.is_logged">
+                <a ui-sref="home.dashboard">
+                    <i class="fa fa-fw fa-dashboard"></i>&nbsp;
+                    My dashboard
+                </a>
+            </li>
+            <li ng-if="user.is_logged">
+                <a ui-sref="user-topic-create.choose-ontology({username: user.username})">
+                    <i class="fa fa-fw fa-plus"></i>&nbsp;
+                    New data collection
+                </a>
+            </li>
+            <li ng-if="user.is_logged">
+                <a ui-sref="user.me({username: user.username})">
+                    <i class="fa fa-fw fa-user"></i>&nbsp;
+                    My profile
+                </a>
+            </li>
+            <li ng-if="user.is_logged">
+                <a ui-sref="user.settings({username: user.username})">
+                    <i class="fa fa-fw fa-cog"></i>&nbsp;
+                    Settings
+                </a>
+            </li>
+            <li ng-if="user.is_logged">
+                <a ng-click="logout()">
+                    <i class="fa fa-fw fa-sign-out text-danger"></i>&nbsp;
+                    Sign out
+                </a>
+            </li>
+        </ul>
+
+        <div class="main-aside__current-topic main-aside__menu" ng-if="topicsFactory.topic.slug">
+            <h4 class="main-aside__menu__title">
                 <a href="[[topicsFactory.topic.link]]" class="main-aside__current-topic__title">
-                    <i class="fa fa-home"></i>
                     [[topicsFactory.topic.title]]
                 </a>
-                <div class="main-aside__current-topic__author">
-                    by
-                    <a ui-sref="user({username: topicsFactory.topic.author.username})">
-                        [[topicsFactory.topic.author.username]]
-                    </a>
-                </div>
-            </h3>
+            </h4>
+            <div class="main-aside__current-topic__author hidden">
+                by
+                <a ui-sref="user({username: topicsFactory.topic.author.username})">
+                    [[topicsFactory.topic.author.username]]
+                </a>
+            </div>
             <ul class="main-aside__current-topic__taxonomy list-unstyled">
                 <li ng-repeat="model in topicsFactory.topic.models | filter:{is_searchable: true} | orderBy:'index'">
                     <a href="[[topicsFactory.topic.link]]/[[model.name|lowercase]]">
-                        <div class="small" color-tag ref="model.name|lowercase"></div>
+                        <div class="small" color-tag ref="model.name|lowercase"></div>&nbsp;
                         [[model.verbose_name]]
                     </a>
                 </li>
@@ -36,7 +75,9 @@
         </div>
 
         <div class="main-aside__investigations-list">
-            <h4>Featured investigations</h4>
+            <h4 class="main-aside__menu__title">
+                Featured collections
+            </h4>
 
             <div class="main-aside__investigations-list__topic" ng-repeat="topic in featured" title="[[topic.title]]">
                 <a ng-href="[[topic.link]]" class="fg"></a>

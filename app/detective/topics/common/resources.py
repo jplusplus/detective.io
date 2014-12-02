@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 from .models                          import *
 from app.detective.exceptions         import UnavailableImage, NotAnImage, OversizedFile
@@ -99,16 +100,27 @@ class TopicSkeletonAuthorization(ReadOnlyAuthorization):
 class TopicSkeletonResource(ModelResource):
     class Meta:
         authorization = TopicSkeletonAuthorization()
-        queryset = TopicSkeleton.objects.all()
+        queryset = TopicSkeleton.objects.all().order_by("order")
+        filtering = { 'id' : ALL, 'title': ALL }
+        ordering = ["order", "name"]
 
     def dehydrate(self, bundle):
+        request = bundle.request
+        bundle.data['ontology_models'] = bundle.obj.ontology_models
+        bundle.data['blank'] = not len(bundle.obj.ontology_models)
+
+        if type(bundle.obj.ontology) is list:
+            bundle.data["ontology"] = bundle.obj.ontology
+        else:
+            bundle.data["ontology"] = []
         try:
             thumbnailer     = get_thumbnailer(bundle.obj.picture)
             thumbnailSmall  = thumbnailer.get_thumbnail({'size': (60, 60), 'crop': True})
             thumbnailMedium = thumbnailer.get_thumbnail({'size': (350, 240), 'crop': True})
+            bundle.data['picture'] =  request.build_absolute_uri(bundle.data['picture'])
             bundle.data['thumbnail'] = {
-                'small' : thumbnailSmall.url,
-                'medium': thumbnailMedium.url
+                'small' : request.build_absolute_uri(thumbnailSmall.url),
+                'medium': request.build_absolute_uri(thumbnailMedium.url)
             }
         # No image available
         except InvalidImageFormatError:
@@ -217,14 +229,12 @@ class TopicAuthorization(ReadOnlyAuthorization):
     def create_detail(self, object_list, bundle):
         authorize = False
         user      = bundle.request.user
-        skeleton  = TopicSkeleton.objects.get(title=bundle.data['skeleton_title'])
         if user.is_authenticated():
             public      = bundle.data.get('public', True)
             profile     = user.detectiveprofileuser
             unlimited   = profile.topics_max()   < 0
             under_limit = profile.topics_count() < profile.topics_max()
             authorize   = unlimited or under_limit
-            authorize   = authorize and (profile.plan in skeleton.target_plans)
             if not public:
                 authorize = authorize and profile.plan != 'free'
         return authorize
@@ -270,17 +280,17 @@ class TopicNestedResource(ModelResource):
     author             = fields.ToOneField(UserNestedResource, 'author', full=True, null=True)
     link               = fields.CharField(attribute='get_absolute_path',  readonly=True)
     search_placeholder = fields.CharField(attribute='search_placeholder', readonly=True)
-    dataset = fields.ToOneField(TopicDataSetResource, 'dataset', full=False, null=True)
+    dataset            = fields.ToOneField(TopicDataSetResource, 'dataset', full=False, null=True)
 
     class Meta:
         resource_name      = 'topic'
         always_return_data = True
         authorization      = TopicAuthorization()
         authentication     = MultiAuthentication(Authentication(), BasicAuthentication(), SessionAuthentication())
-
         validation         = TopicValidation()
         queryset           = Topic.objects.all().prefetch_related('author')
         filtering          = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
+
 
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
@@ -325,17 +335,17 @@ class TopicNestedResource(ModelResource):
                 user = User.objects.get(username=collaborator)
             # You can't invite the author of the topic
             if user == topic.author:
-                return http.HttpBadRequest("You can't invite the author of the topic.")
+                return http.HttpBadRequest("You can't invite the owner of the collection.")
             # Email options for kown user
             template = get_template("email.topic-invitation.existing-user.txt")
             to_email = user.email
-            subject = '[Detective.io] You’ve just been added to an investigation'
+            subject = '[Detective.io] You’ve just been added to a data collection'
             signup = request.build_absolute_uri( reverse("signup") )
             # Get the contributor group for this topic
             contributor_group = topic.get_contributor_group()
             # Check that the user isn't already in this group
             if user.groups.filter(name=contributor_group.name):
-                return http.HttpBadRequest("You can't invite someone twice to the same topic.")
+                return http.HttpBadRequest("You can't invite someone twice to the same collection.")
             else:
                 # Add user to the collaborator group
                 contributor_group.user_set.add(user)
@@ -346,14 +356,14 @@ class TopicNestedResource(ModelResource):
             # Send an invitation to create an account
             template = get_template("email.topic-invitation.new-user.txt")
             to_email = collaborator
-            subject = '[Detective.io] Someone needs your help on an investigation'
+            subject = '[Detective.io] Someone needs your help to collect data'
             try:
                 # Creates a topictoken
                 topicToken = TopicToken(topic=topic, email=collaborator)
                 topicToken.save()
             except IntegrityError:
                 # Can't invite the same user once!
-                return http.HttpBadRequest("You can't invite someone twice to the same topic.")
+                return http.HttpBadRequest("You can't invite someone twice to the same collection.")
             signup = request.build_absolute_uri( reverse("signup-invitation", args=[topicToken.token]) )
 
         # Creates link to the topic
@@ -406,7 +416,7 @@ class TopicNestedResource(ModelResource):
             return HttpResponse(u"{username} successfuly left {topic} contributors.".format(
                 username=user.username, topic=topic.title))
         else:
-            return HttpResponseForbidden("You are not a contributor of this topic.")
+            return HttpResponseForbidden("You are not a contributor of this collection.")
 
     def list_collaborators(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
@@ -493,8 +503,12 @@ class TopicNestedResource(ModelResource):
             rulesManager = bundle.request.current_topic.get_rules()
             # Get all registered models
             models = get_registered_models()
+            # return json for ontology_as_json field
+            if bundle.obj.ontology_as_json:
+                bundle.data["ontology_as_json"] = bundle.obj.ontology_as_json
             # Filter model to the one under app.detective.topics
             bundle.data["models"] = []
+            bundle.data["ontology_models"] = []
             for m in bundle.obj.get_models():
                 try:
                     idx = m.__idx__
@@ -508,6 +522,9 @@ class TopicNestedResource(ModelResource):
                     'index': idx
                 }
                 bundle.data["models"].append(model)
+                # Save searchable models for this ontology
+                if model["is_searchable"]:
+                    bundle.data["ontology_models"].append(model["verbose_name"])
         _is_uploading = cache.get("{0}_is_uploading".format(bundle.data["ontology_as_mod"]))
         if _is_uploading != None and _is_uploading:
             bundle.data["is_uploading"] = True
@@ -528,9 +545,11 @@ class TopicNestedResource(ModelResource):
         if url == None:
             return None
         try:
-            name = urlparse(url).path.split('/')[-1]
+            name  = urlparse(url).path.split('/')[-1]
+            image = urllib2.urlopen(url).read()
+
             tmp_file = NamedTemporaryFile(delete=True)
-            tmp_file.write(urllib2.urlopen(url).read())
+            tmp_file.write(image)
             tmp_file.flush()
             if not is_image(tmp_file):
                 raise NotAnImage()
@@ -542,75 +561,32 @@ class TopicNestedResource(ModelResource):
         except urllib2.URLError:
             raise UnavailableImage()
 
-    def get_skeleton(self, bundle):
-        # workaround to avoid SQL lazyness, store topic skeleton in bundle obj.
-        topic_skeleton = getattr(bundle, 'skeleton', None)
-        if not topic_skeleton:
-            topic_skeleton_pk = bundle.data.get('topic_skeleton', None)
-            if topic_skeleton_pk:
-                topic_skeleton = TopicSkeleton.objects.get(pk=topic_skeleton_pk)
-                setattr(bundle, 'skeleton', topic_skeleton)
-        return topic_skeleton
-
-    def hydrate_skeleton_title(self, bundle):
-        topic_skeleton = self.get_skeleton(bundle)
-        if topic_skeleton:
-            bundle.data['skeleton_title'] = topic_skeleton.title
-        return bundle
-
     def hydrate_author(self, bundle):
         bundle.data['author'] = bundle.request.user
         return bundle
 
     def hydrate_background(self, bundle):
+        request = bundle.request
+        # Django is mono-threaded in DEBUG, so it is impossible to download
+        # a file served locally by Django.
+        is_local = lambda u: urlparse(u).hostname == urlparse( request.build_absolute_uri() ).hostname
         # handle background setting from topic skeleton and from background_url
         # if provided
-        topic_skeleton = self.get_skeleton(bundle)
         background_url = bundle.data.get('background_url', None)
-        if topic_skeleton and not background_url:
-            bundle.data['background'] = topic_skeleton.picture
-        else:
-            if background_url:
-                try:
-                    bundle.data['background'] = self.download_url(background_url)
-                except UnavailableImage:
-                    bundle.data['background'] = TopicValidationErrors['background']['unavailable']['code']
-                except NotAnImage:
-                    bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
-                except OversizedFile:
-                    bundle.data['background'] = TopicValidationErrors['background']['oversized_file']['code']
-
-            elif bundle.data.get('background', None):
-                # we remove from data the previously setted background to avoid
-                # further supsicious operation errors
-                self.clean_bundle_key('background', bundle)
-        return bundle
-
-    def hydrate_about(self, bundle):
-        def should_have_credits(bundle, skeleton):
-            topic_about    = bundle.data.get('about', '')
-            background_url = bundle.data.get('background_url', None)
-            if not skeleton:
-                return False
-            credits = ( skeleton.picture_credits or '')
-            return (not background_url) and skeleton and \
-                   (not (credits.lower() in topic_about.lower()))
-
-        topic_skeleton = self.get_skeleton(bundle)
-        if should_have_credits(bundle, topic_skeleton):
-            topic_about = bundle.data.get('about', '')
-            if topic_about != '':
-                topic_about = "%s<br/><br/>" % topic_about
-            bundle.data['about'] = "%s%s" % (topic_about, topic_skeleton.picture_credits)
-        return bundle
-
-    def hydrate_ontology_as_json(self, bundle):
-        # feed ontology_as_json attribute when needed
-        topic_skeleton = self.get_skeleton(bundle)
-        if topic_skeleton:
-            bundle.data['ontology_as_json'] = topic_skeleton.ontology
-        else:
-            self.clean_bundle_key('ontology_as_json', bundle)
+        # Back URL must exits and not be a local file
+        if background_url and not is_local(background_url):
+            try:
+                bundle.data['background'] = self.download_url(background_url)
+            except UnavailableImage:
+                bundle.data['background'] = TopicValidationErrors['background']['unavailable']['code']
+            except NotAnImage:
+                bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
+            except OversizedFile:
+                bundle.data['background'] = TopicValidationErrors['background']['oversized_file']['code']
+        elif bundle.data.get('background', None):
+            # we remove from data the previously setted background to avoid
+            # further supsicious operation errors
+            self.clean_bundle_key('background', bundle)
         return bundle
 
     def hydrate_dataset(self, bundle):
@@ -637,7 +613,6 @@ class TopicNestedResource(ModelResource):
     def clean_bundle(self, bundle):
         # we remove useless (for topic's model class) keys from bundle
         self.clean_bundle_key('background_url', bundle)
-        self.clean_bundle_key('topic_skeleton', bundle)
         return bundle
 
 # simpler version of TopicResource, this resource doesn't use the full

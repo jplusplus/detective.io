@@ -1,13 +1,14 @@
 #=require TopicFormCtrl
 class window.EditTopicCtrl extends window.TopicFormCtrl
-    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', 'topic']
-    constructor: (@scope, @state, @TopicsFactory, @Page, @User, @EVENTS, @rootScope, @topic)->
+    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', 'topic', 'TopicSkeleton']
+    constructor: (@scope, @state, @TopicsFactory, @Page, @User, @EVENTS, @rootScope, @topic, @TopicSkeleton)->
         super
-        @setEditingMode()
         @init   = yes
         @master = angular.copy @topic
+        # Scope attributes
         @scope.topic = @topic
         @scope.saved = no
+        # Scope methods
         @scope.deleteTopicBackground = @deleteTopicBackground
 
         @scope.$on @EVENTS.topic.user_updated, (e, previous, next)=>

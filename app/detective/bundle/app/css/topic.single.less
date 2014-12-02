@@ -43,7 +43,7 @@
 
         h2, &__heading {
             position:relative;
-            z-index:20;
+            z-index:30;
             pointer-events: none;
         }
 
@@ -88,25 +88,25 @@
                 margin:0;
             }
 
-            &__tab {           
+            &__tab {
                 margin-right:10px;
                 padding:0;
 
                 a {
                     text-decoration: none;
-                    border:1px solid white;     
+                    border:1px solid white;
                     color:black;
                     display: block;
-                    padding:10px 15px;       
+                    padding:10px 15px;
                     background:darken(@body-bg, 5%);
                     border-radius: @border-radius-base @border-radius-base 0 0;
                     .box-shadow(0 -2px 2px 0 fade(black, 20));
                 }
 
-                &.active a {                    
+                &.active a {
                     background:@body-bg;
                     font-weight: bold;
-                    border-bottom: 1px solid @body-bg;   
+                    border-bottom: 1px solid @body-bg;
                 }
             }
 

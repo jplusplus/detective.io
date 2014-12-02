@@ -13,6 +13,7 @@ class VirtualApp:
         "relationship" : "Relationship",
         "string"       : "StringProperty",
         "char"         : "StringProperty",
+        "richtext"     : "StringProperty",
         "url"          : "URLProperty",
         "int"          : "IntegerProperty",
         "integer"      : "IntegerProperty",
@@ -225,12 +226,14 @@ class VirtualApp:
         # @TODO raise custom exception
         if not field_type in self.JSONTYPES: return None, None
         # Convert type to neo4django property type
-        field_type = self.JSONTYPES[field_type]
+        neo4j_type = self.JSONTYPES[field_type]
         # Add a default value for boolean properties
-        if field_type == 'BooleanProperty' and not 'default' in field_opts.keys():
+        if neo4j_type == 'BooleanProperty' and not 'default' in field_opts.keys():
             field_opts['default'] = False
+        # Add a rule for richtext type
+        if field_type == 'richtext': self.add_rule(model_name, field_name, 'is_rich', True)
         # Return an instance of the field
-        return field_name, getattr(models, field_type)(**field_opts)
+        return field_name, getattr(models, neo4j_type)(**field_opts)
 
 
 def parse(ontology, module='', app_label=None):

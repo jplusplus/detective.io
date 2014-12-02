@@ -30,6 +30,7 @@ field = {
                 "float",
                 "relationship",
                 "string",
+                "richtext",
                 "char",
                 "url",
                 "int",

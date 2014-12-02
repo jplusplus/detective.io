@@ -10,7 +10,7 @@
         src             = src.slice ((src.indexOf window.STATIC_URL) + window.STATIC_URL.length)
         worker          = new Worker "/proxy/" + src
         absUrl          = do $location.absUrl
-        leafSize        = 4
+        leafSize        = 6
         svgSize         = [ element.width(), element.height() ]
         d3Svg           = ((d3.select element[0]).append 'svg')
             .attr
@@ -27,6 +27,7 @@
         d3Drag          = d3Graph.drag()
         maxNodeWeight   = 1
         maxLinkWeight   = 1
+        typeColor       = (d)-> if d._type is aggregationType then "#fff" else $filter("strToColor")(d._type)
         # Fix node after draging
         d3Drag.on "dragstart", (d)-> d3.select(@).classed("fixed", d.fixed = yes)
         d3Drag.on "dragend", (d)->
@@ -130,8 +131,8 @@
             leafNameClass = (d)-> if sizeScale(d.weight) > leafSize then "leaf-name" else "leaf-name leaf-name--small"
             getGradID     = (d)-> "linkGrad-" + d.source._id + "-" + d.target._id
             getArrowID    = (d)-> "linkArrow-" + d.source._id + "-" + d.target._id
-            sourceColor   = (d)-> $filter("strToColor")(d.source._type)
-            targetColor   = (d)-> $filter("strToColor")(d.target._type)
+            sourceColor   = (d)-> typeColor(d.source)
+            targetColor   = (d)-> typeColor(d.target)
             # Use a scale to calculate the distance
             d3Graph.linkDistance(linkDistance)
 
@@ -153,7 +154,7 @@
                         viewBox : "0 -5 10 10"
                         refX : 15
                         refY : -1.5
-                        fill: (d)-> $filter("strToColor")(d.target._type)
+                        fill: (d)-> typeColor(d.target)
                         markerWidth : leafSize
                         markerHeight : leafSize
                         orient : "auto"
@@ -181,7 +182,7 @@
             d3Leafs.enter().insert('svg:circle', 'text')
                 .attr 'class', 'leaf'
                 .attr 'r', (d)-> sizeScale(d.weight)
-                .style 'fill', (d)-> unless d._type is aggregationType then $filter("strToColor")(d._type)
+                .style 'fill', typeColor
                 .each (d)-> (createPattern d, d3Defs)
                 .call d3Drag
             # Remove old leafs

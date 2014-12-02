@@ -23,15 +23,15 @@ svg {
 
 
 
-    .leaf-name-wrapper {        
+    .leaf-name-wrapper {
         position:relative;
         pointer-events: none;
-        text-align: center;        
+        text-align: center;
     }
 
     .leaf-name {
-        display: inline-block;        
-        text-align: center;        
+        display: inline-block;
+        text-align: center;
         font: @font-family-base;
         color:@text-color;
         background:white;
@@ -39,6 +39,7 @@ svg {
         border-radius: 2px;
         font-size:0.7em;
         white-space: nowrap;
+        .transition(0.4s);
 
         /*
         position:absolute;
@@ -58,7 +59,7 @@ svg {
         */
 
         &--small {
-            opacity:0.5;
+            opacity:0;
         }
     }
 }

@@ -135,7 +135,7 @@
                     type : 'get_from_leaf'
                     data : d
             else
-                $state.go "user-topic-detail.network",
+                $state.go "user-topic-detail",
                     username: $stateParams.username
                     topic   : $stateParams.topic
                     type    : d._type.toLowerCase()

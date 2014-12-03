@@ -220,8 +220,7 @@
             for edge in edges
                 for key in ['source', 'target']
                     edge[key] = _.findWhere leafs, _id : edge[key]._id
-            for i in [0..(Math.min leafs.length, 3)]
-                leafs[i]._shouldDisplayName = yes if leafs[i]?
+            for leaf, i in leafs
                 savedPosition = getLeafPosition leafs[i]
                 # Has a position in this context?
                 if savedPosition? and savedPosition[ do getContext ]?

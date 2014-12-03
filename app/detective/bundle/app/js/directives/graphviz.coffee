@@ -75,6 +75,8 @@
         # Save the position of the given leaf (according its datum)
         # in the localstorage
         saveLeafPosition =  (d)->
+            # Only for node with an id
+            return unless d._id?
             # Get all position
             pos = do leafSavedPositions
             # Retreive the position for this leaf in this context
@@ -224,6 +226,12 @@
                     # Extract its position
                     leafs[i].x = leafs[i].px = savedPosition[ do getContext ].x * svgSize[0]
                     leafs[i].y = leafs[i].py = savedPosition[ do getContext ].y * svgSize[1]
+                else if isCurrent leafs[i]._id
+                    # Fix the node too
+                    leafs[i].fixed = yes
+                    # Move the node at the center
+                    leafs[i].x = leafs[i].px = svgSize[0]/2
+                    leafs[i].y = leafs[i].py = svgSize[1]/2
             do d3Update
 
         d3Update = =>

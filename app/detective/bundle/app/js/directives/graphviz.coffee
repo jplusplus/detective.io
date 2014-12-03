@@ -10,6 +10,8 @@
         AGGREGATION_TYPE = '__aggregation_bubble'
         # Minimum leaf size
         LEAF_SIZE        = 6
+        # This key is used to retreive the leaf's positions from the localstorage
+        LS_LEAFS_KEY     = "leaf_positions"
         # Worker SRC
         src = angular.element('.topic__single__graph__worker script').attr("src")
         src = src.slice ((src.indexOf window.STATIC_URL) + window.STATIC_URL.length)
@@ -47,6 +49,48 @@
             worker.addEventListener 'message', workerMessage
             # Update graph when there is some data
             scope.$watch 'data', => do update if scope.data
+
+        # This experimental feature try to use the localstorage to remember
+        # where the user moved a given leaf.
+        #
+        # This position is saved in indices and has a context
+        # (which is a node page). This way we allow the user to keep consistancy
+        # in the positioning of the node
+        leafSavedPositions = ->
+            pos = localStorageService.get(LS_LEAFS_KEY) or {}
+            # Save the leaf positions of no value is given
+            localStorageService.set LS_LEAFS_KEY, pos unless pos.length
+            # Simply returns the positions
+            pos
+
+
+        # The context is simply the current state param id
+        # or a global context key if we are not inside a single page
+        getContext = ->
+            if $stateParams.id?
+                'context__node--' + $stateParams.id
+            else
+                'context__all'
+
+        # Save the position of the given leaf (according its datum)
+        # in the localstorage
+        saveLeafPosition =  (d)->
+            # Get all position
+            pos = do leafSavedPositions
+            # Retreive the position for this leaf in this context
+            pos[d._id] = {} unless pos[d._id]?
+            # Add a sub key according the context
+            pos[d._id][ do getContext ] =
+                # Position are indices
+                x: d.x/svgSize[0]
+                y: d.y/svgSize[1]
+            # Then save positions updated
+            localStorageService.set LS_LEAFS_KEY, pos
+
+        # The position of a single leaf inside localstorage
+        getLeafPosition = (d)->
+            # Get all position
+            leafSavedPositions()[ d._id ]
 
         workerMessage = (message)->
             switch message.data.type
@@ -107,6 +151,8 @@
             do d3Graph.start
             for i in [0..100] then do d3Graph.tick
             do d3Graph.stop
+            # Then save the leaf position
+            saveLeafPosition d
 
         graphTick =  ()->
             d3Leafs.each (d)->
@@ -167,10 +213,17 @@
             edges = new_edges
             for edge in edges
                 for key in ['source', 'target']
-                    edge[key] = _.findWhere leafs,
-                        _id : edge[key]._id
+                    edge[key] = _.findWhere leafs, _id : edge[key]._id
             for i in [0..(Math.min leafs.length, 3)]
                 leafs[i]._shouldDisplayName = yes if leafs[i]?
+                savedPosition = getLeafPosition leafs[i]
+                # Has a position in this context?
+                if savedPosition? and savedPosition[ do getContext ]?
+                    # Fix the node
+                    leafs[i].fixed = yes
+                    # Extract its position
+                    leafs[i].x = leafs[i].px = savedPosition[ do getContext ].x * svgSize[0]
+                    leafs[i].y = leafs[i].py = savedPosition[ do getContext ].y * svgSize[1]
             do d3Update
 
         d3Update = =>
@@ -242,7 +295,7 @@
                     .attr 'class', 'leaf'
                     .attr 'r', (d)-> sizeScale(d.weight)
                     .style 'fill', typeColor
-                    .each (d)-> (createPattern d, d3Defs)
+                    .each (d)-> createPattern d, d3Defs
                     .call d3Drag
             # Remove old leafs
             d3Leafs.exit().remove()

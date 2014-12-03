@@ -88,6 +88,6 @@ gulp.task('watch', ['default'], function() {
   gulp.watch('app/css/**/*.less', ['less']);
   gulp.watch('app/js/**/*.coffee', ['coffee']);
   gulp.watch('app/templates/**/*.html').on('change', livereload.changed)
-  gulp.watch('.build/**/*.{css,js}').on('change', livereload.changed)
+  gulp.watch('.build/**/*.css').on('change', livereload.changed)
   gulp.watch('bower.json', ['bower']);
 });

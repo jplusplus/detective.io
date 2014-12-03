@@ -145,14 +145,12 @@
                     id      : d._id
                 # URL paths
                 url = "/#{u.username}/#{u.topic}/#{u.type}/#{u.id}/"
-
-                if attr.embed?
-                    $window.open url
-                else
-                    $location.url url
-                    # We're in a d3 callback so we need to manually
-                    # $apply the scope
-                    do scope.$apply
+                # Naviguate in the graph for embed
+                url = "/embed" + url if attr.embed?
+                $location.url url
+                # We're in a d3 callback so we need to manually
+                # $apply the scope
+                do scope.$apply
 
         leafEnter = (d)->
             d3Svg.select(".leaf-name[data-id='#{d._id}']").attr("class", "leaf-name")

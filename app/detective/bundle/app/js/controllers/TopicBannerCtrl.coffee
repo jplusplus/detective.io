@@ -27,8 +27,8 @@ class window.TopicBannerCtrl
         # true means that inequality of the watchExpression is determined according to the angular.equals function.
         # To save the value of the object for later comparison, the angular.copy function is used.
         # This therefore means that watching complex objects will have adverse memory and performance implications.
-        if @state.is("user-topic-graph")
-            @scope.graphNavigationEnabled = true
+        @scope.$on '$stateChangeSuccess', =>
+            @scope.graphNavigationEnabled = @state.is("user-topic.network")
             @renderGraph()
 
     retrieveTopicForms: (forms) =>
@@ -58,7 +58,7 @@ class window.TopicBannerCtrl
     # filter the data and render the graph via @scope.graphnodes
     # shared with detective/js/directives/topic.single.graph.coffee
     renderGraph: =>
-        return unless @state.is("user-topic-graph")
+        return unless @state.is("user-topic.network")
         if @data?
             data = angular.copy(@data)
             # filter by filtersSelected

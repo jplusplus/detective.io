@@ -131,13 +131,11 @@ class GraphWorker
         loaded
 
     load_from_leaf : (source_leaf) =>
-        source_leaf = _.findWhere @leafs,
-            _id : source_leaf._id
+        source_leaf = _.findWhere @leafs, _id : source_leaf._id
         leafs_to_load = (source_leaf.leafs.splice 0, @aggregation_threshold)
 
-        if (source_leaf.leafs.length > 0)
+        if (leafs_to_load.length > 0)
             source_leaf.name = "#{source_leaf.leafs.length} more entities"
-            @log 'update aggregation leaf count ' + source_leaf.leafs.length
         else
             @delete_leaf source_leaf
 

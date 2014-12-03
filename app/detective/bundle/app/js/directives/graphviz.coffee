@@ -11,30 +11,30 @@
         # Minimum leaf size
         LEAF_SIZE        = 6
         # Worker SRC
-        src             = angular.element('.topic__single__graph__worker script').attr("src")
-        src             = src.slice ((src.indexOf window.STATIC_URL) + window.STATIC_URL.length)
+        src = angular.element('.topic__single__graph__worker script').attr("src")
+        src = src.slice ((src.indexOf window.STATIC_URL) + window.STATIC_URL.length)
         # Instanciate the graph Worker
-        worker          = new Worker "/proxy/" + src
-        absUrl          = do $location.absUrl
+        worker = new Worker "/proxy/" + src
+        absUrl = do $location.absUrl
         # The SVG size follows its container
-        svgSize         = [ element.width(), element.height() ]
+        svgSize = [ element.width(), element.height() ]
         # Data arrays
-        leafs           = []
-        edges           = []
+        leafs = []
+        edges = []
         # D3 elements instancies
-        d3Svg           = d3.select(element[0]).append 'svg'
-        d3Defs          = d3Svg.insert 'svg:defs', 'path'
-        d3Graph         = d3.layout.force().size(svgSize).charge(-300)
-        d3Drag          = d3Graph.drag()
-        d3Grads         = d3Defs.selectAll("linearGradient")
+        d3Svg = d3.select(element[0]).append 'svg'
+        d3Defs = d3Svg.insert 'svg:defs', 'path'
+        d3Graph = d3.layout.force().size(svgSize).charge(-300)
+        d3Drag = d3Graph.drag()
+        d3Grads = d3Defs.selectAll("linearGradient")
         # Not yet define but globally available
-        d3Edges         = null
-        d3Leafs         = null
-        d3Labels        = null
+        d3Edges = null
+        d3Leafs = null
+        d3Labels = null
         # Maximum nodes weight according the current data
-        maxNodeWeight   = 1
+        maxNodeWeight = 1
         # Maximum links weight according the current data
-        maxLinkWeight   = 1
+        maxLinkWeight = 1
 
         init = ->
             # Resize the svg
@@ -235,19 +235,22 @@
 
             # Remove old edges
             d3Edges.exit().remove()
-
             # Create all new leafs
             d3Leafs = d3Svg.selectAll('.leaf').data leafs, (d)-> d._id
-            d3Leafs.enter().insert('svg:circle', 'text')
-                .attr 'class', 'leaf'
-                .attr 'r', (d)-> sizeScale(d.weight)
-                .style 'fill', typeColor
-                .each (d)-> (createPattern d, d3Defs)
-                .call d3Drag
+            d3Leafs.enter()
+                .insert('svg:circle', 'text')
+                    .attr 'class', 'leaf'
+                    .attr 'r', (d)-> sizeScale(d.weight)
+                    .style 'fill', typeColor
+                    .each (d)-> (createPattern d, d3Defs)
+                    .call d3Drag
             # Remove old leafs
             d3Leafs.exit().remove()
+            # Ensure that all existing label are deleted
+            d3Svg.selectAll('.leaf-name-wrapper').remove()
             # Create all new labels
             d3Labels = d3Svg.selectAll('.leaf-name-wrapper').data leafs, (d)-> d._id
+            # Remove any existing label
             d3Labels.enter()
                 .append('svg:foreignObject')
                     .attr "class", "leaf-name-wrapper"
@@ -260,7 +263,6 @@
                         .text (d)-> d.name
                         .attr 'class', leafNameClass
                         .attr 'data-id', (d)-> d._id
-
             # Remove old labels
             d3Labels.exit().remove()
             # Pre-calculate positions

@@ -136,7 +136,7 @@
                 worker.postMessage
                     type : 'get_from_leaf'
                     data : d
-            else
+            else if not isCurrent(d)
                 # Build the URL
                 u =
                     username: $stateParams.username
@@ -153,7 +153,9 @@
                 do scope.$apply
 
         leafEnter = (d)->
-            d3Svg.select(".leaf-name[data-id='#{d._id}']").attr("class", "leaf-name")
+            # Do not change current node
+            unless isCurrent(d._id)
+                d3Svg.select(".leaf-name[data-id='#{d._id}']").attr("class", "leaf-name")
 
         leafLeave = (callback=angular.noop)->
             (d)->
@@ -263,11 +265,18 @@
             # Calculate the link distance according theire weights
             linkDistance  = (d)-> 100 + sizeScale(d.target.weight + d.source.weight)
             # Calculate the class of the given leaf name
-            leafNameClass = (d)-> if sizeScale(d.weight) > LEAF_SIZE then "leaf-name" else "leaf-name leaf-name--small"
             getGradID     = (d)-> "linkGrad-" + d.source._id + "-" + d.target._id
             getArrowID    = (d)-> "linkArrow-" + d.source._id + "-" + d.target._id
             sourceColor   = (d)-> typeColor(d.source)
             targetColor   = (d)-> typeColor(d.target)
+            leafNameClass = (d)->
+                classes = ["leaf-name"]
+                if isCurrent d._id
+                    classes.push "leaf-name--current"
+                else if sizeScale(d.weight) <= LEAF_SIZE
+                    classes.push "leaf-name--small"
+                # Return all classes as string
+                classes.join " "
 
             # Use a scale to calculate the distance
             d3Graph.linkDistance(linkDistance)

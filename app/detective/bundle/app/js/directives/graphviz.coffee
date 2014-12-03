@@ -92,7 +92,7 @@
         # The position of a single leaf inside localstorage
         getLeafPosition = (d)->
             # Get all position
-            leafSavedPositions()[ d._id ]
+            leafSavedPositions()[ d._id ] if d?
 
         workerMessage = (message)->
             switch message.data.type
@@ -135,7 +135,11 @@
                     type : 'get_from_leaf'
                     data : d
             else
-                $state.go "user-topic-detail.network", id: d._id, type: d._type.toLowerCase()
+                $state.go "user-topic-detail.network",
+                    username: $stateParams.username
+                    topic   : $stateParams.topic
+                    type    : d._type.toLowerCase()
+                    id      : d._id
                 # We're in a d3 callback so we need to manually $apply the scope
                 do scope.$apply
 

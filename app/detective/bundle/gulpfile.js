@@ -36,6 +36,7 @@ gulp.task('coffee', function() {
 gulp.task('copy', function () {
 	// Copy assets to the .build dir
   gulp.src('./app/img/**/*').pipe(gulp.dest('.build/img/'));
+  gulp.src('./app/svg/**/*').pipe(gulp.dest('.build/svg/'));
   gulp.src('./app/components/**/*').pipe(gulp.dest('.build/components/'));
 });
 

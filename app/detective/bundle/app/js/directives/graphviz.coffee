@@ -1,4 +1,4 @@
-(angular.module 'detective.directive').directive "graphviz", ['$filter', '$stateParams', '$location', '$rootScope', 'Individual', 'localStorageService', ($filter, $stateParams, $location, $rootScope, Individual, localStorageService)->
+(angular.module 'detective.directive').directive "graphviz", ['$filter', '$stateParams', '$state', '$location', '$rootScope', 'Individual', 'localStorageService', ($filter, $stateParams, $state, $location, $rootScope, Individual, localStorageService)->
     restrict: "AE"
     template: "<div></div>"
     replace : yes
@@ -135,7 +135,7 @@
                     type : 'get_from_leaf'
                     data : d
             else
-                $location.path "/#{$stateParams.username}/#{$stateParams.topic}/#{do d._type.toLowerCase}/#{d._id}"
+                $state.go "user-topic-detail.network", id: d._id, type: d._type.toLowerCase()
                 # We're in a d3 callback so we need to manually $apply the scope
                 do scope.$apply
 

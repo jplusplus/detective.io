@@ -8,12 +8,14 @@ angular.module('detective.config').config [
         # ui-router configuration
         $stateProvider.state('node',
             url: '/embed/:username/:topic/:type/:id/'
-            controller: ['$scope', '$stateParams', 'individual', 'graphnodes', 'topic',
-                ($scope, $stateParams, individual, graphnodes, topic)->
+            controller: ['$scope', '$stateParams', 'individual', 'graphnodes', 'topic', 'Page'
+                ($scope, $stateParams, individual, graphnodes, topic, Page)->
                     $scope.topic      = topic
                     $scope.individual = individual
                     $scope.graphnodes = graphnodes
                     $scope.link = "/#{$stateParams.username}/#{$stateParams.topic}/#{$stateParams.type}/#{$stateParams.id}/"
+                    # Update page title
+                    Page.title( $scope.individual.name or "Unkown" )
             ]
             resolve:
                 topic: UserTopicCtrl.resolve.topic

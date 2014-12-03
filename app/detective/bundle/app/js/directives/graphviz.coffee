@@ -1,4 +1,4 @@
-(angular.module 'detective.directive').directive "graphviz", ['$filter', '$stateParams', '$location', '$rootScope', 'Individual', ($filter, $stateParams, $location, $rootScope, Individual)->
+(angular.module 'detective.directive').directive "graphviz", ['$filter', '$stateParams', '$location', '$rootScope', 'Individual', 'localStorageService', ($filter, $stateParams, $location, $rootScope, Individual, localStorageService)->
     restrict: "AE"
     template: "<div></div>"
     replace : yes

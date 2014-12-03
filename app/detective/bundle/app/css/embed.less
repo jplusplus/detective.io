@@ -1,0 +1,104 @@
+@staticPath: "../";
+// Z-indexes
+@zindex-context   : 10;
+@zindex-content   : @zindex-context+100;
+@zindex-tooltips  : @zindex-content+100;
+@zindex-loading   : @zindex-tooltips+100;
+@zindex-breadcrumb: @zindex-loading+100;
+@zindex-header    : @zindex-breadcrumb+100;
+// Icons font
+@import '//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.css';
+// Bootstrap dependancies
+@import './bootstrap.loader.less';
+@import './bootstrap.alert.less';
+@import './bootstrap.fonts.less';
+@import './bootstrap.dropdown-menu.less';
+@import './bootstrap.form.less';
+@import './bootstrap.icon.less';
+@import './bootstrap.menu.less';
+@import './bootstrap.navs.less';
+@import './bootstrap.modals.less';
+@import './bootstrap.pagination.less';
+@import './bootstrap.panel.less';
+// Custom mixin and helper classes
+@import './tools.less';
+@import './animations.less';
+// Core
+@import './graphviz.less';
+
+@embed-heading-height: 30px;
+
+.embed {
+
+	position:fixed;
+	top:0;
+	bottom:0;
+	right:0;
+	left:0;
+
+	&--loading:before {
+		content:"";
+		position:absolute;
+		top:0;
+		bottom:0;
+		right:0;
+		left:0;
+		background:@brand-secondary;
+		z-index:30;
+	}
+
+	&--loading:after {
+		z-index:40;
+		color:white;
+		content:"Loading...";
+		position:absolute;
+		top:50%;
+		left:50%;
+		.translate(-50%, -50%);
+	}
+
+	&__heading {
+		z-index: 20;
+		background: @brand-secondary;
+		position:fixed;
+		top:0;
+		right:0;
+		left:0;
+		padding:0 10px;
+		height: @embed-heading-height;
+		line-height: @embed-heading-height;
+		white-space: nowrap;
+		color: contrast(@brand-secondary);
+		overflow: hidden;
+		.box-shadow(0 0 10px black);
+
+		&__name {
+			display: inline-block;
+			font-size: inherit;
+			margin:0;
+			font-weight: bold;
+			a, a:hover, a:active {
+				color:white;
+			}
+		}
+
+		&__brand {
+			position: absolute;
+			right:0px;
+			top:0;
+			padding:inherit;
+			font-size:0.8em;
+			background: @brand-secondary;
+			.box-shadow(0 0 20px 10px @brand-secondary);
+		}
+	}
+
+	&__graphviz {
+		z-index: 10;
+		position:absolute;
+		top:@embed-heading-height;
+		bottom:0;
+		left:0;
+		right:0;
+	}
+}

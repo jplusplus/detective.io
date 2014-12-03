@@ -1,0 +1,75 @@
+{% extends "base.dj.html" %}
+{% load staticfiles %}
+{% load compress %}
+
+{% block extracss %}
+    {% compress css %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/embed.css' %}">
+    {% endcompress %}
+{% endblock %}
+
+{% block extrajs %}
+
+    {% compress js %}
+        <script src="{% static 'js/modules.js' %}"></script>
+
+        <script src="{% static 'js/services/UtilsFactory.js' %}"></script>
+        <script src="{% static 'js/services/User.js' %}"></script>
+        <script src="{% static 'js/services/TopicsFactory.js' %}"></script>
+        <script src="{% static 'js/services/TopicSkeleton.js' %}"></script>
+        <script src="{% static 'js/services/TopicDataSet.js' %}"></script>
+        <script src="{% static 'js/services/Topic.js' %}"></script>
+        <script src="{% static 'js/services/Summary.js' %}"></script>
+        <script src="{% static 'js/services/Search.js' %}"></script>
+        <script src="{% static 'js/services/QueryFactory.js' %}"></script>
+        <script src="{% static 'js/services/Page.js' %}"></script>
+        <script src="{% static 'js/services/IndividualForm.js' %}"></script>
+        <script src="{% static 'js/services/Individual.js' %}"></script>
+        <script src="{% static 'js/services/HttpErrorInterceptor.js' %}"></script>
+        <script src="{% static 'js/services/Group.js' %}"></script>
+        <script src="{% static 'js/services/Common.js' %}"></script>
+        <script src="{% static 'js/services/AuthHttpInterceptor.js' %}"></script>
+        <script src="{% static 'js/services/Auth.js' %}"></script>
+
+        <script src="{% static 'js/controllers/PageCtrl.js' %}"></script>
+        <script src="{% static 'js/controllers/UserTopicCtrl.js' %}"></script>
+
+        <script src="{% static 'js/filters/individualPreview.js' %}"></script>
+        <script src="{% static 'js/filters/strToColor.js' %}"></script>
+        <script src="{% static 'js/directives/graphviz.js' %}"></script>
+
+        <script src="{% static 'js/constants/events.js' %}"></script>
+
+        <script src="{% static 'js/config/urlRouter.js' %}"></script>
+        <script src="{% static 'js/config/safeApply.js' %}"></script>
+        <script src="{% static 'js/config/rootScope.js' %}"></script>
+        <script src="{% static 'js/config/loadWatch.js' %}"></script>
+        <script src="{% static 'js/config/interpolation.js' %}"></script>
+        <script src="{% static 'js/config/httpProvider.js' %}"></script>
+
+        <script src="{% static 'js/embed.js' %}"></script>
+
+    {% endcompress %}
+    <span class='topic__single__graph__worker'>
+        {% compress js %}
+            <script src="{% static 'js/workers/GraphWorker.js' %}"></script>
+        {% endcompress %}
+    </span>
+{% endblock %}
+
+{% block content %}
+    <div class="embed" ng-class="{ 'embed--loading': Page.loading() }"  ui-view>
+        <div class="embed__heading">
+            <h2 class="embed__heading__name">
+                <a ng-href="[[link]]" target="_blank">
+                    [[individual|individualPreview:"unknown"]]
+                    <i class="fa fa-external-link small"></i>
+                </a>
+            </h2>
+            <div  class="embed__heading__brand">
+                Created with <a target="_blank" href="https://www.detective.io">Detective.io</a><sup>beta</sup>
+            </div>
+        </div>
+        <graphviz class="embed__graphviz" data="graphnodes" embed></graphviz>
+    </div>
+{% endblock %}

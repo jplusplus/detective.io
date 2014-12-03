@@ -15,7 +15,7 @@ gulp.task('clean', function(cb) {
 
 
 gulp.task('less', function () {
-  return gulp.src('app/css/base.less')
+  return gulp.src('app/css/{base,embed}.less')
     .pipe(
     	less({
       	paths: [ path.join(__dirname, 'app') ]

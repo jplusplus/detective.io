@@ -71,6 +71,27 @@ def home(request, social_meta_dict=None,**kwargs):
         response.delete_cookie("user__username")
     return response
 
+@gzip_page
+def embed(request, social_meta_dict=None,**kwargs):
+    if social_meta_dict == None:
+        social_meta_dict = default_social_meta(request)
+    # Render template without any argument
+    response = render_to_response('embed.dj.html', { 'meta': social_meta_dict, 'debug': settings.DEBUG } )
+
+    # Add a cookie containing some user information
+    if request.user.is_authenticated():
+        permissions = request.user.get_all_permissions()
+        # Create the cookie
+        response.set_cookie("user__is_logged",   1)
+        response.set_cookie("user__is_staff",    1*request.user.is_staff)
+        response.set_cookie("user__username",    unicode(request.user.username))
+    else:
+        # Deletre existing cookie
+        response.delete_cookie("user__is_logged")
+        response.delete_cookie("user__is_staff")
+        response.delete_cookie("user__username")
+    return response
+
 def entity_list(request, **kwargs):
     def __entity_type_name(entity_klass):
         type_name           = None

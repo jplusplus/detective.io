@@ -1,10 +1,11 @@
-(angular.module 'detective.directive').directive "graphviz", ['$filter', '$stateParams', '$state', '$location', '$rootScope', 'Individual', 'localStorageService', ($filter, $stateParams, $state, $location, $rootScope, Individual, localStorageService)->
+(angular.module 'detective.directive').directive "graphviz", ['$filter', '$stateParams', '$state', '$location', '$window',  'localStorageService', ($filter, $stateParams, $state, $location, $window, localStorageService)->
     restrict: "AE"
     template: "<div></div>"
     replace : yes
     scope   :
-        data : '='
-        clustering : '='
+        data: '='
+        clustering: '='
+        embed: "="
     link: (scope, element, attr)->
         # Constant to reconize aggregation node
         AGGREGATION_TYPE = '__aggregation_bubble'
@@ -18,27 +19,28 @@
         # Instanciate the graph Worker
         worker = new Worker "/proxy/" + src
         absUrl = do $location.absUrl
-        # The SVG size follows its container
-        svgSize = [ element.width(), element.height() ]
         # Data arrays
         leafs = []
         edges = []
-        # D3 elements instancies
-        d3Svg = d3.select(element[0]).append 'svg'
-        d3Defs = d3Svg.insert 'svg:defs', 'path'
-        d3Graph = d3.layout.force().size(svgSize).charge(-300)
-        d3Drag = d3Graph.drag()
-        d3Grads = d3Defs.selectAll("linearGradient")
+        # The SVG size follows its container
+        svgSize = null
         # Not yet define but globally available
-        d3Edges = null
-        d3Leafs = null
-        d3Labels = null
+        d3Svg = d3Defs = d3Drag = d3Graph = null
+        d3Grads = d3Edges = d3Leafs = d3Labels = null
         # Maximum nodes weight according the current data
         maxNodeWeight = 1
         # Maximum links weight according the current data
         maxLinkWeight = 1
 
         init = ->
+            # The SVG size follows its container
+            svgSize = [ element.width(), element.height() ]
+            # D3 elements instancies
+            d3Svg = d3.select(element[0]).append 'svg'
+            d3Defs = d3Svg.insert 'svg:defs', 'path'
+            d3Graph = d3.layout.force().size(svgSize).charge(-300)
+            d3Drag = d3Graph.drag()
+            d3Grads = d3Defs.selectAll("linearGradient")
             # Resize the svg
             d3Svg.attr width: svgSize[0], height : svgSize[1]
             # User events
@@ -135,13 +137,22 @@
                     type : 'get_from_leaf'
                     data : d
             else
-                $state.go "user-topic-detail",
+                # Build the URL
+                u =
                     username: $stateParams.username
                     topic   : $stateParams.topic
                     type    : d._type.toLowerCase()
                     id      : d._id
-                # We're in a d3 callback so we need to manually $apply the scope
-                do scope.$apply
+                # URL paths
+                url = "/#{u.username}/#{u.topic}/#{u.type}/#{u.id}/"
+
+                if attr.embed?
+                    $window.open url
+                else
+                    $location.url url
+                    # We're in a d3 callback so we need to manually
+                    # $apply the scope
+                    do scope.$apply
 
         leafEnter = (d)->
             d3Svg.select(".leaf-name[data-id='#{d._id}']").attr("class", "leaf-name")
@@ -342,4 +353,5 @@
 
         # Everything is declared, let's go!
         do init
+
 ]

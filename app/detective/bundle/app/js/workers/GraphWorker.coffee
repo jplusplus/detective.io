@@ -1,4 +1,3 @@
-
 class GraphWorker
     constructor: (@_) ->
         @_.addEventListener 'message', @on_message
@@ -134,7 +133,7 @@ class GraphWorker
     load_from_leaf : (source_leaf) =>
         source_leaf = _.findWhere @leafs,
             _id : source_leaf._id
-        leafs_to_load = (source_leaf.leafs.splice 0, 2)
+        leafs_to_load = (source_leaf.leafs.splice 0, @aggregation_threshold)
 
         if (source_leaf.leafs.length > 0)
             source_leaf.name = "#{source_leaf.leafs.length} more entities"
@@ -166,9 +165,9 @@ class GraphWorker
                 @log "Can't perform action <#{event.data.type}>."
 
     log : (message) =>
-        # @post_message
-        #     type : 'log'
-        #     data : message
+        @post_message
+            type : 'log'
+            data : message
 
     ask_update : =>
         @post_message

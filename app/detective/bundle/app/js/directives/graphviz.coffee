@@ -6,36 +6,60 @@
         data : '='
         clustering : '='
     link: (scope, element, attr)->
-        src             = (angular.element '.topic__single__graph__worker script')[0].src
+        # Constant to reconize aggregation node
+        AGGREGATION_TYPE = '__aggregation_bubble'
+        # Minimum leaf size
+        LEAF_SIZE        = 6
+        # Worker SRC
+        src             = angular.element('.topic__single__graph__worker script').attr("src")
         src             = src.slice ((src.indexOf window.STATIC_URL) + window.STATIC_URL.length)
+        # Instanciate the graph Worker
         worker          = new Worker "/proxy/" + src
         absUrl          = do $location.absUrl
-        leafSize        = 6
+        # The SVG size follows its container
         svgSize         = [ element.width(), element.height() ]
-        d3Svg           = ((d3.select element[0]).append 'svg')
-            .attr
-                width  : svgSize[0]
-                height : svgSize[1]
+        # Data arrays
+        leafs           = []
+        edges           = []
+        # D3 elements instancies
+        d3Svg           = d3.select(element[0]).append 'svg'
         d3Defs          = d3Svg.insert 'svg:defs', 'path'
         d3Graph         = d3.layout.force().size(svgSize).charge(-300)
-        aggregationType = '__aggregation_bubble'
+        d3Drag          = d3Graph.drag()
+        d3Grads         = d3Defs.selectAll("linearGradient")
+        # Not yet define but globally available
         d3Edges         = null
         d3Leafs         = null
         d3Labels        = null
-        leafs           = []
-        edges           = []
-        d3Drag          = d3Graph.drag()
+        # Maximum nodes weight according the current data
         maxNodeWeight   = 1
+        # Maximum links weight according the current data
         maxLinkWeight   = 1
-        typeColor       = (d)-> if d._type is aggregationType then "#fff" else $filter("strToColor")(d._type)
-        # Fix node after draging
-        d3Drag.on "dragstart", (d)-> d3.select(@).classed("fixed", d.fixed = yes)
-        d3Drag.on "dragend", (d)->
-            do d3Graph.start
-            for i in [0..100] then do d3Graph.tick
-            do d3Graph.stop
 
-        d3Grads = d3Defs.selectAll("linearGradient")
+        init = ->
+            # Resize the svg
+            d3Svg.attr width: svgSize[0], height : svgSize[1]
+            # User events
+            d3Drag.on "dragstart", leafDragstart
+            d3Drag.on "dragend", leafDragend
+            d3Graph.on 'tick', graphTick
+            # The worker send new data
+            worker.addEventListener 'message', workerMessage
+            # Update graph when there is some data
+            scope.$watch 'data', => do update if scope.data
+
+        workerMessage = (message)->
+            switch message.data.type
+                when 'update'
+                    register message.data.data.leafs, message.data.data.edges
+                when 'log'
+                    console.log message
+
+        typeColor = (d)->
+            if d._type is AGGREGATION_TYPE
+                "#fff"
+            else
+                $filter("strToColor")(d._type)
 
         d3GradsPosition = ->
             d3Grads
@@ -45,7 +69,8 @@
                 .attr "y2", (d)-> d.target.y
 
         # Is the given id the current node
-        isCurrent = (id) => (parseInt $stateParams.id) is parseInt id
+        isCurrent = (id)=>
+            parseInt($stateParams.id) is parseInt(id)
 
         edgeUpdate = (d)->
             datumX = d.target.x - d.source.x
@@ -55,8 +80,46 @@
 
         leafUpdate = (d)-> "translate(#{d.x}, #{d.y})"
 
+        leafClick = (d)->
+            # Check if we're dragging the leaf
+            return if d3.event.defaultPrevented
+            # Check if we clicked on a aggregation bubble
+            if d._type is AGGREGATION_TYPE
+                worker.postMessage
+                    type : 'get_from_leaf'
+                    data : d
+            else
+                $location.path "/#{$stateParams.username}/#{$stateParams.topic}/#{do d._type.toLowerCase}/#{d._id}"
+                # We're in a d3 callback so we need to manually $apply the scope
+                do scope.$apply
+
+        leafEnter = (d)->
+            d3Svg.select(".leaf-name[data-id='#{d._id}']").attr("class", "leaf-name")
+
+        leafLeave = (callback=angular.noop)->
+            (d)->
+                d3Svg.select(".leaf-name[data-id='#{d._id}']").attr("class", callback)
+
+        leafDragstart = (d)->
+            d3.select(@).classed("fixed", d.fixed = yes)
+
+        leafDragend = (d)->
+            do d3Graph.start
+            for i in [0..100] then do d3Graph.tick
+            do d3Graph.stop
+
+        graphTick =  ()->
+            d3Leafs.each (d)->
+                d.x = Math.max LEAF_SIZE, (Math.min svgSize[0] - LEAF_SIZE, d.x)
+                d.y = Math.max LEAF_SIZE, (Math.min svgSize[1] - LEAF_SIZE, d.y)
+                null
+            d3Edges.attr 'd', edgeUpdate
+            d3Leafs.attr 'transform', leafUpdate
+            d3Labels.attr 'transform', leafUpdate
+            do d3GradsPosition
+
         createPattern = (d, d3Defs)->
-            _leafSize = if (isCurrent d._id) then (leafSize * 2) else leafSize
+            _leafSize = if (isCurrent d._id) then (LEAF_SIZE * 2) else LEAF_SIZE
             pattern   = d3Defs.append 'svg:pattern'
             pattern.attr
                 id           : "pattern#{d._id}"
@@ -110,11 +173,6 @@
                 leafs[i]._shouldDisplayName = yes if leafs[i]?
             do d3Update
 
-        worker.addEventListener 'message', (event) =>
-            switch event.data.type
-                when 'update'
-                    register event.data.data.leafs, event.data.data.edges
-
         d3Update = =>
             d3Graph.linkDistance(100).nodes(leafs).links(edges).start()
             # Calculate the maximum link's weight
@@ -124,19 +182,20 @@
             # Calculate the size according the maximum node's weight value
             opacityScale  = d3.scale.linear().range([0.2, 1]).domain([2, maxLinkWeight])
             # Calculate opacity according the maximum link's weight value
-            sizeScale     = d3.scale.linear().range([leafSize, 40]).domain([1, maxNodeWeight])
+            sizeScale     = d3.scale.linear().range([LEAF_SIZE, 40]).domain([1, maxNodeWeight])
             # Calculate the link distance according theire weights
             linkDistance  = (d)-> 100 + sizeScale(d.target.weight + d.source.weight)
             # Calculate the class of the given leaf name
-            leafNameClass = (d)-> if sizeScale(d.weight) > leafSize then "leaf-name" else "leaf-name leaf-name--small"
+            leafNameClass = (d)-> if sizeScale(d.weight) > LEAF_SIZE then "leaf-name" else "leaf-name leaf-name--small"
             getGradID     = (d)-> "linkGrad-" + d.source._id + "-" + d.target._id
             getArrowID    = (d)-> "linkArrow-" + d.source._id + "-" + d.target._id
             sourceColor   = (d)-> typeColor(d.source)
             targetColor   = (d)-> typeColor(d.target)
+
             # Use a scale to calculate the distance
             d3Graph.linkDistance(linkDistance)
 
-            d3Grads = d3Grads.data(d3Graph.links(), getGradID)
+            d3Grads = d3Grads.data d3Graph.links()
             # stretch to fit
             d3Grads.enter().append("linearGradient").attr("id", getGradID ).attr "gradientUnits", "userSpaceOnUse"
             # erase any existing <stop> elements on update
@@ -155,8 +214,8 @@
                         refX : 15
                         refY : -1.5
                         fill: (d)-> typeColor(d.target)
-                        markerWidth : leafSize
-                        markerHeight : leafSize
+                        markerWidth : LEAF_SIZE
+                        markerHeight : LEAF_SIZE
                         orient : "auto"
                     .style 'opacity', (d)-> opacityScale d.source.weight + d.target.weight
                     .append 'path'
@@ -170,7 +229,7 @@
                 .insert 'svg:path', 'circle'
                 .attr 'class', 'edge'
                 .attr 'd', edgeUpdate
-                .attr 'marker-end', (d)-> if d.target._type isnt aggregationType then 'url(' + absUrl + '#' + getArrowID(d) + ')' else ''
+                .attr 'marker-end', (d)-> if d.target._type isnt AGGREGATION_TYPE then 'url(' + absUrl + '#' + getArrowID(d) + ')' else ''
                 .style 'stroke', (d)->  "url(" + absUrl + "#" + getGradID(d) + ")"
                 .style 'stroke-opacity', (d)->  opacityScale d.source.weight + d.target.weight
 
@@ -187,25 +246,8 @@
                 .call d3Drag
             # Remove old leafs
             d3Leafs.exit().remove()
-
-            # Display name on hover
-            d3Leafs.on 'mouseenter', (d)-> d3Svg.select(".leaf-name[data-id='#{d._id}']").attr("class", "leaf-name")
-            d3Leafs.on 'mouseleave', (d)-> d3Svg.select(".leaf-name[data-id='#{d._id}']").attr("class", leafNameClass)
-            d3Leafs.on 'click', (d)->
-                # Check if we're dragging the leaf
-                return if d3.event.defaultPrevented
-                # Check if we clicked on a aggregation bubble
-                if d._type is aggregationType
-                    worker.postMessage
-                        type : 'get_from_leaf'
-                        data : d
-                else
-                    $location.path "/#{$stateParams.username}/#{$stateParams.topic}/#{do d._type.toLowerCase}/#{d._id}"
-                    # We're in a d3 callback so we need to manually $apply the scope
-                    do scope.$apply
-
             # Create all new labels
-            d3Labels = (d3Svg.selectAll '.leaf-name-wrapper').data leafs, (d)-> d._id
+            d3Labels = d3Svg.selectAll('.leaf-name-wrapper').data leafs, (d)-> d._id
             d3Labels.enter()
                 .append('svg:foreignObject')
                     .attr "class", "leaf-name-wrapper"
@@ -218,22 +260,18 @@
                         .text (d)-> d.name
                         .attr 'class', leafNameClass
                         .attr 'data-id', (d)-> d._id
+
             # Remove old labels
             d3Labels.exit().remove()
+            # Pre-calculate positions
             do d3Graph.start
             for i in [0..100] then do d3Graph.tick
             do d3Graph.stop
+            # Display name on hover
+            d3Leafs.on 'mouseenter', leafEnter
+            d3Leafs.on 'mouseleave', leafLeave(leafNameClass)
+            d3Leafs.on 'click',      leafClick
 
-        d3Graph.on 'tick', =>
-            d3Leafs.each (d)->
-                d.x = Math.max leafSize, (Math.min svgSize[0] - leafSize, d.x)
-                d.y = Math.max leafSize, (Math.min svgSize[1] - leafSize, d.y)
-                null
-            d3Edges.attr 'd', edgeUpdate
-            d3Leafs.attr 'transform', leafUpdate
-            d3Labels.attr 'transform', leafUpdate
-            do d3GradsPosition
-
-        # Update graph when there is some data
-        scope.$watch 'data', => do update if scope.data
+        # Everything is declared, let's go!
+        do init
 ]

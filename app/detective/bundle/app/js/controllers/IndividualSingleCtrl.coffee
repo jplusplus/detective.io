@@ -37,7 +37,7 @@ class window.IndividualSingleCtrl
         @scope.embedUrl       = @location.absUrl()
         @scope.embedUrl       = @scope.embedUrl.replace @location.url(), "/embed" + @location.url()
         @scope.embedUrl       = @scope.embedUrl.replace "/network", ""
-        @scope.embedCode      = "<iframe src=\"#{@scope.embedUrl}\" width=\"100%\" height=\"500\"></iframe>"
+        @scope.embedCode      = "<iframe src=\"#{@scope.embedUrl}\" width=\"100%\" height=\"500\" frameborder=\"0\" allowfullscreen></iframe>"
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────

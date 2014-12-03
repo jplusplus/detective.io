@@ -154,11 +154,14 @@
             d3.select(@).classed("fixed", d.fixed = yes)
 
         leafDragend = (d)->
-            do d3Graph.start
-            for i in [0..100] then do d3Graph.tick
-            do d3Graph.stop
+            do forceTick
             # Then save the leaf position
             saveLeafPosition d
+
+        forceTick = ->
+            do d3Graph.start
+            for i in [0..Math.min(70, leafs.length*10)] then do d3Graph.tick
+            do d3Graph.stop
 
         graphTick =  ()->
             d3Leafs.each (d)->
@@ -229,10 +232,11 @@
                     # Extract its position
                     leafs[i].x = leafs[i].px = savedPosition[ do getContext ].x * svgSize[0]
                     leafs[i].y = leafs[i].py = savedPosition[ do getContext ].y * svgSize[1]
-                else if isCurrent leafs[i]._id
-                    # Fix the node too
-                    leafs[i].fixed = yes
-                    # Move the node at the center
+                else
+                    if isCurrent leafs[i]._id
+                        # Fix the current node too (it will stay at the center)
+                        leafs[i].fixed = yes
+                    # Move every node at the center
                     leafs[i].x = leafs[i].px = svgSize[0]/2
                     leafs[i].y = leafs[i].py = svgSize[1]/2
             do d3Update
@@ -330,9 +334,7 @@
             # Remove old labels
             d3Labels.exit().remove()
             # Pre-calculate positions
-            do d3Graph.start
-            for i in [0..100] then do d3Graph.tick
-            do d3Graph.stop
+            do forceTick
             # Display name on hover
             d3Leafs.on 'mouseenter', leafEnter
             d3Leafs.on 'mouseleave', leafLeave(leafNameClass)

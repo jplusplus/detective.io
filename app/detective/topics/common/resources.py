@@ -5,11 +5,9 @@ from app.detective.exceptions         import UnavailableImage, NotAnImage, Overs
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
                                              Subscription, TopicDataSet
-from app.detective.utils              import get_registered_models, \
-                                             get_topics_from_requestwithout, \
-                                             is_valid_email, get_registered_models, \
-                                             get_topics_from_request, is_valid_email, \
-                                             download_urls
+from app.detective.utils              import get_registered_models, without, \
+                                             is_valid_email, \
+                                             get_topics_from_request
 from app.detective.topics.common.user import UserResource, UserNestedResource
 from django.conf                      import settings
 from django.conf.urls                 import url

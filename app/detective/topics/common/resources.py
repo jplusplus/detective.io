@@ -32,8 +32,6 @@ from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
 from tastypie.utils                   import trailing_slash
 from tastypie.validation              import Validation
-from easy_thumbnails.files            import get_thumbnailer
-from easy_thumbnails.exceptions       import InvalidImageFormatError
 from django.db.models                 import Q
 from django.contrib.auth.models       import Group
 

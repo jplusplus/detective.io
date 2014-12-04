@@ -229,11 +229,22 @@
                     edges : edges
 
         register = (new_leafs=[], new_edges=[])=>
-            leafs = new_leafs
-            edges = new_edges
+            leafs   = new_leafs
+            edges   = new_edges
+            popularities = {}
+
             for edge in edges
                 for key in ['source', 'target']
                     edge[key] = _.findWhere leafs, _id : edge[key]._id
+                # We calculate the popularity of each link.
+                # Each popularity is calculated according the source and the target
+                weightKey = edge.source._id + "-" + edge.target._id
+                popularities[weightKey] = 0 unless popularities[weightKey]?
+                popularities[weightKey]++
+            # Apply the popularity to every edge 
+            for edge in edges
+                edge.popularity = popularities[edge.source._id + "-" + edge.target._id]
+
             for leaf, i in leafs
                 savedPosition = getLeafPosition leafs[i]
                 # Has a position in this context?
@@ -256,10 +267,14 @@
             d3Graph.linkDistance(100).nodes(leafs).links(edges).start()
             # Calculate the maximum link's weight
             maxLinkWeight = d3.max d3Graph.links(), (d)-> d.source.weight + d.target.weight
+            # Calculate the maximum link's populqrity
+            maxLinkPopularity = d3.max d3Graph.links(), (d)-> d.popularity
             # Calculate the maximum node's weight
             maxNodeWeight = d3.max d3Graph.nodes(), (d)-> d.weight
             # Calculate the size according the maximum node's weight value
             opacityScale  = d3.scale.linear().range([0.2, 1]).domain([2, maxLinkWeight])
+            # Calculate the size of the links according the maximum link's popularity value
+            linkScale  = d3.scale.linear().range([1, 5]).domain([1, maxLinkPopularity])
             # Calculate opacity according the maximum link's weight value
             sizeScale     = d3.scale.linear().range([LEAF_SIZE, 40]).domain([1, maxNodeWeight])
             # Calculate the link distance according theire weights
@@ -318,6 +333,7 @@
                 .attr 'marker-end', (d)-> if d.target._type isnt AGGREGATION_TYPE then 'url(' + absUrl + '#' + getArrowID(d) + ')' else ''
                 .style 'stroke', (d)->  "url(" + absUrl + "#" + getGradID(d) + ")"
                 .style 'stroke-opacity', (d)->  opacityScale d.source.weight + d.target.weight
+                .style 'stroke-width', (d)->  linkScale d.popularity
 
             # Remove old edges
             d3Edges.exit().remove()

@@ -275,10 +275,13 @@
             opacityScale  = d3.scale.linear().range([0.2, 1]).domain([2, maxLinkWeight])
             # Calculate the size of the links according the maximum link's popularity value
             linkScale  = d3.scale.linear().range([1, 5]).domain([1, maxLinkPopularity])
+            # Size of the arrow according the size of the link
+            arrowScale = (pop)-> Math.max( LEAF_SIZE, 2 * linkScale(pop) )
             # Calculate opacity according the maximum link's weight value
             sizeScale     = d3.scale.linear().range([LEAF_SIZE, 40]).domain([1, maxNodeWeight])
             # Calculate the link distance according theire weights
             linkDistance  = (d)-> 100 + sizeScale(d.target.weight + d.source.weight)
+
             # Calculate the class of the given leaf name
             getGradID     = (d)-> "linkGrad-" + d.source._id + "-" + d.target._id
             getArrowID    = (d)-> "linkArrow-" + d.source._id + "-" + d.target._id
@@ -311,16 +314,16 @@
                     .attr
                         id : getArrowID
                         class: 'arrow'
-                        viewBox : "0 -5 10 10"
-                        refX : 15
-                        refY : -1.5
+                        viewBox: "0 -#{LEAF_SIZE/2} #{LEAF_SIZE} #{LEAF_SIZE}"  
+                        refX: LEAF_SIZE
+                        refY: 0
                         fill: (d)-> typeColor(d.target)
                         markerWidth : LEAF_SIZE
-                        markerHeight : LEAF_SIZE
+                        markerHeight : LEAF_SIZE/2
                         orient : "auto"
                     .style 'opacity', (d)-> opacityScale d.source.weight + d.target.weight
                     .append 'path'
-                        .attr 'd', "M0,-5L10,0L0,5"
+                        .attr 'd', "M0,-#{LEAF_SIZE/2}L#{LEAF_SIZE},0L0,#{LEAF_SIZE/2}"
 
             # Create all new edges
             d3Edges = d3Svg.selectAll('.edge').data edges, (d)->

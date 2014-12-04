@@ -46,7 +46,6 @@
             # User events
             d3Drag.on "dragstart", leafDragstart
             d3Drag.on "dragend", leafDragend
-            d3Graph.on 'tick', graphTick
             # The worker send new data
             worker.addEventListener 'message', workerMessage
             # Update graph when there is some data
@@ -120,11 +119,12 @@
         isCurrent = (id)=>
             parseInt($stateParams.id) is parseInt(id)
 
-        edgeUpdate = (d)->
-            datumX = d.target.x - d.source.x
-            datumY = d.target.y - d.source.y
-            datumR = Math.sqrt (datumX * datumX + datumY * datumY)
-            "M#{d.source.x},#{d.source.y}A#{datumR},#{datumR} 0 0,1 #{d.target.x},#{d.target.y}"
+        edgeUpdate = (scale)->
+            (d)->
+                dx = d.target.x - d.source.x
+                dy = d.target.y - d.source.y
+                dr = Math.sqrt(dx * dx + dy * dy)
+                "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y
 
         leafUpdate = (d)-> "translate(#{d.x}, #{d.y})"
 
@@ -174,15 +174,16 @@
             for i in [0..Math.min(70, leafs.length*10)] then do d3Graph.tick
             do d3Graph.stop
 
-        graphTick =  ()->
-            d3Leafs.each (d)->
-                d.x = Math.max LEAF_SIZE, (Math.min svgSize[0] - LEAF_SIZE, d.x)
-                d.y = Math.max LEAF_SIZE, (Math.min svgSize[1] - LEAF_SIZE, d.y)
-                null
-            d3Edges.attr 'd', edgeUpdate
-            d3Leafs.attr 'transform', leafUpdate
-            d3Labels.attr 'transform', leafUpdate
-            do d3GradsPosition
+        graphTick =  (scale)->
+            ->
+                d3Leafs.each (d)->
+                    d.x = Math.max LEAF_SIZE, (Math.min svgSize[0] - LEAF_SIZE, d.x)
+                    d.y = Math.max LEAF_SIZE, (Math.min svgSize[1] - LEAF_SIZE, d.y)
+                    null
+                d3Edges.attr 'd', edgeUpdate(scale)
+                d3Leafs.attr 'transform', leafUpdate
+                d3Labels.attr 'transform', leafUpdate
+                do d3GradsPosition
 
         createPattern = (d, d3Defs)->
             _leafSize = if (isCurrent d._id) then (LEAF_SIZE * 2) else LEAF_SIZE
@@ -332,7 +333,7 @@
             d3Edges.enter()
                 .insert 'svg:path', 'circle'
                 .attr 'class', 'edge'
-                .attr 'd', edgeUpdate
+                .attr 'd', edgeUpdate(sizeScale)
                 .attr 'marker-end', (d)-> if d.target._type isnt AGGREGATION_TYPE then 'url(' + absUrl + '#' + getArrowID(d) + ')' else ''
                 .style 'stroke', (d)->  "url(" + absUrl + "#" + getGradID(d) + ")"
                 .style 'stroke-opacity', (d)->  opacityScale d.source.weight + d.target.weight
@@ -368,6 +369,8 @@
                         .text (d)-> d.name
                         .attr 'class', leafNameClass
                         .attr 'data-id', (d)-> d._id
+
+            d3Graph.on 'tick', graphTick(sizeScale)
             # Remove old labels
             d3Labels.exit().remove()
             # Pre-calculate positions

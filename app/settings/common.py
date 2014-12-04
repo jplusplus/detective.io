@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
+from os.path import dirname
 import os
 # for relative paths
-here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
+root = lambda x: os.path.join(os.path.abspath( dirname(dirname(__file__))), x)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -11,7 +12,7 @@ TASTYPIE_FULL_DEBUG = DEBUG
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 # Custom data directory
-DATA_ROOT = here('../data')
+DATA_ROOT = root('data')
 
 ADMINS = (
     ('Pierre Romera', 'hello@pirhoo.com'),
@@ -66,7 +67,7 @@ USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = here('../media')
+MEDIA_ROOT = root('media')
 
 UPLOAD_ROOT = os.path.join(MEDIA_ROOT, 'upload')
 
@@ -84,7 +85,7 @@ MEDIA_URL = '/public/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = here('../staticfiles')
+STATIC_ROOT = root('staticfiles')
 
 LOGIN_URL = "/admin"
 # URL prefix for static files.
@@ -93,9 +94,9 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    ('custom_d3',  here('../static/custom_d3') ),
-    ('components', here("../detective/bundle/app/components/") ),
-    here("../detective/bundle/.build/"),
+    ('custom_d3',  root('static/custom_d3') ),
+    ('components', root("detective/bundle/app/components/") ),
+    root("detective/bundle/.build/"),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -158,8 +159,8 @@ ROOT_URLCONF = 'app.urls'
 WSGI_APPLICATION = 'app.wsgi.application'
 
 TEMPLATE_DIRS = (
-    here('../detective/templates'),
-    here('../detective/bundle/app/templates'),
+    root('detective/templates'),
+    root('detective/bundle/app/templates'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.

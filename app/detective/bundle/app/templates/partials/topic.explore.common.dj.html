@@ -66,7 +66,7 @@
                     </form>
                     <div class="col-md-8 col-md-push-2 lead top20" ng-if="types">
                         Navigate through
-                        <span ng-repeat="form in filtered = ( forms | filter:isSearchable | orderBy:'index' )">
+                        <span ng-repeat="form in filtered = ( forms | filter:isSearchable )">
                             <span ng-if="$last && !$first"> and </span>
                             <span ng-if="!$last && !$first">, </span>
                             <a ng-href="/[[username]]/[[topic]]/[[form.name]]" ng-init="count = getTypeCount(form.name)">

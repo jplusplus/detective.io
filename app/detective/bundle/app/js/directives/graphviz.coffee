@@ -1,6 +1,6 @@
 (angular.module 'detective.directive').directive "graphviz", ['$filter', '$stateParams', '$state', '$location', '$window',  'localStorageService', ($filter, $stateParams, $state, $location, $window, localStorageService)->
     restrict: "AE"
-    template: "<div></div>"
+    templateUrl: "partial/graphviz.html"
     replace : yes
     scope   :
         data: '='
@@ -36,7 +36,7 @@
             # The SVG size follows its container
             svgSize = [ element.width(), element.height() ]
             # D3 elements instancies
-            d3Svg = d3.select(element[0]).append('svg').attr("class", "graphviz")
+            d3Svg = d3.select(element[0]).append('svg')
             d3Defs = d3Svg.insert 'svg:defs', 'path'
             d3Graph = d3.layout.force().size(svgSize).charge(-300)
             d3Drag = d3Graph.drag()

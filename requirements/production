@@ -1,6 +1,6 @@
 -r common
 boto==2.9.6
-distribute==0.6.31
+#distribute==0.6.35
 dj-database-url==0.2.1
 django-pylibmc-sasl==0.2.4
 django-sslify==0.2.3

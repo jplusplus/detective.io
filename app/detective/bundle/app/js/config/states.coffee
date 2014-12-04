@@ -186,6 +186,11 @@ angular.module('detective.config').config [
                 # Allow a dynamic loading by setting the templateUrl within controller
                 template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
             )
+            .state('user-topic.network',
+                url: "network/"
+                # Allow a dynamic loading by setting the templateUrl within controller
+                template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
+            )
             .state('user-topic-edit',
                 url: "/:username/:topic/edit/"
                 controller: EditTopicCtrl
@@ -203,14 +208,6 @@ angular.module('detective.config').config [
                     topic: UserTopicCtrl.resolve.topic
                 auth: true
                 owner: true
-            )
-            .state('user-topic-graph',
-                url: "/:username/:topic/graph/"
-                controller: ExploreCtrl
-                resolve:
-                    topic: UserTopicCtrl.resolve.topic
-                # Allow a dynamic loading by setting the templateUrl within controller
-                template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
             )
             .state('user-topic-invite',
                 url: "/:username/:topic/invite/"
@@ -273,5 +270,9 @@ angular.module('detective.config').config [
                     topic: UserTopicCtrl.resolve.topic
                     forms: UserTopicCtrl.resolve.forms
                     individual: UserTopicCtrl.resolve.individual
+            )
+            .state('user-topic-detail.network',
+                url: 'network/'
+                templateUrl: "/partial/topic.single.network.html"
             )
 ]

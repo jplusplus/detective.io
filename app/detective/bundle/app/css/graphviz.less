@@ -1,0 +1,81 @@
+.graphviz {
+
+    background: url("@{staticPath}img/graph.png");
+    color: white;
+
+    &__alert {
+        position:absolute;
+        top:50%;
+        left:50%;
+        .translate(-50%, -50%);        
+    }
+
+    .leaf {
+        stroke: white;
+        stroke-width: 0;
+        cursor: pointer;
+        fill: lighten(@body-bg, 20%);
+
+        &:hover {
+            stroke-width: 1.5px;
+        }
+    }
+
+    .edge {
+        fill: none;
+        stroke: white;
+        stroke-width: 1.5px;
+    }
+
+    .arrow {
+        stroke-width: 0px;
+    }
+
+
+
+    .leaf-name-wrapper {
+        position:relative;
+        pointer-events: none;
+        text-align: center;
+    }
+
+    .leaf-name {
+        display: inline-block;
+        text-align: center;
+        font: @font-family-base;
+        color:@text-color;
+        background:white;
+        padding:2px;
+        border-radius: 2px;
+        font-size:0.7em;
+        white-space: nowrap;
+        .box-shadow(0 0 5px 0 @brand-secondary);
+        .transition(0.4s);
+
+        /*
+        position:absolute;
+        bottom:10px;
+        left:50%;
+        .translate(-50%, 0);
+
+        &:after {
+            content:"";
+            position: absolute;
+            top:100%;
+            left:50%;
+            border:10px solid transparent;
+            border-top-color:white;
+            .translate(-50%, -10%);
+        }
+        */
+
+        &--small {
+            opacity:0;
+        }
+
+        &--current {
+            font-weight: bold;
+            font-size:0.8em;
+        }
+    }
+}

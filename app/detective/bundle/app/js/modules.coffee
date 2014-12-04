@@ -28,4 +28,5 @@ angular.module('detective', [
     'textAngular'
     'ui.router'
     'ui.validate'
+    'LocalStorageModule'
 ])

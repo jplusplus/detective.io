@@ -864,7 +864,7 @@ class IndividualResource(ModelResource):
     def get_graph(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
-        depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
+        depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 2
         topic = Topic.objects.get(ontology_as_mod=get_model_topic(self.get_model()))
         leafs, edges = get_leafs_and_edges(
             topic     = topic,

@@ -49,8 +49,9 @@ def default_social_meta(request):
         "url": request.build_absolute_uri()
     }
 
-@gzip_page
+# @gzip_page
 def home(request, social_meta_dict=None,**kwargs):
+    print "home"
     if social_meta_dict == None:
         social_meta_dict = default_social_meta(request)
 
@@ -70,6 +71,13 @@ def home(request, social_meta_dict=None,**kwargs):
         response.delete_cookie("user__is_staff")
         response.delete_cookie("user__username")
     return response
+
+# @gzip_page
+def embed(request, social_meta_dict=None,**kwargs):
+    print "embed"
+    if social_meta_dict == None: social_meta_dict = default_social_meta(request)
+    # Render template without any argument
+    return render_to_response('embed.dj.html', { 'meta': social_meta_dict, 'debug': settings.DEBUG } )
 
 def entity_list(request, **kwargs):
     def __entity_type_name(entity_klass):

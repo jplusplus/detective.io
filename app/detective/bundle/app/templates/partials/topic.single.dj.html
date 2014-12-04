@@ -1,7 +1,6 @@
-<div id="individual-single">
+<div id="individual-single" class="topic__single">
 
 	<div class="front" ng-style="frontStyle(type)">
-
 		<div class="front__bands"></div>
 
 		<div class="container">
@@ -9,7 +8,7 @@
 				<div class="pull-left">
 					<div color-tag ref="type"></div>
 				</div>
-				<h2 class="bottom0 top0 left60">[[individual|individualPreview:"unknown"]]</h2>
+				<h2 class="bottom0 top0">[[individual|individualPreview:"unknown"]]</h2>
 				<div class="front__heading__meta">
 					<a ng-href="/[[username]]/[[topic]]/[[type]]">
 						<i class="fa fa-tags"></i> [[meta.verbose_name]]
@@ -17,151 +16,165 @@
 					<span sources-popover sources-list="nameSources"></span>
 				</div>
 			</div>
-
-			<div ng-show="hasNetwork()" class="front__network">
-				<graphviz data="graphnodes" topic="topic"></graphviz>
-			</div>
 		</div>
 
+		<div class="front__tabs">
+			<div class="container">
+				<ul class="list-inline">
+					<li class="front__tabs__tab" ui-sref-active-eq="active">
+						<a ui-sref="user-topic-detail">
+							Details
+						</a>
+					</li>
+					<li class="front__tabs__tab"  ui-sref-active-eq="active">
+						<a ui-sref="user-topic-detail.network">
+							Network
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
 	</div>
 
-	<div class="container">
+	<div ui-view autoscroll>
+		<div class="container topic__single__detail">
 
-		<div class="row">
+			<div class="row">
 
-			<div class="col-md-4 col-md-push-8">
-				<div class="panel panel-default padding10 text-right">
-					<span class="btn-group pull-left">
-						<a class="btn btn-default"
-						   ng-if="user.hasChangePermission(topicmeta.ontology_as_mod)"
-						   ng-href="/[[username]]/[[topic]]/contribute/?type=[[type]]&amp;id=[[individual.id]]">
-							<i class="fa fa-edit"></i>
-							Edit
-						</a>
-						<a class="btn btn-default"
-						   ng-if="!user.hasChangePermission(topicmeta.ontology_as_mod)"
-						   ng-href="[[ mailReportLink() ]]"
-						   rel="external"
-						   target="_blank">
-							<i class="fa fa-flag"></i>
-							Report an error
-						</a>
+				<div class="col-md-4 col-md-push-8">
+					<div class="panel panel-default padding10 text-right">
+						<span class="btn-group pull-left">
+							<a class="btn btn-default"
+							   ng-if="user.hasChangePermission(topicmeta.ontology_as_mod)"
+							   ng-href="/[[username]]/[[topic]]/contribute/?type=[[type]]&amp;id=[[individual.id]]">
+								<i class="fa fa-edit"></i>
+								Edit
+							</a>
+							<a class="btn btn-default"
+							   ng-if="!user.hasChangePermission(topicmeta.ontology_as_mod)"
+							   ng-href="[[ mailReportLink() ]]"
+							   rel="external"
+							   target="_blank">
+								<i class="fa fa-flag"></i>
+								Report an error
+							</a>
 
-						<a class="btn btn-default"
-						   ng-if="user.hasDeletePermission(topicmeta.ontology_as_mod)"
-						   ng-click="deleteNode()">
-							<i class="fa fa-trash-o"></i>
-						</a>
-					</span>
-					<span class="btn-group">
-						<a class="btn btn-default" target="_blank" ng-href="/api/[[username]]/[[topic]]/v1/[[type]]/[[individual.id]]/?format=json">
-							<i class="fa fa-download"></i>
-							JSON
-						</a>
-					</span>
-				</div>
+							<a class="btn btn-default"
+							   ng-if="user.hasDeletePermission(topicmeta.ontology_as_mod)"
+							   ng-click="deleteNode()">
+								<i class="fa fa-trash-o"></i>
+							</a>
+						</span>
+						<span class="btn-group">
+							<a class="btn btn-default" target="_blank" ng-href="/api/[[username]]/[[topic]]/v1/[[type]]/[[individual.id]]/?format=json">
+								<i class="fa fa-download"></i>
+								JSON
+							</a>
+						</span>
+					</div>
 
-				<div ng-show="hasRels()">
-					<h3>Jump to...</h3>
-					<div class="panel panel-default padding10">
-						<ul class="nav nav-pills nav-stacked">
-						 	<li ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)">
-						 		<a ng-click="scrollTo('rels-' + field.name)">
-						 			[[field.verbose_name]]
-						 		</a>
-						 	</li>
-						</ul>
+					<div ng-show="hasRels()">
+						<h3>Jump to...</h3>
+						<div class="panel panel-default padding10">
+							<ul class="nav nav-pills nav-stacked">
+							 	<li ng-repeat="field in meta.fields|filter:isRelationship" ng-show="get(field.name)">
+							 		<a ng-click="scrollTo('rels-' + field.name)">
+							 			[[field.verbose_name]]
+							 		</a>
+							 	</li>
+							</ul>
+						</div>
+					</div>
+
+					<div ng-show="authors && authors.length">
+						<span class="label label-default pull-right top05" title="Only the owner of this data collection can see this list.">Not public</span>
+						<h3>Authors</h3>
+						<div class="panel panel-default">
+							<ul class="list-unstyled">
+								<li ng-repeat="author in authors" class="clearfix padding10">
+									<img ng-src="[[author.profile.avatar]]" width="35" height="35" class="img-circle pull-left right10" />
+									<a ui-sref="user({username: author.username})">
+										[[author.username]]
+									</a>
+								</li>
+							</ul>
+						</div>
 					</div>
 				</div>
 
-				<div ng-show="authors && authors.length">
-					<span class="label label-default pull-right top05" title="Only the owner of this data collection can see this list.">Not public</span>
-					<h3>Authors</h3>
+				<div class="col-md-8 col-md-pull-4">
 					<div class="panel panel-default">
-						<ul class="list-unstyled">
-							<li ng-repeat="author in authors" class="clearfix padding10">
-								<img ng-src="[[author.profile.avatar]]" width="35" height="35" class="img-circle pull-left right10" />
-								<a ui-sref="user({username: author.username})">
-									[[author.username]]
-								</a>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
 
-			<div class="col-md-8 col-md-pull-4">
-				<div class="panel panel-default">
-
-					<div class="panel-body">
-						<table class="table table-striped">
-							<tbody>
-							 	<tr ng-repeat="field in meta.fields|filter:isLiteral|filter:hasValue"
-					 		  		ng-init='fieldSources=getSources(field)'>
-							 		<td class="field-name" ng-if="!isMono(field)" width="10%">
-							 			<strong>[[field.verbose_name]]</strong>
-							 		</td>
-							 		<td ng-if="!isMono(field)" width="80%">
-							 			<span ng-bind="get(field.name) | date:'longDate'" ng-if="field.type == 'DateTimeField'"></span>
-							 			<span ng-bind="get(field.name)" ng-if="!isString(field.type) && field.type != 'DateTimeField'
-							 																	     && field.type != 'BooleanField'"></span>
-							 			<span ng-if="isString(field.type) && field.name != 'imageURL'" ng-switch on="isUrl(field.type)">
-							 				<span ng-switch-when="true" ng-switch on="isOEmbed(field)">
-							 					<span ng-switch-when="true">
-							 						<ng-embedly href="get(field.name)"></ng-embedly>
-							 					</span>
-							 					<span ng-switch-default ng-bind-html="get(field.name) | linky:'_blank'"></span>
-							 				</span>
-							 				<span ng-switch-default ng-switch on="isRich(field)">
-									 			<span ng-switch-when="true" ng-bind-html="getTrusted(field.name)"></span>
-									 			<span ng-switch-default ng-bind-html="get(field.name) | linky:'_blank'"></span>
-									 		</span>
-							 			</span>
-							 			<span ng-if="isBoolean(field.type)" ng-bind-html="get(field.name, false) | yesorno | titlecase">
-							 			</span>
-							 		</td>
-						 			<td ng-if="isMono(field) && get(field.name)" colspan="3" width="100%">
-						 				<div ng-if="isAddr(field) || isGeoloc(field)">
+						<div class="panel-body">
+							<table class="table table-striped">
+								<tbody>
+								 	<tr ng-repeat="field in meta.fields|filter:isLiteral|filter:hasValue"
+						 		  		ng-init='fieldSources=getSources(field)'>
+								 		<td class="field-name" ng-if="!isMono(field)" width="10%">
 								 			<strong>[[field.verbose_name]]</strong>
-								 			<a class="map" ng-href="https://www.google.fr/maps/?q=[[get(field.name)]]" target="_blank">
-								 				<span class="lab">
-								 					[[get(field.name)]]
+								 		</td>
+								 		<td ng-if="!isMono(field)" width="80%">
+								 			<span ng-bind="get(field.name) | date:'longDate'" ng-if="field.type == 'DateTimeField'"></span>
+								 			<span ng-bind="get(field.name)" ng-if="!isString(field.type) && field.type != 'DateTimeField'
+								 																	     && field.type != 'BooleanField'"></span>
+								 			<span ng-if="isString(field.type) && field.name != 'imageURL'" ng-switch on="isUrl(field.type)">
+								 				<span ng-switch-when="true" ng-switch on="isOEmbed(field)">
+								 					<span ng-switch-when="true">
+								 						<ng-embedly href="get(field.name)"></ng-embedly>
+								 					</span>
+								 					<span ng-switch-default ng-bind-html="get(field.name) | linky:'_blank'"></span>
 								 				</span>
-								 				<img ng-src="http://maps.googleapis.com/maps/api/staticmap?markers=color:0xFBD154|[[get(field.name)]]&amp;zoom=13&amp;size=640x300&amp;maptype=roadmap&amp;sensor=false&amp;visual_refresh=true" />
-								 			</a>
-								 		</div>
-						 				<div ng-if="isImg(field)" class="img-preview">
-						 					<img ng-src="[[get(field.name)]]" class="pull-left img-responsive" />
-						 				</div>
-						 			</td>
-						 			<td class="field-source text-right" ng-if="!isMono(field)" width="10%">
-			 							<div sources-popover sources-list='fieldSources'></div>
-						 			</td>
-							 	</tr>
-							 </tbody>
-						</table>
+								 				<span ng-switch-default ng-switch on="isRich(field)">
+										 			<span ng-switch-when="true" ng-bind-html="getTrusted(field.name)"></span>
+										 			<span ng-switch-default ng-bind-html="get(field.name) | linky:'_blank'"></span>
+										 		</span>
+								 			</span>
+								 			<span ng-if="isBoolean(field.type)" ng-bind-html="get(field.name, false) | yesorno | titlecase">
+								 			</span>
+								 		</td>
+							 			<td ng-if="isMono(field) && get(field.name)" colspan="3" width="100%">
+							 				<div ng-if="isAddr(field) || isGeoloc(field)">
+									 			<strong>[[field.verbose_name]]</strong>
+									 			<a class="map" ng-href="https://www.google.fr/maps/?q=[[get(field.name)]]" target="_blank">
+									 				<span class="lab">
+									 					[[get(field.name)]]
+									 				</span>
+									 				<img ng-src="http://maps.googleapis.com/maps/api/staticmap?markers=color:0xFBD154|[[get(field.name)]]&amp;zoom=13&amp;size=640x300&amp;maptype=roadmap&amp;sensor=false&amp;visual_refresh=true" />
+									 			</a>
+									 		</div>
+							 				<div ng-if="isImg(field)" class="img-preview">
+							 					<img ng-src="[[get(field.name)]]" class="pull-left img-responsive" />
+							 				</div>
+							 			</td>
+							 			<td class="field-source text-right" ng-if="!isMono(field)" width="10%">
+				 							<div sources-popover sources-list='fieldSources'></div>
+							 			</td>
+								 	</tr>
+								 </tbody>
+							</table>
 
-					 	<div class="relationship"
-					 		  ng-repeat="field in meta.fields|filter:isRelationship|filter:hasValues"
-					 		  ng-init='fieldSources = getSources(field)'
-					 		  id="rels-[[field.name]]">
-					 		<h3>
-								<div color-tag ref="field.related_model" class="pull-left small right10" />
-					 			[[field.verbose_name]]
-					 			<div sources-popover sources-list='fieldSources'></div>
-					 		</h3>
+						 	<div class="relationship"
+						 		  ng-repeat="field in meta.fields|filter:isRelationship|filter:hasValues"
+						 		  ng-init='fieldSources = getSources(field)'
+						 		  id="rels-[[field.name]]">
+						 		<h3>
+									<div color-tag ref="field.related_model" class="pull-left small right10" />
+						 			[[field.verbose_name]]
+						 			<div sources-popover sources-list='fieldSources'></div>
+						 		</h3>
 
-					 		<ul class="list-inline">
-					 			<li ng-repeat="rel in get(field.name)">
-					 				<card ng-model="rel" parent="individual" field="field" topic="topic" username="username" type="field.related_model"></card>
-					 			</li>
-					 		</ul>
-					 	</div>
+						 		<ul class="list-inline">
+						 			<li ng-repeat="rel in get(field.name)">
+						 				<card ng-model="rel" parent="individual" field="field" topic="topic" username="username" type="field.related_model"></card>
+						 			</li>
+						 		</ul>
+						 	</div>
 
+						</div>
 					</div>
 				</div>
-			</div>
 
+			</div>
 		</div>
 	</div>
 </div>

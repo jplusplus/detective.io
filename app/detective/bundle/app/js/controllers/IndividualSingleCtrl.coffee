@@ -34,6 +34,10 @@ class window.IndividualSingleCtrl
         @scope.isLatitude     = (f) => ((do f.name.toLowerCase).indexOf 'latitude') >= 0
         @scope.isLongitude    = (f) => ((do f.name.toLowerCase).indexOf 'longitude') >= 0
         @scope.isGeoloc       = (f) => ((do f.name.toLowerCase).indexOf 'geolocation') >= 0
+        @scope.embedUrl       = @location.absUrl()
+        @scope.embedUrl       = @scope.embedUrl.replace @location.url(), "/embed" + @location.url()
+        @scope.embedUrl       = @scope.embedUrl.replace "/network", ""
+        @scope.embedCode      = "<iframe src=\"#{@scope.embedUrl}\" width=\"100%\" height=\"500\" frameborder=\"0\" allowfullscreen></iframe>"
         # ──────────────────────────────────────────────────────────────────────
         # Scope attributes
         # ──────────────────────────────────────────────────────────────────────

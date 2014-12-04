@@ -23,8 +23,8 @@
         <link rel="dns-prefetch" href="{% static '' %}">
         <link rel="icon" type="image/png" href="{% static 'img/favicon.ico' %}">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-        <link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
-        <link href="https://code.cdn.mozilla.net/fonts/fira.css" rel="stylesheet" type="text/css">
+        <link href="//fonts.googleapis.com/css?family=Noto+Sans:400,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+        <link href="//code.cdn.mozilla.net/fonts/fira.css" rel="stylesheet" type="text/css">
 
         {% block extracss %}{% endblock %}
         <base href="{% url 'home' %}">
@@ -82,6 +82,7 @@
             <script src="{% static 'components/ng-embedly/ng-embedly.js' %}"></script>
             <script src="{% static 'components/speakingurl/speakingurl.min.js' %}"></script>
             <script src="{% static 'components/angular-ui-utils/validate.js' %}"></script>
+            <script src="{% static 'components/angular-local-storage/dist/angular-local-storage.js' %}"></script>
             <!-- endbower -->
             <script src="{% static 'components/angulartics/dist/angulartics.min.js' %}"></script>
             <script src="{% static 'components/angulartics/dist/angulartics-ga.min.js' %}"></script>
@@ -91,11 +92,9 @@
     <body ng-cloak="" ng-class="{ 'is-home': $state.is('home.tour'), 'show-aside': Page.showAside  }">
         <div plan-overfill-displayer=""></div>
         <div http-error-displayer=""></div>
-        {% load cache %}
-        {% cache 3600 fullpage %}
-            {% block content %}{% endblock %}
-            {% block extrajs %}{% endblock %}
-        {% endcache %}
+
+        {% block content %}{% endblock %}
+        {% block extrajs %}{% endblock %}
 
         {% if debug %}
             <script src="http://localhost:35729/livereload.js"></script>

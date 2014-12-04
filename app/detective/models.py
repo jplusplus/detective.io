@@ -380,7 +380,7 @@ class Topic(models.Model):
                 model=subject["name"],
                 app=self.app_label()
             )
-            print query
+            
         # If the received identifier describe a literal value
         elif self.is_registered_relationship(predicate["name"]):
             fields        = utils.iterate_model_fields( all_models[predicate["subject"]] )

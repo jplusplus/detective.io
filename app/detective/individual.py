@@ -562,6 +562,12 @@ class IndividualResource(ModelResource):
 
         return cleaned_data
 
+
+    def obj_delete(self, bundle, **kwargs):    
+        super(IndividualResource, self).obj_delete(bundle, **kwargs)
+        # update the cache
+        topic_cache.incr_version(bundle.request.current_topic)
+
     def get_patch(self, request, **kwargs):
         pk = kwargs["pk"]
         # This should be a POST request

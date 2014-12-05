@@ -166,12 +166,12 @@
 
 					<div class="col-sm-6 individual__form__row__input">
 						<!-- Each type has its own input -->
-						<div ng-if="field.type == 'Relationship'" ng-include="'/partial/topic.contribute.type-relationship.html'"></div>
-						<div ng-if="field.type == 'URLField'" ng-include="'/partial/topic.contribute.type-url.html'"></div>
-						<div ng-if="field.type == 'DateTimeField'" ng-include="'/partial/topic.contribute.type-datetime.html'"></div>
-						<div ng-if="field.type == 'CharField'" ng-include="'/partial/topic.contribute.type-text.html'"></div>
-						<div ng-if="field.type == 'IntegerField'" ng-include="'/partial/topic.contribute.type-integer.html'"></div>
-						<div ng-if="field.type == 'BooleanField'" ng-include="'/partial/topic.contribute.type-boolean.html'"></div>
+						<div ng-if="field.type == 'Relationship'" ng-include="'/partial/main/user/topic/contribute/type-relationship/type-relationship.html'"></div>
+						<div ng-if="field.type == 'URLField'" ng-include="'/partial/main/user/topic/contribute/type-url/type-url.html'"></div>
+						<div ng-if="field.type == 'DateTimeField'" ng-include="'/partial/main/user/topic/contribute/type-datetime/type-datetime.html'"></div>
+						<div ng-if="field.type == 'CharField'" ng-include="'/partial/main/user/topic/contribute/type-text/type-text.html'"></div>
+						<div ng-if="field.type == 'IntegerField'" ng-include="'/partial/main/user/topic/contribute/type-integer/type-integer.html'"></div>
+						<div ng-if="field.type == 'BooleanField'" ng-include="'/partial/main/user/topic/contribute/type-boolean/type-boolean.html'"></div>
 					</div>
 
 					<div class="add-source col-sm-3 individual__form__row__source-btn">

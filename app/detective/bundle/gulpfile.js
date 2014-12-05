@@ -15,7 +15,7 @@ gulp.task('clean', function(cb) {
 
 
 gulp.task('less', function () {
-  return gulp.src('client/app/*/{base,embed}.less')
+  return gulp.src('client/app/*/{main,embed}.less')
     .pipe(
     	less({
       	paths: [ 
@@ -25,7 +25,7 @@ gulp.task('less', function () {
     	})
     	.on('error', gutil.log)
     )
-    .pipe(gulp.dest('.build/css/'));
+    .pipe(gulp.dest('.build/app/'));
 });
 
 gulp.task('coffee', function() {

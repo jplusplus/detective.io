@@ -18,7 +18,10 @@ gulp.task('less', function () {
   return gulp.src('client/app/*/{base,embed}.less')
     .pipe(
     	less({
-      	paths: [ path.join(__dirname, 'client/app') ]
+      	paths: [ 
+          path.join(__dirname, 'client/app'),
+          path.join(__dirname, 'client')
+        ]
     	})
     	.on('error', gutil.log)
     )

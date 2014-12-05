@@ -4,9 +4,9 @@ angular.module('detective.config').config [
         # HTML5 Mode yeah!
         $locationProvider.html5Mode true
         # Not found URL
-        $urlRouterProvider.otherwise("/embed/");
+        $urlRouterProvider.otherwise("/embed/");        
         # ui-router configuration
-        $stateProvider.state('node',
+        $stateProvider.state('entity',
             url: '/embed/:username/:topic/:type/:id/'
             controller: ['$scope', '$stateParams', 'individual', 'graphnodes', 'topic', 'Page'
                 ($scope, $stateParams, individual, graphnodes, topic, Page)->
@@ -21,7 +21,7 @@ angular.module('detective.config').config [
                 topic: UserTopicCtrl.resolve.topic
                 forms: UserTopicCtrl.resolve.forms
                 individual: UserTopicCtrl.resolve.individual
-                graphnodes: [ 'Individual', '$stateParams', (Individual, $stateParams)->
+                graphnodes: [ 'Individual', '$stateParams', (Individual, $stateParams)->                    
                     Individual.graph($stateParams).$promise
                 ]
         )

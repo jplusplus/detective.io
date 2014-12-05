@@ -268,6 +268,6 @@ angular.module('detective.config').config [
             )
             .state('user-topic-detail.network',
                 url: 'network/'
-                templateUrl: "/partial/main/topic/type/entity/network/network.html"
+                templateUrl: "/partial/main/user/topic/type/entity/network/network.html"
             )
 ]

@@ -8,7 +8,7 @@ angular.module('detective.directive').directive "card", ['Summary', 'Individual'
         type      : "="
         field     : "="
         parent    : "="
-    templateUrl: "/partial/topic.single.card.html"
+    templateUrl: "/partial/main/user/topic/type/entity/card/card.html"
     replace: true
     link: (scope, elm, attr) ->
         type = scope.type.toLowerCase()

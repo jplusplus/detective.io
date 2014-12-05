@@ -66,7 +66,7 @@ class window.AddCollaboratorsCtrl
 
     changePermission: (user) =>
         modal = @modal.open
-            templateUrl: '/partial/common.modal.html'
+            templateUrl: '/partial/components/modal/modal.html'
             controller: ['$scope', ($scope) =>
                 $scope.title = "Change the status of <strong>#{user.username}</strong> on the topic <strong>#{@topic.title}</strong>?"
                 $scope.buttons =
@@ -83,7 +83,7 @@ class window.AddCollaboratorsCtrl
 
     removeCollaborator: (user) =>
         modal = @modal.open
-            templateUrl: '/partial/common.modal.html'
+            templateUrl: '/partial/components/modal/modal.html'
             controller: ['$scope', ($scope) =>
                 $scope.title = "Remove <strong>#{user.username}</strong> from the collaborators of the topic <strong>#{@topic.title}</strong>?"
                 $scope.buttons =

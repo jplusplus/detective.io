@@ -22,30 +22,30 @@ angular.module('detective.config').config [
             .state('home.tour',
                 url: 'tour/?scrollTo'
                 controller: TourCtrl
-                templateUrl: '/partial/home.tour.html'
+                templateUrl: '/partial/main/home/tour/tour.html'
             )
             .state('home.dashboard',
                 controller: DashboardCtrl
-                templateUrl: '/partial/home.dashboard.html'
+                templateUrl: '/partial/main/home/dashboard/dashboard.html'
                 resolve: DashboardCtrl.resolve
                 auth: true
             )
             .state('404-page',
                 url: "/404/"
                 controller: NotFoundCtrl
-                templateUrl: '/partial/404.html'
+                templateUrl: '/partial/main/404/404.html'
             )
             .state('404',
                 controller: NotFoundCtrl
-                templateUrl: '/partial/404.html'
+                templateUrl: '/partial/main/404/404.html'
             )
             .state('403',
                 controller: NotFoundCtrl
-                templateUrl: '/partial/403.html'
+                templateUrl: '/partial/main/403/403.html'
             )
             .state('plans',
                 url: "/plans/"
-                templateUrl: '/partial/plans.html'
+                templateUrl: '/partial/main/plans/plans.html'
                 controller: ["Page", (Page) ->
                     Page.title "Paid plans"
                 ]
@@ -54,38 +54,38 @@ angular.module('detective.config').config [
             .state('activate',
                 url: "/account/activate/?token"
                 controller: UserCtrl
-                templateUrl: '/partial/account.activation.html'
+                templateUrl: '/partial/main/account/activation/activation.html'
             )
             .state('reset-password',
                 url: "/account/reset-password/?token"
                 controller: UserCtrl
-                templateUrl: '/partial/account.reset-password.html'
+                templateUrl: '/partial/main/account/reset-password/reset-password.html'
             )
             .state('reset-password-confirm',
                 url: "/account/reset-password-confirm/?token"
                 controller: UserCtrl
-                templateUrl: '/partial/account.reset-password.confirm.html'
+                templateUrl: '/partial/main/account/reset-password-confirmation/reset-password-confirmation.html'
             )
             .state('login',
                 url: "/login/?nextState&nextParams"
                 auth: false # authenticated users cannot access this page
                 controller: LoginCtrl
-                templateUrl: '/partial/account.login.html'
+                templateUrl: '/partial/main/account/login/login.html'
             )
             .state('signup',
                 url: "/signup/?email"
                 auth: false # authenticated users cannot access this page
                 controller: UserCtrl
-                templateUrl: '/partial/account.signup.html'
+                templateUrl: '/partial/main/account/signup/signup.html'
             )
             .state('signup-invitation'
                 url: "/signup/:token/"
                 controller: UserCtrl
-                templateUrl: '/partial/account.signup.html'
+                templateUrl: '/partial/main/account/signup/signup.html'
             )
             .state('subscribe'
                 url: "/subscribe/?plan"
-                templateUrl: '/partial/account.subscribe.html'
+                templateUrl: '/partial/main/account/subscribe/subscribe.html'
                 controller: UserCtrl
             )
             # Pages
@@ -109,7 +109,7 @@ angular.module('detective.config').config [
             )
             .state('user.notme',
                 controller: UserProfileCtrl
-                templateUrl: "/partial/account.html"
+                templateUrl: "/partial/main/user/user.html"
                 default: 'user'
                 resolve:
                     user: UserCtrl.resolve.user
@@ -126,7 +126,7 @@ angular.module('detective.config').config [
             .state('user.me',
                 auth: true
                 controller: UserProfileCtrl
-                templateUrl: "/partial/account.html"
+                templateUrl: "/partial/main/user/user.html"
                 default: 'user'
                 resolve:
                     user: UserCtrl.resolve.user
@@ -144,7 +144,7 @@ angular.module('detective.config').config [
                 auth: true
                 controller: AccountSettingsCtrl
                 url: 'settings/'
-                templateUrl: '/partial/account.settings.html'
+                templateUrl: '/partial/main/account/settings/settings.html'
                 default: 'home'
             )
             # ------------------
@@ -156,21 +156,21 @@ angular.module('detective.config').config [
             #   pattern wont be accessible by its URL and we will never trigger
             #   the proper state.
             .state('user-topic-create',
-                url: '/:username/create/'
+                url: '/create/'
                 controller: CreateTopicCtrl
                 reloadOnSearch: no
-                templateUrl: '/partial/topic.form.html'
+                templateUrl: '/partial/main/dashboard/create/create.html'
                 resolve: CreateTopicCtrl.resolve
             )
             .state('user-topic-create.choose-ontology',
-                templateUrl: '/partial/topic.form.choose-ontology.html'
+                templateUrl: '/partial/main/dashboard/create/choose-ontology/choose-ontology.html'
             )
             .state('user-topic-create.customize-ontology',
                 controller: EditTopicOntologyCtrl
-                templateUrl: '/partial/topic.form.customize-ontology.html'
+                templateUrl: '/partial/main/dashboard/create/customize-ontology/customize-ontology.html'
             )
             .state('user-topic-create.describe',
-                templateUrl: '/partial/topic.form.describe.html'
+                templateUrl: '/partial/main/dashboard/create/describe/describe.html'
             )
             # check previous comment before changing URLs order.
             .state('user-topic',
@@ -187,9 +187,9 @@ angular.module('detective.config').config [
                 template: "<div ng-include src='templateUrl' ng-if='templateUrl'></div>"
             )
             .state('user-topic-edit',
-                url: "/:username/:topic/edit/"
+                url: "/:username/:topic/settings/"
                 controller: EditTopicCtrl
-                templateUrl: '/partial/topic.form.html'
+                templateUrl: '/partial/main/user/topic/settings/settings.html'
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
                 auth: true
@@ -198,7 +198,7 @@ angular.module('detective.config').config [
             .state('user-topic-delete',
                 url: "/:username/:topic/delete/"
                 controller: DeleteTopicCtrl
-                templateUrl: '/partial/topic.delete.html'
+                templateUrl: '/partial/main/user/topic/delete/delete.html'
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
                 auth: true
@@ -207,7 +207,7 @@ angular.module('detective.config').config [
             .state('user-topic-invite',
                 url: "/:username/:topic/invite/"
                 controller: AddCollaboratorsCtrl
-                templateUrl: '/partial/topic.invite.html'
+                templateUrl: '/partial/main/user/topic/invite/invite.html'
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
                     collaborators: AddCollaboratorsCtrl.resolve.collaborators
@@ -218,7 +218,7 @@ angular.module('detective.config').config [
             .state('user-topic-search',
                 url: '/:username/:topic/search/?q&page'
                 controller: IndividualSearchCtrl
-                templateUrl: "/partial/topic.list.html"
+                templateUrl: "/partial/main/user/topic/type/type.html"
                 reloadOnSearch: true
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
@@ -227,14 +227,14 @@ angular.module('detective.config').config [
             .state('user-topic-article',
                 url: '/:username/:topic/p/:slug/'
                 controller: ArticleCtrl
-                templateUrl: "/partial/topic.article.html"
+                templateUrl: "/partial/main/user/topic/article/article.html"
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
             )
             .state('user-topic-contribute',
                 url: '/:username/:topic/contribute/?id&type'
                 controller: ContributeCtrl
-                templateUrl: "/partial/topic.contribute.html"
+                templateUrl: "/partial/main/user/topic/contribute/contribute.html"
                 resolve:
                     forms: UserTopicCtrl.resolve.forms
                     topic: UserTopicCtrl.resolve.topic
@@ -243,7 +243,7 @@ angular.module('detective.config').config [
             .state('user-topic-contribute-upload',
                 url: '/:username/:topic/contribute/upload/'
                 controller: BulkUploadCtrl
-                templateUrl: "/partial/topic.contribute.bulk-upload.html"
+                templateUrl: "/partial/main/user/topic/contribute/bulk-upload/bulk-upload.html"
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
                 auth: true
@@ -251,7 +251,7 @@ angular.module('detective.config').config [
             .state('user-topic-list',
                 url: '/:username/:topic/:type/?page'
                 controller: IndividualListCtrl
-                templateUrl: "/partial/topic.list.html"
+                templateUrl: "/partial/main/user/topic/type/type.html"
                 reloadOnSearch: true
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
@@ -259,7 +259,7 @@ angular.module('detective.config').config [
             .state('user-topic-detail',
                 url: '/:username/:topic/:type/:id/'
                 controller: IndividualSingleCtrl
-                templateUrl: "/partial/topic.single.html"
+                templateUrl: "/partial/main/user/topic/type/entity/entity.html"
                 reloadOnSearch: true
                 resolve:
                     topic: UserTopicCtrl.resolve.topic
@@ -268,6 +268,6 @@ angular.module('detective.config').config [
             )
             .state('user-topic-detail.network',
                 url: 'network/'
-                templateUrl: "/partial/topic.single.network.html"
+                templateUrl: "/partial/main/topic/type/entity/network/network.html"
             )
 ]

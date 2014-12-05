@@ -1,6 +1,6 @@
 angular.module('detective.directive').directive "relationshipForm", ()->
     restrict: "A"
-    templateUrl: "/partial/topic.form.customize-ontology.relationship-form.html"
+    templateUrl: "/partial/main/home/dashboard/create/customize-ontology/relationship-form/relationship-form.html"
     scope:
         models: "="
         relationshipForm: "="

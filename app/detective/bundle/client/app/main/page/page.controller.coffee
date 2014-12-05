@@ -8,6 +8,6 @@ class window.PageCtrl
         # ──────────────────────────────────────────────────────────────────────
         # Build template url
         if @stateParams.slug?
-            @scope.templateUrl  = "/partial/page.#{@stateParams.slug}.html"
+            @scope.templateUrl  = "/partial/main/page/#{@stateParams.slug}/#{@stateParams.slug}.html"
 
 angular.module('detective.controller').controller 'pageCtrl', PageCtrl

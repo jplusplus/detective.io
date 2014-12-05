@@ -1,6 +1,6 @@
 angular.module('detective.directive').directive "modelForm", ()->
     restrict: "A"
-    templateUrl: "/partial/topic.form.customize-ontology.model-form.html"
+    templateUrl: "/partial/main/home/dashboard/create/customize-ontology/model-form/model-form.html"
     scope:
         models: "="
         modelForm: "="

@@ -159,18 +159,18 @@ angular.module('detective.config').config [
                 url: '/create/'
                 controller: CreateTopicCtrl
                 reloadOnSearch: no
-                templateUrl: '/partial/main/dashboard/create/create.html'
+                templateUrl: '/partial/main/home/dashboard/create/create.html'
                 resolve: CreateTopicCtrl.resolve
             )
             .state('user-topic-create.choose-ontology',
-                templateUrl: '/partial/main/dashboard/create/choose-ontology/choose-ontology.html'
+                templateUrl: '/partial/main/home/dashboard/create/choose-ontology/choose-ontology.html'
             )
             .state('user-topic-create.customize-ontology',
                 controller: EditTopicOntologyCtrl
-                templateUrl: '/partial/main/dashboard/create/customize-ontology/customize-ontology.html'
+                templateUrl: '/partial/main/home/dashboard/create/customize-ontology/customize-ontology.html'
             )
             .state('user-topic-create.describe',
-                templateUrl: '/partial/main/dashboard/create/describe/describe.html'
+                templateUrl: '/partial/main/home/dashboard/create/describe/describe.html'
             )
             # check previous comment before changing URLs order.
             .state('user-topic',

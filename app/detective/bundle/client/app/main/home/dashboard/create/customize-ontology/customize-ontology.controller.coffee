@@ -64,7 +64,7 @@ class window.EditTopicOntologyCtrl
 
     removeModel: (model)=>
         modalInstance = @modal.open
-            templateUrl: '/partial/topic.form.customize-ontology.remove-model.html' 
+            templateUrl: '/partial/main/home/dashboard/create/customize-ontology/remove-model/remove-model.html' 
             controller: ($scope, $modalInstance)-> 
                 $scope.model = model                
                 $scope.ok = -> do $modalInstance.close
@@ -90,7 +90,7 @@ class window.EditTopicOntologyCtrl
 
     removeRelationship: (relationship)=>
         modalInstance = @modal.open
-            templateUrl: '/partial/topic.form.customize-ontology.remove-relationship.html' 
+            templateUrl: '/partial/main/home/dashboard/create/customize-ontology/remove-relationship/remove-relationship.html' 
             controller: ($scope, $modalInstance)=> 
                 $scope.relationship = relationship                
                 $scope.getModel = @getModel                

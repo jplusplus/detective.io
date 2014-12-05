@@ -43,11 +43,6 @@ angular.module('detective.config').config [
                 controller: NotFoundCtrl
                 templateUrl: '/partial/403.html'
             )
-            .state('contact-us',
-                url: "/contact-us/"
-                controller: ContactUsCtrl
-                templateUrl: '/partial/contact-us.html'
-            )
             .state('plans',
                 url: "/plans/"
                 templateUrl: '/partial/plans.html'

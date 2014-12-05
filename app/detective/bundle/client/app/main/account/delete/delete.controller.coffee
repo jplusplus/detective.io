@@ -21,7 +21,7 @@ class window.DeleteAccountFormCtrl
         @submitted = true
         return unless form.$valid
         @modalInstance = @modal.open
-            templateUrl: '/partial/account.delete.confirm-modal.html'
+            templateUrl: '/partial/main/account/delete/delete.html'
             controller: 'confirmAccountDeleteModalCtrl as modal'
 
         @modalInstance.result.then (confirmed)=>

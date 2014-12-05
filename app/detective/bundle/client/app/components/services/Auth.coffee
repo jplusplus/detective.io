@@ -30,6 +30,7 @@ angular.module("detective.service").factory "Auth", [
                             deferred.reject("User not authenticated.")
                 else
                     deferred.reject("User not authenticated.")
+                deferred.promise
 
             login: (credentials)->
                 # succefull login

@@ -1,5 +1,5 @@
 #=require TopicFormCtrl
-class window.CreateTopicCtrl extends window.TopicFormCtrl
+class window.CreateTopicCtrl extends window.TopicFormCtrl   
     @resolve:
         skeletons: ($state, $q, Page, TopicSkeleton)->
             notFound = ->

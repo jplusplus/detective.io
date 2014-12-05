@@ -88,6 +88,13 @@ angular.module('detective.config').config [
                 templateUrl: '/partial/main/account/subscribe/subscribe.html'
                 controller: UserCtrl
             )
+            .state('user-topic-create',
+                url: '/create/'
+                controller: CreateTopicCtrl
+                reloadOnSearch: no
+                templateUrl: '/partial/main/home/dashboard/create/create.html'
+                resolve: CreateTopicCtrl.resolve
+            )
             # Pages
             .state('page',
                 url: "/page/:slug/"
@@ -155,13 +162,6 @@ angular.module('detective.config').config [
             #   `/user/:type/` before another pattern `/user/stuff/` the second
             #   pattern wont be accessible by its URL and we will never trigger
             #   the proper state.
-            .state('user-topic-create',
-                url: '/create/'
-                controller: CreateTopicCtrl
-                reloadOnSearch: no
-                templateUrl: '/partial/main/home/dashboard/create/create.html'
-                resolve: CreateTopicCtrl.resolve
-            )
             .state('user-topic-create.choose-ontology',
                 templateUrl: '/partial/main/home/dashboard/create/choose-ontology/choose-ontology.html'
             )

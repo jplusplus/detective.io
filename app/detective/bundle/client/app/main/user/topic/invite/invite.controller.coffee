@@ -114,4 +114,4 @@ class window.AddCollaboratorsCtrl
             (Topic.administrators id : topic.id).$promise
         ]
 
-angular.module('detective.controller').controller 'addCollaboratorsCtrl', AddCollaboratorsCtrl
+angular.module('detective').controller 'addCollaboratorsCtrl', AddCollaboratorsCtrl

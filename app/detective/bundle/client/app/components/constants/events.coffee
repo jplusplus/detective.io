@@ -1,4 +1,4 @@
-angular.module('detective.constants').constant 'constants.events',
+angular.module('detective').constant 'constants.events',
     # topics' related events
     topic:
         # called when topic was succesfuly saved by API

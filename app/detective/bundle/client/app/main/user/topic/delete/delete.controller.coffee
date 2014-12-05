@@ -24,4 +24,4 @@ class window.DeleteTopicCtrl
 
 
 
-angular.module('detective.controller').controller 'deleteTopicCtrl', DeleteTopicCtrl
+angular.module('detective').controller 'deleteTopicCtrl', DeleteTopicCtrl

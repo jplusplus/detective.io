@@ -76,6 +76,6 @@ class window.TopicBannerCtrl
                 @scope.isLoading = no
                 @renderGraph()
 
-angular.module('detective.controller').controller 'TopicBannerCtrl', TopicBannerCtrl
+angular.module('detective').controller 'TopicBannerCtrl', TopicBannerCtrl
 
 # EOF

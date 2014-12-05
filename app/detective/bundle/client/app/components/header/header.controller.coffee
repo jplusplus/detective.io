@@ -61,4 +61,4 @@ class window.HeaderCtrl
 
 
 
-angular.module('detective.controller').controller 'headerCtrl', HeaderCtrl
+angular.module('detective').controller 'headerCtrl', HeaderCtrl

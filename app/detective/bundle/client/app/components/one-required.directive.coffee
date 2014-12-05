@@ -1,4 +1,4 @@
-(angular.module 'detective.directive').directive 'oneRequired', [ ->
+(angular.module 'detective').directive 'oneRequired', [ ->
     restrict : 'A'
     link : (scope, element, attr) ->
         fields = attr.oneRequired.split ','

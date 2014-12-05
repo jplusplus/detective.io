@@ -11,4 +11,4 @@ class window.ConfirmAccountDeleteModalCtrl
         @modalInstance.close(confirm)
 
 
-angular.module('detective.controller').controller 'confirmAccountDeleteModalCtrl', ConfirmAccountDeleteModalCtrl
+angular.module('detective').controller 'confirmAccountDeleteModalCtrl', ConfirmAccountDeleteModalCtrl

@@ -60,4 +60,4 @@ class window.DeleteAccountFormCtrl
     goToDasbhoard: =>
         @state.go 'home.dashboard'
 
-angular.module('detective.controller').controller 'deleteAccountFormCtrl', DeleteAccountFormCtrl
+angular.module('detective').controller 'deleteAccountFormCtrl', DeleteAccountFormCtrl

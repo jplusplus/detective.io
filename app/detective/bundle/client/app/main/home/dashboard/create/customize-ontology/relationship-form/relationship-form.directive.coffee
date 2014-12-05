@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "relationshipForm", ()->
+angular.module('detective').directive "relationshipForm", ()->
     restrict: "A"
     templateUrl: "/partial/main/home/dashboard/create/customize-ontology/relationship-form/relationship-form.html"
     scope:

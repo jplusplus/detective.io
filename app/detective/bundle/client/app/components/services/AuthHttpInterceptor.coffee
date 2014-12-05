@@ -1,4 +1,4 @@
-angular.module('detective.service').factory('AuthHttpInterceptor', [ '$q', '$cookies', 'User', ($q, $cookies, User)->
+angular.module('detective').factory('AuthHttpInterceptor', [ '$q', '$cookies', 'User', ($q, $cookies, User)->
     request: (config)->
         config = config or $q.when(config)
         config.cache = config.cache or not User.is_logged

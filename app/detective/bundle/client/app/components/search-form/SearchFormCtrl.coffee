@@ -45,4 +45,4 @@ class window.SearchFormCtrl
     getQuery: =>
         angular.fromJson @location.search().q
 
-angular.module('detective.controller').controller 'SearchFormCtrl', SearchFormCtrl
+angular.module('detective').controller 'SearchFormCtrl', SearchFormCtrl

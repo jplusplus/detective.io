@@ -1,4 +1,4 @@
-angular.module('detective.service').factory("Individual", [ '$resource', '$http', '$stateParams', ($resource, $http, $stateParams)->
+angular.module('detective').factory("Individual", [ '$resource', '$http', '$stateParams', ($resource, $http, $stateParams)->
     # Set default value for the common individual parameters following the
     # current state params.
     defaultsParams =

@@ -103,4 +103,4 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         )
 
 
-angular.module('detective.controller').controller 'createTopicCtrl', CreateTopicCtrl
+angular.module('detective').controller 'createTopicCtrl', CreateTopicCtrl

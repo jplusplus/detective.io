@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User, TopicsFactory)->
+angular.module('detective').directive "ttTypeahead", ($rootScope, $filter, $compile, $stateParams, User, TopicsFactory)->
 
     scope:
         model                 : "=ttModel"

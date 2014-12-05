@@ -1,4 +1,4 @@
-angular.module('detective.config').config [
+angular.module('detective').config [
     "$urlRouterProvider", "$locationProvider",
     ($urlRouterProvider, $locationProvider)->
         # HTML5 Mode yeah!

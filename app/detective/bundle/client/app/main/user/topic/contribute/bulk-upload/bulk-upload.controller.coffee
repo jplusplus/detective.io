@@ -113,6 +113,6 @@ class window.BulkUploadCtrl
             id   : @scope.feedback.token
         @Common.put params, {"track":true}, (data) =>
 
-angular.module('detective.controller').controller 'BulkUploadCtrl', BulkUploadCtrl
+angular.module('detective').controller 'BulkUploadCtrl', BulkUploadCtrl
 
 # EOF

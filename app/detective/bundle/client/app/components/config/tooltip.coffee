@@ -1,4 +1,4 @@
-angular.module('detective.config').config ['$tooltipProvider', ($tooltipProvider)=>
+angular.module('detective').config ['$tooltipProvider', ($tooltipProvider)=>
     $tooltipProvider.options
         appendToBody: yes
 ]

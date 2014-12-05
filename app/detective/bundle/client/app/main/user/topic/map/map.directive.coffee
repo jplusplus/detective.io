@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "countryMap", ()->
+angular.module('detective').directive "countryMap", ()->
     scope:
         # What to when clicking a country
         click: "&?"

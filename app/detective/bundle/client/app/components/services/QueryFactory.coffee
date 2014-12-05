@@ -1,4 +1,4 @@
-angular.module('detective.service').service 'QueryFactory', [
+angular.module('detective').service 'QueryFactory', [
     '$rootScope', '$stateParams', '$http',  '$location', 'TopicsFactory'
     ($rootScope, $stateParams,  $http, $location, TopicsFactory)->
         new class QueryFactory

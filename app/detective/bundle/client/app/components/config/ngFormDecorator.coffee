@@ -2,7 +2,7 @@
 # took from http://plnkr.co/edit/hSMzWC?p=preview
 # solution is attributed to http://github.com/caitp
 # given in [this comment](https://github.com/angular/angular.js/issues/1404#issuecomment-30859987)
-angular.module('detective.config').config(['$provide', ($provide)->
+angular.module('detective').config(['$provide', ($provide)->
     $provide.decorator 'ngModelDirective', ($delegate)->
         ngModel    = $delegate[0]
         controller = ngModel.controller

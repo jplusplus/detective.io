@@ -67,4 +67,4 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
 
 
 
-angular.module('detective.controller').controller 'editTopicCtrl', EditTopicCtrl
+angular.module('detective').controller 'editTopicCtrl', EditTopicCtrl

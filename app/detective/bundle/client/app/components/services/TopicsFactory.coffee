@@ -1,4 +1,4 @@
-angular.module('detective.service').factory 'TopicsFactory', [
+angular.module('detective').factory 'TopicsFactory', [
     '$q', '$rootScope', '$state', 'Common', 'Topic', 'TopicSkeleton', 'User', 'UtilsFactory'
     ($q, $rootScope, $state, Common, Topic, TopicSkeleton, User, UtilsFactory)->
         new class TopicsFactory

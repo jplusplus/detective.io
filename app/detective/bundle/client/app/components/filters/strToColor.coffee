@@ -1,5 +1,5 @@
 # Return a unique color with the given string
-angular.module('detective.filter').filter("strToColor", ->
+angular.module('detective').filter("strToColor", ->
     return (str="", lum=-0.3) ->
         # @src http://www.sitepoint.com/javascript-generate-lighter-darker-color/
         colorLuminance = (hex, lum) ->

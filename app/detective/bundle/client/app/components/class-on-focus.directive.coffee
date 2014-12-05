@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "classOnFocus", ->
+angular.module('detective').directive "classOnFocus", ->
     restrict: "A"
     link: (scope, element, attr) ->
         element.delegate ':input', 'focus', (node)->

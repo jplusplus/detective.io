@@ -1,6 +1,6 @@
 # override the default input to update on blur
 # Thanks to http://stackoverflow.com/questions/11868393/angularjs-inputtext-ngchange-fires-while-the-value-is-changing
-angular.module('detective.directive').directive "changeOnBlur", ["$timeout", ($timeout)->
+angular.module('detective').directive "changeOnBlur", ["$timeout", ($timeout)->
     restrict: "A"
     require: "ngModel"
     link: (scope, elm, attr, ngModelCtrl) ->

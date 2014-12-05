@@ -1,2 +1,2 @@
 # That's it !
-angular.module('detective.service').factory "IndividualForm", -> []
+angular.module('detective').factory "IndividualForm", -> []

@@ -4,4 +4,4 @@ class window.AccountSettingsCtrl
     constructor: (Page)->
         Page.title 'Settings'
 
-angular.module('detective.controller').controller 'accountSettingsCtrl', AccountSettingsCtrl
+angular.module('detective').controller 'accountSettingsCtrl', AccountSettingsCtrl

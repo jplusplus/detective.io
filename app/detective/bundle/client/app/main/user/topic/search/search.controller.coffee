@@ -60,4 +60,4 @@ class window.IndividualSearchCtrl extends window.IndividualListCtrl
         @Summary.export { q : angular.toJson @scope.query }, cb
 
 # Register the controller
-angular.module('detective.controller').controller 'individualSearchCtrl', IndividualSearchCtrl
+angular.module('detective').controller 'individualSearchCtrl', IndividualSearchCtrl

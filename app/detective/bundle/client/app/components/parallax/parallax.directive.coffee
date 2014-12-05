@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "parallax", ["$window", ($window)->
+angular.module('detective').directive "parallax", ["$window", ($window)->
     restrict: "A"
     link: (scope, elm, attr) ->
         # Detect touch device to desable parallax effect

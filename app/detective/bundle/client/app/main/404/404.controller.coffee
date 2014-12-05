@@ -6,4 +6,4 @@ window.NotFoundCtrl = ($scope, Page, User)->
 
 NotFoundCtrl.$inject = ['$scope', 'Page', 'User'];
 
-angular.module('detective.controller').controller 'notFoundCtrl', NotFoundCtrl
+angular.module('detective').controller 'notFoundCtrl', NotFoundCtrl

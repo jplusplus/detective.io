@@ -1,4 +1,4 @@
-angular.module('detective.service').factory 'UtilsFactory', [
+angular.module('detective').factory 'UtilsFactory', [
     ()->
         new class UtilsFactory
             isValidURL: (url)=>

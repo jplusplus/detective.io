@@ -1,5 +1,5 @@
 # @src https://github.com/angular-ui/ui-router/wiki/Frequently-Asked-Questions#how-to-make-a-trailing-slash-optional-for-all-routes
-angular.module('detective.config').config ["$urlRouterProvider", ($urlRouterProvider)->
+angular.module('detective').config ["$urlRouterProvider", ($urlRouterProvider)->
     $urlRouterProvider.rule ($injector, $location) ->
         path = $location.path()
         # Note: misnomer. This returns a query object, not a search string

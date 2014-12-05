@@ -1,4 +1,4 @@
-(angular.module 'detective.directive').directive 'autofill', [ ->
+(angular.module 'detective').directive 'autofill', [ ->
     require : 'ngModel'
     restrict : 'A'
     link : (scope, element, attr, ngModel) ->

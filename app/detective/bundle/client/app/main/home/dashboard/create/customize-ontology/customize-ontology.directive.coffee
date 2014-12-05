@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive('ontologyVisualization', ['$timeout', ($timeout) ->
+angular.module('detective').directive('ontologyVisualization', ['$timeout', ($timeout) ->
     scope:
         models: "="
     link: (scope, elem, attrs)->

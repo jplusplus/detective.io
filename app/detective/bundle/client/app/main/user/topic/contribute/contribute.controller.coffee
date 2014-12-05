@@ -644,4 +644,4 @@ class window.ContributeCtrl
     toggleHtmlMode: (ev)=> @scope.htmlMode = not @scope.htmlMode
 
 
-angular.module('detective.controller').controller 'contributeCtrl', ContributeCtrl
+angular.module('detective').controller 'contributeCtrl', ContributeCtrl

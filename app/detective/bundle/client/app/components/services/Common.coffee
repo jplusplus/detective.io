@@ -1,4 +1,4 @@
-angular.module('detective.service').factory("Common", [ '$resource', '$http', ($resource, $http)->
+angular.module('detective').factory("Common", [ '$resource', '$http', ($resource, $http)->
     $resource '/api/detective/common/v1/:type/:id/?', {}, {
         get:
             method : 'GET'

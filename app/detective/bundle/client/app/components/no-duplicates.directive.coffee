@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive('noDuplicates', [
+angular.module('detective').directive('noDuplicates', [
     ()->
         require: 'ngModel'
         

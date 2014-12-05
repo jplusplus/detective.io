@@ -1,4 +1,4 @@
-(angular.module 'detective.directive').directive 'planOverfillDisplayer', ['$rootScope', '$timeout', ($rootScope, $timeout) ->
+(angular.module 'detective').directive 'planOverfillDisplayer', ['$rootScope', '$timeout', ($rootScope, $timeout) ->
     restrict : 'A'
     template : "<div ng-include src='templateUrl' class='plan-overfill-message' ng-if='!hidden'></div>"
     scope    :

@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive 'emptyOn', ->
+angular.module('detective').directive 'emptyOn', ->
     restrict: 'A'
     require: 'ngModel'
     link: (scope, element, attr, ngModel)->

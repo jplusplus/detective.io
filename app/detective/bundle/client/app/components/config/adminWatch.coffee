@@ -1,4 +1,4 @@
-angular.module('detective.config').run [
+angular.module('detective').run [
         "$rootScope"
         "$state"
         "User"

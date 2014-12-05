@@ -1,5 +1,5 @@
 # this directive help us to display a display popover for our sources
-angular.module('detective.directive').directive 'sourcesPopover', ['UtilsFactory', (UtilsFactory)->
+angular.module('detective').directive 'sourcesPopover', ['UtilsFactory', (UtilsFactory)->
     restrict: "A"
     templateUrl: "/partial/main/user/topic/type/entity/sources/sources.html"
     replace: true

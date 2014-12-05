@@ -170,6 +170,6 @@ class window.IndividualListCtrl
         @Summary.export { type : @scope.type }, cb, (d) =>
             @scope.exporting_csv = no
 
-angular.module('detective.controller').controller 'individualListCtrl', IndividualListCtrl
+angular.module('detective').controller 'individualListCtrl', IndividualListCtrl
 
 # EOF

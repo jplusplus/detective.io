@@ -9,4 +9,4 @@ class window.MainAsideCtrl
 
 
 
-angular.module('detective.controller').controller 'mainAsideCtrl', MainAsideCtrl
+angular.module('detective').controller 'mainAsideCtrl', MainAsideCtrl

@@ -115,5 +115,5 @@ class window.EditTopicOntologyCtrl
         !! _.keys(relationships).length
 
 
-angular.module('detective.controller').controller 'editTopicOntologyCtrl', EditTopicOntologyCtrl
+angular.module('detective').controller 'editTopicOntologyCtrl', EditTopicOntologyCtrl
 # EOF

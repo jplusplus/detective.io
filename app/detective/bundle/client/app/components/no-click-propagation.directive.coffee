@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "noClickPropagation", ($document) ->
+angular.module('detective').directive "noClickPropagation", ($document) ->
     restrict: "A"
     link: (scope, elem, attr, ctrl) ->
         elem.bind "click", (e) ->

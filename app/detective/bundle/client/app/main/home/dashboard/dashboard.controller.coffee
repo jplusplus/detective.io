@@ -78,4 +78,4 @@ class window.DashboardCtrl
             deferred.promise
         ]
 
-angular.module('detective.controller').controller 'dashboardCtrl', DashboardCtrl
+angular.module('detective').controller 'dashboardCtrl', DashboardCtrl

@@ -1,4 +1,4 @@
-angular.module('detective.service').factory("Summary", [ '$resource', '$http', '$stateParams', ($resource, $http, $stateParams)->
+angular.module('detective').factory("Summary", [ '$resource', '$http', '$stateParams', ($resource, $http, $stateParams)->
     defaultsParams =
         # Use the current topic parameter as default topic
         topic: -> $stateParams.topic or "common"

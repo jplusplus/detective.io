@@ -1,4 +1,4 @@
-angular.module('detective.config').config [
+angular.module('detective').config [
     "$stateProvider",
     ($stateProvider)->
         # ui-router configuration

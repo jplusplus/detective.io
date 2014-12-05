@@ -1,4 +1,4 @@
-angular.module('detective.config').config [
+angular.module('detective').config [
     "$provide"
     ($provide) ->
         $provide.decorator '$uiViewScroll', ($delegate) ->

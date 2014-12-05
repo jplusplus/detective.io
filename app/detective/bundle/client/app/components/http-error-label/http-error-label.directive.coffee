@@ -1,4 +1,4 @@
-(angular.module 'detective.directive').directive 'httpErrorDisplayer', ['$rootScope', '$timeout', '$document', ($rootScope, $timeout, $document) ->
+(angular.module 'detective').directive 'httpErrorDisplayer', ['$rootScope', '$timeout', '$document', ($rootScope, $timeout, $document) ->
     restrict : 'A'
     link : (scope, element, attr) ->
         howManyLabels = 0

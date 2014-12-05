@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive 'homeTour', ["$window", ($window)->
+angular.module('detective').directive 'homeTour', ["$window", ($window)->
     restrict : 'A'
     scope:
         tracker: "="

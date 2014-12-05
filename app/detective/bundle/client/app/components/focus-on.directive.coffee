@@ -1,5 +1,5 @@
 # took from http://stackoverflow.com/a/14837021/885541
-angular.module('detective.directive').directive 'focusOn', ($timeout) ->
+angular.module('detective').directive 'focusOn', ($timeout) ->
     link: (scope, element, attrs) ->
         getTrigger = ->
             scope.$eval attrs.focusOn

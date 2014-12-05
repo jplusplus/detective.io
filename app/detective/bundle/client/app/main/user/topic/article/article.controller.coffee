@@ -21,4 +21,4 @@ class window.ArticleCtrl
             # Or take the article at the top of the list
             @scope.article = articles[0]
 
-angular.module('detective.controller').controller 'articleCtrl', ArticleCtrl
+angular.module('detective').controller 'articleCtrl', ArticleCtrl

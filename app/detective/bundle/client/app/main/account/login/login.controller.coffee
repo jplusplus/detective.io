@@ -62,4 +62,4 @@ class window.LoginCtrl
         , (response)=> @loginError(response.data.error_message) )
 
 
-angular.module('detective.controller').controller 'loginCtrl', LoginCtrl
+angular.module('detective').controller 'loginCtrl', LoginCtrl

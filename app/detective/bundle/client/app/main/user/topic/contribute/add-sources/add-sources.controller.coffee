@@ -154,4 +154,4 @@ class window.AddSourcesModalCtrl
 
 
 
-angular.module('detective.controller').controller 'addSourcesModalCtrl', AddSourcesModalCtrl
+angular.module('detective').controller 'addSourcesModalCtrl', AddSourcesModalCtrl

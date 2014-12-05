@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "modelForm", ()->
+angular.module('detective').directive "modelForm", ()->
     restrict: "A"
     templateUrl: "/partial/main/home/dashboard/create/customize-ontology/model-form/model-form.html"
     scope:

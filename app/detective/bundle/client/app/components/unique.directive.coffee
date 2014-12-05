@@ -1,4 +1,4 @@
-angular.module("detective.directive").directive "unique", ["Individual", (Individual)->
+angular.module("detective").directive "unique", ["Individual", (Individual)->
     restrict: 'A'
     require: "ngModel"
     link: (scope, elem, attrs, ctrl) ->

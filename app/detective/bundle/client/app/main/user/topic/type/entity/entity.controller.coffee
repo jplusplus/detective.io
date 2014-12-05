@@ -158,4 +158,4 @@ class window.IndividualSingleCtrl
             """
         "mailto:contact@detective.io?subject=#{subject}&body=#{body}"
 
-angular.module('detective.controller').controller 'individualSingleCtrl', IndividualSingleCtrl
+angular.module('detective').controller 'individualSingleCtrl', IndividualSingleCtrl

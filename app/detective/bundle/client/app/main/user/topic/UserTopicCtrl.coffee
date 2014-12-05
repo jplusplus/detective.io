@@ -42,4 +42,4 @@ class window.UserTopicCtrl
 
 
 
-angular.module('detective.controller').controller 'userTopicCtrl', UserTopicCtrl
+angular.module('detective').controller 'userTopicCtrl', UserTopicCtrl

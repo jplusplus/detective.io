@@ -16,4 +16,4 @@ class LeaveTopicModalCtrl
             @quitted = true
         )
 
-angular.module('detective.controller').controller 'leaveTopicModalCtrl', LeaveTopicModalCtrl
+angular.module('detective').controller 'leaveTopicModalCtrl', LeaveTopicModalCtrl

@@ -1,4 +1,4 @@
-angular.module("detective.directive").directive 'checkPassword', [
+angular.module("detective").directive 'checkPassword', [
     'Auth', 'User'
     (Auth, User)->
         restrict: 'A'

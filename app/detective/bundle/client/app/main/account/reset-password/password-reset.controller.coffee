@@ -27,4 +27,4 @@ class window.ChangePasswordFormCtrl
 
 
 
-angular.module('detective.controller').controller 'changePasswordFormCtrl', ChangePasswordFormCtrl
+angular.module('detective').controller 'changePasswordFormCtrl', ChangePasswordFormCtrl

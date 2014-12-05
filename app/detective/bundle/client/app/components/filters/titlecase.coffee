@@ -1,4 +1,4 @@
-angular.module('detective.filter').filter "titlecase", ->
+angular.module('detective').filter "titlecase", ->
     (input="") ->
         smallWords = /^(a|an|and|as|at|but|by|en|for|if|in|nor|of|on|or|per|the|to|vs?\.?|via)$/i
         input.replace /[A-Za-z0-9\u00C0-\u00FF]+[^\s-]*/g, (match, index, title) ->

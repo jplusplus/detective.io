@@ -1,4 +1,4 @@
-angular.module('detective.service').factory("TopicDataSet", [
+angular.module('detective').factory("TopicDataSet", [
     '$resource'
     '$http'
     ($resource, $http)->

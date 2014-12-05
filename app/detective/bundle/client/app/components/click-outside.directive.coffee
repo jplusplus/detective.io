@@ -1,5 +1,5 @@
 # @src http://stackoverflow.com/questions/12931369/click-everywhere-but-here-event
-angular.module('detective.directive').directive "clickOutside", ($document, $parse) ->
+angular.module('detective').directive "clickOutside", ($document, $parse) ->
     restrict: "A"
     link: (scope, elem, attr, ctrl) ->
         clickHandler = $parse attr.clickOutside

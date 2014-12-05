@@ -1,4 +1,4 @@
-angular.module('detective.service').factory "Page", ["ngProgressLite", "$rootScope", "$state", (ngProgressLite, $rootScope, $state)->
+angular.module('detective').factory "Page", ["ngProgressLite", "$rootScope", "$state", (ngProgressLite, $rootScope, $state)->
     new class Page
         # ──────────────────────────────────────────────────────────────────────────
         # Private attributes and methods

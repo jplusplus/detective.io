@@ -98,4 +98,4 @@ class window.UserProfileCtrl
             url : "/api/detective/common/v1/profile/#{@user.profile.id}/"
             data : data
 
-angular.module('detective.controller').controller 'userProfileCtrl', UserProfileCtrl
+angular.module('detective').controller 'userProfileCtrl', UserProfileCtrl

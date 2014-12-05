@@ -1,4 +1,4 @@
-angular.module("detective.service").factory "Auth", [
+angular.module("detective").factory "Auth", [
     "$http",
     "$q",
     "$rootScope",

@@ -56,4 +56,4 @@ class window.RelationshipPropertiesCtrl
 
 
 
-angular.module('detective.controller').controller 'relationshipPropertiesCtrl', RelationshipPropertiesCtrl
+angular.module('detective').controller 'relationshipPropertiesCtrl', RelationshipPropertiesCtrl

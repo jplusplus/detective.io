@@ -50,4 +50,4 @@ class window.ExploreCtrl
             tt += if t? and t.count? then t.count else 0
         tt
 
-angular.module('detective.controller').controller 'exploreCtrl', ExploreCtrl
+angular.module('detective').controller 'exploreCtrl', ExploreCtrl

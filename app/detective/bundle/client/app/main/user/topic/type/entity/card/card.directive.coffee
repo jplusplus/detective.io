@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "card", ['Summary', 'Individual', '$sce', (Summary, Individual, $sce)->
+angular.module('detective').directive "card", ['Summary', 'Individual', '$sce', (Summary, Individual, $sce)->
     restrict: 'E'
     require: "ngModel"
     scope:

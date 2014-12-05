@@ -10,4 +10,4 @@ class window.TourCtrl
             @scope.$broadcast "tour:scrollTo", level
 
 
-angular.module('detective.controller').controller 'tourCtrl', TourCtrl
+angular.module('detective').controller 'tourCtrl', TourCtrl

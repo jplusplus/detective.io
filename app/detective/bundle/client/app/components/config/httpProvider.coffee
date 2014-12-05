@@ -1,4 +1,4 @@
-angular.module('detective.config').config(['$httpProvider',
+angular.module('detective').config(['$httpProvider',
     ($httpProvider)->
         # Intercepts HTTP request to add cache for anonymous user
         # and to set the right csrf token from the cookies

@@ -1,4 +1,4 @@
-angular.module('detective.directive').directive "screenHeight", ["$window", ($window)->
+angular.module('detective').directive "screenHeight", ["$window", ($window)->
     (scope, element, attrs) ->
         ev = "screenHeight resize"
         resize = ->

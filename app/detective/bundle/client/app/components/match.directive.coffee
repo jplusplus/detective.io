@@ -1,4 +1,4 @@
-angular.module("detective.directive").directive "match", ->
+angular.module("detective").directive "match", ->
     restrict: 'A'
     require: "ngModel"
     transclude: true

@@ -5,119 +5,126 @@
 
 {% block extracss %}
     {% compress css %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'components/ngprogress-lite/ngprogress-lite.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app/main/main.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'vendors/ngprogress-lite/ngprogress-lite.css' %}">
     {% endcompress %}
 {% endblock %}
 
 {% block extrajs %}
     {% cache 3600 homejs %}
         {% compress js %}
-            <script src="{% static 'js/modules.js' %}"></script>
-            <script src="{% static 'js/services/UtilsFactory.js' %}"></script>
-            <script src="{% static 'js/services/User.js' %}"></script>
-            <script src="{% static 'js/services/TopicsFactory.js' %}"></script>
-            <script src="{% static 'js/services/TopicSkeleton.js' %}"></script>
-            <script src="{% static 'js/services/TopicDataSet.js' %}"></script>
-            <script src="{% static 'js/services/Topic.js' %}"></script>
-            <script src="{% static 'js/services/Summary.js' %}"></script>
-            <script src="{% static 'js/services/Search.js' %}"></script>
-            <script src="{% static 'js/services/QueryFactory.js' %}"></script>
-            <script src="{% static 'js/services/Page.js' %}"></script>
-            <script src="{% static 'js/services/IndividualForm.js' %}"></script>
-            <script src="{% static 'js/services/Individual.js' %}"></script>
-            <script src="{% static 'js/services/HttpErrorInterceptor.js' %}"></script>
-            <script src="{% static 'js/services/Group.js' %}"></script>
-            <script src="{% static 'js/services/Common.js' %}"></script>
-            <script src="{% static 'js/services/AuthHttpInterceptor.js' %}"></script>
-            <script src="{% static 'js/services/Auth.js' %}"></script>
-            <script src="{% static 'js/filters/yesorno.js' %}"></script>
-            <script src="{% static 'js/filters/titlecase.js' %}"></script>
-            <script src="{% static 'js/filters/strToColor.js' %}"></script>
-            <script src="{% static 'js/filters/nl2br.js' %}"></script>
-            <script src="{% static 'js/filters/individualPreview.js' %}"></script>
-            <script src="{% static 'js/directives/unique.js' %}"></script>
-            <script src="{% static 'js/directives/ttTypeahead.js' %}"></script>
-            <script src="{% static 'js/directives/selectOnClick.js' %}"></script>
-            <script src="{% static 'js/directives/sourcesPopover.js' %}"></script>
-            <script src="{% static 'js/directives/graphviz.js' %}"></script>
-            <script src="{% static 'js/directives/scrollTo.js' %}"></script>
-            <script src="{% static 'js/directives/screenHeight.js' %}"></script>
-            <script src="{% static 'js/directives/planOverfillDisplayer.js' %}"></script>
-            <script src="{% static 'js/directives/parallax.js' %}"></script>
-            <script src="{% static 'js/directives/oneRequired.js' %}"></script>
-            <script src="{% static 'js/directives/noDuplicates.js' %}"></script>
-            <script src="{% static 'js/directives/noClickPropagation.js' %}"></script>
-            <script src="{% static 'js/directives/match.js' %}"></script>
-            <script src="{% static 'js/directives/modelForm.js' %}"></script>
-            <script src="{% static 'js/directives/relationshipForm.js' %}"></script>
-            <script src="{% static 'js/directives/httpErrorDisplayer.js' %}"></script>
-            <script src="{% static 'js/directives/homeTour.js' %}"></script>
-            <script src="{% static 'js/directives/focusOn.js' %}"></script>
-            <script src="{% static 'js/directives/emptyOn.js' %}"></script>
-            <script src="{% static 'js/directives/countryMap.js' %}"></script>
-            <script src="{% static 'js/directives/colorTag.js' %}"></script>
-            <script src="{% static 'js/directives/clickOutside.js' %}"></script>
-            <script src="{% static 'js/directives/classOnFocus.js' %}"></script>
-            <script src="{% static 'js/directives/checkPassword.js' %}"></script>
-            <script src="{% static 'js/directives/changeOnBlur.js' %}"></script>
-            <script src="{% static 'js/directives/card.js' %}"></script>
-            <script src="{% static 'js/directives/autofill.js' %}"></script>
-            <script src="{% static 'js/directives/ontologyVisualization.js' %}"></script>
-            <script src="{% static 'js/controllers/UserTopicCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/UserProfileCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/UserCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/TourCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/TopicFormCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/TopicBannerCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/SearchFormCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/RelationshipPropertiesCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/PageCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/NotFoundCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/MainAsideCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/LoginCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/LeaveTopicModalCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/IndividualSingleCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/IndividualListCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/IndividualSearchCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/HeaderCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/ExploreCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/EditTopicCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/EditTopicOntologyCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/DeleteTopicCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/DeleteAccountFormCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/DashboardCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/CreateTopicCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/ContributeCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/ContactUsCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/ConfirmAccountDeleteModalCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/ChangePasswordFormCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/BulkUploadCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/ArticleCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/AddSourcesModalCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/AddCollaboratorsCtrl.js' %}"></script>
-            <script src="{% static 'js/controllers/AccountSettingsCtrl.js' %}"></script>
-            <script src="{% static 'js/constants/events.js' %}"></script>
-            <script src="{% static 'js/config/urlRouter.js' %}"></script>
-            <script src="{% static 'js/config/uiViewScroll.js' %}"></script>
-            <script src="{% static 'js/config/tooltip.js' %}"></script>
-            <script src="{% static 'js/config/textAngular.js' %}"></script>
-            <script src="{% static 'js/config/states.js' %}"></script>
-            <script src="{% static 'js/config/safeApply.js' %}"></script>
-            <script src="{% static 'js/config/rootScope.js' %}"></script>
-            <script src="{% static 'js/config/ngProgressLite.js' %}"></script>
-            <script src="{% static 'js/config/ngFormDecorator.js' %}"></script>
-            <script src="{% static 'js/config/locationScrollTo.js' %}"></script>
-            <script src="{% static 'js/config/loadWatch.js' %}"></script>
-            <script src="{% static 'js/config/interpolation.js' %}"></script>
-            <script src="{% static 'js/config/httpProvider.js' %}"></script>
-            <script src="{% static 'js/config/embedly.js' %}"></script>
-            <script src="{% static 'js/config/authWatch.js' %}"></script>
-            <script src="{% static 'js/config/adminWatch.js' %}"></script>
+            <script src="{% static 'app/main/main.js' %}"></script>
+
+            <script src="{% static 'app/components/click-outside.directive.js' %}"></script>
+            <script src="{% static 'app/components/select-on-click.directive.js' %}"></script>
+            <script src="{% static 'app/components/UserCtrl.js' %}"></script>
+            <script src="{% static 'app/components/unique.directive.js' %}"></script>
+            <script src="{% static 'app/components/search-form/SearchFormCtrl.js' %}"></script>
+            <script src="{% static 'app/components/typeahead/typeahead.directive.js' %}"></script>
+            <script src="{% static 'app/components/match.directive.js' %}"></script>
+            <script src="{% static 'app/components/no-click-propagation.directive.js' %}"></script>
+            <script src="{% static 'app/components/constants/events.js' %}"></script>
+            <script src="{% static 'app/components/empty-on.directive.js' %}"></script>
+            <script src="{% static 'app/components/focus-on.directive.js' %}"></script>
+            <script src="{% static 'app/components/no-duplicates.directive.js' %}"></script>
+            <script src="{% static 'app/components/plan-overfill-message/plan-overfill-message.directive.js' %}"></script>
+
+            <script src="{% static 'app/components/services/Summary.js' %}"></script>
+            <script src="{% static 'app/components/services/TopicDataSet.js' %}"></script>
+            <script src="{% static 'app/components/services/IndividualForm.js' %}"></script>
+            <script src="{% static 'app/components/services/Topic.js' %}"></script>
+            <script src="{% static 'app/components/services/TopicSkeleton.js' %}"></script>
+            <script src="{% static 'app/components/services/Individual.js' %}"></script>
+            <script src="{% static 'app/components/services/Search.js' %}"></script>
+            <script src="{% static 'app/components/services/Auth.js' %}"></script>
+            <script src="{% static 'app/components/services/Page.js' %}"></script>
+            <script src="{% static 'app/components/services/User.js' %}"></script>
+            <script src="{% static 'app/components/services/Common.js' %}"></script>
+            <script src="{% static 'app/components/services/TopicsFactory.js' %}"></script>
+            <script src="{% static 'app/components/services/Group.js' %}"></script>
+            <script src="{% static 'app/components/services/UtilsFactory.js' %}"></script>
+            <script src="{% static 'app/components/services/QueryFactory.js' %}"></script>
+            <script src="{% static 'app/components/services/AuthHttpInterceptor.js' %}"></script>
+            <script src="{% static 'app/components/services/HttpErrorInterceptor.js' %}"></script>
+
+            <script src="{% static 'app/components/parallax/parallax.directive.js' %}"></script>
+            <script src="{% static 'app/components/one-required.directive.js' %}"></script>
+            <script src="{% static 'app/components/change-on-blur.directive.js' %}"></script>
+            <script src="{% static 'app/components/scroll-to.directive.js' %}"></script>
+            <script src="{% static 'app/components/color-tag.directive.js' %}"></script>
+
+            <script src="{% static 'app/components/config/adminWatch.js' %}"></script>
+            <script src="{% static 'app/components/config/urlRouter.js' %}"></script>
+            <script src="{% static 'app/components/config/uiViewScroll.js' %}"></script>
+            <script src="{% static 'app/components/config/ngProgressLite.js' %}"></script>
+            <script src="{% static 'app/components/config/loadWatch.js' %}"></script>
+            <script src="{% static 'app/components/config/httpProvider.js' %}"></script>
+            <script src="{% static 'app/components/config/rootScope.js' %}"></script>
+            <script src="{% static 'app/components/config/safeApply.js' %}"></script>
+            <script src="{% static 'app/components/config/ngFormDecorator.js' %}"></script>
+            <script src="{% static 'app/components/config/locationScrollTo.js' %}"></script>
+            <script src="{% static 'app/components/config/interpolation.js' %}"></script>
+            <script src="{% static 'app/components/config/states.js' %}"></script>
+            <script src="{% static 'app/components/config/authWatch.js' %}"></script>
+            <script src="{% static 'app/components/config/embedly.js' %}"></script>
+            <script src="{% static 'app/components/config/textAngular.js' %}"></script>
+            <script src="{% static 'app/components/config/tooltip.js' %}"></script>
+
+            <script src="{% static 'app/components/main-aside/main-aside.contrller.js' %}"></script>
+            <script src="{% static 'app/components/graphviz/graphviz.directive.js' %}"></script>
+            <script src="{% static 'app/components/check-password.directive.js' %}"></script>
+
+            <script src="{% static 'app/components/filters/yesorno.js' %}"></script>
+            <script src="{% static 'app/components/filters/titlecase.js' %}"></script>
+            <script src="{% static 'app/components/filters/individualPreview.js' %}"></script>
+            <script src="{% static 'app/components/filters/nl2br.js' %}"></script>
+            <script src="{% static 'app/components/filters/strToColor.js' %}"></script>
+            <script src="{% static 'app/components/header/header.controller.js' %}"></script>
+            <script src="{% static 'app/components/http-error-label/http-error-label.directive.js' %}"></script>
+            <script src="{% static 'app/components/screen-height.directive.js' %}"></script>
+            <script src="{% static 'app/components/class-on-focus.directive.js' %}"></script>
+            <script src="{% static 'app/components/autofill.directive.js' %}"></script>
+
+            <script src="{% static 'app/main/page/page.controller.js' %}"></script>
+            <script src="{% static 'app/main/404/NotFoundCtrl.js' %}"></script>
+            <script src="{% static 'app/main/user/user.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/topic.banner.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/topic.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/invite/invite.collaborator.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/contribute/bulk-upload/bulk-upload.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/contribute/add-sources/add-sources.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/contribute/relationship-properties/relationship-properties.controller.js'  %}"></script>    
+            <script src="{% static 'app/main/user/topic/contribute/contribute.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/delete/delete.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/UserTopicCtrl.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/leave/leave.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/article/article.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/map/map.directive.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/settings/settings.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/type/type.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/type/entity/sources/sources.directive.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/type/entity/entity.controller.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/type/entity/card/card.directive.js' %}"></script>
+            <script src="{% static 'app/main/user/topic/search/search.controller.js' %}"></script>
+            <script src="{% static 'app/main/home/tour/tour.directive.js' %}"></script>
+            <script src="{% static 'app/main/home/tour/tour.controller.js' %}"></script>
+            <script src="{% static 'app/main/home/dashboard/create/customize-ontology/customize-ontology.controller.js' %}"></script>
+            <script src="{% static 'app/main/home/dashboard/create/customize-ontology/relationship-form/relationship-form.directive.js' %}"></script>
+            <script src="{% static 'app/main/home/dashboard/create/customize-ontology/model-form/model-form.directive.js' %}"></script>
+            <script src="{% static 'app/main/home/dashboard/create/customize-ontology/customize-ontology.directive.js' %}"></script>
+            <script src="{% static 'app/main/home/dashboard/create/TopicFormCtrl.js' %}"></script>
+            <script src="{% static 'app/main/home/dashboard/create/create.controller.js' %}"></script>
+            <script src="{% static 'app/main/home/dashboard/dashboard.controller.js' %}"></script>
+            <script src="{% static 'app/main/account/reset-password/password-reset.controller.js' %}"></script>
+            <script src="{% static 'app/main/account/reset-password-confirmation/reset-password-confirmation.controller.js' %}"></script>
+            <script src="{% static 'app/main/account/delete/delete.controller.js' %}"></script>
+            <script src="{% static 'app/main/account/login/login.controller.js' %}"></script>
+            <script src="{% static 'app/main/account/settings/settings.controller.js' %}"></script>
+
         {% endcompress %}
         <span class='topic__single__graph__worker'>
             {% compress js %}
-                <script src="{% static 'js/workers/GraphWorker.js' %}"></script>
+                <script src="{% static 'app/components/graphviz/graphviz.worker.js' %}"></script>
             {% endcompress %}
         </span>
     {% endcache %}

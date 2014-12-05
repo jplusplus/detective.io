@@ -346,7 +346,7 @@ class window.ContributeCtrl
 
         openSourcesModal: (field)=>
             @modalInstance = @modal.open
-                templateUrl: '/partial/topic.contribute.add-sources.html'
+                templateUrl: '/partial/main/user/topic/contribute/add-sources/add-sources.html'
                 controller : 'addSourcesModalCtrl'
                 resolve    :
                     # Load the properties of this field
@@ -544,7 +544,7 @@ class window.ContributeCtrl
 
 
         @relationshipProperties = @modal.open
-            templateUrl: '/partial/topic.contribute.relationship-properties.html'
+            templateUrl: '/partial/main/user/topic/contribute/relationship-properties/relationship-properties.html'
             controller : 'relationshipPropertiesCtrl as form'
             resolve    :
                 # Load the properties of this field

@@ -1,6 +1,6 @@
 (angular.module 'detective.directive').directive "graphviz", ['$filter', '$stateParams', '$state', '$location', '$window',  'localStorageService', ($filter, $stateParams, $state, $location, $window, localStorageService)->
     restrict: "AE"
-    templateUrl: "partial/graphviz.html"
+    templateUrl: "partial/components/graphviz/graphviz.html"
     replace : yes
     scope   :
         data: '='

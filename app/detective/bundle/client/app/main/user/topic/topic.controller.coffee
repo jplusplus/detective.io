@@ -20,7 +20,7 @@ class window.ExploreCtrl
         # Set page's title
         @Page.title @scope.meta.title
         # Build template url
-        @scope.templateUrl = "/partial/topic.explore-#{@scope.username}-#{@scope.topic}.html"
+        @scope.templateUrl = "/partial/main/user/topic/topic-#{@scope.username}-#{@scope.topic}.html"
         # Countries info
         @scope.countries = @Summary.get id:"countries"
         # Types info

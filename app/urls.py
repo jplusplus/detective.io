@@ -48,7 +48,7 @@ urlpatterns = patterns('',
     url(r'^(?P<user>[\w\-\.]+)/(?P<topic>[\w\-]+)/contribute/$','app.detective.views.topic', name='contribute'),
     url(r'^(?P<user>[\w\-\.]+)/(?P<topic>[\w\-]+)/contribute/upload/$', 'app.detective.views.topic', name='contribute'),
     url(r'^(?P<user>[\w\-\.]+)/(?P<topic>[\w\-]+)/invite/$', 'app.detective.views.topic', name='invite'),
-    url(r'^partial/topic.explore.(?P<topic>([\w\-\.]+))\.html$', 'app.detective.views.partial_explore', name='partial_explore'),
+    url(r'^partial/main/user/topic/topic-(?P<topic>([\w\-\.]+))\.html$', 'app.detective.views.partial_explore', name='partial_explore'),
     url(r'^partial/(?P<partial_name>([\w\-\./]+))\.html$', 'app.detective.views.partial', name='partial'),
     url(r'^tinymce/', include('tinymce.urls')),
 )

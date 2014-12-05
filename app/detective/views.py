@@ -263,11 +263,11 @@ def partial(request, partial_name=None):
 
 @gzip_page
 def partial_explore(request, topic=None):
-    template_name = partial_name + '.dj.html'
+    template_name =  'main/user/topic/topic-%s.dj.html' % topic
     try:
         return render_to_response(template_name)
     except TemplateDoesNotExist:
-        return partial(request, partial_name='user/topic/topic')
+        return partial(request, partial_name='main/user/topic/topic')
 
 def not_found(request):
     return redirect("/404/")

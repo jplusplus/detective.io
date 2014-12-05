@@ -21,14 +21,14 @@
             # Differents messages to show. Order matter.
             if      scope.nodes_max    > -1 and scope.max_nodes_count >= scope.nodes_max - 10
                 # Attention: nodes count >= (max - 10)
-                scope.templateUrl = "/partial/home.plan-overfill-messages/attention-nodes.html"
+                scope.templateUrl = "/partial/components/plan-overfill-messages/attention-nodes.html"
                 element.addClass("plan-overfill-message--attention")
             else if scope.nodes_max    > -1 and scope.max_nodes_count >= scope.nodes_max - 20
                 # Warning: nodes count >= (max - 20)
-                scope.templateUrl = "/partial/home.plan-overfill-messages/warning-nodes.html"
+                scope.templateUrl = "/partial/components/plan-overfill-messages/warning-nodes.html"
             else if scope.topics_max   > -1 and scope.topics_count    >= scope.topics_max
                 # Attention: topics count == max
-                scope.templateUrl = "/partial/home.plan-overfill-messages/attention-topics.html"
+                scope.templateUrl = "/partial/components/plan-overfill-messages/attention-topics.html"
                 element.addClass("plan-overfill-message--attention")
             else
                 scope.hidden = true

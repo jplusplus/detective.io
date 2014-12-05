@@ -18,7 +18,7 @@ gulp.task('less', function () {
   return gulp.src('client/app/*/{base,embed}.less')
     .pipe(
     	less({
-      	paths: [ path.join(__dirname, 'app') ]
+      	paths: [ path.join(__dirname, 'client/app') ]
     	})
     	.on('error', gutil.log)
     )
@@ -37,6 +37,8 @@ gulp.task('copy', function () {
 	// Copy assets to the .build dir
   gulp.src('client/img/**/*').pipe(gulp.dest('.build/img/'));
   gulp.src('client/svg/**/*').pipe(gulp.dest('.build/svg/'));
+  // For painless retro compatibility we export the build dir 
+  // to the same dir as before (components).
   gulp.src('client/vendors/**/*').pipe(gulp.dest('.build/components/'));
 });
 

@@ -1,7 +1,7 @@
 angular.module('detective').config ["$stateProvider", ($stateProvider)->
     $stateProvider.state('user-topic',
         url: "/:username/:topic/"
-        controller: ExploreCtrl
+        controller: UserTopicCtrl
         resolve:
             topic: UserTopicCtrl.resolve.topic
         # Allow a dynamic loading by setting the templateUrl within controller

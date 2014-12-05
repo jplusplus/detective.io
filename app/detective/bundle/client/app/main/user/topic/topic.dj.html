@@ -1,42 +1,42 @@
 {% load staticfiles %}
 
-<div class="explore topic">
+<div class="explore user__topic">
 
     <div class="banner banner-big" parallax=".bg" speed="0.7" ng-controller="TopicBannerCtrl">
         <img ng-src="[[meta.background]]" class="bg" />
-        <div class="topic__network" ng-if="$state.is('user-topic.network')">
-            <div class="topic__network__loading" ng-if="isLoading">
+        <div class="user__topic__network" ng-if="$state.is('user-topic.network')">
+            <div class="user__topic__network__loading" ng-if="isLoading">
                 <i class="fa fa-circle-o-notch fa-spin"></i> Loading
             </div>
 
-            <a class="topic__network__close-network-view" ui-sref="user-topic({username:username, topic:topic})">
+            <a class="user__topic__network__close-network-view" ui-sref="user-topic({username:username, topic:topic})">
                 <i class="fa fa-arrow-left"></i>&nbsp; Close network view
             </a>
 
-            <div class="topic__network__filters-box">
+            <div class="user__topic__network__filters-box">
                 <form>
-                    <div class="checkbox topic__network__filters-box__all">
+                    <div class="checkbox user__topic__network__filters-box__all">
                         <input type="checkbox"
-                                id="topic__network__filters-box__all"
+                                id="user__topic__network__filters-box__all"
                                 ng-click="toggleSelectAll()"
                                 ng-checked="filtersSelected.length == filtersNames.length"/>
 
-                        <label for="topic__network__filters-box__all">
-                            <div class="topic__network__filters-box__label">All</div>
+                        <label for="user__topic__network__filters-box__all">
+                            <div class="user__topic__network__filters-box__label">All</div>
                         </label>
                     </div>
                     <div class="checkbox" ng-repeat="form in filtered = ( forms | filter:isSearchable | orderBy:'index' )">
                         <input type="checkbox"
-                                id="topic__network__filters-box__[[$index]]"
+                                id="user__topic__network__filters-box__[[$index]]"
                                 name="filtersSelected[]"
                                 value="[[form.name]]"
                                 ng-checked="filtersSelected.indexOf(form.name) > -1"
                                 ng-click="toggleFiltersSelection(form.name)" />
 
                         <label class="filter-names"
-                                for="topic__network__filters-box__[[$index]]"
+                                for="user__topic__network__filters-box__[[$index]]"
                                 ng-init="count = getTypeCount(form.name)" >
-                            <div class="topic__network__filters-box__label">
+                            <div class="user__topic__network__filters-box__label">
                                 <div color-tag ref="form.name" class="small"></div>
                                 [[form.verbose_name_plural]]
                             </div>
@@ -45,7 +45,7 @@
                 </form>
             </div>
 
-            <graphviz class="topic__network__graphviz" data="graphnodes" topic="topic"></graphviz>
+            <graphviz class="user__topic__network__graphviz" data="graphnodes" topic="topic"></graphviz>
         </div>
 
 

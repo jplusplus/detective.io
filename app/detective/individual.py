@@ -301,11 +301,12 @@ class IndividualResource(ModelResource):
                     # Create thumbnailer with the file
                     thumbnailer = get_thumbnailer(image.name)
 
+
                     to_add[field + '_thumbnail'] = {
                         key : public_name(thumbnailer.get_thumbnail({
                             'size': size,
                             'crop': True
-                        }).path)
+                        }).name)
                         for key, size in settings.THUMBNAIL_SIZES.items()
                     }
                 except InvalidImageFormatError as e:

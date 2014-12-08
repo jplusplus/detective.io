@@ -611,7 +611,7 @@ def get_image(url_or_path, download_external=False):
         return None
     # It's an url
     elif url_or_path.startswith("http"):
-        if not url_or_path.startswith(settings.MEDIA_URL) and download_external:
+        if url_or_path.startswith(settings.MEDIA_URL) or download_external:
             # From file storage?
             image = download_url(url_or_path)
             path = join(settings.UPLOAD_ROOT, image.name)

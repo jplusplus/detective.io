@@ -616,6 +616,8 @@ def get_image(url_or_path):
             image = download_url(url_or_path)
         except UnavailableImage:
             return None
+        except NotAnImage:
+            return None
         path = join(settings.UPLOAD_ROOT, image.name)
         # And load it from the path
         return get_image(path)

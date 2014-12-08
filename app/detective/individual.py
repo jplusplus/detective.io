@@ -5,7 +5,8 @@ from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class, to_underscores, get_model_topic, \
                                                 get_leafs_and_edges, get_topic_from_request, \
                                                 iterate_model_fields, topic_cache, \
-                                                without, download_url, get_image
+                                                without, download_url, \
+                                                get_image, is_local
 from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
@@ -270,6 +271,8 @@ class IndividualResource(ModelResource):
         return self.get_resource_uri(bundle) == bundle.request.path
 
     def dehydrate(self, bundle):
+        # Get the request from the bundle
+        request = bundle.request
         # Show additional field following the model's rules
         rules = bundle.request.current_topic.get_rules().model( self.get_model() )
         # Get the output transformation for this model
@@ -290,17 +293,37 @@ class IndividualResource(ModelResource):
             if field == 'image':
                 # Get thumbnails
                 try:
-                    #  Use an file instance
-                    image = get_image(bundle.data[field])
+                    url_or_path = bundle.data[field]
+                    # Remove host for local url
+                    if is_local(request, url_or_path or ''):
+                        # By removing the host, we'll force django
+                        # to read the file instead of downloading it
+                        url_or_path = url_or_path.split( request.get_host() )[1]
+                        url_or_path = url_or_path.replace(settings.MEDIA_URL, '/')
+                    try:
+                        #  Use an file instance
+                        image = get_image(url_or_path)
+                    # The given url is not a valid image
+                    except (NotAnImage, UnavailableImage, OversizedFile):
+                        # Save the new URL to avoid reloading it
+                        setattr(bundle.obj, field, None)
+                        bundle.obj.save()
+                        continue
                     # Skip none value
                     if image is None: continue
+                    # Build the media url using the request
+                    media_url = request.build_absolute_uri(settings.MEDIA_URL)
                     # Extract public name
-                    public_name = lambda i: os.path.join(settings.MEDIA_URL,  i.replace(settings.MEDIA_ROOT, '').strip('/') )
+                    public_name = lambda i: os.path.join(media_url,  i.replace(settings.MEDIA_ROOT, '').strip('/') )
                     # Return the public url
                     bundle.data[field] = public_name(image.name)
+                    # The image url changed...
+                    if getattr(bundle.obj, field) != public_name(image.name):
+                        # Save the new URL to avoid reloading it
+                        setattr(bundle.obj, field, public_name(image.name))
+                        bundle.obj.save()
                     # Create thumbnailer with the file
                     thumbnailer = get_thumbnailer(image.name)
-
 
                     to_add[field + '_thumbnail'] = {
                         key : public_name(thumbnailer.get_thumbnail({

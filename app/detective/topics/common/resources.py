@@ -7,7 +7,7 @@ from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              Subscription, TopicDataSet
 from app.detective.utils              import get_registered_models, without, \
                                              is_valid_email, \
-                                             get_topics_from_request
+                                             get_topics_from_request, is_local
 from app.detective.topics.common.user import UserResource, UserNestedResource
 from django.conf                      import settings
 from django.conf.urls                 import url
@@ -550,14 +550,11 @@ class TopicNestedResource(ModelResource):
 
     def hydrate_background(self, bundle):
         request = bundle.request
-        # Django is mono-threaded in DEBUG, so it is impossible to download
-        # a file served locally by Django.
-        is_local = lambda u: urlparse(u).hostname == urlparse( request.build_absolute_uri() ).hostname
         # handle background setting from topic skeleton and from background_url
         # if provided
         background_url = bundle.data.get('background_url', None)
         # Back URL must exits and not be a local file
-        if background_url and not is_local(background_url):
+        if background_url and not is_local(request, background_url):
             try:
                 bundle.data['background'] = download_url(background_url)
             except UnavailableImage:

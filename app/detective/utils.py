@@ -612,13 +612,10 @@ def get_image(url_or_path):
     # It's an url
     elif url_or_path.startswith("http"):
         # From file storage?
-        try:
-            image = download_url(url_or_path)
-        except UnavailableImage:
-            return None
-        except NotAnImage:
-            return None
+        image = download_url(url_or_path)
         path = join(settings.UPLOAD_ROOT, image.name)
+        # Save the new image
+        default_storage.save(path, image)
         # And load it from the path
         return get_image(path)
     # It's a path
@@ -636,3 +633,10 @@ def get_image(url_or_path):
         return get_image( join( settings.MEDIA_ROOT, url_or_path.strip('/') ) )
     else:
         return None
+
+
+# Django is mono-threaded in DEBUG, so it is impossible to download
+# a file served locally by Django.
+def is_local(request, url):
+    django_hostname = urlparse( request.build_absolute_uri() ).hostname
+    return urlparse(url).hostname == django_hostname

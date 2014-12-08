@@ -604,22 +604,14 @@ def download_url(url):
 
 
 
-def get_image(url_or_path):
+def get_image(url_or_path, download_external=False):
     from django.conf import settings
     if not isinstance(url_or_path, str) and \
        not isinstance(url_or_path, unicode):
         return None
-    # It's an url
-    elif url_or_path.startswith("http"):
-        # From file storage?
-        image = download_url(url_or_path)
-        path = join(settings.UPLOAD_ROOT, image.name)
-        # Save the new image
-        default_storage.save(path, image)
-        # And load it from the path
-        return get_image(path)
     # It's a path
-    elif url_or_path.startswith(settings.MEDIA_ROOT):
+    elif url_or_path.startswith(settings.MEDIA_ROOT) or \
+         url_or_path.startswith(settings.MEDIA_URL):
         try:
             # Load the file from the file storage
             if default_storage.exists(url_or_path):
@@ -628,9 +620,18 @@ def get_image(url_or_path):
                 return None
         except SuspiciousOperation:
             return None
+    # It's an url
+    elif url_or_path.startswith("http") and download_external:
+        # From file storage?
+        image = download_url(url_or_path)
+        path = join(settings.UPLOAD_ROOT, image.name)
+        # Save the new image
+        default_storage.save(path, image)
+        # And load it from the path
+        return get_image(path, download_external)
     # It's a path
     elif url_or_path.startswith("/"):
-        return get_image( join( settings.MEDIA_ROOT, url_or_path.strip('/') ) )
+        return get_image( join( settings.MEDIA_ROOT, url_or_path.strip('/') ), download_external)
     else:
         return None
 

@@ -301,8 +301,9 @@ class IndividualResource(ModelResource):
                         url_or_path = url_or_path.split( request.get_host() )[1]
                         url_or_path = url_or_path.replace(settings.MEDIA_URL, '/')
                     try:
-                        #  Use an file instance
-                        image = get_image(url_or_path)
+                        #  Use a file instance and download external only
+                        #  on detail view (to avoid heavy loading)
+                        image = get_image(url_or_path, download_external=self.use_in(bundle))
                     # The given url is not a valid image
                     except (NotAnImage, UnavailableImage, OversizedFile):
                         # Save the new URL to avoid reloading it

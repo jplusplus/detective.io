@@ -305,11 +305,13 @@ class IndividualResource(ModelResource):
                         #  on detail view (to avoid heavy loading)
                         image = get_image(url_or_path, download_external=self.use_in(bundle))
                     # The given url is not a valid image
-                    except (NotAnImage, UnavailableImage, OversizedFile):
+                    except (NotAnImage, OversizedFile):
                         # Save the new URL to avoid reloading it
                         setattr(bundle.obj, field, None)
                         bundle.obj.save()
                         continue
+                    # The image might be temporary unvailable
+                    except UnavailableImage: continue
                     # Skip none value
                     if image is None: continue
                     # Build the media url using the request

@@ -590,7 +590,7 @@ def download_url(url):
     try:
         name = urlparse(url).path.split('/')[-1]
         tmp_file = NamedTemporaryFile(delete=True)
-        tmp_file.write(urllib2.urlopen(url).read())
+        tmp_file.write(urllib2.urlopen(url, timeout=10).read())
         tmp_file.flush()
         if not is_image(tmp_file):
             raise NotAnImage()

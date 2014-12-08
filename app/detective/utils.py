@@ -609,6 +609,16 @@ def get_image(url_or_path):
     if not isinstance(url_or_path, str) and \
        not isinstance(url_or_path, unicode):
         return None
+    # It's an url
+    elif url_or_path.startswith("http"):
+        # From file storage?
+        try:
+            image = download_url(url_or_path)
+        except UnavailableImage:
+            return None
+        path = join(settings.UPLOAD_ROOT, image.name)
+        # And load it from the path
+        return get_image(path)
     # It's a path
     elif url_or_path.startswith(settings.MEDIA_ROOT):
         try:
@@ -622,15 +632,5 @@ def get_image(url_or_path):
     # It's a path
     elif url_or_path.startswith("/"):
         return get_image( join( settings.MEDIA_ROOT, url_or_path.strip('/') ) )
-    # It's an url
-    elif url_or_path.startswith("http"):
-        # From file storage?
-        try:
-            image = download_url(url_or_path)
-        except UnavailableImage:
-            return None
-        path = join(settings.UPLOAD_ROOT, image.name)
-        # And load it from the path
-        return get_image(path)
     else:
         return None

@@ -5,7 +5,7 @@ from app.detective.neomatch             import Neomatch
 from app.detective.utils                import import_class, to_underscores, get_model_topic, \
                                                 get_leafs_and_edges, get_topic_from_request, \
                                                 iterate_model_fields, topic_cache, \
-                                                without, download_url
+                                                without, download_url, get_image
 from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
@@ -43,6 +43,7 @@ import bleach
 import os
 
 logger = logging.getLogger(__name__)
+
 
 class IndividualAuthorization(DjangoAuthorization):
 
@@ -289,20 +290,26 @@ class IndividualResource(ModelResource):
             if field == 'image':
                 # Get thumbnails
                 try:
-                    bundle.data[field] = bundle.data[field] != None and bundle.data[field].strip('/') or ""
-                    thumbnailer = get_thumbnailer(bundle.data[field])
+                    #  Use an file instance
+                    image = get_image(bundle.data[field])
+                    # Skip none value
+                    if image is None: continue
+                    # Extract public name
+                    public_name = lambda i: os.path.join(settings.MEDIA_URL,  i.replace(settings.MEDIA_ROOT, '').strip('/') )
+                    # Return the public url
+                    bundle.data[field] = public_name(image.name)
+                    # Create thumbnailer with the file
+                    thumbnailer = get_thumbnailer(image.name)
+
                     to_add[field + '_thumbnail'] = {
-                        key : thumbnailer.get_thumbnail({
+                        key : public_name(thumbnailer.get_thumbnail({
                             'size': size,
                             'crop': True
-                        }).url
+                        }).path)
                         for key, size in settings.THUMBNAIL_SIZES.items()
                     }
-                    # Prepend MEDIA_URL
-                    bundle.data[field] = settings.MEDIA_URL + bundle.data[field]
-                except InvalidImageFormatError:
-                    to_add[field + '_thumbnail'] = ''
-                except ValueError:
+                except InvalidImageFormatError as e:
+                    print e
                     to_add[field + '_thumbnail'] = ''
 
             # Convert tuple to array for better serialization

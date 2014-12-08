@@ -1,15 +1,16 @@
-from django.core.cache        import cache
-from django.core.exceptions   import ValidationError
-from django.core.validators   import validate_email
-from django.db.models         import signals
-from django.forms.forms       import pretty_name
-from os                       import listdir
-from os.path                  import isdir, join
-from random                   import randint
-from app.detective.exceptions import UnavailableImage, NotAnImage, OversizedFile
-from urlparse                 import urlparse
-from django.core.files.temp   import NamedTemporaryFile
-from django.core.files        import File
+from django.core.cache         import cache
+from django.core.exceptions    import ValidationError, SuspiciousOperation
+from django.core.files         import File
+from django.core.files.storage import default_storage
+from django.core.files.temp    import NamedTemporaryFile
+from django.core.validators    import validate_email
+from django.db.models          import signals
+from django.forms.forms        import pretty_name
+from os                        import listdir
+from os.path                   import isdir, join
+from random                    import randint
+from app.detective.exceptions  import UnavailableImage, NotAnImage, OversizedFile
+from urlparse                  import urlparse
 import importlib
 import inspect
 import itertools
@@ -22,7 +23,7 @@ import magic
 logger = logging.getLogger(__name__)
 
 # for relative paths
-here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
+here = lambda x: join(os.path.abspath(os.path.dirname(__file__)), x)
 
 def without(coll, val):
     def _check_not_val(el):
@@ -600,3 +601,36 @@ def download_url(url):
         raise UnavailableImage()
     except urllib2.URLError:
         raise UnavailableImage()
+
+
+
+def get_image(url_or_path):
+    from django.conf import settings
+    if not isinstance(url_or_path, str) and \
+       not isinstance(url_or_path, unicode):
+        return None
+    # It's a path
+    elif url_or_path.startswith(settings.MEDIA_ROOT):
+        try:
+            # Load the file from the file storage
+            if default_storage.exists(url_or_path):
+                return default_storage.open(url_or_path)
+            else:
+                return None
+        except SuspiciousOperation:
+            return None
+    # It's a path
+    elif url_or_path.startswith("/"):
+        return get_image( join( settings.MEDIA_ROOT, url_or_path.strip('/') ) )
+    # It's an url
+    elif url_or_path.startswith("http"):
+        # From file storage?
+        try:
+            image = download_url(url_or_path)
+        except UnavailableImage:
+            return None
+        path = join(settings.UPLOAD_ROOT, image.name)
+        # And load it from the path
+        return get_image(path)
+    else:
+        return None

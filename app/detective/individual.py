@@ -290,7 +290,7 @@ class IndividualResource(ModelResource):
                 # Get thumbnails
                 try:
                     bundle.data[field] = bundle.data[field] != None and bundle.data[field].strip('/') or ""
-                    thumbnailer = get_thumbnailer(os.path.join(settings.MEDIA_ROOT, bundle.data[field]))
+                    thumbnailer = get_thumbnailer(bundle.data[field])
                     to_add[field + '_thumbnail'] = {
                         key : thumbnailer.get_thumbnail({
                             'size': size,
@@ -301,7 +301,9 @@ class IndividualResource(ModelResource):
                     # Prepend MEDIA_URL
                     bundle.data[field] = settings.MEDIA_URL + bundle.data[field]
                 except InvalidImageFormatError:
-                    to_add[field + '_thumbnail'] = None
+                    to_add[field + '_thumbnail'] = ''
+                except ValueError:
+                    to_add[field + '_thumbnail'] = ''
 
             # Convert tuple to array for better serialization
             if type( getattr(bundle.obj, field, None) ) is tuple:
@@ -593,7 +595,7 @@ class IndividualResource(ModelResource):
         return cleaned_data
 
 
-    def obj_delete(self, bundle, **kwargs):    
+    def obj_delete(self, bundle, **kwargs):
         super(IndividualResource, self).obj_delete(bundle, **kwargs)
         # update the cache
         topic_cache.incr_version(bundle.request.current_topic)

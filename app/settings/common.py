@@ -72,6 +72,7 @@ MEDIA_ROOT = root('media')
 UPLOAD_ROOT = os.path.join(MEDIA_ROOT, 'upload')
 
 THUMBNAIL_SIZES = {
+    'mini' : (60, 40),
     'small' : (60, 60),
     'medium' : (300, 200)
 }

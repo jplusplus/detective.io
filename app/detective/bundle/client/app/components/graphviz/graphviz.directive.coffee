@@ -147,6 +147,8 @@
                 url = "/#{u.username}/#{u.topic}/#{u.type}/#{u.id}/"
                 # Naviguate in the graph for embed
                 url = "/embed" + url if attr.embed?
+                # Navigate to the netork page
+                url = url + "network/" if $state.is("user-topic-detail.network")
                 $location.url url
                 # We're in a d3 callback so we need to manually
                 # $apply the scope

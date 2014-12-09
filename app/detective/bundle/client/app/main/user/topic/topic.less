@@ -4,8 +4,27 @@
         background:black;
         color:white;
 
+        position: relative;
+        width:100%;
+        overflow: hidden;
+        height:600px;
+
         .bg {
+            position:absolute;
+            min-height:100%;
+            height:auto;
+            width: 100%;
+            z-index:5;
             .opacity(0.7);
+        }
+
+        .fg {
+            z-index:10;
+            position:relative;
+        }
+
+        &.banner-border {
+            border-bottom: #272624 15px solid;
         }
     }
 

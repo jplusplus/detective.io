@@ -6,7 +6,7 @@ from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
                                              Subscription, TopicDataSet
 from app.detective.utils              import get_registered_models, without, \
-                                             is_valid_email, \
+                                             is_valid_email, download_url, \
                                              get_topics_from_request, is_local
 from app.detective.topics.common.user import UserResource, UserNestedResource
 from django.conf                      import settings

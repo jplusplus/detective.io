@@ -567,23 +567,6 @@ class TopicNestedResource(ModelResource):
             # we remove from data the previously setted background to avoid
             # further supsicious operation errors
             self.clean_bundle_key('background', bundle)
-        if topic_skeleton and not background_url:
-            bundle.data['background'] = topic_skeleton.picture
-        else:
-            if background_url:
-                try:
-                    bundle.data['background'] = download_url(background_url)
-                except UnavailableImage:
-                    bundle.data['background'] = TopicValidationErrors['background']['unavailable']['code']
-                except NotAnImage:
-                    bundle.data['background'] = TopicValidationErrors['background']['not_an_image']['code']
-                except OversizedFile:
-                    bundle.data['background'] = TopicValidationErrors['background']['oversized_file']['code']
-
-            elif bundle.data.get('background', None):
-                # we remove from data the previously setted background to avoid
-                # further supsicious operation errors
-                self.clean_bundle_key('background', bundle)
         return bundle
 
     def hydrate_about(self, bundle):

@@ -88,6 +88,11 @@
 			<!-- Table -->
 			<table class="table">
 				<tr ng-repeat="individual in individuals.objects">
+					<td style="width: 60px">
+						<a ng-href="[[singleUrl(individual)]]" ng-if="individual.image_thumbnail">
+							<img ng-src="[[individual.image_thumbnail.mini]]" class="img-thumbnail img-responsive" />
+						</a>
+					</td>
 					<td style="min-width: 80%">
 						<strong>
 							<a ng-href="[[singleUrl(individual)]]">

@@ -215,19 +215,20 @@
                 if scope.data.leafs[edge[0]]? and scope.data.leafs[edge[2]]?
                     edges.push
                         source : scope.data.leafs[edge[0]]
-                        target : scope.data.leafs[edge[2]]
+                        target : scope.data.leafs[edge[2]]                
                         _type : edge[1]
-
+            # Force clustering OR more than 70 node
+            if scope.clustering or scope.data.length > 70
+                # Initialize a worker to cluster leafs
+                worker.postMessage
+                    type : 'init'
+                    data :
+                        current_id : $stateParams.id
+                        leafs : leafs
+                        edges : edges
             # Clustering deactivate, skip the worker initialization
-            if not scope.clustering and scope.data.length > 70
-                return register leafs, edges
-            # Initialize a worker to cluster leafs
-            worker.postMessage
-                type : 'init'
-                data :
-                    current_id : $stateParams.id
-                    leafs : leafs
-                    edges : edges
+            else
+                register leafs, edges
 
         register = (new_leafs=[], new_edges=[])=>
             leafs   = new_leafs

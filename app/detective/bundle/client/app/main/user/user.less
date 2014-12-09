@@ -1,0 +1,65 @@
+.user {
+
+    &__user-info {
+
+        @dt-width: 100px;
+        text-align: center;
+        margin-top:40px;
+
+        &__avatar {
+            .border-radius(50%);
+            border:4px solid white;
+        }
+
+        dd {
+            margin-left: 0;
+        }
+
+        &__wrapper {
+            &__input {
+                .center-block();
+                max-width: 200px;
+            }
+
+            &__edit-label, &__edit-label:hover {
+                color:@text-color;
+                text-decoration: none;
+            }
+        }
+    }
+
+    &__topics {
+
+        &__topic {
+
+            padding:20px 0;
+            border-bottom:1px solid @gray-lighter;
+
+            a {
+                vertical-align: bottom;
+                text-decoration: none;
+            }
+
+            &__title {
+                margin-bottom: 0;
+                padding-left:35px;
+                position:relative;
+
+                &__icon {
+                    position:absolute;
+                    left:0;
+                    top:5px;
+                }
+            }
+
+            &__description {
+                padding-left:35px;
+                p, & {
+                    margin-bottom:0;
+                }
+            }
+        }
+
+    }
+
+}

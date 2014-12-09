@@ -1,0 +1,35 @@
+.user__topic__type__entity__network {
+    color: white;
+    position: relative;
+    .pull-footer();
+
+    &__embed {
+        width:100%;
+        padding:10px;
+        position: relative;
+        z-index: 20;
+        .box-shadow(0 0 10px black);
+
+        input[readonly] {
+            cursor: text;
+            background: white;
+        }
+
+        label {
+            font-weight:normal;
+            margin:0;
+        }
+
+        &__addon {
+            font-weight: bold;
+            color:@text-color;
+        }
+    }
+
+    &__graphviz {
+        position: relative;
+        z-index: 10;
+        width:100%;
+        height:600px;
+    }
+}

@@ -50,13 +50,12 @@ def default_social_meta(request):
     }
 
 # @gzip_page
-def home(request, social_meta_dict=None,**kwargs):
-    print "home"
+def main(request, social_meta_dict=None,**kwargs):    
     if social_meta_dict == None:
         social_meta_dict = default_social_meta(request)
 
     # Render template without any argument
-    response = render_to_response('home.dj.html', { 'meta': social_meta_dict, 'debug': settings.DEBUG } )
+    response = render_to_response('main/main.dj.html', { 'meta': social_meta_dict, 'debug': settings.DEBUG } )
 
     # Add a cookie containing some user information
     if request.user.is_authenticated():
@@ -74,10 +73,9 @@ def home(request, social_meta_dict=None,**kwargs):
 
 # @gzip_page
 def embed(request, social_meta_dict=None,**kwargs):
-    print "embed"
     if social_meta_dict == None: social_meta_dict = default_social_meta(request)
     # Render template without any argument
-    return render_to_response('embed.dj.html', { 'meta': social_meta_dict, 'debug': settings.DEBUG } )
+    return render_to_response('embed/embed.dj.html', { 'meta': social_meta_dict, 'debug': settings.DEBUG } )
 
 def entity_list(request, **kwargs):
     def __entity_type_name(entity_klass):
@@ -101,7 +99,7 @@ def entity_list(request, **kwargs):
         topic     = __get_topic(request, user, **kwargs)
 
         if not topic.public:
-            return home(request, None, **kwargs)
+            return main(request, None, **kwargs)
 
         if topic.public and user:
             default_meta = default_social_meta(request)
@@ -129,11 +127,11 @@ def entity_list(request, **kwargs):
                     'pictures'    : pictures,
                     'url'         : default_meta['url']
         }
-        return home(request, meta_dict, **kwargs)
+        return main(request, meta_dict, **kwargs)
 
     except ObjectDoesNotExist as e:
         logger.debug("Tried to access a non-existing model %s" % e)
-        return home(request, None, **kwargs)
+        return main(request, None, **kwargs)
 
 def entity_details(request, **kwargs):
     def __entity_title(entity):
@@ -158,7 +156,7 @@ def entity_details(request, **kwargs):
         user  = __get_user(request, **kwargs)
         topic = __get_topic(request, user, **kwargs)
         if not topic.public:
-            return home(request, None, **kwargs)
+            return main(request, None, **kwargs)
 
         meta_pictures = []
         default_meta  = default_social_meta(request)
@@ -189,18 +187,18 @@ def entity_details(request, **kwargs):
             'pictures'   : meta_pictures,
             'url'        : default_meta['url']
         }
-        return home(request, meta_dict, **kwargs)
+        return main(request, meta_dict, **kwargs)
 
     except ObjectDoesNotExist as e:
         logger.debug("Tried to access a non-existing model %s" % e)
-        return home(request, None, **kwargs)
+        return main(request, None, **kwargs)
 
 def topic(request, **kwargs):
     try:
         user  = __get_user(request, **kwargs)
         topic = __get_topic(request, user, **kwargs)
         if not topic.public:
-            return home(request, None, **kwargs)
+            return main(request, None, **kwargs)
 
         default_meta  = default_social_meta(request)
         generic_description = (
@@ -227,10 +225,10 @@ def topic(request, **kwargs):
             'pictures'    : meta_pictures,
             'url'         : default_meta['url']
         }
-        return home(request, meta_dict, **kwargs)
+        return main(request, meta_dict, **kwargs)
     except ObjectDoesNotExist as e:
         logger.debug("Tried to access a non-existing model %s" % e)
-        return home(request, None, **kwargs)
+        return main(request, None, **kwargs)
 
 def profile(request, **kwargs):
     try:
@@ -250,14 +248,14 @@ def profile(request, **kwargs):
             'pictures': [ profile.avatar ],
             'url': default_meta['url']
         }
-        return home(request, meta_dict, **kwargs)
+        return main(request, meta_dict, **kwargs)
     except ObjectDoesNotExist as e:
         logger.debug("Tried to access a non-existing model %s" % e)
-        return home(request, None, **kwargs)
+        return main(request, None, **kwargs)
 
 @gzip_page
 def partial(request, partial_name=None):
-    template_name = 'partials/' + partial_name + '.dj.html'
+    template_name = partial_name + '.dj.html'
     try:
         return render_to_response(template_name)
     except TemplateDoesNotExist:
@@ -265,11 +263,11 @@ def partial(request, partial_name=None):
 
 @gzip_page
 def partial_explore(request, topic=None):
-    template_name = 'partials/topic.explore.' + topic + '.dj.html'
+    template_name =  'main/user/topic/topic-%s.dj.html' % topic
     try:
         return render_to_response(template_name)
     except TemplateDoesNotExist:
-        return partial(request, partial_name='topic.explore.common')
+        return partial(request, partial_name='main/user/topic/topic')
 
 def not_found(request):
     return redirect("/404/")

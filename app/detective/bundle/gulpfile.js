@@ -15,33 +15,38 @@ gulp.task('clean', function(cb) {
 
 
 gulp.task('less', function () {
-  return gulp.src('app/css/{base,embed}.less')
+  return gulp.src('client/app/*/{main,embed}.less')
     .pipe(
     	less({
-      	paths: [ path.join(__dirname, 'app') ]
+      	paths: [ 
+          path.join(__dirname, 'client/app'),
+          path.join(__dirname, 'client')
+        ]
     	})
     	.on('error', gutil.log)
     )
-    .pipe(gulp.dest('.build/css/'));
+    .pipe(gulp.dest('.build/app/'));
 });
 
 gulp.task('coffee', function() {
-  return gulp.src('app/js/**/*.coffee')
+  return gulp.src('client/app/**/*.coffee')
     .pipe(
     	coffee({bare: true}).on('error', gutil.log)
     )
-    .pipe(gulp.dest('.build/js/'));
+    .pipe(gulp.dest('.build/app/'));
 });
 
 gulp.task('copy', function () {
 	// Copy assets to the .build dir
-  gulp.src('./app/img/**/*').pipe(gulp.dest('.build/img/'));
-  gulp.src('./app/svg/**/*').pipe(gulp.dest('.build/svg/'));
-  gulp.src('./app/components/**/*').pipe(gulp.dest('.build/components/'));
+  gulp.src('client/img/**/*').pipe(gulp.dest('.build/img/'));
+  gulp.src('client/svg/**/*').pipe(gulp.dest('.build/svg/'));
+  // For painless retro compatibility we export the build dir 
+  // to the same dir as before (components).
+  gulp.src('client/vendors/**/*').pipe(gulp.dest('.build/components/'));
 });
 
 gulp.task('bower', function () {
-  return gulp.src('./app/templates/*.html')
+  return gulp.src('client/app/*.html')
   	// Inspect bower packages
     .pipe(wiredep({
     	// Excluded dependencies (must be added manually)
@@ -59,16 +64,18 @@ gulp.task('bower', function () {
     	}
    	}))
 		// Template where inject bower dependencies
-    .pipe(gulp.dest('./app/templates/'));
+    .pipe(gulp.dest('client/app/'));
 });
 
+// THIS TASK IS NOT WORKING (YET)
+// @todo: Find a way to auto inject JS file in the best order
 gulp.task('inject', ['coffee'], function() {
 	// Files to inject (without workers)
-	var sources = gulp.src(['js/**/*.js', '!js/workers/*'], {cwd: '.build'});
+	var sources = gulp.src(['**/*.js', '!**/*.worker.js'], {cwd: '.build'});
 	// Preserve angular order
 	sources = sources.pipe(angular())
 	// Inspect template file
-  return gulp.src('app/templates/*.html')
+  return gulp.src('client/app/*/*.html')
   	// Inject sources from above
  		.pipe(inject(sources, {
  			addRootSlash: false,
@@ -78,7 +85,7 @@ gulp.task('inject', ['coffee'], function() {
 	    }
  		}))
  		// Write into the original file
-  	.pipe(gulp.dest('app/templates/'));
+  	.pipe(gulp.dest('client/app/'));
 });
 
 
@@ -86,9 +93,9 @@ gulp.task('default', ['coffee', 'less', 'bower', 'copy']);
 
 gulp.task('watch', ['default'], function() {
   livereload.listen({silent: true});
-  gulp.watch('app/css/**/*.less', ['less']);
-  gulp.watch('app/js/**/*.coffee', ['coffee']);
-  gulp.watch('app/templates/**/*.html').on('change', livereload.changed)
+  gulp.watch('client/app/**/*.less', ['less']);
+  gulp.watch('client/app/**/*.coffee', ['coffee']);
+  gulp.watch('client/app/**/*.html').on('change', livereload.changed)
   gulp.watch('.build/**/*.css').on('change', livereload.changed)
   gulp.watch('bower.json', ['bower']);
 });

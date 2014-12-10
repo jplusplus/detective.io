@@ -21,14 +21,13 @@
                 <div class="col-sm-4 form-label top05">
                     <label for="id_topic_title">Title</label>
                     <p class="help-block" ng-if="isCreating()">
-                        Mandatory.<br/>
-                        You <b>cannot</b> change it later.
+                        Mandatory.
                     </p>
                 </div>
                 <div class="col-sm-8">
                     <input id="id_topic_title"
                            name="title"
-                           ng-disabled="loading.main || max_reached || isEditing()"
+                           ng-disabled="loading.main || max_reached"
                            class="form-control"
                            ng-model="topic.title"
                            required>

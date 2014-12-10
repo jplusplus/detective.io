@@ -59,6 +59,7 @@ AWS_QUERYSTRING_AUTH       = False
 AWS_S3_FILE_OVERWRITE      = os.getenv('AWS_S3_FILE_OVERWRITE') == "True" and True or False
 AWS_IS_GZIPPED             = False
 
+
 GZIP_CONTENT_TYPES         = (
     'text/css',
     'text/csv',

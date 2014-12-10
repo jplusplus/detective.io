@@ -216,10 +216,10 @@ SOUTH_MIGRATION_MODULES = {
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# One-week activation window
-ACCOUNT_ACTIVATION_DAYS = 7
+# Two-weeks activation window
+ACCOUNT_ACTIVATION_DAYS = 14
 # Send or not an activation email
-ACCOUNT_ACTIVATION_ENABLED = False
+ACCOUNT_ACTIVATION_ENABLED = True
 
 # MemCachier configuration took from https://devcenter.heroku.com/articles/memcachier#django
 def get_cache():

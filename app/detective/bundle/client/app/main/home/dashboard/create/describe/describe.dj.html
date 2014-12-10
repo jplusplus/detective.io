@@ -41,17 +41,17 @@
             <div class="row form-group" ng-if="isCreating()">
                 <div class="col-sm-4 form-label top05">
                   <label for="id_topic_private">
-                    Make this data collection private
+                    Private data collection 
                   </label>
-                  <p class="help-block">
-                    Hide this data collection from the public
-                  </p>
                 </div>
                 <div class="col-sm-8 top05">
+                  <label>
                     <input type="checkbox" id="id_topic_private"
                            ng-model="topic_private"
                            ng-change="topic.public = !topic_private"
-                           class="pull-left top05">
+                           class="pull-left top05 right05">                    
+                    Hide this data collection from the public
+                  </label>
                 </div>
             </div>
             <!-- Topic subtitle/description field -->

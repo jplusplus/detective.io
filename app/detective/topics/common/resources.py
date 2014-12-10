@@ -232,8 +232,6 @@ class TopicAuthorization(ReadOnlyAuthorization):
             unlimited   = profile.topics_max()   < 0
             under_limit = profile.topics_count() < profile.topics_max()
             authorize   = unlimited or under_limit
-            if not public:
-                authorize = authorize and profile.plan != 'free'
         return authorize
 
     def get_read_permissions(self, user):

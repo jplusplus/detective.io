@@ -7,16 +7,15 @@ class window.TopicFormCtrl
         @scope.loading   =
             main: false
             privacy: false
-
         @scope.submitted = no
-        @scope.submit = @submit
+        
+        @scope.submit           = @submit
         @scope.isPublic         = @isPublic
         @scope.isPrivate        = @isPrivate
         @scope.isEditing        = @isEditing
         @scope.isCreating       = @isCreating
         @scope.hideErrors       = @hideErrors
         @scope.modelsNames      = @modelsNames
-        @scope.canChangePrivacy = @canChangePrivacy
         @scope.changePrivacy    = @changePrivacy
 
         @scope.$watch 'topic', @onTopicUpdated, yes
@@ -40,8 +39,6 @@ class window.TopicFormCtrl
             @edit(panel)
         if @isCreating()
             @create(panel)
-
-    canChangePrivacy: => @User.profile.plan != 'free'
 
     isPublic: =>  !!@scope.topic.public
 

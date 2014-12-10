@@ -21,14 +21,13 @@
                 <div class="col-sm-4 form-label top05">
                     <label for="id_topic_title">Title</label>
                     <p class="help-block" ng-if="isCreating()">
-                        Mandatory.<br/>
-                        You <b>cannot</b> change it later.
+                        Mandatory.
                     </p>
                 </div>
                 <div class="col-sm-8">
                     <input id="id_topic_title"
                            name="title"
-                           ng-disabled="loading.main || max_reached || isEditing()"
+                           ng-disabled="loading.main || max_reached"
                            class="form-control"
                            ng-model="topic.title"
                            required>
@@ -38,25 +37,20 @@
             </div>
             <!-- Topic public/private field. We show this checkbox only on creation.
                  For edition we add a danger-zone at <thead></thead> botton of this form. -->
-            <div class="row form-group" ng-if="isCreating()"
-                 ng-class="{ disabled: !canChangePrivacy()}">
+            <div class="row form-group" ng-if="isCreating()">
                 <div class="col-sm-4 form-label top05">
                   <label for="id_topic_private">
-                    Make this data collection private
+                    Private data collection 
                   </label>
-                  <p class="help-block">
-                    Hide this data collection from the public
-                  </p>
                 </div>
                 <div class="col-sm-8 top05">
+                  <label>
                     <input type="checkbox" id="id_topic_private"
                            ng-model="topic_private"
                            ng-change="topic.public = !topic_private"
-                           ng-disabled="!canChangePrivacy()"
-                           class="pull-left top05">
-                    <label class='pull-left disabled-explanation' ng-show="!canChangePrivacy()">
-                        Only <a ui-sref="plans">paid plans</a> can make private data collections.
-                    </label>
+                           class="pull-left top05 right05">                    
+                    Hide this data collection from the public
+                  </label>
                 </div>
             </div>
             <!-- Topic subtitle/description field -->
@@ -166,7 +160,6 @@
 
     <div class="panel panel-danger top15" ng-if="isEditing()"
          ng-class="{
-          disabled: !canChangePrivacy(),
           loading: loading.privacy
          }">
         <div class="panel-heading">
@@ -192,7 +185,7 @@
                     <button type="button"
                             class="btn btn-danger btn-block"
                             ng-if="isEditing()"
-                            ng-disabled="loading.privacy || !canChangePrivacy()"
+                            ng-disabled="loading.privacy"
                             ng-click="changePrivacy(form)">
                         <i class="fa"
                             ng-class="{

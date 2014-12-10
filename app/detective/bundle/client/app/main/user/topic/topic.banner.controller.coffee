@@ -59,6 +59,7 @@ class window.TopicBannerCtrl
     # shared with detective/js/directives/topic.single.graph.coffee
     renderGraph: =>
         return unless @state.is("user-topic.network")
+        @scope.graphnodes = false
         if @data?
             data = angular.copy(@data)
             # filter by filtersSelected

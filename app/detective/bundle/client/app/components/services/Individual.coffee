@@ -1,12 +1,12 @@
-angular.module('detective').factory("Individual", [ '$resource', '$http', '$stateParams', ($resource, $http, $stateParams)->
+angular.module('detective').factory("Individual", [ '$resource', '$http', '$state', ($resource, $http, $state)->
     # Set default value for the common individual parameters following the
     # current state params.
     defaultsParams =
         # Use the current topic parameter as default topic
-        topic:    -> $stateParams.topic or "common"
-        username: -> $stateParams.username or "detective"
-        type:     -> $stateParams.type
-        id:       -> $stateParams.id
+        topic:    -> $state.params.topic or "common"
+        username: -> $state.params.username or "detective"
+        type:     -> $state.params.type
+        id:       -> $state.params.id
 
     # This function aims to transforms an array of relationships target ids
     # into an array of object. It ensure a seamsless transition to the new
@@ -100,6 +100,4 @@ angular.module('detective').factory("Individual", [ '$resource', '$http', '$stat
             url:'/api/:username/:topic/v1/:type/:id/graph/?'
             method: 'GET'
             isArray: no
-            paramDefaults:
-                depth: "2"
 ])

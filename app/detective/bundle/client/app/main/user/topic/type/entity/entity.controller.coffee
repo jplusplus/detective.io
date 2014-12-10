@@ -29,7 +29,6 @@ class window.IndividualSingleCtrl
         @scope.isAddr         = (f)=> f.name.toLowerCase().indexOf('address') > -1
         @scope.isImg          = (f)=> f.name is 'image'
         @scope.isMono         = (f)=> @scope.isAddr(f) or @scope.isImg(f) or @scope.isGeoloc(f)
-        @scope.graphnodes     = []
         @scope.frontStyle     = (ref)=> 'background-color': @filter("strToColor")(ref)
         @scope.isLatitude     = (f) => ((do f.name.toLowerCase).indexOf 'latitude') >= 0
         @scope.isLongitude    = (f) => ((do f.name.toLowerCase).indexOf 'longitude') >= 0
@@ -55,14 +54,6 @@ class window.IndividualSingleCtrl
         @scope.authors     = @Individual.authors()
         # Get source for the names
         @scope.nameSources = do @getNameSources
-        # Load graph data
-        graph_params =
-            topic   : @scope.topic
-            username: @scope.username
-            type    : @stateParams.type
-            id      : @stateParams.id
-            depth   : 2
-        @Individual.graph graph_params, (data) => @scope.graphnodes = data
 
         do @computeGeolocation
         # Set page's title

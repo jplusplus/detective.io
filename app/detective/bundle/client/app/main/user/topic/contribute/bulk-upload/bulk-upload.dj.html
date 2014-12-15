@@ -2,14 +2,14 @@
 
 	<div class="container">
 
-		<h2>Upload objects and relationship</h2>
+		<h2>Import from CSV</h2>
 
 		<div class="panel panel-default">
 			<div class="panel-body">
 
 				<div class="bottom20">
 					<form>
-						<p>Please select a CSV file to upload:</p>
+						<p>Please select a CSV file to import:</p>
 						<div ng-repeat="field_name in file_fields" class="well">
 							<input type="file" multiple ng-file-select="onFileSelect($files, field_name)" class="form-control" ng-disabled="disableForm">
 						</div>
@@ -29,7 +29,7 @@
 					We weren't able to proccess your files now, but will send you an email when they're ready.
 				</div>
 				<div class="alert alert-warning long" ng-if="isALongJob">
-					This job seems to be long, we will send you an email when they're ready. You can close this window if you would like.
+					This import seems to be long, we will send you an email when it's done. You can close this window if you wish.
 				</div>
 				<div class="loader" ng-if="feedback">
 					<div>[[ job_status.meta.progress_title ]]</div>
@@ -46,7 +46,7 @@
 				</div>
 
 				<div class="alert alert-warning" ng-if="job_status.result.errors && job_status.result.errors.length > 0">
-					there are some warning about this request:
+					There are some warnings about this request:
 					<div ng-repeat="error in job_status.result.errors">
 						<div ng-repeat="(key, value) in error">
 							[[key]]: [[value]]
@@ -63,30 +63,39 @@
 					<div class="alert alert-info">
 						<h4>File format</h4>
 						<p>
-							Entities file should respect this header structure:
+							You can import data from CSV files into your data collection. Your files must be separated into files for items (or nodes) and files for relationships between these items. Each file must have a header row.
+						</p>
+						<p>
+							If you have any question, send us an email at <a href="mailto:contact@detective.io">contact@detective.io</a>.
+						</p>
+						<p>
+							Item files must respect this header structure:
 						</p>
 						<table class="table table-bordered tabl top10 panel panel-default">
 							<theader>
 								<tr>
-									<td>&lt;object_name&gt;_id</td>
+									<td>&lt;item&gt;_id</td>
 									<td>&lt;field_name1&gt;</td>
 									<td>&lt;field_name2&gt;</td>
+									<td>&lt;field_name3&gt;</td>
+									<td>&lt;field_name4&gt;</td>
 									<td>etc..</td>
 								</tr>
 							</theader>
 						</table>
 						<p>
-							Relationships file should respect this header structure:
+							Relationships files must respect this header structure:
 						</p>
 						<table class="table table-bordered tabl top10 bottom0 panel panel-default">
 							<theader>
 								<tr>
-									<td>&lt;object_1_name&gt;_id</td>
+									<td>&lt;item1_id&gt;_id</td>
 									<td>&lt;relation_type&gt;</td>
-									<td>&lt;object_2_name&gt;</td>
+									<td>&lt;item2_id&gt;</td>
 								</tr>
 							</theader>
 						</table>
+						<p>Feeling confused? Check out some examples: <a href="https://docs.google.com/uc?id=0ByNJSo4EX-ziVktCTWF6V0MtSlE&export=download">CSV files of terrorist incidents in Europe</a>, <a href="https://docs.google.com/uc?id=0ByNJSo4EX-ziRzl4TjBGcVRkWHc&export=download">CSV files of companies listed on the NYSE</a> or the <a href="https://docs.google.com/uc?id=0ByNJSo4EX-ziT2lpeWJFbERsR2c&export=download">CSV files of a list of the members of the European Parliament</a>.</p>
 					</div>
 				</div>
 			</div>

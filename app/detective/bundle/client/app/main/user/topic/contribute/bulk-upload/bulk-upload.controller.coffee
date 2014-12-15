@@ -3,7 +3,7 @@ class window.BulkUploadCtrl
     @$inject: ['$scope', '$http', '$stateParams', '$location', 'Page', 'Individual', '$timeout', 'Common', 'User']
 
     constructor: (@scope, @http, @stateParams, @location, @Page, @Individual, @timeout, @Common, @User)->
-        @Page.title "Bulk Upload", no
+        @Page.title "Import from CSV", no
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
         # ──────────────────────────────────────────────────────────────────────

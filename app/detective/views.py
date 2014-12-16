@@ -50,7 +50,7 @@ def default_social_meta(request):
     }
 
 # @gzip_page
-def main(request, social_meta_dict=None,**kwargs):    
+def main(request, social_meta_dict=None,**kwargs):
     if social_meta_dict == None:
         social_meta_dict = default_social_meta(request)
 
@@ -259,7 +259,7 @@ def partial(request, partial_name=None):
     try:
         return render_to_response(template_name)
     except TemplateDoesNotExist:
-        raise Http404
+        return HttpResponse('', status=404)
 
 @gzip_page
 def partial_explore(request, topic=None):

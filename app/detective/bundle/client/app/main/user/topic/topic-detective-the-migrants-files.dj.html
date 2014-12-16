@@ -1,0 +1,219 @@
+{% load staticfiles %}
+
+<div class="explore user__topic">
+
+    <div class="banner banner-big" parallax=".bg" speed="0.7">
+        <img ng-src="[[meta.background]]" class="bg" />
+        <div class="fg top90 container">
+            <div class="intro">
+                <h2>[[meta.title]]</h2>
+                <p class="lead" ng-if="meta.description" ng-bind-html="meta.description"></p>
+                <p>
+                    <strong>
+                        <i class="fa fa-trophy right05"></i>
+                        Winner of the <a href="http://www.globaleditorsnetwork.org/programmes/data-journalism-awards/" target="_blank">Datajournalism Awards</a>.
+                    </strong>
+                </p>
+                <p class="top40">
+                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.ontology_as_mod)" ng-href="/[[username]]/[[topic]]/contribute">
+                        Add data
+                    </a>
+                    <a class="btn btn-primary btn-lg" ng-click="scrollToExplore = true">
+                        Explore
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-primary">
+        <div class="container">
+            <a scroll-to="600" ng-if="scrollToExplore == true" reset="scrollToExplore"></a>
+            <div class="top50 bottom40">
+                <div class="row">
+                    <form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl as search">
+                        <input type="search"
+                                autocorrect="off"
+                                autocapitalize="off"
+                                placeholder="[[ search.topic.search_placeholder]]"
+                                tt-typeahead
+                                tt-individual="'summary'"
+                                tt-topic="search.topic.author.username + '/' + search.topic.slug"
+                                tt-model="search.selectedIndividual"
+                                tt-endpoint="'human'"
+                                value-key="label"
+                                limit="10"
+                                class="form-control"
+                                id="input-search" />
+                    </form>
+                    <div class="col-md-8 col-md-push-2 lead top20" ng-if="types">
+                        Navigate through
+                        <a ng-href="/[[username]]/[[topic]]/event">[[getTypeCount("event")]] events</a>,
+                        <a ng-href="/[[username]]/[[topic]]/territory">[[getTypeCount("territory")]] territories</a>,
+                        <a ng-href="/[[username]]/[[topic]]/detentioncenter">[[getTypeCount("detentioncenter")]] detention centers</a> and the
+                        <a ng-href="/[[username]]/[[topic]]/migrant">[[getTypeCount("migrant")]] migrants</a> for which some data is available.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="hr-primary bottom0" />
+
+    <iframe src="//jplusplus.cartodb.com/viz/f89ad96e-7ec4-11e4-84ac-0e018d66dc29/embed_map?title=false&description=false&search=false&shareable=true&cartodb_logo=true&layer_selector=false&legends=false&scrollwheel=false&fullscreen=false&sublayer_options=1&sql=" width="100%" height="600px" class="hidden-xs"  frameborder="0" allowfullscreen></iframe>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="partners top60">
+
+                    <div class="col-sm-3 col-md-12 col-xs-4 bottom20">
+                        <img alt="NZZ" src="{% static 'img/partners/01 - NZZ.png' %}" class="img-responsive" />
+                    </div>
+
+                    <div class="col-sm-3 col-md-12 col-xs-4 bottom20">
+                        <img alt="El Confidencial" src="{% static 'img/partners/02 - El Confidencial.png' %}" class="img-responsive" />
+                    </div>
+
+                    <div class="col-sm-3 col-md-12 col-xs-4 bottom20">
+                        <img alt="Radiobubble" src="{% static 'img/partners/03 - Radiobubble.png' %}" class="img-responsive" />
+                    </div>
+
+                    <div class="clearfix visible-xs"></div>
+
+                    <div class="col-sm-3 col-md-12 col-xs-4 bottom20">
+                        <img alt="Sydsvenskan" src="{% static 'img/partners/04 - Sydsvenskan.png' %}" class="img-responsive" />
+                    </div>
+
+                    <div class="clearfix visible-sm"></div>
+
+                    <div class="col-sm-3 col-md-12 col-xs-4 bottom20">
+                        <img alt="lespresso" src="{% static 'img/partners/05 - lespresso.png' %}" class="img-responsive" />
+                    </div>
+
+                    <div class="col-sm-3 col-md-12 col-xs-4 bottom20">
+                        <img alt="HLB" src="{% static 'img/partners/06 - HLB.png' %}" class="img-responsive" />
+                    </div>
+
+                    <div class="clearfix visible-xs"></div>
+
+                    <div class="col-sm-3 col-md-12 col-xs-4 bottom20">
+                        <img alt="Le Monde Diplomatique" src="{% static 'img/partners/07 - Le Monde Diplomatique.png' %}" class="img-responsive" />
+                    </div>
+
+                    <div class="col-sm-3 col-md-12 col-xs-4 bottom20">
+                        <img alt="EUObserver" src="{% static 'img/partners/08 - EUObserver.png' %}" class="img-responsive" />
+                    </div>
+
+                    <div class="clearfix visible-sm"></div>
+
+                    <div class="col-sm-3 col-md-12 col-xs-4 bottom20">
+                        <img alt="MO" src="{% static 'img/partners/09 - MO.png' %}" class="img-responsive" />
+                    </div>
+
+                    <div class="clearfix visible-xs"></div>
+                </div>
+            </div>
+
+            <div class="visible-sm clearfix top20"></div>
+
+            <div class="col-md-7">
+                <h3>About the project</h3>
+                <div ng-bind-html="meta.about"></div>
+            </div>
+
+            <ul class="col-md-3 top60 list-group">
+                <li class="list-group-item">
+                    <h5 class="list-group-item-heading">
+                        Neue Zürcher Zeitung
+                    </h5>
+                    <a class="list-group-item-text" href="http://www.nzz.ch/aktuell/international/auslandnachrichten/die-toten-vor-europas-tueren-1.18272891#" target="_blank">
+                        Die Toten vor Europas Türen
+                    </a>
+                </li>
+
+                <li class="list-group-item">
+                    <h5 class="list-group-item-heading">
+                        Neue Zürcher Zeitung
+                    </h5>
+                    <a class="list-group-item-text" href="http://www.nzz.ch/aktuell/international/auslandnachrichten/daten-einer-tragoedie-1.18272916" target="_blank">
+                        Daten einer Tragödie
+                    </a>
+                </li>
+
+                <li class="list-group-item">
+                    <h5 class="list-group-item-heading">
+                        Radio Bubble
+                    </h5>
+                    <a class="list-group-item-text" href="http://www.rbdata.gr/themigrantsfiles/index.html" target="_blank">
+                        Τα θανατηφόρα τείχη της Ευρώπης
+                    </a>
+                </li>
+
+                <li class="list-group-item">
+                    <h5 class="list-group-item-heading">
+                        El Confidencial
+                    </h5>
+                    <a class="list-group-item-text" href="http://www.elconfidencial.com/mundo/2014-03-31/trece-anos-de-inmigracion-mas-de-23-000-muertos-por-intentar-alcanzar-europa_108953/" target="_blank">
+                        Trece años de inmigración: más de 23.000 muertos por intentar alcanzar Europa
+                    </a>
+                </li>
+
+                <li class="list-group-item">
+                    <h5 class="list-group-item-heading">
+                        El Confidencial
+                    </h5>
+                    <a class="list-group-item-text" href="http://www.elconfidencial.com/mundo/2014-03-31/ante-el-cierre-de-fronteras-los-inmigrantes-se-vuelcan-hacia-rutas-mas-peligrosas_109006/" target="_blank">
+                        Ante el cierre de fronteras, los inmigrantes se vuelcan hacia rutas más peligrosas
+                    </a>
+                </li>
+
+                <li class="list-group-item">
+                    <h5 class="list-group-item-heading">
+                        Hufvudstadsbladet
+                    </h5>
+                    <a class="list-group-item-text" href="http://hbl.fi/nyheter/2014-03-31/587881/fastning-europa-kraver-tusentals-liv" target="_blank">
+                        Fästning Europa kräver tusentals liv (€)
+                    </a>
+                </li>
+
+                <li class="list-group-item">
+                    <h5 class="list-group-item-heading">
+                        L'Espresso
+                    </h5>
+                    <a class="list-group-item-text" href="http://speciali.espresso.repubblica.it/interattivi-2014/migranti/index.html" target="_blank">
+                        Migranti, la guerra del Mediterraneo
+                    </a>
+                </li>
+
+                <li class="list-group-item">
+                    <h5 class="list-group-item-heading">
+                        Mondiaal Nieuws
+                    </h5>
+                    <a class="list-group-item-text" href="http://www.mo.be/nieuws/de-weg-naar-europa-een-kerkhof" target="_blank">
+                        De weg naar Europa is een kerkhof
+                    </a>
+                </li>
+
+                <li class="list-group-item">
+                    <h5 class="list-group-item-heading">
+                        Le Monde Diplomatique
+                    </h5>
+                    <a class="list-group-item-text" href="http://www.monde-diplomatique.fr/carnet/2014-03-31-morts-aux-frontieres" target="_blank">
+                        « Ces gens-là sont morts, ce ne sont plus des migrants »
+                    </a>
+                </li>
+
+                <li class="list-group-item">
+                    <h5 class="list-group-item-heading">
+                        EU Observer
+                    </h5>
+                    <a class="list-group-item-text" href="http://euobserver.com/justice/123682" target="_blank">
+                        Surveying migrants' deaths at Europe's door
+                    </a>
+                </li>
+            </ul>
+
+
+        </div>
+    </div>
+</div>

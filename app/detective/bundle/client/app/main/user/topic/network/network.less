@@ -1,0 +1,105 @@
+.user__topic__network {
+    overflow: hidden;
+    position: relative;
+    z-index: 5;
+
+    height:100%;
+
+    &__close-network-view,
+    &__close-network-view:hover {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color:white;
+    }
+
+    &__loading {
+        .translate(50%, 50%);
+        height     : 100%;
+        position   : absolute;
+        left       : 0;
+        right      : 0;
+    }
+
+
+    &__filters-box {
+        position: absolute;
+        top: 0;
+        bottom:0;
+        display: block;
+        padding: 10px 15px;
+        white-space: nowrap;
+        background:fade(@brand-secondary, 50);
+
+        .checkbox {
+            padding:0;
+        }
+
+        label.filter-names &__label {
+            display: inline-block;
+        }
+
+        /* to hide the checkbox itself */
+        input[type=checkbox] { display:none; }
+
+
+        input[type=checkbox] + label .color-tag {
+            margin-right: 5px;
+            .translate(0, 5px);
+        }
+
+         /* unchecked icon */
+        input[type=checkbox] + label {
+            opacity:0.5;
+            font-weight: bold;
+            .color-tag {
+                opacity:0.5;
+            }
+        }
+
+        /* checked icon */
+        input[type=checkbox]:checked + label {
+            opacity:1;
+            .color-tag {
+                opacity:1;
+            }
+        }
+
+        & &__all {
+            display: block;
+            border-bottom:1px solid fade(white, 30);
+            padding-bottom:5px;
+            padding-left:30px;
+            position: relative;
+
+            label:before {
+                content:"";
+                position: absolute;
+                left:0;
+                top:0;
+                width:20px;
+                height:20px;
+                .border-radius(@border-radius-small);
+                border:1px solid fade(white, 40);
+            }
+
+            label:after {
+                content:"";
+                position: absolute;
+                left:0;
+                top:0;
+                border:10px transparent solid;
+                border-left-color:fade(white, 25%);
+                border-top-color:fade(white, 5%);
+                border-right-color:fade(black, 15%);
+                border-bottom-color:fade(black, 35%);
+            }
+        }
+    }
+
+    &__graphviz {
+        height : 100%;
+    }
+}
+
+// EOF

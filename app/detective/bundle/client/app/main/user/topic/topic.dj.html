@@ -1,0 +1,120 @@
+{% load staticfiles %}
+
+<div class="explore user__topic">
+
+    <div class="banner banner-big" parallax=".bg" speed="0.7" ng-controller="TopicBannerCtrl">
+        <img ng-src="[[meta.background]]" class="bg" />
+        <div class="user__topic__network" ng-if="$state.is('user-topic.network')">
+            <div class="user__topic__network__loading" ng-if="isLoading">
+                <i class="fa fa-circle-o-notch fa-spin"></i> Loading
+            </div>
+
+            <a class="user__topic__network__close-network-view" ui-sref="user-topic({username:username, topic:topic})">
+                <i class="fa fa-arrow-left"></i>&nbsp; Close network view
+            </a>
+
+            <div class="user__topic__network__filters-box">
+                <form>
+                    <div class="checkbox user__topic__network__filters-box__all">
+                        <input type="checkbox"
+                                id="user__topic__network__filters-box__all"
+                                ng-click="toggleSelectAll()"
+                                ng-checked="filtersSelected.length == filtersNames.length"/>
+
+                        <label for="user__topic__network__filters-box__all">
+                            <div class="user__topic__network__filters-box__label">All</div>
+                        </label>
+                    </div>
+                    <div class="checkbox" ng-repeat="form in filtered = ( forms | filter:isSearchable | orderBy:'index' )">
+                        <input type="checkbox"
+                                id="user__topic__network__filters-box__[[$index]]"
+                                name="filtersSelected[]"
+                                value="[[form.name]]"
+                                ng-checked="filtersSelected.indexOf(form.name) > -1"
+                                ng-click="toggleFiltersSelection(form.name)" />
+
+                        <label class="filter-names"
+                                for="user__topic__network__filters-box__[[$index]]"
+                                ng-init="count = getTypeCount(form.name)" >
+                            <div class="user__topic__network__filters-box__label">
+                                <div color-tag ref="form.name" class="small"></div>
+                                [[form.verbose_name_plural]]
+                            </div>
+                        </label>
+                    </div>
+                </form>
+            </div>
+
+            <graphviz ng-if="graphnodes" class="user__topic__network__graphviz" data="graphnodes"></graphviz>
+        </div>
+
+
+        <div class="fg top90 container">
+            <div class="intro" ng-if="!$state.is('user-topic.network')">
+                <h2>[[meta.title]]</h2>
+                <p class="lead" ng-if="meta.description" ng-bind-html="meta.description"></p>
+                <p class="top40">
+                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.ontology_as_mod)" ng-href="/[[username]]/[[topic]]/contribute">
+                        Add items
+                    </a>
+                    <a class="btn btn-primary btn-lg" ui-sref="user-topic.network({username:username, topic:topic})">
+                        Explore
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-primary">
+        <div class="container">
+            <div class="top50 bottom40">
+                <div class="row">
+                    <!-- Search bar on topic home page -->
+                    <form class="col-md-8 col-md-push-2" role="search"  ng-controller="SearchFormCtrl as search">
+                        <input type="search"
+                                autocorrect="off"
+                                autocapitalize="off"
+                                placeholder="[[ search.topic.search_placeholder ]]"
+                                tt-typeahead
+                                tt-individual="'summary'"
+                                tt-disable-entity-creation="true"
+                                tt-topic="search.topic.author.username + '/' + search.topic.slug"
+                                tt-model="search.selectedIndividual"
+                                tt-endpoint="'human'"
+                                value-key="label"
+                                limit="10"
+                                class="form-control"
+                                id="input-search" />
+                    </form>
+                    <div class="col-md-8 col-md-push-2 lead top20" ng-if="types">
+                        Navigate through
+                        <span ng-repeat="form in filtered = ( forms | filter:isSearchable )">
+                            <span ng-if="$last && !$first"> and </span>
+                            <span ng-if="!$last && !$first">, </span>
+                            <a ng-href="/[[username]]/[[topic]]/[[form.name]]" ng-init="count = getTypeCount(form.name)">
+                                [[count]]
+                                <span ng-if="count <= 1">[[form.verbose_name]]</span>
+                                <span ng-if="count > 1">[[form.verbose_name_plural]]</span>
+                            </a>
+                            <span ng-if="$last">.</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="hr-primary" />
+
+    <div class="container">
+        <div class="row" ng-init="display_map=shouldDisplayMap()">
+            <div class="about"
+                 ng-class="{ 'col-md-4': display_map, 'col-md-8 col-md-push-2': !display_map}">
+                <h3>About the project</h3>
+                <div ng-bind-html="meta.about"></div>
+            </div>
+            <div ng-show="display_map" class="col-md-8 select-a-country">
+                <div country-map model="selectedCountry" values="countries" class="top60" />
+            </div>
+        </div>
+    </div>
+</div>

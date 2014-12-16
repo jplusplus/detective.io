@@ -1,0 +1,23 @@
+<div class='user__topic__type__entity__sources' click-outside="fieldSourcesOpened=false" ng-show="sources.length">
+    <a  class='user__topic__type__entity__sources__link' ng-click="fieldSourcesOpened=!fieldSourcesOpened">
+        <i class="fa fa-caret-down"></i> Sources
+    </a>
+    <div class='user__topic__type__entity__sources__popover'
+         ng-show='fieldSourcesOpened'
+         ng-class='"user__topic__type__entity__sources__popover--[[orientation || "up"]]"'>
+        <div class='arrow'></div>
+        <ul class="user__topic__type__entity__sources__popover__list">
+            <li class="user__topic__type__entity__sources___popover__list__item"
+                ng-repeat="source in sources track by source.reference">
+                <a ng-if="isSourceURLValid(source)"
+                   target="_blank"
+                   ng-href="[[ source.reference ]]">
+                   [[ source.reference ]]
+                </a>
+                <span ng-if="!isSourceURLValid(source)">
+                    [[ source.reference ]]
+                </span>
+            </li>
+        </ul>
+    </div>
+</div>

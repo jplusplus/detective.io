@@ -1,0 +1,93 @@
+<div class="container user" ui-view>
+
+    <div class="row">
+        <div class="user__user-info col-sm-6 col-sm-push-3">
+            <img class="user__user-info__avatar" title="Avatar provided by Gravatar"  ng-src="[[ user.gravatar ]]" />
+            <div class="user__user-info__wrapper">
+                <h2>
+                    [[ user.username ]]
+                </h2>
+                <dl class="dl-horizontal">
+                    <dt ng-repeat-start="field in ['location', 'organization', 'url']"
+                        class='text-muted sr-only'
+                        ng-show="isMe || user[field]">
+                        [[ field | titlecase ]]
+                    </dt>
+                    <dd ng-repeat-end ng-show="isMe || user[field]">
+                        <span ng-show="shoulShowValueFor(field)">
+                            <span ng-if="user[field]" ng-bind-html="user[field] | linky:'_blank'"></span>
+                            <a ng-click="openFormFor(field)"
+                               ng-if="isMe"
+                               class="user__user-info__wrapper__edit-label">
+                                <span  ng-if="!user[field]">
+                                    <span ng-switch="field">
+                                        <span ng-switch-when="organization">Add your organization</span>
+                                        <span ng-switch-when="url">Add your website</span>
+                                        <span ng-switch-when="location">Add your location</span>
+                                    </span>
+                                </span>
+                                <i class="fa fa-pencil"></i>
+                            </a>
+                        </span>
+                        <span ng-show="shouldShowFormFor(field)">
+                            <form ng-submit="validateFormFor(field)" class="user__user-info__wrapper__input">
+                                <div class="input-group">
+                                    <input ng-model="user[field]" class="form-control" />
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" type="submit">
+                                            Save
+                                        </button>
+                                    </span>
+                                </div>
+                            </form>
+                        </span>
+                    </dd>
+                </dl>
+                <div class='clearfix'>&nbsp;</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div ng-if="shouldShowTopics" class="user__topics col-sm-6 col-sm-push-3 panel panel-default"
+             ng-class='{ loading: loading  }'>
+            <span ng-if="topics.length">
+                <div class="panel-body">
+                    <h3>Data collections</h3>
+                    <ul class="list-unstyled">
+                        <li ng-repeat="topic in topics" class="user__topics__topic">
+                            <a ng-href="[[topic.link]]">
+                                <div class="lead user__topics__topic__title">
+                                    <i class="fa fa-cube user__topics__topic__title__icon"
+                                       title="Own by [[topic.author.username]]"
+                                       ng-if="topic.author.username == user.username"></i>
+                                    <i class="fa fa-cubes user__topics__topic__title__icon"
+                                       title="Own by [[topic.author.username]]"
+                                       ng-if="topic.author.username != user.username"></i>
+                                    [[topic.title]]<br />
+                                </div>
+                                <div class="text-muted user__topics__topic__description"
+                                     ng-bind-html="topic.description"></div>
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="dashboard__paginator pagination pull-right">
+                        <li ng-if="hasPrevious()">
+                            <a ng-click="previousPage()">
+                                <i class="fa fa-caret-left"></i>
+                                &nbsp;Previous
+                            </a>
+                        </li>
+                        <li ng-if="hasNext()">
+                            <a ng-click="nextPage()">
+                                Next&nbsp;
+                                <i class="fa fa-caret-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </span>
+            <h3 ng-if="!topics.length">No data collections found</h3>
+        </div>
+    </div>
+</div>

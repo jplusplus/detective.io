@@ -1,11 +1,16 @@
-from django.core.cache      import cache
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
-from django.db.models       import signals
-from django.forms.forms     import pretty_name
-from os                     import listdir
-from os.path                import isdir, join
-from random                 import randint
+from django.core.cache         import cache
+from django.core.exceptions    import ValidationError, SuspiciousOperation
+from django.core.files         import File
+from django.core.files.storage import default_storage
+from django.core.files.temp    import NamedTemporaryFile
+from django.core.validators    import validate_email
+from django.db.models          import signals
+from django.forms.forms        import pretty_name
+from os                        import listdir
+from os.path                   import isdir, join
+from random                    import randint
+from app.detective.exceptions  import UnavailableImage, NotAnImage, OversizedFile
+from urlparse                  import urlparse
 import importlib
 import inspect
 import itertools
@@ -13,10 +18,12 @@ import logging
 import os
 import re
 import tempfile
+import urllib2
+import magic
 logger = logging.getLogger(__name__)
 
 # for relative paths
-here = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
+here = lambda x: join(os.path.abspath(os.path.dirname(__file__)), x)
 
 def without(coll, val):
     def _check_not_val(el):
@@ -563,8 +570,76 @@ class DumbProfiler(object):
                 delattr(self, attr)
 
 
-
-
 topic_cache   = TopicCachier()
 dumb_profiler = DumbProfiler()
-# EOF
+
+def download_url(url):
+    tmp_file = None
+    def is_image(tmp):
+        mimetype = magic.from_file(tmp.name, True)
+        return mimetype.startswith('image')
+
+    def is_oversized(tmp, url):
+        max_size_in_bytes = 1 * 1024 ** 2 # 1MB
+        file_size = os.stat(tmp.name).st_size
+        oversized = file_size > max_size_in_bytes
+        return oversized
+
+    if url == None:
+        return None
+    try:
+        name = urlparse(url).path.split('/')[-1]
+        tmp_file = NamedTemporaryFile(delete=True)
+        tmp_file.write(urllib2.urlopen(url, timeout=10).read())
+        tmp_file.flush()
+        if not is_image(tmp_file):
+            raise NotAnImage()
+        if is_oversized(tmp_file, url):
+            raise OversizedFile()
+        return File(tmp_file, name)
+    except urllib2.HTTPError:
+        raise UnavailableImage()
+    except urllib2.URLError:
+        raise UnavailableImage()
+
+
+
+def get_image(url_or_path, download_external=False):
+    from django.conf import settings
+    if not isinstance(url_or_path, str) and \
+       not isinstance(url_or_path, unicode):
+        return None
+    # It's an url
+    elif url_or_path.startswith("http"):
+        if url_or_path.startswith(settings.MEDIA_URL) or download_external:
+            # From file storage?
+            image = download_url(url_or_path)
+            path = join(settings.UPLOAD_ROOT, image.name)
+            # Save the new image
+            default_storage.save(path, image)
+            # And load it from the path
+            return get_image(path, download_external)
+        else:
+            return None
+    # It's a path
+    elif url_or_path.startswith(settings.MEDIA_ROOT):
+        try:
+            # Load the file from the file storage
+            if default_storage.exists(url_or_path):
+                return default_storage.open(url_or_path)
+            else:
+                return None
+        except SuspiciousOperation:
+            return None
+    # It's a path
+    elif url_or_path.startswith("/"):
+        return get_image( join( settings.MEDIA_ROOT, url_or_path.strip('/') ), download_external)
+    else:
+        return None
+
+
+# Django is mono-threaded in DEBUG, so it is impossible to download
+# a file served locally by Django.
+def is_local(request, url):
+    django_hostname = urlparse( request.build_absolute_uri() ).hostname
+    return urlparse(url).hostname == django_hostname

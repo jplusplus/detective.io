@@ -2,16 +2,22 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic, get_leafs_and_edges, get_topic_from_request, iterate_model_fields, topic_cache, without
+from app.detective.utils                import import_class, to_underscores, get_model_topic, \
+                                                get_leafs_and_edges, get_topic_from_request, \
+                                                iterate_model_fields, topic_cache, \
+                                                without, download_url, \
+                                                get_image, is_local
 from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
+from app.detective.exceptions           import UnavailableImage, NotAnImage, OversizedFile
 from django.conf                        import settings
 from django.conf.urls                   import url
 from django.contrib.auth.models         import User
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
 from django.core.paginator              import Paginator, InvalidPage
 from django.core.urlresolvers           import reverse
+from django.core.files.storage          import default_storage
 from django.db.models.query             import QuerySet
 from django.http                        import Http404
 from neo4jrestclient                    import client
@@ -29,12 +35,16 @@ from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
 from datetime                           import datetime
+from easy_thumbnails.exceptions         import InvalidImageFormatError
+from easy_thumbnails.files              import get_thumbnailer
 import json
 import re
 import logging
 import bleach
+import os
 
 logger = logging.getLogger(__name__)
+
 
 class IndividualAuthorization(DjangoAuthorization):
 
@@ -261,6 +271,8 @@ class IndividualResource(ModelResource):
         return self.get_resource_uri(bundle) == bundle.request.path
 
     def dehydrate(self, bundle):
+        # Get the request from the bundle
+        request = bundle.request
         # Show additional field following the model's rules
         rules = bundle.request.current_topic.get_rules().model( self.get_model() )
         # Get the output transformation for this model
@@ -275,7 +287,58 @@ class IndividualResource(ModelResource):
 
         bundle.data["_transform"] = transform or getattr(bundle.data, 'name', None)
 
+        to_add = dict()
         for field in bundle.data:
+            # Image field
+            if field == 'image':
+                # Get thumbnails
+                try:
+                    url_or_path = bundle.data[field]
+                    # Remove host for local url
+                    if is_local(request, url_or_path or ''):
+                        # By removing the host, we'll force django
+                        # to read the file instead of downloading it
+                        url_or_path = url_or_path.split( request.get_host() )[1]
+                        url_or_path = url_or_path.replace(settings.MEDIA_URL, '/')
+                    try:
+                        #  Use a file instance and download external only
+                        #  on detail view (to avoid heavy loading)
+                        image = get_image(url_or_path, download_external=self.use_in(bundle))
+                    # The given url is not a valid image
+                    except (NotAnImage, OversizedFile):
+                        # Save the new URL to avoid reloading it
+                        setattr(bundle.obj, field, None)
+                        bundle.obj.save()
+                        continue
+                    # The image might be temporary unvailable
+                    except UnavailableImage: continue
+                    # Skip none value
+                    if image is None: continue
+                    # Build the media url using the request
+                    media_url = request.build_absolute_uri(settings.MEDIA_URL)
+                    # Extract public name
+                    public_name = lambda i: os.path.join(media_url,  i.replace(settings.MEDIA_ROOT, '').strip('/') )
+                    # Return the public url
+                    bundle.data[field] = public_name(image.name)
+                    # The image url changed...
+                    if getattr(bundle.obj, field) != public_name(image.name):
+                        # Save the new URL to avoid reloading it
+                        setattr(bundle.obj, field, public_name(image.name))
+                        bundle.obj.save()
+                    # Create thumbnailer with the file
+                    thumbnailer = get_thumbnailer(image.name)
+
+                    to_add[field + '_thumbnail'] = {
+                        key : public_name(thumbnailer.get_thumbnail({
+                            'size': size,
+                            'crop': True
+                        }).name)
+                        for key, size in settings.THUMBNAIL_SIZES.items()
+                    }
+                except InvalidImageFormatError as e:
+                    print e
+                    to_add[field + '_thumbnail'] = ''
+
             # Convert tuple to array for better serialization
             if type( getattr(bundle.obj, field, None) ) is tuple:
                 bundle.data[field] = list( getattr(bundle.obj, field) )
@@ -288,6 +351,9 @@ class IndividualResource(ModelResource):
             # We can also receive a function
             elif callable(transform):
                 bundle.data[field] = transform(bundle.data, field)
+
+        for key in to_add.keys():
+            bundle.data[key] = to_add[key]
 
         return bundle
 
@@ -562,6 +628,12 @@ class IndividualResource(ModelResource):
 
         return cleaned_data
 
+
+    def obj_delete(self, bundle, **kwargs):
+        super(IndividualResource, self).obj_delete(bundle, **kwargs)
+        # update the cache
+        topic_cache.incr_version(bundle.request.current_topic)
+
     def get_patch(self, request, **kwargs):
         pk = kwargs["pk"]
         # This should be a POST request
@@ -650,9 +722,14 @@ class IndividualResource(ModelResource):
             # Or a literal value
             # (integer, date, url, email, etc)
             else:
-                print field_name, field_value
+                # Current model
+                model = self.get_model()
+                # Fields
+                fields = { x['name'] : x for x in iterate_model_fields(model) }
                 # Remove the values
                 if field_value in [None, '']:
+                    if field_name == 'image' and fields[field_name]['type'] == 'URLField':
+                        self.remove_node_file(node, field_name, True)
                     # The field may not exists (yet)
                     try:
                         node.delete(field_name)
@@ -661,10 +738,6 @@ class IndividualResource(ModelResource):
                 # We simply update the node property
                 # (the value is already validated)
                 else:
-                    # Current model
-                    model = self.get_model()
-                    # Fields
-                    fields = { x['name'] : x for x in iterate_model_fields(model) }
                     if field_name in fields:
                         if 'is_rich' in fields[field_name]['rules'] and fields[field_name]['rules']['is_rich']:
                             data[field_name] = field_value = bleach.clean(field_value,
@@ -674,6 +747,18 @@ class IndividualResource(ModelResource):
                                                                               '*': ("class",),
                                                                               'a': ("href", "target")
                                                                           })
+                        if field_name == 'image' and fields[field_name]['type'] == 'URLField':
+                            self.remove_node_file(node, field_name, True)
+                            try:
+                                image_file = download_url(data[field_name])
+                                path = default_storage.save(os.path.join(settings.UPLOAD_ROOT, image_file.name) , image_file)
+                                data[field_name] = field_value = path.replace(settings.MEDIA_ROOT, "")
+                            except UnavailableImage:
+                                data[field_name] = field_value = ""
+                            except NotAnImage:
+                                data[field_name] = field_value = ""
+                            except OversizedFile:
+                                data[field_name] = field_value = ""
                     node.set(field_name, field_value)
         # update the cache
         topic_cache.incr_version(request.current_topic)
@@ -858,7 +943,7 @@ class IndividualResource(ModelResource):
     def get_graph(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
-        depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 1
+        depth = int(request.GET['depth']) if 'depth' in request.GET.keys() else 2
         topic = Topic.objects.get(ontology_as_mod=get_model_topic(self.get_model()))
         leafs, edges = get_leafs_and_edges(
             topic     = topic,
@@ -866,5 +951,20 @@ class IndividualResource(ModelResource):
             root_node = kwargs['pk'])
         self.log_throttled_access(request)
         return self.create_response(request, {'leafs': leafs, 'edges' : edges})
+
+    def remove_node_file(self, node, field_name, thumbnails=False):
+        try:
+            file_name = os.path.join(settings.MEDIA_ROOT, node.get(field_name).strip('/'))
+            default_storage.delete(file_name)
+
+            if thumbnails:
+                extension = file_name.split('.')[-1].lower().replace('jpeg', 'jpg')
+                suffixes = [".{0}x{1}_q85_crop.".format(size[0], size[1]) for size in settings.THUMBNAIL_SIZES.values()]
+                for suffix in suffixes:
+                    full_file_name = "{0}{1}{2}".format(file_name, suffix, extension)
+                    if default_storage.exists(full_file_name):
+                        default_storage.delete(full_file_name)
+        except:
+            pass
 
 # EOF

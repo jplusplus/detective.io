@@ -1,0 +1,158 @@
+<form class="login-form panel panel-default panel-centered top30 black"
+      name="form"
+      ng-class="{loading:loading}"
+      ng-hide="signupSucceed"
+      ng-submit="signup(form)"
+      novalidate>
+  <div class="panel-body">
+ 	  <h2>Sign up</h2>
+    <fieldset ng-disabled="loading">
+      <div class="form-group">
+        <label for="inputUsername">Username</label>
+        <div class="input-group">
+          <input required
+                 autocorrect="off"
+                 autocapitalize="off"
+                 unique="username"
+                 type="text"
+                 name="username"
+                 ng-model="username"
+                 ng-pattern="/^([\w\.\-])+$/"
+                 class="form-control"
+                 id="inputUsername"
+                 placeholder="Choose a username" />
+          <span class="input-group-addon">
+            <i class="fa fa-check-square-o text-success" ng-show="form.username.$valid"></i>
+            <i class="fa fa-square-o"                    ng-hide="form.username.$valid"></i>
+          </span>
+        </div>
+        <p class="alert alert-danger top05" ng-show="usernameSubmitted && form.username.$error.unique">
+          This username is already taken.
+        </p>
+        <p class="alert alert-danger top05" ng-show="usernameSubmitted && form.username.$error.required">
+          You have to enter a username.
+        </p>
+        <p class="alert alert-danger top05" ng-show="usernameSubmitted && form.username.$error.pattern">
+          Nice touch, but you can only use numbers, letters, and -, _ or . here.
+        </p>
+
+      </div>
+
+      <div class="form-group">
+        <label for="inputEmail">Email</label>
+        <div class="input-group">
+          <input required
+                 autocorrect="off"
+                 autocapitalize="off"
+                 unique="email"
+                 type="email"
+                 name="email"
+                 ng-model="email"
+                 class="form-control"
+                 id="inputEmail"
+                 placeholder="Enter your email address">
+          <span class="input-group-addon">
+            <i class="fa fa-check-square-o text-success" ng-show="form.email.$valid"></i>
+            <i class="fa fa-square-o" ng-hide="form.email.$valid"></i>
+          </span>
+        </div>
+        <p class="alert alert-danger top05" ng-show="emailSubmitted && form.email.$error.unique">
+          This email is already in use.
+        </p>
+        <p class="alert alert-danger top05" ng-show="emailSubmitted && form.email.$error.required">
+          You have to enter an email.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label for="inputPassword">Password</label>
+        <div class="input-group">
+          <input required
+                 autocorrect="off"
+                 autocapitalize="off"
+                 type="password"
+                 name="password"
+                 ng-model="password"
+                 class="form-control"
+                 ng-minlength="6"
+                 id="inputPassword"
+                 placeholder="Create a password">
+          <span class="input-group-addon">
+            <i class="fa fa-check-square-o text-success" ng-show="form.password.$valid"></i>
+            <i class="fa fa-square-o" ng-hide="form.password.$valid"></i>
+          </span>
+        </div>
+        <p class="text-muted top05">
+          At least 6 characters.
+        </p>
+        <p class="alert alert-danger" ng-show="passwordSubmitted && (form.password.$error.required || form.password.$error.minlength)">
+          <span ng-show="form.password.$error.minlength">
+            This password is too short.
+          </span>
+          <span ng-hide="form.password.$error.minlength">
+            You have to enter a password.
+          </span>
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label for="inputPasswordCheck">Password check</label>
+        <div class="input-group">
+          <input required
+                 autocorrect="off"
+                 autocapitalize="off"
+                 type="password"
+                 name="password2"
+                 ng-model="password2"
+                 match with="password"
+                 class="form-control"
+                 id="inputPasswordCheck"
+                 placeholder="Enter this password again">
+          <span class="input-group-addon">
+            <i class="fa fa-check-square-o text-success" ng-show="form.password2.$valid"></i>
+            <i class="fa fa-square-o" ng-hide="form.password2.$valid"></i>
+          </span>
+        </div>
+        <div ng-if="form.password.$valid">
+          <p class="alert alert-danger top05" ng-show="form.password2.$error.match">
+            Passwords don't match.
+          </p>
+          <p class="alert alert-danger top05" ng-show="password2Submitted && form.password2.$error.required">
+            You have to repeat your password.
+          </p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="inputTermsCheck">I have read and agree to the <a ui-sref="page({slug:'terms'})" target="_blank" rel="nofollow" title="Terms">Terms of Use</a>
+          <input required
+                 class="left05"
+                 type="checkbox"
+                 name="terms"
+                 ng-model="terms"
+                 id="inputTermsCheck">
+        </label>
+        <p class="alert alert-danger" ng-show="termsSubmitted && form.terms.$error.required">
+            You have to agree to the <a ui-sref="page({slug:'terms'})" target="_blank" rel="nofollow" title="Terms">Terms</a> to use Detective.io
+        </p>
+      </div>
+      <div class="alert alert-danger top05" ng-if="error">
+        [[error]]
+      </div>
+    </fieldset>
+  </div>
+	<div class="tr panel-footer">
+    <span class="pull-left">
+      No wait, I have an account. <a ui-sref="login">Let me log in.</a>
+    </span>
+  	<button type="submit" class="btn btn-primary">Sign up</button>
+  </div>
+</form>
+
+<div class="top30  panel panel-default panel-centered" ng-show="signupSucceed">
+  <div class="panel-body">
+    <h3>Account created</h3>
+  </div>
+  <div class="panel-footer">
+    <p>Congratulations, please <strong>check your inbox to activate your account</strong>.</p>
+  </div>
+</div>

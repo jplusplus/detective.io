@@ -1,0 +1,137 @@
+body {
+    font-weight: 300;
+    padding-top:@header-height;
+    padding-bottom: 0;
+    z-index:@zindex-context;
+    overflow-x: hidden;
+
+    &.is-home {
+        padding-top:0;
+    }
+
+    &.show-aside:not(.is-home) {
+        @media (max-width: @screen-xs-max) {
+            overflow:hidden;
+        }
+    }
+
+    h4, h5, h6 {
+        font-family: inherit;
+    }
+
+    a {
+        cursor: pointer;
+        text-decoration:underline;
+
+        &.btn {
+            text-decoration:none;
+        }
+    }
+
+    label.radio {
+        font-weight:normal;
+    }
+
+    .required label, label.required {
+        &:after {
+            content:"*";
+            color:red;
+        }
+    }
+
+    .bg-primary {
+        background:@brand-primary;
+        color:contrast(@brand-primary);
+        a {
+            color:mix(contrast(@brand-primary), @brand-primary);
+        }
+    }
+
+
+    .bg-secondary {
+        background:@brand-secondary;
+        color:contrast(@brand-secondary);
+        a {
+            color:mix(contrast(@brand-secondary), @brand-secondary);
+        }
+    }
+
+
+    .hr-primary {
+        margin-top:0;
+        border:0;
+        height:15px;
+        background:darken(@brand-primary, 5%);
+    }
+
+    .bg-light {
+        background:#fff;
+    }
+
+
+    .loading {
+        position:relative;
+        min-height:20px;
+
+        &.static {
+            position:static;
+        }
+
+        &:not(.after):before, &.before:after {
+            z-index: @zindex-loading;
+            content:"";
+            display:block;
+            position:absolute;
+            top:0;
+            bottom:0;
+            left:0;
+            right:0;
+            .progress-striped .progress-bar();
+            .progress-bar-variant(#bbb);
+            .progress.active .progress-bar();
+            .opacity(0.4);
+        }
+    }
+
+    .freeze {
+        visibility: hidden;
+        min-height:400px;
+    }
+
+    .color-tag {
+        max-width:40px;
+        height:40px;
+        display:inline-block;
+        position:relative;
+        overflow: hidden;
+        .border-radius(@border-radius-small);
+
+        &:after {
+            position:absolute;
+            top:50%;
+            left:50%;
+            .translate(-50%, -50%);
+            content:"";
+            border:20px transparent solid;
+            border-left-color:fade(white, 25%);
+            border-top-color:fade(white, 5%);
+            border-right-color:fade(black, 15%);
+            border-bottom-color:fade(black, 35%);
+        }
+
+        &.small {
+            .translate(0, 2px);
+            width:20px;
+            height:20px;
+        }
+    }
+
+    // input styling
+    input.display-validation.ng-invalid.ng-dirty {
+        .has-error > .form-control();
+    }
+    .col-padding {
+        padding-left: @grid-gutter-width / 2;
+        padding-right: @grid-gutter-width / 2;
+    }
+}

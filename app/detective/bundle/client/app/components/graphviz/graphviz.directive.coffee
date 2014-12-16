@@ -217,7 +217,7 @@
                 if scope.data.leafs[edge[0]]? and scope.data.leafs[edge[2]]?
                     edges.push
                         source : scope.data.leafs[edge[0]]
-                        target : scope.data.leafs[edge[2]]                
+                        target : scope.data.leafs[edge[2]]
                         _type : edge[1]
             # Force clustering OR more than 70 node
             if scope.clustering or scope.data.length > 70
@@ -245,7 +245,7 @@
                 weightKey = edge.source._id + "-" + edge.target._id
                 popularities[weightKey] = 0 unless popularities[weightKey]?
                 popularities[weightKey]++
-            # Apply the popularity to every edge 
+            # Apply the popularity to every edge
             for edge in edges
                 edge.popularity = popularities[edge.source._id + "-" + edge.target._id]
 
@@ -318,7 +318,7 @@
                     .attr
                         id : getArrowID
                         class: 'arrow'
-                        viewBox: "0 -#{LEAF_SIZE/2} #{LEAF_SIZE} #{LEAF_SIZE}"  
+                        viewBox: "0 -#{LEAF_SIZE/2} #{LEAF_SIZE} #{LEAF_SIZE}"
                         refX: LEAF_SIZE
                         refY: 0
                         fill: (d)-> typeColor(d.target)

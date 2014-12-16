@@ -69,7 +69,10 @@ angular.module('detective').directive "modelForm", ()->
             $scope.model.fields.push field
         # Remove a field
         $scope.removeField = (field)->
-            index = _.indexOf $scope.model.fields, (f)-> f.name is field.name
+            index = -1
+            # Find the index of the field
+            angular.forEach $scope.model.fields, (f, i)-> index = i if f.name is field.name
+            # Delete the existing field
             delete $scope.model.fields[index]
             $scope.model.fields.splice(index, 1)
         # True if the given type is allowed

@@ -68,7 +68,9 @@ angular.module('detective').directive "relationshipForm", ()->
             $scope.relationship.fields.push field
         # Remove a field
         $scope.removeField = (field)->
-            index = _.indexOf $scope.relationship.fields, (f)-> f.name is field.name
+            index = -1
+            # Find the index of the field
+            angular.forEach $scope.relationship.fields, (f, i)-> index = i if f.name is field.name
             delete $scope.relationship.fields[index]
             $scope.relationship.fields.splice(index, 1)
         # True if the given type is allowed

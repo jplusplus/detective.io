@@ -54,28 +54,29 @@ class IndividualAuthorization(DjangoAuthorization):
             topic = Topic.objects.get(ontology_as_mod=get_model_topic(bundle.obj)).public
         return topic
 
-    def check_contribution_permission(self, object_list, bundle, operation):
+    def check_contribution_permission(self, bundle, operation):
         authorized = False
         user = bundle.request.user
+        app_label = bundle.request.current_topic.app_label()
         if user:
-            perm_name  = "%s.contribute_%s" % (object_list._app_label, operation)
+            perm_name  = "%s.contribute_%s" % (app_label, operation)
             authorized = user.is_staff or user.has_perm(perm_name)
         return authorized
 
     def read_detail(self, object_list, bundle):
         topic = self.get_topic_from_bundle(bundle)
-        if not topic.public and not self.check_contribution_permission(object_list, bundle, 'read'):
+        if not topic.public and not self.check_contribution_permission(bundle, 'read'):
             raise Unauthorized("Sorry, only staff or contributors can read resource.")
         return True
 
     def read_list(self, object_list, bundle):
         topic = self.get_topic_from_bundle(bundle)
-        if not topic.public and not self.check_contribution_permission(object_list, bundle, 'read'):
+        if not topic.public and not self.check_contribution_permission(bundle, 'read'):
             raise Unauthorized("Sorry, only staff or contributors can read resource.")
         return object_list
 
     def create_detail(self, object_list, bundle):
-        if not self.check_contribution_permission(object_list, bundle, 'add'):
+        if not self.check_contribution_permission(bundle, 'add'):
             raise Unauthorized("Sorry, only staff or contributors can create resource.")
         # check if user can add regarding to his plan
         topic         = get_topic_from_request(bundle.request)
@@ -85,12 +86,12 @@ class IndividualAuthorization(DjangoAuthorization):
         return True
 
     def update_detail(self, object_list, bundle):
-        if not self.check_contribution_permission(object_list, bundle, 'change'):
+        if not self.check_contribution_permission(bundle, 'change'):
             raise Unauthorized("Sorry, only staff or contributors can update resource.")
         return True
 
     def delete_detail(self, object_list, bundle):
-        if not self.check_contribution_permission(object_list, bundle, 'delete'):
+        if not self.check_contribution_permission(bundle, 'delete'):
             raise Unauthorized("Sorry, only staff or contributors can delete resource.")
         return True
 

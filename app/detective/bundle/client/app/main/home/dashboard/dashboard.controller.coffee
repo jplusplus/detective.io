@@ -31,7 +31,7 @@ class window.DashboardCtrl
 
     openLeaveModal: (topic)=>
         @modalInstance = @modal.open
-            templateUrl: '/partial/topic.leave-modal.html'
+            templateUrl: '/partial/user/topic/leave/leave.html'
             controller : 'leaveTopicModalCtrl as modal'
             resolve:
                 topic: -> topic

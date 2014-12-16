@@ -41,6 +41,12 @@ angular.module('detective').directive "modelForm", ()->
                     field.name = do field.name.toLowerCase
                 else
                     field.name = field.name.substring(0, 1).toLowerCase() + field.name.substring(1)
+            # Overide verbose_name_plural value
+            if $scope.model.verbose_name.substr(-1) is 'y'
+                # Name finishing by an y must finish by "ies" in there pluaral form
+                $scope.model.verbose_name_plural = $scope.model.verbose_name.slice(0, -1) + "ies"
+            else
+                $scope.model.verbose_name_plural = $scope.model.verbose_name + "s"
             # Returns the model after sanitizing
             $scope.model
         # Validate the given value: it must be unique, no other model should have it

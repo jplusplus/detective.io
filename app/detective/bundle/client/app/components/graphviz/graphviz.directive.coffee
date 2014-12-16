@@ -1,4 +1,4 @@
-(angular.module 'detective').directive "graphviz", ['$filter', '$stateParams', '$state', '$location', '$window',  'localStorageService', ($filter, $stateParams, $state, $location, $window, localStorageService)->
+(angular.module 'detective').directive "graphviz", ['$filter', '$stateParams', '$state', '$location', '$window', '$timeout', 'localStorageService', ($filter, $stateParams, $state, $location, $window, $timeout, localStorageService)->
     restrict: "AE"
     templateUrl: "partial/components/graphviz/graphviz.html"
     replace : yes
@@ -205,32 +205,37 @@
             null
 
         update = =>
-            # It's useless to process if we do not have any leaf
-            return if not scope.data.leafs?
-            # Extract leafs and edges from data
-            leafs = []
-            for id, leaf of scope.data.leafs
-                scope.data.leafs[id]._index = leafs.length
-                leafs.push scope.data.leafs[id]
-            edges = []
-            for edge in scope.data.edges
-                if scope.data.leafs[edge[0]]? and scope.data.leafs[edge[2]]?
-                    edges.push
-                        source : scope.data.leafs[edge[0]]
-                        target : scope.data.leafs[edge[2]]
-                        _type : edge[1]
-            # Force clustering OR more than 70 node
-            if scope.clustering or scope.data.length > 70
-                # Initialize a worker to cluster leafs
-                worker.postMessage
-                    type : 'init'
-                    data :
-                        current_id : $stateParams.id
-                        leafs : leafs
-                        edges : edges
-            # Clustering deactivate, skip the worker initialization
-            else
-                register leafs, edges
+            # We add a small idle here since Chrome has choosed to be a complete
+            # as buggy as IE. See #660
+            $timeout( =>
+                # It's useless to process if we do not have any leaf
+                return if not scope.data.leafs?
+                # Extract leafs and edges from data
+                leafs = []
+                for id, leaf of scope.data.leafs
+                    scope.data.leafs[id]._index = leafs.length
+                    leafs.push scope.data.leafs[id]
+                edges = []
+                for edge in scope.data.edges
+                    if scope.data.leafs[edge[0]]? and scope.data.leafs[edge[2]]?
+                        edges.push
+                            source : scope.data.leafs[edge[0]]
+                            target : scope.data.leafs[edge[2]]
+                            _type : edge[1]
+                # Force clustering OR more than 70 node
+                if scope.clustering or scope.data.length > 70
+                    # Initialize a worker to cluster leafs
+                    worker.postMessage
+                        type : 'init'
+                        data :
+                            current_id : $stateParams.id
+                            leafs : leafs
+                            edges : edges
+                # Clustering deactivate, skip the worker initialization
+                else
+                    register leafs, edges
+            # Timeout only on webkit
+            , if 'WebkitAppearance' in document.documentElement.style then 250 else 0)
 
         register = (new_leafs=[], new_edges=[])=>
             leafs   = new_leafs

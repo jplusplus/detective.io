@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
-from .errors                import ForbiddenError, UnauthorizedError
-from app.detective.models   import Topic
-from app.detective.search   import Search
-from app.detective.neomatch import Neomatch
-from app.detective.parser   import schema
-from app.detective          import graph, utils
-from difflib                import SequenceMatcher
-from django.core.paginator  import Paginator, InvalidPage
-from django.http            import Http404, HttpResponse
-from neo4django.db          import connection
-from tastypie               import http
-from tastypie.exceptions    import ImmediateHttpResponse
-from tastypie.resources     import Resource
-from tastypie.serializers   import Serializer
-from .jobs                  import process_bulk_parsing_and_save_as_model, render_csv_zip_file
+from .errors                  import ForbiddenError, UnauthorizedError
+from app.detective.models     import Topic
+from app.detective.search     import Search
+from app.detective.neomatch   import Neomatch
+from app.detective.parser     import schema
+from app.detective.individual import IndividualAuthorization
+from app.detective            import graph, utils
+from difflib                  import SequenceMatcher
+from django.core.paginator    import Paginator, InvalidPage
+from django.http              import Http404, HttpResponse
+from neo4django.db            import connection
+from tastypie                 import http
+from tastypie.exceptions      import ImmediateHttpResponse
+from tastypie.resources       import Resource
+from tastypie.serializers     import Serializer
+from .jobs                    import process_bulk_parsing_and_save_as_model, render_csv_zip_file
 import json
 import re
 import logging
@@ -30,6 +31,7 @@ class SummaryResource(Resource):
 
     class Meta:
         allowed_methods = ['get', 'post']
+        authorization   = IndividualAuthorization()
         resource_name   = 'summary'
         object_class    = object
 
@@ -44,10 +46,11 @@ class SummaryResource(Resource):
         # Nothing yet here!
         raise Http404("Sorry, not implemented yet!")
 
-    def obj_get(self, request=None, **kwargs):
+    def discover_method(self, request=None, **kwargs):
         content = {}
-        if request is None and "bundle" in kwargs:
-            request = kwargs["bundle"].request
+        bundle  = kwargs["bundle"]
+        # Deduces request from bundle
+        if request is None: request = bundle.request
         # Refresh syntax cache at each request
         if hasattr(self, "syntax"): delattr(self, "syntax")
         # Get the current topic
@@ -59,7 +62,7 @@ class SummaryResource(Resource):
         if method:
             try:
                 self.throttle_check(request)
-                content = method(kwargs["bundle"], request)
+                content = method(bundle, request)
                 if isinstance(content, HttpResponse):
                     response = content
                 else:
@@ -75,29 +78,15 @@ class SummaryResource(Resource):
         # We force tastypie to render the response directly
         raise ImmediateHttpResponse(response=response)
 
-    # TODO : factorize obj_get and post_detail methods
+    def obj_get(self, request=None, **kwargs):
+        # User must be allow to see this topic
+        self.authorized_read_list(None, kwargs["bundle"])
+        return self.discover_method(request, **kwargs)
+
     def post_detail(self, request=None, **kwargs):
-        content = {}
-        if request is None and "bundle" in kwargs:
-            request = kwargs["bundle"].request
-        # Get the current topic
-        self.topic = self.get_topic_or_404(request=request)
-        # Check for an optional method to do further dehydration.
-        method = getattr(self, "summary_%s" % kwargs["pk"], None)
-        if method:
-            try:
-                self.throttle_check(request)
-                content = method(request, **kwargs)
-                # Create an HTTP response
-                response = self.create_response(data=content, request=request)
-            except ForbiddenError as e:
-                response = http.HttpForbidden(e)
-            except UnauthorizedError as e:
-                response = http.HttpUnauthorized(e)
-        else:
-            # Stop here, unkown summary type
-            raise Http404("Sorry, not implemented yet!")
-        raise ImmediateHttpResponse(response=response)
+        # User must be allow to edit this topic
+        self.authorized_create_detail(None, kwargs["bundle"])
+        return self.discover_method(request, **kwargs)
 
     def get_topic_or_404(self, request=None):
         try:

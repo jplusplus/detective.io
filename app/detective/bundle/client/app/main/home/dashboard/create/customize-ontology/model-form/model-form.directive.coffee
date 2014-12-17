@@ -19,6 +19,8 @@ angular.module('detective').directive "modelForm", ()->
             if $scope.model.verbose_name?
                 # Generate model name
                 $scope.model.name = toModelName $scope.model.verbose_name
+            else
+                $scope.model.verbose_name = ""
             # Add field array
             $scope.model.fields or= []
             # Process each field

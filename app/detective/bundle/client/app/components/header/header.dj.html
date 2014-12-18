@@ -58,7 +58,8 @@
             <a class="btn btn-default topic-search__home" href="[[search.topic.link]]" title="[[search.topic.title]]">
                 [[search.topic.title | characters:25]]
             </a>
-            <span class="topic-search__input">
+            <!-- We use an ng-repeat here to force typeahead to start from a brand new instance -->
+            <span class="topic-search__input" ng-repeat="topic in [search.topic]">
                 <input type="search"
                        autocorrect="off"
                        autocapitalize="off"

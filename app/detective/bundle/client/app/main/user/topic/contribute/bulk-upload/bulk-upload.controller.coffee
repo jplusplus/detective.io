@@ -1,8 +1,8 @@
 class window.BulkUploadCtrl
     # Injects dependencies
-    @$inject: ['$scope', '$http', '$stateParams', '$location', 'Page', 'Individual', '$timeout', 'Common', 'User']
+    @$inject: ['$scope', '$http', '$state', '$stateParams', '$location', 'Page', 'Individual', '$timeout', 'Common', 'User', 'topic']
 
-    constructor: (@scope, @http, @stateParams, @location, @Page, @Individual, @timeout, @Common, @User)->
+    constructor: (@scope, @http, @state, @stateParams, @location, @Page, @Individual, @timeout, @Common, @User, @topic)->
         @Page.title "Import from CSV", no
         # ──────────────────────────────────────────────────────────────────────
         # Scope methods
@@ -29,7 +29,7 @@ class window.BulkUploadCtrl
 
         # Redirect unauthorized user
         @scope.$watch (=> User), =>
-            @location.url("/#{@scope.username}/#{@scope.topic}/") unless User.hasChangePermission(@topic)
+            @state.go "user-topic", @stateParams unless User.hasChangePermission @topic.ontology_as_mod
         , true
 
         # CONFIG

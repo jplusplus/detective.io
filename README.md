@@ -5,7 +5,7 @@
 [License](https://github.com/jplusplus/detective.io/blob/master/LICENSE) •
 [Test coverage](https://coveralls.io/r/jplusplus/detective.io) •
 [Documentation](http://docs.detective.io/en/latest/) •
-*Version 1.12.2 Frog*
+*Version 1.12.3 Frog*
 
 ## Installation
 

@@ -48,9 +48,8 @@ class SummaryResource(Resource):
 
     def discover_method(self, request=None, **kwargs):
         content = {}
-        bundle  = kwargs["bundle"]
         # Deduces request from bundle
-        if request is None: request = bundle.request
+        if request is None and "bundle" in kwargs: request = kwargs["bundle"].request
         # Refresh syntax cache at each request
         if hasattr(self, "syntax"): delattr(self, "syntax")
         # Get the current topic
@@ -62,7 +61,7 @@ class SummaryResource(Resource):
         if method:
             try:
                 self.throttle_check(request)
-                content = method(bundle, request)
+                content = method(kwargs["bundle"], request)
                 if isinstance(content, HttpResponse):
                     response = content
                 else:
@@ -84,7 +83,8 @@ class SummaryResource(Resource):
         return self.discover_method(request, **kwargs)
 
     def post_detail(self, request=None, **kwargs):
-        # User must be allow to edit this topic
+        kwargs["bundle"] = self.build_bundle(request=request)
+         # User must be allow to edit this topic
         self.authorized_create_detail(None, kwargs["bundle"])
         return self.discover_method(request, **kwargs)
 
@@ -359,7 +359,7 @@ class SummaryResource(Resource):
         self.log_throttled_access(request)
         return self.create_response(request, {'leafs': leafs, 'edges' : edges})
 
-    def summary_bulk_upload(self, request, **kwargs):
+    def summary_bulk_upload(self, bundle, request):
         # only allow POST requests
         self.method_check(request, allowed=['post'])
         # check session

@@ -29,7 +29,7 @@ class window.BulkUploadCtrl
 
         # Redirect unauthorized user
         @scope.$watch (=> User), =>
-            @state.go "user-topic", @stateParams unless User.hasChangePermission @topic
+            @state.go "user-topic", @stateParams unless User.hasChangePermission @topic.ontology_as_mod
         , true
 
         # CONFIG

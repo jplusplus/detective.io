@@ -90,7 +90,9 @@ angular.module('detective').directive "ttTypeahead", ($rootScope, $filter, $comp
             if shouldDisableEntityCreation()
                 div = [
                     "<div class='tt-suggestion'>",
-                        "Sorry, no results found.",
+                        "<div class='tt-suggestion__line tt-suggestion__line--no-results'>",
+                            "Sorry, no results found.",
+                        "</div>"
                     "</div>"
                 ]
             else
@@ -149,7 +151,7 @@ angular.module('detective').directive "ttTypeahead", ($rootScope, $filter, $comp
             lastDataset = objects
             # Remove the parent from the output
             if scope.parent?
-                objects = _.filter objects, (o)-> o.id isnt scope.parent.id 
+                objects = _.filter objects, (o)-> o.id isnt scope.parent.id
             objects
 
         onRequestCompleted = (xhr, status)-> setLoaded()
@@ -228,7 +230,7 @@ angular.module('detective').directive "ttTypeahead", ($rootScope, $filter, $comp
                             '</div>',
                         '</div>'
                     ].join "").render
-            
+
             # typeahead initialization
             typeahead = element.typeahead options, typeahead_params
             # when typeahead is initialized we can add search/loading indicator
@@ -278,7 +280,7 @@ angular.module('detective').directive "ttTypeahead", ($rootScope, $filter, $comp
             # Watch change event
             element.on "change", (input)->
                 # Filter using the current value
-                datum = _.findWhere lastDataset, "name": element.val()                
+                datum = _.findWhere lastDataset, "name": element.val()
                 # If datum exist, use the selected event
                 ev = "typeahead:" + (if datum then "selected" else "uservalue")
                 # Trigger this even

@@ -7,7 +7,7 @@ angular.module('detective').directive "modelForm", ()->
         submit: "&"
         cancel: "&"
     controller: [ '$scope', ($scope)->
-        FIELD_TYPES = ['string', 'richtext', 'float', 'datetime', 'url']
+        FIELD_TYPES = ['string', 'richtext', 'float', 'datetime', 'url', 'boolean']
         # Transform the given string into a valid model name
         toModelName = (verbose_name)->
             verbose_name = getSlug verbose_name, titleCase: yes

@@ -18,8 +18,14 @@ class window.EditTopicOntologyCtrl
         @scope.removeRelationship       = @removeRelationship
         # Initialize variables
         do @startOver
-        # List of current model
-        @scope.models                   = @scope.selected_skeleton.ontology or []
+        # List of current model from diferent contexts
+        if @scope.selected_skeleton?
+            @scope.models = @scope.selected_skeleton.ontology
+        else if @scope.topic?
+            @scope.models = @scope.topic.ontology_as_json
+        else
+            @scope.models = []
+
 
     # Shortcuts
     hasSelectedModel        : => @scope.selectedModel?
@@ -64,17 +70,17 @@ class window.EditTopicOntologyCtrl
 
     removeModel: (model)=>
         modalInstance = @modal.open
-            templateUrl: '/partial/main/home/dashboard/create/customize-ontology/remove-model/remove-model.html' 
-            controller: ($scope, $modalInstance)-> 
-                $scope.model = model                
+            templateUrl: '/partial/main/home/dashboard/create/customize-ontology/remove-model/remove-model.html'
+            controller: ($scope, $modalInstance)->
+                $scope.model = model
                 $scope.ok = -> do $modalInstance.close
                 $scope.cancel = -> $modalInstance.dismiss 'cancel'
         # Removing approved
         modalInstance.result.then =>
             # Look into the other models
-            for m, model_index in @scope.models 
+            for m, model_index in @scope.models
                 # Remove every field related to this model
-                m.fields = _.filter m.fields, (field)-> field.related_model isnt model.name                        
+                m.fields = _.filter m.fields, (field)-> field.related_model isnt model.name
             @scope.models = _.without @scope.models, model
             do @startOver
 
@@ -90,10 +96,10 @@ class window.EditTopicOntologyCtrl
 
     removeRelationship: (relationship)=>
         modalInstance = @modal.open
-            templateUrl: '/partial/main/home/dashboard/create/customize-ontology/remove-relationship/remove-relationship.html' 
-            controller: ($scope, $modalInstance)=> 
-                $scope.relationship = relationship                
-                $scope.getModel = @getModel                
+            templateUrl: '/partial/main/home/dashboard/create/customize-ontology/remove-relationship/remove-relationship.html'
+            controller: ($scope, $modalInstance)=>
+                $scope.relationship = relationship
+                $scope.getModel = @getModel
                 $scope.ok = -> do $modalInstance.close
                 $scope.cancel = -> $modalInstance.dismiss 'cancel'
         # Removing approved

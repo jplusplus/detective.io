@@ -81,9 +81,9 @@
                                 </div>
                             </div>
                             <div ng-show="hasSelectedModel()">
-                                <button type="button" 
-                                        class="btn btn-danger pull-right" 
-                                        title="Remove this model" 
+                                <button type="button"
+                                        class="btn btn-danger pull-right"
+                                        title="Remove this model"
                                         ng-click="removeModel(selectedModel)">
                                     <i class="fa fa-trash"></i>
                                 </button>
@@ -94,6 +94,8 @@
                                      model-form="selectedModel"
                                      models="models"
                                      submit="editModel($value)"
+                                     may-lost-field-data="mayLostFieldData(field, model)"
+                                     may-lost-model-data="mayLostModelData(model)"
                                      cancel="startOver()"></div>
                             </div>
                         </div>
@@ -138,9 +140,9 @@
                                 </div>
                             </div>
                             <div ng-show="hasSelectedRelationship()">
-                                <button type="button" 
-                                        class="btn btn-danger pull-right" 
-                                        title="Remove this relationship" 
+                                <button type="button"
+                                        class="btn btn-danger pull-right"
+                                        title="Remove this relationship"
                                         ng-click="removeRelationship(selectedRelationship)">
                                     <i class="fa fa-trash"></i>
                                 </button>
@@ -157,6 +159,7 @@
                                      models="models"
                                      change-bounds="false"
                                      submit="editRelationship($value)"
+                                     may-lost-field-data="mayLostFieldData(field, model)"
                                      cancel="startOver()"></div>
                             </div>
                         </div>

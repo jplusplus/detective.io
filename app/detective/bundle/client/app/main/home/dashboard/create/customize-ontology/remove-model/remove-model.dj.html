@@ -2,8 +2,12 @@
     <h4>[[model.verbose_name || model.name]]</h4>
 </div>
 <div class="modal-body">
-    If you delete this data model, all the relationships associated to this model will be deleted too. 
+    If you delete this data model, all the relationships associated to this model will be deleted too.
     Are you sure to continue?
+    <div ng-show="mayLostData" class="alert alert-warning bottom0">
+    	<i class="fa fa-warning"></i>
+    	<strong>You're about to remove an existing model.</strong><br />Every data associated to this model will be lost.
+    </div>
 </div>
 <div class="modal-footer">
     <button class="btn btn-default" ng-click="cancel()">Cancel</button>

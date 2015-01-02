@@ -6,6 +6,8 @@ angular.module('detective').directive "modelForm", ()->
         modelForm: "="
         submit: "&"
         cancel: "&"
+        mayLostFieldData: "&"
+        mayLostModelData: "&"
     controller: [ '$scope', ($scope)->
         FIELD_TYPES = ['string', 'richtext', 'float', 'datetime', 'url', 'boolean']
         # Transform the given string into a valid model name
@@ -17,8 +19,11 @@ angular.module('detective').directive "modelForm", ()->
         # Sanitize the model to make it ready to be inserted
         $scope.sanitizeModel = (remove_empty_field=no, populate_empty=no)->
             if $scope.model.verbose_name?
-                # Generate model name
-                $scope.model.name = toModelName $scope.model.verbose_name
+                # You may be allowed to change the name of the model
+                # with no risk of loosing data
+                if not $scope.mayLostModelData({model: $scope.master})
+                    # Generate model name
+                    $scope.model.name = toModelName $scope.model.verbose_name
             else
                 $scope.model.verbose_name = ""
             # Add field array
@@ -29,20 +34,23 @@ angular.module('detective').directive "modelForm", ()->
                 continue unless $scope.isAllowedType(field)
                 # Use name as default verbose name
                 field.verbose_name = field.verbose_name or field.name if populate_empty
-                # Generate fields name
-                field.name = toFieldName field.verbose_name
-                # Field name exists?
-                unless field.name? and field.name isnt ''
-                    # Should we remove empty field?
-                    if remove_empty_field
-                        delete $scope.model.fields[index]
-                        $scope.model.fields.splice index, 1
-                    continue
-                # Lowercase first letter
-                if field.name.length < 2
-                    field.name = do field.name.toLowerCase
-                else
-                    field.name = field.name.substring(0, 1).toLowerCase() + field.name.substring(1)
+                # You may be allowed to change the name of the field
+                # with no risk of loosing data
+                if not $scope.mayLostFieldData({field: field, model: $scope.master})
+                    # Generate fields name
+                    field.name = toFieldName field.verbose_name
+                    # Field name exists?
+                    unless field.name? and field.name isnt ''
+                        # Should we remove empty field?
+                        if remove_empty_field
+                            delete $scope.model.fields[index]
+                            $scope.model.fields.splice index, 1
+                        continue
+                    # Lowercase first letter
+                    if field.name.length < 2
+                        field.name = do field.name.toLowerCase
+                    else
+                        field.name = field.name.substring(0, 1).toLowerCase() + field.name.substring(1)
             # Overide verbose_name_plural value
             if $scope.model.verbose_name.substr(-1) is 'y'
                 # Name finishing by an y must finish by "ies" in there pluaral form
@@ -85,11 +93,11 @@ angular.module('detective').directive "modelForm", ()->
             $scope.model.fields.splice(index, 1)
         # True if the given type is allowed
         $scope.isAllowedType = (field)-> FIELD_TYPES.indexOf( do field.type.toLowerCase ) > -1
+        # Original model
+        $scope.master = $scope.modelForm
         # Shortcut to the model object
         $scope.model = angular.copy $scope.modelForm or {}
         $scope.model = $scope.sanitizeModel yes, yes
-        # Original model
-        $scope.master = $scope.modelForm
         # Add default fields
         $scope.model.fields = [] unless $scope.model.fields?
         # Field that will be added to the list

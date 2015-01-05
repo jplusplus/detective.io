@@ -1,4 +1,4 @@
-<div class="topic-edit-ontology">
+<div class="topic-edit-ontology" ng-class="{ 'loading': loading.main }">
     <div class="panel panel-default">
         <div class="panel-heading">
             Your data structure contains the data models and the relationships between them.
@@ -164,12 +164,19 @@
                             </div>
                         </div>
 
-                        <div class="topic-edit-ontology__workspace__menu__footer">
-                            <button class="btn btn-primary" ng-disabled="!selected_skeleton.ontology.length" type="button" ui-sref="user-topic-create.describe">
+                        <form class="topic-edit-ontology__workspace__menu__footer"  name="form" ng-submit="submit(form)" novalidate>
+                            <div class="pull-left text-success top05" ng-show="isEditing() && !!saved">
+                                <i class="fa fa-check right05"></i>
+                                Changes saved!
+                            </div>
+
+                            <button class="btn btn-primary" ng-if="isCreating()" ng-disabled="!selected_skeleton.ontology.length" type="button" ui-sref="user-topic-create.describe">
                                 Describe
                             </button>
-                        </div>
-
+                            <button ng-if="isEditing()"  ng-disabled="loading.main" type="submit" class="form-footer__submit-btn btn btn-primary">
+                                Save changes
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

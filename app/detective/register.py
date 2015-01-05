@@ -132,6 +132,9 @@ def topics_rules():
 
 
 def import_or_create(path, register=True, force=False):
+    if path.startswith("app.detective.topics.common") or \
+       path.startswith("app.detective.topics.enery"):
+        return importlib.import_module(path)
     try:
         # For the new module to be written
         if force:
@@ -141,10 +144,11 @@ def import_or_create(path, register=True, force=False):
         module = importlib.import_module(path)
     # File dosen't exist, we create it virtually!
     except ImportError:
-        path_parts      = path.split(".")
-        module          = imp.new_module(path)
-        module.__name__ = path
-        name            = path_parts[-1]
+        path_parts         = path.split(".")
+        module             = imp.new_module(path)
+        module.__name__    = path
+        module.__virtual__ = True
+        name               = path_parts[-1]
         # Register the new module in the global scope
         if register:
             # Get the parent module

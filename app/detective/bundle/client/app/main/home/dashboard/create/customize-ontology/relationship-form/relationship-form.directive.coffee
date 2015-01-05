@@ -8,7 +8,7 @@ angular.module('detective').directive "relationshipForm", ()->
         submit: "&"
         cancel: "&"
         mayLostFieldData: "&"
-    controller: [ '$scope', ($scope)->
+    controller: [ '$scope', 'Modal', ($scope, Modal)->
         FIELD_TYPES = ['string', 'float', 'date', 'url']
         # Transform the given string into a valid field name
         toFieldName = (verbose_name)-> getSlug verbose_name, separator: '_'
@@ -54,6 +54,26 @@ angular.module('detective').directive "relationshipForm", ()->
                         field.name = do field.name.toLowerCase
                     else
                         field.name = field.name.substring(0, 1).toLowerCase() + field.name.substring(1)
+                # This field might not be changeable without risk
+                else
+                    # Original field
+                    masterField = _.find($scope.master.fields, { name: field.name })
+                    # Type changed
+                    if field.type isnt masterField.type
+                        # Closure function to transmit the field type
+                        resetType = (field, masterField)->
+                            # User cancel the change
+                            (isYes)->
+                                if isYes
+                                    # Update the master to ask the question once
+                                    masterField.type = field.type
+                                else
+                                    # Restore the field type
+                                    field.type = masterField.type
+                        # Ask confirmation
+                        m = Modal("Unconvertible data will be lost. Are you sure?", "Yes, change the type")
+                        # Reset (or no the field's type)
+                        m.then resetType field, masterField
             # Remove empty field if needed
             delete $scope.relationship.fields if $scope.relationship.fields.length is 0 and remove_empty_field
             # Returns the relationship after sanitzing

@@ -249,7 +249,6 @@ angular.module('detective').directive "ttTypeahead", ($rootScope, $filter, $comp
                         do scope.submit
             # Watch select event
             element.on "typeahead:selected", (ev, individual)->
-                console.log "selected", lastQuery
                 if not _.isEmpty(attrs.ttModel)
                     scope.$apply =>
                         # workaround to have same types between individual and

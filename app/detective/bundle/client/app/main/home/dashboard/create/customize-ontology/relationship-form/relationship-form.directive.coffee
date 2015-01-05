@@ -57,7 +57,6 @@ angular.module('detective').directive "relationshipForm", ()->
             # Remove empty field if needed
             delete $scope.relationship.fields if $scope.relationship.fields.length is 0 and remove_empty_field
             # Returns the relationship after sanitzing
-            console.log($scope.relationship)
             $scope.relationship
         # Validate the given value: it must be unique, no other field should have it
         $scope.isValidFieldName = (verbose_name, field, fields=$scope.relationship.fields)->

@@ -8,7 +8,7 @@ angular.module('detective').directive "modelForm", ()->
         cancel: "&"
         mayLostFieldData: "&"
         mayLostModelData: "&"
-    controller: [ '$scope', ($scope)->
+    controller: [ '$scope', 'Modal', ($scope, Modal)->
         FIELD_TYPES = ['string', 'richtext', 'float', 'datetime', 'url', 'boolean']
         # Transform the given string into a valid model name
         toModelName = (verbose_name)->
@@ -51,6 +51,26 @@ angular.module('detective').directive "modelForm", ()->
                         field.name = do field.name.toLowerCase
                     else
                         field.name = field.name.substring(0, 1).toLowerCase() + field.name.substring(1)
+                # This field might not be changeable without risk
+                else
+                    # Original field
+                    masterField = _.find($scope.master.fields, { name: field.name })
+                    # Type changed
+                    if field.type isnt masterField.type
+                        # Closure function to transmit the field type
+                        resetType = (field, masterField)->
+                            # User cancel the change
+                            (isYes)->
+                                if isYes
+                                    # Update the master to ask the question once
+                                    masterField.type = field.type
+                                else
+                                    # Restore the field type
+                                    field.type = masterField.type
+                        # Ask confirmation
+                        m = Modal("Unconvertible data will be lost. Are you sure?", "Yes, change the type")
+                        # Reset (or no the field's type)
+                        m.then resetType field, masterField
             # Overide verbose_name_plural value
             if $scope.model.verbose_name.substr(-1) is 'y'
                 # Name finishing by an y must finish by "ies" in there pluaral form

@@ -237,7 +237,7 @@ class Topic(models.Model):
         # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
         # Refresh the API
-        #self.reload()
+        self.reload()
 
     def reload(self):
         from app.detective.register import topic_models
@@ -380,7 +380,7 @@ class Topic(models.Model):
                 model=subject["name"],
                 app=self.app_label()
             )
-            
+
         # If the received identifier describe a literal value
         elif self.is_registered_relationship(predicate["name"]):
             fields        = utils.iterate_model_fields( all_models[predicate["subject"]] )

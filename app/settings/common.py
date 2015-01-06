@@ -124,7 +124,8 @@ TEMPLATE_LOADERS = (
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
 CACHE_BYPASS_URLS               = (
     r"/api/(?P<user>[\w\-\.]+)/(?P<topic>[\w\-]+)/v1/summary/graph/",
-    r"/api/(?P<user>[\w\-\.]+)/(?P<topic>[\w\-]+)/v1/summary/export/"
+    r"/api/(?P<user>[\w\-\.]+)/(?P<topic>[\w\-]+)/v1/summary/export/",
+    r"/api/(?P<user>[\w\-\.]+)/(?P<topic>[\w\-]+)/v1/summary/forms/"
 )
 
 MIDDLEWARE_CLASSES = [

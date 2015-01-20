@@ -170,9 +170,12 @@ def reload_urlconf(urlconf=None):
         reload(sys.modules[urlconf])
 
 def clean_topic(path):
+    mod_to_delete = []
     for mod_name in sys.modules:
         if mod_name.startswith(path):
-            del sys.modules[mod_name]
+            mod_to_delete.append(mod_name)
+    for mod_name in mod_to_delete:
+        del sys.modules[mod_name]
 
 def topic_models(path, force=False):
     """

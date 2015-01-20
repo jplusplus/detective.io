@@ -169,6 +169,11 @@ def reload_urlconf(urlconf=None):
     if urlconf in sys.modules:
         reload(sys.modules[urlconf])
 
+def clean_topic(path):
+    for mod_name in sys.modules:
+        if mod_name.startswith(path):
+            del sys.modules[mod_name]
+
 def topic_models(path, force=False):
     """
         Auto-discover topic-related model by looking into
@@ -182,6 +187,8 @@ def topic_models(path, force=False):
             {path}.summary
             {path}.urls
     """
+    # Clean the topic virtual instances from sys.module
+    if force: clean_topic(path)
     topic_module = import_or_create(path, force=force)
     topic_name   = path.split(".")[-1]
     # Ensure that the topic's model exist

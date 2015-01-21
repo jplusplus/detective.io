@@ -11,6 +11,7 @@ from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
 from app.detective.exceptions           import UnavailableImage, NotAnImage, OversizedFile
+from django                             import forms
 from django.conf                        import settings
 from django.conf.urls                   import url
 from django.contrib.auth.models         import User
@@ -337,7 +338,6 @@ class IndividualResource(ModelResource):
                         for key, size in settings.THUMBNAIL_SIZES.items()
                     }
                 except InvalidImageFormatError as e:
-                    print e
                     to_add[field + '_thumbnail'] = ''
 
             # Convert tuple to array for better serialization
@@ -398,13 +398,14 @@ class IndividualResource(ModelResource):
         request = bundle.request
         # Current model
         model = self.get_model()
-
         # Get the node's data using the rest API
         try: node = connection.nodes.get(pk)
         # Node not found
         except client.NotFoundError: raise Http404("Not found.")
+        # Convert existing properties
+        node.properties = self.convert(node.properties)
         # Create a model istance from the node
-        return model._neo4j_instance(node)
+        return model._neo4j_instance( node )
 
     def get_detail(self, request, **kwargs):
         basic_bundle = self.build_bundle(request=request)
@@ -558,6 +559,46 @@ class IndividualResource(ModelResource):
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
 
+    def convert(self, properties, model=None):
+        if model is None: model = self.get_model()
+        validate = False
+        # Iterate until the whole properties object validates
+        while not validate:
+            try:
+                self.validate(properties)
+                validate = True
+            except ValidationError as e:
+                # Convert each key
+                for key in e.message_dict.keys():
+                    value = self.convert_field(key, properties[key])
+                    # Skip unconvertible values
+                    if value is None: del properties[key]
+                    # Save the value
+                    else: properties[key] = value
+        return properties
+
+    def convert_field(self, name, value, model=None):
+        if model is None: model = self.get_model()
+        # Find the model's field
+        field = self.get_model_field(name, model)
+        # Find the field type
+        fieldtype = field._property.get_internal_type()
+        # Get the field widget
+        formfield = field._property.formfield()
+        # Choose the best way to convert
+        try:
+            if fieldtype == 'BooleanField':
+                return bool(value)
+            elif fieldtype == 'CharField':
+                return str(value)
+            elif fieldtype == 'DateTimeField':
+                return forms.DateTimeField().clean(value)
+            else:
+                return formfield.clean(value)
+        # Wrong convettion result to a None value
+        except (ValueError, TypeError, ValidationError):
+            return None
+
     def validate(self, data, model=None, allow_missing=False):
         if model is None: model = self.get_model()
         cleaned_data = {}
@@ -573,6 +614,18 @@ class IndividualResource(ModelResource):
                         # Skip this field
                         else: continue
                     cleaned_data[field_name] = data[field_name]
+                # DateTime field must be validate manually
+                elif field.get_internal_type() == 'DateTimeField':
+                    # Create a native datetimefield
+                    formfield = forms.DateTimeField()
+                    try:
+                        # Validate and clean the data
+                        cleaned_data[field_name] = formfield.clean(data[field_name])
+                    except ValidationError:
+                        # Raise the same error the field name as key
+                        if not allow_missing: raise ValidationError({field_name: 'Must be a valid date/time'})
+                        # Skip this field
+                        else: continue
                 # Only literal values have a _property attribute
                 elif hasattr(field, "_property"):
                     try:
@@ -590,7 +643,7 @@ class IndividualResource(ModelResource):
                             # @warning: this will validate the data for
                             # array of values but not clean them
                             cleaned_data[field_name] = data[field_name]
-                    except ValidationError as e:
+                    except ValidationError:
                         # Raise the same error the field name as key
                         if not allow_missing: raise ValidationError({field_name: e.messages})
                 # The given value is a relationship
@@ -848,7 +901,6 @@ class IndividualResource(ModelResource):
         elif request.method == 'DELETE':
             delete_source(source_id)
 
-        print "Took %f to patch sources" % (time.time() - start_time)
         return self.create_response(request, source)
 
     def get_authors(self, request, **kwargs):

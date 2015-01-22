@@ -151,7 +151,10 @@ class IndividualResource(ModelResource):
         # Closure function to receive the model used to convert a node to an instance
         def get_converter(model):
             def neo4j_instance(node):
-                node.properties = self.convert(node.properties, model=model)
+                try:
+                    self.validate(node.properties, model=model)
+                except ValidationError as e:
+                    node.properties = self.convert(node.properties, model=model)
                 return model._neo4j_instance(node)
             return neo4j_instance
         # Close function to slice a paginator result
@@ -597,7 +600,6 @@ class IndividualResource(ModelResource):
                 self.validate(properties, model=model)
                 validate = True
             except ValidationError as e:
-                print e
                 # Convert each key
                 for key in e.message_dict.keys():
                     value = self.convert_field(key, properties[key], model=model)

@@ -119,6 +119,7 @@ class FieldSourceResource(ModelResource):
         del bundle.data["resource_uri"]
         return bundle
 
+
 class IndividualResource(ModelResource):
 
     field_sources = fields.ToManyField(
@@ -131,6 +132,10 @@ class IndividualResource(ModelResource):
 
     def __init__(self, api_name=None):
         super(IndividualResource, self).__init__(api_name)
+        # Override the get_slice method of the paginator to allow
+        # dynamic node convertion. Since every model instance is sent to the user
+        # using the paginator, we use it an interface to convert data.
+        self._meta.paginator_class.get_slice = self.resource_get_slice()
         # By default, tastypie detects detail mode globally: it means that
         # even into an embeded resource (through a relationship), Tastypie will
         # serialize it as if we are in it's detail view.
@@ -139,6 +144,27 @@ class IndividualResource(ModelResource):
             if field_object.use_in == 'detail':
                 # We use a custom method
                 field_object.use_in = self.use_in
+
+    # This function si a closure that receives
+    # the instance of the current resource model.
+    def resource_get_slice(self):
+        # Closure function to receive the model used to convert a node to an instance
+        def get_converter(model):
+            def neo4j_instance(node):
+                node.properties = self.convert(node.properties, model=model)
+                return model._neo4j_instance(node)
+            return neo4j_instance
+        # Close function to slice a paginator result
+        def get_slice(paginator, limit, offset):
+            # Override the query function that transforms node into neo4django model.
+            # We pass the current model through a closure.
+            paginator.objects.query.model_from_node = get_converter(paginator.objects.model)
+            # Iterate over the objects using the modified query
+            subset = [o for o in paginator.objects.query.execute(paginator.objects.db) ]
+            # No limit parameter,  we return the whole subset from the given offset
+            if limit == 0: return subset[offset:]
+            return subset[offset:offset + limit]
+        return get_slice
 
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
@@ -272,6 +298,7 @@ class IndividualResource(ModelResource):
         # Use in detail
         return self.get_resource_uri(bundle) == bundle.request.path
 
+
     def dehydrate(self, bundle):
         # Get the request from the bundle
         request = bundle.request
@@ -402,7 +429,9 @@ class IndividualResource(ModelResource):
         try: node = connection.nodes.get(pk)
         # Node not found
         except client.NotFoundError: raise Http404("Not found.")
-        # Convert existing properties
+        # Convert existing properties.
+        # Since we allow the user to change her data structure we must be able
+        # to convert the data she already put into the database.
         node.properties = self.convert(node.properties)
         # Create a model istance from the node
         return model._neo4j_instance( node )
@@ -565,12 +594,13 @@ class IndividualResource(ModelResource):
         # Iterate until the whole properties object validates
         while not validate:
             try:
-                self.validate(properties)
+                self.validate(properties, model=model)
                 validate = True
             except ValidationError as e:
+                print e
                 # Convert each key
                 for key in e.message_dict.keys():
-                    value = self.convert_field(key, properties[key])
+                    value = self.convert_field(key, properties[key], model=model)
                     # Skip unconvertible values
                     if value is None: del properties[key]
                     # Save the value

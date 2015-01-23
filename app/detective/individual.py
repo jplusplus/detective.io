@@ -11,12 +11,13 @@ from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
 from app.detective.exceptions           import UnavailableImage, NotAnImage, OversizedFile
+from app.detective.paginator            import Paginator, resource_paginator
 from django                             import forms
 from django.conf                        import settings
 from django.conf.urls                   import url
 from django.contrib.auth.models         import User
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
-from django.core.paginator              import Paginator, InvalidPage
+from django.core.paginator              import InvalidPage
 from django.core.urlresolvers           import reverse
 from django.core.files.storage          import default_storage
 from django.db.models.query             import QuerySet
@@ -130,12 +131,11 @@ class IndividualResource(ModelResource):
         use_in='detail'
     )
 
+
     def __init__(self, api_name=None):
         super(IndividualResource, self).__init__(api_name)
-        # Override the get_slice method of the paginator to allow
-        # dynamic node convertion. Since every model instance is sent to the user
-        # using the paginator, we use it an interface to convert data.
-        self._meta.paginator_class.get_slice = self.resource_get_slice()
+        # Pass the current instance of the resource to the paginator
+        self._meta.paginator_class = resource_paginator(self)
         # By default, tastypie detects detail mode globally: it means that
         # even into an embeded resource (through a relationship), Tastypie will
         # serialize it as if we are in it's detail view.
@@ -144,30 +144,6 @@ class IndividualResource(ModelResource):
             if field_object.use_in == 'detail':
                 # We use a custom method
                 field_object.use_in = self.use_in
-
-    # This function si a closure that receives
-    # the instance of the current resource model.
-    def resource_get_slice(self):
-        # Closure function to receive the model used to convert a node to an instance
-        def get_converter(model):
-            def neo4j_instance(node):
-                try:
-                    self.validate(node.properties, model=model)
-                except ValidationError as e:
-                    node.properties = self.convert(node.properties, model=model)
-                return model._neo4j_instance(node)
-            return neo4j_instance
-        # Close function to slice a paginator result
-        def get_slice(paginator, limit, offset):
-            # Override the query function that transforms node into neo4django model.
-            # We pass the current model through a closure.
-            paginator.objects.query.model_from_node = get_converter(paginator.objects.model)
-            # Iterate over the objects using the modified query
-            subset = [o for o in paginator.objects.query.execute(paginator.objects.db) ]
-            # No limit parameter,  we return the whole subset from the given offset
-            if limit == 0: return subset[offset:]
-            return subset[offset:offset + limit]
-        return get_slice
 
     def prepend_urls(self):
         params = (self._meta.resource_name, trailing_slash())
@@ -511,38 +487,24 @@ class IndividualResource(ModelResource):
         query     = request.GET.get('q', '').lower()
         query     = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', query).strip()
         limit     = int( request.GET.get('limit', 20))
-        exclude   = int( request.GET.get('exclude', -1) )
+        p         = int(request.GET.get('page', 1))
         # Do the query.
         results   = self._meta.queryset.filter(name__icontains=query)
-        # Quicker than query exclude
-        results   = [r for r in results if r.id != exclude]
-        paginator = Paginator(results, limit)
+        # For retro compatibility we use the django paginator
+        paginator = resource_paginator(self)(request.GET, results, resource_uri=self.get_resource_uri(), limit=limit, collection_name=self._meta.collection_name)
+        to_be_serialized = paginator.page()
 
-        try:
-            p     = int(request.GET.get('page', 1))
-            page  = paginator.page(p)
-        except InvalidPage:
-            raise Http404("Sorry, no results on that page.")
+        # Dehydrate the bundles in preparation for serialization.
+        bundles = []
 
-        objects = []
+        for obj in to_be_serialized[self._meta.collection_name]:
+            bundle = self.build_bundle(obj=obj, request=request)
+            bundles.append(self.full_dehydrate(bundle, for_list=True))
 
-        for result in page.object_list:
-            bundle = self.build_bundle(obj=result, request=request)
-            bundle = self.full_dehydrate(bundle, for_list=True)
-            objects.append(bundle)
+        to_be_serialized[self._meta.collection_name] = bundles
+        to_be_serialized = self.alter_list_data_to_serialize(request, to_be_serialized)
 
-        object_list = {
-            'objects': objects,
-            'meta': {
-                'q': query,
-                'page': p,
-                'limit': limit,
-                'total_count': paginator.count
-            }
-        }
-
-        self.log_throttled_access(request)
-        return self.create_response(request, object_list)
+        return self.create_response(request, to_be_serialized)
 
     def get_mine(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
@@ -555,7 +517,6 @@ class IndividualResource(ModelResource):
                 'objects': [],
                 'meta': {
                     'author': request.user,
-                    'page': 1,
                     'limit': limit,
                     'total_count': 0
                 }
@@ -563,33 +524,21 @@ class IndividualResource(ModelResource):
         else:
             # Do the query.
             results   = self._meta.queryset.filter(_author__contains=request.user.id)
-            paginator = Paginator(results, limit)
+            # For retro compatibility we use the django paginator
+            paginator = resource_paginator(self)(request.GET, results, resource_uri=self.get_resource_uri(), limit=limit, collection_name=self._meta.collection_name)
+            to_be_serialized = paginator.page()
 
-            try:
-                p     = int(request.GET.get('page', 1))
-                page  = paginator.page(p)
-            except InvalidPage:
-                raise Http404("Sorry, no results on that page.")
+            # Dehydrate the bundles in preparation for serialization.
+            bundles = []
 
-            objects = []
+            for obj in to_be_serialized[self._meta.collection_name]:
+                bundle = self.build_bundle(obj=obj, request=request)
+                bundles.append(self.full_dehydrate(bundle, for_list=True))
 
-            for result in page.object_list:
-                bundle = self.build_bundle(obj=result, request=request)
-                bundle = self.full_dehydrate(bundle, for_list=True)
-                objects.append(bundle)
+            to_be_serialized[self._meta.collection_name] = bundles
+            to_be_serialized = self.alter_list_data_to_serialize(request, to_be_serialized)
 
-            object_list = {
-                'objects': objects,
-                'meta': {
-                    'author': request.user,
-                    'page': p,
-                    'limit': limit,
-                    'total_count': paginator.count
-                }
-            }
-
-        self.log_throttled_access(request)
-        return self.create_response(request, object_list)
+            return self.create_response(request, to_be_serialized)
 
     def convert(self, properties, model=None):
         if model is None: model = self.get_model()

@@ -513,14 +513,14 @@ class IndividualResource(ModelResource):
         limit = int(request.GET.get('limit', 20))
 
         if request.user.id is None:
-            object_list = {
+            return self.create_response(request, {
                 'objects': [],
                 'meta': {
                     'author': request.user,
                     'limit': limit,
                     'total_count': 0
                 }
-            }
+            })
         else:
             # Do the query.
             results   = self._meta.queryset.filter(_author__contains=request.user.id)

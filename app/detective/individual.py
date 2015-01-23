@@ -26,7 +26,6 @@ from neo4jrestclient                    import client
 from neo4jrestclient.request            import TransactionException
 from neo4django.db                      import connection
 from neo4django.db.models               import NodeModel
-from neo4django.db.models.properties    import DateProperty, BoundProperty
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
 from tastypie.authentication            import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
@@ -549,6 +548,7 @@ class IndividualResource(ModelResource):
                 self.validate(properties, model=model)
                 validate = True
             except ValidationError as e:
+                print e
                 # Convert each key
                 for key in e.message_dict.keys():
                     value = self.convert_field(key, properties[key], model=model)
@@ -598,7 +598,7 @@ class IndividualResource(ModelResource):
                 # DateTime field must be validate manually
                 elif field.get_internal_type() == 'DateTimeField':
                     # Create a native datetimefield
-                    formfield = forms.DateTimeField()
+                    formfield = forms.DateTimeField(input_formats=settings.DATETIME_FORMATS)
                     try:
                         # Validate and clean the data
                         cleaned_data[field_name] = formfield.clean(data[field_name])

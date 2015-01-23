@@ -548,7 +548,6 @@ class IndividualResource(ModelResource):
                 self.validate(properties, model=model)
                 validate = True
             except ValidationError as e:
-                print e
                 # Convert each key
                 for key in e.message_dict.keys():
                     value = self.convert_field(key, properties[key], model=model)
@@ -598,11 +597,11 @@ class IndividualResource(ModelResource):
                 # DateTime field must be validate manually
                 elif field.get_internal_type() == 'DateTimeField':
                     # Create a native datetimefield
-                    formfield = forms.DateTimeField(input_formats=settings.DATETIME_FORMATS)
+                    formfield = forms.DateTimeField(input_formats=settings.DATETIME_FORMATS, required=False)
                     try:
                         # Validate and clean the data
                         cleaned_data[field_name] = formfield.clean(data[field_name])
-                    except ValidationError:
+                    except ValidationError as e:
                         # Raise the same error the field name as key
                         if not allow_missing: raise ValidationError({field_name: 'Must be a valid date/time'})
                         # Skip this field

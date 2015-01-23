@@ -173,6 +173,7 @@ def clean_topic(path):
     mod_to_delete = []
     for mod_name in sys.modules:
         if mod_name.startswith(path):
+            print mod_name
             mod_to_delete.append(mod_name)
     for mod_name in mod_to_delete:
         del sys.modules[mod_name]
@@ -237,7 +238,6 @@ def topic_models(path, force=False):
         #  * as an attribute of `resources`
         #  * as a module
         setattr(resources, resource_name, Resource)
-        sys.modules[resource_path] = Resource
         # And register it into the API instance
         api.register(Resource())
     # Every app have to instance a SummaryResource class

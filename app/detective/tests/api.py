@@ -605,10 +605,6 @@ class TopicApiTestCase(ApiTestCase):
         # At least 2 results
         self.assertGreater( len(data.items()), 1 )
 
-    def test_search_organization_wrong_page(self):
-        resp = self.api_client.get('/api/detective/energy/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_super_credentials())
-        self.assertEqual(resp.status_code in [302, 404], True)
-
     def test_cypher_detail(self):
         resp = self.api_client.get('/api/detective/common/v1/cypher/111/', format='json', authentication=self.get_super_credentials())
         self.assertTrue(resp.status_code in [302, 404])

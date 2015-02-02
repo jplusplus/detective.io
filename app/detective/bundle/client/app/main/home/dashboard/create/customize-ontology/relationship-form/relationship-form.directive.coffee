@@ -9,7 +9,7 @@ angular.module('detective').directive "relationshipForm", ()->
         cancel: "&"
         mayLostFieldData: "&"
     controller: [ '$scope', '$state', 'Modal', ($scope, $state, Modal)->
-        FIELD_TYPES = ['string', 'float', 'date', 'url']
+        FIELD_TYPES = ['string', 'float', 'date', 'url', 'richtext']
         # Some field may be disable in edit mode
         $scope.isEditing = -> $state.includes("user-topic-edit")
         # Transform the given string into a valid field name

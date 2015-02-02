@@ -31,12 +31,14 @@
       </div>
   </div>
   <div class="bottom10">
+      <i class="fa fa-info-circle pull-right top05" tooltip="You can't edit this field"></i>
       <label>Reverse name</label>
       <input type="text"
              class="form-control"
              ng-model="relationship.related_name"
              ui-validate="{ unique: 'isValidFieldName($value, relationship, target.fields)' }"
              name="related_name"
+             ng-disabled="isEditing()"
              placeholder="Ex: has board member" />
       <div ng-show="relationshipForm.related_name.$error.unique" class="text-danger small">
         This name already exists.

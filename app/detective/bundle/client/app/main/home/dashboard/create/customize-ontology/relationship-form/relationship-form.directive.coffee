@@ -8,8 +8,10 @@ angular.module('detective').directive "relationshipForm", ()->
         submit: "&"
         cancel: "&"
         mayLostFieldData: "&"
-    controller: [ '$scope', 'Modal', ($scope, Modal)->
+    controller: [ '$scope', '$state', 'Modal', ($scope, $state, Modal)->
         FIELD_TYPES = ['string', 'float', 'date', 'url']
+        # Some field may be disable in edit mode
+        $scope.isEditing = -> $state.includes("user-topic-edit")
         # Transform the given string into a valid field name
         toFieldName = (verbose_name)-> getSlug verbose_name, separator: '_'
         # Sanitize the model to make it ready to be inserted

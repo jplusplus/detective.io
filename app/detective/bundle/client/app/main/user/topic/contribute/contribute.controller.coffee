@@ -638,8 +638,7 @@ class window.ContributeCtrl
         (field)=>
             not individual.isVisible(field) and @isAllowedType(field.type)
 
-    isRich: (field) =>
-        field.rules.is_rich or no
+    isRich: (field) => field.rules.is_rich or no
 
     toggleHtmlMode: (ev)=> @scope.htmlMode = not @scope.htmlMode
 

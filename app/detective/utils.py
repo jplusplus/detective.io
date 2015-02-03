@@ -215,10 +215,10 @@ def iterate_model_fields(model, order_by='name'):
     models_rules = register.topics_rules().model(model)
     if hasattr(model, '__fields_order__'):
         _len = len(model._meta.fields)
-        model_fileds = sorted(model._meta.fields, key=lambda x: model.__fields_order__.index(x.name) if x.name in model.__fields_order__ else _len)
+        model_fields = sorted(model._meta.fields, key=lambda x: model.__fields_order__.index(x.name) if x.name in model.__fields_order__ else _len)
     else:
-        model_fileds = sorted(model._meta.fields, key=lambda el: getattr(el, order_by))
-    for f in model_fileds:
+        model_fields = sorted(model._meta.fields, key=lambda el: getattr(el, order_by))
+    for f in model_fields:
         # Ignores field terminating by + or begining by _
         if not f.name.endswith("+") and not f.name.endswith("_set") and not f.name.startswith("_"):
             try:
@@ -256,7 +256,7 @@ def iterate_model_fields(model, order_by='name'):
                 'verbose_name' : verbose_name,
                 'related_model': related_model,
                 'model'        : model.__name__,
-                'rules'        : field_rules
+                'rules'        : field_rules.copy()
             }
 
 def get_model_nodes():

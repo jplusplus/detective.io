@@ -223,6 +223,13 @@ class Topic(models.Model):
             if inspect.isclass(klass) and issubclass(klass, models.Model):
                 yield klass
 
+    def get_model(self, name):
+        model  = None
+        for m in self.get_models():
+            if m.__name__.lower() == name.lower():
+                model = m
+        return model
+
     def clean(self):
         models.Model.clean(self)
 

@@ -1,6 +1,6 @@
 <div id="create-topic" class="container topic-form">
 
-    <div class="topic-form__header" ng-show="isCreating()">
+    <div class="topic-form__header topic-form__header--ordered" ng-show="isCreating()">
       <h2>Create a new data collection</h2>
 
       <ul class="nav nav-pills topic-form__header__tabs" role="tablist">
@@ -40,10 +40,23 @@
           <label class="label label-info" ng-if="!topic.public">private</label>
         </small>
       </h2>
+      <ul class="nav nav-pills topic-form__header__tabs" role="tablist">
+        <li class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-edit.customize-ontology') }">
+          <a ui-sref=".customize-ontology">
+            Customize your structure
+          </a>
+        </li>
+        <li class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-edit') }">
+          <a ui-sref="user-topic-edit">
+            Describe your data collection
+          </a>
+        </li>
+      </ul>
     </div>
-    <div ng-if="isEditing()" ng-include="'partial/main/home/dashboard/create/describe/describe.html'"></div>
 
-    <div ui-view></div>
+    <div ui-view>
+      <div ng-if="isEditing()" ng-include="'partial/main/home/dashboard/create/describe/describe.html'"></div>
+    </div>
 
     <a ui-sref="home.dashboard"><i class='fa fa-arrow-left'></i>&nbsp;Go back to your dashboard</a>
 </div>

@@ -17,7 +17,7 @@ angular.module('detective').directive('ontologyVisualization', ['$timeout', ($ti
                 width      = elem.width()
                 height     = elem.height()
                 angle      = 0
-                step       = (2 * Math.PI) / models_nui.length                
+                step       = (2 * Math.PI) / models_nui.length
                 # And move the models arround the center
                 models_nui.each ->
                     x = Math.round(width  / 2 + radius * Math.cos(angle) - $(this).width()  / 2)
@@ -34,7 +34,7 @@ angular.module('detective').directive('ontologyVisualization', ['$timeout', ($ti
                         if field.type == "relationship"
                             model_name = model.name
                             related_to = field.related_model
-                            # We create a new connection between 
+                            # We create a new connection between
                             # the model_name and the related_mode
                             plumb.connect
                                 source: elem.find("[data-identifier='#{model_name}']")
@@ -64,7 +64,7 @@ angular.module('detective').directive('ontologyVisualization', ['$timeout', ($ti
                                         }
                                     ]
                                 ]
-                # Make every model draggable      
+                # Make every model draggable
                 plumb.draggable plumb.getSelector(".model"),
                     containment: elem
 

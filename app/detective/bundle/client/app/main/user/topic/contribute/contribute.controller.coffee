@@ -156,7 +156,7 @@ class window.ContributeCtrl
             _.each updated_fields, (name)=>
                 related_meta = _.findWhere updated_meta.fields, name: name
                 # Model related to the updated field is the current one
-                if related_meta.related_model is @meta.model
+                if related_meta? and related_meta.related_model is @meta.model
                     # Get the field of the same relationship type
                     rel = _.findWhere @meta.fields, rel_type: related_meta.rel_type
                     # Save its name
@@ -638,8 +638,7 @@ class window.ContributeCtrl
         (field)=>
             not individual.isVisible(field) and @isAllowedType(field.type)
 
-    isRich: (field) =>
-        field.rules.is_rich or no
+    isRich: (field) => field.rules.is_rich or no
 
     toggleHtmlMode: (ev)=> @scope.htmlMode = not @scope.htmlMode
 

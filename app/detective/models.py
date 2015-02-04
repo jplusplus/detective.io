@@ -223,21 +223,33 @@ class Topic(models.Model):
             if inspect.isclass(klass) and issubclass(klass, models.Model):
                 yield klass
 
+    def get_model(self, name):
+        model  = None
+        for m in self.get_models():
+            if m.__name__.lower() == name.lower():
+                model = m
+        return model
+
     def clean(self):
         models.Model.clean(self)
 
     def save(self, *args, **kwargs):
+        try:
+            # Original model before saving
+            orig = Topic.objects.get(pk=self.pk)
+        except Topic.DoesNotExist:
+            orig = None
         # Ensure that the module field is populated with app_label()
         self.ontology_as_mod = self.app_label()
-
         # For automatic slug generation.
         if not self.slug:
             self.slug = slugify(self.title)[:50]
-
         # Call the parent save method
         super(Topic, self).save(*args, **kwargs)
-        # Refresh the API
-        #self.reload()
+        # Ontology changed
+        if orig is not None and orig.ontology_as_json != self.ontology_as_json:
+            # Refresh the API
+            self.reload()
 
     def reload(self):
         from app.detective.register import topic_models
@@ -380,7 +392,7 @@ class Topic(models.Model):
                 model=subject["name"],
                 app=self.app_label()
             )
-            
+
         # If the received identifier describe a literal value
         elif self.is_registered_relationship(predicate["name"]):
             fields        = utils.iterate_model_fields( all_models[predicate["subject"]] )

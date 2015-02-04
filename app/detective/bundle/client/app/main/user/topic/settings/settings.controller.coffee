@@ -20,11 +20,9 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
             @init = no if @init
 
         @scope.$on @EVENTS.topic.updated, (e, topic)=>
-            @topic = topic
-            @scope.topic = @topic
             # avoid reference binding, otherwise @topicChanges will return an
             # empty object everytime.
-            @master = angular.copy @topic
+            @master = angular.copy topic
 
         @Page.title "Settings of #{@topic.title}"
 
@@ -49,12 +47,12 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
                     changes[prop] = now_val
         changes
 
-    edit: (panel)=>
+    edit: (panel='main')=>
         @scope.loading[panel] = yes
         @scope.saved = no
         changes = @topicChanges @scope.topic
 
-        @TopicsFactory.update({id: @scope.topic.id}, changes, (data)=>
+        @TopicsFactory.update id: @scope.topic.id, changes, (data)=>
                 @scope.$broadcast @EVENTS.topic.updated, data
                 @scope.saved = yes
                 @scope.loading[panel] = no
@@ -63,7 +61,6 @@ class window.EditTopicCtrl extends window.TopicFormCtrl
                 @scope.saved = no
                 if response.status is 400
                     @scope.error = response.data.topic
-        )
 
 
 

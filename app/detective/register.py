@@ -133,18 +133,22 @@ def topics_rules():
 
 def import_or_create(path, register=True, force=False):
     try:
-        # For the new module to be written
-        if force:
-            if path in sys.modules: del( sys.modules[path] )
-            raise ImportError
-        # Import the models.py file
+        # Import the module once
         module = importlib.import_module(path)
+        # If it doesn't raise an Importerror,
+        # we may need to reload it
+        if force:
+            # The module isn't a file
+            if getattr(module, "__file__", None) is None and path in sys.modules:
+                del( sys.modules[path] )
+                # Reimport the module
+                raise ImportError
     # File dosen't exist, we create it virtually!
     except ImportError:
-        path_parts      = path.split(".")
-        module          = imp.new_module(path)
-        module.__name__ = path
-        name            = path_parts[-1]
+        path_parts         = path.split(".")
+        module             = imp.new_module(path)
+        module.__name__    = path
+        name               = path_parts[-1]
         # Register the new module in the global scope
         if register:
             # Get the parent module
@@ -165,6 +169,15 @@ def reload_urlconf(urlconf=None):
     if urlconf in sys.modules:
         reload(sys.modules[urlconf])
 
+def clean_topic(path):
+    mod_to_delete = []
+    for mod_name in sys.modules:
+        if mod_name.startswith(path):
+            print mod_name
+            mod_to_delete.append(mod_name)
+    for mod_name in mod_to_delete:
+        del sys.modules[mod_name]
+
 def topic_models(path, force=False):
     """
         Auto-discover topic-related model by looking into
@@ -178,6 +191,8 @@ def topic_models(path, force=False):
             {path}.summary
             {path}.urls
     """
+    # Clean the topic virtual instances from sys.module
+    if force: clean_topic(path)
     topic_module = import_or_create(path, force=force)
     topic_name   = path.split(".")[-1]
     # Ensure that the topic's model exist
@@ -223,7 +238,6 @@ def topic_models(path, force=False):
         #  * as an attribute of `resources`
         #  * as a module
         setattr(resources, resource_name, Resource)
-        sys.modules[resource_path] = Resource
         # And register it into the API instance
         api.register(Resource())
     # Every app have to instance a SummaryResource class

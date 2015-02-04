@@ -6,8 +6,14 @@
     </h4>
 </div>
 <div class="modal-body">
-    If you delete this relationship, all the fields associated to this relationship will be deleted too. 
-    Are you sure to continue?
+    <p>
+    	If you delete this relationship, all the fields associated to this relationship will be deleted too.
+    	Are you sure to continue?
+    </p>
+    <div ng-show="mayLostData" class="alert alert-warning bottom0">
+    	<i class="fa fa-warning"></i>
+    	<strong>You're about to remove an existing relationship.</strong><br />Every data associated to this relationship will be lost.
+    </div>
 </div>
 <div class="modal-footer">
     <button class="btn btn-default" ng-click="cancel()">Cancel</button>

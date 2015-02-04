@@ -26,12 +26,10 @@ angular.module('detective').directive "card", ['Summary', 'Individual', '$sce', 
             id: scope.individual.id
         # Get the value for the given field name with the current individual
         scope.get = (name, isrel=no)->
-            unless isrel
-                scope.individual[name] or false
-            else
-                scope.relIndividual[name] or false
+            scope[ if isrel then "relIndividual" else "individual" ][name] or no
+
         scope.getTrusted = (n) ->
-            val = scope.get n
+            val = scope.get n, yes
             if val? and val.length > 0 then ($sce.trustAsHtml val) else ""
         # True if the given property is a string
         scope.isString = (f)-> ["CharField", "URLField"].indexOf(f.type) > -1

@@ -4,6 +4,11 @@
       <h2>Create a new data collection</h2>
 
       <ul class="nav nav-pills topic-form__header__tabs" role="tablist">
+        <li class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.batch') }">
+          <a ui-sref=".batch">
+            Upload your data
+          </a>
+        </li>
         <li class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.choose-ontology') }">
           <a ui-sref=".choose-ontology">
             Choose a template

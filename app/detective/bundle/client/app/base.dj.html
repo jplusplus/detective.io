@@ -21,12 +21,12 @@
 
         <meta name="viewport" id="viewport" content="width=480px, maximum-scale=1, user-scalable=no">
         <script>
-          (function(doc) {
-              var viewport = doc.getElementById('viewport');
-              if ( navigator.userAgent.match(/iPad/i) ) {
-                viewport.setAttribute("content", "width=992px, maximum-scale=1, user-scalable=no");
-              }
-          }(document));
+            (function(doc) {
+                var viewport = doc.getElementById('viewport');
+                if ( navigator.userAgent.match(/iPad/i) ) {
+                    viewport.setAttribute("content", "width=992px, maximum-scale=1, user-scalable=no");
+                }
+            }(document));
         </script>
 
         <link rel="dns-prefetch" href="{% static '' %}">

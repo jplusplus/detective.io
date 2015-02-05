@@ -1,5 +1,5 @@
 #=require TopicFormCtrl
-class window.CreateTopicCtrl extends window.TopicFormCtrl   
+class window.CreateTopicCtrl extends window.TopicFormCtrl
     @resolve:
         skeletons: ($state, $q, Page, TopicSkeleton)->
             notFound = ->
@@ -42,12 +42,7 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.hasSelectedSkeleton = @hasSelectedSkeleton
         # Scope events
         @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
-        # We allow skeleton preselection
-        if @scope.selected_skeleton?
-            @state.go "user-topic-create.customize-ontology"
-            do @onSkeletonSelected
-        else
-            @state.go "user-topic-create.choose-ontology"
+        @state.go "user-topic-create"
 
     selectSkeleton: (skeleton)=>
         if not skeleton?

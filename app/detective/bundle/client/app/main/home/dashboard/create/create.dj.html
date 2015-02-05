@@ -1,67 +1,34 @@
 <div id="create-topic" class="container topic-form">
-
-    <div class="topic-form__header topic-form__header--ordered" ng-show="isCreating()">
-      <h2>Create a new data collection</h2>
-
-      <ul class="nav nav-pills topic-form__header__tabs" role="tablist">
-        <li class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.batch') }">
-          <a ui-sref=".batch">
-            Upload your data
-          </a>
-        </li>
-        <li class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.choose-ontology') }">
-          <a ui-sref=".choose-ontology">
-            Choose a template
-          </a>
-        </li>
-        <li ng-if="selected_skeleton" class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.customize-ontology') }">
-          <a ui-sref=".customize-ontology">
-            Customize your template
-          </a>
-        </li>
-        <li ng-if="!selected_skeleton" class="topic-form__header__tabs__item disable">
-          <a>
-            Customize your template
-          </a>
-        </li>
-        <li ng-if="selected_skeleton && selected_skeleton.ontology.length" class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.describe') }">
-          <a ui-sref=".describe">
-            Describe your data collection
-          </a>
-        </li>
-        <li ng-if="!selected_skeleton || !selected_skeleton.ontology.length" class="topic-form__header__tabs__item disable">
-          <a>
-            Describe your data collection
-          </a>
-        </li>
-      </ul>
-    </div>
-
-
-    <div class="topic-form__header" ng-show="isEditing()">
-      <h2>
-        Settings of "[[topic.title]]"
-        <small>
-          <label class="label label-info" ng-if="!topic.public">private</label>
-        </small>
-      </h2>
-      <ul class="nav nav-pills topic-form__header__tabs" role="tablist">
-        <li class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-edit.customize-ontology') }">
-          <a ui-sref=".customize-ontology">
-            Customize your structure
-          </a>
-        </li>
-        <li class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-edit') }">
-          <a ui-sref="user-topic-edit">
-            Describe your data collection
-          </a>
-        </li>
-      </ul>
-    </div>
-
+    <h2>Create a new data collection</h2>
     <div ui-view>
-      <div ng-if="isEditing()" ng-include="'partial/main/home/dashboard/create/describe/describe.html'"></div>
+      <div class="row create-topic__choices">
+        <div class="col-sm-6 create-topic__choices__item">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <p class="lead">Visualize the network in your data</p>
+              <textarea class="form-control" rows="6" placeholder="Select your data (including header row/column) in Excel or OpenOffice and paste it here."></textarea>
+            </div>
+            <div class="panel-footer text-right">
+              <button class="btn btn-primary">
+                Upload your data
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 create-topic__choices__item">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <p class="lead">You have no data yet?</p>
+              <p>Compose your data structure, the way you want to describe things, before adding any data.</p>
+            </div>
+            <div class="panel-footer text-right">
+              <a class="btn btn-primary" ui-sref="user-topic-create.manual.choose-ontology">
+                Create your structure
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-
     <a ui-sref="home.dashboard"><i class='fa fa-arrow-left'></i>&nbsp;Go back to your dashboard</a>
 </div>

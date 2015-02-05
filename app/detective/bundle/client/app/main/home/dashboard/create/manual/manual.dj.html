@@ -1,0 +1,30 @@
+<div class="topic-form__header topic-form__header--ordered">
+  <ul class="nav nav-pills topic-form__header__tabs" role="tablist">
+    <li class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.manual.choose-ontology') }">
+      <a ui-sref=".choose-ontology">
+        Choose a template
+      </a>
+    </li>
+    <li ng-if="selected_skeleton" class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.manual.customize-ontology') }">
+      <a ui-sref=".customize-ontology">
+        Customize your template
+      </a>
+    </li>
+    <li ng-if="!selected_skeleton" class="topic-form__header__tabs__item disable">
+      <a>
+        Customize your template
+      </a>
+    </li>
+    <li ng-if="selected_skeleton && selected_skeleton.ontology.length" class="topic-form__header__tabs__item" ng-class="{ active: $state.is('user-topic-create.manual.describe') }">
+      <a ui-sref=".describe">
+        Describe your data collection
+      </a>
+    </li>
+    <li ng-if="!selected_skeleton || !selected_skeleton.ontology.length" class="topic-form__header__tabs__item disable">
+      <a>
+        Describe your data collection
+      </a>
+    </li>
+  </ul>
+</div>
+<div ui-view></div>

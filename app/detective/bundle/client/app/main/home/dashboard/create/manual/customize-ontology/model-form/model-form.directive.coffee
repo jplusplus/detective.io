@@ -1,41 +1,35 @@
-angular.module('detective').directive "relationshipForm", ()->
+angular.module('detective').directive "modelForm", ()->
     restrict: "A"
-    templateUrl: "/partial/main/home/dashboard/create/customize-ontology/relationship-form/relationship-form.html"
+    templateUrl: "/partial/main/home/dashboard/create/manual/customize-ontology/model-form/model-form.html"
     scope:
         models: "="
-        relationshipForm: "="
-        changeBounds: "="
+        modelForm: "="
         submit: "&"
         cancel: "&"
         mayLostFieldData: "&"
-    controller: [ '$scope', '$state', 'Modal', ($scope, $state, Modal)->
+        mayLostModelData: "&"
+    controller: [ '$scope', 'Modal', ($scope, Modal)->
         FIELD_TYPES = ['string', 'richtext', 'float', 'datetime', 'url', 'boolean']
-        $scope.isEditing = ->
-            # Some field may be disable in edit mode
-            $state.includes("user-topic-edit") and $scope.mayLostFieldData field: $scope.relationship
+        # Transform the given string into a valid model name
+        toModelName = (verbose_name)->
+            verbose_name = getSlug verbose_name, titleCase: yes
+            verbose_name.split('-').join('')
         # Transform the given string into a valid field name
         toFieldName = (verbose_name)-> getSlug verbose_name, separator: '_'
         # Sanitize the model to make it ready to be inserted
-        $scope.sanitizeRelationship = (remove_empty_field=no, populate_empty=no)->
-            if $scope.relationship.verbose_name?
-                # You may be allowed to change the name of the relationship
+        $scope.sanitizeModel = (remove_empty_field=no, populate_empty=no)->
+            if $scope.model.verbose_name?
+                # You may be allowed to change the name of the model
                 # with no risk of loosing data
-                if not $scope.mayLostFieldData({field: $scope.relationship})
+                if not $scope.mayLostModelData({model: $scope.master})
                     # Generate model name
-                    $scope.relationship.name = toFieldName $scope.relationship.verbose_name
-            # Complete missing data
-            $scope.relationship.fields      or= []
-            $scope.relationship.type          = "relationship"
-            $scope.relationship.rules         = search_terms: []
-            $scope.relationship.help_text     = ""
-            if $scope.changeBounds
-                $scope.relationship.related_model = ($scope.target or name: null).name
-                $scope.relationship.model         = ($scope.source or name: null).name
+                    $scope.model.name = toModelName $scope.model.verbose_name
+            else
+                $scope.model.verbose_name = ""
             # Add field array
-            $scope.relationship.fields or= []
+            $scope.model.fields or= []
             # Process each field
-            for field, index in $scope.relationship.fields
-                continue unless field?
+            for field, index in $scope.model.fields
                 # Skip unallowed types
                 continue unless $scope.isAllowedType(field)
                 # Use name as default verbose name
@@ -46,11 +40,11 @@ angular.module('detective').directive "relationshipForm", ()->
                     # Generate fields name
                     field.name = toFieldName field.verbose_name
                     # Field name exists?
-                    if not field.name? or field.name is ''
+                    unless field.name? and field.name isnt ''
                         # Should we remove empty field?
                         if remove_empty_field
-                            delete $scope.relationship.fields[index]
-                            $scope.relationship.fields.splice index, 1
+                            delete $scope.model.fields[index]
+                            $scope.model.fields.splice index, 1
                         continue
                     # Lowercase first letter
                     if field.name.length < 2
@@ -77,43 +71,57 @@ angular.module('detective').directive "relationshipForm", ()->
                         m = Modal("Unconvertible data will be lost. Are you sure?", "Yes, change the type")
                         # Reset (or no the field's type)
                         m.then resetType field, masterField
-            # Remove empty field if needed
-            delete $scope.relationship.fields if $scope.relationship.fields.length is 0 and remove_empty_field
-            # Returns the relationship after sanitzing
-            $scope.relationship
-        # Validate the given value: it must be unique, no other field should have it
-        $scope.isValidFieldName = (verbose_name, field, fields=$scope.relationship.fields)->
+            # Overide verbose_name_plural value
+            if $scope.model.verbose_name.substr(-1) is 'y'
+                # Name finishing by an y must finish by "ies" in there pluaral form
+                $scope.model.verbose_name_plural = $scope.model.verbose_name.slice(0, -1) + "ies"
+            else
+                $scope.model.verbose_name_plural = $scope.model.verbose_name + "s"
+            # Returns the model after sanitizing
+            $scope.model
+        # Validate the given value: it must be unique, no other model should have it
+        $scope.isValidModelName = (verbose_name)->
             # Do not test emty value
-            return yes if verbose_name is '' or not verbose_name?
+            return yes if verbose_name is ''
+            # For better sustainability, different case is not allowed too
+            name = toModelName(verbose_name).toLowerCase()
+            # Find a model with the same name?
+            not _.find($scope.models, (m)-> m.name.toLowerCase() is name and m isnt $scope.master)?
+        # Validate the given value: it must be unique, no other field should have it
+        $scope.isValidFieldName = (verbose_name, field)->
+            # Do not test emty value
+            return yes if verbose_name is ''
             # For better sustainability, different case is not allowed too
             name = toFieldName(verbose_name).toLowerCase()
             # Find a field with the same name?
-            not _.find(fields, (f)-> f.name.toLowerCase() is name and f isnt field)?
+            not _.find($scope.model.fields, (f)-> f.name.toLowerCase() is name and f isnt field)?
         # Add a field
-        $scope.addField = ->
+        $scope.addField = =>
+            verbose_name = if $scope.model.fields.length is 0 then "name" else ""
             field = angular.copy
-                name: ""
-                verbose_name: ""
+                verbose_name: verbose_name
+                name: toModelName verbose_name
                 type: "string"
-            $scope.relationship.fields.push field
+            $scope.model.fields.push field
         # Remove a field
         $scope.removeField = (field)->
             index = -1
             # Find the index of the field
-            angular.forEach $scope.relationship.fields, (f, i)-> index = i if f.name is field.name
-            delete $scope.relationship.fields[index]
-            $scope.relationship.fields.splice(index, 1)
+            angular.forEach $scope.model.fields, (f, i)-> index = i if f.name is field.name
+            # Delete the existing field
+            delete $scope.model.fields[index]
+            $scope.model.fields.splice(index, 1)
         # True if the given type is allowed
         $scope.isAllowedType = (field)-> FIELD_TYPES.indexOf( do field.type.toLowerCase ) > -1
         # Original model
-        $scope.master = $scope.relationshipForm
+        $scope.master = $scope.modelForm
         # Shortcut to the model object
-        $scope.relationship = angular.copy($scope.relationshipForm or {})
-        $scope.relationship = $scope.sanitizeRelationship no, yes
+        $scope.model = angular.copy $scope.modelForm or {}
+        $scope.model = $scope.sanitizeModel yes, yes
         # Add default fields
-        $scope.relationship.fields = [] unless $scope.relationship.fields?
+        $scope.model.fields = [] unless $scope.model.fields?
         # Field that will be added to the list
-        do $scope.addField unless $scope.relationship.fields.length
+        do $scope.addField unless $scope.model.fields.length
         # Sanitize the model automaticly
-        $scope.$watch "relationship", (-> do $scope.sanitizeRelationship), yes
+        $scope.$watch "model", ( -> do $scope.sanitizeModel ), yes
     ]

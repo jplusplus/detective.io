@@ -173,7 +173,6 @@ def clean_topic(path):
     mod_to_delete = []
     for mod_name in sys.modules:
         if mod_name.startswith(path):
-            print mod_name
             mod_to_delete.append(mod_name)
     for mod_name in mod_to_delete:
         del sys.modules[mod_name]
@@ -276,4 +275,6 @@ def topic_models(path, force=False):
     # At last, force the url resolver to reload (because we update it)
     clear_url_caches()
     reload_urlconf()
+    topic_module.__name__ = path
+    sys.modules[path] = topic_module
     return topic_module

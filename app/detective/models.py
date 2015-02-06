@@ -205,9 +205,16 @@ class Topic(models.Model):
     def get_module_token(size=10, chars=string.ascii_uppercase + string.digits):
         return "topic%s" % ''.join(random.choice(chars) for x in range(size))
 
-    def get_module(self):
-        from app.detective import topics
-        return getattr(topics, self.app_label())
+    def get_module_path(self):
+        return "app.detective.topics.%s" % self.module
+
+    def get_module(self, reload_module=True):
+        if reload_module and self.ontology_as_json:
+            module = self.reload()
+        else:
+            from app.detective import topics
+            module = getattr(topics, self.app_label())
+        return module
 
     def get_models_module(self):
         """ return the module topic_module.models """
@@ -254,7 +261,7 @@ class Topic(models.Model):
     def reload(self):
         from app.detective.register import topic_models
         # Register the topic's models again
-        topic_models(self.get_module().__name__, force=True)
+        return topic_models(self.get_module_path(), force=True)
 
     def has_default_ontology(self):
         try:
@@ -416,7 +423,6 @@ class Topic(models.Model):
                 is_out='<' if relationships[0]['direction'] == 'out' else '',
                 is_in='>' if relationships[0]['direction'] == 'in' else ''
             )
-            print query
         else:
             return {'errors': 'Unkown predicate type: %s' % predicate["name"]}
         return connection.cypher(query).to_dicts()

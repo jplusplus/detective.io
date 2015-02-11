@@ -1154,6 +1154,8 @@ class TopicApiTestCase(ApiTestCase):
         PillMoleculesContainedMoleculeProperties = models.PillMoleculesContainedMoleculeProperties
         Molecule                                 = models.Molecule
         Pill                                     = models.Pill
+        # Original count
+        original_count = topic.entities_count()
         # create entities
         pilulea       = Pill    .objects.create(name='pilule A')
         mola          = Molecule.objects.create(name="molecule A")
@@ -1163,16 +1165,16 @@ class TopicApiTestCase(ApiTestCase):
             "quantity_(in_milligrams)." : "12"
         }
         PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
-        self.assertEqual(topic.entities_count(), 2)
+        self.assertEqual(topic.entities_count(), original_count + 2)
         pilulea.molecules_contained.add(mola)
-        self.assertEqual(topic.entities_count(), 2)
+        self.assertEqual(topic.entities_count(), original_count + 2)
         molb          = Molecule.objects.create(name="molecule B")
-        self.assertEqual(topic.entities_count(), 3)
+        self.assertEqual(topic.entities_count(), original_count + 3)
         molb.delete()
-        self.assertEqual(topic.entities_count(), 2)
+        self.assertEqual(topic.entities_count(), original_count + 2)
         mola.delete()
         pilulea.delete()
-        self.assertEqual(topic.entities_count(), 0)
+        self.assertEqual(topic.entities_count(), original_count)
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')

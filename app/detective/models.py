@@ -329,7 +329,7 @@ class Topic(models.Model):
         if response is None:
             query = """
                 START a = node(0)
-                MATCH a-[`<<TYPE>>`]->(b)--> c
+                MATCH a-[:`<<TYPE>>`]->(b)-[:`<<INSTANCE>>`]->(c)
                 WHERE b.app_label = "{app_label}"
                 AND not(has(c._relationship))
                 RETURN count(c) as count;

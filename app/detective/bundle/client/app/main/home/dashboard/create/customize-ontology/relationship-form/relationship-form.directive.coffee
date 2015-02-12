@@ -7,15 +7,22 @@ angular.module('detective').directive "relationshipForm", ()->
         changeBounds: "="
         submit: "&"
         cancel: "&"
-    controller: [ '$scope', ($scope)->
-        FIELD_TYPES = ['string', 'float', 'date', 'url']
+        mayLostFieldData: "&"
+    controller: [ '$scope', '$state', 'Modal', ($scope, $state, Modal)->
+        FIELD_TYPES = ['string', 'richtext', 'float', 'datetime', 'url', 'boolean']
+        $scope.isEditing = ->
+            # Some field may be disable in edit mode
+            $state.includes("user-topic-edit") and $scope.mayLostFieldData field: $scope.relationship
         # Transform the given string into a valid field name
         toFieldName = (verbose_name)-> getSlug verbose_name, separator: '_'
         # Sanitize the model to make it ready to be inserted
         $scope.sanitizeRelationship = (remove_empty_field=no, populate_empty=no)->
             if $scope.relationship.verbose_name?
-                # Generate model name
-                $scope.relationship.name = toFieldName $scope.relationship.verbose_name
+                # You may be allowed to change the name of the relationship
+                # with no risk of loosing data
+                if not $scope.mayLostFieldData({field: $scope.relationship})
+                    # Generate model name
+                    $scope.relationship.name = toFieldName $scope.relationship.verbose_name
             # Complete missing data
             $scope.relationship.fields      or= []
             $scope.relationship.type          = "relationship"
@@ -33,20 +40,43 @@ angular.module('detective').directive "relationshipForm", ()->
                 continue unless $scope.isAllowedType(field)
                 # Use name as default verbose name
                 field.verbose_name = field.verbose_name or field.name if populate_empty
-                # Generate fields name
-                field.name = toFieldName field.verbose_name
-                # Field name exists?
-                if not field.name? or field.name is ''
-                    # Should we remove empty field?
-                    if remove_empty_field
-                        delete $scope.relationship.fields[index]
-                        $scope.relationship.fields.splice index, 1
-                    continue
-                # Lowercase first letter
-                if field.name.length < 2
-                    field.name = do field.name.toLowerCase
+                # You may be allowed to change the name of the field
+                # with no risk of loosing data
+                if not $scope.mayLostFieldData({field: field, model: $scope.master})
+                    # Generate fields name
+                    field.name = toFieldName field.verbose_name
+                    # Field name exists?
+                    if not field.name? or field.name is ''
+                        # Should we remove empty field?
+                        if remove_empty_field
+                            delete $scope.relationship.fields[index]
+                            $scope.relationship.fields.splice index, 1
+                        continue
+                    # Lowercase first letter
+                    if field.name.length < 2
+                        field.name = do field.name.toLowerCase
+                    else
+                        field.name = field.name.substring(0, 1).toLowerCase() + field.name.substring(1)
+                # This field might not be changeable without risk
                 else
-                    field.name = field.name.substring(0, 1).toLowerCase() + field.name.substring(1)
+                    # Original field
+                    masterField = _.find($scope.master.fields, { name: field.name })
+                    # Type changed
+                    if field.type isnt masterField.type
+                        # Closure function to transmit the field type
+                        resetType = (field, masterField)->
+                            # User cancel the change
+                            (isYes)->
+                                if isYes
+                                    # Update the master to ask the question once
+                                    masterField.type = field.type
+                                else
+                                    # Restore the field type
+                                    field.type = masterField.type
+                        # Ask confirmation
+                        m = Modal("Unconvertible data will be lost. Are you sure?", "Yes, change the type")
+                        # Reset (or no the field's type)
+                        m.then resetType field, masterField
             # Remove empty field if needed
             delete $scope.relationship.fields if $scope.relationship.fields.length is 0 and remove_empty_field
             # Returns the relationship after sanitzing
@@ -75,11 +105,11 @@ angular.module('detective').directive "relationshipForm", ()->
             $scope.relationship.fields.splice(index, 1)
         # True if the given type is allowed
         $scope.isAllowedType = (field)-> FIELD_TYPES.indexOf( do field.type.toLowerCase ) > -1
+        # Original model
+        $scope.master = $scope.relationshipForm
         # Shortcut to the model object
         $scope.relationship = angular.copy($scope.relationshipForm or {})
         $scope.relationship = $scope.sanitizeRelationship no, yes
-        # Original model
-        $scope.master = $scope.relationshipForm
         # Add default fields
         $scope.relationship.fields = [] unless $scope.relationship.fields?
         # Field that will be added to the list

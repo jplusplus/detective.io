@@ -146,19 +146,23 @@ class SummaryResource(Resource):
             del t["name"]
         return obj
 
+
+    def sanitize_field(self, field):
+        if "through" in field["rules"]:
+            field["rules"]["through"] = getattr(field["rules"]["through"], "__name__")
+        return field
+
     def summary_forms(self, bundle, request):
         available_resources = {}
         # Get the model's rules manager
-        rulesManager = request.current_topic.get_rules()
+        rulesManager = self.topic.get_rules()
         # Fetch every registered model
         # to print out its rules
         for model in self.topic.get_models():
             name                = model.__name__.lower()
             rules               = rulesManager.model(model).all()
-            fields              = utils.get_model_fields(model)
             verbose_name        = getattr(model._meta, "verbose_name", name)
             verbose_name_plural = getattr(model._meta, "verbose_name_plural", verbose_name + "s")
-
             for key in rules:
                 # Filter rules to keep only Neomatch
                 if isinstance(rules[key], Neomatch):
@@ -170,20 +174,11 @@ class SummaryResource(Resource):
                         "related_model": rules[key].target_model.__name__
                     })
 
-            for field in fields:
-                # Create a copy of the rule to avoid compromize the rules singleton
-                field["rules"] = field["rules"].copy()
-                for key, rule in field["rules"].items():
-                    # Convert class to model name
-                    if inspect.isclass(rule):
-                        field["rules"][key] = getattr(rule, "__name__", rule)
+            fields = [ field.copy() for field in utils.iterate_model_fields(model) ]
+            fields = [ self.sanitize_field(field) for field in fields ]
 
-            try:
-                idx = model.__idx__
-            except AttributeError:
-                idx = 0
             available_resources[name] = {
-                'description'         : getattr(model, "_description", None),
+                'help_text'           : getattr(model, "_description", None),
                 'topic'               : getattr(model, "_topic", self.topic.slug) or self.topic.slug,
                 'model'               : getattr(model, "__name__", ""),
                 'verbose_name'        : verbose_name,
@@ -191,10 +186,12 @@ class SummaryResource(Resource):
                 'name'                : name,
                 'fields'              : fields,
                 'rules'               : rules,
-                'index'               : idx
+                'index'               : getattr(model, "__idx__", 0)
             }
 
+
         return available_resources
+
 
     def summary_mine(self, bundle, request):
         app_label = self.topic.app_label()

@@ -8,7 +8,7 @@ class window.TopicFormCtrl
             main: false
             privacy: false
         @scope.submitted = no
-        
+
         @scope.submit           = @submit
         @scope.isPublic         = @isPublic
         @scope.isPrivate        = @isPrivate
@@ -20,7 +20,7 @@ class window.TopicFormCtrl
 
         @scope.$watch 'topic', @onTopicUpdated, yes
 
-    isEditing: => @state.is("user-topic-edit")
+    isEditing: => @state.includes("user-topic-edit")
 
     isCreating: => @state.includes("user-topic-create")
 

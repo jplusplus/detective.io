@@ -13,15 +13,6 @@
 
     .show-aside:not(.is-home) & {
         left:@aside-width;
-
-        @media (max-width: @screen-xs-max) {
-           left:100%;
-
-            .header {
-                .translate(100%, 0);
-            }
-        }
-
     }
 }
 
@@ -37,10 +28,6 @@
     color: contrast(@brand-secondary);
     .transition(@header-open-speed);
     .translate(-100%, 0);
-
-    @media (max-width: @screen-xs-max) {
-       width:100%;
-    }
 
     &__overlay {
         position: absolute;

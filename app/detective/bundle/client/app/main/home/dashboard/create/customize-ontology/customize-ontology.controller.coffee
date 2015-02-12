@@ -1,7 +1,10 @@
 class window.EditTopicOntologyCtrl
-    @$inject: ['$scope', 'Page', '$rootScope', 'TopicsFactory', '$modal']
-    constructor: (@scope, @Page, @rootScope,  @TopicsFactory, @modal)->
+    @$inject: ['$scope', '$state', 'Page', '$rootScope', 'TopicsFactory', '$modal']
+    constructor: (@scope, @state, @Page, @rootScope,  @TopicsFactory, @modal)->
         # Scope methods
+        @scope.isEditing                = @isEditing
+        @scope.mayLostFieldData         = @mayLostFieldData
+        @scope.mayLostModelData         = @mayLostModelData
         @scope.hasSelectedModel         = @hasSelectedModel
         @scope.hasSelectedRelationship  = @hasSelectedRelationship
         @scope.startEditingModel        = @startEditingModel
@@ -18,15 +21,34 @@ class window.EditTopicOntologyCtrl
         @scope.removeRelationship       = @removeRelationship
         # Initialize variables
         do @startOver
-        # List of current model
-        @scope.models                   = @scope.selected_skeleton.ontology or []
+        # List of current model from diferent contexts
+        if @scope.selected_skeleton?
+            @scope.models = @scope.selected_skeleton.ontology
+        else if @scope.topic?
+            @scope.models = @scope.topic.ontology_as_json
+        else
+            @scope.models = []
+        # A copy of the initial model
+        @master = angular.copy(@scope.models)
+
 
     # Shortcuts
     hasSelectedModel        : => @scope.selectedModel?
     hasSelectedRelationship : => @scope.selectedRelationship?
     startEditingModel       : (model)=> @scope.selectedModel = model
     startEditingRelationship: (relationship)=> @scope.selectedRelationship = relationship
-    getModel                : (name)=> _.find @scope.models, name: name
+    getModel                : (name, models=@scope.models)=> _.find models, name: name
+    isEditing               : => @state.includes("user-topic-edit")
+    mayLostFieldData        : (field, model)=> @isEditing() and @isExistingField(field, model)
+    mayLostModelData        : (model)=> @isEditing() and @isExistingModel(model)
+
+    isExistingModel: (model)=>
+        return !! @getModel(model.name, @master)
+
+    isExistingField: (field, model)=>
+        # Relationship fields resolve a parent model
+        model = @getModel(field.model, @master) unless model?
+        return model? and _.find model.fields, name: field.name
 
     startOver: =>
         # Panels display
@@ -64,17 +86,18 @@ class window.EditTopicOntologyCtrl
 
     removeModel: (model)=>
         modalInstance = @modal.open
-            templateUrl: '/partial/main/home/dashboard/create/customize-ontology/remove-model/remove-model.html' 
-            controller: ($scope, $modalInstance)-> 
-                $scope.model = model                
+            templateUrl: '/partial/main/home/dashboard/create/customize-ontology/remove-model/remove-model.html'
+            controller: ($scope, $modalInstance)=>
+                $scope.mayLostData  = @mayLostModelData(model)
+                $scope.model        = model
                 $scope.ok = -> do $modalInstance.close
                 $scope.cancel = -> $modalInstance.dismiss 'cancel'
         # Removing approved
         modalInstance.result.then =>
             # Look into the other models
-            for m, model_index in @scope.models 
+            for m, model_index in @scope.models
                 # Remove every field related to this model
-                m.fields = _.filter m.fields, (field)-> field.related_model isnt model.name                        
+                m.fields = _.filter m.fields, (field)-> field.related_model isnt model.name
             @scope.models = _.without @scope.models, model
             do @startOver
 
@@ -90,10 +113,11 @@ class window.EditTopicOntologyCtrl
 
     removeRelationship: (relationship)=>
         modalInstance = @modal.open
-            templateUrl: '/partial/main/home/dashboard/create/customize-ontology/remove-relationship/remove-relationship.html' 
-            controller: ($scope, $modalInstance)=> 
-                $scope.relationship = relationship                
-                $scope.getModel = @getModel                
+            templateUrl: '/partial/main/home/dashboard/create/customize-ontology/remove-relationship/remove-relationship.html'
+            controller: ($scope, $modalInstance)=>
+                $scope.mayLostData  = @mayLostFieldData(relationship)
+                $scope.relationship = relationship
+                $scope.getModel     = @getModel
                 $scope.ok = -> do $modalInstance.close
                 $scope.cancel = -> $modalInstance.dismiss 'cancel'
         # Removing approved

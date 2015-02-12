@@ -54,10 +54,17 @@
                 <h2>[[meta.title]]</h2>
                 <p class="lead" ng-if="meta.description" ng-bind-html="meta.description"></p>
                 <p class="top40">
-                    <a class="btn btn-stroke btn-lg right20" ng-if="user.hasAddPermission(meta.ontology_as_mod)" ng-href="/[[username]]/[[topic]]/contribute">
+                    <a class="btn btn-stroke btn-lg" ng-if="user.hasAddPermission(meta.ontology_as_mod)" ng-href="/[[username]]/[[topic]]/contribute">
+                        <i class="fa fa-plus"></i>
                         Add items
                     </a>
-                    <a class="btn btn-primary btn-lg" ui-sref="user-topic.network({username:username, topic:topic})">
+                    <a class="btn btn-stroke btn-lg"
+                        ng-if="user.owns(meta)"
+                        ui-sref="user-topic-edit({topic: topic, username: username})">
+                        <i class="fa fa-cog"></i>
+                        Settings
+                    </a>
+                    <a class="btn btn-primary btn-lg" ui-sref="user-topic.network({username:username, topic: topic})">
                         Explore
                     </a>
                 </p>

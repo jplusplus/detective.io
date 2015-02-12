@@ -11,11 +11,13 @@ from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
 from app.detective.exceptions           import UnavailableImage, NotAnImage, OversizedFile
+from app.detective.paginator            import Paginator, resource_paginator
+from django                             import forms
 from django.conf                        import settings
 from django.conf.urls                   import url
 from django.contrib.auth.models         import User
 from django.core.exceptions             import ObjectDoesNotExist, ValidationError
-from django.core.paginator              import Paginator, InvalidPage
+from django.core.paginator              import InvalidPage
 from django.core.urlresolvers           import reverse
 from django.core.files.storage          import default_storage
 from django.db.models.query             import QuerySet
@@ -24,7 +26,6 @@ from neo4jrestclient                    import client
 from neo4jrestclient.request            import TransactionException
 from neo4django.db                      import connection
 from neo4django.db.models               import NodeModel
-from neo4django.db.models.properties    import DateProperty, BoundProperty
 from neo4django.db.models.relationships import MultipleNodes
 from tastypie                           import fields
 from tastypie.authentication            import Authentication, SessionAuthentication, BasicAuthentication, MultiAuthentication
@@ -118,6 +119,7 @@ class FieldSourceResource(ModelResource):
         del bundle.data["resource_uri"]
         return bundle
 
+
 class IndividualResource(ModelResource):
 
     field_sources = fields.ToManyField(
@@ -128,8 +130,11 @@ class IndividualResource(ModelResource):
         use_in='detail'
     )
 
+
     def __init__(self, api_name=None):
         super(IndividualResource, self).__init__(api_name)
+        # Pass the current instance of the resource to the paginator
+        self._meta.paginator_class = resource_paginator(self)
         # By default, tastypie detects detail mode globally: it means that
         # even into an embeded resource (through a relationship), Tastypie will
         # serialize it as if we are in it's detail view.
@@ -271,6 +276,7 @@ class IndividualResource(ModelResource):
         # Use in detail
         return self.get_resource_uri(bundle) == bundle.request.path
 
+
     def dehydrate(self, bundle):
         # Get the request from the bundle
         request = bundle.request
@@ -337,7 +343,6 @@ class IndividualResource(ModelResource):
                         for key, size in settings.THUMBNAIL_SIZES.items()
                     }
                 except InvalidImageFormatError as e:
-                    print e
                     to_add[field + '_thumbnail'] = ''
 
             # Convert tuple to array for better serialization
@@ -398,13 +403,16 @@ class IndividualResource(ModelResource):
         request = bundle.request
         # Current model
         model = self.get_model()
-
         # Get the node's data using the rest API
         try: node = connection.nodes.get(pk)
         # Node not found
         except client.NotFoundError: raise Http404("Not found.")
+        # Convert existing properties.
+        # Since we allow the user to change her data structure we must be able
+        # to convert the data she already put into the database.
+        node.properties = self.convert(node.properties)
         # Create a model istance from the node
-        return model._neo4j_instance(node)
+        return model._neo4j_instance( node )
 
     def get_detail(self, request, **kwargs):
         basic_bundle = self.build_bundle(request=request)
@@ -478,38 +486,24 @@ class IndividualResource(ModelResource):
         query     = request.GET.get('q', '').lower()
         query     = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', query).strip()
         limit     = int( request.GET.get('limit', 20))
-        exclude   = int( request.GET.get('exclude', -1) )
+        p         = int(request.GET.get('page', 1))
         # Do the query.
         results   = self._meta.queryset.filter(name__icontains=query)
-        # Quicker than query exclude
-        results   = [r for r in results if r.id != exclude]
-        paginator = Paginator(results, limit)
+        # For retro compatibility we use the django paginator
+        paginator = resource_paginator(self)(request.GET, results, resource_uri=self.get_resource_uri(), limit=limit, collection_name=self._meta.collection_name)
+        to_be_serialized = paginator.page()
 
-        try:
-            p     = int(request.GET.get('page', 1))
-            page  = paginator.page(p)
-        except InvalidPage:
-            raise Http404("Sorry, no results on that page.")
+        # Dehydrate the bundles in preparation for serialization.
+        bundles = []
 
-        objects = []
+        for obj in to_be_serialized[self._meta.collection_name]:
+            bundle = self.build_bundle(obj=obj, request=request)
+            bundles.append(self.full_dehydrate(bundle, for_list=True))
 
-        for result in page.object_list:
-            bundle = self.build_bundle(obj=result, request=request)
-            bundle = self.full_dehydrate(bundle, for_list=True)
-            objects.append(bundle)
+        to_be_serialized[self._meta.collection_name] = bundles
+        to_be_serialized = self.alter_list_data_to_serialize(request, to_be_serialized)
 
-        object_list = {
-            'objects': objects,
-            'meta': {
-                'q': query,
-                'page': p,
-                'limit': limit,
-                'total_count': paginator.count
-            }
-        }
-
-        self.log_throttled_access(request)
-        return self.create_response(request, object_list)
+        return self.create_response(request, to_be_serialized)
 
     def get_mine(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
@@ -518,45 +512,72 @@ class IndividualResource(ModelResource):
         limit = int(request.GET.get('limit', 20))
 
         if request.user.id is None:
-            object_list = {
+            return self.create_response(request, {
                 'objects': [],
                 'meta': {
                     'author': request.user,
-                    'page': 1,
                     'limit': limit,
                     'total_count': 0
                 }
-            }
+            })
         else:
             # Do the query.
             results   = self._meta.queryset.filter(_author__contains=request.user.id)
-            paginator = Paginator(results, limit)
+            # For retro compatibility we use the django paginator
+            paginator = resource_paginator(self)(request.GET, results, resource_uri=self.get_resource_uri(), limit=limit, collection_name=self._meta.collection_name)
+            to_be_serialized = paginator.page()
 
+            # Dehydrate the bundles in preparation for serialization.
+            bundles = []
+
+            for obj in to_be_serialized[self._meta.collection_name]:
+                bundle = self.build_bundle(obj=obj, request=request)
+                bundles.append(self.full_dehydrate(bundle, for_list=True))
+
+            to_be_serialized[self._meta.collection_name] = bundles
+            to_be_serialized = self.alter_list_data_to_serialize(request, to_be_serialized)
+
+            return self.create_response(request, to_be_serialized)
+
+    def convert(self, properties, model=None):
+        if model is None: model = self.get_model()
+        validate = False
+        # Iterate until the whole properties object validates
+        while not validate:
             try:
-                p     = int(request.GET.get('page', 1))
-                page  = paginator.page(p)
-            except InvalidPage:
-                raise Http404("Sorry, no results on that page.")
+                self.validate(properties, model=model)
+                validate = True
+            except ValidationError as e:
+                # Convert each key
+                for key in e.message_dict.keys():
+                    value = self.convert_field(key, properties[key], model=model)
+                    # Skip unconvertible values
+                    if value is None: del properties[key]
+                    # Save the value
+                    else: properties[key] = value
+        return properties
 
-            objects = []
-
-            for result in page.object_list:
-                bundle = self.build_bundle(obj=result, request=request)
-                bundle = self.full_dehydrate(bundle, for_list=True)
-                objects.append(bundle)
-
-            object_list = {
-                'objects': objects,
-                'meta': {
-                    'author': request.user,
-                    'page': p,
-                    'limit': limit,
-                    'total_count': paginator.count
-                }
-            }
-
-        self.log_throttled_access(request)
-        return self.create_response(request, object_list)
+    def convert_field(self, name, value, model=None):
+        if model is None: model = self.get_model()
+        # Find the model's field
+        field = self.get_model_field(name, model)
+        # Find the field type
+        fieldtype = field._property.get_internal_type()
+        # Get the field widget
+        formfield = field._property.formfield()
+        # Choose the best way to convert
+        try:
+            if fieldtype == 'BooleanField':
+                return bool(value)
+            elif fieldtype == 'CharField':
+                return str(value)
+            elif fieldtype == 'DateTimeField':
+                return forms.DateTimeField().clean(value)
+            else:
+                return formfield.clean(value)
+        # Wrong convettion result to a None value
+        except (ValueError, TypeError, ValidationError):
+            return None
 
     def validate(self, data, model=None, allow_missing=False):
         if model is None: model = self.get_model()
@@ -573,6 +594,18 @@ class IndividualResource(ModelResource):
                         # Skip this field
                         else: continue
                     cleaned_data[field_name] = data[field_name]
+                # DateTime field must be validate manually
+                elif field.get_internal_type() == 'DateTimeField':
+                    # Create a native datetimefield
+                    formfield = forms.DateTimeField(input_formats=settings.DATETIME_FORMATS, required=False)
+                    try:
+                        # Validate and clean the data
+                        cleaned_data[field_name] = formfield.clean(data[field_name])
+                    except ValidationError as e:
+                        # Raise the same error the field name as key
+                        if not allow_missing: raise ValidationError({field_name: 'Must be a valid date/time'})
+                        # Skip this field
+                        else: continue
                 # Only literal values have a _property attribute
                 elif hasattr(field, "_property"):
                     try:
@@ -590,7 +623,7 @@ class IndividualResource(ModelResource):
                             # @warning: this will validate the data for
                             # array of values but not clean them
                             cleaned_data[field_name] = data[field_name]
-                    except ValidationError as e:
+                    except ValidationError:
                         # Raise the same error the field name as key
                         if not allow_missing: raise ValidationError({field_name: e.messages})
                 # The given value is a relationship
@@ -848,7 +881,6 @@ class IndividualResource(ModelResource):
         elif request.method == 'DELETE':
             delete_source(source_id)
 
-        print "Took %f to patch sources" % (time.time() - start_time)
         return self.create_response(request, source)
 
     def get_authors(self, request, **kwargs):

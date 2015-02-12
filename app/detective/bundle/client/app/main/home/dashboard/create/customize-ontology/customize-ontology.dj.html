@@ -1,4 +1,4 @@
-<div class="topic-edit-ontology">
+<div class="topic-edit-ontology" ng-class="{ 'loading': loading.main }">
     <div class="panel panel-default">
         <div class="panel-heading">
             Your data structure contains the data models and the relationships between them.
@@ -81,9 +81,9 @@
                                 </div>
                             </div>
                             <div ng-show="hasSelectedModel()">
-                                <button type="button" 
-                                        class="btn btn-danger pull-right" 
-                                        title="Remove this model" 
+                                <button type="button"
+                                        class="btn btn-danger pull-right"
+                                        title="Remove this model"
                                         ng-click="removeModel(selectedModel)">
                                     <i class="fa fa-trash"></i>
                                 </button>
@@ -94,6 +94,8 @@
                                      model-form="selectedModel"
                                      models="models"
                                      submit="editModel($value)"
+                                     may-lost-field-data="mayLostFieldData(field, model)"
+                                     may-lost-model-data="mayLostModelData(model)"
                                      cancel="startOver()"></div>
                             </div>
                         </div>
@@ -138,9 +140,9 @@
                                 </div>
                             </div>
                             <div ng-show="hasSelectedRelationship()">
-                                <button type="button" 
-                                        class="btn btn-danger pull-right" 
-                                        title="Remove this relationship" 
+                                <button type="button"
+                                        class="btn btn-danger pull-right"
+                                        title="Remove this relationship"
                                         ng-click="removeRelationship(selectedRelationship)">
                                     <i class="fa fa-trash"></i>
                                 </button>
@@ -157,16 +159,24 @@
                                      models="models"
                                      change-bounds="false"
                                      submit="editRelationship($value)"
+                                     may-lost-field-data="mayLostFieldData(field, model)"
                                      cancel="startOver()"></div>
                             </div>
                         </div>
 
-                        <div class="topic-edit-ontology__workspace__menu__footer">
-                            <button class="btn btn-primary" ng-disabled="!selected_skeleton.ontology.length" type="button" ui-sref="user-topic-create.describe">
+                        <form class="topic-edit-ontology__workspace__menu__footer"  name="form" ng-submit="submit(form)" novalidate>
+                            <div class="pull-left text-success top05" ng-show="isEditing() && !!saved">
+                                <i class="fa fa-check right05"></i>
+                                Changes saved!
+                            </div>
+
+                            <button class="btn btn-primary" ng-if="isCreating()" ng-disabled="!selected_skeleton.ontology.length" type="button" ui-sref="user-topic-create.describe">
                                 Describe
                             </button>
-                        </div>
-
+                            <button ng-if="isEditing()"  ng-disabled="loading.main" type="submit" class="form-footer__submit-btn btn btn-primary">
+                                Save changes
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

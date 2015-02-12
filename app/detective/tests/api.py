@@ -605,10 +605,6 @@ class TopicApiTestCase(ApiTestCase):
         # At least 2 results
         self.assertGreater( len(data.items()), 1 )
 
-    def test_search_organization_wrong_page(self):
-        resp = self.api_client.get('/api/detective/energy/v1/organization/search/?q=Roméra&page=10000', format='json', authentication=self.get_super_credentials())
-        self.assertEqual(resp.status_code in [302, 404], True)
-
     def test_cypher_detail(self):
         resp = self.api_client.get('/api/detective/common/v1/cypher/111/', format='json', authentication=self.get_super_credentials())
         self.assertTrue(resp.status_code in [302, 404])
@@ -882,12 +878,33 @@ class TopicApiTestCase(ApiTestCase):
             self.assertIn("quantity_(in_milligrams).", relation.keys()        , relation)
             self.assertEqual(relation["quantity_(in_milligrams)."], property  , relation)
 
+        # Get orphan count
+        def count_orphans():
+            orphans_count = 0
+            for Model in topic.get_models():
+                for field in utils.iterate_model_fields(Model):
+                    if field["rel_type"] and "through" in field["rules"]:
+                        ids= []
+                        for entity in Model.objects.all():
+                            ids.extend([_.id for _ in entity.node.relationships.all()])
+                        Properties = field["rules"]["through"]
+                        for info in Properties.objects.all():
+                            if info._relationship not in ids:
+                                orphans_count += 1
+            return orphans_count
+
+        # Check if orphans exist. It shouldn't !
+        def has_more_orphans(orphans_count=0):
+            self.assertEqual(orphans_count, count_orphans())
+
         topic    = Topic.objects.get(slug='test-pillen')
         models   = topic.get_models_module()
         # get models
         PillMoleculesContainedMoleculeProperties = models.PillMoleculesContainedMoleculeProperties
         Molecule                                 = models.Molecule
         Pill                                     = models.Pill
+        # Initial orphan count
+        orphans_count = count_orphans()
         # create entities
         pilulea       = Pill    .objects.create(name='pilule A')
         mola          = Molecule.objects.create(name="molecule A")
@@ -936,28 +953,14 @@ class TopicApiTestCase(ApiTestCase):
         self.assertNotIn("quantity_(in_milligrams).", relation_pamd.keys() , relation_pamd)
         self.assertTrue(int(relation_pamd["_relationship"]) > 0            , relation_pamd)
         self.assertEquals(relation_pamd["_endnodes"], [pilulea.id, mold_wo_infos.id])
-        # check if orphans exist. It shouldn't !
-        def check_if_orphans_exist():
-            orphans_count = 0
-            for Model in topic.get_models():
-                for field in utils.iterate_model_fields(Model):
-                    if field["rel_type"] and "through" in field["rules"]:
-                        ids= []
-                        for entity in Model.objects.all():
-                            ids.extend([_.id for _ in entity.node.relationships.all()])
-                        Properties = field["rules"]["through"]
-                        for info in Properties.objects.all():
-                            if info._relationship not in ids:
-                                orphans_count += 1
-            self.assertEqual(orphans_count, 0)
         # remove one molecule
         molb.delete()
-        check_if_orphans_exist()
+        has_more_orphans(orphans_count)
         pilulea.delete()
         mola.delete()
         molc.delete()
         mold_wo_infos.delete()
-        check_if_orphans_exist()
+        has_more_orphans(orphans_count)
 
     def test_patch_relations(self):
         """
@@ -1158,6 +1161,8 @@ class TopicApiTestCase(ApiTestCase):
         PillMoleculesContainedMoleculeProperties = models.PillMoleculesContainedMoleculeProperties
         Molecule                                 = models.Molecule
         Pill                                     = models.Pill
+        # Original count
+        original_count = topic.entities_count()
         # create entities
         pilulea       = Pill    .objects.create(name='pilule A')
         mola          = Molecule.objects.create(name="molecule A")
@@ -1167,16 +1172,16 @@ class TopicApiTestCase(ApiTestCase):
             "quantity_(in_milligrams)." : "12"
         }
         PillMoleculesContainedMoleculeProperties.objects.create(**relation_args)
-        self.assertEqual(topic.entities_count(), 2)
+        self.assertEqual(topic.entities_count(), original_count + 2)
         pilulea.molecules_contained.add(mola)
-        self.assertEqual(topic.entities_count(), 2)
+        self.assertEqual(topic.entities_count(), original_count + 2)
         molb          = Molecule.objects.create(name="molecule B")
-        self.assertEqual(topic.entities_count(), 3)
+        self.assertEqual(topic.entities_count(), original_count + 3)
         molb.delete()
-        self.assertEqual(topic.entities_count(), 2)
+        self.assertEqual(topic.entities_count(), original_count + 2)
         mola.delete()
         pilulea.delete()
-        self.assertEqual(topic.entities_count(), 0)
+        self.assertEqual(topic.entities_count(), original_count)
 
     def test_topic_endpoint_exists(self):
         resp = self.api_client.get('/api/detective/common/v1/topic/?slug=christmas', follow=True, format='json')

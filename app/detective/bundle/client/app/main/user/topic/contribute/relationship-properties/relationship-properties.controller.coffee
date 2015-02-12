@@ -5,6 +5,7 @@ class window.RelationshipPropertiesCtrl
         # Cancel button just closes the modal
         @scope.cancel = @close
         @scope.save = @save
+        @scope.isRich = @isRich
         @scope.isEditable = @isEditable
         # This relationship may not have properties yet
         @scope.individual = fields: @properties
@@ -38,6 +39,7 @@ class window.RelationshipPropertiesCtrl
         # Close the modal
         @close(promise)
 
+    isRich: (field) => field.rules.is_rich or no
     isEditable: (field)=>
         @isAllowedType(field.type) and
         # We must say explicitely if this field is not editable

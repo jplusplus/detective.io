@@ -18,7 +18,16 @@
         {% for picture_url in meta.pictures %}
             <meta property="og:image" content="{{ picture_url }}">
         {% endfor %}
-        <meta name="viewport" content="width=device-width">
+
+        <meta name="viewport" id="viewport" content="width=480px, maximum-scale=1, user-scalable=no">
+        <script>
+          (function(doc) {
+              var viewport = doc.getElementById('viewport');
+              if ( navigator.userAgent.match(/iPad/i) ) {
+                viewport.setAttribute("content", "width=992px, maximum-scale=1, user-scalable=no");
+              }
+          }(document));
+        </script>
 
         <link rel="dns-prefetch" href="{% static '' %}">
         <link rel="icon" type="image/png" href="{% static 'img/favicon.ico' %}">

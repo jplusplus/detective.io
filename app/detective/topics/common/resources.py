@@ -526,6 +526,10 @@ class TopicNestedResource(ModelResource):
             bundle.data["is_uploading"] = True
         return bundle
 
+
+    def dehydrate_ontology_as_json(self, bundle):
+        return bundle.obj.ontology_sanitized
+
     def get_skeleton(self, bundle):
         # workaround to avoid SQL lazyness, store topic skeleton in bundle obj.
         topic_skeleton = getattr(bundle, 'skeleton', None)

@@ -30,6 +30,15 @@ class VirtualApp:
         "float"        : "StringProperty"
     }
 
+    TYPEMATCHES = {
+        "date"         : "datetime",
+        "time"         : "datetime",
+        "datetimestamp": "datetime",
+        "bool"         : "boolean",
+        "char"         : "string",
+        "int"          : "integer"
+    }
+
     def __init__(self, module, app_label, ontology):
         # Add dictionary of pending rules that
         # will be added once the model is created

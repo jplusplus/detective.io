@@ -1,7 +1,7 @@
 from app.detective              import utils
 from app.detective.exceptions   import UnavailableImage
 from app.detective.permissions  import create_permissions, remove_permissions
-from app.detective.parser       import schema
+from app.detective.parser       import schema, json
 
 from django                     import forms
 from django.conf                import settings
@@ -471,6 +471,35 @@ class Topic(models.Model):
         # Simply call the function to register app's rules
         if func: rules = func()
         return rules
+
+    @staticmethod
+    def field_type_sanitized(field):
+        matches     = json.VirtualApp.TYPEMATCHES
+        field_type  = field.get("type", None)
+        field_match = matches.get(field_type, None)
+        # We find a match
+        if not field_match is None:
+            # Update the type attribute
+            field_type = field_match
+        # Special behavior for richtext that can be deduce from the field rules
+        if field_type == "string" and field.get("rules", {}).get("is_rich", False):
+            # Switch to 'richtext' type
+            field_type = 'richtext'
+        return field_type
+
+    @property
+    def ontology_sanitized(self):
+        ontology = self.ontology_as_json or []
+        for model in ontology:
+            # Sanitizes model's fields
+            for field in model.get('fields', []):
+                # The sanitize function return the field type
+                field["type"] = self.field_type_sanitized(field)
+                # Sanitizes relationship's fields
+                for rel_field in field.get('fields', []):
+                    rel_field["type"] = self.field_type_sanitized(rel_field)
+        return ontology
+
 
 class TopicToken(models.Model):
     topic      = models.ForeignKey(Topic, help_text="The topic this token is related to.")

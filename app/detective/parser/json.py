@@ -160,8 +160,7 @@ class VirtualApp:
             field_opts["indexed"] = True
         # It's a relationship!
         if "related_model" in desc and desc["related_model"] is not None:
-            field_opts["target"] = to_class_name(desc["related_model"].lower())
-            field_target = to_class_name(field_opts["target"])
+            field_target = field_opts["target"] = to_class_name(desc["related_model"])
             # Remove "has_" from the begining of the name
             if field_name.startswith("has_"): field_name = field_name[4:]
             # Build rel_type using the name and the class name

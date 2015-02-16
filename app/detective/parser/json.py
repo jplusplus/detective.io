@@ -233,6 +233,8 @@ class VirtualApp:
         # Skip unkown type
         # @TODO raise custom exception
         if not field_type in self.JSONTYPES: return None, None
+        # Skip relationship without target
+        if field_type == "relationship" and not "target" in field_opts: return None, None
         # Convert type to neo4django property type
         neo4j_type = self.JSONTYPES[field_type]
         # Add a default value for boolean properties

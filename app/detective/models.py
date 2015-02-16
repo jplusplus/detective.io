@@ -160,7 +160,7 @@ class Topic(models.Model):
 
     ontology_as_owl  = models.FileField(null=True, blank=True, upload_to="ontologies", verbose_name="Ontology as OWL", help_text="Ontology file that descibes your field of study.")
     ontology_as_mod  = models.SlugField(blank=True, max_length=250, verbose_name="Ontology as a module", help_text="Module to use to create your topic.")
-    ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True, validators=[validate_ontology_as_json])
+    ontology_as_json = JSONField(null=True, verbose_name="Ontology as JSON", blank=True)
 
     dataset = models.ForeignKey(TopicDataSet, blank=True, null=True)
 

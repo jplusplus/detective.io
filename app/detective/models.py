@@ -650,7 +650,7 @@ class DetectiveProfileUser(models.Model):
     @property
     def avatar(self):
         hash_email = hashlib.md5(self.user.email.strip().lower()).hexdigest()
-        return "http://www.gravatar.com/avatar/{hash}?s=200&d=mm".format(
+        return "//www.gravatar.com/avatar/{hash}?s=200&d=mm".format(
             hash=hash_email)
 
     def topics_count (self): return Topic.objects.filter(author=self.user).count()

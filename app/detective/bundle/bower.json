@@ -35,6 +35,7 @@
     "jsPlumb": "1.6.4",
     "speakingurl": "~0.17.0",
     "angular-ui-utils": "bower-validate",
-    "angular-local-storage": "~0.1.5"
+    "angular-local-storage": "~0.1.5",
+    "papaparse": "~4.1.0"
   }
 }

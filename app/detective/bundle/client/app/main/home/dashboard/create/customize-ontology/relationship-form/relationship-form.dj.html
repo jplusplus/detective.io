@@ -1,0 +1,102 @@
+<form ng-submit="relationshipForm.$valid && submit({'$value': sanitizeRelationship(true)})" name="relationshipForm" novalidate>
+  <div class="bottom10" ng-show="changeBounds">
+      <label>Relationship between*</label>
+      <div class="row">
+        <div class="col-xs-5">
+          <select ng-options="model as model.verbose_name for model in models" ng-model="source" class="form-control">
+            <option value="">Choose a data model</option>
+          </select>
+        </div>
+        <div class="col-xs-2">
+          <span class="btn">and</span>
+        </div>
+        <div class="col-xs-5">
+          <select ng-options="model as model.verbose_name for model in models" ng-model="target" class="form-control">
+            <option value="">Choose a data model</option>
+          </select>
+        </div>
+      </div>
+  </div>
+  <div class="bottom10">
+      <label>Name*</label>
+      <input type="text"
+             class="form-control"
+             ng-model="relationship.verbose_name"
+             ui-validate="{ unique: 'isValidFieldName($value, relationship, source.fields)' }"
+             name="verbose_name"
+             placeholder="Ex: is a board member of"
+             required />
+      <div ng-show="relationshipForm.verbose_name.$error.unique" class="text-danger small">
+        This name already exists.
+      </div>
+  </div>
+  <div class="bottom10">
+      <i ng-show="isEditing()" class="fa fa-info-circle pull-right top05" tooltip="You can't edit this field"></i>
+      <label>Reverse name</label>
+      <input type="text"
+             class="form-control"
+             ng-model="relationship.related_name"
+             ui-validate="{ unique: 'isValidFieldName($value, relationship, target.fields)' }"
+             name="related_name"
+             ng-disabled="isEditing()"
+             placeholder="Ex: has board member" />
+      <div ng-show="relationshipForm.related_name.$error.unique" class="text-danger small">
+        This name already exists.
+      </div>
+  </div>
+  <div>
+    <h5>
+        <strong>Fields</strong>
+        <span class="text-muted pull-right">Ex: From</span>
+    </h5>
+    <div class="well well-sm topic-edit-ontology__workspace__menu__panel__fields" ng-form="fieldsForm">
+        <div class="row">
+            <div class="col-xs-5">Label</div>
+            <div class="col-xs-5">Type</div>
+        </div>
+        <fieldset class="row topic-edit-ontology__workspace__menu__panel__fields__field"
+                  ng-repeat="field in relationship.fields | filter:isAllowedType">
+            <div class="col-xs-5 topic-edit-ontology__workspace__menu__panel__fields__field__input">
+                <input type="text"
+                       class="form-control"
+                       name="field[[$index]]"
+                       ui-validate="{ unique: 'isValidFieldName($value, field)' }"
+                       ng-model="field.verbose_name" />
+            </div>
+            <div class="col-xs-5 topic-edit-ontology__workspace__menu__panel__fields__field__input">
+                <select class="form-control" ng-model="field.type">
+                    <option value="string">Short text</option>
+                    <option value="richtext">Long text</option>
+                    <option value="float">Number</option>
+                    <option value="datetime">Date</option>
+                    <option value="url">URL</option>
+                    <option value="boolean">Yes or no</option>
+                </select>
+            </div>
+            <div class="col-xs-2">
+              <button class="btn btn-default btn-block" type="button" ng-click="removeField(field)">
+                  <i class="fa fa-trash"></i>
+              </button>
+            </div>
+            <div ng-show="fieldsForm['field' + $index].$error.unique && fieldsForm['field' + $index].$dirty" class="text-danger small col-xs-12">
+              This field name already exists.
+            </div>
+        </fieldset>
+        <div class="topic-edit-ontology__workspace__menu__panel__fields__field">
+          <a class="btn btn-default" ng-click="addField()">
+              <i class="fa fa-plus"></i> Add a new field
+          </a>
+        </div>
+    </div>
+  </div>
+  <div class="topic-edit-ontology__workspace__menu__panel__footer">
+      <div class="pull-right">
+          <button class="btn btn-primary" type="submit" ng-disabled="!relationshipForm.$valid">
+              Save
+          </button>
+      </div>
+      <button class="btn btn-default" type="button" ng-click="cancel()">
+          Cancel
+      </button>
+  </div>
+</form>

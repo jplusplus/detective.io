@@ -6,12 +6,12 @@
           <div class="panel panel-default">
             <div class="panel-body">
               <p class="lead">Visualize the network in your data</p>
-              <textarea class="form-control" rows="6" placeholder="Select your data (including header row/column) in Excel or OpenOffice and paste it here."></textarea>
+              <textarea ng-model="csv" class="form-control" rows="6" placeholder="Select your data (including header row/column) in Excel or OpenOffice and paste it here."></textarea>
             </div>
             <div class="panel-footer text-right">
-              <button class="btn btn-primary">
+              <a class="btn btn-primary" ui-sref="user-topic-create.batch({ csv: csv })">
                 Upload your data
-              </button>
+              </a>
             </div>
           </div>
         </div>

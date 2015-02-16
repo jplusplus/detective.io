@@ -623,7 +623,7 @@ class IndividualResource(ModelResource):
                             # @warning: this will validate the data for
                             # array of values but not clean them
                             cleaned_data[field_name] = data[field_name]
-                    except ValidationError:
+                    except ValidationError as e:
                         # Raise the same error the field name as key
                         if not allow_missing: raise ValidationError({field_name: e.messages})
                 # The given value is a relationship

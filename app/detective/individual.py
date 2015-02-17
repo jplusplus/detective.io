@@ -344,6 +344,9 @@ class IndividualResource(ModelResource):
                     }
                 except InvalidImageFormatError as e:
                     to_add[field + '_thumbnail'] = ''
+                # Ignore missing image error
+                except IOError as e:
+                    pass
 
             # Convert tuple to array for better serialization
             if type( getattr(bundle.obj, field, None) ) is tuple:

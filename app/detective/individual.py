@@ -297,7 +297,7 @@ class IndividualResource(ModelResource):
         to_add = dict()
         for field in bundle.data:
             # Image field
-            if field == 'image':
+            if field == 'image' and self.use_in(bundle):
                 # Get thumbnails
                 try:
                     url_or_path = bundle.data[field]

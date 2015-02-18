@@ -297,7 +297,7 @@ class IndividualResource(ModelResource):
         to_add = dict()
         for field in bundle.data:
             # Image field
-            if field == 'image':
+            if field == 'image' and self.use_in(bundle):
                 # Get thumbnails
                 try:
                     url_or_path = bundle.data[field]
@@ -344,6 +344,12 @@ class IndividualResource(ModelResource):
                     }
                 except InvalidImageFormatError as e:
                     to_add[field + '_thumbnail'] = ''
+                # Ignore missing image error
+                except IOError as e:
+                    to_add[field] = ''
+                    # Removes unusable image
+                    setattr(bundle.obj, field, None)
+                    bundle.obj.save()
 
             # Convert tuple to array for better serialization
             if type( getattr(bundle.obj, field, None) ) is tuple:
@@ -623,7 +629,7 @@ class IndividualResource(ModelResource):
                             # @warning: this will validate the data for
                             # array of values but not clean them
                             cleaned_data[field_name] = data[field_name]
-                    except ValidationError:
+                    except ValidationError as e:
                         # Raise the same error the field name as key
                         if not allow_missing: raise ValidationError({field_name: e.messages})
                 # The given value is a relationship

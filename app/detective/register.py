@@ -38,7 +38,7 @@ class TopicRegistor(object):
         topic_key = self.__get_topic_key(topic)
         if not self.__topic_models(topic_key):
             self.__registered_topics[topic_key] = self.topic_models(topic_key)
-            self.default_rules(topic) # register default rules for a topic
+            rules = self.default_rules(topic) # register default rules for a topic
         return self.__topic_models(topic_key)
 
     def default_rules(self, topic):

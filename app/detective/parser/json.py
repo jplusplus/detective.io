@@ -160,8 +160,7 @@ class VirtualApp:
             field_opts["indexed"] = True
         # It's a relationship!
         if "related_model" in desc and desc["related_model"] is not None:
-            field_opts["target"] = to_class_name(desc["related_model"].lower())
-            field_target = to_class_name(field_opts["target"])
+            field_target = field_opts["target"] = to_class_name(desc["related_model"])
             # Remove "has_" from the begining of the name
             if field_name.startswith("has_"): field_name = field_name[4:]
             # Build rel_type using the name and the class name
@@ -234,6 +233,8 @@ class VirtualApp:
         # Skip unkown type
         # @TODO raise custom exception
         if not field_type in self.JSONTYPES: return None, None
+        # Skip relationship without target
+        if field_type == "relationship" and not "target" in field_opts: return None, None
         # Convert type to neo4django property type
         neo4j_type = self.JSONTYPES[field_type]
         # Add a default value for boolean properties

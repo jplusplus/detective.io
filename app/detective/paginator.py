@@ -28,11 +28,9 @@ def resource_paginator(resource=None, base=TastypiePaginator):
             # Override the query function that transforms node into neo4django model.
             # We pass the current model through a closure.
             self.objects.query.model_from_node = self.get_converter(self.objects.model)
-            # Iterate over the objects using the modified query
-            subset = [o for o in self.objects.query.execute(self.objects.db) ]
             # No limit parameter,  we return the whole subset from the given offset
-            if limit == 0: return subset[offset:]
-            return subset[offset:offset + limit]
+            if limit == 0: return self.objects[offset:]
+            return self.objects[offset:offset + limit]
     return Paginator
 
 # Allows paginator exportation without auto convertion

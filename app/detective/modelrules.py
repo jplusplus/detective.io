@@ -45,6 +45,7 @@ class Model(HasRules):
         if not inspect.isclass(model) or not hasattr(model, "_meta"):
             raise Exception("You can only registed model's class.")
         self.model = model
+        self.name  = "%s.%s" % (model.__module__, model.__name__)
         # Get the model fields
         self.field_names = model._meta.get_all_field_names()
         # Field of the model
@@ -99,17 +100,23 @@ class ModelRules(object):
 
     # This method will add the given model to the register list
     def register_model(self, model):
+        name  = "%s.%s" % (model.__module__, model.__name__)
         # Soft validation:
         # we stop double registering
         # without raise an exception
-        if model not in self.registered_models:
-            self.registered_models[model] = Model(model)
+        if name not in self.registered_models:
+            self.registered_models[name] = Model(model)
 
-        return self.registered_models[model]
+        return self.registered_models[name]
 
     # Get model (shortcut to register_model)
     model = register_model
     # List of registered model
     def models(self): return self.registered_models
 
-
+    # Get model's rules by its name
+    def by_name(self, name):
+        for model in self.registered_models:
+            rules = self.registered_models[model]
+            if rules.name == name: return rules
+        return None

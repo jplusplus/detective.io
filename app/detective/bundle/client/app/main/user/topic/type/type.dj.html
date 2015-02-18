@@ -87,10 +87,10 @@
 			</div>
 			<!-- Table -->
 			<table class="table user__topic__type__list">
-				<tr ng-repeat="individual in individuals.objects" class="user__topic__type__list__item">	
-					<td style="width: 60px">
-						<a ng-href="[[singleUrl(individual)]]" ng-if="individual.image_thumbnail">
-							<img ng-src="[[individual.image_thumbnail.mini]]" class="img-thumbnail img-responsive" />
+				<tr ng-repeat="individual in individuals.objects" class="user__topic__type__list__item">
+					<td style="max-width: 50px">
+						<a ng-href="[[singleUrl(individual)]]" ng-if="individual.image" class="hidden-xs">
+							<img ng-src="[[individual.image]]" class="img-thumbnail img-responsive" />
 						</a>
 					</td>
 					<td>
@@ -99,7 +99,7 @@
 								[[individual|individualPreview:"unknown"]]
 							</a>
 						</strong>
-						<br />					
+						<br />
 						<div class="small user__topic__type__list__item__actions">
 							<a ng-href="[[singleUrl(individual)]]">Details</a> —
 							<a ng-href="[[singleUrl(individual)]]/network/">Network</a> —

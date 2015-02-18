@@ -31,7 +31,8 @@ from tastypie.constants               import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions              import Unauthorized
 from tastypie.resources               import ModelResource
 from tastypie.utils                   import trailing_slash
-from tastypie.validation              import Validation
+from tastypie.validation              import FormValidation
+from django.forms                     import ModelForm
 from django.db.models                 import Q
 from django.contrib.auth.models       import Group
 
@@ -174,7 +175,7 @@ class TopicDataSetResource(ModelResource):
 
         return bundle
 
-class TopicValidation(Validation):
+class TopicValidation(FormValidation):
 
     def is_valid_background_image(self, bundle, request, errors={}):
         def get_error(code):
@@ -203,14 +204,18 @@ class TopicValidation(Validation):
                     u"please chose another title"
                 ).format(title=title)
 
-    # Ways of improvements: use FormValidation instead of Validation and
-    # relies on model validation instead of this API validation.
+
     def is_valid(self, bundle, request=None):
         errors = super(TopicValidation, self).is_valid(bundle, request)
         self.is_valid_background_image(bundle, request, errors)
         self.is_valid_topic_title(bundle, request, errors)
         return errors
 
+
+class TopicForm(ModelForm):
+    class Meta:
+        model = Topic
+        fields = ['ontology_as_json']
 
 class TopicAuthorization(ReadOnlyAuthorization):
 
@@ -282,7 +287,7 @@ class TopicNestedResource(ModelResource):
         always_return_data = True
         authorization      = TopicAuthorization()
         authentication     = MultiAuthentication(Authentication(), BasicAuthentication(), SessionAuthentication())
-        validation         = TopicValidation()
+        validation         = TopicValidation(form_class=TopicForm)
         queryset           = Topic.objects.all().prefetch_related('author')
         filtering          = {'id': ALL, 'slug': ALL, 'author': ALL_WITH_RELATIONS, 'featured': ALL_WITH_RELATIONS, 'ontology_as_mod': ALL, 'public': ALL, 'title': ALL}
 

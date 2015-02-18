@@ -98,6 +98,8 @@ class window.ContributeCtrl
             scope.$on("individual:created", @getSimilars) if fields.name? and not related_to?
             # We may have to refresh this individual
             scope.$on("individual:updated", @shouldRefresh)
+            # We may have to refresh relationships
+            scope.$on("individual:deleted", @refreshRelationships)
             # Class attributes from parameters
             # ──────────────────────────────────────────────────────────────────
             @Individual   = scope.Individual
@@ -160,7 +162,7 @@ class window.ContributeCtrl
                     # Get the field of the same relationship type
                     rel = _.findWhere @meta.fields, rel_type: related_meta.rel_type
                     # Save its name
-                    relationships.push rel.name
+                    relationships.push rel.name if rel?
             # Does this individual have relationships fields?
             if relationships.length
                 # Set loading state to the relationships fields
@@ -179,6 +181,30 @@ class window.ContributeCtrl
                             @fields[rel] = individual[rel]
                         # Field no more loading
                         delete @updating[rel]
+
+        refreshRelationships: (event, deleted_individual)=>
+            # Do not refresh unkown forms
+            return unless @type? and @fields.id? and @fields.id isnt deleted_individual.id
+            # List of relationship field to update
+            relationships = _.where @meta.fields, type: 'Relationship'
+            relationships = ( rel.name for rel in relationships )
+            # Set loading state to the relationships fields
+            @updating[rel] = yes for rel in relationships
+            # Load the individual
+            @Individual.get type: @type, id: @fields.id, (individual)=>
+                # Reload the relationships fields
+                for rel in relationships
+                    # The field may not exists yet in the database
+                    @master[rel] = @master[rel] ? []
+                    @fields[rel] = @fields[rel] ? []
+                    if individual[rel]?
+                        # Update the master too in order
+                        # to avoid new reloading
+                        @master[rel] = angular.copy(individual[rel])
+                        @fields[rel] = individual[rel]
+                    # Field no more loading
+                    delete @updating[rel]
+
 
         getChanges: (prev=@master, now=@fields)=>
             changes = {}
@@ -384,9 +410,8 @@ class window.ContributeCtrl
         delete: (index, msg='Are you sure you want to delete this node?')=>
             # Ask user for confirmation
             if confirm(msg)
-                @Individual.delete
-                    id   : @fields.id
-                    type : @type
+                @Individual.delete id: @fields.id, type: @type, =>
+                    @scope.$broadcast "individual:deleted", @fields
                 @scope.removeIndividual(index)
 
         # Toggle the close attribute

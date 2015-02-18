@@ -266,9 +266,10 @@ class Search(object):
         """
         matches = []
         for item in lst:
-            cpr = item["label"]
-            relevance = SequenceMatcher(None, token, cpr).ratio()
-            if relevance >= ratio:
-                item["relevance"] = relevance
-                matches.append(item)
+            if type(item) is dict:
+                cpr = item["label"]
+                relevance = SequenceMatcher(None, token, cpr).ratio()
+                if relevance >= ratio:
+                    item["relevance"] = relevance
+                    matches.append(item)
         return matches

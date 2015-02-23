@@ -8,39 +8,39 @@ var del          = require('del')
 var path         = require('path');
 var wiredep      = require('wiredep').stream;
 var livereload   = require('gulp-livereload');
+var lazypipe     = require('lazypipe');
 
 gulp.task('clean', function(cb) {
   del(['.build'], cb);
 });
 
 
+var lessPipe = lazypipe()
+  .pipe(less, {
+    paths: [
+      path.join(__dirname, 'client/app'),
+      path.join(__dirname, 'client')
+    ]
+  })
+  .pipe(gulp.dest, '.build/app/');
+
 gulp.task('less', function () {
-  return gulp.src('client/app/*/{main,embed}.less')
-    .pipe(
-    	less({
-      	paths: [ 
-          path.join(__dirname, 'client/app'),
-          path.join(__dirname, 'client')
-        ]
-    	})
-    	.on('error', gutil.log)
-    )
-    .pipe(gulp.dest('.build/app/'));
+  return gulp.src('client/app/*/{main,embed}.less').pipe(lessPipe());
 });
 
+var coffeePipe = lazypipe()
+  .pipe(coffee, {bare: true})
+  .pipe(gulp.dest, '.build/app/');
+
 gulp.task('coffee', function() {
-  return gulp.src('client/app/**/*.coffee')
-    .pipe(
-    	coffee({bare: true}).on('error', gutil.log)
-    )
-    .pipe(gulp.dest('.build/app/'));
+  return gulp.src('client/app/**/*.coffee').pipe(coffeePipe())
 });
 
 gulp.task('copy', function () {
 	// Copy assets to the .build dir
   gulp.src('client/img/**/*').pipe(gulp.dest('.build/img/'));
   gulp.src('client/svg/**/*').pipe(gulp.dest('.build/svg/'));
-  // For painless retro compatibility we export the build dir 
+  // For painless retro compatibility we export the build dir
   // to the same dir as before (components).
   gulp.src('client/vendors/**/*').pipe(gulp.dest('.build/components/'));
 });

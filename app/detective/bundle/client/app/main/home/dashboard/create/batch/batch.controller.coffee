@@ -6,6 +6,7 @@ class window.EditTopicBatchCtrl
         @scope.csv = @csv
         # Guess models without user pick
         @scope.models = @getModels @csv
+        @scope.models = @populateModels @scope.models, @csv
         # Extract picked model from this selection
         @scope.areModels = _.reduce @scope.models, (result, model)->
             result[model.name] = yes
@@ -16,6 +17,7 @@ class window.EditTopicBatchCtrl
         @scope.$watch "areModels", (userPick)=>
             # We pass the user pick to influence the statistic selection
             @scope.models = @getModels @csv, userPick
+            @scope.models = @populateModels @scope.models, @csv
         # Watch for value changes
         , yes
 
@@ -41,6 +43,9 @@ class window.EditTopicBatchCtrl
         # If we detect at least one model,
         # imports every remaining properties into the first model
         models[0].properties = properties if models.length
+        models
+
+    populateModels: (models, csv)=>
         # Then we collect data for each model
         for model in models
             # Every model must be connected together by default
@@ -93,6 +98,8 @@ class window.EditTopicBatchCtrl
                         for rel, idx in relationships
                             entity[field][idx] = target_model.names[rel]
         models
+
+    modelsToGraphviz:(models)=>
 
     # Reconizes if a field is a model using the csv's statistics
     mayBeModel: (field, stats, csv)=>

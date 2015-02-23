@@ -73,10 +73,11 @@ class window.EditTopicBatchCtrl
                             model.entities[idx][field] = model.entities[idx][field].concat entity[field]
                 # Create a hashmap of entities name
                 else
+                    entity.id = model.name + ":" + model.entities.length
+                    # Save its index
+                    model.names[entity.name] = entity.id
                     # Save the entity
                     model.entities.push entity
-                    # Save its index
-                    model.names[entity.name] = model.name + ":" + (model.entities.length - 1)
         # Relationships must now
         # be converted to array of index
         for model in models

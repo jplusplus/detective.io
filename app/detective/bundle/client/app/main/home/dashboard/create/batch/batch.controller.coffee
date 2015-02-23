@@ -3,10 +3,23 @@ class window.EditTopicBatchCtrl
     constructor: (@scope, @Page, @rootScope,  @TopicsFactory, @modal, @stateParams)->
         # Parse the given CSV using header
         @csv = Papa.parse @stateParams.csv, header: yes, dynamicTyping: yes, skipEmptyLines: yes
+        @scope.csv = @csv
+        # Guess models without user pick
+        @scope.models = @getModels @csv
+        # Extract picked model from this selection
+        @scope.areModels = _.reduce @scope.models, (result, model)->
+            result[model.name] = yes
+            result
+        , {}
+        # When the selection changes,
+        # we have to guess again what the structure could be
+        @scope.$watch "areModels", (userPick)=>
+            # We pass the user pick to influence the statistic selection
+            @scope.models = @getModels @csv, userPick
+        # Watch for value changes
+        , yes
 
-        console.log @getModels(@csv)
-
-    getModels: (csv)=>
+    getModels: (csv, force={})=>
         # Collects stat for every field
         stats = @getFieldsStats csv
         # Fields reconized as models
@@ -14,22 +27,70 @@ class window.EditTopicBatchCtrl
         properties = []
         # Analyse every field
         for field in csv.meta.fields
-            # The given field may be a model
-            if @mayBeModel field, stats, csv
-                # Add the field to the models list
-                models.push name: field, properties: []
-            else
-                properties.push field
-        # If we detect some models
-        if models.length
-            # Import every remaining properties into the first model
-            models[0].properties = properties
-        # Every model must be connected together by default
+            if field isnt ''
+                # The given field may be a model
+                if force[field] or not force[field]? and @mayBeModel field, stats, csv
+                    # Add the field to the models list
+                    models.push
+                        name: field
+                        properties: []
+                        entities: []
+                        names: {}
+                else
+                    properties.push field
+        # If we detect at least one model,
+        # imports every remaining properties into the first model
+        models[0].properties = properties if models.length
+        # Then we collect data for each model
         for model in models
+            # Every model must be connected together by default
             for target in models
                 # Avoid self-directed relationship
                 if model.name isnt target.name
                     model.properties = model.properties.concat target.name
+            # Collect model's node
+            for row in csv.data
+                # Pick properties for this model
+                entity = _.pick row, model.properties
+                # Use the current model field as name
+                entity.name = row[model.name]
+                # Convert relationships field to array
+                for field, relationships of entity
+                    # Find the target model for this field (if there is one)
+                    target_model = _.findWhere models, name: field
+                    # The field is a relationship
+                    entity[field] = [relationships] if target_model?
+                # Get the index of entities with the same name
+                pk = model.names[ entity.name ]
+                # This entity may already exists
+                if pk?
+                    idx = pk.split(':')[1]
+                    # We merge its relationships
+                    for field, value of model.entities[idx]
+                        # Relationships fields are array
+                        if _.findWhere(models, name: field)
+                            # Merge array of relationships
+                            model.entities[idx][field] = model.entities[idx][field].concat entity[field]
+                # Create a hashmap of entities name
+                else
+                    # Save the entity
+                    model.entities.push entity
+                    # Save its index
+                    model.names[entity.name] = model.name + ":" + (model.entities.length - 1)
+        # Relationships must now
+        # be converted to array of index
+        for model in models
+            # Model's entities
+            for entity in model.entities
+                # Entitie's fields
+                for field, relationships of entity
+                    # Find the target model for this field (if there is one)
+                    target_model = _.findWhere models, name: field
+                    # The field is a relationship
+                    if target_model?
+                        # Convert its values to an array of index
+                        for rel, idx in relationships
+                            entity[field][idx] = target_model.names[rel]
         models
 
     # Reconizes if a field is a model using the csv's statistics

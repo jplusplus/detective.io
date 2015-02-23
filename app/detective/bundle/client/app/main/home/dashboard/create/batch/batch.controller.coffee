@@ -7,7 +7,7 @@ class window.EditTopicBatchCtrl
         # Guess models without user pick
         @scope.models = @getModels @csv
         @scope.models = @populateModels @scope.models, @csv
-        @modelsToGraphviz @scope.models
+        [ @scope.leafs, @scope.edges ] = @modelsToGraphviz @scope.models
         # Extract picked model from this selection
         @scope.areModels = _.reduce @scope.models, (result, model)->
             result[model.name] = yes
@@ -19,6 +19,7 @@ class window.EditTopicBatchCtrl
             # We pass the user pick to influence the statistic selection
             @scope.models = @getModels @csv, userPick
             @scope.models = @populateModels @scope.models, @csv
+            [ @scope.leafs, @scope.edges ] = @modelsToGraphviz @scope.models
         # Watch for value changes
         , yes
 
@@ -89,7 +90,7 @@ class window.EditTopicBatchCtrl
         for model in models
             # Model's entities
             for entity in model.entities
-                # Entitie's fields
+                # Entity's fields
                 for field, relationships of entity
                     # Find the target model for this field (if there is one)
                     target_model = _.findWhere models, name: field
@@ -101,7 +102,27 @@ class window.EditTopicBatchCtrl
         models
 
     modelsToGraphviz:(models)=>
-        console.log models
+        leafs = {}
+        edges = []
+
+        for model in models
+            for entity in model.entities
+                # Create a leaf for this entity
+                leafs[entity.id] =
+                    _id: entity.id
+                    _type: model.name
+                    name: entity.name
+                # Look into the entity's fields to find relationships
+                for field, relationships of entity
+                    # Find the target model for this field (if there is one)
+                    target_model = _.findWhere models, name: field
+                    # The field is a relationship
+                    if target_model?
+                        label = "#{model.name} has #{target_model.name}"
+                        # Create an edges for each relationships
+                        edges.push [entity.id, label, rel] for rel in relationships
+
+        return [leafs, edges]
 
     # Reconizes if a field is a model using the csv's statistics
     mayBeModel: (field, stats, csv)=>

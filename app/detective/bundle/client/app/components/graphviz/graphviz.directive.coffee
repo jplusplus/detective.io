@@ -31,6 +31,8 @@
         maxNodeWeight = 1
         # Maximum links weight according the current data
         maxLinkWeight = 1
+        # True if there is data
+        scope.hasData = -> _.keys(scope.data.leafs).length
 
         init = ->
             # The SVG size follows its container
@@ -49,7 +51,7 @@
             # The worker send new data
             worker.addEventListener 'message', workerMessage
             # Update graph when there is some data
-            scope.$watch 'data', => do update if scope.data
+            scope.$watch 'data', (=> do update if scope.data), no
 
         # This experimental feature try to use the localstorage to remember
         # where the user moved a given leaf.

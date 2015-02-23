@@ -46,7 +46,6 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         # Load data sample
         @http.get("static/csv/sample-bill-murray.tsv").success (data)=>
             @scope.csv = data
-            @state.go "user-topic-create.batch", csv: @scope.csv
 
     selectSkeleton: (skeleton)=>
         if not skeleton?

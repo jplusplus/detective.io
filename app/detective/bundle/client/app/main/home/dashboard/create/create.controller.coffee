@@ -19,10 +19,10 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
             # Return a deffered object
             deferred.promise
 
-    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location',  'skeletons']
+    @$inject: TopicFormCtrl.$inject.concat ['$rootScope', '$timeout', '$location',  'skeletons', '$http']
     # Note: The 5 first parameters need to stay in that order if we want the
     # `super` call to work properly (TopicFormCtrl.new.apply(this, arguments))
-    constructor: (@scope, @state, @TopicsFactory, @Page, @User, @EVENTS, @rootScope, @timeout, @location, skeletons)->
+    constructor: (@scope, @state, @TopicsFactory, @Page, @User, @EVENTS, @rootScope, @timeout, @location, skeletons, @http)->
         super
         @Page.title "Create a new data collection"
         # Scope attributes
@@ -43,6 +43,10 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         # Scope events
         @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
         @state.go "user-topic-create"
+        # Load data sample
+        @http.get("static/csv/sample-bill-murray.tsv").success (data)=>
+            @scope.csv = data
+            @state.go "user-topic-create.batch", csv: @scope.csv
 
     selectSkeleton: (skeleton)=>
         if not skeleton?

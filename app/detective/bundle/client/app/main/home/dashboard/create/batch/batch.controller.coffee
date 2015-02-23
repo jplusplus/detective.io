@@ -7,6 +7,7 @@ class window.EditTopicBatchCtrl
         # Guess models without user pick
         @scope.models = @getModels @csv
         @scope.models = @populateModels @scope.models, @csv
+        @modelsToGraphviz @scope.models
         # Extract picked model from this selection
         @scope.areModels = _.reduce @scope.models, (result, model)->
             result[model.name] = yes
@@ -100,6 +101,7 @@ class window.EditTopicBatchCtrl
         models
 
     modelsToGraphviz:(models)=>
+        console.log models
 
     # Reconizes if a field is a model using the csv's statistics
     mayBeModel: (field, stats, csv)=>

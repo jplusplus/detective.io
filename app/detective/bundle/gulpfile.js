@@ -7,8 +7,9 @@ var less         = require('gulp-less');
 var del          = require('del')
 var path         = require('path');
 var wiredep      = require('wiredep').stream;
-var livereload   = require('gulp-livereload');
 var lazypipe     = require('lazypipe');
+var browserSync  = require('browser-sync');
+var reload       = browserSync.reload;
 
 gulp.task('clean', function(cb) {
   del(['.build'], cb);
@@ -92,10 +93,20 @@ gulp.task('inject', ['coffee'], function() {
 gulp.task('default', ['coffee', 'less', 'bower', 'copy']);
 
 gulp.task('watch', ['default'], function() {
-  livereload.listen({silent: true});
+
+  gulp.watch('bower.json', ['bower']);
   gulp.watch('client/app/**/*.less', ['less']);
   gulp.watch('client/app/**/*.coffee', ['coffee']);
-  gulp.watch('client/app/**/*.html').on('change', livereload.changed)
-  gulp.watch('.build/**/*.css').on('change', livereload.changed)
-  gulp.watch('bower.json', ['bower']);
+
+  browserSync({
+    proxy: "localhost:8000",
+    logLevel: "info",
+    reloadDelay: 1000,
+    files: [
+      'client/app/**/*.html',
+      '.build/app/**/*.css',
+      '.build/app/**/*.js'
+    ]
+  });
+
 });

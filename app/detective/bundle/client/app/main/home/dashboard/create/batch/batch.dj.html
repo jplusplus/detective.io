@@ -1,19 +1,24 @@
-<div class="panel panel-default">
-  <div class="row">
-    <div class="col-sm-8">
-      <graphviz style="height: 600px" data="{leafs: leafs, edges: edges}"></graphviz>
-    </div>
-    <div class="col-sm-4">
-      <a ui-sref="user-topic-create">Use an other dataset</a>
-      <h4>Choose wich columns are nodes</h4>
-      <ul class="list-unstyled">
-        <li ng-repeat="field in csv.meta.fields">
-          <label class="checbox">
-            <input type="checkbox" ng-model="areModels[field]" />
-            <span class="label label-info">[[field]]</span>
-          </label>
-        </li>
-      </ul>
-    </div>
+<div class="panel panel-default create-topic__batch">
+  <div class="create-topic__batch__pick panel-body">
+    <h4>Choose wich columns are nodes</h4>
+    <ul class="list-inline create-topic__batch__pick__models">
+      <li ng-repeat="model in csv.meta.fields" class="create-topic__batch__pick__models__item" ng-class="{ 'create-topic__batch__pick__models__item--active': areModels[model] }">
+        <label>
+          <input type="checkbox" ng-model="areModels[model]" />
+          <div color-tag ref="model" class="small"></div>
+          [[model]]
+        </label>
+      </li>
+    </ul>
   </div>
+  <div class="panel-footer text-right">
+    <button ui-sref="user-topic-create" class="btn btn-default pull-left">
+      Use an other dataset
+    </button>
+    <button ui-sref="user-topic-create" class="btn btn-primary">
+      Describe
+    </button>
+  </div>
+
+  <graphviz class="create-topic__batch__graph" data="{leafs: leafs, edges: edges}"></graphviz>
 </div>

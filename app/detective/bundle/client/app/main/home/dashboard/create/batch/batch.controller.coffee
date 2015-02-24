@@ -118,8 +118,15 @@ class window.EditTopicBatchCtrl
                     # The field is a relationship
                     if target_model?
                         label = "#{model.name} has #{target_model.name}"
-                        # Create an edges for each relationships
-                        edges.push [entity.id, label, rel] for rel in relationships
+                        # Create an edge for each relationship
+                        for rel in relationships
+                            isSameEdge = (edge)->
+                                edge[0] is entity.id and edge[2] is rel or
+                                edge[2] is entity.id and edge[0] is rel
+                            # Avoid duplicated edge
+                            unless _.find(edges, isSameEdge)?
+                                # Create an edges for each relationships
+                                edges.push [entity.id, label, rel]
 
         return [leafs, edges]
 

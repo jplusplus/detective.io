@@ -40,12 +40,14 @@ class window.CreateTopicCtrl extends window.TopicFormCtrl
         @scope.isSkeletonSelected  = @isSkeletonSelected
         @scope.isTeaserSkeleton    = @isTeaserSkeleton
         @scope.hasSelectedSkeleton = @hasSelectedSkeleton
+        @scope.loadCSV             = @loadCSV
         # Scope events
         @scope.$on @EVENTS.skeleton.selected, @onSkeletonSelected
         @state.go "user-topic-create"
+
+    loadCSV: (url)=>
         # Load data sample
-        @http.get("static/csv/sample-bill-murray.tsv").success (data)=>
-            @scope.csv = data
+        @http.get(url).success (data)=> @scope.csv = data
 
     selectSkeleton: (skeleton)=>
         if not skeleton?

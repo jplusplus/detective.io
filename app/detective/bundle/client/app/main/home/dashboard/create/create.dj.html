@@ -1,34 +1,57 @@
+{% load staticfiles %}
 <div id="create-topic" class="container topic-form">
-    <h2>Create a new data collection</h2>
-    <div ui-view>
-      <div class="row create-topic__choices">
-        <div class="col-sm-6 create-topic__choices__item">
-          <div class="panel panel-default">
-            <div class="panel-body">
-              <p class="lead">Visualize the network in your data</p>
-              <textarea ng-model="csv" class="form-control" rows="6" placeholder="Select your data (including header row/column) in Excel or OpenOffice and paste it here."></textarea>
-            </div>
-            <div class="panel-footer text-right">
-              <a class="btn btn-primary" ui-sref="user-topic-create.batch({ csv: csv })">
-                Upload your data
-              </a>
-            </div>
+  <h2>Create a new data collection</h2>
+  <div ui-view>
+    <div class="row create-topic__choices">
+      <div class="col-sm-6 create-topic__choices__item">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <p class="lead">Visualize the network in your data</p>
+            <textarea ng-model="csv" class="form-control" rows="6" placeholder="Select your data (including header row/column) in Excel or OpenOffice and paste it here."></textarea>
           </div>
-        </div>
-        <div class="col-sm-6 create-topic__choices__item">
-          <div class="panel panel-default">
-            <div class="panel-body">
-              <p class="lead">You have no data yet?</p>
-              <p>Compose your data structure, the way you want to describe things, before adding any data.</p>
-            </div>
-            <div class="panel-footer text-right">
-              <a class="btn btn-primary" ui-sref="user-topic-create.manual.choose-ontology">
-                Create your structure
-              </a>
+          <div class="panel-footer">
+            <button class="btn btn-primary pull-right" ui-sref="user-topic-create.batch({ csv: csv })">
+              Upload your data
+            </button>
+            <div class="dropdown" is-open="showSamples">
+              <button class="btn btn-default" dropdown-toggle>
+                Use a sample dataset <i class="caret"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li>
+                  <a ng-click="loadCSV('{% static 'csv/sample-bill-murray.tsv' %}'); showSamples = false">
+                    Bill Murrays' network of co-stars
+                  </a>
+                </li>
+                <li>
+                  <a ng-click="loadCSV('{% static 'csv/sample-administrators-french-firms.tsv' %}'); showSamples = false">
+                    Administrators of French firms
+                  </a>
+                </li>
+                <li>
+                  <a ng-click="loadCSV('{% static 'csv/sample-spin-doctors.tsv' %}'); showSamples = false">
+                    Spin doctors and autocrats
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </div>
+      <div class="col-sm-6 create-topic__choices__item">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <p class="lead">You have no data yet?</p>
+            <p>Compose your data structure, the way you want to describe things, before adding any data.</p>
+          </div>
+          <div class="panel-footer text-right">
+            <button class="btn btn-primary" ui-sref="user-topic-create.manual.choose-ontology">
+              Create your structure
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <a ui-sref="home.dashboard"><i class='fa fa-arrow-left'></i>&nbsp;Go back to your dashboard</a>
+  </div>
+  <a ui-sref="home.dashboard"><i class='fa fa-arrow-left'></i>&nbsp;Go back to your dashboard</a>
 </div>

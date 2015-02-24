@@ -8,6 +8,7 @@ var del          = require('del')
 var path         = require('path');
 var wiredep      = require('wiredep').stream;
 var lazypipe     = require('lazypipe');
+var cache        = require('gulp-cached');
 var browserSync  = require('browser-sync');
 var reload       = browserSync.reload;
 
@@ -34,7 +35,9 @@ var coffeePipe = lazypipe()
   .pipe(gulp.dest, '.build/app/');
 
 gulp.task('coffee', function() {
-  return gulp.src('client/app/**/*.coffee').pipe(coffeePipe())
+  return gulp.src('client/app/**/*.coffee')
+    .pipe(cache('coffee'))
+    .pipe(coffeePipe());
 });
 
 gulp.task('copy', function () {
@@ -101,7 +104,6 @@ gulp.task('watch', ['default'], function() {
   browserSync({
     proxy: "localhost:8000",
     logLevel: "info",
-    reloadDelay: 1000,
     files: [
       'client/app/**/*.html',
       '.build/app/**/*.css',

@@ -5,9 +5,7 @@ class window.EditTopicBatchCtrl
         @csv = Papa.parse @stateParams.csv, header: yes, dynamicTyping: yes, skipEmptyLines: yes
         @scope.csv = @csv
         # Guess models without user pick
-        @scope.models = @getModels @csv
-        @scope.models = @populateModels @scope.models, @csv
-        [ @scope.leafs, @scope.edges ] = @modelsToGraphviz @scope.models
+        do @buildOntology
         # Extract picked model from this selection
         @scope.areModels = _.reduce @scope.models, (result, model)->
             result[model.name] = yes
@@ -15,13 +13,14 @@ class window.EditTopicBatchCtrl
         , {}
         # When the selection changes,
         # we have to guess again what the structure could be
-        @scope.$watch "areModels", (userPick)=>
-            # We pass the user pick to influence the statistic selection
-            @scope.models = @getModels @csv, userPick
-            @scope.models = @populateModels @scope.models, @csv
-            [ @scope.leafs, @scope.edges ] = @modelsToGraphviz @scope.models
-        # Watch for value changes
-        , yes
+        @scope.$watch "areModels", @buildOntology, yes
+
+    buildOntology:  (userPick={})=>
+        # We pass the user pick to influence the statistic selection
+        @scope.models = @getModels @csv, userPick
+        @scope.models = @populateModels @scope.models, @csv
+        [ @scope.leafs, @scope.edges ] = @modelsToGraphviz @scope.models
+
 
     getModels: (csv, force={})=>
         # Collects stat for every field

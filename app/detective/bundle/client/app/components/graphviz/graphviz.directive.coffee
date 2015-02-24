@@ -132,7 +132,7 @@
 
         leafClick = (d)->
             # Check if we're dragging the leaf
-            return if d3.event.defaultPrevented
+            return if d3.event.defaultPrevented or isNaN d._id
             # Check if we clicked on a aggregation bubble
             if d._type is AGGREGATION_TYPE
                 worker.postMessage
@@ -292,7 +292,6 @@
             sizeScale     = d3.scale.linear().range([LEAF_SIZE, 40]).domain([1, maxNodeWeight])
             # Calculate the link distance according theire weights
             linkDistance  = (d)-> 100 + sizeScale(d.target.weight + d.source.weight)
-
             # Calculate the class of the given leaf name
             getGradID     = (d)-> "linkGrad-" + d.source._id + "-" + d.target._id
             getArrowID    = (d)-> "linkArrow-" + d.source._id + "-" + d.target._id

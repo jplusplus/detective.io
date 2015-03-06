@@ -794,10 +794,21 @@ class IndividualResource(ModelResource):
                                 image_file = download_url(data[field_name])
                                 # New Image path
                                 path = os.path.join(settings.UPLOAD_ROOT, image_file.name)
-                                # Store the image
-                                path = default_storage.save(path, image_file)
-                                # Removed the media root
-                                path = path.replace(settings.MEDIA_ROOT, "")
+                                # In debug mode, MEDIA root is needed first
+                                # to access to the images
+                                if setting.DEBUG:
+                                    # Removed the media root
+                                    path = path.replace(settings.MEDIA_ROOT, "")
+                                    # Store the image
+                                    path = default_storage.save(path, image_file)
+                                # In production mode the image is not on the same
+                                # server so we can remove its path to have a
+                                # shorter path to the image
+                                else:
+                                    # Store the image
+                                    path = default_storage.save(path, image_file)
+                                    # Removed the media root
+                                    path = path.replace(settings.MEDIA_ROOT, "")
                                 host = settings.MEDIA_URL
                                 # The path must start with host name
                                 if not host.startswith("http"):
@@ -805,7 +816,7 @@ class IndividualResource(ModelResource):
                                     # because if means that we are using a local path
                                     host = request.build_absolute_uri(settings.MEDIA_URL)
                                 # Join the path to the file and the MEDIA_URL
-                                path = "/".join([ host.strip("/"), path.strip("/") ])
+                                path = "/".join([ host.strip("/"), patpath.strip("/") ])
                                 # Save the value
                                 data[field_name] = field_value = path
                             except UnavailableImage:

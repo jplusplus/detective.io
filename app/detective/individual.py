@@ -805,7 +805,7 @@ class IndividualResource(ModelResource):
                                     # because if means that we are using a local path
                                     host = request.build_absolute_uri(settings.MEDIA_URL)
                                 # Join the path to the file and the MEDIA_URL
-                                path = "/".join([ host.strip("/"), patpath.strip("/") ])
+                                path = "/".join([ host.strip("/"), path.strip("/") ])
                                 # Save the value
                                 data[field_name] = field_value = path
                             except UnavailableImage:

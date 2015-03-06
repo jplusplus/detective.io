@@ -796,7 +796,7 @@ class IndividualResource(ModelResource):
                                 path = os.path.join(settings.UPLOAD_ROOT, image_file.name)
                                 # In debug mode, MEDIA root is needed first
                                 # to access to the images
-                                if setting.DEBUG:
+                                if settings.DEBUG:
                                     # Removed the media root
                                     path = path.replace(settings.MEDIA_ROOT, "")
                                     # Store the image

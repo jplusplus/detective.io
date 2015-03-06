@@ -782,7 +782,7 @@ class IndividualResource(ModelResource):
                         if 'is_rich' in fields[field_name]['rules'] and fields[field_name]['rules']['is_rich']:
                             data[field_name] = field_value = bleach.clean(field_value,
                                                                           tags=("br", "blockquote", "ul", "ol",
-                                                                                "li", "b", "i", "u", "a", "p", "span"),
+                                                                                "li", "b", "i", "u", "a", "p", "div", "span"),
                                                                           attributes={
                                                                               '*': ("class",),
                                                                               'a': ("href", "target")

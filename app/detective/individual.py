@@ -791,7 +791,12 @@ class IndividualResource(ModelResource):
                             self.remove_node_file(node, field_name, True)
                             try:
                                 image_file = download_url(data[field_name])
-                                path = default_storage.save(os.path.join(settings.UPLOAD_ROOT, image_file.name) , image_file)
+                                # Remove host for debug mode
+                                if settings.DEBUG:
+                                    path = default_storage.save(os.path.join(settings.UPLOAD_ROOT, image_file.name) , image_file)
+                                else:
+                                    path = default_storage.save(image_file.name, image_file)
+
                                 path = path.replace(settings.MEDIA_ROOT, "")
                                 host = settings.MEDIA_URL
                                 # The path must start with host name
@@ -803,7 +808,6 @@ class IndividualResource(ModelResource):
                                 path = "/".join([ host.strip("/"), path.strip("/") ])
                                 # Save the value
                                 data[field_name] = field_value = path
-                                print field_value
                             except UnavailableImage:
                                 data[field_name] = field_value = ""
                             except NotAnImage:

@@ -7,40 +7,44 @@ var less         = require('gulp-less');
 var del          = require('del')
 var path         = require('path');
 var wiredep      = require('wiredep').stream;
-var livereload   = require('gulp-livereload');
+var lazypipe     = require('lazypipe');
+var cache        = require('gulp-cached');
+var browserSync  = require('browser-sync');
+var reload       = browserSync.reload;
 
 gulp.task('clean', function(cb) {
   del(['.build'], cb);
 });
 
 
+var lessPipe = lazypipe()
+  .pipe(less, {
+    paths: [
+      path.join(__dirname, 'client/app'),
+      path.join(__dirname, 'client')
+    ]
+  })
+  .pipe(gulp.dest, '.build/app/');
+
 gulp.task('less', function () {
-  return gulp.src('client/app/*/{main,embed}.less')
-    .pipe(
-    	less({
-      	paths: [ 
-          path.join(__dirname, 'client/app'),
-          path.join(__dirname, 'client')
-        ]
-    	})
-    	.on('error', gutil.log)
-    )
-    .pipe(gulp.dest('.build/app/'));
+  return gulp.src('client/app/*/{main,embed}.less').pipe(lessPipe());
 });
+
+var coffeePipe = lazypipe()
+  .pipe(coffee, {bare: true})
+  .pipe(gulp.dest, '.build/app/');
 
 gulp.task('coffee', function() {
   return gulp.src('client/app/**/*.coffee')
-    .pipe(
-    	coffee({bare: true}).on('error', gutil.log)
-    )
-    .pipe(gulp.dest('.build/app/'));
+    .pipe(cache('coffee'))
+    .pipe(coffeePipe());
 });
 
 gulp.task('copy', function () {
 	// Copy assets to the .build dir
   gulp.src('client/img/**/*').pipe(gulp.dest('.build/img/'));
   gulp.src('client/svg/**/*').pipe(gulp.dest('.build/svg/'));
-  // For painless retro compatibility we export the build dir 
+  // For painless retro compatibility we export the build dir
   // to the same dir as before (components).
   gulp.src('client/vendors/**/*').pipe(gulp.dest('.build/components/'));
 });
@@ -92,10 +96,19 @@ gulp.task('inject', ['coffee'], function() {
 gulp.task('default', ['coffee', 'less', 'bower', 'copy']);
 
 gulp.task('watch', ['default'], function() {
-  livereload.listen({silent: true});
+
+  gulp.watch('bower.json', ['bower']);
   gulp.watch('client/app/**/*.less', ['less']);
   gulp.watch('client/app/**/*.coffee', ['coffee']);
-  gulp.watch('client/app/**/*.html').on('change', livereload.changed)
-  gulp.watch('.build/**/*.css').on('change', livereload.changed)
-  gulp.watch('bower.json', ['bower']);
+
+  browserSync({
+    proxy: "localhost:8000",
+    logLevel: "info",
+    files: [
+      'client/app/**/*.html',
+      '.build/app/**/*.css',
+      '.build/app/**/*.js'
+    ]
+  });
+
 });

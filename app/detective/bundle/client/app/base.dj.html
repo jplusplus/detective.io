@@ -82,8 +82,13 @@
             <script src="{% static 'vendors/raphael/raphael.js' %}"></script>
             <script src="{% static 'vendors/typeahead.js/dist/typeahead.bundle.js' %}"></script>
             <script src="{% static 'vendors/underscore/underscore.js' %}"></script>
-            <script src="{% static 'vendors/textAngular/dist/textAngular.min.js' %}"></script>
-            <script src="{% static 'vendors/rangy/rangy-core.js' %}"></script>
+            <script src="{% static 'vendors/rangy/rangy-core.min.js' %}"></script>
+            <script src="{% static 'vendors/rangy/rangy-cssclassapplier.min.js' %}"></script>
+            <script src="{% static 'vendors/rangy/rangy-selectionsaverestore.min.js' %}"></script>
+            <script src="{% static 'vendors/rangy/rangy-serializer.min.js' %}"></script>
+            <script src="{% static 'vendors/textAngular/src/textAngular.js' %}"></script>
+            <script src="{% static 'vendors/textAngular/src/textAngular-sanitize.js' %}"></script>
+            <script src="{% static 'vendors/textAngular/src/textAngularSetup.js' %}"></script>
             <script src="{% static 'vendors/gsap/src/uncompressed/TweenMax.js' %}"></script>
             <script src="{% static 'vendors/ScrollMagic/js/jquery.scrollmagic.js' %}"></script>
             <script src="{% static 'vendors/jquery-waypoints/waypoints.js' %}"></script>
@@ -104,9 +109,5 @@
 
         {% block content %}{% endblock %}
         {% block extrajs %}{% endblock %}
-
-        {% if debug %}
-            <script src="http://localhost:35729/livereload.js"></script>
-        {% endif %}
     </body>
 </html>

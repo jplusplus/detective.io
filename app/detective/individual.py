@@ -782,7 +782,7 @@ class IndividualResource(ModelResource):
                         if 'is_rich' in fields[field_name]['rules'] and fields[field_name]['rules']['is_rich']:
                             data[field_name] = field_value = bleach.clean(field_value,
                                                                           tags=("br", "blockquote", "ul", "ol",
-                                                                                "li", "b", "i", "u", "a", "p"),
+                                                                                "li", "b", "i", "u", "a", "p", "div", "span"),
                                                                           attributes={
                                                                               '*': ("class",),
                                                                               'a': ("href", "target")
@@ -790,9 +790,24 @@ class IndividualResource(ModelResource):
                         if field_name == 'image' and fields[field_name]['type'] == 'URLField':
                             self.remove_node_file(node, field_name, True)
                             try:
+                                # Download the image
                                 image_file = download_url(data[field_name])
-                                path = default_storage.save(os.path.join(settings.UPLOAD_ROOT, image_file.name) , image_file)
-                                data[field_name] = field_value = path.replace(settings.MEDIA_ROOT, "")
+                                # New Image path
+                                path = os.path.join(settings.UPLOAD_ROOT, image_file.name)
+                                # Removed the media root
+                                path = path.replace(settings.MEDIA_ROOT, "")
+                                # Store the image
+                                path = default_storage.save(path, image_file)
+                                host = settings.MEDIA_URL
+                                # The path must start with host name
+                                if not host.startswith("http"):
+                                    # If not, we append the request URL
+                                    # because if means that we are using a local path
+                                    host = request.build_absolute_uri(settings.MEDIA_URL)
+                                # Join the path to the file and the MEDIA_URL
+                                path = "/".join([ host.strip("/"), path.strip("/") ])
+                                # Save the value
+                                data[field_name] = field_value = path
                             except UnavailableImage:
                                 data[field_name] = field_value = ""
                             except NotAnImage:

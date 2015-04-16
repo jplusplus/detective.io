@@ -191,18 +191,9 @@ def clean_topic(path):
         del sys.modules[mod_name]
 
 
-def reload_models():
-    curdir = os.getcwd()
-
-    for app in appcache.get_apps():
-        __import__(app.__name__)
-        reload(app)
-
-    appcache.app_store = SortedDict()
-    appcache.app_models = SortedDict()
-    appcache.app_errors = {}
-    appcache.handled = {}
-    appcache.loaded = False
+def reload_models(app_label):
+    if app_label in appcache.app_models:
+        del appcache.app_models[app_label]
 
 def topic_models(path, force=False):
     """
@@ -218,14 +209,13 @@ def topic_models(path, force=False):
             {path}.urls
     """
     # Clean the topic virtual instances from sys.module
-    if force:
-        reload_models()
-        clean_topic(path)
+    if force: clean_topic(path)
     topic_module = import_or_create(path, force=force)
     topic_name   = path.split(".")[-1]
     # Ensure that the topic's model exist
     topic = Topic.objects.get(ontology_as_mod=topic_name)
     app_label = topic.app_label()
+    reload_models(app_label)
     # Add '.models to the path if needed
     models_path = path if path.endswith(".models") else '%s.models' % path
     urls_path   = "%s.urls" % path
@@ -306,10 +296,5 @@ def topic_models(path, force=False):
     reload_urlconf()
     topic_module.__name__ = path
     sys.modules[path] = topic_module
-
-
-
-
-    assert( len( models['Company']._meta.fields ) == 9 )
 
     return topic_module

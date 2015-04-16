@@ -5,12 +5,16 @@ from django.conf.urls                    import url, include, patterns
 from django.conf                         import settings
 from django.core.cache                   import cache
 from django.core.urlresolvers            import clear_url_caches
+from django.db.models.loading            import AppCache
+from django.utils.datastructures         import SortedDict
 from tastypie.api                        import NamespacedApi
 
 import importlib
 import os
 import sys
 import imp
+
+appcache = AppCache()
 
 class TopicRegistor(object):
     __instance = None
@@ -175,7 +179,21 @@ def clean_topic(path):
         if mod_name.startswith(path):
             mod_to_delete.append(mod_name)
     for mod_name in mod_to_delete:
+        # Special deletion mode for models
+        if mod_name.endswith(".models"):
+            mod = sys.modules[mod_name]
+            # Get all module children
+            children = [ getattr(mod, c) for c in dir(mod) ]
+            # Filter to only have  the models
+            for model in [ c for c in children if hasattr(c, 'Meta') ]:
+                model = None
+                del model
         del sys.modules[mod_name]
+
+
+def reload_models(app_label):
+    if app_label in appcache.app_models:
+        del appcache.app_models[app_label]
 
 def topic_models(path, force=False):
     """
@@ -197,6 +215,7 @@ def topic_models(path, force=False):
     # Ensure that the topic's model exist
     topic = Topic.objects.get(ontology_as_mod=topic_name)
     app_label = topic.app_label()
+    reload_models(app_label)
     # Add '.models to the path if needed
     models_path = path if path.endswith(".models") else '%s.models' % path
     urls_path   = "%s.urls" % path
@@ -277,4 +296,5 @@ def topic_models(path, force=False):
     reload_urlconf()
     topic_module.__name__ = path
     sys.modules[path] = topic_module
+
     return topic_module

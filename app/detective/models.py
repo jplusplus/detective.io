@@ -218,7 +218,7 @@ class Topic(models.Model):
 
     def get_models_module(self):
         """ return the module topic_module.models """
-        return getattr(self.get_module(reload_module=False), "models", {})
+        return getattr(self.get_module(reload_module=True), "models", {})
 
     def get_models(self):
         """ return a generator of Model """

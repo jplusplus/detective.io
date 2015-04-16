@@ -5,12 +5,16 @@ from django.conf.urls                    import url, include, patterns
 from django.conf                         import settings
 from django.core.cache                   import cache
 from django.core.urlresolvers            import clear_url_caches
+from django.db.models.loading            import AppCache
+from django.utils.datastructures         import SortedDict
 from tastypie.api                        import NamespacedApi
 
 import importlib
 import os
 import sys
 import imp
+
+appcache = AppCache()
 
 class TopicRegistor(object):
     __instance = None
@@ -175,7 +179,33 @@ def clean_topic(path):
         if mod_name.startswith(path):
             mod_to_delete.append(mod_name)
     for mod_name in mod_to_delete:
+        # Special deletion mode for models
+        if mod_name.endswith(".models"):
+            mod = sys.modules[mod_name]
+            # Get all module children
+            children = [ getattr(mod, c) for c in dir(mod) ]
+            # Filter to only have  the models
+            for model in [ c for c in children if hasattr(c, 'Meta') ]:
+                model = None
+                del model
         del sys.modules[mod_name]
+
+
+def reload_models():
+    curdir = os.getcwd()
+    app = appcache.get_app("detective", True)
+
+    f = app.__file__
+    if f.startswith(curdir) and f.endswith('.pyc'):
+        os.remove(f)
+    __import__(app.__name__)
+    reload(app)
+
+    appcache.app_store = SortedDict()
+    appcache.app_models = SortedDict()
+    appcache.app_errors = {}
+    appcache.handled = {}
+    appcache.loaded = False
 
 def topic_models(path, force=False):
     """
@@ -191,7 +221,9 @@ def topic_models(path, force=False):
             {path}.urls
     """
     # Clean the topic virtual instances from sys.module
-    if force: clean_topic(path)
+    if force:
+        reload_models()
+        clean_topic(path)
     topic_module = import_or_create(path, force=force)
     topic_name   = path.split(".")[-1]
     # Ensure that the topic's model exist
@@ -277,4 +309,10 @@ def topic_models(path, force=False):
     reload_urlconf()
     topic_module.__name__ = path
     sys.modules[path] = topic_module
+
+
+
+
+    assert( len( models['Company']._meta.fields ) == 9 )
+
     return topic_module

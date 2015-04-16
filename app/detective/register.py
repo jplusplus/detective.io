@@ -193,13 +193,10 @@ def clean_topic(path):
 
 def reload_models():
     curdir = os.getcwd()
-    app = appcache.get_app("detective", True)
 
-    f = app.__file__
-    if f.startswith(curdir) and f.endswith('.pyc'):
-        os.remove(f)
-    __import__(app.__name__)
-    reload(app)
+    for app in appcache.get_apps():
+        __import__(app.__name__)
+        reload(app)
 
     appcache.app_store = SortedDict()
     appcache.app_models = SortedDict()

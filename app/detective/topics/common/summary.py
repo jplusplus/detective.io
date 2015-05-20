@@ -388,8 +388,7 @@ class SummaryResource(Resource):
             response = dict(status="ok", file_name=response_in_cache)
         else:
             # return a quick response
-            response = dict(
-                status = "enqueued")
+            response = dict(status = "enqueued")
             # check if a job already exist
             for job in django_rq.get_queue('high').jobs:
                 if job.meta["cache_key"] == cache_key:

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from app.detective                      import register, graph
 from app.detective.neomatch             import Neomatch
+from app.detective.sustainability       import dummy_model_to_ressource
 from app.detective.utils                import import_class, to_underscores, get_model_topic, \
                                                 get_leafs_and_edges, get_topic_from_request, \
                                                 iterate_model_fields, topic_cache, \
@@ -233,17 +234,7 @@ class IndividualResource(ModelResource):
 
     # TODO: Find another way!
     def dummy_class_to_ressource(self, klass):
-        module = klass.__module__.split(".")
-        # Remove last path part if need
-        if module[-1] == 'models': module = module[0:-1]
-        # Build the resource path
-        module = ".".join(module + ["resources", klass.__name__ + "Resource"])
-        try:
-            # Try to import the class
-            import_class(module)
-            return module
-        except ImportError:
-            return None
+        return dummy_model_to_ressource(klass)
 
     def get_to_many_field(self, field, full=False):
         if type(field.target_model) == str:

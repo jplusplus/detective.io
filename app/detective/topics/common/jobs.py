@@ -26,6 +26,7 @@ from django.core.files.base             import ContentFile
 from django.core.cache                  import cache
 from cStringIO                          import StringIO
 from app.detective.topics.common.models import FieldSource
+from app.detective.sustainability       import convertible_objects
 import app.detective.utils              as utils
 import django_rq
 import json
@@ -64,6 +65,8 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
         model_name = model_name or objects[0].__class__.__name__
         spamwriter = csv.writer(csv_file)
         spamwriter.writerow(["%s_id" % (model_name)] + columns) # header
+        objects = convertible_objects(objects)
+        objects = objects[0:]
         for obj in objects:
             all_ids.append(_getattr(obj, 'id'))
             obj_columns = []
@@ -97,6 +100,7 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
             if model_type and model.__name__.lower() != model_type:
                 continue
             (columns, edges) = get_columns(model)
+
             objects = model.objects.all()
             if objects.count() > 0:
                 all_ids = write_all_in_zip(objects, columns, zip_file)
@@ -397,7 +401,7 @@ def process_bulk_parsing_and_save_as_model(topic, files, start_time=None):
                                 "_endnodes"     : [id_mapping[(model_from, id_from)].id, instance_to.id],
                                 "_relationship" : relation_id,
                             }
-                            # Pairwise the properties with their names 
+                            # Pairwise the properties with their names
                             relation_args.update(zip(properties_name, properties))
                             try:
                                 ModelProperties.objects.create(**relation_args)

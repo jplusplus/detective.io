@@ -26,7 +26,6 @@ from django.core.files.base             import ContentFile
 from django.core.cache                  import cache
 from cStringIO                          import StringIO
 from app.detective.topics.common.models import FieldSource
-from app.detective.sustainability       import convertible_objects
 import app.detective.utils              as utils
 import django_rq
 import json
@@ -65,8 +64,6 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
         model_name = model_name or objects[0].__class__.__name__
         spamwriter = csv.writer(csv_file)
         spamwriter.writerow(["%s_id" % (model_name)] + columns) # header
-        objects = convertible_objects(objects)
-        objects = objects[0:]
         for obj in objects:
             all_ids.append(_getattr(obj, 'id'))
             obj_columns = []

@@ -404,10 +404,6 @@ class IndividualResource(ModelResource):
         try: node = connection.nodes.get(pk)
         # Node not found
         except client.NotFoundError: raise Http404("Not found.")
-        # Convert existing properties.
-        # Since we allow the user to change her data structure we must be able
-        # to convert the data she already put into the database.
-        node.properties = self.convert(node.properties)
         # Create a model istance from the node
         return model._neo4j_instance( node )
 

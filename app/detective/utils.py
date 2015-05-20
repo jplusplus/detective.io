@@ -10,6 +10,7 @@ from os                        import listdir
 from os.path                   import isdir, join
 from random                    import randint
 from app.detective.exceptions  import UnavailableImage, NotAnImage, OversizedFile
+from app.detective.sustainability import FluidNodeModel
 from urlparse                  import urlparse
 import importlib
 import inspect
@@ -78,7 +79,7 @@ def create_node_model(name, fields=None, app_label='', module='', options=None):
     # Add in any fields that were provided
     if fields: attrs.update(fields)
     # Create the class, which automatically triggers ModelBase processing
-    cls = type(name, (models.NodeModel,), attrs)
+    cls = type(name, (FluidNodeModel,), attrs)
     signals.post_save.connect(update_topic_cache, sender=cls)
     signals.post_delete.connect(delete_entity, sender=cls)
     return cls

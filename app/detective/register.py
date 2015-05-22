@@ -6,11 +6,9 @@ from django.conf                         import settings
 from django.core.cache                   import cache
 from django.core.urlresolvers            import clear_url_caches
 from django.db.models.loading            import AppCache
-from django.utils.datastructures         import SortedDict
 from tastypie.api                        import NamespacedApi
 
 import importlib
-import os
 import sys
 import imp
 

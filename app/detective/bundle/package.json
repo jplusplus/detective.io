@@ -1,6 +1,6 @@
 {
   "name": "detective",
-  "version": "1.12.8",
+  "version": "1.12.9",
   "dependencies": {
     "bower": "latest",
     "browser-sync": "^2.2.1",

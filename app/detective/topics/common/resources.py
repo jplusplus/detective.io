@@ -5,17 +5,14 @@ from app.detective.exceptions         import UnavailableImage, NotAnImage, Overs
 from app.detective.models             import QuoteRequest, Topic, TopicToken, \
                                              TopicSkeleton, Article, User, \
                                              Subscription, TopicDataSet
-from app.detective.utils              import get_registered_models, without, \
+from app.detective.utils              import get_registered_models, \
                                              is_valid_email, download_url, \
-                                             get_topics_from_request, is_local
+                                             is_local
 from app.detective.topics.common.user import UserResource, UserNestedResource
 from django.conf                      import settings
 from django.conf.urls                 import url
-from django.core.exceptions           import SuspiciousOperation
 from django.core.mail                 import EmailMultiAlternatives
 from django.core.urlresolvers         import reverse
-from django.core.files                import File
-from django.core.files.temp           import NamedTemporaryFile
 from django.core.cache                import cache
 from django.db                        import IntegrityError
 from django.db.models                 import Q
@@ -33,13 +30,9 @@ from tastypie.resources               import ModelResource
 from tastypie.utils                   import trailing_slash
 from tastypie.validation              import FormValidation
 from django.forms                     import ModelForm
-from django.db.models                 import Q
 from django.contrib.auth.models       import Group
 
-import copy
 import json
-import re
-import os
 
 TopicValidationErrors = {
     'background': {
@@ -102,7 +95,6 @@ class TopicSkeletonResource(ModelResource):
         ordering = ["order", "name"]
 
     def dehydrate(self, bundle):
-        request = bundle.request
         bundle.data['ontology_models'] = bundle.obj.ontology_models
         bundle.data['blank'] = not len(bundle.obj.ontology_models)
 
@@ -232,7 +224,6 @@ class TopicAuthorization(ReadOnlyAuthorization):
         authorize = False
         user      = bundle.request.user
         if user.is_authenticated():
-            public      = bundle.data.get('public', True)
             profile     = user.detectiveprofileuser
             unlimited   = profile.topics_max()   < 0
             under_limit = profile.topics_count() < profile.topics_max()
@@ -502,8 +493,6 @@ class TopicNestedResource(ModelResource):
         if 'models' not in self._meta.excludes:
             # Get the model's rules manager
             rulesManager = bundle.request.current_topic.get_rules()
-            # Get all registered models
-            models = get_registered_models()
             # return json for ontology_as_json field
             if bundle.obj.ontology_as_json:
                 bundle.data["ontology_as_json"] = bundle.obj.ontology_as_json

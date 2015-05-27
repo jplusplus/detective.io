@@ -97,6 +97,7 @@ def render_csv_zip_file(topic, model_type=None, query=None, cache_key=None):
             if model_type and model.__name__.lower() != model_type:
                 continue
             (columns, edges) = get_columns(model)
+
             objects = model.objects.all()
             if objects.count() > 0:
                 all_ids = write_all_in_zip(objects, columns, zip_file)
@@ -397,7 +398,7 @@ def process_bulk_parsing_and_save_as_model(topic, files, start_time=None):
                                 "_endnodes"     : [id_mapping[(model_from, id_from)].id, instance_to.id],
                                 "_relationship" : relation_id,
                             }
-                            # Pairwise the properties with their names 
+                            # Pairwise the properties with their names
                             relation_args.update(zip(properties_name, properties))
                             try:
                                 ModelProperties.objects.create(**relation_args)

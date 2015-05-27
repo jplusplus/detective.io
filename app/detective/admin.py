@@ -12,7 +12,6 @@ from app.detective.models       import PLANS_CHOICES
 from django.conf                import settings
 from django.contrib             import admin
 from django                     import forms
-from django.db                  import models
 from django.db.models           import CharField
 from django.contrib.auth.admin  import UserAdmin
 from django.contrib.auth.models import User

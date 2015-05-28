@@ -394,7 +394,7 @@ class SummaryResource(Resource):
                     break
             else:
                 # enqueue the job
-                queue = django_rq.get_queue('high', default_timeout=360)
+                queue = django_rq.get_queue('high', default_timeout=7200)
                 job = queue.enqueue(render_csv_zip_file,
                                     topic      = self.topic,
                                     model_type = request.GET.get("type"),

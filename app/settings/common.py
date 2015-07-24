@@ -66,20 +66,14 @@ USE_L10N = True
 USE_TZ = False
 
 DATETIME_FORMATS = [
-'%Y-%m-%dT%H:%M:%S.%fZ', # '2006-10-25T14:30:59.000Z'
-'%Y-%m-%d %H:%M:%S.%fZ', # '2006-10-25T14:30:59.000Z'
-'%Y-%m-%dT%H:%M:%S.%f',  # '2006-10-25T14:30:59.000'
-'%Y-%m-%d %H:%M:%S.%f',  # '2006-10-25 14:30:59.000'
-'%Y-%m-%d %H:%M:%S',     # '2006-10-25 14:30:59'
-'%Y-%m-%d %H:%M',        # '2006-10-25 14:30'
-'%Y-%m-%d',              # '2006-10-25'
-'%m/%d/%Y %H:%M:%S',     # '10/25/2006 14:30:59'
-'%m/%d/%Y %H:%M',        # '10/25/2006 14:30'
-'%m/%d/%Y',              # '10/25/2006'
-'%m/%d/%y %H:%M:%S',     # '10/25/06 14:30:59'
-'%m/%d/%y %H:%M',        # '10/25/06 14:30'
-'%m/%d/%y'
-]              # '10/25/06'
+    '%Y-%m-%dT%H:%M:%S.%fZ', # '2006-10-25T14:30:59.000Z'
+    '%Y-%m-%d %H:%M:%S.%fZ', # '2006-10-25T14:30:59.000Z'
+    '%Y-%m-%dT%H:%M:%S.%f',  # '2006-10-25T14:30:59.000'
+    '%Y-%m-%d %H:%M:%S.%f',  # '2006-10-25 14:30:59.000'
+    '%Y-%m-%d %H:%M:%S',     # '2006-10-25 14:30:59'
+    '%Y-%m-%d %H:%M',        # '2006-10-25 14:30'
+    '%Y-%m-%d'               # '2006-10-25'
+]
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -261,8 +255,8 @@ def get_cache():
     # Use django local development cache (for local development).
     return {
         'default': {
-            #'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+            #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
             'LOCATION': '/tmp/django_cache',
         }
     }

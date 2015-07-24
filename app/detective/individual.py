@@ -1,29 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.detective                      import register, graph
+from app.detective                      import graph
 from app.detective.neomatch             import Neomatch
-from app.detective.utils                import import_class, to_underscores, get_model_topic, \
+from app.detective.sustainability       import dummy_model_to_ressource
+from app.detective.utils                import import_class, get_model_topic, \
                                                 get_leafs_and_edges, get_topic_from_request, \
                                                 iterate_model_fields, topic_cache, \
-                                                without, download_url, \
+                                                download_url, \
                                                 get_image, is_local
 from app.detective.topics.common.models import FieldSource
 from app.detective.topics.common.user   import UserNestedResource
 from app.detective.models               import Topic
 from app.detective.exceptions           import UnavailableImage, NotAnImage, OversizedFile
-from app.detective.paginator            import Paginator, resource_paginator
+from app.detective.paginator            import resource_paginator
 from django                             import forms
 from django.conf                        import settings
 from django.conf.urls                   import url
 from django.contrib.auth.models         import User
-from django.core.exceptions             import ObjectDoesNotExist, ValidationError
-from django.core.paginator              import InvalidPage
+from django.core.exceptions             import ValidationError
 from django.core.urlresolvers           import reverse
 from django.core.files.storage          import default_storage
 from django.db.models.query             import QuerySet
 from django.http                        import Http404
 from neo4jrestclient                    import client
-from neo4jrestclient.request            import TransactionException
 from neo4django.db                      import connection
 from neo4django.db.models               import NodeModel
 from neo4django.db.models.relationships import MultipleNodes
@@ -35,9 +34,9 @@ from tastypie.exceptions                import Unauthorized
 from tastypie.resources                 import ModelResource
 from tastypie.serializers               import Serializer
 from tastypie.utils                     import trailing_slash
-from datetime                           import datetime
 from easy_thumbnails.exceptions         import InvalidImageFormatError
 from easy_thumbnails.files              import get_thumbnailer
+
 import json
 import re
 import logging
@@ -233,17 +232,7 @@ class IndividualResource(ModelResource):
 
     # TODO: Find another way!
     def dummy_class_to_ressource(self, klass):
-        module = klass.__module__.split(".")
-        # Remove last path part if need
-        if module[-1] == 'models': module = module[0:-1]
-        # Build the resource path
-        module = ".".join(module + ["resources", klass.__name__ + "Resource"])
-        try:
-            # Try to import the class
-            import_class(module)
-            return module
-        except ImportError:
-            return None
+        return dummy_model_to_ressource(klass)
 
     def get_to_many_field(self, field, full=False):
         if type(field.target_model) == str:
@@ -342,10 +331,10 @@ class IndividualResource(ModelResource):
                         }).name)
                         for key, size in settings.THUMBNAIL_SIZES.items()
                     }
-                except InvalidImageFormatError as e:
+                except InvalidImageFormatError:
                     to_add[field + '_thumbnail'] = ''
                 # Ignore missing image error
-                except IOError as e:
+                except IOError:
                     to_add[field] = ''
                     # Removes unusable image
                     setattr(bundle.obj, field, None)
@@ -392,7 +381,7 @@ class IndividualResource(ModelResource):
             # Create a brand new node
             node = connection.nodes.create(**data)
             # Instanciate its type
-            rel_type = connection.relationships.create(model_node, "<<INSTANCE>>", node)
+            connection.relationships.create(model_node, "<<INSTANCE>>", node)
         # Commit the transaction
         tx.commit()
         # Create an object to build the bundle
@@ -405,18 +394,12 @@ class IndividualResource(ModelResource):
 
     def obj_get(self, **kwargs):
         pk      = kwargs["pk"]
-        bundle  = kwargs["bundle"]
-        request = bundle.request
         # Current model
         model = self.get_model()
         # Get the node's data using the rest API
         try: node = connection.nodes.get(pk)
         # Node not found
         except client.NotFoundError: raise Http404("Not found.")
-        # Convert existing properties.
-        # Since we allow the user to change her data structure we must be able
-        # to convert the data she already put into the database.
-        node.properties = self.convert(node.properties)
         # Create a model istance from the node
         return model._neo4j_instance( node )
 
@@ -492,7 +475,6 @@ class IndividualResource(ModelResource):
         query     = request.GET.get('q', '').lower()
         query     = re.sub("\"|'|`|;|:|{|}|\|(|\|)|\|", '', query).strip()
         limit     = int( request.GET.get('limit', 20))
-        p         = int(request.GET.get('page', 1))
         # Do the query.
         results   = self._meta.queryset.filter(name__icontains=query)
         # For retro compatibility we use the django paginator
@@ -928,7 +910,7 @@ class IndividualResource(ModelResource):
         authors = User.objects.filter(id__in=authors_ids).select_related("profile")
         # Create a bundle with each resources
         bundles = [resource.build_bundle(obj=a, request=request) for a in authors]
-        data = [resource.full_dehydrate(bundle) for bundle in bundles]
+        data = [resource.full_dehydrate(b)for b in bundles]
         # We ask for relationship properties
         return resource.create_response(request, data)
 

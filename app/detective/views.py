@@ -3,7 +3,7 @@
 from django.conf                  import settings
 from django.contrib.auth          import get_user_model
 from django.core.exceptions       import ObjectDoesNotExist
-from django.http                  import Http404, HttpResponse
+from django.http                  import HttpResponse
 from django.shortcuts             import render_to_response, redirect
 from django.template              import TemplateDoesNotExist
 from django.views.decorators.gzip import gzip_page

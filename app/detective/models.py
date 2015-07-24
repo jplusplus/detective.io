@@ -1,12 +1,10 @@
 from app.detective              import utils
-from app.detective.exceptions   import UnavailableImage
 from app.detective.permissions  import create_permissions, remove_permissions
 from app.detective.parser       import schema, json
 
 from django                     import forms
 from django.conf                import settings
 from django.contrib.auth.models import User, Group
-from django.core.cache          import cache
 from django.core.paginator      import Paginator
 from django.db                  import models
 from django.db.models           import signals
@@ -24,9 +22,7 @@ import importlib
 import inspect
 import os
 import random
-import re
 import string
-import urllib2
 import django_rq
 import base64
 
@@ -218,7 +214,7 @@ class Topic(models.Model):
 
     def get_models_module(self):
         """ return the module topic_module.models """
-        return getattr(self.get_module(), "models", {})
+        return getattr(self.get_module(reload_module=True), "models", {})
 
     def get_models(self):
         """ return a generator of Model """
@@ -293,7 +289,6 @@ class Topic(models.Model):
 
     @property
     def search_placeholder(self, max_suggestion=5):
-        from app.detective import register
         # Get the model's rules manager
         rulesManager = self.get_rules()
         # List of searchable models
@@ -394,7 +389,7 @@ class Topic(models.Model):
                 AND type.app_label = '{app}'
                 RETURN DISTINCT ID(root) as id, root.name as name, type.model_name as model
             """.format(
-                field=ield_name,
+                field=field_name,
                 value=identifier,
                 model=subject["name"],
                 app=self.app_label()
@@ -746,7 +741,7 @@ def apply_dataset(*args, **kwargs):
                 dataset.zip_file.open('r')
                 # enqueue the parsing job
                 queue = django_rq.get_queue('default', default_timeout=7200)
-                job   = queue.enqueue(unzip_and_process_bulk_parsing_and_save_as_model, instance, base64.b64encode(dataset.zip_file.read()))
+                queue.enqueue(unzip_and_process_bulk_parsing_and_save_as_model, instance, base64.b64encode(dataset.zip_file.read()))
                 dataset.zip_file.close()
 
 

@@ -3,7 +3,7 @@ angular.module('detective').config ["$stateProvider", ($stateProvider)->
         url: "/"
         template: '<ui-view/>'
         controller: ["Auth", "$state", (Auth, $state)->
-            unless $state.includes("home.*")
+            if $state.is("home")
                 if Auth.isAuthenticated()
                     $state.go "home.dashboard"
                 else

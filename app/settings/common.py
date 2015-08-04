@@ -139,6 +139,7 @@ CACHE_BYPASS_URLS               = (
 )
 
 MIDDLEWARE_CLASSES = [
+    'django_seo_js.middleware.EscapedFragmentMiddleware',
     'django_seo_js.middleware.UserAgentMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',

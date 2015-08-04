@@ -139,6 +139,7 @@ CACHE_BYPASS_URLS               = (
 )
 
 MIDDLEWARE_CLASSES = [
+    'django_seo_js.middleware.UserAgentMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -152,7 +153,6 @@ MIDDLEWARE_CLASSES = [
     'urlmiddleware.URLMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
 ]
 
 
@@ -214,6 +214,8 @@ INSTALLED_APPS = (
     'tinymce',
     # Redis queue backend
     "django_rq",
+    # Prerendering
+    'django_seo_js',
     # Internal
     'app.detective',
     'app.detective.topics.common',
@@ -231,6 +233,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_ACTIVATION_DAYS = 14
 # Send or not an activation email
 ACCOUNT_ACTIVATION_ENABLED = True
+
+SEO_JS_ENABLED = True
+SEO_JS_PRERENDER_TOKEN = os.environ.get('SEO_JS_PRERENDER_TOKEN', None)
+SEO_JS_BACKEND = "django_seo_js.backends.PrerenderHosted"
+SEO_JS_PRERENDER_URL = "http://jpp-prerender.herokuapp.com/"
+SEO_JS_PRERENDER_RECACHE_URL = "http://jpp-prerender.herokuapp.com/recache"
 
 # MemCachier configuration took from https://devcenter.heroku.com/articles/memcachier#django
 def get_cache():

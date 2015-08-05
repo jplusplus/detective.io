@@ -1,6 +1,6 @@
 angular.module('detective').config ["$stateProvider", ($stateProvider)->
 
-    unless navigator.userAgent.toLowercase().indexOf("prerender") > -1
+    unless navigator.userAgent.toLowerCase().indexOf("prerender") > -1
         $stateProvider.state 'user-topic-tmf',
             url: '/detective/the-migrants-files/'
             controller: ($window)->

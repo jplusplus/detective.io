@@ -8,7 +8,7 @@ angular.module('detective').run(['$rootScope', '$state', 'User', 'Page', '$modal
         $rootScope.Page   = Page
 
         # Only show the message once
-        unless $cookies.gotMessage or navigator.userAgent is 'prerender.io'
+        unless $cookies.gotMessage or navigator.userAgent.toLowercase().indexOf("prerender") > -1
           $modal.open
             controller: [
               '$modalInstance', '$scope', ($modalInstance, $scope)->
@@ -36,7 +36,7 @@ angular.module('detective').run(['$rootScope', '$state', 'User', 'Page', '$modal
             </div>
             <div class="modal-footer text-right">
               <button class="btn btn-primary" ng-click="close()">
-                Got it - ' + navigator.userAgent + '
+                Got it
               </button>
             </div>'
   ])

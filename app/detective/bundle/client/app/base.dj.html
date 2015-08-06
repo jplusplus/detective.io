@@ -1,5 +1,6 @@
 {% load staticfiles %}
 {% load compress %}
+{% load django_seo_js %}
 <!DOCTYPE html>
 <!--[if lt IE 7]><html ng-controller="PageCtrl" ng-app="detective" class="no-js ie lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>   <html ng-controller="PageCtrl" ng-app="detective" class="no-js ie lt-ie9 lt-ie8"> <![endif]-->
@@ -37,6 +38,7 @@
 
         {% block extracss %}{% endblock %}
         <base href="{% url 'main' %}">
+        {% seo_js_head %}
 
         <script type="text/javascript">
             window.STATIC_URL = "{% static '' %}";

@@ -18,6 +18,7 @@ INSTALLED_APPS = list(INSTALLED_APPS)
 # remove south an djrill to speed up the tests
 INSTALLED_APPS.remove('south')
 INSTALLED_APPS.remove('compressor')
+INSTALLED_APPS.remove('django_seo_js')
 
 # Enable account activation in order to test it
 ACCOUNT_ACTIVATION_ENABLED = True

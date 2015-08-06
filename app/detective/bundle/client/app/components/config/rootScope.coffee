@@ -8,7 +8,7 @@ angular.module('detective').run(['$rootScope', '$state', 'User', 'Page', '$modal
         $rootScope.Page   = Page
 
         # Only show the message once
-        unless $cookies.gotMessage
+        unless $cookies.gotMessage or navigator.userAgent.toLowerCase().indexOf("prerender") > -1
           $modal.open
             controller: [
               '$modalInstance', '$scope', ($modalInstance, $scope)->

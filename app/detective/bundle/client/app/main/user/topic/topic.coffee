@@ -1,14 +1,15 @@
 angular.module('detective').config ["$stateProvider", ($stateProvider)->
 
-    $stateProvider.state 'user-topic-tmf',
-        url: '/detective/the-migrants-files/'
-        controller: ($window)->
-            $window.location.href = 'http://www.themigrantsfiles.com/'
-            
-    $stateProvider.state 'user-topic-belarus',
-        url: '/detective/belarus-networks/'
-        controller: ($window)->
-            $window.location.href = 'http://jplusplus.github.io/belarus-networks/'
+    unless navigator.userAgent.toLowerCase().indexOf("prerender") > -1
+        $stateProvider.state 'user-topic-tmf',
+            url: '/detective/the-migrants-files/'
+            controller: ($window)->
+                $window.location.href = 'http://www.themigrantsfiles.com/'
+
+        $stateProvider.state 'user-topic-belarus',
+            url: '/detective/belarus-networks/'
+            controller: ($window)->
+                $window.location.href = 'http://jplusplus.github.io/belarus-networks/'
 
     $stateProvider.state 'user-topic',
         url: "/:username/:topic/"

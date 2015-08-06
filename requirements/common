@@ -26,3 +26,4 @@ sqlparse==0.1.13
 times==0.6.2
 unidecode==0.04.16
 wsgiref==0.1.2
+django-seo-js==0.3.1

@@ -117,28 +117,28 @@
 
 				<!-- previous -->
 				<li ng-class="{disabled: !hasPreviousPage()}">
-					<a ng-click="previousPage()">&laquo;</a>
+					<a ng-href="[[ previousPage() ]]">&laquo;</a>
 				</li>
 
 				<!-- first page -->
 				<li ng-class="{active: 1 == page}">
-					<a ng-click="goToPage(1)">1</a>
+					<a ng-href="[[ getPage(1) ]]">1</a>
 				</li>
 
 				<!-- nearest pages -->
 				<li class="disabled" ng-if="nearestPages()[0] > 2"><a >...</a></li>
 				<li ng-repeat="p in nearestPages()" ng-class="{active: p == page}">
-					<a ng-click="goToPage(p)">[[p]] <span class="sr-only">(current)</span></a>
+					<a ng-href="[[ getPage(p) ]]">[[p]] <span class="sr-only">(current)</span></a>
 				</li>
 				<li class="disabled" ng-if="nearestPages()[nearestPages().length - 1] && nearestPages()[nearestPages().length - 1] + 1 < pages().length "><a >...</a></li>
 				<!-- last page -->
 				<li ng-if="pages().length > 1" ng-class="{active: pages().length == page}">
-					<a ng-click="goToPage(pages().length)">[[ pages().length ]]</a>
+					<a ng-href="[[ getPage(pages().length) ]]">[[ pages().length ]]</a>
 				</li>
 
 				<!-- next -->
 				<li ng-class="{disabled: !hasNextPage()}">
-					<a ng-click="nextPage()">&raquo;</a>
+					<a ng-href="[[ nextPage() ]]">&raquo;</a>
 				</li>
 			</ul>
 		</div>

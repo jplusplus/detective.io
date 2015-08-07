@@ -12,7 +12,7 @@ class window.IndividualListCtrl
         @scope.nextPage        = @nextPage
         @scope.pages           = @pages
         @scope.nearestPages    = @nearestPages
-        @scope.goToPage        = @goToPage
+        @scope.getPage         = @getPage
         @scope.singleUrl       = @singleUrl
         @scope.editUrl         = @editUrl
         @scope.isLoading       = @isLoading
@@ -109,10 +109,10 @@ class window.IndividualListCtrl
         return pages
 
     # Go to the given page
-    goToPage: (page)=>
+    getPage: (page)=>
         params = @stateParams
         params.page = 1*page
-        @state.transitionTo @state.current, params, reload: yes
+        @state.href @state.current, params
     # True if there is a previous page
     hasPreviousPage: => @scope.individuals.meta? and @scope.page > 1
     # True if there is a next page
@@ -123,9 +123,9 @@ class window.IndividualListCtrl
         @scope.page < nb_pages
 
     # Go to the previous page
-    previousPage: => @goToPage(1*@scope.page-1) if @hasPreviousPage()
+    previousPage: => @getPage(1*@scope.page-1) if @hasPreviousPage()
     # Go to the next page
-    nextPage: => @goToPage(1*@scope.page+1) if @hasNextPage()
+    nextPage: => @getPage(1*@scope.page+1) if @hasNextPage()
     # Loading state
     isLoading: => not @scope.individuals.meta?
 
